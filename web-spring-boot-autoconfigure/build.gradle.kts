@@ -16,7 +16,7 @@ kotlin {
 }
 
 group = "io.stereov.web"
-version = "0.1.1"
+version = "0.1.2-SNAPSHOT"
 
 val accessToken = properties["maven.accessToken"] as String?
 
