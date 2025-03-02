@@ -16,7 +16,7 @@ kotlin {
 }
 
 group = "io.stereov.web"
-version = "0.1.5-SNAPSHOT"
+version = "0.1.5"
 
 val accessToken: String? = properties["maven.accessToken"] as String? ?: System.getenv("GITEA_TOKEN")
 
