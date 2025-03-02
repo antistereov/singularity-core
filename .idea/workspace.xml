@@ -4,9 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6425ee52-d53a-4284-80e9-458a68ea090c" name="Changes" comment="ci: add CI configuration for Gitea">
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="6425ee52-d53a-4284-80e9-458a68ea090c" name="Changes" comment="ci: make gradlew executable">
+      <change beforePath="$PROJECT_DIR$/web-spring-boot-autoconfigure/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/build.gradle.kts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -169,7 +168,7 @@
       <updated>1740914075693</updated>
       <workItem from="1740914077869" duration="4294000" />
       <workItem from="1740919004527" duration="29000" />
-      <workItem from="1740919038925" duration="290000" />
+      <workItem from="1740919038925" duration="478000" />
     </task>
     <task id="LOCAL-00001" summary="refactor: create module for autoconfiguration and for starter">
       <option name="closed" value="true" />
@@ -213,6 +212,7 @@
     <MESSAGE value="refactor: create module for autoconfiguration and for starter" />
     <MESSAGE value="refactor: remove unused tests and set version to snapshot" />
     <MESSAGE value="ci: add CI configuration for Gitea" />
-    <option name="LAST_COMMIT_MESSAGE" value="ci: add CI configuration for Gitea" />
+    <MESSAGE value="ci: make gradlew executable" />
+    <option name="LAST_COMMIT_MESSAGE" value="ci: make gradlew executable" />
   </component>
 </project>

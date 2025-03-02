@@ -14,7 +14,7 @@ kotlin {
 group = "io.stereov.web"
 version = "0.0.7"
 
-val accessToken = properties["maven.accessToken"] as String
+val accessToken = properties["maven.accessToken"] as String?
 
 repositories {
     mavenCentral()
