@@ -7,6 +7,8 @@ plugins {
     id("org.springframework.boot") version "3.4.1"
     id("io.spring.dependency-management") version "1.1.4"
     id("maven-publish")
+    id("java-library")
+    id("org.jetbrains.kotlin.kapt") version "2.1.10"
 }
 
 kotlin {
@@ -34,7 +36,8 @@ dependencies {
     api(platform("org.springframework.boot:spring-boot-dependencies:$springBootVersion"))
     api("org.springframework.boot:spring-boot-starter-actuator")
     api("org.springframework.boot:spring-boot-autoconfigure")
-    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+    kapt("org.springframework.boot:spring-boot-configuration-processor")
+    compileOnly("org.springframework.boot:spring-boot-configuration-processor")
 
     // Security and JWT
     api("org.springframework.boot:spring-boot-starter-security")
@@ -93,7 +96,7 @@ dependencies {
 publishing {
     publications {
         create<MavenPublication>("webSpringBoot") {
-            from(components["kotlin"])
+            from(components["java"])
         }
     }
 
