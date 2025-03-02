@@ -5,12 +5,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 @ConfigurationProperties(prefix = "webstarter.mail")
 data class MailProperties(
     val enableEmailVerification: Boolean = false,
-    val host: String = "",
+    val host: String,
     val port: Int = 0,
-    val email: String = "",
-    val username: String = "",
-    val password: String = "",
-    val transportProtocol: String = "",
+    val email: String,
+    val username: String,
+    val password: String,
+    val transportProtocol: String,
     val smtpAuth: Boolean = false,
     val smtpStarttls: Boolean = false,
     val debug: Boolean = false,
