@@ -1,7 +1,5 @@
 package io.stereov.web.config
 
-import com.mongodb.reactivestreams.client.MongoClient
-import com.mongodb.reactivestreams.client.MongoClients
 import com.nimbusds.jose.jwk.source.ImmutableSecret
 import com.nimbusds.jose.proc.SecurityContext
 import io.github.bucket4j.distributed.ExpirationAfterWriteStrategy
@@ -29,13 +27,13 @@ import io.stereov.web.user.service.UserService
 import io.stereov.web.user.service.UserSessionService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
+import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties
-import org.springframework.boot.autoconfigure.mongo.MongoProperties
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebAutoConfiguration
+import org.springframework.boot.autoconfigure.mongo.MongoReactiveAutoConfiguration
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.data.mongodb.core.ReactiveMongoTemplate
-import org.springframework.data.mongodb.core.SimpleReactiveMongoDatabaseFactory
 import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRepositories
 import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.http.HttpStatus
@@ -63,7 +61,13 @@ import java.time.Duration
 import javax.crypto.spec.SecretKeySpec
 
 @Configuration
-@AutoConfiguration
+@AutoConfiguration(
+    after = [
+        MongoReactiveAutoConfiguration::class,
+        SpringDataWebAutoConfiguration::class,
+        RedisAutoConfiguration::class,
+    ]
+)
 @EnableConfigurationProperties(
     AuthProperties::class,
     BackendProperties::class,
@@ -313,17 +317,5 @@ class AutoConfiguration {
         val source = UrlBasedCorsConfigurationSource()
         source.registerCorsConfiguration("/**", configuration)
         return source
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun reactiveMongoClient(properties: MongoProperties): MongoClient {
-        return MongoClients.create(properties.uri)
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun reactiveMongoTemplate(mongoClient: MongoClient, properties: MongoProperties): ReactiveMongoTemplate {
-        return ReactiveMongoTemplate(SimpleReactiveMongoDatabaseFactory(mongoClient, properties.database))
     }
 }

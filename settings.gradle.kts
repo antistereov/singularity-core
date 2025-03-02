@@ -1,4 +1,4 @@
-plugins {
-    id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
-}
-rootProject.name = "web-start"
+rootProject.name = "web-spring-boot"
+
+include("web-spring-boot-autoconfigure")
+include("web-spring-boot-starter")

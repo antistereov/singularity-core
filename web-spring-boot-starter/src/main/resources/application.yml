@@ -1,0 +1,54 @@
+server:
+  port: 8000
+
+spring:
+  main:
+    web-application-type: reactive
+  data:
+    mongodb:
+      uri: mongodb://${MONGO_DB_USERNAME}:${MONGO_DB_PASSWORD}@${MONGO_DB_HOST}:${MONGO_DB_PORT}/${MONGO_DB_DATABASE_NAME}?authSource=admin&tls=${MONGO_DB_SSL_ENABLED:false}
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
+      database: ${REDIS_DATABASE:0}
+      timeout: ${REDIS_TIMEOUT:5000ms}
+      ssl:
+        enabled: ${REDIS_SSL_ENABLED:false}
+  devtools:
+    restart:
+      enabled: ${DEV_MODE:false}
+      additional-paths: src/main
+
+logging:
+  level:
+    io.stereov: ${LOG_LEVEL:DEBUG}
+
+webstarter:
+  mail:
+    enable-email-verification: ${ENABLE_EMAIL_VERIFICATION:true}
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    email: ${MAIL_EMAIL}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    transport-protocol: ${MAIL_TRANSPORT_PROTOCOL:smtp}
+    smtp-auth: ${MAIL_SMTP_AUTH:true}
+    smtp-starttls: ${MAIL_SMTP_STARTTLS:true}
+    debug: ${MAIL_DEBUG:false}
+    verification-expiration: ${MAIL_VERIFICATION_EXPIRATION:900}
+    verification-send-cooldown: ${MAIL_VERIFICATION_SEND_COOLDOWN:60}
+  encryption:
+    secret-key: ${SECRET_KEY}
+  jwt:
+    secret-key: ${JWT_SECRET_KEY}
+    expires-in: ${JWT_EXPIRATION:900}
+  backend:
+    base-url: ${BACKEND_BASE_URL}
+    secure: ${SECURE:false}
+  rate-limit:
+    ip-rate-limit-minute: ${IP_RATE_LIMIT_MINUTE:200}
+    account-rate-limit-minute: ${ACCOUNT_RATE_LIMIT_MINUTE:100}
+  frontend:
+    base-url: ${FRONTEND_BASE_URL}
+    email-verification-path: ${EMAIL_VERIFICATION_PATH}

@@ -1,6 +1,3 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     kotlin("jvm") version "2.0.21"
     kotlin("plugin.spring") version "2.0.21"
@@ -10,8 +7,12 @@ plugins {
     id("maven-publish")
 }
 
+kotlin {
+    jvmToolchain(21)
+}
+
 group = "io.stereov.web"
-version = "0.0.6"
+version = "0.0.7"
 
 val accessToken = properties["maven.accessToken"] as String
 
@@ -87,15 +88,9 @@ dependencies {
     testImplementation("org.testcontainers:mongodb:$testContainersVersion")
 }
 
-configurations.all {
-    exclude(group = "commons-logging", module = "commons-logging")
-    exclude(group = "org.springframework.boot", module = "spring-boot-starter-logging")
-    exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat")
-}
-
 publishing {
     publications {
-        create<MavenPublication>("webStart") {
+        create<MavenPublication>("webSpringBoot") {
             from(components["kotlin"])
         }
     }
@@ -115,24 +110,4 @@ publishing {
             }
         }
     }
-}
-
-tasks.withType<KotlinCompile>().configureEach {
-    compilerOptions {
-        freeCompilerArgs.add("-Xjsr305=strict")
-        jvmTarget.set(JvmTarget.JVM_21)
-    }
-}
-
-tasks.withType<JavaExec> {
-    jvmArgs = listOf("-DLog4jContextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector")
-}
-
-
-tasks.test {
-    useJUnitPlatform()
-}
-
-kotlin {
-    jvmToolchain(21)
 }

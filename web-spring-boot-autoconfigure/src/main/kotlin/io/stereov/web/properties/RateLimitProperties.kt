@@ -2,7 +2,7 @@ package io.stereov.web.properties
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 
-@ConfigurationProperties(prefix = "rate-limit")
+@ConfigurationProperties(prefix = "webstarter.rate-limit")
 data class RateLimitProperties(
     val ipRateLimitMinute: Long,
     val accountRateLimitMinute: Long = 200,
