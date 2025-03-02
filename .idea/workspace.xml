@@ -4,89 +4,22 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6425ee52-d53a-4284-80e9-458a68ea090c" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/test/kotlin/io/stereov/web/AutoConfigurationTest.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/test/kotlin/io/stereov/web/TestApplication.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web-spring-boot-starter/.env.sample" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web-spring-boot-starter/build.gradle.kts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web-spring-boot-starter/src/main/kotlin/io/stereov/web/WebSpringBootStarterApplication.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web-spring-boot-starter/src/main/resources/application.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gradle.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.jar" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gradlew" beforeDir="false" afterPath="$PROJECT_DIR$/gradlew" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gradlew.bat" beforeDir="false" afterPath="$PROJECT_DIR$/gradlew.bat" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/settings.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/auth/exception/AuthException.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/auth/exception/AuthException.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/auth/exception/AuthExceptionHandler.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/auth/exception/AuthExceptionHandler.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/auth/exception/InvalidCredentialsException.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/auth/exception/InvalidCredentialsException.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/auth/exception/InvalidPrincipalException.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/auth/exception/InvalidPrincipalException.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/auth/exception/NoTokenProvidedException.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/auth/exception/NoTokenProvidedException.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/auth/model/CustomAuthenticationToken.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/auth/model/CustomAuthenticationToken.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/auth/service/AuthenticationService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/auth/service/AuthenticationService.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/config/AutoConfiguration.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/config/AutoConfiguration.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/config/Constants.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/config/Constants.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/filter/CookieAuthenticationFilter.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/filter/CookieAuthenticationFilter.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/filter/LoggingFilter.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/filter/LoggingFilter.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/filter/RateLimitingFilter.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/filter/RateLimitingFilter.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/global/exception/BaseWebException.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/global/exception/BaseWebException.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/global/model/ErrorResponse.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/global/model/ErrorResponse.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/global/service/encryption/EncryptionService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/global/service/encryption/EncryptionService.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/global/service/geolocation/GeoLocationService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/global/service/geolocation/GeoLocationService.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/global/service/geolocation/exception/GeoLocationException.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/global/service/geolocation/exception/GeoLocationException.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/global/service/geolocation/model/GeoLocationResponse.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/global/service/geolocation/model/GeoLocationResponse.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/global/service/hash/HashService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/global/service/hash/HashService.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/global/service/jwt/JwtService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/global/service/jwt/JwtService.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/global/service/jwt/exception/InvalidTokenException.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/global/service/jwt/exception/InvalidTokenException.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/global/service/jwt/exception/TokenException.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/global/service/jwt/exception/TokenException.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/global/service/jwt/exception/TokenExceptionHandler.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/global/service/jwt/exception/TokenExceptionHandler.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/global/service/jwt/exception/TokenExpiredException.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/global/service/jwt/exception/TokenExpiredException.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/global/service/jwt/model/AccessToken.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/global/service/jwt/model/AccessToken.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/global/service/jwt/model/EmailVerificationToken.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/global/service/jwt/model/EmailVerificationToken.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/global/service/jwt/model/RefreshToken.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/global/service/jwt/model/RefreshToken.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/global/service/mail/MailService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/global/service/mail/MailService.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/global/service/mail/MailVerificationCooldownService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/global/service/mail/MailVerificationCooldownService.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/global/service/mail/exception/MailException.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/global/service/mail/exception/MailException.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/global/service/mail/exception/MailExceptionHandler.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/global/service/mail/exception/MailExceptionHandler.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/global/service/mail/exception/MailVerificationCooldownException.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/global/service/mail/exception/MailVerificationCooldownException.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/properties/AuthProperties.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/properties/AuthProperties.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/properties/BackendProperties.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/properties/BackendProperties.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/properties/EncryptionProperties.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/properties/EncryptionProperties.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/properties/FrontendProperties.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/properties/FrontendProperties.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/properties/JwtProperties.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/properties/JwtProperties.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/properties/MailProperties.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/properties/MailProperties.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/properties/RateLimitProperties.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/properties/RateLimitProperties.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/user/controller/UserSessionController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/user/controller/UserSessionController.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/user/dto/DeviceInfoRequestDto.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/user/dto/DeviceInfoRequestDto.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/user/dto/DeviceInfoResponseDto.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/user/dto/DeviceInfoResponseDto.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/user/dto/LoginUserDto.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/user/dto/LoginUserDto.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/user/dto/RegisterUserDto.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/user/dto/RegisterUserDto.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/user/dto/UserDto.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/user/dto/UserDto.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/user/exception/EmailAlreadyExistsException.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/user/exception/EmailAlreadyExistsException.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/user/exception/InvalidUserDocumentException.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/user/exception/InvalidUserDocumentException.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/user/exception/UserDoesNotExistException.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/user/exception/UserDoesNotExistException.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/user/exception/UserException.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/user/exception/UserException.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/user/exception/UserExceptionHandler.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/user/exception/UserExceptionHandler.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/user/model/DeviceInfo.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/user/model/DeviceInfo.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/user/model/Role.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/user/model/Role.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/user/model/UserDocument.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/user/model/UserDocument.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/user/repository/UserRepository.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/user/repository/UserRepository.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/user/service/CookieService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/user/service/CookieService.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/user/service/UserService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/user/service/UserService.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/io/stereov/web/user/service/UserSessionService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/user/service/UserSessionService.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/log4j.component.properties" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-starter/src/main/resources/log4j.component.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/log4j.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-starter/src/main/resources/log4j.yaml" afterDir="false" />
+    <list default="true" id="6425ee52-d53a-4284-80e9-458a68ea090c" name="Changes" comment="refactor: remove unused tests and set version to snapshot">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/user/controller/UserSessionController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/user/controller/UserSessionController.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/user/dto/UserDto.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/user/dto/UserDto.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/user/service/CookieService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/user/service/CookieService.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ChangesViewManager">
+    <option name="groupingKeys">
+      <option value="directory" />
+      <option value="module" />
+    </option>
   </component>
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
@@ -113,36 +46,39 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "customColor": "",
-  "associatedIndex": 7
-}]]></component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 7
+}</component>
   <component name="ProjectId" id="2tl5yS4qAt2w1xZANztArYulda0" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Gradle.Build web-spring-boot.executor": "Run",
-    "RequestMappingsPanelOrder0": "0",
-    "RequestMappingsPanelOrder1": "1",
-    "RequestMappingsPanelWidth0": "75",
-    "RequestMappingsPanelWidth1": "75",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "Spring Boot.WebSpringBootStarterApplication.executor": "Run",
-    "git-widget-placeholder": "main",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Dev/Code",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Gradle.Build web-spring-boot.executor&quot;: &quot;Run&quot;,
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;Spring Boot.WebSpringBootStarterApplication.executor&quot;: &quot;Run&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Dev/Code&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration default="true" type="JetRunConfigurationType">
       <module name="web-spring-boot" />
@@ -178,11 +114,33 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1740914075693</updated>
-      <workItem from="1740914077869" duration="352000" />
+      <workItem from="1740914077869" duration="1650000" />
     </task>
+    <task id="LOCAL-00001" summary="refactor: create module for autoconfiguration and for starter">
+      <option name="closed" value="true" />
+      <created>1740914501599</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1740914501599</updated>
+    </task>
+    <task id="LOCAL-00002" summary="refactor: remove unused tests and set version to snapshot">
+      <option name="closed" value="true" />
+      <created>1740914757275</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1740914757275</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="refactor: create module for autoconfiguration and for starter" />
+    <MESSAGE value="refactor: remove unused tests and set version to snapshot" />
+    <option name="LAST_COMMIT_MESSAGE" value="refactor: remove unused tests and set version to snapshot" />
   </component>
 </project>

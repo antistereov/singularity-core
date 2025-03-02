@@ -91,6 +91,27 @@ class UserSessionController(
             .body(mapOf("message" to "success"))
     }
 
+    @PostMapping("/refresh")
+    suspend fun refreshToken(
+        exchange: ServerWebExchange,
+        @RequestBody deviceInfoDto: DeviceInfoRequestDto
+    ): ResponseEntity<UserDto> {
+        logger.debug { "Refreshing token" }
+
+        val ipAddress = exchange.request.remoteAddress?.address?.hostAddress
+
+        val userDto = cookieService.validateRefreshTokenAndGetUserDto(exchange, deviceInfoDto.id)
+        val userId = userDto.id
+
+        val newAccessToken = cookieService.createAccessTokenCookie(userId)
+        val newRefreshToken = cookieService.createRefreshTokenCookie(userId, deviceInfoDto, ipAddress)
+
+        return ResponseEntity.ok()
+            .header("Set-Cookie", newAccessToken.toString())
+            .header("Set-Cookie", newRefreshToken.toString())
+            .body(userDto)
+    }
+
     @DeleteMapping("/me")
     suspend fun delete(): ResponseEntity<Map<String, String>> {
         val clearAccessTokenCookie = cookieService.clearAccessTokenCookie()

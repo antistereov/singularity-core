@@ -5,7 +5,7 @@ import io.stereov.web.user.model.Role
 import java.time.Instant
 
 data class UserDto(
-    val id: String? = null,
+    val id: String,
     val name: String,
     val email: String,
     val roles: List<Role> = listOf(Role.USER),

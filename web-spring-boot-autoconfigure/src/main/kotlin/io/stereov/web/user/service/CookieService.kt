@@ -5,7 +5,6 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.web.properties.BackendProperties
 import io.stereov.web.properties.JwtProperties
 import io.stereov.web.user.dto.DeviceInfoRequestDto
-import io.stereov.web.user.dto.UserDto
 import io.stereov.web.user.model.DeviceInfo
 import org.springframework.http.ResponseCookie
 import org.springframework.stereotype.Service
@@ -13,7 +12,8 @@ import io.stereov.web.config.Constants
 import io.stereov.web.global.service.geolocation.GeoLocationService
 import io.stereov.web.global.service.jwt.JwtService
 import io.stereov.web.global.service.jwt.exception.InvalidTokenException
-import io.stereov.web.global.service.jwt.model.RefreshToken
+import io.stereov.web.user.dto.UserDto
+import org.springframework.web.server.ServerWebExchange
 
 @Service
 class CookieService(
@@ -119,7 +119,12 @@ class CookieService(
         return cookie.build()
     }
 
-    suspend fun validateRefreshTokenAndGetAccountDto(refreshToken: RefreshToken): UserDto {
+    suspend fun validateRefreshTokenAndGetUserDto(exchange: ServerWebExchange, deviceId: String): UserDto {
+        val refreshTokenCookie = exchange.request.cookies[Constants.REFRESH_TOKEN_COOKIE]?.firstOrNull()?.value
+            ?: throw InvalidTokenException("No refresh token provided")
+
+        val refreshToken = jwtService.extractRefreshToken(refreshTokenCookie, deviceId)
+
         val user = userService.findById(refreshToken.accountId)
         if (user.devices.any { it.id == refreshToken.deviceId && it.tokenValue == refreshToken.value }) {
             return user.toDto()
