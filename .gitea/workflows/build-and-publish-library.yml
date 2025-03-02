@@ -1,0 +1,29 @@
+name: Build Library and Publish to Maven
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  GITEA_TOKEN: ${{ secrets.TOKEN }}
+
+jobs:
+  docker_build_and_push:
+    name: Build Library and Publish to Maven
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Build with Gradle
+        run: |
+          ./gradlew build -x test
+
+      - name: Run Tests
+        run: |
+          ./gradlew test
+
+      - name: Publish Package
+        run: |
+          ./gradlew publish
