@@ -52,3 +52,8 @@ webstarter:
   frontend:
     base-url: ${FRONTEND_BASE_URL}
     email-verification-path: ${EMAIL_VERIFICATION_PATH}
+  auth:
+    public-paths:
+      - "/user/register"
+      - "/user/login"
+      - "/user/refresh"

@@ -9,8 +9,7 @@ data class RegisterUserDto(
     val email: String,
     @field:NotBlank(message = "Password is required")
     val password: String,
-    @field:NotBlank(message = "Name is required")
-    val name: String,
+    val username: String? = null,
+    val name: String? = null,
     val device: DeviceInfoRequestDto,
-    val guestId: String? = null,
 )

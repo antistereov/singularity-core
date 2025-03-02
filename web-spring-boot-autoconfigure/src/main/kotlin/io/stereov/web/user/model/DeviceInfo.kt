@@ -2,7 +2,9 @@ package io.stereov.web.user.model
 
 import io.stereov.web.user.dto.DeviceInfoRequestDto
 import io.stereov.web.user.dto.DeviceInfoResponseDto
+import io.stereov.web.user.exception.InvalidUserDocumentException
 import kotlinx.serialization.Serializable
+import java.time.Instant
 
 @Serializable
 data class DeviceInfo(
@@ -32,8 +34,12 @@ data class DeviceInfo(
     }
 
     fun toResponseDto(): DeviceInfoResponseDto {
+        requireNotNull(issuedAt) {
+            throw InvalidUserDocumentException("Device with ID ${this.id} has no issue date")
+        }
+
         return DeviceInfoResponseDto(
-            id, browser, os, ipAddress, location
+            id, browser, os, ipAddress, location, Instant.ofEpochMilli(issuedAt).toString()
         )
     }
 }

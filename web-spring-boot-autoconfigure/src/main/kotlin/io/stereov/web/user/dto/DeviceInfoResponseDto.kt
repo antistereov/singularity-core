@@ -10,4 +10,5 @@ data class DeviceInfoResponseDto(
     val os: String? = null,
     val ipAddress: String?,
     val location: DeviceInfo.LocationInfo?,
+    val lastActive: String
 )

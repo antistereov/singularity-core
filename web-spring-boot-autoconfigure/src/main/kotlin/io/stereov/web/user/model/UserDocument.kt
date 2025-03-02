@@ -10,7 +10,8 @@ import java.time.Instant
 @Document(collection = "users")
 data class UserDocument(
     @Id val id: String? = null,
-    val name: String,
+    val username: String? = null,
+    val name: String? = null,
     @Indexed(unique = true) val email: String,
     val password: String,
     val roles: List<Role> = listOf(Role.USER),
@@ -23,6 +24,6 @@ data class UserDocument(
     fun toDto(): UserDto {
         this.id ?: throw UserException("No ID provided in document")
 
-        return UserDto(id, name, email, roles, emailVerified, devices, lastActive)
+        return UserDto(id, username, name, email, roles, emailVerified, devices.map { it.toResponseDto() }, lastActive.toString())
     }
 }
