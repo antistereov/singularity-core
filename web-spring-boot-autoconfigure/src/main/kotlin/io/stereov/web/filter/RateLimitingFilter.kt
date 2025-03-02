@@ -7,17 +7,13 @@ import io.stereov.web.auth.service.AuthenticationService
 import io.stereov.web.properties.RateLimitProperties
 import io.stereov.web.global.exception.BaseWebException
 import kotlinx.coroutines.reactor.mono
-import org.springframework.core.annotation.Order
 import org.springframework.http.HttpStatus
-import org.springframework.stereotype.Component
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Mono
 import java.time.Duration
 
-@Component
-@Order(2)
 class RateLimitingFilter(
     private val authenticationService: AuthenticationService,
     private val proxyManager: LettuceBasedProxyManager<String>,

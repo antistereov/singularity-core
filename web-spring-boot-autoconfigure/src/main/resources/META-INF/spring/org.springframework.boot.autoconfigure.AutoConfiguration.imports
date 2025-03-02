@@ -1,1 +1,8 @@
-io.stereov.web.config.AutoConfiguration
+io.stereov.web.config.ApplicationConfiguration
+io.stereov.web.config.AuthenticationConfiguration
+io.stereov.web.config.EncryptionConfiguration
+io.stereov.web.config.JwtEncodingConfig
+io.stereov.web.config.MailConfiguration
+io.stereov.web.config.RedisConfiguration
+io.stereov.web.config.WebClientConfiguration
+io.stereov.web.config.WebSecurityConfiguration

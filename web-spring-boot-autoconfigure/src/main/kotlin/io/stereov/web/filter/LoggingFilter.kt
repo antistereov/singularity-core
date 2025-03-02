@@ -2,15 +2,12 @@ package io.stereov.web.filter
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.springframework.core.annotation.Order
-import org.springframework.stereotype.Component
+import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Mono
 
-@Component
-@Order(0)
 class LoggingFilter : WebFilter {
 
     private val logger: KLogger
@@ -30,10 +27,15 @@ class LoggingFilter : WebFilter {
                 val status = exchange.response.statusCode
                 logger.debug { "Outgoing response - $method $path: $status" }
             }
-            .onErrorResume { e ->
-                val status = exchange.response.statusCode
-                logger.warn { "Request failed    - $method $path: $status - Error: ${e.message}" }
-                throw e
+            .onErrorResume { error ->
+                val status = if (error is ResponseStatusException) {
+                    error.statusCode
+                } else {
+                    exchange.response.statusCode ?: "UNKNOWN"
+                }
+
+                logger.warn { "Request failed    - $method $path: $status - Error: ${error.message}" }
+                throw error
             }
     }
 }
