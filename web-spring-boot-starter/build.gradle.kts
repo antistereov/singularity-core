@@ -13,7 +13,7 @@ plugins {
 group = "io.stereov.web"
 version = "0.0.1-SNAPSHOT"
 
-val accessToken = properties["maven.accessToken"] as String
+val accessToken = properties["maven.accessToken"] as String?
 
 repositories {
     mavenCentral()
