@@ -5,20 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6425ee52-d53a-4284-80e9-458a68ea090c" name="Changes" comment="ci: add CI configuration for Gitea">
-      <change afterPath="$PROJECT_DIR$/.gitea/workflows/build-and-test.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web-spring-boot-starter/src/test/kotlin/io/stereov/web/ApplicationStartupTest.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web-spring-boot-starter/src/test/kotlin/io/stereov/web/BaseIntegrationTest.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web-spring-boot-starter/src/test/kotlin/io/stereov/web/auth/SecurityIntegrationTest.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web-spring-boot-starter/src/test/kotlin/io/stereov/web/auth/service/HashServiceTest.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web-spring-boot-starter/src/test/kotlin/io/stereov/web/user/controller/UserSessionControllerIntegrationTest.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/user/dto/DeviceInfoResponseDto.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/user/dto/DeviceInfoResponseDto.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/user/dto/RegisterUserDto.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/user/dto/RegisterUserDto.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/user/dto/UserDto.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/user/dto/UserDto.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/user/model/DeviceInfo.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/user/model/DeviceInfo.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/user/model/UserDocument.kt" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-autoconfigure/src/main/kotlin/io/stereov/web/user/model/UserDocument.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web-spring-boot-starter/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/web-spring-boot-starter/src/main/resources/application.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,17 +36,6 @@
               <path>
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
                 <item name="web-spring-boot" type="f1a62948:ProjectNode" />
-              </path>
-              <path>
-                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="web-spring-boot" type="f1a62948:ProjectNode" />
-                <item name="Tasks" type="e4a08cd1:TasksNode" />
-              </path>
-              <path>
-                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="web-spring-boot" type="f1a62948:ProjectNode" />
-                <item name="Tasks" type="e4a08cd1:TasksNode" />
-                <item name="build" type="c8890929:TasksNode$1" />
               </path>
             </expand>
             <select />
@@ -96,7 +73,7 @@
     "Spring Boot.WebSpringBootStarterApplication.executor": "Run",
     "git-widget-placeholder": "main",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/andre/Dev/stereov/baseline/web-spring-boot/.gitea",
+    "last_opened_file_path": "/Users/stereov/Developer/stereov/baseline/web-spring-boot",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -148,17 +125,6 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration default="true" type="JetRunConfigurationType">
-      <module name="web-spring-boot" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
-      <module name="web-spring-boot" />
-      <option name="filePath" />
-      <method v="2" />
-    </configuration>
     <configuration name="WebSpringBootStarterApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <option name="envFilePaths">
         <option value="$PROJECT_DIR$/web-spring-boot-starter/.env" />
@@ -185,6 +151,14 @@
       </list>
     </recent_temporary>
   </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-fdfe4dae3a2d-intellij.indexing.shared.core-IU-243.22562.218" />
+        <option value="bundled-js-predefined-d6986cc7102b-deb605915726-JavaScript-IU-243.22562.218" />
+      </set>
+    </attachedChunks>
+  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -194,6 +168,8 @@
       <option name="presentableId" value="Default" />
       <updated>1740914075693</updated>
       <workItem from="1740914077869" duration="4294000" />
+      <workItem from="1740919004527" duration="29000" />
+      <workItem from="1740919038925" duration="290000" />
     </task>
     <task id="LOCAL-00001" summary="refactor: create module for autoconfiguration and for starter">
       <option name="closed" value="true" />
