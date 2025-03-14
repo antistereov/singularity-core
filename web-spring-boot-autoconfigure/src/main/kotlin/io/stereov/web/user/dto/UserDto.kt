@@ -13,4 +13,5 @@ data class UserDto(
     val emailVerified: Boolean = false,
     val devices: List<DeviceInfoResponseDto> = listOf(),
     val lastActive: String,
+    val twoFactorAuthEnabled: Boolean,
 )

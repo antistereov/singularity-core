@@ -7,7 +7,7 @@ import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 
 class CustomAuthenticationToken(
-    val accountId: String,
+    val userId: String,
     authorities: Collection<GrantedAuthority>
 ) : AbstractAuthenticationToken(authorities) {
 
@@ -16,10 +16,10 @@ class CustomAuthenticationToken(
     }
 
     override fun getCredentials(): Any? = null
-    override fun getPrincipal(): String = accountId
+    override fun getPrincipal(): String = userId
 
     constructor(userDocument: UserDocument): this(
-        accountId = userDocument.id ?: throw InvalidUserDocumentException("AccountDocument does not contain ID"),
+        userId = userDocument.id ?: throw InvalidUserDocumentException("AccountDocument does not contain ID"),
         authorities = userDocument.roles.map { SimpleGrantedAuthority("ROLE_$it") },
     )
 }

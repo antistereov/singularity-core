@@ -3,13 +3,17 @@ package io.stereov.web.auth.service
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.web.global.service.jwt.exception.InvalidTokenException
+import io.stereov.web.user.model.UserDocument
+import io.stereov.web.user.service.UserService
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.stereotype.Service
 
 @Service
-class AuthenticationService {
+class AuthenticationService(
+    private val userService: UserService
+) {
 
     private val logger: KLogger
         get() = KotlinLogging.logger {}
@@ -21,11 +25,18 @@ class AuthenticationService {
         return auth
     }
 
-    suspend fun getCurrentAccountId(): String {
+    suspend fun getCurrentUserId(): String {
         logger.debug {"Extracting user ID." }
 
         val auth = getCurrentAuthentication()
-        return auth.accountId
+        return auth.userId
+    }
+
+    suspend fun getCurrentUser(): UserDocument {
+        logger.debug { "Extracting current user" }
+
+        val userId = getCurrentUserId()
+        return userService.findById(userId)
     }
 
     private suspend fun getCurrentAuthentication(): io.stereov.web.auth.model.CustomAuthenticationToken {

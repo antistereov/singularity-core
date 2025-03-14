@@ -19,6 +19,7 @@ import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
 import io.stereov.web.config.Constants
 import io.stereov.web.user.dto.DeviceInfoRequestDto
+import io.stereov.web.user.dto.TwoFactorSetupResponseDto
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
@@ -53,6 +54,7 @@ class BaseIntegrationTest {
         @JvmStatic
         fun properties(registry: DynamicPropertyRegistry) {
             registry.add("spring.data.mongodb.uri") { "${mongoDBContainer.connectionString}/test" }
+            registry.add("webstarter.app.name") { "TestApplication" }
             registry.add("webstarter.jwt.expires-in") { 900 }
             registry.add("webstarter.jwt.secret-key") { "64f09a172d31b6253d0af2e7dccce6bc9e4e55f8043df07c3ebda72c262758662c2c076e9f11965f43959186b9903fa122da44699b38e40ec21b4bd2fc0ad8c93be946d3dcd0208a1a3ae9d39d4482674d56f6e6dddfe8a6321ad31a824b26e3d528943b0943ad3560d23a79da1fefde0ee2a20709437cedee9def79d5b4c0cf96ee36c02b67ab5fd28638606a5c19ffe8b76d40077549f6db6920a97da0089f5cd2d28665e1d4fb6d9a68fe7b78516a8fc8c33d6a6dac53a77ab670e3449cb237a49104478b717e20e1d22e270f7cf06f9b412b55255c150cb079365eadaddd319385d6221e4b40ed89cdcde540538ce88e66ae2f783c3c48859a14ec6eff83" }
             registry.add("webstarter.encryption.secret-key") { "3eJAiq7XBjMc5AXkCwsjbA==" }
@@ -65,11 +67,6 @@ class BaseIntegrationTest {
             registry.add("spring.data.redis.host") { redisContainer.host }
             registry.add("spring.data.redis.port") { redisContainer.getMappedPort(6379) }
             registry.add("spring.data.redis.password") { "" }
-            registry.add("webstarter.auth.public-paths") { listOf(
-                "/user/register",
-                "/user/login",
-                "/user/refresh"
-            ) }
         }
     }
 
@@ -83,6 +80,7 @@ class BaseIntegrationTest {
         email: String = "test@email.com",
         password: String = "password",
         deviceId: String = "device",
+        twoFactorEnabled: Boolean = false,
     ): TestRegisterResponse {
         val device = DeviceInfoRequestDto(id = deviceId)
 
@@ -94,13 +92,24 @@ class BaseIntegrationTest {
             .returnResult<Void>()
             .responseCookies
 
-        val user = userService.findByEmailOrNull(email)
         val accessToken = responseCookies[Constants.ACCESS_TOKEN_COOKIE]?.firstOrNull()?.value
         val refreshToken = responseCookies[Constants.REFRESH_TOKEN_COOKIE]?.firstOrNull()?.value
 
-        requireNotNull(user) { "User associated to $email not saved" }
         requireNotNull(accessToken) { "No access token contained in response" }
         requireNotNull(refreshToken) { "No refresh token contained in response" }
+
+        if (twoFactorEnabled) {
+            webTestClient.post()
+                .uri("/user/2fa/setup")
+                .cookie(Constants.ACCESS_TOKEN_COOKIE, accessToken)
+                .exchange()
+                .expectStatus().isOk
+                .expectBody(TwoFactorSetupResponseDto::class.java)
+                .returnResult()
+        }
+
+        val user = userService.findByEmailOrNull(email)
+        requireNotNull(user) { "User associated to $email not saved" }
 
         return TestRegisterResponse(user, accessToken, refreshToken)
     }

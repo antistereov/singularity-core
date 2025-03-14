@@ -30,7 +30,7 @@ class RateLimitingFilter(
             ipBucket
                 .flatMap { checkBucket(it) }
                 .then(
-                    mono { authenticationService.getCurrentAccountId() }
+                    mono { authenticationService.getCurrentUserId() }
                         .onErrorResume { Mono.empty() }
                         .flatMap { accountId ->
                             val userBucket = resolveBucket("rate_limit_user:$accountId", rateLimitProperties.accountRateLimitMinute, rateLimitProperties.ipRateLimitRefreshMinute)

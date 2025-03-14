@@ -78,6 +78,13 @@ class WebSecurityConfiguration {
                 it.authenticationEntryPoint(authenticationEntryPoint())
             }
             .authorizeExchange {
+                it.pathMatchers(
+                    "/user/login",
+                    "/user/refresh",
+                    "user/register",
+                    "user/2fa/verify",
+                    "user/2fa/status"
+                ).permitAll()
                 authProperties.publicPaths.forEach { path ->
                     it.pathMatchers(path).permitAll()
                 }

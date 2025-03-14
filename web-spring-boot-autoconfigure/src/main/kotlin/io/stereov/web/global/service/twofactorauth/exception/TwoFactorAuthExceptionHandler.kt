@@ -1,4 +1,4 @@
-package io.stereov.web.auth.exception
+package io.stereov.web.global.service.twofactorauth.exception
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -10,24 +10,21 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.server.ServerWebExchange
 
 @ControllerAdvice
-class AuthExceptionHandler {
+class TwoFactorAuthExceptionHandler {
 
     private val logger: KLogger
         get() = KotlinLogging.logger {}
 
-    @ExceptionHandler(AuthException::class)
-    suspend fun handleAuthExceptions(
-        ex: AuthException,
+    @ExceptionHandler(TwoFactorAuthException::class)
+    suspend fun handleRateLimitExceptions(
+        ex: TwoFactorAuthException,
         exchange: ServerWebExchange
     ): ResponseEntity<ErrorResponse> {
         logger.warn { "${ex.javaClass.simpleName} - ${ex.message}" }
 
         val status = when (ex) {
-            is NoTokenProvidedException -> HttpStatus.UNAUTHORIZED
-            is InvalidCredentialsException -> HttpStatus.UNAUTHORIZED
-            is InvalidPrincipalException -> HttpStatus.UNAUTHORIZED
-            is NoTwoFactorUserAttributeException -> HttpStatus.BAD_REQUEST
-            else -> HttpStatus.UNAUTHORIZED
+            is InvalidTwoFactorCodeException -> HttpStatus.UNAUTHORIZED
+            else -> HttpStatus.INTERNAL_SERVER_ERROR
         }
 
         val errorResponse = ErrorResponse(

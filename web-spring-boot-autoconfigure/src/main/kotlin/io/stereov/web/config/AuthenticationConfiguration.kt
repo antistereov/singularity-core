@@ -6,6 +6,7 @@ import io.stereov.web.global.service.hash.HashService
 import io.stereov.web.global.service.jwt.JwtService
 import io.stereov.web.global.service.mail.MailService
 import io.stereov.web.global.service.mail.MailVerificationCooldownService
+import io.stereov.web.global.service.twofactorauth.TwoFactorAuthService
 import io.stereov.web.properties.*
 import io.stereov.web.user.controller.UserSessionController
 import io.stereov.web.user.repository.UserRepository
@@ -38,8 +39,8 @@ class AuthenticationConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun authenticationService(): AuthenticationService {
-        return AuthenticationService()
+    fun authenticationService(userService: UserService): AuthenticationService {
+        return AuthenticationService(userService)
     }
 
     @Bean
@@ -52,6 +53,12 @@ class AuthenticationConfiguration {
     @ConditionalOnMissingBean
     fun hashService(): HashService {
         return HashService()
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun twoFactorAuthService(): TwoFactorAuthService {
+        return twoFactorAuthService()
     }
 
     @Bean
@@ -81,6 +88,7 @@ class AuthenticationConfiguration {
         mailService: MailService,
         mailProperties: MailProperties,
         mailVerificationCooldownService: MailVerificationCooldownService,
+        twoFactorAuthService: TwoFactorAuthService
     ): UserSessionService {
         return UserSessionService(
             userService,
@@ -89,7 +97,9 @@ class AuthenticationConfiguration {
             authenticationService,
             mailService,
             mailProperties,
-            mailVerificationCooldownService)
+            mailVerificationCooldownService,
+            twoFactorAuthService
+        )
     }
 
     @Bean

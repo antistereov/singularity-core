@@ -1,5 +1,6 @@
 package io.stereov.web.user.model
 
+import io.stereov.web.user.dto.DeviceInfoRequestDto
 import io.stereov.web.user.dto.UserDto
 import io.stereov.web.user.exception.UserException
 import org.springframework.data.annotation.Id
@@ -19,11 +20,17 @@ data class UserDocument(
     val verificationUuid: String,
     val devices: List<DeviceInfo> = listOf(),
     val lastActive: Instant = Instant.now(),
+    val twoFactorEnabled: Boolean = false,
+    val twoFactorSecret: String? = null,
 ) {
 
     fun toDto(): UserDto {
         this.id ?: throw UserException("No ID provided in document")
 
-        return UserDto(id, username, name, email, roles, emailVerified, devices.map { it.toResponseDto() }, lastActive.toString())
+        return UserDto(id, username, name, email, roles, emailVerified, devices.map { it.toResponseDto() }, lastActive.toString(), twoFactorEnabled)
+    }
+
+    fun getIdOrThrowEx(): String {
+        return this.id ?: throw UserException("No ID found in user document")
     }
 }

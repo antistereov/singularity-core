@@ -1,7 +1,7 @@
 package io.stereov.web.user.dto
 
-data class LoginUserDto(
+data class LoginRequest(
     val email: String,
     val password: String,
-    val device: DeviceInfoRequestDto
+    val device: DeviceInfoRequestDto,
 )

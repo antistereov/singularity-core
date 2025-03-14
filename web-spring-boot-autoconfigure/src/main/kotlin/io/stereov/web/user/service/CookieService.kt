@@ -132,4 +132,36 @@ class CookieService(
             throw InvalidTokenException("Invalid refresh token")
         }
     }
+
+    suspend fun createTwoFactorSessionCookie(userId: String): ResponseCookie {
+        logger.debug { "Creating cookie for two factor authentication token" }
+
+        val cookie = ResponseCookie.from(Constants.TWO_FACTOR_ATTRIBUTE, userId)
+            .httpOnly(true)
+            .sameSite("Strict")
+            .maxAge(0)
+            .path("/")
+
+        if (backendProperties.secure) {
+            cookie.secure(true)
+        }
+
+        return cookie.build()
+    }
+
+    suspend fun clearTwoFactorSessionCookie(): ResponseCookie {
+        logger.debug { "Clearing cookie for two factor authentication token" }
+
+        val cookie = ResponseCookie.from(Constants.TWO_FACTOR_ATTRIBUTE, "")
+            .httpOnly(true)
+            .sameSite("Strict")
+            .maxAge(0)
+            .path("/")
+
+        if (backendProperties.secure) {
+            cookie.secure(true)
+        }
+
+        return cookie.build()
+    }
 }

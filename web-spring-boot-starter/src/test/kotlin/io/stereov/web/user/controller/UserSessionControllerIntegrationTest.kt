@@ -1,21 +1,20 @@
 package io.stereov.web.user.controller
 
+import com.warrenstrange.googleauth.GoogleAuthenticator
 import io.stereov.web.BaseIntegrationTest
 import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpHeaders
 import io.stereov.web.config.Constants
-import io.stereov.web.user.dto.DeviceInfoRequestDto
-import io.stereov.web.user.dto.LoginUserDto
-import io.stereov.web.user.dto.RegisterUserDto
-import io.stereov.web.user.dto.UserDto
+import io.stereov.web.user.dto.*
 import io.stereov.web.user.model.DeviceInfo
+import org.junit.jupiter.api.Assertions.*
 
 class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
+
+    val gAuth = GoogleAuthenticator()
 
     @Test fun `getAccount returns user account`() = runTest {
         val user = registerUser()
@@ -45,21 +44,21 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val password = "password"
         val deviceId = "device"
         val user = registerUser(email, password, deviceId)
-        val loginUserDto = LoginUserDto(email, password, DeviceInfoRequestDto(deviceId))
+        val loginRequest = LoginRequest(email, password, DeviceInfoRequestDto(deviceId))
 
         val response = webTestClient.post()
             .uri("/user/login")
-            .bodyValue(loginUserDto)
+            .bodyValue(loginRequest)
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserDto::class.java)
+            .expectBody(LoginResponse::class.java)
             .returnResult()
 
         val accessToken = response.responseCookies[Constants.ACCESS_TOKEN_COOKIE]
             ?.firstOrNull()?.value
         val refreshToken = response.responseCookies[Constants.REFRESH_TOKEN_COOKIE]
             ?.firstOrNull()?.value
-        val account = response.responseBody
+        val account = response.responseBody?.user
 
         requireNotNull(accessToken) { "No access token provided in response" }
         requireNotNull(refreshToken) { "No refresh token provided in response" }
@@ -69,7 +68,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         assertTrue(refreshToken.isNotBlank())
         assertEquals(user.info.id, account.id)
 
-        val userDetails = webTestClient.get()
+        val userDto = webTestClient.get()
             .uri("user/me")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, accessToken)
             .exchange()
@@ -78,10 +77,10 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
             .returnResult()
             .responseBody
 
-        requireNotNull(userDetails) { "No UserDetails provided in response" }
+        requireNotNull(userDto)
 
-        assertEquals(user.info.id, userDetails.id)
-        assertEquals(user.info.email, userDetails.email)
+        assertEquals(user.info.id, userDto.id)
+        assertEquals(user.info.email, userDto.email)
 
         assertEquals(1, userService.findAll().count())
     }
@@ -96,13 +95,13 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
 
         webTestClient.post()
             .uri("/user/login")
-            .bodyValue(LoginUserDto(user.info.email, "wrong password", user.info.devices.first().toRequestDto()))
+            .bodyValue(LoginRequest(user.info.email, "wrong password", user.info.devices.first().toRequestDto()))
             .exchange()
             .expectStatus().isUnauthorized
 
         webTestClient.post()
             .uri("/user/login")
-            .bodyValue(LoginUserDto("another@email.com", "wrong password", user.info.devices.first().toRequestDto()))
+            .bodyValue(LoginRequest("another@email.com", "wrong password", user.info.devices.first().toRequestDto()))
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -116,10 +115,10 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
 
         val accessToken = webTestClient.post()
             .uri("/user/login")
-            .bodyValue(LoginUserDto(email, password, DeviceInfoRequestDto(newDeviceId)))
+            .bodyValue(LoginRequest(email, password, DeviceInfoRequestDto(newDeviceId)))
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserDto::class.java)
+            .expectBody(LoginResponse::class.java)
             .returnResult()
             .responseCookies[Constants.ACCESS_TOKEN_COOKIE]?.firstOrNull()?.value
 
@@ -141,6 +140,31 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         assertEquals(2, devices.size)
         assertTrue(devices.any { it.id == deviceId })
         assertTrue(devices.any { it.id == newDeviceId })
+    }
+
+    @Test fun `login with two factor returns no user`() = runTest {
+        val email = "test@email.com"
+        val password = "password"
+        val deviceId = "device"
+
+
+        val user = registerUser(email, password, deviceId, true)
+
+        val loginRequest = LoginRequest(email, password, DeviceInfoRequestDto(deviceId))
+
+        val response = webTestClient.post()
+            .uri("/user/login")
+            .bodyValue(loginRequest)
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(LoginResponse::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(response)
+
+        assertTrue(response.twoFactorRequired)
+        assertNull(response.user)
     }
 
     @Test fun `register registers new user`() = runTest {
@@ -466,5 +490,61 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         assertTrue(refreshToken.isNullOrBlank())
 
         assertEquals(0, userService.findAll().count())
+    }
+
+    @Test fun `2fa setup succeeds`() = runTest {
+        val email = "test@email.com"
+        val password = "password"
+        val deviceId = "device"
+        val user = registerUser(email, password, deviceId)
+        val login = LoginRequest(email, password, DeviceInfoRequestDto(deviceId))
+
+        val response = webTestClient.post()
+            .uri("/user/2fa/setup")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(TwoFactorSetupResponseDto::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(response)
+
+        val code = gAuth.getTotpPassword(response.secret)
+
+        val loginRes = webTestClient.post()
+            .uri("/user/login")
+            .bodyValue(login)
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(LoginResponse::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(loginRes)
+
+        assertTrue(loginRes.twoFactorRequired)
+        assertNull(loginRes.user)
+
+        val userRes = webTestClient.post()
+            .uri("/user/2fa/verify?code=$code")
+            .cookie(Constants.TWO_FACTOR_ATTRIBUTE, user.info.getIdOrThrowEx())
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(UserDto::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(userRes)
+
+        assertTrue(userRes.twoFactorAuthEnabled)
+        assertEquals(user.info.getIdOrThrowEx(), userRes.id)
+    }
+    @Test fun `2fa setup requires authentication`() = runTest {
+        val user = registerUser()
+        webTestClient.post()
+            .uri("/user/2fa/setup")
+            .exchange()
+            .expectStatus().isUnauthorized
     }
 }

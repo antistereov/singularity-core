@@ -2,7 +2,9 @@ package io.stereov.web.user.controller
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.web.auth.exception.NoTwoFactorUserAttributeException
 import io.stereov.web.auth.service.AuthenticationService
+import io.stereov.web.config.Constants
 import io.stereov.web.user.dto.*
 import io.stereov.web.user.model.DeviceInfo
 import io.stereov.web.user.model.UserDocument
@@ -14,6 +16,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ServerWebExchange
 import io.stereov.web.user.exception.UserException
+import kotlinx.coroutines.reactive.awaitFirst
 
 @RestController
 @RequestMapping("/user")
@@ -29,7 +32,7 @@ class UserSessionController(
 
     @GetMapping("/me")
     suspend fun getAccount(): ResponseEntity<UserDto> {
-        val accountId = authenticationService.getCurrentAccountId()
+        val accountId = authenticationService.getCurrentUserId()
 
         return ResponseEntity.ok(userService.findById(accountId).toDto())
     }
@@ -37,13 +40,30 @@ class UserSessionController(
     @PostMapping("/login")
     suspend fun login(
         exchange: ServerWebExchange,
-        @RequestBody payload: LoginUserDto
-    ): ResponseEntity<UserDto> {
+        @RequestBody payload: LoginRequest
+    ): ResponseEntity<LoginResponse> {
         logger.info { "Executing login" }
 
         val user = userSessionService.checkCredentialsAndGetUser(payload)
 
-        return generateTokensAndLogin(exchange, user, payload.device)
+        if (user.twoFactorEnabled) {
+            val twoFactorCookie = cookieService.createTwoFactorSessionCookie(user.getIdOrThrowEx())
+            return ResponseEntity.ok()
+                .header("Set-Cookie", twoFactorCookie.toString())
+                .body(LoginResponse(true, null))
+        }
+
+        val userId = user.id ?: throw UserException("No ID found in user document")
+
+        val ipAddress = exchange.request.remoteAddress?.address?.hostAddress
+
+        val accessTokenCookie = cookieService.createAccessTokenCookie(userId)
+        val refreshTokenCookie = cookieService.createRefreshTokenCookie(userId, payload.device, ipAddress)
+
+        return ResponseEntity.ok()
+            .header("Set-Cookie", accessTokenCookie.toString())
+            .header("Set-Cookie", refreshTokenCookie.toString())
+            .body(LoginResponse(false, user.toDto()))
     }
 
     @PostMapping("/register")
@@ -53,22 +73,13 @@ class UserSessionController(
     ): ResponseEntity<UserDto> {
         logger.info { "Executing register" }
 
-        val userId = userSessionService.registerUserAndGetUserId(payload)
+        val user = userSessionService.registerAndGetUser(payload)
 
-        return generateTokensAndLogin(exchange, userId, payload.device)
-    }
-
-    private suspend fun generateTokensAndLogin(
-        exchange: ServerWebExchange,
-        user: UserDocument,
-        deviceInfo: DeviceInfoRequestDto,
-    ): ResponseEntity<UserDto> {
         val userId = user.id ?: throw UserException("No ID found in user document")
-
         val ipAddress = exchange.request.remoteAddress?.address?.hostAddress
 
         val accessTokenCookie = cookieService.createAccessTokenCookie(userId)
-        val refreshTokenCookie = cookieService.createRefreshTokenCookie(userId, deviceInfo, ipAddress)
+        val refreshTokenCookie = cookieService.createRefreshTokenCookie(userId, payload.device, ipAddress)
 
         return ResponseEntity.ok()
             .header("Set-Cookie", accessTokenCookie.toString())
@@ -117,7 +128,7 @@ class UserSessionController(
         val clearAccessTokenCookie = cookieService.clearAccessTokenCookie()
         val clearRefreshTokenCookie = cookieService.clearRefreshTokenCookie()
 
-        userService.deleteById(authenticationService.getCurrentAccountId())
+        userService.deleteById(authenticationService.getCurrentUserId())
 
         return ResponseEntity.ok()
             .header("Set-Cookie", clearAccessTokenCookie.toString())
@@ -154,7 +165,7 @@ class UserSessionController(
 
     @GetMapping("/devices")
     suspend fun getDevices(): ResponseEntity<Map<String, List<DeviceInfo>>> {
-        val userId = authenticationService.getCurrentAccountId()
+        val userId = authenticationService.getCurrentUserId()
 
         val devices = userService.getDevices(userId)
 
@@ -165,12 +176,40 @@ class UserSessionController(
 
     @DeleteMapping("/devices")
     suspend fun deleteDevice(@RequestParam("device_id") deviceId: String): ResponseEntity<Map<String, List<DeviceInfoResponseDto>>> {
-        val userId = authenticationService.getCurrentAccountId()
+        val userId = authenticationService.getCurrentUserId()
 
         val updatedUser = userService.deleteDevice(userId, deviceId)
 
         return ResponseEntity.ok(
             mapOf("devices" to updatedUser.devices.map { it.toResponseDto() })
+        )
+    }
+
+    @PostMapping("/2fa/setup")
+    suspend fun setupTwoFactorAuth(): ResponseEntity<TwoFactorSetupResponseDto> {
+        val res = userSessionService.setUpTwoFactorAuth()
+
+        return ResponseEntity.ok().body(res)
+    }
+
+    @PostMapping("/2fa/verify")
+    suspend fun verifyTwoFactorAuth(@RequestParam("code") code: Int, exchange: ServerWebExchange): ResponseEntity<UserDto> {
+        val userId = exchange.request.cookies[Constants.TWO_FACTOR_ATTRIBUTE]?.firstOrNull()?.value
+            ?: throw NoTwoFactorUserAttributeException()
+
+        val userDto = userSessionService.validateTwoFactorCode(userId, code)
+
+        val clearTwoFactorCookie = cookieService.clearTwoFactorSessionCookie()
+        return ResponseEntity.ok()
+            .header("Set-Cookie", clearTwoFactorCookie.toString())
+            .body(userDto)
+    }
+
+    @GetMapping("/2fa/status")
+    suspend fun getTwoFactorAuthStatus(exchange: ServerWebExchange): ResponseEntity<Map<String, Boolean>> {
+        val isPending = exchange.request.cookies[Constants.TWO_FACTOR_ATTRIBUTE]?.firstOrNull()?.value.isNullOrBlank()
+        return ResponseEntity.ok().body(
+            mapOf("twoFactorRequired" to isPending)
         )
     }
 }

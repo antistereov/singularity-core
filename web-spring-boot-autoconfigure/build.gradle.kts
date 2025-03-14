@@ -45,6 +45,9 @@ dependencies {
     api("org.springframework.security:spring-security-oauth2-resource-server")
     api("org.springframework.security:spring-security-oauth2-jose")
 
+    // 2FA
+    api("com.warrenstrange:googleauth:1.5.0")
+
     // Reactive and Coroutines
     api("org.springframework.boot:spring-boot-starter-webflux")
     api("org.springframework.boot:spring-boot-starter-reactor-netty")

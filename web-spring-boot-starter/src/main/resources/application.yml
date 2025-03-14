@@ -25,6 +25,8 @@ logging:
     io.stereov: ${LOG_LEVEL:DEBUG}
 
 webstarter:
+  app:
+    name: TestApplication
   mail:
     enable-email-verification: ${ENABLE_EMAIL_VERIFICATION:true}
     host: ${MAIL_HOST}
@@ -52,8 +54,3 @@ webstarter:
   frontend:
     base-url: ${FRONTEND_BASE_URL}
     email-verification-path: ${EMAIL_VERIFICATION_PATH}
-  auth:
-    public-paths:
-      - "/user/register"
-      - "/user/login"
-      - "/user/refresh"
