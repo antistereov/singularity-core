@@ -27,6 +27,8 @@ logging:
 webstarter:
   app:
     name: TestApplication
+    base-url: ${BACKEND_BASE_URL}
+    secure: ${SECURE:false}
   mail:
     enable-email-verification: ${ENABLE_EMAIL_VERIFICATION:true}
     host: ${MAIL_HOST}
@@ -40,17 +42,17 @@ webstarter:
     debug: ${MAIL_DEBUG:false}
     verification-expiration: ${MAIL_VERIFICATION_EXPIRATION:900}
     verification-send-cooldown: ${MAIL_VERIFICATION_SEND_COOLDOWN:60}
-  encryption:
-    secret-key: ${SECRET_KEY}
-  jwt:
-    secret-key: ${JWT_SECRET_KEY}
-    expires-in: ${JWT_EXPIRATION:900}
-  backend:
-    base-url: ${BACKEND_BASE_URL}
-    secure: ${SECURE:false}
-  rate-limit:
-    ip-rate-limit-minute: ${IP_RATE_LIMIT_MINUTE:200}
-    account-rate-limit-minute: ${ACCOUNT_RATE_LIMIT_MINUTE:100}
+  security:
+    encryption:
+      secret-key: ${SECRET_KEY}
+    jwt:
+      secret-key: ${JWT_SECRET_KEY}
+      expires-in: ${JWT_EXPIRATION:900}
+    rate-limit:
+      ip-rate-limit-minute: ${IP_RATE_LIMIT_MINUTE:200}
+      account-rate-limit-minute: ${ACCOUNT_RATE_LIMIT_MINUTE:100}
+    two-factor:
+      recovery-code-length: 20
   frontend:
     base-url: ${FRONTEND_BASE_URL}
     email-verification-path: ${EMAIL_VERIFICATION_PATH}

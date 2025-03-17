@@ -7,7 +7,6 @@ import io.stereov.web.auth.service.AuthenticationService
 import io.stereov.web.config.Constants
 import io.stereov.web.user.dto.*
 import io.stereov.web.user.model.DeviceInfo
-import io.stereov.web.user.model.UserDocument
 import io.stereov.web.user.service.CookieService
 import io.stereov.web.user.service.UserService
 import io.stereov.web.user.service.UserSessionService
@@ -16,7 +15,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ServerWebExchange
 import io.stereov.web.user.exception.UserException
-import kotlinx.coroutines.reactive.awaitFirst
 
 @RestController
 @RequestMapping("/user")
@@ -46,8 +44,8 @@ class UserSessionController(
 
         val user = userSessionService.checkCredentialsAndGetUser(payload)
 
-        if (user.twoFactorEnabled) {
-            val twoFactorCookie = cookieService.createTwoFactorSessionCookie(user.getIdOrThrowEx())
+        if (user.security.twoFactor.enabled) {
+            val twoFactorCookie = cookieService.createTwoFactorSessionCookie(user.idX)
             return ResponseEntity.ok()
                 .header("Set-Cookie", twoFactorCookie.toString())
                 .body(LoginResponse(true, null))
@@ -75,7 +73,7 @@ class UserSessionController(
 
         val user = userSessionService.registerAndGetUser(payload)
 
-        val userId = user.id ?: throw UserException("No ID found in user document")
+        val userId = user.idX
         val ipAddress = exchange.request.remoteAddress?.address?.hostAddress
 
         val accessTokenCookie = cookieService.createAccessTokenCookie(userId)
@@ -211,5 +209,18 @@ class UserSessionController(
         return ResponseEntity.ok().body(
             mapOf("twoFactorRequired" to isPending)
         )
+    }
+
+    @PostMapping("/2fa/recovery")
+    suspend fun recoverUser(@RequestParam("code") code: String, exchange: ServerWebExchange): ResponseEntity<UserDto> {
+        val userId = exchange.request.cookies[Constants.TWO_FACTOR_ATTRIBUTE]?.firstOrNull()?.value
+            ?: throw NoTwoFactorUserAttributeException()
+
+        val userDto = userSessionService.recoverUser(userId, code)
+
+        val clearTwoFactorCookie = cookieService.clearTwoFactorSessionCookie()
+        return ResponseEntity.ok()
+            .header("Set-Cookie", clearTwoFactorCookie.toString())
+            .body(userDto)
     }
 }

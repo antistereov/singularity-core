@@ -4,5 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "webstarter.app")
 data class AppProperties(
-    val name: String
+    val name: String,
+    val baseUrl: String,
+    val secure: Boolean = false,
 )

@@ -148,7 +148,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val deviceId = "device"
 
 
-        val user = registerUser(email, password, deviceId, true)
+        registerUser(email, password, deviceId, true)
 
         val loginRequest = LoginRequest(email, password, DeviceInfoRequestDto(deviceId))
 
@@ -528,7 +528,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
 
         val userRes = webTestClient.post()
             .uri("/user/2fa/verify?code=$code")
-            .cookie(Constants.TWO_FACTOR_ATTRIBUTE, user.info.getIdOrThrowEx())
+            .cookie(Constants.TWO_FACTOR_ATTRIBUTE, user.info.idX)
             .exchange()
             .expectStatus().isOk
             .expectBody(UserDto::class.java)
@@ -538,10 +538,10 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         requireNotNull(userRes)
 
         assertTrue(userRes.twoFactorAuthEnabled)
-        assertEquals(user.info.getIdOrThrowEx(), userRes.id)
+        assertEquals(user.info.idX, userRes.id)
     }
     @Test fun `2fa setup requires authentication`() = runTest {
-        val user = registerUser()
+        registerUser()
         webTestClient.post()
             .uri("/user/2fa/setup")
             .exchange()

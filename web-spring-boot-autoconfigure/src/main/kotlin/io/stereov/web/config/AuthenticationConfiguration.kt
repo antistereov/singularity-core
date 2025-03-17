@@ -1,6 +1,7 @@
 package io.stereov.web.config
 
 import io.stereov.web.auth.service.AuthenticationService
+import io.stereov.web.global.service.encryption.EncryptionService
 import io.stereov.web.global.service.geolocation.GeoLocationService
 import io.stereov.web.global.service.hash.HashService
 import io.stereov.web.global.service.jwt.JwtService
@@ -88,7 +89,9 @@ class AuthenticationConfiguration {
         mailService: MailService,
         mailProperties: MailProperties,
         mailVerificationCooldownService: MailVerificationCooldownService,
-        twoFactorAuthService: TwoFactorAuthService
+        twoFactorAuthService: TwoFactorAuthService,
+        twoFactorAuthProperties: TwoFactorAuthProperties,
+        encryptionService: EncryptionService
     ): UserSessionService {
         return UserSessionService(
             userService,
@@ -98,7 +101,9 @@ class AuthenticationConfiguration {
             mailService,
             mailProperties,
             mailVerificationCooldownService,
-            twoFactorAuthService
+            twoFactorAuthService,
+            twoFactorAuthProperties,
+            encryptionService
         )
     }
 
@@ -107,10 +112,10 @@ class AuthenticationConfiguration {
     fun cookieService(
         jwtService: JwtService,
         jwtProperties: JwtProperties,
-        backendProperties: BackendProperties,
+        appProperties: AppProperties,
         geoLocationService: GeoLocationService,
         userService: UserService,
     ): CookieService {
-        return CookieService(jwtService, jwtProperties, backendProperties, geoLocationService, userService)
+        return CookieService(jwtService, jwtProperties, appProperties, geoLocationService, userService)
     }
 }

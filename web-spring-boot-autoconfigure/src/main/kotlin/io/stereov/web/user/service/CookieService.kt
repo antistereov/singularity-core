@@ -2,7 +2,6 @@ package io.stereov.web.user.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.web.properties.BackendProperties
 import io.stereov.web.properties.JwtProperties
 import io.stereov.web.user.dto.DeviceInfoRequestDto
 import io.stereov.web.user.model.DeviceInfo
@@ -12,6 +11,7 @@ import io.stereov.web.config.Constants
 import io.stereov.web.global.service.geolocation.GeoLocationService
 import io.stereov.web.global.service.jwt.JwtService
 import io.stereov.web.global.service.jwt.exception.InvalidTokenException
+import io.stereov.web.properties.AppProperties
 import io.stereov.web.user.dto.UserDto
 import org.springframework.web.server.ServerWebExchange
 
@@ -19,7 +19,7 @@ import org.springframework.web.server.ServerWebExchange
 class CookieService(
     private val jwtService: JwtService,
     private val jwtProperties: JwtProperties,
-    private val backendProperties: BackendProperties,
+    private val appProperties: AppProperties,
     private val geoLocationService: GeoLocationService,
     private val userService: UserService,
 ) {
@@ -38,7 +38,7 @@ class CookieService(
             .maxAge(jwtProperties.expiresIn)
             .path("/")
 
-        if (backendProperties.secure) {
+        if (appProperties.secure) {
             cookie.secure(true)
         }
         return cookie.build()
@@ -79,7 +79,7 @@ class CookieService(
             .path("/")
             .maxAge(10L * 365 * 24 * 60 * 60)
 
-        if (backendProperties.secure) {
+        if (appProperties.secure) {
             cookie.secure(true)
         }
 
@@ -95,7 +95,7 @@ class CookieService(
             .maxAge(0)
             .path("/")
 
-        if (backendProperties.secure) {
+        if (appProperties.secure) {
             cookie.secure(true)
         }
 
@@ -112,7 +112,7 @@ class CookieService(
             .maxAge(0)
             .path("/")
 
-        if (backendProperties.secure) {
+        if (appProperties.secure) {
             cookie.secure(true)
         }
 
@@ -142,7 +142,7 @@ class CookieService(
             .maxAge(0)
             .path("/")
 
-        if (backendProperties.secure) {
+        if (appProperties.secure) {
             cookie.secure(true)
         }
 
@@ -158,7 +158,7 @@ class CookieService(
             .maxAge(0)
             .path("/")
 
-        if (backendProperties.secure) {
+        if (appProperties.secure) {
             cookie.secure(true)
         }
 

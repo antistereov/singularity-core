@@ -1,6 +1,5 @@
 package io.stereov.web.auth.model
 
-import io.stereov.web.user.exception.InvalidUserDocumentException
 import io.stereov.web.user.model.UserDocument
 import org.springframework.security.authentication.AbstractAuthenticationToken
 import org.springframework.security.core.GrantedAuthority
@@ -19,7 +18,7 @@ class CustomAuthenticationToken(
     override fun getPrincipal(): String = userId
 
     constructor(userDocument: UserDocument): this(
-        userId = userDocument.id ?: throw InvalidUserDocumentException("AccountDocument does not contain ID"),
+        userId = userDocument.idX,
         authorities = userDocument.roles.map { SimpleGrantedAuthority("ROLE_$it") },
     )
 }

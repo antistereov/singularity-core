@@ -6,4 +6,5 @@ import kotlinx.serialization.Serializable
 data class TwoFactorSetupResponseDto(
     val secret: String,
     val optAuthUrl: String,
+    val recoveryCode: String
 )

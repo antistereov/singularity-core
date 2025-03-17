@@ -19,11 +19,11 @@ import org.springframework.context.annotation.Configuration
 @EnableConfigurationProperties(
     AppProperties::class,
     AuthProperties::class,
-    BackendProperties::class,
     EncryptionProperties::class,
     FrontendProperties::class,
     JwtProperties::class,
     MailProperties::class,
     RateLimitProperties::class,
+    TwoFactorAuthProperties::class
 )
 class ApplicationConfiguration

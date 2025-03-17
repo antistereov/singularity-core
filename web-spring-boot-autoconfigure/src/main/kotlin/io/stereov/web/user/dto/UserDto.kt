@@ -6,7 +6,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class UserDto(
     val id: String,
-    val username: String?,
     val name: String?,
     val email: String,
     val roles: List<Role> = listOf(Role.USER),
@@ -14,4 +13,5 @@ data class UserDto(
     val devices: List<DeviceInfoResponseDto> = listOf(),
     val lastActive: String,
     val twoFactorAuthEnabled: Boolean,
+    val app: ApplicationInfoDto?,
 )

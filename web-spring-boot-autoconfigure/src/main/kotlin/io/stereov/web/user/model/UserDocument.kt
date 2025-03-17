@@ -1,9 +1,9 @@
 package io.stereov.web.user.model
 
-import io.stereov.web.user.dto.DeviceInfoRequestDto
 import io.stereov.web.user.dto.UserDto
 import io.stereov.web.user.exception.UserException
 import org.springframework.data.annotation.Id
+import org.springframework.data.annotation.Transient
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
@@ -11,26 +11,42 @@ import java.time.Instant
 @Document(collection = "users")
 data class UserDocument(
     @Id val id: String? = null,
-    val username: String? = null,
-    val name: String? = null,
     @Indexed(unique = true) val email: String,
+    val name: String? = null,
     val password: String,
     val roles: List<Role> = listOf(Role.USER),
-    val emailVerified: Boolean = false,
-    val verificationUuid: String,
+    val security: UserSecurityDetails = UserSecurityDetails(),
     val devices: List<DeviceInfo> = listOf(),
     val lastActive: Instant = Instant.now(),
-    val twoFactorEnabled: Boolean = false,
-    val twoFactorSecret: String? = null,
+    val app: ApplicationInfo? = null,
 ) {
 
-    fun toDto(): UserDto {
-        this.id ?: throw UserException("No ID provided in document")
+    /**
+     * Return the [id] and throw a [UserException] if the [id] is null.
+     *
+     * @throws UserException If [id] is null
+     */
+    @get:Transient
+    val idX: String
+        get() = this.id ?: throw UserException("No ID found in UserDocument")
 
-        return UserDto(id, username, name, email, roles, emailVerified, devices.map { it.toResponseDto() }, lastActive.toString(), twoFactorEnabled)
+    fun toDto(): UserDto {
+        return UserDto(
+            idX,
+            name,
+            email,
+            roles,
+            security.mail.verified,
+            devices.map { it.toResponseDto() },
+            lastActive.toString(),
+            security.twoFactor.enabled,
+            app?.toDto()
+        )
     }
 
-    fun getIdOrThrowEx(): String {
-        return this.id ?: throw UserException("No ID found in user document")
+    fun disableTwoFactorAuth() {
+        this.security.twoFactor.enabled = false
+        this.security.twoFactor.secret = null
+        this.security.twoFactor.recoveryCode = null
     }
 }

@@ -9,7 +9,6 @@ import io.stereov.web.user.model.UserDocument
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.stereotype.Service
-import javax.security.auth.login.AccountException
 
 @Service
 class MailService(
@@ -26,9 +25,9 @@ class MailService(
     suspend fun sendVerificationEmail(user: UserDocument) {
         logger.debug { "Sending verification email to ${user.email}" }
 
-        val userId = user.id ?: throw AccountException("UserDocument does not contain an ID")
+        val userId = user.idX
 
-        val token = jwtService.createEmailVerificationToken(user.email, user.verificationUuid)
+        val token = jwtService.createEmailVerificationToken(user.email, user.security.mail.verificationUuid)
         val verificationUrl = generateVerificationUrl(token)
         val message = SimpleMailMessage()
         message.from = mailProperties.email
