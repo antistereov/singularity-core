@@ -7,6 +7,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
 
 class CustomAuthenticationToken(
     val userId: String,
+    val deviceId: String,
     authorities: Collection<GrantedAuthority>
 ) : AbstractAuthenticationToken(authorities) {
 
@@ -17,8 +18,9 @@ class CustomAuthenticationToken(
     override fun getCredentials(): Any? = null
     override fun getPrincipal(): String = userId
 
-    constructor(userDocument: UserDocument): this(
+    constructor(userDocument: UserDocument, deviceId: String): this(
         userId = userDocument.idX,
         authorities = userDocument.roles.map { SimpleGrantedAuthority("ROLE_$it") },
+        deviceId = deviceId
     )
 }

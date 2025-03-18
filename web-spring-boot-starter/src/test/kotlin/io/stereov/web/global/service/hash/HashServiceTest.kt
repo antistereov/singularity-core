@@ -1,6 +1,5 @@
-package io.stereov.web.auth.service
+package io.stereov.web.global.service.hash
 
-import io.stereov.web.global.service.hash.HashService
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 

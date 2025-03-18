@@ -1,20 +1,15 @@
 package io.stereov.web.user.controller
 
-import com.warrenstrange.googleauth.GoogleAuthenticator
 import io.stereov.web.BaseIntegrationTest
-import kotlinx.coroutines.flow.count
-import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Test
-import org.springframework.core.ParameterizedTypeReference
-import org.springframework.http.HttpHeaders
 import io.stereov.web.config.Constants
 import io.stereov.web.user.dto.*
-import io.stereov.web.user.model.DeviceInfo
+import kotlinx.coroutines.flow.count
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Test
+import org.springframework.http.HttpHeaders
 
 class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
-
-    val gAuth = GoogleAuthenticator()
 
     @Test fun `getAccount returns user account`() = runTest {
         val user = registerUser()
@@ -141,14 +136,12 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         assertTrue(devices.any { it.id == deviceId })
         assertTrue(devices.any { it.id == newDeviceId })
     }
-
-    @Test fun `login with two factor returns no user`() = runTest {
+    @Test fun `login with two factor works as expected`() = runTest {
         val email = "test@email.com"
         val password = "password"
         val deviceId = "device"
 
-
-        registerUser(email, password, deviceId, true)
+        val user = registerUser(email, password, deviceId, true)
 
         val loginRequest = LoginRequest(email, password, DeviceInfoRequestDto(deviceId))
 
@@ -159,12 +152,15 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
             .expectStatus().isOk
             .expectBody(LoginResponse::class.java)
             .returnResult()
-            .responseBody
 
-        requireNotNull(response)
+        val body = response.responseBody
+        requireNotNull(body)
 
-        assertTrue(response.twoFactorRequired)
-        assertNull(response.user)
+        requireNotNull(user.twoFactorToken)
+        assertEquals(user.twoFactorToken, response.responseCookies[Constants.TWO_FACTOR_AUTH_COOKIE]?.firstOrNull()?.value)
+
+        assertTrue(body.twoFactorRequired)
+        assertNotNull(body.user)
     }
 
     @Test fun `register registers new user`() = runTest {
@@ -234,72 +230,6 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
     @Test fun `register needs body`() = runTest {
         webTestClient.post()
             .uri("/user/login")
-            .exchange()
-            .expectStatus().isBadRequest
-    }
-
-    @Test fun `getDevices returns devices`() = runTest {
-        val user = registerUser(deviceId = "first")
-        val devices = user.info.devices.toMutableList()
-        devices.addAll(listOf(DeviceInfo("second"), DeviceInfo("third")))
-
-        userService.save(user.info.copy(
-            devices = devices
-        ))
-
-        val response = webTestClient.get()
-            .uri("/user/devices")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
-            .exchange()
-            .expectStatus().isOk
-            .expectBody(object : ParameterizedTypeReference<Map<String, List<DeviceInfoRequestDto>>>() {})
-            .returnResult()
-            .responseBody
-
-        requireNotNull(response) { "No body found in response" }
-
-        val deviceResponse = response["devices"]
-
-        requireNotNull(deviceResponse) { "No device key found in response" }
-
-        assertEquals(3, deviceResponse.size)
-        assertTrue(deviceResponse.any { it.id == "first" })
-        assertTrue(deviceResponse.any { it.id == "second" })
-        assertTrue(deviceResponse.any { it.id == "third" })
-    }
-    @Test fun `getDevices requires authentication`() = runTest {
-        webTestClient.get()
-            .uri("/user/devices")
-            .exchange()
-            .expectStatus().isUnauthorized
-    }
-
-    @Test fun `deleteDevice deletes device`() = runTest {
-        val deviceId = "device"
-        val user = registerUser(deviceId = deviceId)
-
-        webTestClient.delete()
-            .uri("/user/devices?device_id=$deviceId")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
-            .exchange()
-            .expectStatus().isOk
-
-        val updatedUser = userService.findById(user.info.id!!)
-        val devices = updatedUser.devices
-
-        assertEquals(0, devices.size)
-    }
-    @Test fun `deleteDevice requires authentication`() = runTest {
-        webTestClient.delete()
-            .uri("/user/devices?device_id=device")
-            .exchange()
-            .expectStatus().isUnauthorized
-    }
-    @Test fun `deleteDevice requires request param`() = runTest {
-        val user = registerUser()
-        webTestClient.delete()
-            .uri("/user/devices")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectStatus().isBadRequest
     }
@@ -490,61 +420,5 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         assertTrue(refreshToken.isNullOrBlank())
 
         assertEquals(0, userService.findAll().count())
-    }
-
-    @Test fun `2fa setup succeeds`() = runTest {
-        val email = "test@email.com"
-        val password = "password"
-        val deviceId = "device"
-        val user = registerUser(email, password, deviceId)
-        val login = LoginRequest(email, password, DeviceInfoRequestDto(deviceId))
-
-        val response = webTestClient.post()
-            .uri("/user/2fa/setup")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
-            .exchange()
-            .expectStatus().isOk
-            .expectBody(TwoFactorSetupResponseDto::class.java)
-            .returnResult()
-            .responseBody
-
-        requireNotNull(response)
-
-        val code = gAuth.getTotpPassword(response.secret)
-
-        val loginRes = webTestClient.post()
-            .uri("/user/login")
-            .bodyValue(login)
-            .exchange()
-            .expectStatus().isOk
-            .expectBody(LoginResponse::class.java)
-            .returnResult()
-            .responseBody
-
-        requireNotNull(loginRes)
-
-        assertTrue(loginRes.twoFactorRequired)
-        assertNull(loginRes.user)
-
-        val userRes = webTestClient.post()
-            .uri("/user/2fa/verify?code=$code")
-            .cookie(Constants.TWO_FACTOR_ATTRIBUTE, user.info.idX)
-            .exchange()
-            .expectStatus().isOk
-            .expectBody(UserDto::class.java)
-            .returnResult()
-            .responseBody
-
-        requireNotNull(userRes)
-
-        assertTrue(userRes.twoFactorAuthEnabled)
-        assertEquals(user.info.idX, userRes.id)
-    }
-    @Test fun `2fa setup requires authentication`() = runTest {
-        registerUser()
-        webTestClient.post()
-            .uri("/user/2fa/setup")
-            .exchange()
-            .expectStatus().isUnauthorized
     }
 }

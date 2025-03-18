@@ -8,12 +8,13 @@ import io.stereov.web.global.service.jwt.JwtService
 import io.stereov.web.global.service.mail.MailService
 import io.stereov.web.global.service.mail.MailVerificationCooldownService
 import io.stereov.web.global.service.twofactorauth.TwoFactorAuthService
-import io.stereov.web.properties.*
+import io.stereov.web.properties.AppProperties
+import io.stereov.web.properties.JwtProperties
+import io.stereov.web.properties.MailProperties
+import io.stereov.web.properties.TwoFactorAuthProperties
 import io.stereov.web.user.controller.UserSessionController
 import io.stereov.web.user.repository.UserRepository
-import io.stereov.web.user.service.CookieService
-import io.stereov.web.user.service.UserService
-import io.stereov.web.user.service.UserSessionService
+import io.stereov.web.user.service.*
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
@@ -76,7 +77,7 @@ class AuthenticationConfiguration {
         userSessionService: UserSessionService,
         cookieService: CookieService,
     ): UserSessionController {
-        return UserSessionController(authenticationService, userService, userSessionService, cookieService)
+        return UserSessionController(authenticationService, userSessionService, cookieService)
     }
 
     @Bean
@@ -88,22 +89,15 @@ class AuthenticationConfiguration {
         authenticationService: AuthenticationService,
         mailService: MailService,
         mailProperties: MailProperties,
-        mailVerificationCooldownService: MailVerificationCooldownService,
-        twoFactorAuthService: TwoFactorAuthService,
-        twoFactorAuthProperties: TwoFactorAuthProperties,
-        encryptionService: EncryptionService
+        deviceService: UserDeviceService,
     ): UserSessionService {
         return UserSessionService(
             userService,
             hashService,
-            jwtService,
             authenticationService,
             mailService,
             mailProperties,
-            mailVerificationCooldownService,
-            twoFactorAuthService,
-            twoFactorAuthProperties,
-            encryptionService
+            deviceService,
         )
     }
 
@@ -117,5 +111,40 @@ class AuthenticationConfiguration {
         userService: UserService,
     ): CookieService {
         return CookieService(jwtService, jwtProperties, appProperties, geoLocationService, userService)
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun userDeviceService(
+        userService: UserService,
+        authenticationService: AuthenticationService,
+    ) : UserDeviceService {
+        return UserDeviceService(userService, authenticationService)
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun userMailVerificationService(
+        userService: UserService,
+        jwtService: JwtService,
+        authenticationService: AuthenticationService,
+        mailVerificationCooldownService: MailVerificationCooldownService,
+        mailService: MailService
+    ): UserMailVerificationService {
+        return UserMailVerificationService(userService, jwtService, authenticationService, mailVerificationCooldownService, mailService)
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun userTwoFactorAuthService(
+        userService: UserService,
+        twoFactorAuthService: TwoFactorAuthService,
+        encryptionService: EncryptionService,
+        authenticationService: AuthenticationService,
+        twoFactorAuthProperties: TwoFactorAuthProperties,
+        hashService: HashService,
+        cookieService: CookieService
+    ): UserTwoFactorAuthService {
+        return UserTwoFactorAuthService(userService, twoFactorAuthService, encryptionService, authenticationService, twoFactorAuthProperties, hashService, cookieService)
     }
 }

@@ -2,6 +2,8 @@ package io.stereov.web.auth.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.web.auth.exception.InvalidPrincipalException
+import io.stereov.web.auth.model.CustomAuthenticationToken
 import io.stereov.web.global.service.jwt.exception.InvalidTokenException
 import io.stereov.web.user.model.UserDocument
 import io.stereov.web.user.service.UserService
@@ -18,13 +20,6 @@ class AuthenticationService(
     private val logger: KLogger
         get() = KotlinLogging.logger {}
 
-    suspend fun getCurrentAuth(): io.stereov.web.auth.model.CustomAuthenticationToken {
-        logger.debug { "Extracting AuthInfo" }
-
-        val auth = getCurrentAuthentication()
-        return auth
-    }
-
     suspend fun getCurrentUserId(): String {
         logger.debug {"Extracting user ID." }
 
@@ -39,14 +34,21 @@ class AuthenticationService(
         return userService.findById(userId)
     }
 
-    private suspend fun getCurrentAuthentication(): io.stereov.web.auth.model.CustomAuthenticationToken {
+    suspend fun getCurrentDeviceId(): String {
+        logger.debug { "Extracting device ID" }
+
+        val auth = getCurrentAuthentication()
+        return auth.deviceId
+    }
+
+    private suspend fun getCurrentAuthentication(): CustomAuthenticationToken {
         val securityContext: SecurityContext = ReactiveSecurityContextHolder.getContext().awaitFirstOrNull()
-            ?: throw io.stereov.web.auth.exception.InvalidPrincipalException("No security context found.")
+            ?: throw InvalidPrincipalException("No security context found.")
 
         val authentication = securityContext.authentication
             ?: throw InvalidTokenException("Authentication is missing.")
 
-        return authentication as? io.stereov.web.auth.model.CustomAuthenticationToken
+        return authentication as? CustomAuthenticationToken
                 ?: throw InvalidTokenException("Authentication does not contain needed properties")
     }
 }

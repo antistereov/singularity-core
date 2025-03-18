@@ -1,9 +1,9 @@
 package io.stereov.web.auth
 
 import io.stereov.web.BaseIntegrationTest
+import io.stereov.web.config.Constants
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
-import io.stereov.web.config.Constants
 
 class SecurityIntegrationTest : BaseIntegrationTest() {
 
@@ -35,7 +35,7 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
     }
     @Test fun `Unexpired token required`() = runTest {
         val user = registerUser()
-        val token = jwtService.createAccessToken(user.info.id!!, 2)
+        val token = jwtService.createAccessToken(user.info.id!!, "device", 2)
 
         webTestClient.get()
             .uri("/user/me")

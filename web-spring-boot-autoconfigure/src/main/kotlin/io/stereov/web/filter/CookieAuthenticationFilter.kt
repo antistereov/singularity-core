@@ -33,15 +33,15 @@ class CookieAuthenticationFilter(
                 return@mono exchange.response.setComplete().awaitFirstOrNull()
             }
 
-            val account = userService.findByIdOrNull(accessToken.accountId)
+            val user = userService.findByIdOrNull(accessToken.userId)
 
-            if (account == null) {
+            if (user == null) {
                 exchange.response.statusCode = HttpStatus.UNAUTHORIZED
 
                 return@mono exchange.response.setComplete().awaitFirstOrNull()
             }
 
-            val authentication = CustomAuthenticationToken(account)
+            val authentication = CustomAuthenticationToken(user, accessToken.deviceId)
 
             val securityContext = SecurityContextImpl(authentication)
             return@mono chain.filter(exchange)

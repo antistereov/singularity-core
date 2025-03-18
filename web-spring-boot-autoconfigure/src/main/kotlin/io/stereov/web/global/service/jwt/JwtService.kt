@@ -1,5 +1,8 @@
 package io.stereov.web.global.service.jwt
 
+import io.github.oshai.kotlinlogging.KLogger
+import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.web.config.Constants
 import io.stereov.web.global.service.jwt.exception.InvalidTokenException
 import io.stereov.web.global.service.jwt.exception.TokenExpiredException
 import io.stereov.web.global.service.jwt.model.AccessToken
@@ -8,11 +11,7 @@ import io.stereov.web.global.service.jwt.model.RefreshToken
 import io.stereov.web.properties.JwtProperties
 import io.stereov.web.properties.MailProperties
 import kotlinx.coroutines.reactive.awaitFirst
-import org.springframework.security.oauth2.jwt.JwsHeader
-import org.springframework.security.oauth2.jwt.JwtClaimsSet
-import org.springframework.security.oauth2.jwt.JwtEncoder
-import org.springframework.security.oauth2.jwt.JwtEncoderParameters
-import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder
+import org.springframework.security.oauth2.jwt.*
 import org.springframework.stereotype.Service
 import java.time.Instant
 import java.util.*
@@ -25,42 +24,47 @@ class JwtService(
     private val mailProperties: MailProperties,
 ) {
 
+    private val logger: KLogger
+        get() = KotlinLogging.logger {}
+
     private val tokenExpiresInSeconds = jwtProperties.expiresIn
 
-    fun createAccessToken(userId: String, expiration: Long = tokenExpiresInSeconds): String {
+    fun createAccessToken(userId: String, deviceId: String, expiration: Long = tokenExpiresInSeconds): String {
+        logger.debug { "Creating access token for user $userId and device $deviceId" }
+
         val jwsHeader = JwsHeader.with { "HS256" }.build()
         val claims = JwtClaimsSet.builder()
             .issuedAt(Instant.now())
             .expiresAt(Instant.now().plusSeconds(expiration))
             .subject(userId)
+            .claim(Constants.JWT_DEVICE_CLAIM, deviceId)
             .build()
 
         return jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, claims)).tokenValue
     }
 
     suspend fun validateAndExtractAccessToken(token: String): AccessToken {
-        val jwt = try {
-            jwtDecoder.decode(token).awaitFirst()
-        } catch(e: Exception) {
-            throw InvalidTokenException("Cannot decode access token", e)
-        }
-        val expiresAt = jwt.expiresAt
-            ?: throw InvalidTokenException("JWT does not contain expiration information")
+        logger.debug { "Validating access token" }
 
-        if (expiresAt <= Instant.now()) throw TokenExpiredException("Access token is expired")
+        val jwt = decodeJwt(token)
 
         val accountId = jwt.subject
             ?: throw InvalidTokenException("JWT does not contain sub")
 
-        return AccessToken(accountId)
+        val deviceId = jwt.claims[Constants.JWT_DEVICE_CLAIM] as? String
+            ?: throw InvalidTokenException("JWT does not contain device id")
+
+        return AccessToken(accountId, deviceId)
     }
 
-    fun createRefreshToken(accountId: String, deviceId: String): String {
+    fun createRefreshToken(userId: String, deviceId: String): String {
+        logger.debug { "Creating refresh token for user $userId and device $deviceId" }
+
         val jwsHeader = JwsHeader.with { "HS256" }.build()
 
         val claims = JwtClaimsSet.builder()
             .id(UUID.randomUUID().toString())
-            .subject(accountId)
+            .subject(userId)
             .claim("device_id", deviceId)
             .issuedAt(Instant.now())
             .build()
@@ -69,6 +73,8 @@ class JwtService(
     }
 
     suspend fun extractRefreshToken(refreshToken: String, deviceId: String): RefreshToken {
+        logger.debug { "Extracting refresh token" }
+
         val jwt = try {
             jwtDecoder.decode(refreshToken).awaitFirst()
         } catch (e: Exception) {
@@ -82,6 +88,8 @@ class JwtService(
     }
 
     fun createEmailVerificationToken(email: String, uuid: String): String {
+        logger.debug { "Creating email verification token" }
+
         val jwsHeader = JwsHeader.with { "HS256" }.build()
         val claims = JwtClaimsSet.builder()
             .issuedAt(Instant.now())
@@ -94,19 +102,53 @@ class JwtService(
     }
 
     suspend fun validateAndExtractVerificationToken(token: String): EmailVerificationToken {
-        val jwt = try {
-            jwtDecoder.decode(token).awaitFirst()
-        } catch (e: Exception) {
-            throw InvalidTokenException("Cannot decode email verification token", e)
-        }
-        val expiresAt = jwt.expiresAt
-            ?: throw InvalidTokenException("JWT does not contain expiration information")
+        logger.debug { "Validating email verification token" }
 
-        if (expiresAt <= Instant.now()) throw TokenExpiredException("Email verification token is expired")
+        val jwt = decodeJwt(token)
 
         val email = jwt.subject
         val uuid = jwt.id
 
         return EmailVerificationToken(email, uuid)
+    }
+
+    fun createTwoFactorToken(userId: String, expiration: Long = tokenExpiresInSeconds): String {
+        logger.debug { "Creating two factor token" }
+
+        val jwsHeader = JwsHeader.with { "HS256" }.build()
+        val claims = JwtClaimsSet.builder()
+            .issuedAt(Instant.now())
+            .expiresAt(Instant.now().plusSeconds(expiration))
+            .subject(userId)
+            .build()
+
+        return jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, claims)).tokenValue
+    }
+
+    suspend fun validateTwoFactorTokenAndExtractUserId(token: String): String {
+        logger.debug { "Validating two factor token" }
+
+        val jwt = decodeJwt(token)
+
+        val userId = jwt.subject
+            ?: throw InvalidTokenException("JWT does not contain sub")
+
+        return userId
+    }
+
+    private suspend fun decodeJwt(token: String): Jwt {
+        logger.debug { "Decoding jwt" }
+
+        val jwt = try {
+            jwtDecoder.decode(token).awaitFirst()
+        } catch(e: Exception) {
+            throw InvalidTokenException("Cannot decode access token", e)
+        }
+        val expiresAt = jwt.expiresAt
+            ?: throw InvalidTokenException("JWT does not contain expiration information")
+
+        if (expiresAt <= Instant.now()) throw TokenExpiredException("Token is expired")
+
+        return jwt
     }
 }

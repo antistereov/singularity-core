@@ -1,7 +1,11 @@
 package io.stereov.web
 
+import io.stereov.web.config.Constants
 import io.stereov.web.global.service.jwt.JwtService
+import io.stereov.web.user.dto.DeviceInfoRequestDto
+import io.stereov.web.user.dto.LoginRequest
 import io.stereov.web.user.dto.RegisterUserDto
+import io.stereov.web.user.dto.TwoFactorSetupResponseDto
 import io.stereov.web.user.model.UserDocument
 import io.stereov.web.user.service.UserService
 import kotlinx.coroutines.runBlocking
@@ -17,9 +21,6 @@ import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.MongoDBContainer
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
-import io.stereov.web.config.Constants
-import io.stereov.web.user.dto.DeviceInfoRequestDto
-import io.stereov.web.user.dto.TwoFactorSetupResponseDto
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
@@ -74,6 +75,9 @@ class BaseIntegrationTest {
         val info: UserDocument,
         val accessToken: String,
         val refreshToken: String,
+        val twoFactorToken: String?,
+        val twoFactorSecret: String?,
+        val twoFactorRecovery: String?,
     )
 
     suspend fun registerUser(
@@ -98,20 +102,39 @@ class BaseIntegrationTest {
         requireNotNull(accessToken) { "No access token contained in response" }
         requireNotNull(refreshToken) { "No refresh token contained in response" }
 
+        var twoFactorToken: String? = null
+        var twoFactorRecovery: String? = null
+        var twoFactorSecret: String? = null
+
         if (twoFactorEnabled) {
-            webTestClient.post()
+            val twoFactorRes = webTestClient.post()
                 .uri("/user/2fa/setup")
                 .cookie(Constants.ACCESS_TOKEN_COOKIE, accessToken)
                 .exchange()
                 .expectStatus().isOk
                 .expectBody(TwoFactorSetupResponseDto::class.java)
                 .returnResult()
+                .responseBody
+
+            twoFactorRecovery = twoFactorRes?.recoveryCode
+            twoFactorSecret = twoFactorRes?.secret
+
+            twoFactorToken = webTestClient.post()
+                .uri("/user/login")
+                .bodyValue(LoginRequest(email, password, device))
+                .exchange()
+                .expectStatus().isOk
+                .returnResult<Void>()
+                .responseCookies[Constants.TWO_FACTOR_AUTH_COOKIE]
+                ?.firstOrNull()
+                ?.value
         }
+
 
         val user = userService.findByEmailOrNull(email)
         requireNotNull(user) { "User associated to $email not saved" }
 
-        return TestRegisterResponse(user, accessToken, refreshToken)
+        return TestRegisterResponse(user, accessToken, refreshToken, twoFactorToken, twoFactorSecret, twoFactorRecovery)
     }
 
     suspend fun deleteAccount(response: TestRegisterResponse) {

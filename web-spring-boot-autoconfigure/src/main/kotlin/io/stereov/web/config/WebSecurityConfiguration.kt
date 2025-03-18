@@ -83,7 +83,8 @@ class WebSecurityConfiguration {
                     "/user/refresh",
                     "user/register",
                     "user/2fa/verify",
-                    "user/2fa/status"
+                    "user/2fa/status",
+                    "user/2fa/recovery"
                 ).permitAll()
                 authProperties.publicPaths.forEach { path ->
                     it.pathMatchers(path).permitAll()

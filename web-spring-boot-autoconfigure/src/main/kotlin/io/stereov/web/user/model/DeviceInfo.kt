@@ -1,21 +1,25 @@
 package io.stereov.web.user.model
 
+import io.github.oshai.kotlinlogging.KLogger
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.web.user.dto.DeviceInfoRequestDto
 import io.stereov.web.user.dto.DeviceInfoResponseDto
-import io.stereov.web.user.exception.InvalidUserDocumentException
 import kotlinx.serialization.Serializable
 import java.time.Instant
 
-@Serializable
 data class DeviceInfo(
     val id: String,
     val tokenValue: String? = null,
     val browser: String? = null,
     val os: String? = null,
-    val issuedAt: Long? = null,
+    val issuedAt: Instant,
     val ipAddress: String? = null,
-    val location: LocationInfo? = null,
+    val location: LocationInfo? = null
 ) {
+
+    private val logger: KLogger
+        get() = KotlinLogging.logger {}
+
     @Serializable
     data class LocationInfo(
         val latitude: Float,
@@ -26,6 +30,8 @@ data class DeviceInfo(
     )
 
     fun toRequestDto(): DeviceInfoRequestDto {
+        logger.debug { "Creating request dto" }
+
         return DeviceInfoRequestDto(
             id = id,
             browser = browser,
@@ -34,12 +40,10 @@ data class DeviceInfo(
     }
 
     fun toResponseDto(): DeviceInfoResponseDto {
-        requireNotNull(issuedAt) {
-            throw InvalidUserDocumentException("Device with ID ${this.id} has no issue date")
-        }
+        logger.debug { "Creating response dto" }
 
         return DeviceInfoResponseDto(
-            id, browser, os, ipAddress, location, Instant.ofEpochMilli(issuedAt).toString()
+            id, browser, os, ipAddress, location, issuedAt.toString()
         )
     }
 }
