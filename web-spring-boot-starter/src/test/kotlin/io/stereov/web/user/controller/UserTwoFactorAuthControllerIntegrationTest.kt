@@ -177,7 +177,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
             .expectStatus().isUnauthorized
     }
 
-    @Test fun `2fa status works`() = runTest {
+    @Test fun `2fa status works is not pending if no cookie is set`() = runTest {
         val status0 = webTestClient.get()
             .uri("/user/2fa/status")
             .exchange()
@@ -187,7 +187,8 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
             .responseBody
 
         assertFalse(status0?.twoFactorRequired!!)
-
+    }
+    @Test fun `2fa status not pending with invalid cookie`() = runTest {
         val status1 = webTestClient.get()
             .uri("/user/2fa/status")
             .cookie(Constants.TWO_FACTOR_AUTH_COOKIE, "test")
@@ -197,6 +198,22 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
             .returnResult()
             .responseBody
 
-        assertTrue(status1?.twoFactorRequired!!)
+        assertFalse(status1?.twoFactorRequired!!)
+    }
+    @Test fun `2fa works when valid cookie is set`() = runTest {
+        val user = registerUser(twoFactorEnabled = true)
+
+        requireNotNull(user.twoFactorToken)
+
+        val res = webTestClient.get()
+            .uri("/user/2fa/status")
+            .cookie(Constants.TWO_FACTOR_AUTH_COOKIE, user.twoFactorToken)
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(TwoFactorStatusResponse::class.java)
+            .returnResult()
+            .responseBody
+
+        assertTrue(res?.twoFactorRequired!!)
     }
 }
