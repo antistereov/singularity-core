@@ -39,7 +39,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val password = "password"
         val deviceId = "device"
         val user = registerUser(email, password, deviceId)
-        val loginRequest = LoginRequest(email, password, DeviceInfoRequestDto(deviceId))
+        val loginRequest = LoginRequest(email, password, DeviceInfoRequest(deviceId))
 
         val response = webTestClient.post()
             .uri("/user/login")
@@ -110,7 +110,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
 
         val accessToken = webTestClient.post()
             .uri("/user/login")
-            .bodyValue(LoginRequest(email, password, DeviceInfoRequestDto(newDeviceId)))
+            .bodyValue(LoginRequest(email, password, DeviceInfoRequest(newDeviceId)))
             .exchange()
             .expectStatus().isOk
             .expectBody(LoginResponse::class.java)
@@ -143,7 +143,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
 
         val user = registerUser(email, password, deviceId, true)
 
-        val loginRequest = LoginRequest(email, password, DeviceInfoRequestDto(deviceId))
+        val loginRequest = LoginRequest(email, password, DeviceInfoRequest(deviceId))
 
         val response = webTestClient.post()
             .uri("/user/login")
@@ -167,11 +167,11 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val email = "test@email.com"
         val password = "password"
         val deviceId = "device"
-        val deviceInfo = DeviceInfoRequestDto(id = deviceId)
+        val deviceInfo = DeviceInfoRequest(id = deviceId)
 
         val response = webTestClient.post()
             .uri("/user/register")
-            .bodyValue(RegisterUserDto(email = email, password = password, device = deviceInfo))
+            .bodyValue(RegisterUserRequest(email = email, password = password, device = deviceInfo))
             .exchange()
             .expectStatus().isOk
             .expectBody(UserDto::class.java)
@@ -208,22 +208,22 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         assertEquals(1, userService.findAll().count())
     }
     @Test fun `register requires valid credentials`() = runTest {
-        val deviceInfo = DeviceInfoRequestDto("device")
+        val deviceInfo = DeviceInfoRequest("device")
         webTestClient.post()
             .uri("/user/register")
-            .bodyValue(RegisterUserDto(email = "invalid", password = "password", device = deviceInfo))
+            .bodyValue(RegisterUserRequest(email = "invalid", password = "password", device = deviceInfo))
             .exchange()
             .expectStatus().isBadRequest
 
         webTestClient.post()
             .uri("/user/register")
-            .bodyValue(RegisterUserDto(email = "", password = "password", device = deviceInfo))
+            .bodyValue(RegisterUserRequest(email = "", password = "password", device = deviceInfo))
             .exchange()
             .expectStatus().isBadRequest
 
         webTestClient.post()
             .uri("/user/register")
-            .bodyValue(RegisterUserDto(email = "test@email.com", password = "", device = deviceInfo))
+            .bodyValue(RegisterUserRequest(email = "test@email.com", password = "", device = deviceInfo))
             .exchange()
             .expectStatus().isBadRequest
     }
@@ -264,7 +264,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
             .expectStatus().isBadRequest
     }
     @Test fun `refresh requires token`() = runTest {
-        val deviceInfo = DeviceInfoRequestDto("device")
+        val deviceInfo = DeviceInfoRequest("device")
         webTestClient.post()
             .uri("/user/me")
             .bodyValue(deviceInfo)
@@ -272,7 +272,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
             .expectStatus().isUnauthorized
     }
     @Test fun `refresh requires valid token`() = runTest {
-        val deviceInfo = DeviceInfoRequestDto("device")
+        val deviceInfo = DeviceInfoRequest("device")
         webTestClient.post()
             .uri("/user/me")
             .cookie(Constants.REFRESH_TOKEN_COOKIE, "Refresh")
@@ -286,7 +286,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         webTestClient.post()
             .uri("/user/refresh")
             .cookie(Constants.REFRESH_TOKEN_COOKIE, refreshToken)
-            .bodyValue(DeviceInfoRequestDto(user.info.devices.firstOrNull()?.id!!))
+            .bodyValue(DeviceInfoRequest(user.info.devices.firstOrNull()?.id!!))
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -295,14 +295,14 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         webTestClient.post()
             .uri("/user/refresh")
             .cookie(Constants.REFRESH_TOKEN_COOKIE, user.refreshToken)
-            .bodyValue(DeviceInfoRequestDto(user.info.devices.firstOrNull()?.id!!))
+            .bodyValue(DeviceInfoRequest(user.info.devices.firstOrNull()?.id!!))
             .exchange()
             .expectStatus().isOk
 
         webTestClient.post()
             .uri("/user/refresh")
             .cookie(Constants.REFRESH_TOKEN_COOKIE, user.refreshToken)
-            .bodyValue(DeviceInfoRequestDto(user.info.devices.firstOrNull()?.id!!))
+            .bodyValue(DeviceInfoRequest(user.info.devices.firstOrNull()?.id!!))
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -311,7 +311,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         webTestClient.post()
             .uri("/user/refresh")
             .cookie(Constants.REFRESH_TOKEN_COOKIE, user.refreshToken)
-            .bodyValue(DeviceInfoRequestDto("another device"))
+            .bodyValue(DeviceInfoRequest("another device"))
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -320,7 +320,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val response = webTestClient.post()
             .uri("/user/refresh")
             .cookie(Constants.REFRESH_TOKEN_COOKIE, user.refreshToken)
-            .bodyValue(DeviceInfoRequestDto(user.info.devices.first().id))
+            .bodyValue(DeviceInfoRequest(user.info.devices.first().id))
             .exchange()
             .expectStatus().isOk
             .expectBody(UserDto::class.java)
@@ -344,7 +344,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         webTestClient.post()
             .uri("/user/refresh")
             .cookie(Constants.REFRESH_TOKEN_COOKIE, refreshToken)
-            .bodyValue(DeviceInfoRequestDto(user.info.devices.first().id))
+            .bodyValue(DeviceInfoRequest(user.info.devices.first().id))
             .exchange()
             .expectStatus().isOk
 
@@ -369,7 +369,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
 
         val response = webTestClient.post()
             .uri("/user/logout")
-            .bodyValue(DeviceInfoRequestDto(user.info.devices.first().id))
+            .bodyValue(DeviceInfoRequest(user.info.devices.first().id))
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectStatus().isOk

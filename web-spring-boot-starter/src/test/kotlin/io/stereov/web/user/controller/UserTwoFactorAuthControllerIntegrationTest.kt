@@ -17,14 +17,14 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
         val password = "password"
         val deviceId = "device"
         val user = registerUser(email, password, deviceId)
-        val login = LoginRequest(email, password, DeviceInfoRequestDto(deviceId))
+        val login = LoginRequest(email, password, DeviceInfoRequest(deviceId))
 
         val response = webTestClient.post()
             .uri("/user/2fa/setup")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(TwoFactorSetupResponseDto::class.java)
+            .expectBody(TwoFactorSetupResponse::class.java)
             .returnResult()
             .responseBody
 

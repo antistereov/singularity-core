@@ -8,7 +8,7 @@ import io.stereov.web.global.service.encryption.EncryptionService
 import io.stereov.web.global.service.hash.HashService
 import io.stereov.web.global.service.twofactorauth.TwoFactorAuthService
 import io.stereov.web.properties.TwoFactorAuthProperties
-import io.stereov.web.user.dto.TwoFactorSetupResponseDto
+import io.stereov.web.user.dto.TwoFactorSetupResponse
 import io.stereov.web.user.dto.UserDto
 import io.stereov.web.user.exception.InvalidUserDocumentException
 import org.springframework.stereotype.Service
@@ -28,7 +28,7 @@ class UserTwoFactorAuthService(
     private val logger: KLogger
         get() = KotlinLogging.logger {}
 
-    suspend fun setUpTwoFactorAuth(): TwoFactorSetupResponseDto {
+    suspend fun setUpTwoFactorAuth(): TwoFactorSetupResponse {
         logger.debug { "Setting up two factor authentication" }
 
         val user = authenticationService.getCurrentUser()
@@ -42,7 +42,7 @@ class UserTwoFactorAuthService(
 
         userService.save(user.setupTwoFactorAuth(encryptedSecret, hashedRecoveryCode))
 
-        return TwoFactorSetupResponseDto(secret, otpAuthUrl, recoveryCode)
+        return TwoFactorSetupResponse(secret, otpAuthUrl, recoveryCode)
     }
 
     suspend fun validateTwoFactorCode(exchange: ServerWebExchange, code: Int): UserDto {
@@ -59,6 +59,17 @@ class UserTwoFactorAuthService(
         }
 
         return user.toDto()
+    }
+
+    suspend fun twoFactorPending(exchange: ServerWebExchange): Boolean {
+        logger.debug { "Checking two factor authentication status" }
+
+        return try {
+            cookieService.validateTwoFactorSessionCookieAndGetUserId(exchange)
+            true
+        } catch (e: Exception) {
+            false
+        }
     }
 
     suspend fun recoverUser(exchange: ServerWebExchange, recoveryCode: String): UserDto {

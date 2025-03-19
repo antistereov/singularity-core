@@ -9,7 +9,7 @@ import io.stereov.web.global.service.hash.HashService
 import io.stereov.web.global.service.mail.MailService
 import io.stereov.web.properties.MailProperties
 import io.stereov.web.user.dto.LoginRequest
-import io.stereov.web.user.dto.RegisterUserDto
+import io.stereov.web.user.dto.RegisterUserRequest
 import io.stereov.web.user.exception.EmailAlreadyExistsException
 import io.stereov.web.user.model.UserDocument
 import org.springframework.stereotype.Service
@@ -44,7 +44,7 @@ class UserSessionService(
         return userService.save(user)
     }
 
-    suspend fun registerAndGetUser(payload: RegisterUserDto): UserDocument {
+    suspend fun registerAndGetUser(payload: RegisterUserRequest): UserDocument {
         logger.debug { "Registering user ${payload.email}" }
 
         if (userService.existsByEmail(payload.email)) {

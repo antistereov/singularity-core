@@ -2,10 +2,10 @@ package io.stereov.web
 
 import io.stereov.web.config.Constants
 import io.stereov.web.global.service.jwt.JwtService
-import io.stereov.web.user.dto.DeviceInfoRequestDto
+import io.stereov.web.user.dto.DeviceInfoRequest
 import io.stereov.web.user.dto.LoginRequest
-import io.stereov.web.user.dto.RegisterUserDto
-import io.stereov.web.user.dto.TwoFactorSetupResponseDto
+import io.stereov.web.user.dto.RegisterUserRequest
+import io.stereov.web.user.dto.TwoFactorSetupResponse
 import io.stereov.web.user.model.UserDocument
 import io.stereov.web.user.service.UserService
 import kotlinx.coroutines.runBlocking
@@ -86,11 +86,11 @@ class BaseIntegrationTest {
         deviceId: String = "device",
         twoFactorEnabled: Boolean = false,
     ): TestRegisterResponse {
-        val device = DeviceInfoRequestDto(id = deviceId)
+        val device = DeviceInfoRequest(id = deviceId)
 
         val responseCookies = webTestClient.post()
             .uri("/user/register")
-            .bodyValue(RegisterUserDto(email = email, password = password, device = device))
+            .bodyValue(RegisterUserRequest(email = email, password = password, device = device))
             .exchange()
             .expectStatus().isOk
             .returnResult<Void>()
@@ -112,7 +112,7 @@ class BaseIntegrationTest {
                 .cookie(Constants.ACCESS_TOKEN_COOKIE, accessToken)
                 .exchange()
                 .expectStatus().isOk
-                .expectBody(TwoFactorSetupResponseDto::class.java)
+                .expectBody(TwoFactorSetupResponse::class.java)
                 .returnResult()
                 .responseBody
 

@@ -2,7 +2,7 @@ package io.stereov.web.user.controller
 
 import io.stereov.web.BaseIntegrationTest
 import io.stereov.web.config.Constants
-import io.stereov.web.user.dto.DeviceInfoResponseDto
+import io.stereov.web.user.dto.DeviceInfoResponse
 import io.stereov.web.user.model.DeviceInfo
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -24,7 +24,7 @@ class UserDeviceControllerIntegrationTest : BaseIntegrationTest() {
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(object : ParameterizedTypeReference<List<DeviceInfoResponseDto>>() {})
+            .expectBody(object : ParameterizedTypeReference<List<DeviceInfoResponse>>() {})
             .returnResult()
             .responseBody
 

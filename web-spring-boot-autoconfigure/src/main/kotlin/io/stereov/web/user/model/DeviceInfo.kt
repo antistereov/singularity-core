@@ -2,8 +2,8 @@ package io.stereov.web.user.model
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.web.user.dto.DeviceInfoRequestDto
-import io.stereov.web.user.dto.DeviceInfoResponseDto
+import io.stereov.web.user.dto.DeviceInfoRequest
+import io.stereov.web.user.dto.DeviceInfoResponse
 import kotlinx.serialization.Serializable
 import java.time.Instant
 
@@ -29,20 +29,20 @@ data class DeviceInfo(
         val countryCode: String,
     )
 
-    fun toRequestDto(): DeviceInfoRequestDto {
+    fun toRequestDto(): DeviceInfoRequest {
         logger.debug { "Creating request dto" }
 
-        return DeviceInfoRequestDto(
+        return DeviceInfoRequest(
             id = id,
             browser = browser,
             os = os,
         )
     }
 
-    fun toResponseDto(): DeviceInfoResponseDto {
+    fun toResponseDto(): DeviceInfoResponse {
         logger.debug { "Creating response dto" }
 
-        return DeviceInfoResponseDto(
+        return DeviceInfoResponse(
             id, browser, os, ipAddress, location, issuedAt.toString()
         )
     }

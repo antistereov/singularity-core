@@ -1,6 +1,6 @@
 package io.stereov.web.user.controller
 
-import io.stereov.web.user.dto.DeviceInfoResponseDto
+import io.stereov.web.user.dto.DeviceInfoResponse
 import io.stereov.web.user.service.UserDeviceService
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
@@ -16,14 +16,14 @@ class UserDeviceController(
 ) {
 
     @GetMapping
-    suspend fun getDevices(): ResponseEntity<List<DeviceInfoResponseDto>> {
+    suspend fun getDevices(): ResponseEntity<List<DeviceInfoResponse>> {
         val devices = deviceService.getDevices()
 
         return ResponseEntity.ok(devices.map { it.toResponseDto() })
     }
 
     @DeleteMapping("/{deviceId}")
-    suspend fun removeDevice(@PathVariable deviceId: String): ResponseEntity<List<DeviceInfoResponseDto>> {
+    suspend fun removeDevice(@PathVariable deviceId: String): ResponseEntity<List<DeviceInfoResponse>> {
         val updatedUser = deviceService.removeDevice(deviceId)
 
         return ResponseEntity.ok(updatedUser.devices.map { it.toResponseDto()})

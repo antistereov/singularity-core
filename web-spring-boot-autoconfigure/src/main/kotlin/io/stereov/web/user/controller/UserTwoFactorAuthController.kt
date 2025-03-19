@@ -1,7 +1,6 @@
 package io.stereov.web.user.controller
 
-import io.stereov.web.config.Constants
-import io.stereov.web.user.dto.TwoFactorSetupResponseDto
+import io.stereov.web.user.dto.TwoFactorSetupResponse
 import io.stereov.web.user.dto.TwoFactorStatusResponse
 import io.stereov.web.user.dto.UserDto
 import io.stereov.web.user.service.CookieService
@@ -22,7 +21,7 @@ class UserTwoFactorAuthController(
 ) {
 
     @PostMapping("/setup")
-    suspend fun setupTwoFactorAuth(): ResponseEntity<TwoFactorSetupResponseDto> {
+    suspend fun setupTwoFactorAuth(): ResponseEntity<TwoFactorSetupResponse> {
         val res = twoFactorService.setUpTwoFactorAuth()
 
         return ResponseEntity.ok().body(res)
@@ -40,10 +39,16 @@ class UserTwoFactorAuthController(
 
     @GetMapping("/status")
     suspend fun getTwoFactorAuthStatus(exchange: ServerWebExchange): ResponseEntity<TwoFactorStatusResponse> {
-        val isPending = !exchange.request.cookies[Constants.TWO_FACTOR_AUTH_COOKIE]?.firstOrNull()?.value.isNullOrBlank()
-        return ResponseEntity.ok().body(
-            TwoFactorStatusResponse(isPending)
-        )
+        val isPending = twoFactorService.twoFactorPending(exchange)
+
+        val res = ResponseEntity.ok()
+
+        if (!isPending) {
+            val clearTwoFactorTokenCookie = cookieService.clearTwoFactorSessionCookie()
+            res.header("Set-Cookie", clearTwoFactorTokenCookie.toString())
+        }
+
+        return res.body(TwoFactorStatusResponse(isPending))
     }
 
     @PostMapping("/recovery")

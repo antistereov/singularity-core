@@ -23,7 +23,7 @@ class UserSessionController(
         get() = KotlinLogging.logger {}
 
     @GetMapping("/me")
-    suspend fun getAccount(): ResponseEntity<UserDto> {
+    suspend fun getUser(): ResponseEntity<UserDto> {
         val user = authenticationService.getCurrentUser()
 
         return ResponseEntity.ok(user.toDto())
@@ -59,7 +59,7 @@ class UserSessionController(
     @PostMapping("/register")
     suspend fun register(
         exchange: ServerWebExchange,
-        @RequestBody @Valid payload: RegisterUserDto
+        @RequestBody @Valid payload: RegisterUserRequest
     ): ResponseEntity<UserDto> {
         logger.info { "Executing register" }
 
@@ -77,7 +77,7 @@ class UserSessionController(
     }
 
     @PostMapping("/logout")
-    suspend fun logout(@RequestBody deviceInfo: DeviceInfoRequestDto): ResponseEntity<Map<String, String>> {
+    suspend fun logout(@RequestBody deviceInfo: DeviceInfoRequest): ResponseEntity<Map<String, String>> {
         logger.info { "Executing logout" }
 
         val clearAccessTokenCookie = cookieService.clearAccessTokenCookie()
@@ -94,7 +94,7 @@ class UserSessionController(
     @PostMapping("/refresh")
     suspend fun refreshToken(
         exchange: ServerWebExchange,
-        @RequestBody deviceInfoDto: DeviceInfoRequestDto
+        @RequestBody deviceInfoDto: DeviceInfoRequest
     ): ResponseEntity<UserDto> {
         logger.debug { "Refreshing token" }
 

@@ -8,7 +8,7 @@ import io.stereov.web.global.service.jwt.JwtService
 import io.stereov.web.global.service.jwt.exception.InvalidTokenException
 import io.stereov.web.properties.AppProperties
 import io.stereov.web.properties.JwtProperties
-import io.stereov.web.user.dto.DeviceInfoRequestDto
+import io.stereov.web.user.dto.DeviceInfoRequest
 import io.stereov.web.user.dto.UserDto
 import io.stereov.web.user.model.DeviceInfo
 import org.springframework.http.ResponseCookie
@@ -47,7 +47,7 @@ class CookieService(
 
     suspend fun createRefreshTokenCookie(
         userId: String,
-        deviceInfoDto: DeviceInfoRequestDto,
+        deviceInfoDto: DeviceInfoRequest,
         ipAddress: String?
     ): ResponseCookie {
         logger.info { "Creating refresh token cookie" }
