@@ -7,6 +7,7 @@ import io.stereov.web.global.service.jwt.JwtService
 import io.stereov.web.global.service.mail.MailService
 import io.stereov.web.global.service.mail.MailVerificationCooldownService
 import io.stereov.web.global.service.mail.exception.MailVerificationCooldownException
+import io.stereov.web.user.dto.MailVerificationCooldownResponse
 import io.stereov.web.user.dto.UserDto
 import org.springframework.stereotype.Service
 
@@ -36,11 +37,13 @@ class UserMailVerificationService(
         }
     }
 
-    suspend fun getRemainingEmailVerificationCooldown(): Long {
+    suspend fun getRemainingEmailVerificationCooldown(): MailVerificationCooldownResponse {
         logger.debug { "Getting remaining email verification cooldown" }
 
         val userId = authenticationService.getCurrentUserId()
-        return mailVerificationCooldownService.getRemainingEmailVerificationCooldown(userId)
+        val cooldown = mailVerificationCooldownService.getRemainingEmailVerificationCooldown(userId)
+
+        return MailVerificationCooldownResponse(cooldown)
     }
 
     suspend fun resendEmailVerificationToken() {

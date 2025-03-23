@@ -1,5 +1,6 @@
 package io.stereov.web.user.controller
 
+import io.stereov.web.user.dto.MailVerificationCooldownResponse
 import io.stereov.web.user.dto.UserDto
 import io.stereov.web.user.service.UserMailVerificationService
 import org.springframework.http.ResponseEntity
@@ -24,12 +25,10 @@ class UserMailVerificationController(
     }
 
     @GetMapping("/email-verification-cooldown")
-    suspend fun getRemainingEmailVerificationCooldown(): ResponseEntity<Map<String, Long>> {
+    suspend fun getRemainingEmailVerificationCooldown(): ResponseEntity<MailVerificationCooldownResponse> {
         val remainingCooldown = mailVerificationService.getRemainingEmailVerificationCooldown()
 
-        return ResponseEntity.ok().body(mapOf(
-            "remaining" to remainingCooldown
-        ))
+        return ResponseEntity.ok().body(remainingCooldown)
     }
 
     @PostMapping("/resend-verification-email")
