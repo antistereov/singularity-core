@@ -32,20 +32,20 @@ val log4jVersion = "2.24.3"
 val testContainersVersion = "1.19.0"
 val bucket4jVersion = "8.14.0"
 
-val mavenCentralUsername: String = properties["mavencentral.username"] as String?
+val mavenCentralUsername: String? = properties["mavencentral.username"] as String?
     ?: System.getenv("MAVENCENTRAL_USERNAME")
-val mavenCentralPassword: String = properties["mavencentral.password"] as String?
+val mavenCentralPassword: String? = properties["mavencentral.password"] as String?
     ?: System.getenv("MAVENCENTRAL_PASSWORD")
-val gpgPassphrase: String = properties["gpg.passphrase"] as String?
+val gpgPassphrase: String? = properties["gpg.passphrase"] as String?
     ?: System.getenv("GPG_PASSPHRASE")
 val gpgUseFileCondition: String = properties["gpg.use-file"] as String?
     ?: "false"
 val gpgUseFile: Boolean = gpgUseFileCondition.toBoolean()
-val gpgSecretKey: String = properties["gpg.private-key"] as String?
+val gpgSecretKey: String? = properties["gpg.private-key"] as String?
     ?: System.getenv("GPG_PRIVATE_KEY")
-val gpgPublicKey: String = properties["gpg.public-key"] as String?
+val gpgPublicKey: String? = properties["gpg.public-key"] as String?
     ?: System.getenv("GPG_PUBLIC_KEY")
-val gitHubToken: String = properties["github.token"] as String?
+val gitHubToken: String? = properties["github.token"] as String?
     ?: System.getenv("GITHUB_TOKEN")
 
 dependencies {
