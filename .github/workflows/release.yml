@@ -11,7 +11,7 @@ env:
   GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
   GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
   GPG_PUBLIC_KEY: ${{ secrets.GPG_PUBLIC_KEY }}
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.TOKEN }}
 
 jobs:
   release_and_deploy:
