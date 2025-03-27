@@ -21,7 +21,7 @@ kotlin {
 }
 
 group = "io.stereov.web"
-version = "0.1.7-SNAPSHOT"
+version = "0.1.7"
 
 repositories {
     mavenCentral()
