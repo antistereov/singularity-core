@@ -28,24 +28,6 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      # Checking versions
-      - name: Get Gradle version
-        id: gradle_version
-        run: |
-          VERSION=$(./gradlew checkVersion --quiet | tail -n 1) # Capture last line
-          echo "Gradle Project Version: $VERSION"
-          echo "version=$VERSION" >> $GITHUB_ENV  # Export as environment variable
-
-      - name: Get Git tag version
-        run: |
-          TAG_VERSION=${{ github.ref_name }}
-          echo "Git Tag Version: $TAG_VERSION"
-          if [[ "$TAG_VERSION" != "$VERSION" ]]; then
-            echo "❌ Version mismatch! Gradle version ($VERSION) does not match Git tag ($TAG_VERSION)"
-            exit 1
-          fi
-          echo "✅ Versions match. Proceeding with release."
-
       # Build and Test
       - name: Build with Gradle
         run: |
@@ -53,6 +35,22 @@ jobs:
       - name: Run Tests
         run: |
           ./gradlew test
+
+      # Checking versions
+      - name: Verify version numbers
+        id: gradle_version
+        run: |
+          VERSION=$(./gradlew checkVersion --quiet)
+          echo "Gradle Project Version: $VERSION"
+          TAG_VERSION=${{ github.ref_name }}
+          echo "Git Tag Version: $TAG_VERSION"
+          
+          if [[ "$TAG_VERSION" != "$VERSION" ]]; then
+              echo "❌ Version mismatch! Gradle version ($VERSION) does not match Git tag ($TAG_VERSION)"
+              exit 1
+          fi
+          echo "✅ Versions match. Proceeding with release."
+
 
       # Publish
       - name: Publish
