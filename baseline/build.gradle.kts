@@ -1,4 +1,5 @@
 
+import org.jetbrains.kotlin.gradle.internal.builtins.StandardNames.FqNames.target
 import org.jreleaser.model.Active
 import org.jreleaser.model.Signing
 import org.springframework.boot.gradle.tasks.bundling.BootJar
@@ -20,7 +21,7 @@ kotlin {
 }
 
 group = "io.stereov.web"
-version = "0.1.5"
+version = "0.1.7-SNAPSHOT"
 
 repositories {
     mavenCentral()
@@ -195,6 +196,7 @@ jreleaser {
                 }
 
                 append {
+                    target.set(File("$rootDir/CHANGELOG.md"))
                     enabled.set(true)
                 }
             }
