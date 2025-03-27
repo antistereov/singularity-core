@@ -1,5 +1,4 @@
 
-import org.jetbrains.kotlin.gradle.internal.builtins.StandardNames.FqNames.target
 import org.jreleaser.model.Active
 import org.jreleaser.model.Signing
 import org.springframework.boot.gradle.tasks.bundling.BootJar
@@ -235,5 +234,12 @@ jreleaser {
                 }
             }
         }
+    }
+}
+
+tasks.register("checkVersion") {
+    doLast {
+        val projectVersion = project.version.toString()
+        println(projectVersion)
     }
 }
