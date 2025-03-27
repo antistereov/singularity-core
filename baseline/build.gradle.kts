@@ -1,6 +1,7 @@
 
 import org.jreleaser.model.Active
 import org.jreleaser.model.Signing
+import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
     kotlin("jvm") version "2.0.21"
@@ -116,6 +117,10 @@ dependencies {
 java {
     withJavadocJar()
     withSourcesJar()
+}
+
+tasks.getByName<BootJar>("bootJar") {
+    enabled = false
 }
 
 publishing {
