@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
 import org.springframework.boot.autoconfigure.data.web.SpringDataWebAutoConfiguration
 import org.springframework.boot.autoconfigure.mongo.MongoReactiveAutoConfiguration
+import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.redis.core.ReactiveRedisTemplate
@@ -16,6 +17,7 @@ import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.JavaMailSenderImpl
 
 @Configuration
+@ConditionalOnProperty(prefix = "baseline.mail", name = ["enable-verification"], havingValue = "true", matchIfMissing = false)
 @AutoConfiguration(
     after = [
         MongoReactiveAutoConfiguration::class,
@@ -24,16 +26,10 @@ import org.springframework.mail.javamail.JavaMailSenderImpl
         ApplicationConfiguration::class,
     ]
 )
+@EnableConfigurationProperties(MailProperties::class)
 class MailConfiguration {
 
     @Bean
-    @ConditionalOnProperty(prefix = "baseline.mail", name = ["enable-email-verification"], havingValue = "true", matchIfMissing = false)
-    fun mailProperties(mailProperties: MailProperties): MailProperties {
-        return mailProperties
-    }
-
-    @Bean
-    @ConditionalOnProperty(prefix = "baseline.mail", name = ["enable-email-verification"], havingValue = "true", matchIfMissing = false)
     fun javaMailSender(mailProperties: MailProperties): JavaMailSender {
         val mailSender = JavaMailSenderImpl()
         mailSender.host = mailProperties.host
@@ -50,7 +46,6 @@ class MailConfiguration {
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "baseline.mail", name = ["enable-email-verification"], havingValue = "true", matchIfMissing = false)
     fun mailService(
         mailSender: JavaMailSender,
         mailProperties: MailProperties,
@@ -62,7 +57,6 @@ class MailConfiguration {
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "baseline.mail", name = ["enable-email-verification"], havingValue = "true", matchIfMissing = false)
     fun mailVerificationCooldownService(
         redisTemplate: ReactiveRedisTemplate<String, String>,
         mailProperties: MailProperties

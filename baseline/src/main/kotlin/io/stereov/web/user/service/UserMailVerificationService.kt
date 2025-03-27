@@ -9,9 +9,11 @@ import io.stereov.web.global.service.mail.MailVerificationCooldownService
 import io.stereov.web.global.service.mail.exception.MailVerificationCooldownException
 import io.stereov.web.user.dto.MailVerificationCooldownResponse
 import io.stereov.web.user.dto.UserDto
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
 
 @Service
+@ConditionalOnProperty(prefix = "baseline.mail", name = ["enable-verification"], havingValue = "true", matchIfMissing = false)
 class UserMailVerificationService(
     private val userService: UserService,
     private val authenticationService: AuthenticationService,

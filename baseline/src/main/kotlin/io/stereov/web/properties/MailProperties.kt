@@ -1,10 +1,12 @@
 package io.stereov.web.properties
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "baseline.mail")
+@ConditionalOnProperty(prefix = "baseline.mail", name = ["enable-verification"], havingValue = "true", matchIfMissing = false)
 data class MailProperties(
-    val enableEmailVerification: Boolean = false,
+    val enableVerification: Boolean = false,
     val host: String,
     val port: Int = 0,
     val email: String,

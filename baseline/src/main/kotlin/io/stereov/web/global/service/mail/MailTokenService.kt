@@ -5,11 +5,13 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.web.global.service.jwt.JwtService
 import io.stereov.web.global.service.jwt.model.EmailVerificationToken
 import io.stereov.web.properties.MailProperties
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
 import org.springframework.stereotype.Service
 import java.time.Instant
 
 @Service
+@ConditionalOnProperty(prefix = "baseline.mail", name = ["enable-verification"], havingValue = "true", matchIfMissing = false)
 class MailTokenService(
     private val mailProperties: MailProperties,
     private val jwtService: JwtService,

@@ -5,11 +5,13 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.web.properties.FrontendProperties
 import io.stereov.web.properties.MailProperties
 import io.stereov.web.user.model.UserDocument
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.stereotype.Service
 
 @Service
+@ConditionalOnProperty(prefix = "baseline.mail", name = ["enable-verification"], havingValue = "true", matchIfMissing = false)
 class MailService(
     private val mailSender: JavaMailSender,
     private val mailProperties: MailProperties,

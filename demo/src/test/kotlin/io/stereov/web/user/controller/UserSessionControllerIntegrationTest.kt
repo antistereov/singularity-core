@@ -282,7 +282,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
     }
     @Test fun `refresh requires associated token to account`() = runTest {
         val user = registerUser()
-        val refreshToken = jwtService.createRefreshToken(user.info.id!!, user.info.devices.first().id)
+        val refreshToken = userTokenService.createRefreshToken(user.info.id!!, user.info.devices.first().id)
         webTestClient.post()
             .uri("/user/refresh")
             .cookie(Constants.REFRESH_TOKEN_COOKIE, refreshToken)

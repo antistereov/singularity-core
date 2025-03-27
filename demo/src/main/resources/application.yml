@@ -29,19 +29,19 @@ baseline:
     name: TestApplication
     base-url: ${BACKEND_BASE_URL}
     secure: ${SECURE:false}
-#  mail:
-#    enable-email-verification: ${ENABLE_EMAIL_VERIFICATION:true}
-#    host: ${MAIL_HOST}
-#    port: ${MAIL_PORT}
-#    email: ${MAIL_EMAIL}
-#    username: ${MAIL_USERNAME}
-#    password: ${MAIL_PASSWORD}
-#    transport-protocol: ${MAIL_TRANSPORT_PROTOCOL:smtp}
-#    smtp-auth: ${MAIL_SMTP_AUTH:true}
-#    smtp-starttls: ${MAIL_SMTP_STARTTLS:true}
-#    debug: ${MAIL_DEBUG:false}
-#    verification-expiration: ${MAIL_VERIFICATION_EXPIRATION:900}
-#    verification-send-cooldown: ${MAIL_VERIFICATION_SEND_COOLDOWN:60}
+  mail:
+    enable-verification: ${ENABLE_EMAIL_VERIFICATION:true}
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    email: ${MAIL_EMAIL}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    transport-protocol: ${MAIL_TRANSPORT_PROTOCOL:smtp}
+    smtp-auth: ${MAIL_SMTP_AUTH:true}
+    smtp-starttls: ${MAIL_SMTP_STARTTLS:true}
+    debug: ${MAIL_DEBUG:false}
+    verification-expiration: ${MAIL_VERIFICATION_EXPIRATION:900}
+    verification-send-cooldown: ${MAIL_VERIFICATION_SEND_COOLDOWN:60}
   security:
     encryption:
       secret-key: ${SECRET_KEY}
