@@ -25,7 +25,7 @@ val testContainersVersion = "1.19.0"
 
 dependencies {
     // Web Starter
-    api(project(":web-spring-boot-autoconfigure"))
+    api(project(":baseline"))
 
     // Development
     developmentOnly("org.springframework.boot:spring-boot-devtools:$springBootVersion")
