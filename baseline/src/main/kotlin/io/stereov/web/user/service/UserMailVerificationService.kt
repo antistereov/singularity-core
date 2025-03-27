@@ -3,8 +3,8 @@ package io.stereov.web.user.service
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.web.auth.service.AuthenticationService
-import io.stereov.web.global.service.jwt.JwtService
 import io.stereov.web.global.service.mail.MailService
+import io.stereov.web.global.service.mail.MailTokenService
 import io.stereov.web.global.service.mail.MailVerificationCooldownService
 import io.stereov.web.global.service.mail.exception.MailVerificationCooldownException
 import io.stereov.web.user.dto.MailVerificationCooldownResponse
@@ -14,10 +14,10 @@ import org.springframework.stereotype.Service
 @Service
 class UserMailVerificationService(
     private val userService: UserService,
-    private val jwtService: JwtService,
     private val authenticationService: AuthenticationService,
     private val mailVerificationCooldownService: MailVerificationCooldownService,
-    private val mailService: MailService
+    private val mailService: MailService,
+    private val mailTokenService: MailTokenService
 ) {
 
     private val logger: KLogger
@@ -26,7 +26,7 @@ class UserMailVerificationService(
     suspend fun verifyEmail(token: String): UserDto {
         logger.debug { "Verifying email" }
 
-        val verificationToken = jwtService.validateAndExtractVerificationToken(token)
+        val verificationToken = mailTokenService.validateAndExtractVerificationToken(token)
         val user = userService.findByEmail(verificationToken.email)
 
         return if (user.security.mail.verificationUuid == verificationToken.uuid) {
@@ -46,8 +46,8 @@ class UserMailVerificationService(
         return MailVerificationCooldownResponse(cooldown)
     }
 
-    suspend fun resendEmailVerificationToken() {
-        logger.debug { "Resending email verification token" }
+    suspend fun sendEmailVerificationToken() {
+        logger.debug { "Sending email verification token" }
 
         val userId = authenticationService.getCurrentUserId()
         val remainingCooldown = mailVerificationCooldownService.getRemainingEmailVerificationCooldown(userId)
@@ -60,5 +60,4 @@ class UserMailVerificationService(
 
         return mailService.sendVerificationEmail(user)
     }
-
 }

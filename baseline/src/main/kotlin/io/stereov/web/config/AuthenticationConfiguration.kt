@@ -6,17 +6,18 @@ import io.stereov.web.global.service.geolocation.GeoLocationService
 import io.stereov.web.global.service.hash.HashService
 import io.stereov.web.global.service.jwt.JwtService
 import io.stereov.web.global.service.mail.MailService
+import io.stereov.web.global.service.mail.MailTokenService
 import io.stereov.web.global.service.mail.MailVerificationCooldownService
 import io.stereov.web.global.service.twofactorauth.TwoFactorAuthService
 import io.stereov.web.properties.AppProperties
 import io.stereov.web.properties.JwtProperties
-import io.stereov.web.properties.MailProperties
 import io.stereov.web.properties.TwoFactorAuthProperties
 import io.stereov.web.user.controller.UserSessionController
 import io.stereov.web.user.repository.UserRepository
 import io.stereov.web.user.service.*
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
 import org.springframework.boot.autoconfigure.data.web.SpringDataWebAutoConfiguration
 import org.springframework.boot.autoconfigure.mongo.MongoReactiveAutoConfiguration
@@ -87,16 +88,12 @@ class AuthenticationConfiguration {
         hashService: HashService,
         jwtService: JwtService,
         authenticationService: AuthenticationService,
-        mailService: MailService,
-        mailProperties: MailProperties,
         deviceService: UserDeviceService,
     ): UserSessionService {
         return UserSessionService(
             userService,
             hashService,
             authenticationService,
-            mailService,
-            mailProperties,
             deviceService,
         )
     }
@@ -104,13 +101,14 @@ class AuthenticationConfiguration {
     @Bean
     @ConditionalOnMissingBean
     fun cookieService(
-        jwtService: JwtService,
+        userTokenService: UserTokenService,
         jwtProperties: JwtProperties,
         appProperties: AppProperties,
         geoLocationService: GeoLocationService,
         userService: UserService,
+        twoFactorAuthTokenService: TwoFactorAuthTokenService
     ): CookieService {
-        return CookieService(jwtService, jwtProperties, appProperties, geoLocationService, userService)
+        return CookieService(userTokenService, jwtProperties, appProperties, geoLocationService, userService, twoFactorAuthTokenService)
     }
 
     @Bean
@@ -123,15 +121,15 @@ class AuthenticationConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean
+    @ConditionalOnProperty(prefix = "baseline.mail", name = ["enable-email-verification"], havingValue = "true", matchIfMissing = false)
     fun userMailVerificationService(
         userService: UserService,
-        jwtService: JwtService,
         authenticationService: AuthenticationService,
         mailVerificationCooldownService: MailVerificationCooldownService,
-        mailService: MailService
+        mailService: MailService,
+        mailTokenService: MailTokenService,
     ): UserMailVerificationService {
-        return UserMailVerificationService(userService, jwtService, authenticationService, mailVerificationCooldownService, mailService)
+        return UserMailVerificationService(userService, authenticationService, mailVerificationCooldownService, mailService, mailTokenService)
     }
 
     @Bean

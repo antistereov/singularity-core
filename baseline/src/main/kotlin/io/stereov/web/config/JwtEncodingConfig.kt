@@ -4,7 +4,6 @@ import com.nimbusds.jose.jwk.source.ImmutableSecret
 import com.nimbusds.jose.proc.SecurityContext
 import io.stereov.web.global.service.jwt.JwtService
 import io.stereov.web.properties.JwtProperties
-import io.stereov.web.properties.MailProperties
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
@@ -52,9 +51,7 @@ class JwtEncodingConfig {
     fun jwtService(
         jwtDecoder: ReactiveJwtDecoder,
         jwtEncoder: JwtEncoder,
-        jwtProperties: JwtProperties,
-        mailProperties: MailProperties
     ): JwtService {
-        return JwtService(jwtDecoder, jwtEncoder, jwtProperties, mailProperties)
+        return JwtService(jwtDecoder, jwtEncoder)
     }
 }

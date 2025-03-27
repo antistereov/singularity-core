@@ -6,8 +6,6 @@ import io.stereov.web.auth.exception.AuthException
 import io.stereov.web.auth.exception.InvalidCredentialsException
 import io.stereov.web.auth.service.AuthenticationService
 import io.stereov.web.global.service.hash.HashService
-import io.stereov.web.global.service.mail.MailService
-import io.stereov.web.properties.MailProperties
 import io.stereov.web.user.dto.LoginRequest
 import io.stereov.web.user.dto.RegisterUserRequest
 import io.stereov.web.user.exception.EmailAlreadyExistsException
@@ -19,8 +17,6 @@ class UserSessionService(
     private val userService: UserService,
     private val hashService: HashService,
     private val authenticationService: AuthenticationService,
-    private val mailService: MailService,
-    private val mailProperties: MailProperties,
     private val deviceService: UserDeviceService
 ) {
 
@@ -61,10 +57,6 @@ class UserSessionService(
 
         if (savedUserDocument.id == null) {
             throw AuthException("Login failed: UserDocument contains no id")
-        }
-
-        if (mailProperties.enableEmailVerification) {
-            mailService.sendVerificationEmail(savedUserDocument)
         }
 
         return savedUserDocument

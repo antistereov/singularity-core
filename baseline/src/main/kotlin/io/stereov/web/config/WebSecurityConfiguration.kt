@@ -5,11 +5,11 @@ import io.stereov.web.auth.service.AuthenticationService
 import io.stereov.web.filter.CookieAuthenticationFilter
 import io.stereov.web.filter.LoggingFilter
 import io.stereov.web.filter.RateLimitingFilter
-import io.stereov.web.global.service.jwt.JwtService
 import io.stereov.web.properties.AuthProperties
 import io.stereov.web.properties.FrontendProperties
 import io.stereov.web.properties.RateLimitProperties
 import io.stereov.web.user.service.UserService
+import io.stereov.web.user.service.UserTokenService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
@@ -63,7 +63,7 @@ class WebSecurityConfiguration {
         http: ServerHttpSecurity,
         authProperties: AuthProperties,
         frontendProperties: FrontendProperties,
-        jwtService: JwtService,
+        userTokenService: UserTokenService,
         userService: UserService,
         authenticationService: AuthenticationService,
         proxyManager: LettuceBasedProxyManager<String>,
@@ -99,7 +99,7 @@ class WebSecurityConfiguration {
             }
             .addFilterBefore(LoggingFilter(), SecurityWebFiltersOrder.AUTHENTICATION)
             .addFilterBefore(RateLimitingFilter(authenticationService, proxyManager, rateLimitProperties), SecurityWebFiltersOrder.AUTHENTICATION)
-            .addFilterBefore(CookieAuthenticationFilter(jwtService, userService), SecurityWebFiltersOrder.AUTHENTICATION)
+            .addFilterBefore(CookieAuthenticationFilter(userTokenService, userService), SecurityWebFiltersOrder.AUTHENTICATION)
             .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())
             .build()
     }

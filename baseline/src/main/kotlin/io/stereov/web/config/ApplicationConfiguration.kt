@@ -22,7 +22,6 @@ import org.springframework.context.annotation.Configuration
     EncryptionProperties::class,
     FrontendProperties::class,
     JwtProperties::class,
-    MailProperties::class,
     RateLimitProperties::class,
     TwoFactorAuthProperties::class
 )

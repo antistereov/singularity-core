@@ -2,7 +2,6 @@ package io.stereov.web.global.service.mail
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.web.global.service.jwt.JwtService
 import io.stereov.web.properties.FrontendProperties
 import io.stereov.web.properties.MailProperties
 import io.stereov.web.user.model.UserDocument
@@ -15,8 +14,8 @@ class MailService(
     private val mailSender: JavaMailSender,
     private val mailProperties: MailProperties,
     private val frontendProperties: FrontendProperties,
-    private val jwtService: JwtService,
     private val mailVerificationCooldownService: MailVerificationCooldownService,
+    private val mailTokenService: MailTokenService,
 ) {
 
     private val logger: KLogger
@@ -27,7 +26,7 @@ class MailService(
 
         val userId = user.idX
 
-        val token = jwtService.createEmailVerificationToken(user.email, user.security.mail.verificationUuid)
+        val token = mailTokenService.createToken(user.email, user.security.mail.verificationUuid)
         val verificationUrl = generateVerificationUrl(token)
         val message = SimpleMailMessage()
         message.from = mailProperties.email

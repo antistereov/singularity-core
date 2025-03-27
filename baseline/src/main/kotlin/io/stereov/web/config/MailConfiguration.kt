@@ -1,11 +1,11 @@
 package io.stereov.web.config
 
-import io.stereov.web.global.service.jwt.JwtService
 import io.stereov.web.global.service.mail.MailService
+import io.stereov.web.global.service.mail.MailTokenService
 import io.stereov.web.global.service.mail.MailVerificationCooldownService
 import io.stereov.web.properties.*
 import org.springframework.boot.autoconfigure.AutoConfiguration
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
 import org.springframework.boot.autoconfigure.data.web.SpringDataWebAutoConfiguration
 import org.springframework.boot.autoconfigure.mongo.MongoReactiveAutoConfiguration
@@ -27,7 +27,13 @@ import org.springframework.mail.javamail.JavaMailSenderImpl
 class MailConfiguration {
 
     @Bean
-    @ConditionalOnMissingBean
+    @ConditionalOnProperty(prefix = "baseline.mail", name = ["enable-email-verification"], havingValue = "true", matchIfMissing = false)
+    fun mailProperties(mailProperties: MailProperties): MailProperties {
+        return mailProperties
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "baseline.mail", name = ["enable-email-verification"], havingValue = "true", matchIfMissing = false)
     fun javaMailSender(mailProperties: MailProperties): JavaMailSender {
         val mailSender = JavaMailSenderImpl()
         mailSender.host = mailProperties.host
@@ -44,19 +50,19 @@ class MailConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean
+    @ConditionalOnProperty(prefix = "baseline.mail", name = ["enable-email-verification"], havingValue = "true", matchIfMissing = false)
     fun mailService(
         mailSender: JavaMailSender,
         mailProperties: MailProperties,
         frontendProperties: FrontendProperties,
-        jwtService: JwtService,
-        mailVerificationCooldownService: MailVerificationCooldownService
+        mailVerificationCooldownService: MailVerificationCooldownService,
+        mailTokenService: MailTokenService,
     ): MailService {
-        return MailService(mailSender, mailProperties, frontendProperties, jwtService, mailVerificationCooldownService)
+        return MailService(mailSender, mailProperties, frontendProperties, mailVerificationCooldownService, mailTokenService)
     }
 
     @Bean
-    @ConditionalOnMissingBean
+    @ConditionalOnProperty(prefix = "baseline.mail", name = ["enable-email-verification"], havingValue = "true", matchIfMissing = false)
     fun mailVerificationCooldownService(
         redisTemplate: ReactiveRedisTemplate<String, String>,
         mailProperties: MailProperties

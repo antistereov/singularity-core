@@ -2,9 +2,9 @@ package io.stereov.web.filter
 
 import io.stereov.web.auth.model.CustomAuthenticationToken
 import io.stereov.web.config.Constants
-import io.stereov.web.global.service.jwt.JwtService
 import io.stereov.web.global.service.jwt.exception.TokenException
 import io.stereov.web.user.service.UserService
+import io.stereov.web.user.service.UserTokenService
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.mono
 import org.springframework.http.HttpStatus
@@ -16,7 +16,7 @@ import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Mono
 
 class CookieAuthenticationFilter(
-    private val jwtService: JwtService,
+    private val userTokenService: UserTokenService,
     private val userService: UserService,
 ) : WebFilter {
 
@@ -26,7 +26,7 @@ class CookieAuthenticationFilter(
 
         if (!authToken.isNullOrBlank()) {
             val accessToken = try {
-                jwtService.validateAndExtractAccessToken(authToken)
+                userTokenService.validateAndExtractAccessToken(authToken)
             } catch(e: TokenException) {
                 exchange.response.statusCode = HttpStatus.UNAUTHORIZED
 
