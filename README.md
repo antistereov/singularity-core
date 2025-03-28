@@ -55,26 +55,26 @@ This repository isn't just for personal use—it's meant to be a **collaborative
 
 Add the dependency to your `build.gradle.kts`, `build.gradle` or `pom.xml` if using Maven:
 
-   **For Kotlin DSL:**
-   ```kotlin
-   implementation("io.stereov.web:baseline:1.0.0") // Check for the latest version
-   ```
+**For Kotlin DSL:**
+```kotlin
+implementation("io.stereov.web:baseline:<version>") // Check for the latest version
+```
 
-   **For Gradle:**
-   ```groovy
-   dependencies {
-       implementation 'io.stereov.web:baseline:1.0.0' // Check for the latest version
-   }
-   ```
+**For Gradle:**
+```groovy
+dependencies {
+   implementation 'io.stereov.web:baseline:<version>' // Check for the latest version
+}
+```
 
-   **For Maven:**
-   ```xml
-   <dependency>
-       <groupId>io.stereov.web</groupId>
-       <artifactId>baseline</artifactId>
-       <version>1.0.0</version> <!-- Check for the latest version -->
-   </dependency>
-   ```
+**For Maven:**
+```xml
+<dependency>
+   <groupId>io.stereov.web</groupId>
+   <artifactId>baseline</artifactId>
+   <version>_version_</version> <!-- Check for the latest version -->
+</dependency>
+```
 
 #### Configuration
 
@@ -216,8 +216,6 @@ Here are the key properties you need to set in your `application.yaml`:
     By default, it is set to `false`.
 
 #### *(Optional)* Test Setup
-
-Set up dependencies for testing:
    
 I recommend the following packages if you want to test your application properly:
 ```kotlin
