@@ -3,8 +3,8 @@
 This is a Kotlin-based Spring Web application template designed to provide essential features for secure and efficient web applications. 
 It incorporates a wide range of functionality, such as user management, two-factor authentication, JWT-based authentication, encryption, and more, making it an excellent starting point for building production-ready applications.
 
-> **Note:** 
-> This repository goes hand in hand with my Angular baseline. You can find it [here](https://github.com/antistereov/web-angular-baseline).
+**Note:** 
+This repository goes hand in hand with my Angular baseline. You can find it [here](https://github.com/antistereov/web-angular-baseline).
 
 ## **Why Use This?**
 
@@ -40,8 +40,6 @@ This repository isn't just for personal use—it's meant to be a **collaborative
 - **Rate Limiting**: Configurable rate-limiting for both IP and user account-based limits to prevent abuse.
 - **Asynchronous Programming**: Built with Kotlin coroutines for async processing, and integrates Log4j for asynchronous logging.
 
----
-
 ## Development Setup
 
 ### Prerequisites:
@@ -51,10 +49,11 @@ This repository isn't just for personal use—it's meant to be a **collaborative
 
 ### Running the Application:
 
-> **Note:** 
-> You can always look at the demo module for inspiration.
+**Note:** You can always look at the demo module for inspiration.
 
-1. Add the dependency to your `build.gradle.kts`, `build.gradle` or `pom.xml` if using Maven:
+#### Dependency
+
+Add the dependency to your `build.gradle.kts`, `build.gradle` or `pom.xml` if using Maven:
 
    **For Kotlin DSL:**
    ```kotlin
@@ -77,161 +76,162 @@ This repository isn't just for personal use—it's meant to be a **collaborative
    </dependency>
    ```
 
-2. Configure the required properties in `application.yml`:
+#### Configuration
 
-   Here are the key properties you need to set:
-    - **Spring Configuration:**
-      
-      There are some things you need to set up in order to make things work:
-      ```yaml
-      server:
-        # The port the server should run on
-        port: 8000
-      spring:
-        main:
-          # This setting is really important to make your application reactive
-          web-application-type: reactive
-        devtools:
-          restart:
-            # Do you want your application to restart if changes occur?
-            enabled: false
-            additional-paths: src/main
-      logging:
-        level:
+Here are the key properties you need to set in your `application.yaml`:
+- **Spring Configuration:**
+    There are some things you need to set up in order to make things work:
+
+    ```yaml
+    server:
+      # The port the server should run on
+      port: 8000
+    spring:
+      main:
+        # This setting is really important to make your application reactive
+        web-application-type: reactive
+      devtools:
+        restart:
+          # Do you want your application to restart if changes occur?
+          enabled: false
+          additional-paths: src/main
+        logging:
+          level:
           # Set log levels for your packages
           io.stereov.web: DEBUG
-      ```
-      If you want to enable dev tools, you have to add the following dependency:
+    ```
+    If you want to enable dev tools, you have to add the following dependency:
       
-      ```kotlin
-      developmentOnly("org.springframework.boot:spring-boot-devtools")
-      ```
-    - **MongoDB:**
-   
-        You need to connect your backend to a MongoDB instance. This instance is used to save information about the users.
-   
-        ```yaml
-        spring:
-          data:
-            mongodb:
-             uri: mongodb://<username>:<password>@<host>:<port>/<database>?authSource=admin
-        ```
+    ```kotlin
+    developmentOnly("org.springframework.boot:spring-boot-devtools")
+    ```
 
-    - **Redis:**
+- **MongoDB:**
+   
+    You need to connect your backend to a MongoDB instance. This instance is used to save information about the users.
+   
+    ```yaml
+    spring:
+      data:
+        mongodb:
+         uri: mongodb://<username>:<password>@<host>:<port>/<database>?authSource=admin
+    ```
+
+- **Redis:**
            
-        You need a running redis instance for rate-limiting and caching.
-        ```yaml
-        spring:
-          data:
-            redis:
-              host: <redis_host>
-              port: <redis_port>
-              password: <redis_password>
-              database: 0
-              timeout: 5000ms
-              ssl:
-                enabled: false
-        ```
+    You need a running redis instance for rate-limiting and caching.
+    ```yaml
+    spring:
+      data:
+        redis:
+          host: <redis_host>
+          port: <redis_port>
+          password: <redis_password>
+          database: 0
+          timeout: 5000ms
+          ssl:
+            enabled: false
+    ```
 
-    - **Application Settings:**
+- **Application Settings:**
 
-      This sets the main configurations for the application.
-      ```yaml
-      baseline:
-        app:
-          # The name of your application
-          name: YourApplication
-          # The base URL of your API
-          base-url: http://localhost:8000
-          # Whether SSL and the secure setting for HTTP-only cookies should be set
-          secure: true # You might need to set it to false during development
-      ```
+    This sets the main configurations for the application.
+    ```yaml
+    baseline:
+      app:
+        # The name of your application
+        name: YourApplication
+        # The base URL of your API
+        base-url: http://localhost:8000
+        # Whether SSL and the secure setting for HTTP-only cookies should be set
+        secure: true # You might need to set it to false during development
+    ```
     
-    - **UI Settings:**
+- **UI Settings:**
     
-      Most probably, you are using this application to control your UI.
-      You have to set some properties in order to make it run as expected.
-      ```yaml
-      baseline:
-        app:
-          # The base URL of your frontend
-          base-url: http://localhost:4200
-      ```
+    Most probably, you are using this application to control your UI.
+    You have to set some properties in order to make it run as expected.
+    ```yaml
+    baseline:
+      app:
+        # The base URL of your frontend
+        base-url: http://localhost:4200
+    ```
       
-    - **Security Settings:**
+- **Security Settings:**
    
-      You need to set up some measures to secure your web application:
-      ```yaml
-      baseline:
-        app:
-          security:
-            encryption:
-              # Generate an encryption key that is used to encrypt entries in the database
-              # You can create one here: https://generate-random.org/encryption-key-generator and use the Base64 value
-              secret-key: <your-encryption-key>
-            jwt:
-              # Your JWT secret
-              # You can generate a secret here: https://jwtsecret.com/generate
-              secret-key: <your-jwt-secret>
-              # In how many seconds should your JWT expire?
-              expires-in: 900
-            rate-limit:
-              # How many calls do you allow per minute per IP address?
-              ip-rate-limit-minute: 200
-              # How many calls do you allow per minute per account?
-              account-rate-limit-minute: 100
-            two-factor:
-              # How long should the recovery code be?
-              recovery-code-length: 20
-      ```
+    You need to set up some measures to secure your web application:
+    ```yaml
+    baseline:
+      app:
+        security:
+          encryption:
+            # Generate an encryption key that is used to encrypt entries in the database
+            # You can create one here: https://generate-random.org/encryption-key-generator and use the Base64 value
+            secret-key: <your-encryption-key>
+          jwt:
+            # Your JWT secret
+            # You can generate a secret here: https://jwtsecret.com/generate
+            secret-key: <your-jwt-secret>
+            # In how many seconds should your JWT expire?
+            expires-in: 900
+          rate-limit:
+            # How many calls do you allow per minute per IP address?
+            ip-rate-limit-minute: 200
+            # How many calls do you allow per minute per account?
+            account-rate-limit-minute: 100
+          two-factor:
+            # How long should the recovery code be?
+            recovery-code-length: 20
+    ```
 
-   - **Email Verification Settings:**
+- **Email Verification Settings:**
    
-     You can require users to enable their email. Therefore, you need to configure your own SMTP server.
-     This server will send the user an email with a link to verify their email address.
-     ```yaml
-     baseline:
-       mail:
-         # Enable email verification - false on default
-         enable-verification: true 
-         # Credentials for your smtp server
-         host: <smtp_host>
-         port: <smtp_port>
-         username: <smtp_username>
-         password: <smtp_password>
-         # The transport protocol - it is SMTP most of the time
-         transport-protocol: smtp 
-         # Enable SMTP authentication
-         smtp-auth: true 
-         # Enable STARTTLS encryption
-         smtp-starttls: true
-         # Enable debugging
-         debug: false
-         # How long should the token contained in the email be valid
-         verification-expiration: 900
-         # How much time should pass until a new verification email can be sent
-         verification-send-cooldown: 60 
-     ```
+    You can require users to enable their email. Therefore, you need to configure your own SMTP server.
+    This server will send the user an email with a link to verify their email address.
+    ```yaml
+    baseline:
+      mail:
+        # Enable email verification - false on default
+        enable-verification: true 
+        # Credentials for your smtp server
+        host: <smtp_host>
+        port: <smtp_port>
+        username: <smtp_username>
+        password: <smtp_password>
+        # The transport protocol - it is SMTP most of the time
+        transport-protocol: smtp 
+        # Enable SMTP authentication
+        smtp-auth: true 
+        # Enable STARTTLS encryption
+        smtp-starttls: true
+        # Enable debugging
+        debug: false
+        # How long should the token contained in the email be valid
+        verification-expiration: 900
+        # How much time should pass until a new verification email can be sent
+        verification-send-cooldown: 60 
+    ```
     This is optional. You can enable email verification by setting `enable-verification` to true. 
     By default, it is set to `false`.
 
-3. *(Optional)* **Set up dependencies for testing:**
-   
-   I recommend the following packages if you want to test your application properly:
-   ```kotlin
-   testImplementation("org.springframework.boot:spring-boot-starter-test") {
-        exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
-        exclude(group = "org.mockito")
-    }
-    testImplementation("org.junit.jupiter:junit-jupiter")
-    testImplementation("io.mockk:mockk:1.13.13")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinxVersion")
-    testImplementation("org.testcontainers:testcontainers:$testContainersVersion")
-    testImplementation("org.testcontainers:junit-jupiter:$testContainersVersion")
-    testImplementation("org.testcontainers:mongodb:$testContainersVersion")
-   ```
+#### *(Optional)* Test Setup
 
----
+Set up dependencies for testing:
+   
+I recommend the following packages if you want to test your application properly:
+```kotlin
+testImplementation("org.springframework.boot:spring-boot-starter-test") {
+    exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
+    exclude(group = "org.mockito")
+}
+testImplementation("org.junit.jupiter:junit-jupiter")
+testImplementation("io.mockk:mockk:1.13.13")
+testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinxVersion")
+testImplementation("org.testcontainers:testcontainers:$testContainersVersion")
+testImplementation("org.testcontainers:junit-jupiter:$testContainersVersion")
+testImplementation("org.testcontainers:mongodb:$testContainersVersion")
+```
 
 ## Service Overview
 
@@ -263,8 +263,6 @@ This repository isn't just for personal use—it's meant to be a **collaborative
 ### **JWT Encoding & Decoding**
 - **JwtService**:  
   The `JwtService` handles the encoding and decoding of JSON Web Tokens (JWT) for authentication and authorization.
-
----
 
 ## Endpoints
 
