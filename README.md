@@ -1,5 +1,7 @@
 # Kotlin+Spring Web Baseline
 
+[![Maven Central](https://img.shields.io/maven-central/v/io.stereov.web/baseline.svg)](https://central.sonatype.com/artifact/io.stereov.web/baseline)
+
 This is a Kotlin-based Spring Web application template designed to provide essential features for secure and efficient web applications. 
 It incorporates a wide range of functionality, such as user management, two-factor authentication, JWT-based authentication, encryption, and more, making it an excellent starting point for building production-ready applications.
 
