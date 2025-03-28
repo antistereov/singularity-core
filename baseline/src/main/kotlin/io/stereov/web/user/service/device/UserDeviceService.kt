@@ -1,10 +1,11 @@
-package io.stereov.web.user.service
+package io.stereov.web.user.service.device
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.web.auth.service.AuthenticationService
 import io.stereov.web.user.model.DeviceInfo
 import io.stereov.web.user.model.UserDocument
+import io.stereov.web.user.service.UserService
 import org.springframework.stereotype.Service
 
 @Service

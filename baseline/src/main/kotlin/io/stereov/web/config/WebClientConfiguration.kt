@@ -9,6 +9,20 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.reactive.function.client.WebClient
 
+/**
+ * # Configuration class for the web client.
+ *
+ * This class is responsible for configuring the web client in the application.
+ *
+ * It runs after the [MongoReactiveAutoConfiguration], [SpringDataWebAutoConfiguration],
+ * [RedisAutoConfiguration], and [ApplicationConfiguration] classes to ensure that
+ * the necessary configurations are applied in the correct order.
+ *
+ * This class enables the following beans:
+ * - [WebClient]
+ *
+ * @author <a href="https://github.com/antistereov">antistereov</a>
+ */
 @Configuration
 @AutoConfiguration(
     after = [

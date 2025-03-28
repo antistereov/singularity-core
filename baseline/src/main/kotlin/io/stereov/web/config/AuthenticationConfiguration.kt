@@ -1,23 +1,26 @@
 package io.stereov.web.config
 
 import io.stereov.web.auth.service.AuthenticationService
+import io.stereov.web.auth.service.CookieService
 import io.stereov.web.global.service.encryption.EncryptionService
 import io.stereov.web.global.service.geolocation.GeoLocationService
 import io.stereov.web.global.service.hash.HashService
 import io.stereov.web.global.service.jwt.JwtService
-import io.stereov.web.global.service.mail.MailService
-import io.stereov.web.global.service.mail.MailTokenService
-import io.stereov.web.global.service.mail.MailVerificationCooldownService
 import io.stereov.web.global.service.twofactorauth.TwoFactorAuthService
 import io.stereov.web.properties.AppProperties
 import io.stereov.web.properties.JwtProperties
 import io.stereov.web.properties.TwoFactorAuthProperties
+import io.stereov.web.user.controller.UserDeviceController
 import io.stereov.web.user.controller.UserSessionController
+import io.stereov.web.user.controller.UserTwoFactorAuthController
 import io.stereov.web.user.repository.UserRepository
 import io.stereov.web.user.service.*
+import io.stereov.web.user.service.device.UserDeviceService
+import io.stereov.web.user.service.token.TwoFactorAuthTokenService
+import io.stereov.web.user.service.token.UserTokenService
+import io.stereov.web.user.service.twofactor.UserTwoFactorAuthService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
 import org.springframework.boot.autoconfigure.data.web.SpringDataWebAutoConfiguration
 import org.springframework.boot.autoconfigure.mongo.MongoReactiveAutoConfiguration
@@ -26,6 +29,34 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRepositories
 import org.springframework.web.reactive.function.client.WebClient
 
+/**
+ * # Authentication configuration class.
+ *
+ * This class is responsible for configuring the authentication-related services
+ * and components in the application.
+ *
+ * It runs after the [MongoReactiveAutoConfiguration], [SpringDataWebAutoConfiguration],
+ * [RedisAutoConfiguration], and [ApplicationConfiguration] classes to ensure that
+ * the necessary configurations are applied in the correct order.
+ *
+ * This class enables the following services:
+ * - [AuthenticationService]
+ * - [GeoLocationService]
+ * - [HashService]
+ * - [TwoFactorAuthService]
+ * - [UserService]
+ * - [UserSessionService]
+ * - [CookieService]
+ * - [UserDeviceService]
+ * - [UserTwoFactorAuthService]
+ *
+ * It enabled the following controllers:
+ * - [UserSessionController]
+ * - [UserTwoFactorAuthController]
+ * - [UserDeviceController]
+ *
+ * @author <a href="https://github.com/antistereov">antistereov</a>
+ */
 @Configuration
 @AutoConfiguration(
     after = [
@@ -89,12 +120,14 @@ class AuthenticationConfiguration {
         jwtService: JwtService,
         authenticationService: AuthenticationService,
         deviceService: UserDeviceService,
+        userTwoFactorAuthService: UserTwoFactorAuthService,
     ): UserSessionService {
         return UserSessionService(
             userService,
             hashService,
             authenticationService,
             deviceService,
+            userTwoFactorAuthService
         )
     }
 
@@ -121,18 +154,6 @@ class AuthenticationConfiguration {
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "baseline.mail", name = ["enable-email-verification"], havingValue = "true", matchIfMissing = false)
-    fun userMailVerificationService(
-        userService: UserService,
-        authenticationService: AuthenticationService,
-        mailVerificationCooldownService: MailVerificationCooldownService,
-        mailService: MailService,
-        mailTokenService: MailTokenService,
-    ): UserMailVerificationService {
-        return UserMailVerificationService(userService, authenticationService, mailVerificationCooldownService, mailService, mailTokenService)
-    }
-
-    @Bean
     @ConditionalOnMissingBean
     fun userTwoFactorAuthService(
         userService: UserService,
@@ -144,5 +165,22 @@ class AuthenticationConfiguration {
         cookieService: CookieService
     ): UserTwoFactorAuthService {
         return UserTwoFactorAuthService(userService, twoFactorAuthService, encryptionService, authenticationService, twoFactorAuthProperties, hashService, cookieService)
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun userTwoFactorAuthController(
+        userTwoFactorAuthService: UserTwoFactorAuthService,
+        cookieService: CookieService
+    ): UserTwoFactorAuthController {
+        return UserTwoFactorAuthController(userTwoFactorAuthService, cookieService)
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun userDeviceController(
+        userDeviceService: UserDeviceService
+    ): UserDeviceController {
+        return UserDeviceController(userDeviceService)
     }
 }

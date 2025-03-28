@@ -1,20 +1,31 @@
-package io.stereov.web.user.service
+package io.stereov.web.auth.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.web.config.Constants
 import io.stereov.web.global.service.geolocation.GeoLocationService
-import io.stereov.web.global.service.jwt.exception.InvalidTokenException
+import io.stereov.web.global.service.jwt.exception.model.InvalidTokenException
 import io.stereov.web.properties.AppProperties
 import io.stereov.web.properties.JwtProperties
 import io.stereov.web.user.dto.DeviceInfoRequest
 import io.stereov.web.user.dto.UserDto
 import io.stereov.web.user.model.DeviceInfo
+import io.stereov.web.user.service.UserService
+import io.stereov.web.user.service.token.TwoFactorAuthTokenService
+import io.stereov.web.user.service.token.UserTokenService
 import org.springframework.http.ResponseCookie
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ServerWebExchange
 import java.time.Instant
 
+/**
+ * # Service for managing cookies related to user authentication.
+ *
+ * This service provides methods to create, clear, and validate cookies for access tokens,
+ * refresh tokens, and two-factor authentication.
+ *
+ * @author <a href="https://github.com/antistereov">antistereov</a>
+ */
 @Service
 class CookieService(
     private val userTokenService: UserTokenService,
@@ -28,6 +39,14 @@ class CookieService(
     private val logger: KLogger
         get() = KotlinLogging.logger {}
 
+    /**
+     * Creates a cookie for the access token.
+     *
+     * @param userId The ID of the user.
+     * @param deviceId The ID of the device.
+     *
+     * @return The created access token cookie.
+     */
     fun createAccessTokenCookie(userId: String, deviceId: String): ResponseCookie {
         logger.debug { "Creating access token cookie for user $userId" }
 
@@ -45,6 +64,15 @@ class CookieService(
         return cookie.build()
     }
 
+    /**
+     * Creates a cookie for the refresh token.
+     *
+     * @param userId The ID of the user.
+     * @param deviceInfoDto The device information.
+     * @param ipAddress The IP address of the user.
+     *
+     * @return The created refresh token cookie.
+     */
     suspend fun createRefreshTokenCookie(
         userId: String,
         deviceInfoDto: DeviceInfoRequest,
@@ -91,6 +119,11 @@ class CookieService(
         return cookie.build()
     }
 
+    /**
+     * Clears the access token cookie.
+     *
+     * @return The cleared access token cookie.
+     */
     fun clearAccessTokenCookie(): ResponseCookie {
         logger.debug { "Clearing access token cookie" }
 
@@ -108,6 +141,11 @@ class CookieService(
 
     }
 
+    /**
+     * Clears the refresh token cookie.
+     *
+     * @return The cleared refresh token cookie.
+     */
     fun clearRefreshTokenCookie(): ResponseCookie {
         logger.debug { "Clearing refresh token cookie" }
 
@@ -124,6 +162,14 @@ class CookieService(
         return cookie.build()
     }
 
+    /**
+     * Validates the refresh token and retrieves the user information.
+     *
+     * @param exchange The server web exchange.
+     * @param deviceId The ID of the device.
+     *
+     * @return The user information.
+     */
     suspend fun validateRefreshTokenAndGetUserDto(exchange: ServerWebExchange, deviceId: String): UserDto {
         logger.debug { "Validating refresh token and getting user" }
 
@@ -141,6 +187,13 @@ class CookieService(
         }
     }
 
+    /**
+     * Creates a cookie for the two-factor authentication token.
+     *
+     * @param userId The ID of the user.
+     *
+     * @return The created two-factor authentication token cookie.
+     */
     suspend fun createTwoFactorSessionCookie(userId: String): ResponseCookie {
         logger.debug { "Creating cookie for two factor authentication token" }
 
@@ -157,6 +210,15 @@ class CookieService(
         return cookie.build()
     }
 
+    /**
+     * Validates the two-factor authentication session cookie and retrieves the user ID.
+     *
+     * @param exchange The server web exchange.
+     *
+     * @return The user ID associated with the two-factor authentication session.
+     *
+     * @throws InvalidTokenException If the two-factor authentication token is invalid or not provided.
+     */
     suspend fun validateTwoFactorSessionCookieAndGetUserId(exchange: ServerWebExchange): String {
         logger.debug { "Validating two factor session cookie" }
 
@@ -166,6 +228,11 @@ class CookieService(
         return twoFactorAuthTokenService.validateTwoFactorTokenAndExtractUserId(twoFactorCookie)
     }
 
+    /**
+     * Clears the two-factor authentication session cookie.
+     *
+     * @return The cleared two-factor authentication session cookie.
+     */
     suspend fun clearTwoFactorSessionCookie(): ResponseCookie {
         logger.debug { "Clearing cookie for two factor authentication token" }
 

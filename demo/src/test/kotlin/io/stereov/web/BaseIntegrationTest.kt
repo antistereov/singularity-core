@@ -7,7 +7,7 @@ import io.stereov.web.user.dto.RegisterUserRequest
 import io.stereov.web.user.dto.TwoFactorSetupResponse
 import io.stereov.web.user.model.UserDocument
 import io.stereov.web.user.service.UserService
-import io.stereov.web.user.service.UserTokenService
+import io.stereov.web.user.service.token.UserTokenService
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach
 import org.springframework.beans.factory.annotation.Autowired

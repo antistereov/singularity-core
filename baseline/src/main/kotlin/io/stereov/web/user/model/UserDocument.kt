@@ -3,24 +3,43 @@ package io.stereov.web.user.model
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.web.user.dto.UserDto
-import io.stereov.web.user.exception.UserException
+import io.stereov.web.user.exception.model.InvalidUserDocumentException
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Transient
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
 
+/**
+ * # UserDocument
+ *
+ * This class represents a user document in the database.
+ * It contains fields for user information, security details, and device information.
+ * It also provides methods for managing two-factor authentication, devices, and roles.
+ *
+ * @property id The unique identifier for the user document.
+ * @property email The email address of the user.
+ * @property name The name of the user.
+ * @property password The hashed password of the user.
+ * @property roles The roles assigned to the user.
+ * @property security The security details of the user.
+ * @property devices The list of devices associated with the user.
+ * @property lastActive The last active timestamp of the user.
+ * @property app The application information associated with the user.
+ *
+ * @author antistereov
+ */
 @Document(collection = "users")
 data class UserDocument(
     @Id val id: String? = null,
-    @Indexed(unique = true) val email: String,
+    @Indexed(unique = true) var email: String,
     val name: String? = null,
-    val password: String,
+    var password: String,
     val roles: MutableList<Role> = mutableListOf(Role.USER),
     val security: UserSecurityDetails = UserSecurityDetails(),
     val devices: MutableList<DeviceInfo> = mutableListOf(),
     var lastActive: Instant = Instant.now(),
-    val app: ApplicationInfo? = null,
+    var app: ApplicationInfo? = null,
 ) {
 
     @get:Transient
@@ -28,14 +47,32 @@ data class UserDocument(
         get() = KotlinLogging.logger {}
 
     /**
-     * Return the [id] and throw a [UserException] if the [id] is null.
+     * Return the [id] and throw a [InvalidUserDocumentException] if the [id] is null.
      *
-     * @throws UserException If [id] is null
+     * @throws InvalidUserDocumentException If [id] is null
      */
     @get:Transient
     val idX: String
-        get() = this.id ?: throw UserException("No ID found in UserDocument")
+        get() = this.id ?: throw InvalidUserDocumentException("No ID found in UserDocument")
 
+    /**
+     * Get the application info of the user.
+     *
+     * This method returns the application info associated with the user cast to the given class [T].
+     *
+     * @throws InvalidUserDocumentException If the application info is not of the expected type.
+     */
+    inline fun <reified T: ApplicationInfo> getApplicationInfo(): T {
+        return app as? T ?: throw InvalidUserDocumentException("No application info found in UserDocument")
+    }
+
+    /**
+     * Convert this [UserDocument] to a [UserDto].
+     *
+     * This method is used to create a data transfer object (DTO) for the user.
+     *
+     * @return A [UserDto] containing the user information.
+     */
     fun toDto(): UserDto {
         logger.debug { "Creating UserDto" }
 
@@ -52,6 +89,16 @@ data class UserDocument(
         )
     }
 
+    /**
+     * Set up two-factor authentication for the user.
+     *
+     * This method enables two-factor authentication and sets the secret and recovery code.
+     *
+     * @param secret The secret key for the user.
+     * @param recoveryCode The recovery code for the user.
+     *
+     * @return The updated [UserDocument].
+     */
     fun setupTwoFactorAuth(secret: String, recoveryCode: String): UserDocument {
         logger.debug { "Setting up two factor authentication" }
 
@@ -62,6 +109,13 @@ data class UserDocument(
         return this
     }
 
+    /**
+     * Disable two-factor authentication for the user.
+     *
+     * This method disables two-factor authentication and clears the secret and recovery code.
+     *
+     * @return The updated [UserDocument].
+     */
     fun disableTwoFactorAuth() {
         logger.debug { "Disabling two factor authentication" }
 
@@ -70,6 +124,15 @@ data class UserDocument(
         this.security.twoFactor.recoveryCode = null
     }
 
+    /**
+     * Add or update a device for the user.
+     *
+     * This method adds a new device or updates an existing device in the user's device list.
+     *
+     * @param deviceInfo The device information to add or update.
+     *
+     * @return The updated [UserDocument].
+     */
     fun addOrUpdateDevice(deviceInfo: DeviceInfo): UserDocument {
         logger.debug { "Adding or updating device ${deviceInfo.id}" }
 
@@ -79,6 +142,15 @@ data class UserDocument(
         return this
     }
 
+    /**
+     * Remove a device from the user's device list.
+     *
+     * This method removes a device from the user's device list based on the device ID.
+     *
+     * @param deviceId The ID of the device to remove.
+     *
+     * @return The updated [UserDocument].
+     */
     fun removeDevice(deviceId: String): UserDocument {
         logger.debug { "Removing device $deviceId" }
 
@@ -87,21 +159,51 @@ data class UserDocument(
         return this
     }
 
+    /**
+     * Clear all devices from the user's device list.
+     *
+     * This method removes all devices from the user's device list.
+     */
     fun clearDevices() {
         logger.debug { "Clearing devices" }
 
         this.devices.clear()
     }
 
+    /**
+     * Add a role to the user.
+     *
+     * This method adds a new role to the user's role list.
+     *
+     * @param role The role to add.
+     *
+     * @return The updated list of roles.
+     */
     fun addRole(role: Role): List<Role> {
         this.roles.add(role)
         return this.roles
     }
 
+    /**
+     * Remove a role from the user.
+     *
+     * This method removes a role from the user's role list.
+     *
+     * @param role The role to remove.
+     *
+     * @return True if the role was removed, false otherwise.
+     */
     fun removeRole(role: Role): Boolean {
         return this.roles.remove(role)
     }
 
+    /**
+     * Update the last active timestamp of the user.
+     *
+     * This method sets the last active timestamp to the current time.
+     *
+     * @return The updated [UserDocument].
+     */
     fun updateLastActive(): UserDocument {
         logger.debug { "Updating last active" }
 

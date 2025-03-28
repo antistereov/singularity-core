@@ -20,7 +20,7 @@ class GeoLocationService(
                 .retrieve()
                 .awaitBody<GeoLocationResponse>()
         } catch (e: Exception) {
-            throw GeoLocationException("Unable to retrieve current geolocation")
+            throw GeoLocationException("Unable to retrieve current geolocation", e)
         }
     }
 }

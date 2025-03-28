@@ -1,7 +1,7 @@
 package io.stereov.web.user.controller
 
 import io.stereov.web.user.dto.DeviceInfoResponse
-import io.stereov.web.user.service.UserDeviceService
+import io.stereov.web.user.service.device.UserDeviceService
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.DeleteMapping

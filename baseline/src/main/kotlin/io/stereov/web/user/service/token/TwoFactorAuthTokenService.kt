@@ -1,9 +1,9 @@
-package io.stereov.web.user.service
+package io.stereov.web.user.service.token
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.web.global.service.jwt.JwtService
-import io.stereov.web.global.service.jwt.exception.InvalidTokenException
+import io.stereov.web.global.service.jwt.exception.model.InvalidTokenException
 import io.stereov.web.properties.JwtProperties
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
 import org.springframework.stereotype.Service

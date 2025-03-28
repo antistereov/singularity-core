@@ -20,6 +20,26 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import java.time.Duration
 
+/**
+ * # Configuration class for Redis-related beans.
+ *
+ * This class is responsible for configuring the Redis-related services
+ * and components in the application.
+ *
+ * It runs after the [MongoReactiveAutoConfiguration], [SpringDataWebAutoConfiguration],
+ * [RedisAutoConfiguration], and [ApplicationConfiguration] classes to ensure that
+ * the necessary configurations are applied in the correct order.
+ *
+ * It enables the following services:
+ * - [RedisService]
+ *
+ * It enables the following beans:
+ * - [StatefulRedisConnection]
+ * - [RedisClient]
+ * - [LettuceBasedProxyManager]
+ *
+ * @author <a href="https://github.com/antistereov">antistereov</a>
+ */
 @Configuration
 @AutoConfiguration(
     after = [

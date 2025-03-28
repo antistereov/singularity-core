@@ -8,6 +8,27 @@ import org.springframework.boot.autoconfigure.mongo.MongoReactiveAutoConfigurati
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration
 
+/**
+ * # Application configuration class.
+ *
+ * This class is responsible for configuring the application properties and enabling
+ * configuration properties for various components.
+ *
+ * It runs after the [MongoReactiveAutoConfiguration], [SpringDataWebAutoConfiguration]
+ * and [RedisAutoConfiguration] classes to ensure that the necessary configurations are
+ * applied in the correct order.
+ *
+ * This class enables the following configuration properties:
+ * - [AppProperties]
+ * - [AuthProperties]
+ * - [EncryptionProperties]
+ * - [UiProperties]
+ * - [JwtProperties]
+ * - [RateLimitProperties]
+ * - [TwoFactorAuthProperties]
+ *
+ * @author <a href="https://github.com/antistereov">antistereov</a>
+ */
 @Configuration
 @AutoConfiguration(
     after = [

@@ -1,8 +1,11 @@
-package io.stereov.web.global.service.twofactorauth.exception
+package io.stereov.web.global.service.jwt.exception.handler
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.web.global.model.ErrorResponse
+import io.stereov.web.global.service.jwt.exception.model.InvalidTokenException
+import io.stereov.web.global.service.jwt.exception.TokenException
+import io.stereov.web.global.service.jwt.exception.model.TokenExpiredException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
@@ -10,20 +13,21 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.server.ServerWebExchange
 
 @ControllerAdvice
-class TwoFactorAuthExceptionHandler {
+class TokenExceptionHandler {
 
     private val logger: KLogger
         get() = KotlinLogging.logger {}
 
-    @ExceptionHandler(TwoFactorAuthException::class)
-    suspend fun handleRateLimitExceptions(
-        ex: TwoFactorAuthException,
+    @ExceptionHandler(TokenException::class)
+    suspend fun handleTokenExceptions(
+        ex: TokenException,
         exchange: ServerWebExchange
     ): ResponseEntity<ErrorResponse> {
         logger.warn { "${ex.javaClass.simpleName} - ${ex.message}" }
 
         val status = when (ex) {
-            is InvalidTwoFactorCodeException -> HttpStatus.UNAUTHORIZED
+            is TokenExpiredException -> HttpStatus.UNAUTHORIZED
+            is InvalidTokenException -> HttpStatus.UNAUTHORIZED
             else -> HttpStatus.INTERNAL_SERVER_ERROR
         }
 

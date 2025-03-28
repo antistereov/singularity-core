@@ -1,6 +1,7 @@
 package io.stereov.web.global.service.cache
 
 import io.stereov.web.BaseIntegrationTest
+import io.stereov.web.global.service.cache.exception.model.RedisKeyNotFoundException
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*
@@ -21,42 +22,47 @@ class RedisServiceTest : BaseIntegrationTest() {
     @Test fun `save and get works`() = runTest {
         redisService.saveData("key", "value")
 
-        assertEquals("value", redisService.getData("key"))
+        assertEquals("value", redisService.getDataOrNull("key"))
     }
     @Test fun `save overrides key`() = runTest {
         redisService.saveData("key", "value")
-        assertEquals("value", redisService.getData("key"))
+        assertEquals("value", redisService.getDataOrNull("key"))
 
         redisService.saveData("key", "value2")
-        assertEquals("value2", redisService.getData("key"))
+        assertEquals("value2", redisService.getDataOrNull("key"))
     }
 
     @Test fun `delete works`() = runTest {
         redisService.saveData("key", "value")
-        assertEquals("value", redisService.getData("key"))
+        assertEquals("value", redisService.getDataOrNull("key"))
 
         redisService.deleteData("key")
-        assertNull(redisService.getData("key"))
+        assertNull(redisService.getDataOrNull("key"))
     }
     @Test fun `delete works if key does not exists`() = runTest {
         redisService.deleteData("key")
     }
 
-    @Test fun `get returns null if no key exists`() = runTest {
-        assertNull(redisService.getData("key"))
+    @Test fun `getDataOrNul returns null if no key exists`() = runTest {
+        assertNull(redisService.getDataOrNull("key"))
+    }
+    @Test fun `getData throws error if no key exists`() = runTest {
+        assertThrowsExactly(RedisKeyNotFoundException::class.java) {
+            runBlocking { redisService.getData("key") }
+        }
     }
 
     @Test fun `deleteAll deletesAll`() = runTest {
         redisService.saveData("key1", "value")
         redisService.saveData("key2", "value")
 
-        assertEquals("value", redisService.getData("key1"))
-        assertEquals("value", redisService.getData("key2"))
+        assertEquals("value", redisService.getDataOrNull("key1"))
+        assertEquals("value", redisService.getDataOrNull("key2"))
 
         redisService.deleteAll()
 
-        assertNull(redisService.getData("key1"))
-        assertNull(redisService.getData("key2"))
+        assertNull(redisService.getDataOrNull("key1"))
+        assertNull(redisService.getDataOrNull("key2"))
     }
     @Test fun `deleteAll works if no data exist`() = runTest {
         redisService.deleteAll()

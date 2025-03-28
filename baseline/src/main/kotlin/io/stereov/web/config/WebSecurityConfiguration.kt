@@ -6,10 +6,10 @@ import io.stereov.web.filter.CookieAuthenticationFilter
 import io.stereov.web.filter.LoggingFilter
 import io.stereov.web.filter.RateLimitingFilter
 import io.stereov.web.properties.AuthProperties
-import io.stereov.web.properties.UiProperties
 import io.stereov.web.properties.RateLimitProperties
+import io.stereov.web.properties.UiProperties
 import io.stereov.web.user.service.UserService
-import io.stereov.web.user.service.UserTokenService
+import io.stereov.web.user.service.token.UserTokenService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
@@ -32,6 +32,28 @@ import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.reactive.CorsConfigurationSource
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
 
+/**
+ * # Configuration class for web security.
+ *
+ * This class is responsible for configuring the web security settings
+ * and components in the application.
+ *
+ * It runs after the [MongoReactiveAutoConfiguration], [SpringDataWebAutoConfiguration],
+ * [RedisAutoConfiguration], and [ApplicationConfiguration] classes to ensure that
+ * the necessary configurations are applied in the correct order.
+ *
+ * It enables the following services:
+ * - [UserTokenService]
+ * - [UserService]
+ *
+ * It enables the following beans:
+ * - [PasswordEncoder]
+ * - [ServerAuthenticationEntryPoint]
+ * - [SecurityWebFilterChain]
+ * - [CorsConfigurationSource]
+ *
+ * @author <a href="https://github.com/antistereov">antistereov</a>
+ */
 @Configuration
 @EnableWebFluxSecurity
 @EnableMethodSecurity(prePostEnabled = true)

@@ -4,7 +4,7 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.web.auth.service.AuthenticationService
 import io.stereov.web.user.dto.*
-import io.stereov.web.user.service.CookieService
+import io.stereov.web.auth.service.CookieService
 import io.stereov.web.user.service.UserSessionService
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
@@ -74,6 +74,13 @@ class UserSessionController(
             .header("Set-Cookie", accessTokenCookie.toString())
             .header("Set-Cookie", refreshTokenCookie.toString())
             .body(user.toDto())
+    }
+
+    @PutMapping("/password")
+    suspend fun changePassword(@RequestBody payload: ChangePasswordRequest) {
+        val user = authenticationService.getCurrentUser()
+
+        user.password
     }
 
     @PostMapping("/logout")

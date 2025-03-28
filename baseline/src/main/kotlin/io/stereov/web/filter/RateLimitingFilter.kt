@@ -4,8 +4,8 @@ import io.github.bucket4j.Bucket
 import io.github.bucket4j.BucketConfiguration
 import io.github.bucket4j.redis.lettuce.cas.LettuceBasedProxyManager
 import io.stereov.web.auth.service.AuthenticationService
-import io.stereov.web.properties.RateLimitProperties
 import io.stereov.web.global.exception.BaseWebException
+import io.stereov.web.properties.RateLimitProperties
 import kotlinx.coroutines.reactor.mono
 import org.springframework.http.HttpStatus
 import org.springframework.web.server.ServerWebExchange
@@ -14,6 +14,16 @@ import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Mono
 import java.time.Duration
 
+/**
+ * # Filter for rate limiting incoming requests.
+ *
+ * This filter limits the number of requests from a single IP address and user account
+ * within a specified time period.
+ *
+ * It uses the Bucket4j library to manage the rate limiting.
+ *
+ * @author <a href="https://github.com/antistereov">antistereov</a>
+ */
 class RateLimitingFilter(
     private val authenticationService: AuthenticationService,
     private val proxyManager: LettuceBasedProxyManager<String>,

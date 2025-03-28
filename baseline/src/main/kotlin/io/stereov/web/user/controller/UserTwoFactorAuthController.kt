@@ -3,8 +3,8 @@ package io.stereov.web.user.controller
 import io.stereov.web.user.dto.TwoFactorSetupResponse
 import io.stereov.web.user.dto.TwoFactorStatusResponse
 import io.stereov.web.user.dto.UserDto
-import io.stereov.web.user.service.CookieService
-import io.stereov.web.user.service.UserTwoFactorAuthService
+import io.stereov.web.auth.service.CookieService
+import io.stereov.web.user.service.twofactor.UserTwoFactorAuthService
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping

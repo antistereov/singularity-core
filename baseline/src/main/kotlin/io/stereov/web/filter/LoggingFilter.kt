@@ -8,6 +8,14 @@ import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Mono
 
+/**
+ * # Filter for logging incoming requests and outgoing responses.
+ *
+ * This filter logs the details of incoming requests and outgoing responses,
+ * including the HTTP method, path, and status code.
+ *
+ * @author <a href="https://github.com/antistereov">antistereov</a>
+ */
 class LoggingFilter : WebFilter {
 
     private val logger: KLogger

@@ -1,10 +1,10 @@
-package io.stereov.web.user.service
+package io.stereov.web.user.service.token
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.web.config.Constants
 import io.stereov.web.global.service.jwt.JwtService
-import io.stereov.web.global.service.jwt.exception.InvalidTokenException
+import io.stereov.web.global.service.jwt.exception.model.InvalidTokenException
 import io.stereov.web.global.service.jwt.model.AccessToken
 import io.stereov.web.global.service.jwt.model.RefreshToken
 import io.stereov.web.properties.JwtProperties

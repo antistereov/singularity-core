@@ -17,6 +17,25 @@ import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder
 import javax.crypto.spec.SecretKeySpec
 
+/**
+ * # Configuration class for JWT-related beans.
+ *
+ * This class is responsible for configuring the JWT-related services
+ * and components in the application.
+ *
+ * It runs after the [MongoReactiveAutoConfiguration], [SpringDataWebAutoConfiguration],
+ * [RedisAutoConfiguration], and [ApplicationConfiguration] classes to ensure that
+ * the necessary configurations are applied in the correct order.
+ *
+ * This class enables the following services:
+ * - [JwtService]
+ *
+ * It enables the following beans:
+ * - [JwtEncoder]
+ * - [ReactiveJwtDecoder]
+ *
+ * @author <a href="https://github.com/antistereov">antistereov</a>
+ */
 @Configuration
 @AutoConfiguration(
     after = [
