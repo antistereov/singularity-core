@@ -18,7 +18,7 @@ class UserMailVerificationController(
     private val mailVerificationService: UserMailVerificationService
 ) {
 
-    @GetMapping("/verify-email")
+    @GetMapping("/verify")
     suspend fun verifyEmail(@RequestParam token: String): ResponseEntity<UserDto> {
         val authInfo = mailVerificationService.verifyEmail(token)
 
@@ -26,14 +26,14 @@ class UserMailVerificationController(
             .body(authInfo)
     }
 
-    @GetMapping("/email-verification-cooldown")
+    @GetMapping("/cooldown")
     suspend fun getRemainingEmailVerificationCooldown(): ResponseEntity<MailVerificationCooldownResponse> {
         val remainingCooldown = mailVerificationService.getRemainingEmailVerificationCooldown()
 
         return ResponseEntity.ok().body(remainingCooldown)
     }
 
-    @PostMapping("/send-verification-email")
+    @PostMapping("/send")
     suspend fun sendVerificationEmail(): ResponseEntity<Map<String, String>> {
 
         mailVerificationService.sendEmailVerificationToken()

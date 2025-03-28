@@ -25,6 +25,9 @@ val testContainersVersion = "1.19.0"
 
 dependencies {
     // Web Starter
+    // Since this is configured as a module on the same repository, it uses a direct import.
+    // You should use:
+    // implementation("io.stereov.web:baseline:<version>")
     api(project(":baseline"))
 
     // Development

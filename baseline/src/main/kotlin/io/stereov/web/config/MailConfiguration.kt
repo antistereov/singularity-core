@@ -49,11 +49,11 @@ class MailConfiguration {
     fun mailService(
         mailSender: JavaMailSender,
         mailProperties: MailProperties,
-        frontendProperties: FrontendProperties,
+        uiProperties: UiProperties,
         mailVerificationCooldownService: MailVerificationCooldownService,
         mailTokenService: MailTokenService,
     ): MailService {
-        return MailService(mailSender, mailProperties, frontendProperties, mailVerificationCooldownService, mailTokenService)
+        return MailService(mailSender, mailProperties, uiProperties, mailVerificationCooldownService, mailTokenService)
     }
 
     @Bean

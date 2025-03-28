@@ -2,7 +2,7 @@ package io.stereov.web.global.service.mail
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.web.properties.FrontendProperties
+import io.stereov.web.properties.UiProperties
 import io.stereov.web.properties.MailProperties
 import io.stereov.web.user.model.UserDocument
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service
 class MailService(
     private val mailSender: JavaMailSender,
     private val mailProperties: MailProperties,
-    private val frontendProperties: FrontendProperties,
+    private val uiProperties: UiProperties,
     private val mailVerificationCooldownService: MailVerificationCooldownService,
     private val mailTokenService: MailTokenService,
 ) {
@@ -41,6 +41,6 @@ class MailService(
     }
 
     private fun generateVerificationUrl(token: String): String {
-        return "${frontendProperties.baseUrl}${frontendProperties.emailVerificationPath}?token=$token"
+        return "${uiProperties.baseUrl}${mailProperties.uiVerificationPath}?token=$token"
     }
 }

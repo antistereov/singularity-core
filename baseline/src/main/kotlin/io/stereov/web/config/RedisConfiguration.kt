@@ -9,6 +9,7 @@ import io.lettuce.core.api.StatefulRedisConnection
 import io.lettuce.core.codec.ByteArrayCodec
 import io.lettuce.core.codec.RedisCodec
 import io.lettuce.core.codec.StringCodec
+import io.stereov.web.global.service.cache.RedisService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
@@ -32,7 +33,7 @@ class RedisConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun statefulRedisConnection(redisProperties: RedisProperties): StatefulRedisConnection<String, ByteArray> {
+    fun redisClient(redisProperties: RedisProperties): RedisClient {
         val redisUri = RedisURI.builder()
             .withHost(redisProperties.host)
             .withPort(redisProperties.port)
@@ -45,7 +46,12 @@ class RedisConfiguration {
             }
             .build()
 
-        val redisClient = RedisClient.create(redisUri)
+        return RedisClient.create(redisUri)
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun statefulRedisConnection(redisClient: RedisClient): StatefulRedisConnection<String, ByteArray> {
         return redisClient.connect(RedisCodec.of(StringCodec.UTF8, ByteArrayCodec()))
     }
 
@@ -55,5 +61,11 @@ class RedisConfiguration {
         return Bucket4jLettuce.casBasedBuilder(connection)
             .expirationAfterWrite(ExpirationAfterWriteStrategy.basedOnTimeForRefillingBucketUpToMax(Duration.ofSeconds(10)))
             .build()
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun redisService(redisConnection: StatefulRedisConnection<String, ByteArray>): RedisService {
+        return RedisService(redisConnection)
     }
 }

@@ -18,4 +18,5 @@ data class MailProperties(
     val debug: Boolean = false,
     val verificationExpiration: Long = 900,
     val verificationSendCooldown: Long = 60,
+    val uiVerificationPath: String,
 )

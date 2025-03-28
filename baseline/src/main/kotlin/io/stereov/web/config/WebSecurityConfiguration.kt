@@ -6,7 +6,7 @@ import io.stereov.web.filter.CookieAuthenticationFilter
 import io.stereov.web.filter.LoggingFilter
 import io.stereov.web.filter.RateLimitingFilter
 import io.stereov.web.properties.AuthProperties
-import io.stereov.web.properties.FrontendProperties
+import io.stereov.web.properties.UiProperties
 import io.stereov.web.properties.RateLimitProperties
 import io.stereov.web.user.service.UserService
 import io.stereov.web.user.service.UserTokenService
@@ -62,7 +62,7 @@ class WebSecurityConfiguration {
     fun filterChain(
         http: ServerHttpSecurity,
         authProperties: AuthProperties,
-        frontendProperties: FrontendProperties,
+        uiProperties: UiProperties,
         userTokenService: UserTokenService,
         userService: UserService,
         authenticationService: AuthenticationService,
@@ -71,7 +71,7 @@ class WebSecurityConfiguration {
     ): SecurityWebFilterChain {
         return http
             .csrf { it.disable() }
-            .cors { it.configurationSource(corsConfigurationSource(frontendProperties)) }
+            .cors { it.configurationSource(corsConfigurationSource(uiProperties)) }
             .httpBasic { it.disable() }
             .formLogin { it.disable() }
             .exceptionHandling {
@@ -106,9 +106,9 @@ class WebSecurityConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun corsConfigurationSource(frontendProperties: FrontendProperties): CorsConfigurationSource {
+    fun corsConfigurationSource(uiProperties: UiProperties): CorsConfigurationSource {
         val configuration = CorsConfiguration()
-        configuration.allowedOrigins = listOf(frontendProperties.baseUrl)
+        configuration.allowedOrigins = listOf(uiProperties.baseUrl)
         configuration.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
         configuration.allowedHeaders = listOf("Authorization", "Content-Type")
         configuration.allowCredentials = true

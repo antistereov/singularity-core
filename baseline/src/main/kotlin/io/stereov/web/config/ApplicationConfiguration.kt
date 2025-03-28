@@ -20,7 +20,7 @@ import org.springframework.context.annotation.Configuration
     AppProperties::class,
     AuthProperties::class,
     EncryptionProperties::class,
-    FrontendProperties::class,
+    UiProperties::class,
     JwtProperties::class,
     RateLimitProperties::class,
     TwoFactorAuthProperties::class
