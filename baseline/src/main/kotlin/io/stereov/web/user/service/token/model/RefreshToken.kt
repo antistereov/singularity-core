@@ -1,4 +1,4 @@
-package io.stereov.web.global.service.jwt.model
+package io.stereov.web.user.service.token.model
 
 data class RefreshToken(
     val accountId: String,

@@ -1,9 +1,10 @@
 package io.stereov.web.auth
 
-import io.stereov.web.BaseIntegrationTest
 import io.stereov.web.config.Constants
+import io.stereov.web.test.BaseIntegrationTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
+import java.time.Instant
 
 class SecurityIntegrationTest : BaseIntegrationTest() {
 
@@ -33,17 +34,15 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isUnauthorized
     }
-    @Test fun `Unexpired token required`() = runTest {
+    @Test fun `unexpired token required`() = runTest {
         val user = registerUser()
-        val token = userTokenService.createAccessToken(user.info.id!!, "device", 2)
+        val token = userTokenService.createAccessToken(user.info.id!!, "device", Instant.ofEpochSecond(0))
 
         webTestClient.get()
             .uri("/user/me")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, token)
             .exchange()
             .expectStatus().isOk
-
-        Thread.sleep(2000)
 
         webTestClient.get()
             .uri("/user/me")

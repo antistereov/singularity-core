@@ -13,7 +13,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
  * It is prefixed with `baseline.mail` in the configuration file and only set if
  * the `enable-verification` property is set to `true`.
  *
- * @property enableVerification Indicates whether email verification is enabled.
+ * @property enable Indicates whether email verification is enabled.
  * @property host The SMTP server host.
  * @property port The SMTP server port.
  * @property email The email address used for sending emails.
@@ -25,14 +25,17 @@ import org.springframework.boot.context.properties.ConfigurationProperties
  * @property debug Indicates whether debug mode is enabled for SMTP.
  * @property verificationExpiration The expiration time for email verification in seconds.
  * @property verificationSendCooldown The cooldown time for sending verification emails in seconds.
+ * @property passwordResetExpiration The expiration time for password reset tokens in seconds.
+ * @property passwordResetSendCooldown The cooldown time for sending password reset emails in seconds.
  * @property uiVerificationPath The UI path for email verification.
+ * @property uiPasswordResetPath The UI path for password reset.
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
 @ConfigurationProperties(prefix = "baseline.mail")
-@ConditionalOnProperty(prefix = "baseline.mail", name = ["enable-verification"], havingValue = "true", matchIfMissing = false)
+@ConditionalOnProperty(prefix = "baseline.mail", name = ["enable"], havingValue = "true", matchIfMissing = false)
 data class MailProperties(
-    val enableVerification: Boolean = false,
+    val enable: Boolean = false,
     val host: String,
     val port: Int = 0,
     val email: String,
@@ -44,5 +47,8 @@ data class MailProperties(
     val debug: Boolean = false,
     val verificationExpiration: Long = 900,
     val verificationSendCooldown: Long = 60,
-    val uiVerificationPath: String,
+    val passwordResetExpiration: Long = 900,
+    val passwordResetSendCooldown: Long = 60,
+    val uiVerificationPath: String = "/auth/mail/verify",
+    val uiPasswordResetPath: String = "/auth/reset-password",
 )

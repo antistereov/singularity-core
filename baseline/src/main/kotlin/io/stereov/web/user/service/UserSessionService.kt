@@ -6,11 +6,9 @@ import io.stereov.web.auth.exception.AuthException
 import io.stereov.web.auth.exception.model.InvalidCredentialsException
 import io.stereov.web.auth.service.AuthenticationService
 import io.stereov.web.global.service.hash.HashService
-import io.stereov.web.user.dto.ChangeEmailRequest
-import io.stereov.web.user.dto.ChangePasswordRequest
-import io.stereov.web.user.dto.LoginRequest
-import io.stereov.web.user.dto.RegisterUserRequest
+import io.stereov.web.user.dto.*
 import io.stereov.web.user.exception.model.EmailAlreadyExistsException
+import io.stereov.web.user.exception.model.NoAppInfoFoundException
 import io.stereov.web.user.model.ApplicationInfo
 import io.stereov.web.user.model.UserDocument
 import io.stereov.web.user.service.device.UserDeviceService
@@ -102,6 +100,23 @@ class UserSessionService(
         user.password = hashService.hashBcrypt(payload.newPassword)
 
         return userService.save(user)
+    }
+
+    suspend fun changeUser(payload: ChangeUserRequest): UserDocument {
+        val user = authenticationService.getCurrentUser()
+
+        user.name = payload.name
+
+        return userService.save(user)
+    }
+
+    suspend fun getApplicationInfo(): ApplicationInfoDto {
+        logger.debug { "Getting application info" }
+
+        val user = authenticationService.getCurrentUser()
+
+        return user.app?.toDto()
+            ?: throw NoAppInfoFoundException(user.idX)
     }
 
     suspend fun <T: ApplicationInfo> setApplicationInfo(app: T): UserDocument {

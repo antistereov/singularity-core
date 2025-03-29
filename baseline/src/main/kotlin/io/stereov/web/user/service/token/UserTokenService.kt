@@ -5,9 +5,9 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.web.config.Constants
 import io.stereov.web.global.service.jwt.JwtService
 import io.stereov.web.global.service.jwt.exception.model.InvalidTokenException
-import io.stereov.web.global.service.jwt.model.AccessToken
-import io.stereov.web.global.service.jwt.model.RefreshToken
 import io.stereov.web.properties.JwtProperties
+import io.stereov.web.user.service.token.model.AccessToken
+import io.stereov.web.user.service.token.model.RefreshToken
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
 import org.springframework.stereotype.Service
 import java.time.Instant
@@ -16,18 +16,20 @@ import java.util.*
 @Service
 class UserTokenService(
     private val jwtService: JwtService,
-    private val jwtProperties: JwtProperties,
+    jwtProperties: JwtProperties,
 ) {
 
     private val logger: KLogger
         get() = KotlinLogging.logger {}
 
-    fun createAccessToken(userId: String, deviceId: String, expiration: Long = jwtProperties.expiresIn): String {
+    private val expiresIn = jwtProperties.expiresIn
+
+    fun createAccessToken(userId: String, deviceId: String, issuedAt: Instant = Instant.now()): String {
         logger.debug { "Creating access token for user $userId and device $deviceId" }
 
         val claims = JwtClaimsSet.builder()
-            .issuedAt(Instant.now())
-            .expiresAt(Instant.now().plusSeconds(expiration))
+            .issuedAt(issuedAt)
+            .expiresAt(issuedAt.plusSeconds(expiresIn))
             .subject(userId)
             .claim(Constants.JWT_DEVICE_CLAIM, deviceId)
             .build()

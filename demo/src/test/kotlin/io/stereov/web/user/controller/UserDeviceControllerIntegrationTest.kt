@@ -1,6 +1,6 @@
 package io.stereov.web.user.controller
 
-import io.stereov.web.BaseIntegrationTest
+import io.stereov.web.test.BaseIntegrationTest
 import io.stereov.web.config.Constants
 import io.stereov.web.user.dto.DeviceInfoResponse
 import io.stereov.web.user.model.DeviceInfo

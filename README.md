@@ -194,8 +194,8 @@ Here are the key properties you need to set in your `application.yaml`:
     ```yaml
     baseline:
       mail:
-        # Enable email verification - false on default
-        enable-verification: true 
+        # Enable email verification and password reset - false on default
+        enable: true 
         # Credentials for your smtp server
         host: <smtp_host>
         port: <smtp_port>
@@ -209,13 +209,23 @@ Here are the key properties you need to set in your `application.yaml`:
         smtp-starttls: true
         # Enable debugging
         debug: false
-        # How long should the token contained in the email be valid
+        # How long should a token for email verification be valid?
         verification-expiration: 900
-        # How much time should pass until a new verification email can be sent
+        # How much time should pass until a new verification email can be sent?
         verification-send-cooldown: 60 
+        # How long a token for a password reset should be valid?
+        password-reset-expiration: 900
+        # How much time should pass until a new password reset email can be sent?
+        password-reset-cooldown: 60
+        # The path to the email verification page in the UI
+        ui-verification-path: /auth/mail/verify
+        # The path to the password reset page in the UI
+        ui-password-reset-path: /auth/password-reset
     ```
     This is optional. You can enable email verification by setting `enable-verification` to true. 
     By default, it is set to `false`.
+    
+    **Note:** Password resets are not possible without email verification.
 
 #### *(Optional)* Test Setup
    
@@ -274,9 +284,12 @@ testImplementation("org.testcontainers:mongodb:$testContainersVersion")
 - **POST /user/refresh**: Refreshes the user's JWT tokens.
 
 ### `/user/mail`
-- **GET /user/mail/verify**: Verifies the user's email address using a token.
-- **GET /user/mail/cooldown**: Retrieves the remaining cooldown time before the user can request another email verification.
-- **POST /user/mail/send**: Sends the email verification token.
+- **POST /user/mail/verify**: Verifies the user's email address using a token.
+- **GET /user/mail/verify/cooldown**: Retrieves the remaining cooldown time before the user can request another email verification.
+- **POST /user/mail/verify/send**: Send the email verification token.
+- **POST /user/mail/password-reset**: Resets the user's password.
+- **GET /user/mail/password-reset/cooldown**: Retrieves the remaining cooldown time before the user can request another password reset email.
+- **POST /user/mail/password-reset/send**: Sends a password reset email to the user.
 
 ### `/user/devices`
 - **GET /user/devices**: Retrieves a list of devices associated with the authenticated user.

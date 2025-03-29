@@ -1,5 +1,5 @@
 package io.stereov.web.user.dto
 
-data class MailVerificationCooldownResponse(
+data class MailCooldownResponse(
     val remaining: Long,
 )

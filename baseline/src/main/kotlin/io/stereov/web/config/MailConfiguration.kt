@@ -1,15 +1,16 @@
 package io.stereov.web.config
 
 import io.stereov.web.auth.service.AuthenticationService
+import io.stereov.web.global.service.hash.HashService
 import io.stereov.web.global.service.jwt.JwtService
+import io.stereov.web.global.service.mail.MailCooldownService
 import io.stereov.web.global.service.mail.MailService
 import io.stereov.web.global.service.mail.MailTokenService
-import io.stereov.web.global.service.mail.MailVerificationCooldownService
 import io.stereov.web.properties.MailProperties
 import io.stereov.web.properties.UiProperties
-import io.stereov.web.user.controller.UserMailVerificationController
-import io.stereov.web.user.service.UserMailVerificationService
+import io.stereov.web.user.controller.UserMailController
 import io.stereov.web.user.service.UserService
+import io.stereov.web.user.service.mail.UserMailService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -40,11 +41,11 @@ import org.springframework.mail.javamail.JavaMailSenderImpl
  *
  * This class enables the following services:
  * - [MailService]
- * - [MailVerificationCooldownService]
+ * - [MailCooldownService]
  * - [MailTokenService]
  *
  * It enables the following controllers:
- * - [UserMailVerificationController]
+ * - [UserMailController]
  *
  * It enables the following beans:
  * - [JavaMailSender]
@@ -52,7 +53,7 @@ import org.springframework.mail.javamail.JavaMailSenderImpl
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
 @Configuration
-@ConditionalOnProperty(prefix = "baseline.mail", name = ["enable-verification"], havingValue = "true", matchIfMissing = false)
+@ConditionalOnProperty(prefix = "baseline.mail", name = ["enable"], havingValue = "true", matchIfMissing = false)
 @AutoConfiguration(
     after = [
         MongoReactiveAutoConfiguration::class,
@@ -87,19 +88,19 @@ class MailConfiguration {
         mailSender: JavaMailSender,
         mailProperties: MailProperties,
         uiProperties: UiProperties,
-        mailVerificationCooldownService: MailVerificationCooldownService,
+        mailCooldownService: MailCooldownService,
         mailTokenService: MailTokenService,
     ): MailService {
-        return MailService(mailSender, mailProperties, uiProperties, mailVerificationCooldownService, mailTokenService)
+        return MailService(mailSender, mailProperties, uiProperties, mailCooldownService, mailTokenService)
     }
 
     @Bean
     @ConditionalOnMissingBean
-    fun mailVerificationCooldownService(
+    fun mailCooldownService(
         redisTemplate: ReactiveRedisTemplate<String, String>,
         mailProperties: MailProperties
-    ): MailVerificationCooldownService {
-        return MailVerificationCooldownService(redisTemplate, mailProperties)
+    ): MailCooldownService {
+        return MailCooldownService(redisTemplate, mailProperties)
     }
 
     @Bean
@@ -113,21 +114,22 @@ class MailConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun userMailVerificationService(
+    fun userMailService(
         userService: UserService,
         authenticationService: AuthenticationService,
-        mailVerificationCooldownService: MailVerificationCooldownService,
+        mailCooldownService: MailCooldownService,
         mailService: MailService,
         mailTokenService: MailTokenService,
-    ): UserMailVerificationService {
-        return UserMailVerificationService(userService, authenticationService, mailVerificationCooldownService, mailService, mailTokenService)
+        hashService: HashService
+    ): UserMailService {
+        return UserMailService(userService, authenticationService, mailCooldownService, mailService, mailTokenService, hashService)
     }
 
     @Bean
     @ConditionalOnMissingBean
     fun userMailController(
-        userMailVerificationService: UserMailVerificationService
-    ): UserMailVerificationController {
-        return UserMailVerificationController(userMailVerificationService)
+        userMailService: UserMailService
+    ): UserMailController {
+        return UserMailController(userMailService)
     }
 }

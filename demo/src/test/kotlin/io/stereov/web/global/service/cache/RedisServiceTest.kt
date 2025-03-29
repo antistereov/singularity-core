@@ -1,6 +1,6 @@
 package io.stereov.web.global.service.cache
 
-import io.stereov.web.BaseIntegrationTest
+import io.stereov.web.test.BaseIntegrationTest
 import io.stereov.web.global.service.cache.exception.model.RedisKeyNotFoundException
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest

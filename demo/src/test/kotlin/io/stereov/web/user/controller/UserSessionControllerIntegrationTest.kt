@@ -1,7 +1,7 @@
 package io.stereov.web.user.controller
 
-import io.stereov.web.BaseIntegrationTest
 import io.stereov.web.config.Constants
+import io.stereov.web.test.BaseIntegrationTest
 import io.stereov.web.user.dto.*
 import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.test.runTest
@@ -421,4 +421,6 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
 
         assertEquals(0, userService.findAll().count())
     }
+
+    // TODO: Add tests for user updates
 }

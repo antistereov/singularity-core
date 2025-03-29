@@ -3,8 +3,8 @@ package io.stereov.web.user.controller
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.web.auth.service.AuthenticationService
-import io.stereov.web.user.dto.*
 import io.stereov.web.auth.service.CookieService
+import io.stereov.web.user.dto.*
 import io.stereov.web.user.service.UserSessionService
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
@@ -76,11 +76,32 @@ class UserSessionController(
             .body(user.toDto())
     }
 
-    @PutMapping("/password")
-    suspend fun changePassword(@RequestBody payload: ChangePasswordRequest) {
-        val user = authenticationService.getCurrentUser()
+    @PutMapping("/me/email")
+    suspend fun changeEmail(@RequestBody payload: ChangeEmailRequest): ResponseEntity<UserDto> {
+        return ResponseEntity.ok().body(
+            userSessionService.changeEmail(payload).toDto()
+        )
+    }
 
-        user.password
+    @PutMapping("/me/password")
+    suspend fun changePassword(@RequestBody payload: ChangePasswordRequest): ResponseEntity<UserDto> {
+        return ResponseEntity.ok().body(
+            userSessionService.changePassword(payload).toDto()
+        )
+    }
+
+    @PutMapping("/me")
+    suspend fun changeUser(@RequestBody payload: ChangeUserRequest): ResponseEntity<UserDto> {
+        return ResponseEntity.ok().body(
+            userSessionService.changeUser(payload).toDto()
+        )
+    }
+
+    @GetMapping("/me/app")
+    suspend fun getApplicationInfo(): ResponseEntity<ApplicationInfoDto> {
+        return ResponseEntity.ok().body(
+            userSessionService.getApplicationInfo()
+        )
     }
 
     @PostMapping("/logout")

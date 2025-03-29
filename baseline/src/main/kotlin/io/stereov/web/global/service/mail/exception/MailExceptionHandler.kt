@@ -23,7 +23,7 @@ class MailExceptionHandler {
         logger.warn { "${ex.javaClass.simpleName} - ${ex.message}" }
 
         val status = when (ex) {
-            is MailVerificationCooldownException -> HttpStatus.TOO_MANY_REQUESTS
+            is MailCooldownException -> HttpStatus.TOO_MANY_REQUESTS
             else -> HttpStatus.INTERNAL_SERVER_ERROR
         }
 

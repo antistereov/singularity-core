@@ -1,7 +1,7 @@
 package io.stereov.web.user.controller
 
 import com.warrenstrange.googleauth.GoogleAuthenticator
-import io.stereov.web.BaseIntegrationTest
+import io.stereov.web.test.BaseIntegrationTest
 import io.stereov.web.config.Constants
 import io.stereov.web.user.dto.*
 import kotlinx.coroutines.test.runTest

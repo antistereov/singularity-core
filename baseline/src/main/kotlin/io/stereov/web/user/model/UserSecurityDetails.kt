@@ -1,6 +1,6 @@
 package io.stereov.web.user.model
 
-import java.util.UUID
+import java.util.*
 
 /**
  * # UserSecurityDetails
@@ -35,11 +35,13 @@ data class UserSecurityDetails(
      *
      * This class represents the email verification details of a user.
      *
-     * @property verificationUuid The UUID for email verification.
      * @property verified Indicates whether the email is verified.
+     * @property verificationSecret The secret key for email verification.
+     * @property passwordResetSecret The secret key for password reset.
      */
     data class MailVerificationDetails(
-        var verificationUuid: String = UUID.randomUUID().toString(),
         var verified: Boolean = false,
+        var verificationSecret: String = UUID.randomUUID().toString(),
+        var passwordResetSecret: String = UUID.randomUUID().toString(),
     )
 }

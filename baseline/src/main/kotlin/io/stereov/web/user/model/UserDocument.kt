@@ -33,7 +33,7 @@ import java.time.Instant
 data class UserDocument(
     @Id val id: String? = null,
     @Indexed(unique = true) var email: String,
-    val name: String? = null,
+    var name: String? = null,
     var password: String,
     val roles: MutableList<Role> = mutableListOf(Role.USER),
     val security: UserSecurityDetails = UserSecurityDetails(),

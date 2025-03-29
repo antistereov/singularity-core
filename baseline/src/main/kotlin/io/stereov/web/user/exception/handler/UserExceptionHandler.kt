@@ -3,11 +3,8 @@ package io.stereov.web.user.exception.handler
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.web.global.model.ErrorResponse
-import io.stereov.web.user.exception.*
-import io.stereov.web.user.exception.model.EmailAlreadyExistsException
-import io.stereov.web.user.exception.model.InvalidRoleException
-import io.stereov.web.user.exception.model.InvalidUserDocumentException
-import io.stereov.web.user.exception.model.UserDoesNotExistException
+import io.stereov.web.user.exception.UserException
+import io.stereov.web.user.exception.model.*
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
@@ -32,6 +29,7 @@ class UserExceptionHandler {
             is EmailAlreadyExistsException -> HttpStatus.CONFLICT
             is InvalidUserDocumentException -> HttpStatus.INTERNAL_SERVER_ERROR
             is InvalidRoleException -> HttpStatus.INTERNAL_SERVER_ERROR
+            is NoAppInfoFoundException -> HttpStatus.NOT_FOUND
             else -> HttpStatus.INTERNAL_SERVER_ERROR
         }
 
