@@ -217,32 +217,45 @@ Here are the key properties you need to set in your `application.yaml`:
         base-url: http://localhost:4200
     ```
       
-- **Security Settings:**
+  - **Security Settings:**
    
-    You need to set up some measures to secure your web application:
-    ```yaml
-    baseline:
-      app:
-        security:
-          encryption:
-            # Generate an encryption key that is used to encrypt entries in the database
-            # You can create one here: https://generate-random.org/encryption-key-generator and use the Base64 value
-            secret-key: <your-encryption-key>
-          jwt:
-            # Your JWT secret
-            # You can generate a secret here: https://jwtsecret.com/generate
-            secret-key: <your-jwt-secret>
-            # In how many seconds should your JWT expire?
-            expires-in: 900
-          rate-limit:
-            # How many calls do you allow per minute per IP address?
-            ip-rate-limit-minute: 200
-            # How many calls do you allow per minute per account?
-            account-rate-limit-minute: 100
-          two-factor:
-            # How long should the recovery code be?
-            recovery-code-length: 20
-    ```
+      You need to set up some measures to secure your web application:
+      ```yaml
+      baseline:
+        app:
+          security:
+            encryption:
+              # Generate an encryption key that is used to encrypt entries in the database
+              # You can create one here: https://generate-random.org/encryption-key-generator and use the Base64 value
+              secret-key: <your-encryption-key>
+            jwt:
+              # Your JWT secret
+              # You can generate a secret here: https://jwtsecret.com/generate
+              secret-key: <your-jwt-secret>
+              # In how many seconds should your JWT expire?
+              expires-in: 900
+              rate-limit:
+                # How many requests can a user make in a given time window?
+                ip-limit: 200
+                # How long should the time window be?
+                ip-time-window-minutes: 1
+                # How many requests can a user make in a given time window?
+                user-limit: 100
+                # How long should the time window be?
+                user-time-window-minutes: 1
+              login-attempt-limit:
+                # How many login attempts can a user make in a given time window?
+                email-limit: 15
+                # How long should the time window be?
+                email-time-window-minutes: 15
+                # How many login attempts can a user make in a given time window?
+                ip-limit: 10
+                # How long should the time window be?
+                ip-time-window-minutes: 15
+            two-factor:
+              # How long should the recovery code be?
+              recovery-code-length: 20
+      ```
 
 - **Email Verification Settings:**
    

@@ -6,6 +6,7 @@ import io.stereov.web.filter.CookieAuthenticationFilter
 import io.stereov.web.filter.LoggingFilter
 import io.stereov.web.filter.RateLimitingFilter
 import io.stereov.web.properties.AuthProperties
+import io.stereov.web.properties.LoginAttemptLimitProperties
 import io.stereov.web.properties.RateLimitProperties
 import io.stereov.web.properties.UiProperties
 import io.stereov.web.user.service.UserService
@@ -90,6 +91,7 @@ class WebSecurityConfiguration {
         authenticationService: AuthenticationService,
         proxyManager: LettuceBasedProxyManager<String>,
         rateLimitProperties: RateLimitProperties,
+        loginAttemptLimitProperties: LoginAttemptLimitProperties,
     ): SecurityWebFilterChain {
         return http
             .csrf { it.disable() }
@@ -111,8 +113,8 @@ class WebSecurityConfiguration {
                 }
                 it.anyExchange().permitAll()
             }
+            .addFilterBefore(RateLimitingFilter(authenticationService, proxyManager, rateLimitProperties, loginAttemptLimitProperties), SecurityWebFiltersOrder.FIRST)
             .addFilterBefore(LoggingFilter(), SecurityWebFiltersOrder.AUTHENTICATION)
-            .addFilterBefore(RateLimitingFilter(authenticationService, proxyManager, rateLimitProperties), SecurityWebFiltersOrder.AUTHENTICATION)
             .addFilterBefore(CookieAuthenticationFilter(userTokenService, userService), SecurityWebFiltersOrder.AUTHENTICATION)
             .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())
             .build()

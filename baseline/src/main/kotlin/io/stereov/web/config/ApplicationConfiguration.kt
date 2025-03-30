@@ -26,6 +26,7 @@ import org.springframework.context.annotation.Configuration
  * - [JwtProperties]
  * - [RateLimitProperties]
  * - [TwoFactorAuthProperties]
+ * - [LoginAttemptLimitProperties]
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
@@ -44,6 +45,7 @@ import org.springframework.context.annotation.Configuration
     UiProperties::class,
     JwtProperties::class,
     RateLimitProperties::class,
-    TwoFactorAuthProperties::class
+    TwoFactorAuthProperties::class,
+    LoginAttemptLimitProperties::class
 )
 class ApplicationConfiguration

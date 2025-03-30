@@ -91,6 +91,13 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isBadRequest
     }
+    @Test fun `login needs correct body`() = runTest {
+        webTestClient.post()
+            .uri("/user/login")
+            .bodyValue("Test")
+            .exchange()
+            .expectStatus().isEqualTo(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+    }
     @Test fun `login needs valid credentials`() = runTest {
         val user = registerUser()
 

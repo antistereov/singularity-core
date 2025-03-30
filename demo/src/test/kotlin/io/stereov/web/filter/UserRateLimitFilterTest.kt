@@ -1,43 +1,20 @@
-package io.stereov.web.test
+package io.stereov.web.filter
 
-import io.mockk.Runs
-import io.mockk.every
-import io.mockk.just
-import io.stereov.web.test.config.MockMailSenderConfig
-import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
+import io.stereov.web.config.Constants
+import io.stereov.web.properties.RateLimitProperties
+import io.stereov.web.test.BaseSpringBootTest
+import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.ApplicationContext
-import org.springframework.context.annotation.Import
-import org.springframework.mail.SimpleMailMessage
-import org.springframework.mail.javamail.JavaMailSender
+import org.springframework.http.HttpStatus
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.MongoDBContainer
-import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
 
-@Testcontainers
-@Import(MockMailSenderConfig::class)
-class BaseMailIntegrationTest : BaseSpringBootTest() {
-
-    @Autowired
-    lateinit var applicationContext: ApplicationContext
-
-    @Autowired
-    lateinit var mailSender: JavaMailSender
-
-    @BeforeEach
-    fun init() {
-        every { mailSender.send(any<SimpleMailMessage>()) } just Runs
-    }
-
-    @AfterEach
-    fun clearDatabase() = runBlocking {
-        userService.deleteAll()
-    }
+class UserRateLimitFilterTest : BaseSpringBootTest() {
 
     companion object {
         private val mongoDBContainer = MongoDBContainer("mongo:latest").apply {
@@ -67,14 +44,41 @@ class BaseMailIntegrationTest : BaseSpringBootTest() {
             registry.add("spring.data.redis.host") { redisContainer.host }
             registry.add("spring.data.redis.port") { redisContainer.getMappedPort(6379) }
             registry.add("spring.data.redis.password") { "" }
-            registry.add("baseline.security.rate-limit.user-limit") { 10000 }
-            registry.add("baseline.security.rate-limit.user-time-window-minutes") { 1 }
-            registry.add("baseline.security.rate-limit.ip-limit") { 10000 }
-            registry.add("baseline.security.rate-limit.ip-time-window-minutes") { 1 }
-            registry.add("baseline.security.login-attempt-limit.ip-limit") { 10000 }
-            registry.add("baseline.security.login-attempt-limit.ip-time-window-minutes") { 1 }
-            registry.add("baseline.security.login-attempt-limit.email-limit") { 10000 }
-            registry.add("baseline.security.login-attempt-limit.email-time-window-minutes") { 1 }
+            registry.add("baseline.security.rate-limit.user-limit") { 2 }
+            registry.add("baseline.security.rate-limit.user-time-window-minutes") { 2 }
+            registry.add("baseline.security.rate-limit.ip-limit") { 4 }
+            registry.add("baseline.security.rate-limit.ip-time-window-minutes") { 2 }
         }
+    }
+
+    @Autowired
+    private lateinit var rateLimitProperties: RateLimitProperties
+
+    @Test fun `account rate limit works`() = runTest {
+        val user = registerUser()
+
+        assertEquals(2, rateLimitProperties.userLimit)
+
+        webTestClient.get()
+            .uri("/user/me")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .exchange()
+            .expectStatus().isOk
+
+        webTestClient.get()
+            .uri("/user/me")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .exchange()
+            .expectStatus().isOk
+
+        webTestClient.get()
+            .uri("/user/me")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .exchange()
+            .expectStatus().isEqualTo(HttpStatus.TOO_MANY_REQUESTS)
+    }
+
+    @Test fun `ip rate limit works`() {
+
     }
 }

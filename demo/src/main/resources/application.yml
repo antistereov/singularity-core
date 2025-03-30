@@ -52,8 +52,15 @@ baseline:
       secret-key: ${JWT_SECRET_KEY}
       expires-in: ${JWT_EXPIRATION:900}
     rate-limit:
-      ip-rate-limit-minute: ${IP_RATE_LIMIT_MINUTE:200}
-      account-rate-limit-minute: ${ACCOUNT_RATE_LIMIT_MINUTE:100}
+      ip-limit: ${IP_RATE_LIMIT_MINUTE:200}
+      ip-time-window-minutes: 1
+      user-limit: ${ACCOUNT_RATE_LIMIT_MINUTE:100}
+      user-time-window-minutes: 1
+    login-attempt-limit:
+      email-limit: 15
+      email-time-window-minutes: 15
+      ip-limit: 10
+      ip-time-window-minutes: 15
     two-factor:
       recovery-code-length: 20
   ui:
