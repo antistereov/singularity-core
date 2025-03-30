@@ -3,11 +3,11 @@ package io.stereov.web.test
 import com.warrenstrange.googleauth.GoogleAuthenticator
 import io.mockk.every
 import io.stereov.web.config.Constants
-import io.stereov.web.test.config.MockGoogleAuthConfig
-import io.stereov.web.user.dto.DeviceInfoRequest
-import io.stereov.web.user.dto.LoginRequest
-import io.stereov.web.user.dto.RegisterUserRequest
-import io.stereov.web.user.dto.TwoFactorSetupResponse
+import io.stereov.web.test.config.MockConfig
+import io.stereov.web.user.dto.request.DeviceInfoRequest
+import io.stereov.web.user.dto.request.LoginRequest
+import io.stereov.web.user.dto.request.RegisterUserRequest
+import io.stereov.web.user.dto.response.TwoFactorSetupResponse
 import io.stereov.web.user.model.UserDocument
 import io.stereov.web.user.service.UserService
 import org.junit.jupiter.api.BeforeEach
@@ -19,7 +19,7 @@ import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.returnResult
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Import(MockGoogleAuthConfig::class)
+@Import(MockConfig::class)
 class BaseSpringBootTest {
 
     @Autowired

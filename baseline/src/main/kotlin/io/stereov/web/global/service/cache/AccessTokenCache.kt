@@ -58,11 +58,10 @@ class AccessTokenCache(
     }
 
     /**
-     * Checks if a token ID is valid for a specific user and device.
+     * Checks if a token ID is valid for a specific user.
      *
      * @param userId The ID of the user.
      * @param tokenId The token ID to be checked.
-     * @param deviceId The ID of the device.
      * @return True if the token ID is valid, false otherwise.
      */
     suspend fun removeTokenId(userId: String, tokenId: String): Boolean {

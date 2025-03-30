@@ -2,12 +2,15 @@ package io.stereov.web.user.controller
 
 import io.stereov.web.config.Constants
 import io.stereov.web.test.BaseIntegrationTest
-import io.stereov.web.user.dto.*
+import io.stereov.web.user.dto.UserDto
+import io.stereov.web.user.dto.request.*
+import io.stereov.web.user.dto.response.LoginResponse
 import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 
 class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
 
@@ -76,6 +79,9 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
 
         assertEquals(user.info.id, userDto.id)
         assertEquals(user.info.email, userDto.email)
+
+        assertEquals(deviceId, user.info.devices.firstOrNull()?.id)
+        assertEquals(1, user.info.devices.size)
 
         assertEquals(1, userService.findAll().count())
     }
@@ -234,6 +240,260 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
             .expectStatus().isBadRequest
     }
 
+    @Test fun `changeEmail works`() = runTest {
+        val oldEmail = "old@email.com"
+        val newEmail = "new@email.com"
+        val password = "password"
+        val user = registerUser(oldEmail, password, twoFactorEnabled = true)
+        val twoFactorCode = gAuth.getTotpPassword(user.twoFactorSecret)
+
+        val res = webTestClient.put()
+            .uri("/user/me/email")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .bodyValue(ChangeEmailRequest(newEmail, password, twoFactorCode))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(UserDto::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        assertEquals(newEmail, res.email)
+        userService.findByEmail(newEmail)
+    }
+    @Test fun `changeEmail works without 2fa`() = runTest {
+        val oldEmail = "old@email.com"
+        val newEmail = "new@email.com"
+        val password = "password"
+        val user = registerUser(oldEmail, password)
+
+        val res = webTestClient.put()
+            .uri("/user/me/email")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .bodyValue(ChangeEmailRequest(newEmail, password, null))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(UserDto::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        assertEquals(newEmail, res.email)
+        userService.findByEmail(newEmail)
+    }
+    @Test fun `changeEmail requires authentication`() = runTest {
+        val oldEmail = "old@email.com"
+        val newEmail = "new@email.com"
+        val password = "password"
+        val user = registerUser(oldEmail, password)
+        val twoFactorCode = gAuth.getTotpPassword(user.twoFactorSecret)
+
+        webTestClient.put()
+            .uri("/user/me/email")
+            .bodyValue(ChangeEmailRequest(newEmail, password, twoFactorCode))
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+    @Test fun `changeEmail requires body`() = runTest {
+        val oldEmail = "old@email.com"
+        val password = "password"
+        val user = registerUser(oldEmail, password)
+
+        webTestClient.put()
+            .uri("/user/me/email")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .exchange()
+            .expectStatus().isBadRequest
+    }
+    @Test fun `changeEmail requires correct password`() = runTest {
+        val oldEmail = "old@email.com"
+        val newEmail = "new@email.com"
+        val password = "password"
+        val user = registerUser(oldEmail, password)
+        val twoFactorCode = gAuth.getTotpPassword(user.twoFactorSecret)
+
+        webTestClient.put()
+            .uri("/user/me/email")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .bodyValue(ChangeEmailRequest(newEmail, "wrong-password", twoFactorCode))
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+    @Test fun `changeEmail requires correct 2fa code`() = runTest {
+        val oldEmail = "old@email.com"
+        val newEmail = "new@email.com"
+        val password = "password"
+        val user = registerUser(oldEmail, password, twoFactorEnabled = true)
+        val twoFactorCode = gAuth.getTotpPassword(user.twoFactorSecret) + 1
+
+        webTestClient.put()
+            .uri("/user/me/email")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .bodyValue(ChangeEmailRequest(newEmail, "wrong-password", twoFactorCode))
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+    @Test fun `changeEmail requires non-existing email`() = runTest {
+        val oldEmail = "old@email.com"
+        val newEmail = "new@email.com"
+        val password = "password"
+        val user = registerUser(oldEmail, password)
+        val twoFactorCode = gAuth.getTotpPassword(user.twoFactorSecret)
+        registerUser(newEmail)
+
+        webTestClient.put()
+            .uri("/user/me/email")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .bodyValue(ChangeEmailRequest(newEmail, password, twoFactorCode))
+            .exchange()
+            .expectStatus().isEqualTo(HttpStatus.CONFLICT)
+    }
+
+    @Test fun `changePassword works`() = runTest {
+        val email = "old@email.com"
+        val oldPassword = "password"
+        val newPassword = "newPassword"
+        val user = registerUser(email, oldPassword, twoFactorEnabled = true)
+        val twoFactorCode = gAuth.getTotpPassword(user.twoFactorSecret)
+
+        val res = webTestClient.put()
+            .uri("/user/me/password")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .bodyValue(ChangePasswordRequest(oldPassword, newPassword, twoFactorCode))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(UserDto::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        webTestClient.post()
+            .uri("/user/login")
+            .bodyValue(LoginRequest(email, newPassword, DeviceInfoRequest("device")))
+            .exchange()
+            .expectStatus().isOk
+    }
+    @Test fun `changePassword works without 2fa`() = runTest {
+        val email = "old@email.com"
+        val oldPassword = "password"
+        val newPassword = "newPassword"
+        val user = registerUser(email, oldPassword)
+
+        val res = webTestClient.put()
+            .uri("/user/me/password")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .bodyValue(ChangePasswordRequest(oldPassword, newPassword, null))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(UserDto::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        webTestClient.post()
+            .uri("/user/login")
+            .bodyValue(LoginRequest(email, newPassword, DeviceInfoRequest("device")))
+            .exchange()
+            .expectStatus().isOk
+    }
+    @Test fun `changePassword requires authentication`() = runTest {
+        val email = "old@email.com"
+        val oldPassword = "password"
+        val newPassword = "newPassword"
+        val user = registerUser(email, oldPassword)
+        val twoFactorCode = gAuth.getTotpPassword(user.twoFactorSecret)
+
+        webTestClient.put()
+            .uri("/user/me/password")
+            .bodyValue(ChangePasswordRequest(oldPassword, newPassword, twoFactorCode))
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+    @Test fun `changePassword requires body`() = runTest {
+        val email = "old@email.com"
+        val oldPassword = "password"
+        val user = registerUser(email, oldPassword)
+
+        webTestClient.put()
+            .uri("/user/me/password")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .exchange()
+            .expectStatus().isBadRequest
+    }
+    @Test fun `changePassword requires correct password`() = runTest {
+        val email = "old@email.com"
+        val oldPassword = "password"
+        val newPassword = "newPassword"
+        val user = registerUser(email, oldPassword)
+        val twoFactorCode = gAuth.getTotpPassword(user.twoFactorSecret)
+
+        webTestClient.put()
+            .uri("/user/me/password")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .bodyValue(ChangePasswordRequest("wrong-password", newPassword, twoFactorCode))
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+    @Test fun `changePassword requires correct 2fa code`() = runTest {
+        val email = "old@email.com"
+        val oldPassword = "password"
+        val newPassword = "newPassword"
+        val user = registerUser(email, oldPassword, twoFactorEnabled = true)
+        val twoFactorCode = gAuth.getTotpPassword(user.twoFactorSecret) + 1
+
+        webTestClient.put()
+            .uri("/user/me/password")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .bodyValue(ChangePasswordRequest(oldPassword, newPassword, twoFactorCode))
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+
+    @Test fun `changeUser works`() = runTest {
+        val user = registerUser()
+        val newName = "MyName"
+        val accessToken = user.accessToken
+
+        val res = webTestClient.put()
+            .uri("/user/me")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, accessToken)
+            .bodyValue(ChangeUserRequest(newName))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(UserDto::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        assertEquals(newName, res.name)
+        assertEquals(newName, userService.findById(user.info.idX).name)
+    }
+    @Test fun `changeUser requires authentication`() = runTest {
+        registerUser()
+        val newName = "MyName"
+
+        webTestClient.put()
+            .uri("/user/me")
+            .bodyValue(ChangeUserRequest(newName))
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+    @Test fun `changeUser requires body`() = runTest {
+        val user = registerUser()
+        val accessToken = user.accessToken
+
+        webTestClient.put()
+            .uri("/user/me")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, accessToken)
+            .exchange()
+            .expectStatus().isBadRequest
+    }
+
     @Test fun `checkAuthentication requires authentication`() = runTest {
         webTestClient.get()
             .uri("/user/me")
@@ -266,7 +526,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
     @Test fun `refresh requires token`() = runTest {
         val deviceInfo = DeviceInfoRequest("device")
         webTestClient.post()
-            .uri("/user/me")
+            .uri("/user/refresh")
             .bodyValue(deviceInfo)
             .exchange()
             .expectStatus().isUnauthorized
@@ -274,7 +534,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
     @Test fun `refresh requires valid token`() = runTest {
         val deviceInfo = DeviceInfoRequest("device")
         webTestClient.post()
-            .uri("/user/me")
+            .uri("/user/refresh")
             .cookie(Constants.REFRESH_TOKEN_COOKIE, "Refresh")
             .bodyValue(deviceInfo)
             .exchange()
@@ -387,10 +647,65 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val account = response.responseBody
 
         requireNotNull(account) { "No account provided in response" }
+
+        assertTrue(userService.findById(user.info.idX).devices.isEmpty())
     }
     @Test fun `logout requires authentication`() = runTest {
         webTestClient.post()
-            .uri("/account/logout")
+            .uri("/user/logout")
+            .bodyValue(DeviceInfoRequest("device"))
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+
+    @Test fun `logoutAllDevices works`() = runTest {
+        val email = "test@email.com"
+        val password = "password"
+        val deviceId1 = "device"
+        val deviceId2 = "device2"
+        val registeredUser = registerUser(email, password, deviceId1)
+
+        webTestClient.post()
+            .uri("/user/login")
+            .bodyValue(LoginRequest(email, password, DeviceInfoRequest(deviceId1)))
+            .exchange()
+            .expectStatus().isOk
+
+        webTestClient.post()
+            .uri("/user/login")
+            .bodyValue(LoginRequest(email, password, DeviceInfoRequest(deviceId2)))
+            .exchange()
+            .expectStatus().isOk
+
+        var user = userService.findByEmail(email)
+
+        assertEquals(2, user.devices.size)
+        assertTrue(user.devices.any { it.id == deviceId1 })
+        assertTrue(user.devices.any { it.id == deviceId2 })
+
+        val response = webTestClient.post()
+            .uri("/user/logout-all")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, registeredUser.accessToken)
+            .exchange()
+            .expectStatus().isOk
+            .expectBody()
+            .returnResult()
+
+        val cookies = response.responseCookies
+
+        val accessToken = cookies[Constants.ACCESS_TOKEN_COOKIE]?.firstOrNull()?.value
+        val refreshToken = cookies[Constants.ACCESS_TOKEN_COOKIE]?.firstOrNull()?.value
+
+        assertTrue(accessToken.isNullOrBlank())
+        assertTrue(refreshToken.isNullOrBlank())
+
+        user = userService.findByEmail(email)
+
+        assertTrue(user.devices.isEmpty())
+    }
+    @Test fun `logoutAllDevices requires authentication`() = runTest {
+        webTestClient.post()
+            .uri("/user/logout-all")
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -421,6 +736,4 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
 
         assertEquals(0, userService.findAll().count())
     }
-
-    // TODO: Add tests for user updates
 }

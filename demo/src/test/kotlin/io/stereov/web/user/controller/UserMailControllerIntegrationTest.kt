@@ -4,10 +4,10 @@ import io.mockk.verify
 import io.stereov.web.config.Constants
 import io.stereov.web.global.service.mail.MailTokenService
 import io.stereov.web.test.BaseMailIntegrationTest
-import io.stereov.web.user.dto.DeviceInfoRequest
-import io.stereov.web.user.dto.LoginRequest
-import io.stereov.web.user.dto.MailCooldownResponse
-import io.stereov.web.user.dto.ResetPasswordRequest
+import io.stereov.web.user.dto.request.DeviceInfoRequest
+import io.stereov.web.user.dto.request.LoginRequest
+import io.stereov.web.user.dto.response.MailCooldownResponse
+import io.stereov.web.user.dto.request.ResetPasswordRequest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test

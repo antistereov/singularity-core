@@ -166,7 +166,7 @@ class UserSessionController(
     /**
      * Set up two-factor authentication for the user.
      *
-     * @param payload The two-factor authentication request payload.
+     * @param deviceInfo The device info request payload.
      * @return The user's information as a [UserDto].
      */
     @PostMapping("/logout")
@@ -184,6 +184,11 @@ class UserSessionController(
             .body(mapOf("message" to "success"))
     }
 
+    /**
+     * Logs out the user from all devices.
+     *
+     * @return A response indicating the success of the operation.
+     */
     @PostMapping("/logout-all")
     suspend fun logoutFromAllDevices(): ResponseEntity<Map<String, String>> {
         logger.debug { "Logging out user from all devices" }

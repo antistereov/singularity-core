@@ -17,9 +17,9 @@ import org.springframework.stereotype.Repository
 interface UserRepository : CoroutineCrudRepository<UserDocument, String> {
 
     /**
-     * Finds a user by their ID.
+     * Finds a user by their email.
      *
-     * @param userId The ID of the user to find.
+     * @param email The email of the user to find.
      *
      * @return The [UserDocument] of the found user, or null if not found.
      */

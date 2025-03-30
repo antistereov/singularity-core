@@ -3,6 +3,11 @@ package io.stereov.web.user.controller
 import io.stereov.web.test.BaseIntegrationTest
 import io.stereov.web.config.Constants
 import io.stereov.web.user.dto.*
+import io.stereov.web.user.dto.request.DeviceInfoRequest
+import io.stereov.web.user.dto.request.LoginRequest
+import io.stereov.web.user.dto.response.LoginResponse
+import io.stereov.web.user.dto.response.TwoFactorSetupResponse
+import io.stereov.web.user.dto.response.TwoFactorStatusResponse
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
