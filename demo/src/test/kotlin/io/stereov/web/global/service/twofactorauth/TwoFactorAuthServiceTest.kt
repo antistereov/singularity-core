@@ -1,12 +1,14 @@
 package io.stereov.web.global.service.twofactorauth
 
+import com.warrenstrange.googleauth.GoogleAuthenticator
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class TwoFactorAuthServiceTest {
 
-    private val twoFactorAuthService = TwoFactorAuthService()
+    private val gAuth = GoogleAuthenticator()
+    private val twoFactorAuthService = TwoFactorAuthService(gAuth)
 
     @Test
     fun `2FA works as expected`() {

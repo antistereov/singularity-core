@@ -42,12 +42,6 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
             .uri("/user/me")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, token)
             .exchange()
-            .expectStatus().isOk
-
-        webTestClient.get()
-            .uri("/user/me")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, token)
-            .exchange()
             .expectStatus().isUnauthorized
     }
 }

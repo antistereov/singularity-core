@@ -1,19 +1,25 @@
 package io.stereov.web.test
 
+import com.warrenstrange.googleauth.GoogleAuthenticator
+import io.mockk.every
 import io.stereov.web.config.Constants
+import io.stereov.web.test.config.MockGoogleAuthConfig
 import io.stereov.web.user.dto.DeviceInfoRequest
 import io.stereov.web.user.dto.LoginRequest
 import io.stereov.web.user.dto.RegisterUserRequest
 import io.stereov.web.user.dto.TwoFactorSetupResponse
 import io.stereov.web.user.model.UserDocument
 import io.stereov.web.user.service.UserService
+import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.Import
 import org.springframework.http.HttpHeaders
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.returnResult
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Import(MockGoogleAuthConfig::class)
 class BaseSpringBootTest {
 
     @Autowired
@@ -21,6 +27,21 @@ class BaseSpringBootTest {
 
     @Autowired
     lateinit var userService: UserService
+
+    @Autowired
+    lateinit var gAuth: GoogleAuthenticator
+
+    @BeforeEach
+    fun setupMocks() {
+        val secret = "secret-key"
+        val code = 123456
+
+        every { gAuth.createCredentials().key } returns "secret-key"
+        every { gAuth.authorize(any(), any()) } answers {
+            firstArg<String>() == secret && secondArg<Int>() == code
+        }
+        every { gAuth.getTotpPassword(secret) } returns code
+    }
 
     data class TestRegisterResponse(
         val info: UserDocument,

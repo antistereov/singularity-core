@@ -1,6 +1,5 @@
 package io.stereov.web.user.controller
 
-import com.warrenstrange.googleauth.GoogleAuthenticator
 import io.stereov.web.test.BaseIntegrationTest
 import io.stereov.web.config.Constants
 import io.stereov.web.user.dto.*
@@ -9,8 +8,6 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
-
-    private val gAuth = GoogleAuthenticator()
 
     @Test fun `2fa setup succeeds`() = runTest {
         val email = "test@email.com"
