@@ -1,5 +1,6 @@
 package io.stereov.web.config
 
+import com.warrenstrange.googleauth.GoogleAuthenticator
 import io.stereov.web.auth.service.AuthenticationService
 import io.stereov.web.auth.service.CookieService
 import io.stereov.web.global.service.encryption.EncryptionService
@@ -55,6 +56,9 @@ import org.springframework.web.reactive.function.client.WebClient
  * - [UserTwoFactorAuthController]
  * - [UserDeviceController]
  *
+ * It enables the following beans:
+ * - [GoogleAuthenticator]
+ *
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
 @Configuration
@@ -91,8 +95,14 @@ class AuthenticationConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun twoFactorAuthService(): TwoFactorAuthService {
-        return twoFactorAuthService()
+    fun googleAuthenticator(): GoogleAuthenticator {
+        return GoogleAuthenticator()
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun twoFactorAuthService(googleAuthenticator: GoogleAuthenticator): TwoFactorAuthService {
+        return TwoFactorAuthService(googleAuthenticator)
     }
 
     @Bean

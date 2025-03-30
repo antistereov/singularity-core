@@ -16,9 +16,10 @@ import java.security.SecureRandom
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
 @Service
-class TwoFactorAuthService {
+class TwoFactorAuthService(
+    private val gAuth: GoogleAuthenticator
+) {
 
-    private val gAuth = GoogleAuthenticator()
     private val random = SecureRandom()
 
     /**
