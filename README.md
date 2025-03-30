@@ -277,13 +277,27 @@ testImplementation("org.testcontainers:mongodb:$testContainersVersion")
 ## Endpoints
 
 ### `/user`
+
+These endpoints are used for user management and authentication. 
+They are designed to be secure and efficient, leveraging JWT for stateless authentication.
+The related class is [`UserSessionController`](baseline/src/main/kotlin/io/stereov/web/user/controller/UserSessionController.kt).
+
 - **GET /user/me**: Retrieves information about the currently authenticated user.
+- **GET /user/me/app**: Retrieves application-specific information about the authenticated user.
 - **POST /user/login**: Logs in the user and issues JWT access and refresh tokens.
 - **POST /user/register**: Registers a new user and issues JWT tokens.
 - **POST /user/logout**: Logs the user out and clears authentication cookies.
 - **POST /user/refresh**: Refreshes the user's JWT tokens.
+- **PUT /user/me/email**: Updates the user's email address.
+- **PUT /user/me/password**: Updates the user's password.
+- **PUT /user/me**: Updates the user's profile.
 
 ### `/user/mail`
+
+These endpoints are used for email verification and password reset functionalities.
+They are designed to enhance security and user experience.
+The related class is [`UserMailController`](baseline/src/main/kotlin/io/stereov/web/user/controller/UserMailController.kt).
+
 - **POST /user/mail/verify**: Verifies the user's email address using a token.
 - **GET /user/mail/verify/cooldown**: Retrieves the remaining cooldown time before the user can request another email verification.
 - **POST /user/mail/verify/send**: Send the email verification token.
@@ -292,11 +306,21 @@ testImplementation("org.testcontainers:mongodb:$testContainersVersion")
 - **POST /user/mail/password-reset/send**: Sends a password reset email to the user.
 
 ### `/user/devices`
+
+These endpoints are used for managing user devices and sessions.
+They allow users to view and manage their active sessions and devices.
+The related class is [`UserDeviceController`](baseline/src/main/kotlin/io/stereov/web/user/controller/UserDeviceController.kt).
+
 - **GET /user/devices**: Retrieves a list of devices associated with the authenticated user.
 - **DELETE /user/devices/{deviceId}**: Removes a specific device from the user's account.
 - **DELETE /user/devices**: Clears all devices associated with the user.
 
 ### `/user/2fa`
+
+These endpoints are used for managing two-factor authentication (2FA) for user accounts.
+They provide a secure way to enhance user account security.
+The related class is [`UserTwoFactorAuthController`](baseline/src/main/kotlin/io/stereov/web/user/controller/UserTwoFactorAuthController.kt).
+
 - **POST /user/2fa/setup**: Sets up two-factor authentication for the user.
 - **POST /user/2fa/verify**: Verifies the user's 2FA code.
 - **GET /user/2fa/status**: Checks whether two-factor authentication is pending for the user.
