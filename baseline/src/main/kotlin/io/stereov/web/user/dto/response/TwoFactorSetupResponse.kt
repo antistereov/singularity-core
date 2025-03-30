@@ -1,4 +1,4 @@
-package io.stereov.web.user.dto
+package io.stereov.web.user.dto.response
 
 import kotlinx.serialization.Serializable
 
@@ -10,6 +10,8 @@ import kotlinx.serialization.Serializable
  * @property secret The secret key for the user.
  * @property optAuthUrl The OTP auth URL for the user.
  * @property recoveryCode The recovery code for the user.
+ *
+ * @author <a href="https://github.com/antistereov">antistereov</a>
  */
 @Serializable
 data class TwoFactorSetupResponse(

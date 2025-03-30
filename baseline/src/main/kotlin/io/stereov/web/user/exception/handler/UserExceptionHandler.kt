@@ -11,6 +11,13 @@ import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.server.ServerWebExchange
 
+/**
+ * # Global exception handler for user-related exceptions.
+ *
+ * This class handles exceptions related to user operations and returns appropriate HTTP responses.
+ *
+ * @author <a href="https://github.com/antistereov">antistereov</a>
+ */
 @ControllerAdvice
 class UserExceptionHandler {
 

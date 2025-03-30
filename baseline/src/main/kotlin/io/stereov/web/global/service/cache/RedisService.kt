@@ -3,8 +3,6 @@ package io.stereov.web.global.service.cache
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.lettuce.core.ExperimentalLettuceCoroutinesApi
-import io.lettuce.core.api.StatefulRedisConnection
-import io.lettuce.core.api.coroutines
 import io.lettuce.core.api.coroutines.RedisCoroutinesCommands
 import io.stereov.web.global.service.cache.exception.model.RedisKeyNotFoundException
 import org.springframework.stereotype.Service
@@ -19,12 +17,12 @@ import org.springframework.stereotype.Service
 @Service
 @OptIn(ExperimentalLettuceCoroutinesApi::class)
 class RedisService(
-    redisConnection: StatefulRedisConnection<String, ByteArray>,
+    private val commands: RedisCoroutinesCommands<String, ByteArray>,
 ) {
     private val logger: KLogger
         get() = KotlinLogging.logger {}
 
-    private val commands: RedisCoroutinesCommands<String, ByteArray> = redisConnection.coroutines()
+
 
     /**
      * Saves a value to Redis with the given key.

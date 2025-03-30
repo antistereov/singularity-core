@@ -3,9 +3,12 @@ package io.stereov.web.config
 import io.github.bucket4j.distributed.ExpirationAfterWriteStrategy
 import io.github.bucket4j.redis.lettuce.Bucket4jLettuce
 import io.github.bucket4j.redis.lettuce.cas.LettuceBasedProxyManager
+import io.lettuce.core.ExperimentalLettuceCoroutinesApi
 import io.lettuce.core.RedisClient
 import io.lettuce.core.RedisURI
 import io.lettuce.core.api.StatefulRedisConnection
+import io.lettuce.core.api.coroutines
+import io.lettuce.core.api.coroutines.RedisCoroutinesCommands
 import io.lettuce.core.codec.ByteArrayCodec
 import io.lettuce.core.codec.RedisCodec
 import io.lettuce.core.codec.StringCodec
@@ -49,6 +52,7 @@ import java.time.Duration
         ApplicationConfiguration::class,
     ]
 )
+@OptIn(ExperimentalLettuceCoroutinesApi::class)
 class RedisConfiguration {
 
     @Bean
@@ -85,7 +89,13 @@ class RedisConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun redisService(redisConnection: StatefulRedisConnection<String, ByteArray>): RedisService {
-        return RedisService(redisConnection)
+    fun redisCoroutinesCommands(connection: StatefulRedisConnection<String, ByteArray>): RedisCoroutinesCommands<String, ByteArray> {
+        return connection.coroutines()
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun redisService(commands: RedisCoroutinesCommands<String, ByteArray>): RedisService {
+        return RedisService(commands)
     }
 }

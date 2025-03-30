@@ -4,6 +4,7 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.web.auth.exception.model.InvalidPrincipalException
 import io.stereov.web.auth.model.CustomAuthenticationToken
+import io.stereov.web.auth.model.ErrorAuthenticationToken
 import io.stereov.web.global.service.jwt.exception.model.InvalidTokenException
 import io.stereov.web.user.model.UserDocument
 import io.stereov.web.user.service.UserService
@@ -23,9 +24,7 @@ import org.springframework.stereotype.Service
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
 @Service
-class AuthenticationService(
-    private val userService: UserService
-) {
+class AuthenticationService {
 
     private val logger: KLogger
         get() = KotlinLogging.logger {}
@@ -40,7 +39,7 @@ class AuthenticationService(
         logger.debug {"Extracting user ID." }
 
         val auth = getCurrentAuthentication()
-        return auth.userId
+        return auth.user.idX
     }
 
     /**
@@ -52,8 +51,7 @@ class AuthenticationService(
     suspend fun getCurrentUser(): UserDocument {
         logger.debug { "Extracting current user" }
 
-        val userId = getCurrentUserId()
-        return userService.findById(userId)
+        return getCurrentAuthentication().user
     }
 
     /**
@@ -67,6 +65,19 @@ class AuthenticationService(
 
         val auth = getCurrentAuthentication()
         return auth.deviceId
+    }
+
+    /**
+     * Get the ID of the currently authenticated token.
+     *
+     * @throws InvalidPrincipalException If the security context or authentication is missing.
+     * @throws InvalidTokenException If the authentication does not contain the needed properties.
+     */
+    suspend fun getCurrentTokenId(): String {
+        logger.debug { "Extracting token ID" }
+
+        val auth = getCurrentAuthentication()
+        return auth.tokenId
     }
 
     /**
@@ -84,7 +95,10 @@ class AuthenticationService(
         val authentication = securityContext.authentication
             ?: throw InvalidTokenException("Authentication is missing.")
 
-        return authentication as? CustomAuthenticationToken
-                ?: throw InvalidTokenException("Authentication does not contain needed properties")
+        return when ( authentication) {
+            is CustomAuthenticationToken -> authentication
+            is ErrorAuthenticationToken -> throw authentication.error
+            else -> throw InvalidTokenException("Unknown authentication type: ${authentication::class.simpleName}")
+        }
     }
 }

@@ -4,15 +4,15 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.web.auth.exception.AuthException
 import io.stereov.web.auth.service.AuthenticationService
+import io.stereov.web.auth.service.CookieService
 import io.stereov.web.global.service.encryption.EncryptionService
 import io.stereov.web.global.service.hash.HashService
 import io.stereov.web.global.service.twofactorauth.TwoFactorAuthService
 import io.stereov.web.properties.TwoFactorAuthProperties
-import io.stereov.web.user.dto.TwoFactorSetupResponse
+import io.stereov.web.user.dto.response.TwoFactorSetupResponse
 import io.stereov.web.user.dto.UserDto
 import io.stereov.web.user.exception.model.InvalidUserDocumentException
 import io.stereov.web.user.model.UserDocument
-import io.stereov.web.auth.service.CookieService
 import io.stereov.web.user.service.UserService
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ServerWebExchange
@@ -26,7 +26,7 @@ import org.springframework.web.server.ServerWebExchange
  * and the [HashService] to hash and check recovery codes.
  * It interacts with the [UserService] to save user data and the [AuthenticationService] to get the current user.
  *
- * @author antistereov
+ * @author <a href="https://github.com/antistereov">antistereov</a>
  */
 @Service
 class UserTwoFactorAuthService(

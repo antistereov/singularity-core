@@ -9,6 +9,8 @@ import java.util.*
  *
  * @property twoFactor The two-factor authentication details of the user.
  * @property mail The email verification details of the user.
+ *
+ * @author <a href="https://github.com/antistereov">antistereov</a>
  */
 data class UserSecurityDetails(
     val twoFactor: TwoFactorDetails = TwoFactorDetails(),

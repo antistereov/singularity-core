@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service
  * This service provides methods to find, save, and delete user accounts.
  * It interacts with the [UserRepository] to perform database operations.
  *
- * @author antistereov
+ * @author <a href="https://github.com/antistereov">antistereov</a>
  */
 @Service
 class UserService(

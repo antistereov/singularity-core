@@ -100,18 +100,6 @@ class WebSecurityConfiguration {
                 it.authenticationEntryPoint(authenticationEntryPoint())
             }
             .authorizeExchange {
-                it.pathMatchers(
-                    "/user/login",
-                    "/user/refresh",
-                    "/user/register",
-                    "/user/mail/verify",
-                    "/user/mail/reset-password",
-                    "/user/mail/reset-password/send",
-                    "/user/mail/reset-password/cooldown",
-                    "/user/2fa/verify",
-                    "/user/2fa/status",
-                    "/user/2fa/recovery"
-                ).permitAll()
                 authProperties.publicPaths.forEach { path ->
                     it.pathMatchers(path).permitAll()
                 }
@@ -121,7 +109,7 @@ class WebSecurityConfiguration {
                 authProperties.adminPaths.forEach { path ->
                     it.pathMatchers(path).hasRole("ADMIN")
                 }
-                it.anyExchange().authenticated()
+                it.anyExchange().permitAll()
             }
             .addFilterBefore(LoggingFilter(), SecurityWebFiltersOrder.AUTHENTICATION)
             .addFilterBefore(RateLimitingFilter(authenticationService, proxyManager, rateLimitProperties), SecurityWebFiltersOrder.AUTHENTICATION)

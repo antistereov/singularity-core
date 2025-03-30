@@ -27,7 +27,7 @@ import java.time.Instant
  * @property lastActive The last active timestamp of the user.
  * @property app The application information associated with the user.
  *
- * @author antistereov
+ * @author <a href="https://github.com/antistereov">antistereov</a>
  */
 @Document(collection = "users")
 data class UserDocument(

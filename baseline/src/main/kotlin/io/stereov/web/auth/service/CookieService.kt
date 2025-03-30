@@ -7,8 +7,8 @@ import io.stereov.web.global.service.geolocation.GeoLocationService
 import io.stereov.web.global.service.jwt.exception.model.InvalidTokenException
 import io.stereov.web.properties.AppProperties
 import io.stereov.web.properties.JwtProperties
-import io.stereov.web.user.dto.DeviceInfoRequest
 import io.stereov.web.user.dto.UserDto
+import io.stereov.web.user.dto.request.DeviceInfoRequest
 import io.stereov.web.user.model.DeviceInfo
 import io.stereov.web.user.service.UserService
 import io.stereov.web.user.service.token.TwoFactorAuthTokenService
@@ -47,7 +47,7 @@ class CookieService(
      *
      * @return The created access token cookie.
      */
-    fun createAccessTokenCookie(userId: String, deviceId: String): ResponseCookie {
+    suspend fun createAccessTokenCookie(userId: String, deviceId: String): ResponseCookie {
         logger.debug { "Creating access token cookie for user $userId" }
 
         val accessToken = userTokenService.createAccessToken(userId, deviceId)
@@ -82,11 +82,11 @@ class CookieService(
 
         val refreshToken = userTokenService.createRefreshToken(userId, deviceInfoDto.id)
 
-        val location = ipAddress?.let { geoLocationService.getLocation(it) }
+        val location = ipAddress?.let { try { geoLocationService.getLocation(it) } catch(e: Exception) { null } }
 
         val deviceInfo = DeviceInfo(
             id = deviceInfoDto.id,
-            tokenValue = refreshToken,
+            refreshTokenValue = refreshToken,
             browser = deviceInfoDto.browser,
             os = deviceInfoDto.os,
             issuedAt = Instant.now(),
@@ -180,7 +180,7 @@ class CookieService(
 
         val user = userService.findById(refreshToken.accountId)
 
-        if (user.devices.any { it.id == refreshToken.deviceId && it.tokenValue == refreshToken.value }) {
+        if (user.devices.any { it.id == refreshToken.deviceId && it.refreshTokenValue == refreshToken.value }) {
             return user.toDto()
         } else {
             throw InvalidTokenException("Invalid refresh token")

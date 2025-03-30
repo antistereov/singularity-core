@@ -1,8 +1,11 @@
 package io.stereov.web.config
 
 import com.warrenstrange.googleauth.GoogleAuthenticator
+import io.lettuce.core.ExperimentalLettuceCoroutinesApi
+import io.lettuce.core.api.coroutines.RedisCoroutinesCommands
 import io.stereov.web.auth.service.AuthenticationService
 import io.stereov.web.auth.service.CookieService
+import io.stereov.web.global.service.cache.AccessTokenCache
 import io.stereov.web.global.service.encryption.EncryptionService
 import io.stereov.web.global.service.geolocation.GeoLocationService
 import io.stereov.web.global.service.hash.HashService
@@ -15,7 +18,8 @@ import io.stereov.web.user.controller.UserDeviceController
 import io.stereov.web.user.controller.UserSessionController
 import io.stereov.web.user.controller.UserTwoFactorAuthController
 import io.stereov.web.user.repository.UserRepository
-import io.stereov.web.user.service.*
+import io.stereov.web.user.service.UserService
+import io.stereov.web.user.service.UserSessionService
 import io.stereov.web.user.service.device.UserDeviceService
 import io.stereov.web.user.service.token.TwoFactorAuthTokenService
 import io.stereov.web.user.service.token.UserTokenService
@@ -58,6 +62,7 @@ import org.springframework.web.reactive.function.client.WebClient
  *
  * It enables the following beans:
  * - [GoogleAuthenticator]
+ * - [AccessTokenCache]
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
@@ -73,12 +78,13 @@ import org.springframework.web.reactive.function.client.WebClient
 @EnableReactiveMongoRepositories(
     basePackageClasses = [UserRepository::class]
 )
+@OptIn(ExperimentalLettuceCoroutinesApi::class)
 class AuthenticationConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun authenticationService(userService: UserService): AuthenticationService {
-        return AuthenticationService(userService)
+    fun authenticationService(): AuthenticationService {
+        return AuthenticationService()
     }
 
     @Bean
@@ -124,6 +130,15 @@ class AuthenticationConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    fun accessTokenCache(
+        commands: RedisCoroutinesCommands<String, ByteArray>,
+        jwtProperties: JwtProperties,
+    ): AccessTokenCache {
+        return AccessTokenCache(commands, jwtProperties)
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     fun userSessionService(
         userService: UserService,
         hashService: HashService,
@@ -131,13 +146,15 @@ class AuthenticationConfiguration {
         authenticationService: AuthenticationService,
         deviceService: UserDeviceService,
         userTwoFactorAuthService: UserTwoFactorAuthService,
+        accessTokenCache: AccessTokenCache,
     ): UserSessionService {
         return UserSessionService(
             userService,
             hashService,
             authenticationService,
             deviceService,
-            userTwoFactorAuthService
+            userTwoFactorAuthService,
+            accessTokenCache
         )
     }
 

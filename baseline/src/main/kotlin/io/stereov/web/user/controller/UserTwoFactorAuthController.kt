@@ -1,9 +1,9 @@
 package io.stereov.web.user.controller
 
-import io.stereov.web.user.dto.TwoFactorSetupResponse
-import io.stereov.web.user.dto.TwoFactorStatusResponse
-import io.stereov.web.user.dto.UserDto
 import io.stereov.web.auth.service.CookieService
+import io.stereov.web.user.dto.UserDto
+import io.stereov.web.user.dto.response.TwoFactorSetupResponse
+import io.stereov.web.user.dto.response.TwoFactorStatusResponse
 import io.stereov.web.user.service.twofactor.UserTwoFactorAuthService
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
@@ -13,6 +13,15 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ServerWebExchange
 
+/**
+ * # UserTwoFactorAuthController
+ *
+ * This controller handles two-factor authentication (2FA) for users.
+ * It provides endpoints for setting up 2FA, verifying 2FA codes,
+ * checking 2FA status, and recovering user accounts.
+ *
+ * @author <a href="https://github.com/antistereov">antistereov</a>
+ */
 @Controller
 @RequestMapping("/user/2fa")
 class UserTwoFactorAuthController(

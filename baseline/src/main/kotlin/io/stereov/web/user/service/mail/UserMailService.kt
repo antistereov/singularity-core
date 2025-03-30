@@ -8,8 +8,8 @@ import io.stereov.web.global.service.hash.HashService
 import io.stereov.web.global.service.mail.MailCooldownService
 import io.stereov.web.global.service.mail.MailService
 import io.stereov.web.global.service.mail.MailTokenService
-import io.stereov.web.user.dto.MailCooldownResponse
-import io.stereov.web.user.dto.ResetPasswordRequest
+import io.stereov.web.user.dto.response.MailCooldownResponse
+import io.stereov.web.user.dto.request.ResetPasswordRequest
 import io.stereov.web.user.dto.UserDto
 import io.stereov.web.user.service.UserService
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty

@@ -1,8 +1,8 @@
 package io.stereov.web.user.controller
 
-import io.stereov.web.user.dto.MailCooldownResponse
-import io.stereov.web.user.dto.ResetPasswordRequest
 import io.stereov.web.user.dto.UserDto
+import io.stereov.web.user.dto.request.ResetPasswordRequest
+import io.stereov.web.user.dto.response.MailCooldownResponse
 import io.stereov.web.user.service.mail.UserMailService
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.http.ResponseEntity
@@ -10,6 +10,8 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 
 /**
+ * # UserMailController class.
+ *
  * Controller for handling user email verification and password reset requests.
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
