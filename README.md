@@ -42,6 +42,63 @@ This repository isn't just for personal use—it's meant to be a **collaborative
 - **Rate Limiting**: Configurable rate-limiting for both IP and user account-based limits to prevent abuse.
 - **Asynchronous Programming**: Built with Kotlin coroutines for async processing, and integrates Log4j for asynchronous logging.
 
+## Example
+
+This is a simple example of how to set up a simple service that retrieves the current user and
+updates the application info for the user.
+
+```kotlin
+import org.springframework.stereotype.Service
+import io.stereov.web.user.dto.ApplicationInfoDto
+import io.stereov.web.user.dto.ApplicationInfoDto
+import io.stereov.web.auth.service.AuthenticationService
+import io.stereov.web.user.model.UserDocument
+import io.stereov.web.user.service.UserService
+
+/**
+ * This is an example of how to set up custom application info for the user.
+ * 
+ * @param customField A custom application info to set for the user.
+ * @param internalField An internal field that is not exposed to through the dto.
+ */
+data class CustomApplicationInfo(
+    val customField: String,
+    val internalField: String
+) : ApplicationInfo {
+    
+    override fun toDto() = CustomApplicationDto(customField)
+}
+
+/**
+ * This is an example of how to set up a custom application info dto.
+ * It is used to expose the custom application info to the client.
+ * 
+ * @param customField A custom field that is exposed to the client.
+ */
+data class CustomApplicationDto(
+    val customField: String
+)
+
+/**
+ * A service that is used to set the custom application info for the user.
+ */
+@Service
+class CustomService(
+    private val authenticationService: AuthenticationService,
+    private val userService: UserService
+) {
+    suspend fun setCustomApplicationInfo(applicationInfo: CustomApplicationInfo) {
+        // Fetch the current user from the AuthenticationService
+        // If the user is not authenticated, an exception will be thrown and HttpStatus.UNAUTHORIZED will be returned
+        val user: UserDocument = authenticationService.getUserCurrentUser()
+ 
+       // Set custom application info for the user
+       user.app = applicationInfo
+       userService.save(user)
+  }
+}
+```
+
 ## Development Setup
 
 ### Prerequisites:
@@ -251,28 +308,28 @@ testImplementation("org.testcontainers:mongodb:$testContainersVersion")
 
 ### **User Management**
 - **UserService**:  
-  Access and manage user information using the `UserService`.
+  Access and manage user information using the [`UserService`](baseline/src/main/kotlin/io/stereov/web/user/service/UserService.kt).
 
 ### **Authentication**
 - **AuthenticationService**:  
   The application automatically handles authentication per request using a filter. 
-  You can access the current authenticated user via the `AuthenticationService`.
+  You can access the current authenticated user via the [`AuthenticationService`](baseline/src/main/kotlin/io/stereov/web/auth/service/AuthenticationService.kt).
 
 ### **Cache Management**
 - **RedisService**:  
-  Interact with the cache using the `RedisService` for efficient data retrieval and storage.
+  Interact with the cache using the [`RedisService`](baseline/src/main/kotlin/io/stereov/web/global/service/cache/RedisService.kt) for efficient data retrieval and storage.
 
 ### **Encryption & Decryption**
 - **EncryptionService**:  
-  Use the `EncryptionService` to securely encrypt and decrypt values before storing them in the database.
+  Use the [`EncryptionService`](baseline/src/main/kotlin/io/stereov/web/global/service/encryption/EncryptionService.kt) to securely encrypt and decrypt values before storing them in the database.
 
 ### **Hashing & Validation**
 - **HashService**:  
-  The `HashService` allows you to hash sensitive data and validate hashed values for secure comparisons.
+  The [`HashService`](baseline/src/main/kotlin/io/stereov/web/global/service/hash/HashService.kt) allows you to hash sensitive data and validate hashed values for secure comparisons.
 
 ### **JWT Encoding & Decoding**
 - **JwtService**:  
-  The `JwtService` handles the encoding and decoding of JSON Web Tokens (JWT) for authentication and authorization.
+  The [`JwtService`](baseline/src/main/kotlin/io/stereov/web/global/service/jwt/JwtService.kt) handles the encoding and decoding of JSON Web Tokens (JWT) for authentication and authorization.
 
 ## Endpoints
 
@@ -328,7 +385,7 @@ The related class is [`UserTwoFactorAuthController`](baseline/src/main/kotlin/io
 
 ## Technologies Used
 
-- **Kotlin**: A modern, statically-typed language for the JVM.
+- **Kotlin**: A modern, statically typed language for the JVM.
 - **Spring WebFlux**: A reactive framework for building non-blocking applications.
 - **MongoDB**: NoSQL database for data storage.
 - **Redis**: In-memory caching for enhanced performance.
@@ -349,5 +406,5 @@ We welcome contributions! If you'd like to contribute to this project, please fo
 
 ## License
 
-This project is licensed under the GPLv3 License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the GPLv3 License—see the [LICENSE](LICENSE) file for details.
 If you intend for commercial use, please contact me at [contact@stereov.io](mailto:contact@stereov.io).  
