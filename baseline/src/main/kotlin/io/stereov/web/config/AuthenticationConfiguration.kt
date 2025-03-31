@@ -53,6 +53,7 @@ import org.springframework.web.reactive.function.client.WebClient
  * - [HashService]
  * - [RedisService]
  * - [TwoFactorAuthService]
+ * - [TwoFactorAuthTokenService]
  * - [UserService]
  * - [UserSessionService]
  * - [CookieService]
@@ -164,6 +165,12 @@ class AuthenticationConfiguration {
     @ConditionalOnMissingBean
     fun twoFactorAuthService(googleAuthenticator: GoogleAuthenticator): TwoFactorAuthService {
         return TwoFactorAuthService(googleAuthenticator)
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun twoFactorAuthTokenService(jwtService: JwtService, jwtProperties: JwtProperties): TwoFactorAuthTokenService {
+        return TwoFactorAuthTokenService(jwtService, jwtProperties)
     }
 
     @Bean
