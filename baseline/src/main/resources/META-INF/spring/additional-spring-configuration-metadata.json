@@ -1,0 +1,241 @@
+{
+  "groups": [
+    {
+      "name": "baseline.app",
+      "type": "io.stereov.web.properties.AppProperties",
+      "sourceType": "io.stereov.web.properties.AppProperties"
+    },
+    {
+      "name": "baseline.auth",
+      "type": "io.stereov.web.properties.AuthProperties",
+      "sourceType": "io.stereov.web.properties.AuthProperties"
+    },
+    {
+      "name": "baseline.mail",
+      "type": "io.stereov.web.properties.MailProperties",
+      "sourceType": "io.stereov.web.properties.MailProperties"
+    },
+    {
+      "name": "baseline.security.encryption",
+      "type": "io.stereov.web.properties.EncryptionProperties",
+      "sourceType": "io.stereov.web.properties.EncryptionProperties"
+    },
+    {
+      "name": "baseline.security.jwt",
+      "type": "io.stereov.web.properties.JwtProperties",
+      "sourceType": "io.stereov.web.properties.JwtProperties"
+    },
+    {
+      "name": "baseline.security.login-attempt-limit",
+      "type": "io.stereov.web.properties.LoginAttemptLimitProperties",
+      "sourceType": "io.stereov.web.properties.LoginAttemptLimitProperties"
+    },
+    {
+      "name": "baseline.security.rate-limit",
+      "type": "io.stereov.web.properties.RateLimitProperties",
+      "sourceType": "io.stereov.web.properties.RateLimitProperties"
+    },
+    {
+      "name": "baseline.security.two-factor",
+      "type": "io.stereov.web.properties.TwoFactorAuthProperties",
+      "sourceType": "io.stereov.web.properties.TwoFactorAuthProperties"
+    },
+    {
+      "name": "baseline.ui",
+      "type": "io.stereov.web.properties.UiProperties",
+      "sourceType": "io.stereov.web.properties.UiProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "baseline.app.base-url",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.web.properties.AppProperties",
+      "defaultValue": "http://localhost:8000"
+    },
+    {
+      "name": "baseline.app.name",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.web.properties.AppProperties",
+      "defaultValue": "Spring Application"
+    },
+    {
+      "name": "baseline.app.secure",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.stereov.web.properties.AppProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "baseline.auth.admin-paths",
+      "type": "java.util.List<java.lang.String>",
+      "sourceType": "io.stereov.web.properties.AuthProperties"
+    },
+    {
+      "name": "baseline.auth.public-paths",
+      "type": "java.util.List<java.lang.String>",
+      "sourceType": "io.stereov.web.properties.AuthProperties"
+    },
+    {
+      "name": "baseline.auth.user-paths",
+      "type": "java.util.List<java.lang.String>",
+      "sourceType": "io.stereov.web.properties.AuthProperties"
+    },
+    {
+      "name": "baseline.mail.debug",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.stereov.web.properties.MailProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "baseline.mail.email",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.web.properties.MailProperties"
+    },
+    {
+      "name": "baseline.mail.enable",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.stereov.web.properties.MailProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "baseline.mail.host",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.web.properties.MailProperties"
+    },
+    {
+      "name": "baseline.mail.password",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.web.properties.MailProperties"
+    },
+    {
+      "name": "baseline.mail.password-reset-expiration",
+      "type": "java.lang.Long",
+      "sourceType": "io.stereov.web.properties.MailProperties",
+      "defaultValue": 900
+    },
+    {
+      "name": "baseline.mail.password-reset-send-cooldown",
+      "type": "java.lang.Long",
+      "sourceType": "io.stereov.web.properties.MailProperties",
+      "defaultValue": 60
+    },
+    {
+      "name": "baseline.mail.port",
+      "type": "java.lang.Integer",
+      "sourceType": "io.stereov.web.properties.MailProperties",
+      "defaultValue": 587
+    },
+    {
+      "name": "baseline.mail.smtp-auth",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.stereov.web.properties.MailProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "baseline.mail.smtp-starttls",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.stereov.web.properties.MailProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "baseline.mail.transport-protocol",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.web.properties.MailProperties",
+      "defaultValue": "smtp"
+    },
+    {
+      "name": "baseline.mail.ui-password-reset-path",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.web.properties.MailProperties",
+      "defaultValue": "/auth/password-reset"
+    },
+    {
+      "name": "baseline.mail.ui-verification-path",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.web.properties.MailProperties",
+      "defaultValue": "/auth/verify-email"
+    },
+    {
+      "name": "baseline.mail.username",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.web.properties.MailProperties"
+    },
+    {
+      "name": "baseline.mail.verification-expiration",
+      "type": "java.lang.Long",
+      "sourceType": "io.stereov.web.properties.MailProperties",
+      "defaultValue": 900
+    },
+    {
+      "name": "baseline.mail.verification-send-cooldown",
+      "type": "java.lang.Long",
+      "sourceType": "io.stereov.web.properties.MailProperties",
+      "defaultValue": 60
+    },
+    {
+      "name": "baseline.security.encryption.secret-key",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.web.properties.EncryptionProperties"
+    },
+    {
+      "name": "baseline.security.jwt.expires-in",
+      "type": "java.lang.Long",
+      "sourceType": "io.stereov.web.properties.JwtProperties",
+      "defaultValue": 900
+    },
+    {
+      "name": "baseline.security.jwt.secret-key",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.web.properties.JwtProperties"
+    },
+    {
+      "name": "baseline.security.rate-limit.ip-limit",
+      "type": "java.lang.Long",
+      "sourceType": "io.stereov.web.properties.RateLimitProperties",
+      "defaultValue": 200
+    },
+    {
+      "name": "baseline.security.rate-limit.ip-time-window-minutes",
+      "type": "java.lang.Long",
+      "sourceType": "io.stereov.web.properties.RateLimitProperties",
+      "defaultValue": 1
+    },
+    {
+      "name": "baseline.security.rate-limit.user-limit",
+      "type": "java.lang.Long",
+      "sourceType": "io.stereov.web.properties.RateLimitProperties",
+      "defaultValue": 200
+    },
+    {
+      "name": "baseline.security.rate-limit.user-time-window-minutes",
+      "type": "java.lang.Long",
+      "sourceType": "io.stereov.web.properties.RateLimitProperties",
+      "defaultValue": 1
+    },
+    {
+      "name": "baseline.security.login-attempt-limit.ip-limit",
+      "type": "java.lang.Long",
+      "sourceType": "io.stereov.web.properties.LoginAttemptLimitProperties",
+      "defaultValue": 10
+    },
+    {
+      "name": "baseline.security.login-attempt-limit.ip-time-window-minutes",
+      "type": "java.lang.Long",
+      "sourceType": "io.stereov.web.properties.LoginAttemptLimitProperties",
+      "defaultValue": 5
+    },
+    {
+      "name": "baseline.security.two-factor.recovery-code-length",
+      "type": "java.lang.Integer",
+      "sourceType": "io.stereov.web.properties.TwoFactorAuthProperties",
+      "defaultValue": 20
+    },
+    {
+      "name": "baseline.ui.base-url",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.web.properties.UiProperties",
+      "defaultValue": "http://localhost:4200"
+    }
+  ],
+  "hints": []
+}

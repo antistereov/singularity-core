@@ -17,5 +17,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties
  */
 @ConfigurationProperties(prefix = "baseline.security.two-factor")
 data class TwoFactorAuthProperties(
-    val recoveryCodeLength: Int
+    val recoveryCodeLength: Int = 20
 )

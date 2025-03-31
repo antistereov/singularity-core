@@ -20,7 +20,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
  */
 @ConfigurationProperties(prefix = "baseline.security.rate-limit")
 data class RateLimitProperties(
-    val ipLimit: Long = 100,
+    val ipLimit: Long = 200,
     val ipTimeWindowMinutes: Long = 1,
     val userLimit: Long = 200,
     val userTimeWindowMinutes: Long = 1,

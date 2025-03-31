@@ -11,7 +11,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
  * to bind the properties from the application configuration file.
  *
  * It is prefixed with `baseline.mail` in the configuration file and only set if
- * the `enable-verification` property is set to `true`.
+ * the `enable` property is set to `true`.
  *
  * @property enable Indicates whether email verification is enabled.
  * @property host The SMTP server host.
@@ -41,14 +41,14 @@ data class MailProperties(
     val email: String,
     val username: String,
     val password: String,
-    val transportProtocol: String,
-    val smtpAuth: Boolean = false,
-    val smtpStarttls: Boolean = false,
+    val transportProtocol: String = "smtp",
+    val smtpAuth: Boolean = true,
+    val smtpStarttls: Boolean = true,
     val debug: Boolean = false,
     val verificationExpiration: Long = 900,
     val verificationSendCooldown: Long = 60,
     val passwordResetExpiration: Long = 900,
     val passwordResetSendCooldown: Long = 60,
-    val uiVerificationPath: String = "/auth/mail/verify",
+    val uiVerificationPath: String = "/auth/verify-email",
     val uiPasswordResetPath: String = "/auth/reset-password",
 )

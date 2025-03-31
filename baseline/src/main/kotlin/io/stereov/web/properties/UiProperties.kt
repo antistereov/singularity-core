@@ -17,5 +17,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties
  */
 @ConfigurationProperties(prefix = "baseline.ui")
 data class UiProperties(
-    val baseUrl: String,
+    val baseUrl: String = "http://localhost:4200",
 )
