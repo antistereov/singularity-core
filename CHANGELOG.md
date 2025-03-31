@@ -1,3 +1,15 @@
+## [1.0.1]
+
+## Changelog
+
+## 🐛 Fixes
+- [669f7d6](https://github.com/antistereov/web-kotlin-spring-baseline/commits/669f7d6) add missing bean creations
+
+
+## Contributors
+We'd like to thank the following people for their contributions:
+antistereov
+
 ## [1.0.0]
 
 ## Changelog
