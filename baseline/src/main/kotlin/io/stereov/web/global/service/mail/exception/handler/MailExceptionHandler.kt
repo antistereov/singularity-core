@@ -2,6 +2,7 @@ package io.stereov.web.global.service.mail.exception.handler
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.web.global.exception.BaseExceptionHandler
 import io.stereov.web.global.model.ErrorResponse
 import io.stereov.web.global.service.mail.exception.MailException
 import io.stereov.web.global.service.mail.exception.model.MailCooldownException
@@ -19,13 +20,13 @@ import org.springframework.web.server.ServerWebExchange
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
 @ControllerAdvice
-class MailExceptionHandler {
+class MailExceptionHandler : BaseExceptionHandler<MailException> {
 
     private val logger: KLogger
         get() = KotlinLogging.logger {}
 
     @ExceptionHandler(MailException::class)
-    suspend fun handleRateLimitExceptions(
+    override suspend fun handleException(
         ex: MailException,
         exchange: ServerWebExchange
     ): ResponseEntity<ErrorResponse> {

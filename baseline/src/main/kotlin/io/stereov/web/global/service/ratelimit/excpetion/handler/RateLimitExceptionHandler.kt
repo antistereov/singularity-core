@@ -1,12 +1,11 @@
-package io.stereov.web.global.service.jwt.exception.handler
+package io.stereov.web.global.service.ratelimit.excpetion.handler
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.web.global.exception.BaseExceptionHandler
 import io.stereov.web.global.model.ErrorResponse
-import io.stereov.web.global.service.jwt.exception.TokenException
-import io.stereov.web.global.service.jwt.exception.model.InvalidTokenException
-import io.stereov.web.global.service.jwt.exception.model.TokenExpiredException
+import io.stereov.web.global.service.ratelimit.excpetion.RateLimitException
+import io.stereov.web.global.service.ratelimit.excpetion.model.TooManyRequestsException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
@@ -14,28 +13,33 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.server.ServerWebExchange
 
 /**
- * # Global exception handler for token-related exceptions.
+ * Handles exceptions related to rate limiting within the application.
  *
- * This class handles exceptions related to token operations and returns appropriate HTTP responses.
+ * This handler provides a custom implementation for handling [RateLimitException] and its subclasses,
+ * such as [TooManyRequestsException]. It creates and returns a suitable [ResponseEntity] containing
+ * an [ErrorResponse] to be sent back to the client.
+ *
+ * The handler logs the details of the exception for debugging or monitoring purposes.
+ *
+ * Implements [BaseExceptionHandler] for seamlessly handling exceptions specific to rate limiting.
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
 @ControllerAdvice
-class TokenExceptionHandler : BaseExceptionHandler<TokenException> {
+class RateLimitExceptionHandler : BaseExceptionHandler<RateLimitException> {
 
     private val logger: KLogger
         get() = KotlinLogging.logger {}
 
-    @ExceptionHandler(TokenException::class)
+    @ExceptionHandler(RateLimitException::class)
     override suspend fun handleException(
-        ex: TokenException,
+        ex: RateLimitException,
         exchange: ServerWebExchange
     ): ResponseEntity<ErrorResponse> {
         logger.warn { "${ex.javaClass.simpleName} - ${ex.message}" }
 
         val status = when (ex) {
-            is TokenExpiredException -> HttpStatus.UNAUTHORIZED
-            is InvalidTokenException -> HttpStatus.UNAUTHORIZED
+            is TooManyRequestsException -> HttpStatus.TOO_MANY_REQUESTS
             else -> HttpStatus.INTERNAL_SERVER_ERROR
         }
 

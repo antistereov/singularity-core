@@ -3,6 +3,7 @@ package io.stereov.web.config
 import com.warrenstrange.googleauth.GoogleAuthenticator
 import io.lettuce.core.ExperimentalLettuceCoroutinesApi
 import io.lettuce.core.api.coroutines.RedisCoroutinesCommands
+import io.stereov.web.auth.exception.handler.AuthExceptionHandler
 import io.stereov.web.auth.service.AuthenticationService
 import io.stereov.web.auth.service.CookieService
 import io.stereov.web.global.service.cache.AccessTokenCache
@@ -10,6 +11,7 @@ import io.stereov.web.global.service.encryption.EncryptionService
 import io.stereov.web.global.service.geolocation.GeoLocationService
 import io.stereov.web.global.service.hash.HashService
 import io.stereov.web.global.service.jwt.JwtService
+import io.stereov.web.global.service.jwt.exception.handler.TokenExceptionHandler
 import io.stereov.web.global.service.twofactorauth.TwoFactorAuthService
 import io.stereov.web.properties.AppProperties
 import io.stereov.web.properties.JwtProperties
@@ -209,5 +211,17 @@ class AuthenticationConfiguration {
         userDeviceService: UserDeviceService
     ): UserDeviceController {
         return UserDeviceController(userDeviceService)
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun authExceptionHandler(): AuthExceptionHandler {
+        return AuthExceptionHandler()
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun tokenExceptionHandler(): TokenExceptionHandler {
+        return TokenExceptionHandler()
     }
 }

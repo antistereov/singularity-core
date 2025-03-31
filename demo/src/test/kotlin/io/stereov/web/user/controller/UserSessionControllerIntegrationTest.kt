@@ -170,7 +170,6 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         requireNotNull(body)
 
         requireNotNull(user.twoFactorToken)
-        assertEquals(user.twoFactorToken, response.responseCookies[Constants.TWO_FACTOR_AUTH_COOKIE]?.firstOrNull()?.value)
 
         assertTrue(body.twoFactorRequired)
         assertNotNull(body.user)

@@ -6,6 +6,7 @@ import io.stereov.web.global.service.jwt.JwtService
 import io.stereov.web.global.service.mail.MailCooldownService
 import io.stereov.web.global.service.mail.MailService
 import io.stereov.web.global.service.mail.MailTokenService
+import io.stereov.web.global.service.mail.exception.handler.MailExceptionHandler
 import io.stereov.web.properties.MailProperties
 import io.stereov.web.properties.UiProperties
 import io.stereov.web.user.controller.UserMailController
@@ -131,5 +132,11 @@ class MailConfiguration {
         userMailService: UserMailService
     ): UserMailController {
         return UserMailController(userMailService)
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun mailExceptionHandler(): MailExceptionHandler {
+        return MailExceptionHandler()
     }
 }

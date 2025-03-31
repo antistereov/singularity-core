@@ -1,5 +1,7 @@
 package io.stereov.web.user.dto.request
 
+import kotlinx.serialization.Serializable
+
 /**
  * # LoginRequest data class.
  *
@@ -12,6 +14,7 @@ package io.stereov.web.user.dto.request
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
+@Serializable
 data class LoginRequest(
     val email: String,
     val password: String,

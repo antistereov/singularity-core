@@ -1,13 +1,10 @@
 package io.stereov.web.config
 
-import io.github.bucket4j.redis.lettuce.cas.LettuceBasedProxyManager
-import io.stereov.web.auth.service.AuthenticationService
 import io.stereov.web.filter.CookieAuthenticationFilter
 import io.stereov.web.filter.LoggingFilter
 import io.stereov.web.filter.RateLimitingFilter
+import io.stereov.web.global.service.ratelimit.RateLimitService
 import io.stereov.web.properties.AuthProperties
-import io.stereov.web.properties.LoginAttemptLimitProperties
-import io.stereov.web.properties.RateLimitProperties
 import io.stereov.web.properties.UiProperties
 import io.stereov.web.user.service.UserService
 import io.stereov.web.user.service.token.UserTokenService
@@ -88,10 +85,7 @@ class WebSecurityConfiguration {
         uiProperties: UiProperties,
         userTokenService: UserTokenService,
         userService: UserService,
-        authenticationService: AuthenticationService,
-        proxyManager: LettuceBasedProxyManager<String>,
-        rateLimitProperties: RateLimitProperties,
-        loginAttemptLimitProperties: LoginAttemptLimitProperties,
+        rateLimitService: RateLimitService
     ): SecurityWebFilterChain {
         return http
             .csrf { it.disable() }
@@ -113,7 +107,7 @@ class WebSecurityConfiguration {
                 }
                 it.anyExchange().permitAll()
             }
-            .addFilterBefore(RateLimitingFilter(authenticationService, proxyManager, rateLimitProperties, loginAttemptLimitProperties), SecurityWebFiltersOrder.FIRST)
+            .addFilterBefore(RateLimitingFilter(rateLimitService), SecurityWebFiltersOrder.FIRST)
             .addFilterBefore(LoggingFilter(), SecurityWebFiltersOrder.AUTHENTICATION)
             .addFilterBefore(CookieAuthenticationFilter(userTokenService, userService), SecurityWebFiltersOrder.AUTHENTICATION)
             .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())

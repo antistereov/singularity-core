@@ -1,9 +1,7 @@
 package io.stereov.web.filter
 
-import io.stereov.web.properties.LoginAttemptLimitProperties
+import io.stereov.web.properties.RateLimitProperties
 import io.stereov.web.test.BaseSpringBootTest
-import io.stereov.web.user.dto.request.DeviceInfoRequest
-import io.stereov.web.user.dto.request.LoginRequest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -15,7 +13,7 @@ import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.MongoDBContainer
 import org.testcontainers.utility.DockerImageName
 
-class LoginAttemptEmailLimitFilterTest : BaseSpringBootTest() {
+class RateLimitIpFilterTest : BaseSpringBootTest() {
 
     companion object {
         private val mongoDBContainer = MongoDBContainer("mongo:latest").apply {
@@ -45,47 +43,32 @@ class LoginAttemptEmailLimitFilterTest : BaseSpringBootTest() {
             registry.add("spring.data.redis.host") { redisContainer.host }
             registry.add("spring.data.redis.port") { redisContainer.getMappedPort(6379) }
             registry.add("spring.data.redis.password") { "" }
-            registry.add("baseline.security.rate-limit.user-limit") { 10000 }
+            registry.add("baseline.security.rate-limit.user-limit") { 4 }
             registry.add("baseline.security.rate-limit.user-time-window-minutes") { 2 }
-            registry.add("baseline.security.rate-limit.ip-limit") { 10000 }
+            registry.add("baseline.security.rate-limit.ip-limit") { 2 }
             registry.add("baseline.security.rate-limit.ip-time-window-minutes") { 2 }
-            registry.add("baseline.security.login-attempt-limit.ip-limit") { 10000 }
-            registry.add("baseline.security.login-attempt-limit.ip-time-window-minutes") { 1 }
-            registry.add("baseline.security.login-attempt-limit.email-limit") { 2 }
-            registry.add("baseline.security.login-attempt-limit.email-time-window-minutes") { 1 }
-
         }
     }
 
     @Autowired
-    private lateinit var loginAttemptLimitProperties: LoginAttemptLimitProperties
+    private lateinit var rateLimitProperties: RateLimitProperties
 
-    @Test fun `email rate limit works`() = runTest {
-        assertEquals(2, loginAttemptLimitProperties.emailLimit)
-        val device = DeviceInfoRequest("device")
+    @Test fun `ip rate limit works`() = runTest {
+        assertEquals(2, rateLimitProperties.ipLimit)
 
-        webTestClient.post()
-            .uri("/user/login")
-            .bodyValue(LoginRequest("test@email.com", "password1", device))
+        webTestClient.get()
+            .uri("/user/me")
             .exchange()
             .expectStatus().isUnauthorized
 
-        webTestClient.post()
-            .uri("/user/login")
-            .bodyValue(LoginRequest("test@email.com", "password1", device))
+        webTestClient.get()
+            .uri("/user/me")
             .exchange()
             .expectStatus().isUnauthorized
 
-        webTestClient.post()
-            .uri("/user/login")
-            .bodyValue(LoginRequest("test@email.com", "password1", device))
+        webTestClient.get()
+            .uri("/user/me")
             .exchange()
             .expectStatus().isEqualTo(HttpStatus.TOO_MANY_REQUESTS)
-
-        webTestClient.post()
-            .uri("/user/login")
-            .bodyValue(LoginRequest("test1@email.com", "password1", device))
-            .exchange()
-            .expectStatus().isUnauthorized
     }
 }
