@@ -57,9 +57,6 @@ import org.springframework.mail.javamail.JavaMailSenderImpl
 @ConditionalOnProperty(prefix = "baseline.mail", name = ["enable"], havingValue = "true", matchIfMissing = false)
 @AutoConfiguration(
     after = [
-        MongoReactiveAutoConfiguration::class,
-        SpringDataWebAutoConfiguration::class,
-        RedisAutoConfiguration::class,
         ApplicationConfiguration::class,
     ]
 )
@@ -82,6 +79,8 @@ class MailConfiguration {
         props["mail.debug"] = mailProperties.debug
         return mailSender
     }
+
+    // Services
 
     @Bean
     @ConditionalOnMissingBean
@@ -126,6 +125,8 @@ class MailConfiguration {
         return UserMailService(userService, authenticationService, mailCooldownService, mailService, mailTokenService, hashService)
     }
 
+    // Controller
+
     @Bean
     @ConditionalOnMissingBean
     fun userMailController(
@@ -133,6 +134,8 @@ class MailConfiguration {
     ): UserMailController {
         return UserMailController(userMailService)
     }
+
+    // ExceptionHandler
 
     @Bean
     @ConditionalOnMissingBean

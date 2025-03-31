@@ -39,13 +39,10 @@ import javax.crypto.spec.SecretKeySpec
 @Configuration
 @AutoConfiguration(
     after = [
-        MongoReactiveAutoConfiguration::class,
-        SpringDataWebAutoConfiguration::class,
-        RedisAutoConfiguration::class,
         ApplicationConfiguration::class,
     ]
 )
-class JwtEncodingConfig {
+class JwtConfiguration {
 
     @Bean
     @ConditionalOnMissingBean

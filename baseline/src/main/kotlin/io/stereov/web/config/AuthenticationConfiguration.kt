@@ -1,21 +1,22 @@
 package io.stereov.web.config
 
 import com.warrenstrange.googleauth.GoogleAuthenticator
+import io.github.bucket4j.redis.lettuce.cas.LettuceBasedProxyManager
 import io.lettuce.core.ExperimentalLettuceCoroutinesApi
 import io.lettuce.core.api.coroutines.RedisCoroutinesCommands
 import io.stereov.web.auth.exception.handler.AuthExceptionHandler
 import io.stereov.web.auth.service.AuthenticationService
 import io.stereov.web.auth.service.CookieService
 import io.stereov.web.global.service.cache.AccessTokenCache
+import io.stereov.web.global.service.cache.RedisService
 import io.stereov.web.global.service.encryption.EncryptionService
 import io.stereov.web.global.service.geolocation.GeoLocationService
 import io.stereov.web.global.service.hash.HashService
 import io.stereov.web.global.service.jwt.JwtService
 import io.stereov.web.global.service.jwt.exception.handler.TokenExceptionHandler
+import io.stereov.web.global.service.ratelimit.RateLimitService
 import io.stereov.web.global.service.twofactorauth.TwoFactorAuthService
-import io.stereov.web.properties.AppProperties
-import io.stereov.web.properties.JwtProperties
-import io.stereov.web.properties.TwoFactorAuthProperties
+import io.stereov.web.properties.*
 import io.stereov.web.user.controller.UserDeviceController
 import io.stereov.web.user.controller.UserSessionController
 import io.stereov.web.user.controller.UserTwoFactorAuthController
@@ -50,11 +51,13 @@ import org.springframework.web.reactive.function.client.WebClient
  * - [AuthenticationService]
  * - [GeoLocationService]
  * - [HashService]
+ * - [RedisService]
  * - [TwoFactorAuthService]
  * - [UserService]
  * - [UserSessionService]
  * - [CookieService]
  * - [UserDeviceService]
+ * - [UserTokenService]
  * - [UserTwoFactorAuthService]
  *
  * It enabled the following controllers:
@@ -71,10 +74,10 @@ import org.springframework.web.reactive.function.client.WebClient
 @Configuration
 @AutoConfiguration(
     after = [
-        MongoReactiveAutoConfiguration::class,
-        SpringDataWebAutoConfiguration::class,
-        RedisAutoConfiguration::class,
         ApplicationConfiguration::class,
+        WebClientConfiguration::class,
+        RedisConfiguration::class,
+        JwtConfiguration::class,
     ]
 )
 @EnableReactiveMongoRepositories(
@@ -91,6 +94,42 @@ class AuthenticationConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    fun googleAuthenticator(): GoogleAuthenticator {
+        return GoogleAuthenticator()
+    }
+
+    // Services
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun cookieService(
+        userTokenService: UserTokenService,
+        jwtProperties: JwtProperties,
+        appProperties: AppProperties,
+        geoLocationService: GeoLocationService,
+        userService: UserService,
+        twoFactorAuthTokenService: TwoFactorAuthTokenService
+    ): CookieService {
+        return CookieService(userTokenService, jwtProperties, appProperties, geoLocationService, userService, twoFactorAuthTokenService)
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun accessTokenCache(
+        commands: RedisCoroutinesCommands<String, ByteArray>,
+        jwtProperties: JwtProperties,
+    ): AccessTokenCache {
+        return AccessTokenCache(commands, jwtProperties)
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun redisService(redisCoroutinesCommands: RedisCoroutinesCommands<String, ByteArray>): RedisService {
+        return RedisService(redisCoroutinesCommands)
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     fun geoLocationService(webClient: WebClient): GeoLocationService {
         return GeoLocationService(webClient)
     }
@@ -103,8 +142,22 @@ class AuthenticationConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun googleAuthenticator(): GoogleAuthenticator {
-        return GoogleAuthenticator()
+    fun rateLimitService(
+        authenticationService: AuthenticationService,
+        proxyManager: LettuceBasedProxyManager<String>,
+        rateLimitProperties: RateLimitProperties,
+        loginAttemptLimitProperties: LoginAttemptLimitProperties,
+    ): RateLimitService {
+        return RateLimitService(authenticationService, proxyManager, rateLimitProperties, loginAttemptLimitProperties)
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun userDeviceService(
+        userService: UserService,
+        authenticationService: AuthenticationService,
+    ) : UserDeviceService {
+        return UserDeviceService(userService, authenticationService)
     }
 
     @Bean
@@ -115,28 +168,32 @@ class AuthenticationConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    fun userTokenService(
+        jwtService: JwtService,
+        accessTokenCache: AccessTokenCache,
+        jwtProperties: JwtProperties
+    ): UserTokenService {
+        return UserTokenService(jwtService, accessTokenCache, jwtProperties)
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun userTwoFactorAuthService(
+        userService: UserService,
+        twoFactorAuthService: TwoFactorAuthService,
+        encryptionService: EncryptionService,
+        authenticationService: AuthenticationService,
+        twoFactorAuthProperties: TwoFactorAuthProperties,
+        hashService: HashService,
+        cookieService: CookieService
+    ): UserTwoFactorAuthService {
+        return UserTwoFactorAuthService(userService, twoFactorAuthService, encryptionService, authenticationService, twoFactorAuthProperties, hashService, cookieService)
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     fun userService(userRepository: UserRepository): UserService {
         return UserService(userRepository)
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun userSessionController(
-        authenticationService: AuthenticationService,
-        userService: UserService,
-        userSessionService: UserSessionService,
-        cookieService: CookieService,
-    ): UserSessionController {
-        return UserSessionController(authenticationService, userSessionService, cookieService)
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun accessTokenCache(
-        commands: RedisCoroutinesCommands<String, ByteArray>,
-        jwtProperties: JwtProperties,
-    ): AccessTokenCache {
-        return AccessTokenCache(commands, jwtProperties)
     }
 
     @Bean
@@ -160,41 +217,7 @@ class AuthenticationConfiguration {
         )
     }
 
-    @Bean
-    @ConditionalOnMissingBean
-    fun cookieService(
-        userTokenService: UserTokenService,
-        jwtProperties: JwtProperties,
-        appProperties: AppProperties,
-        geoLocationService: GeoLocationService,
-        userService: UserService,
-        twoFactorAuthTokenService: TwoFactorAuthTokenService
-    ): CookieService {
-        return CookieService(userTokenService, jwtProperties, appProperties, geoLocationService, userService, twoFactorAuthTokenService)
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun userDeviceService(
-        userService: UserService,
-        authenticationService: AuthenticationService,
-    ) : UserDeviceService {
-        return UserDeviceService(userService, authenticationService)
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun userTwoFactorAuthService(
-        userService: UserService,
-        twoFactorAuthService: TwoFactorAuthService,
-        encryptionService: EncryptionService,
-        authenticationService: AuthenticationService,
-        twoFactorAuthProperties: TwoFactorAuthProperties,
-        hashService: HashService,
-        cookieService: CookieService
-    ): UserTwoFactorAuthService {
-        return UserTwoFactorAuthService(userService, twoFactorAuthService, encryptionService, authenticationService, twoFactorAuthProperties, hashService, cookieService)
-    }
+    // Controller
 
     @Bean
     @ConditionalOnMissingBean
@@ -212,6 +235,19 @@ class AuthenticationConfiguration {
     ): UserDeviceController {
         return UserDeviceController(userDeviceService)
     }
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun userSessionController(
+        authenticationService: AuthenticationService,
+        userService: UserService,
+        userSessionService: UserSessionService,
+        cookieService: CookieService,
+    ): UserSessionController {
+        return UserSessionController(authenticationService, userSessionService, cookieService)
+    }
+
+    // Exception Handler
 
     @Bean
     @ConditionalOnMissingBean

@@ -26,9 +26,6 @@ import org.springframework.web.reactive.function.client.WebClient
 @Configuration
 @AutoConfiguration(
     after = [
-        MongoReactiveAutoConfiguration::class,
-        SpringDataWebAutoConfiguration::class,
-        RedisAutoConfiguration::class,
         ApplicationConfiguration::class,
     ]
 )

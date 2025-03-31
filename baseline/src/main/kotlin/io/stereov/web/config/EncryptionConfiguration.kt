@@ -28,9 +28,6 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 @AutoConfiguration(
     after = [
-        MongoReactiveAutoConfiguration::class,
-        SpringDataWebAutoConfiguration::class,
-        RedisAutoConfiguration::class,
         ApplicationConfiguration::class,
     ]
 )

@@ -42,10 +42,10 @@ import org.springframework.context.annotation.Configuration
     AppProperties::class,
     AuthProperties::class,
     EncryptionProperties::class,
-    UiProperties::class,
     JwtProperties::class,
+    LoginAttemptLimitProperties::class,
     RateLimitProperties::class,
     TwoFactorAuthProperties::class,
-    LoginAttemptLimitProperties::class
+    UiProperties::class,
 )
 class ApplicationConfiguration

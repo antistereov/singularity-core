@@ -37,7 +37,7 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
  * and components in the application.
  *
  * It runs after the [MongoReactiveAutoConfiguration], [SpringDataWebAutoConfiguration],
- * [RedisAutoConfiguration], and [ApplicationConfiguration] classes to ensure that
+ * [RedisAutoConfiguration], [ApplicationConfiguration] and [AuthenticationConfiguration] classes to ensure that
  * the necessary configurations are applied in the correct order.
  *
  * It enables the following services:
@@ -57,10 +57,7 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
 @EnableMethodSecurity(prePostEnabled = true)
 @AutoConfiguration(
     after = [
-        MongoReactiveAutoConfiguration::class,
-        SpringDataWebAutoConfiguration::class,
-        RedisAutoConfiguration::class,
-        ApplicationConfiguration::class,
+        AuthenticationConfiguration::class
     ]
 )
 class WebSecurityConfiguration {
