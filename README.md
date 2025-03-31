@@ -212,7 +212,7 @@ Here are the key properties you need to set in your `application.yaml`:
     You have to set some properties in order to make it run as expected.
     ```yaml
     baseline:
-      app:
+      ui:
         # The base URL of your frontend
         base-url: http://localhost:4200
     ```
