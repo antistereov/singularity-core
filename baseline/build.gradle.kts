@@ -192,7 +192,7 @@ jreleaser {
 
                 hide {
                     uncategorized.set(true)
-                    categories.set(listOf("merge", "build", "refactor", "revert", "style", "test", "chore", "build", "ci", "docs"))
+                    categories.set(listOf("merge"))
                     contributors.set(listOf("[bot]"))
                 }
 
