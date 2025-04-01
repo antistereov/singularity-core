@@ -96,18 +96,6 @@ dependencies {
 
     // Mail
     api("org.springframework.boot:spring-boot-starter-mail")
-
-    // Tests
-    testApi("org.springframework.boot:spring-boot-starter-test") {
-        exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
-        exclude(group = "org.mockito")
-    }
-    testApi("org.junit.jupiter:junit-jupiter")
-    testApi("io.mockk:mockk:1.13.13")
-    testApi("org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinxVersion")
-    testApi("org.testcontainers:testcontainers:$testContainersVersion")
-    testApi("org.testcontainers:junit-jupiter:$testContainersVersion")
-    testApi("org.testcontainers:mongodb:$testContainersVersion")
 }
 
 configurations.all {
