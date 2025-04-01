@@ -45,9 +45,9 @@ class UserRateLimitFilterTest : BaseSpringBootTest() {
             registry.add("spring.data.redis.port") { redisContainer.getMappedPort(6379) }
             registry.add("spring.data.redis.password") { "" }
             registry.add("baseline.security.rate-limit.user-limit") { 2 }
-            registry.add("baseline.security.rate-limit.user-time-window-minutes") { 2 }
+            registry.add("baseline.security.rate-limit.user-time-window") { 2 }
             registry.add("baseline.security.rate-limit.ip-limit") { 4 }
-            registry.add("baseline.security.rate-limit.ip-time-window-minutes") { 2 }
+            registry.add("baseline.security.rate-limit.ip-time-window") { 2 }
         }
     }
 

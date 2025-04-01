@@ -46,13 +46,11 @@ class LoginAttemptIpLimitFilterTest : BaseSpringBootTest() {
             registry.add("spring.data.redis.port") { redisContainer.getMappedPort(6379) }
             registry.add("spring.data.redis.password") { "" }
             registry.add("baseline.security.rate-limit.user-limit") { 10000 }
-            registry.add("baseline.security.rate-limit.user-time-window-minutes") { 2 }
+            registry.add("baseline.security.rate-limit.user-time-window") { 2 }
             registry.add("baseline.security.rate-limit.ip-limit") { 10000 }
-            registry.add("baseline.security.rate-limit.ip-time-window-minutes") { 2 }
+            registry.add("baseline.security.rate-limit.ip-time-window") { 2 }
             registry.add("baseline.security.login-attempt-limit.ip-limit") { 2 }
-            registry.add("baseline.security.login-attempt-limit.ip-time-window-minutes") { 1 }
-            registry.add("baseline.security.login-attempt-limit.email-limit") { 10000 }
-            registry.add("baseline.security.login-attempt-limit.email-time-window-minutes") { 1 }
+            registry.add("baseline.security.login-attempt-limit.ip-time-window") { 1 }
 
         }
     }
