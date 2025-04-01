@@ -216,11 +216,17 @@ jreleaser {
         maven {
             mavenCentral {
                 this.create("sonatype") {
+                    applyMavenCentralRules.set(true)
+
                     username.set(mavenCentralUsername)
                     password.set(mavenCentralPassword)
+
                     active.set(Active.ALWAYS)
                     url.set("https://central.sonatype.com/api/v1/publisher")
                     stagingRepository("build/staging-deploy")
+
+                    maxRetries.set(100)
+                    retryDelay.set(60)
                 }
             }
         }
