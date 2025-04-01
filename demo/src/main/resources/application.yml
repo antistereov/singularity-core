@@ -1,5 +1,5 @@
-#server:
-#  port: 8000
+server:
+  port: ${BACKEND_PORT}
 
 spring:
   data:
@@ -28,7 +28,7 @@ baseline:
     base-url: ${BACKEND_BASE_URL}
     secure: ${SECURE:false}
   mail:
-    enable: ${ENABLE_EMAIL_VERIFICATION:true}
+    enable: ${ENABLE_EMAIL:true}
     host: ${MAIL_HOST}
     port: ${MAIL_PORT}
     email: ${MAIL_EMAIL}
@@ -40,19 +40,20 @@ baseline:
     debug: ${MAIL_DEBUG:false}
     verification-expiration: ${MAIL_VERIFICATION_EXPIRATION:900}
     verification-send-cooldown: ${MAIL_VERIFICATION_SEND_COOLDOWN:60}
-    password-reset-expiration: ${MAIL_PASSWORD_RESET_EXPIRATION:900}
-    password-reset-send-cooldown: ${MAIL_PASSWORD_RESET_SEND_COOLDOWN:60}
-    ui-verification-path: ${EMAIL_VERIFICATION_PATH}
+    password-reset-expiration: 900
+    password-reset-send-cooldown: 60
+    ui-verification-path: ${EMAIL_VERIFICATION_PATH:/auth/verify-email}
+    ui-password-reset-path: ${PASSWORD_RESET_PATH:/auth/password-reset}
   security:
     encryption:
       secret-key: ${SECRET_KEY}
     jwt:
       secret-key: ${JWT_SECRET_KEY}
-      expires-in: ${JWT_EXPIRATION:900}
+      expires-in: 900
     rate-limit:
-      ip-limit: ${IP_RATE_LIMIT_MINUTE:200}
+      ip-limit: 200
       ip-time-window: 1
-      user-limit: ${ACCOUNT_RATE_LIMIT_MINUTE:100}
+      user-limit: 200
       user-time-window: 1
     login-attempt-limit:
       ip-limit: 10
@@ -60,4 +61,4 @@ baseline:
     two-factor:
       recovery-code-length: 20
   ui:
-    base-url: ${FRONTEND_BASE_URL}
+    base-url: ${UI_BASE_URL}

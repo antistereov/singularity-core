@@ -49,3 +49,4 @@ bin/
 .env
 /baseline/target/
 /logs/
+/demo/logs/
