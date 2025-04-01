@@ -40,3 +40,12 @@ dependencies {
     testImplementation("org.testcontainers:junit-jupiter:$testContainersVersion")
     testImplementation("org.testcontainers:mongodb:$testContainersVersion")
 }
+
+configurations.all {
+    exclude(group = "ch.qos.logback", module = "logback-classic")
+    exclude(group = "org.apache.logging.log4j", module = "log4j-to-slf4j")
+}
+
+tasks.test {
+    useJUnitPlatform()
+}
