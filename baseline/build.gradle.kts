@@ -161,11 +161,12 @@ jreleaser {
         github {
             repoOwner.set("antistereov")
             name.set("web-kotlin-spring-baseline")
-            releaseName.set("Release $version")
             overwrite.set(true)
             skipTag.set(false)
             sign.set(true)
             token.set(gitHubToken)
+
+            uploadAssets.set(Active.ALWAYS)
 
             changelog {
                 enabled.set(true)
