@@ -25,11 +25,11 @@ jobs:
 
       - name: Build with Gradle
         run: |
-          ./gradlew assemble
+          ./gradlew -x test
 
       - name: Run Tests
         run: |
-          ./gradlew build -x test
+          ./gradlew test
 
       - name: Publish Test Reports
         uses: mikepenz/action-junit-report@v5
