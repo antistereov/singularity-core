@@ -3,7 +3,7 @@ name: Release and Deploy
 on:
   push:
     tags:
-      - '[0-9]+.[0-9]+.[0-9]+'
+      - 'v*'
 
 env:
   MAVENCENTRAL_USERNAME: ${{ secrets.MAVENCENTRAL_USERNAME }}
