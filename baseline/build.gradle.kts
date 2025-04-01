@@ -161,7 +161,6 @@ jreleaser {
         github {
             repoOwner.set("antistereov")
             name.set("web-kotlin-spring-baseline")
-            tagName.set("$version")
             releaseName.set("Release $version")
             overwrite.set(true)
             skipTag.set(false)
@@ -172,7 +171,6 @@ jreleaser {
                 enabled.set(true)
                 preset.set("conventional-commits")
                 formatted.set(Active.ALWAYS)
-                links.set(true)
 
                 contributors {
                     enabled.set(true)

@@ -1,3 +1,18 @@
+## [v1.0.4]
+
+## Changelog
+
+## 🐛 Fixes
+- a3f6eb4 fix dependencies and add log4j2 logging
+
+## 🔄️ Changes
+- 955f347 refactor .env.sample and set default application properties
+
+
+## Contributors
+We'd like to thank the following people for their contributions:
+antistereov
+
 ## [1.0.3]
 
 ## Changelog
@@ -40,14 +55,37 @@ antistereov
 - [6a4513d](https://github.com/antistereov/web-kotlin-spring-baseline/commits/6a4513d) add login attempt limits and refactor rate limits
 - [aac778f](https://github.com/antistereov/web-kotlin-spring-baseline/commits/aac778f) add caching of valid access tokens
 - [1c28312](https://github.com/antistereov/web-kotlin-spring-baseline/commits/1c28312) implement password reset
+- [558ca91](https://github.com/antistereov/web-kotlin-spring-baseline/commits/558ca91) simplify paths in mail controller
+- [abefd41](https://github.com/antistereov/web-kotlin-spring-baseline/commits/abefd41) mail is now optional
+- [1e9c1dd](https://github.com/antistereov/web-kotlin-spring-baseline/commits/1e9c1dd) create dto for email verification cooldown
+- [93430f9](https://github.com/antistereov/web-kotlin-spring-baseline/commits/93430f9) **two-factor-auth**: implement recovery
+- [7645206](https://github.com/antistereov/web-kotlin-spring-baseline/commits/7645206) implement two-factor authentication
+- [e1ec3c2](https://github.com/antistereov/web-kotlin-spring-baseline/commits/e1ec3c2) user model is now more robust and can be used for multiple different projects
+- [421ca19](https://github.com/antistereov/web-kotlin-spring-baseline/commits/421ca19) initialize library
+- [81c99cf](https://github.com/antistereov/web-kotlin-spring-baseline/commits/81c99cf) initialize repository
+
+## 🐛 Fixes
+- [9395f4d](https://github.com/antistereov/web-kotlin-spring-baseline/commits/9395f4d) change frontend email verification path
+- [47e09d4](https://github.com/antistereov/web-kotlin-spring-baseline/commits/47e09d4) remove default values for backend and mail properties since there is an issue with config generation otherwise
+- [58c78de](https://github.com/antistereov/web-kotlin-spring-baseline/commits/58c78de) try to resolve annotation processing
 
 ## 🔄️ Changes
 - [2fa6f29](https://github.com/antistereov/web-kotlin-spring-baseline/commits/2fa6f29) create RateLimitService and remove login attempt check based on body
 - [710b16f](https://github.com/antistereov/web-kotlin-spring-baseline/commits/710b16f) make GoogleAuthenticator a bean instead of singleton inside TwoFactorAuthService
+- [b673fe9](https://github.com/antistereov/web-kotlin-spring-baseline/commits/b673fe9) make mail verification truly optional and edit configuration constraints
+- [e50551f](https://github.com/antistereov/web-kotlin-spring-baseline/commits/e50551f) change project structure to make it more readable
+- [e87be17](https://github.com/antistereov/web-kotlin-spring-baseline/commits/e87be17) make naming of dtos consistent
+- [864f084](https://github.com/antistereov/web-kotlin-spring-baseline/commits/864f084) simplify code and add tests
+- [f768861](https://github.com/antistereov/web-kotlin-spring-baseline/commits/f768861) create separate configuration classes for easier maintainability
+- [4dc1840](https://github.com/antistereov/web-kotlin-spring-baseline/commits/4dc1840) remove idea config from repo
+- [c212780](https://github.com/antistereov/web-kotlin-spring-baseline/commits/c212780) update gitignore
+- [532c3e3](https://github.com/antistereov/web-kotlin-spring-baseline/commits/532c3e3) remove unused tests and set version to snapshot
+- [30c2759](https://github.com/antistereov/web-kotlin-spring-baseline/commits/30c2759) create module for autoconfiguration and for starter
+
 
 ## Contributors
 We'd like to thank the following people for their contributions:
-antistereov
+GitHub, Stereov, antistereov
 
 ## [0.2.0]
 
@@ -56,52 +94,35 @@ antistereov
 ## 🚀 Features
 - [558ca91](https://github.com/antistereov/web-kotlin-spring-baseline/commits/558ca91) simplify paths in mail controller
 - [abefd41](https://github.com/antistereov/web-kotlin-spring-baseline/commits/abefd41) mail is now optional
-
-## 🔄️ Changes
-- [b673fe9](https://github.com/antistereov/web-kotlin-spring-baseline/commits/b673fe9) make mail verification truly optional and edit configuration constraints
-- [e50551f](https://github.com/antistereov/web-kotlin-spring-baseline/commits/e50551f) change project structure to make it more readable
-
-## Contributors
-We'd like to thank the following people for their contributions:
-antistereov
-
-## [0.1.8]
-
-## Changelog
+- [1e9c1dd](https://github.com/antistereov/web-kotlin-spring-baseline/commits/1e9c1dd) create dto for email verification cooldown
+- [93430f9](https://github.com/antistereov/web-kotlin-spring-baseline/commits/93430f9) **two-factor-auth**: implement recovery
+- [7645206](https://github.com/antistereov/web-kotlin-spring-baseline/commits/7645206) implement two-factor authentication
+- [e1ec3c2](https://github.com/antistereov/web-kotlin-spring-baseline/commits/e1ec3c2) user model is now more robust and can be used for multiple different projects
+- [421ca19](https://github.com/antistereov/web-kotlin-spring-baseline/commits/421ca19) initialize library
+- [81c99cf](https://github.com/antistereov/web-kotlin-spring-baseline/commits/81c99cf) initialize repository
 
 ## 🐛 Fixes
 - [9395f4d](https://github.com/antistereov/web-kotlin-spring-baseline/commits/9395f4d) change frontend email verification path
 - [47e09d4](https://github.com/antistereov/web-kotlin-spring-baseline/commits/47e09d4) remove default values for backend and mail properties since there is an issue with config generation otherwise
 - [58c78de](https://github.com/antistereov/web-kotlin-spring-baseline/commits/58c78de) try to resolve annotation processing
 
-## Contributors
-We'd like to thank the following people for their contributions:
-antistereov
-
-## [0.1.7]
-
-## Changelog
-
 ## 🔄️ Changes
+- [b673fe9](https://github.com/antistereov/web-kotlin-spring-baseline/commits/b673fe9) make mail verification truly optional and edit configuration constraints
 - [e50551f](https://github.com/antistereov/web-kotlin-spring-baseline/commits/e50551f) change project structure to make it more readable
-
-## Contributors
-We'd like to thank the following people for their contributions:
-antistereov
-
-## [0.1.6]
-
-## Changelog
-
-## 🔄️ Changes
-- [e50551f](https://github.com/antistereov/web-kotlin-spring-baseline/commits/e50551f) change project structure to make it more readable
+- [e87be17](https://github.com/antistereov/web-kotlin-spring-baseline/commits/e87be17) make naming of dtos consistent
+- [864f084](https://github.com/antistereov/web-kotlin-spring-baseline/commits/864f084) simplify code and add tests
+- [f768861](https://github.com/antistereov/web-kotlin-spring-baseline/commits/f768861) create separate configuration classes for easier maintainability
+- [4dc1840](https://github.com/antistereov/web-kotlin-spring-baseline/commits/4dc1840) remove idea config from repo
+- [c212780](https://github.com/antistereov/web-kotlin-spring-baseline/commits/c212780) update gitignore
+- [532c3e3](https://github.com/antistereov/web-kotlin-spring-baseline/commits/532c3e3) remove unused tests and set version to snapshot
+- [30c2759](https://github.com/antistereov/web-kotlin-spring-baseline/commits/30c2759) create module for autoconfiguration and for starter
 
 
 ## Contributors
 We'd like to thank the following people for their contributions:
-antistereov
+GitHub, Stereov, antistereov
 
-## [0.1.5]
+## [0.1.8]
 
 ## Changelog
 
@@ -113,7 +134,13 @@ antistereov
 - [421ca19](https://github.com/antistereov/web-kotlin-spring-baseline/commits/421ca19) initialize library
 - [81c99cf](https://github.com/antistereov/web-kotlin-spring-baseline/commits/81c99cf) initialize repository
 
+## 🐛 Fixes
+- [9395f4d](https://github.com/antistereov/web-kotlin-spring-baseline/commits/9395f4d) change frontend email verification path
+- [47e09d4](https://github.com/antistereov/web-kotlin-spring-baseline/commits/47e09d4) remove default values for backend and mail properties since there is an issue with config generation otherwise
+- [58c78de](https://github.com/antistereov/web-kotlin-spring-baseline/commits/58c78de) try to resolve annotation processing
+
 ## 🔄️ Changes
+- [e50551f](https://github.com/antistereov/web-kotlin-spring-baseline/commits/e50551f) change project structure to make it more readable
 - [e87be17](https://github.com/antistereov/web-kotlin-spring-baseline/commits/e87be17) make naming of dtos consistent
 - [864f084](https://github.com/antistereov/web-kotlin-spring-baseline/commits/864f084) simplify code and add tests
 - [f768861](https://github.com/antistereov/web-kotlin-spring-baseline/commits/f768861) create separate configuration classes for easier maintainability
@@ -121,6 +148,50 @@ antistereov
 - [c212780](https://github.com/antistereov/web-kotlin-spring-baseline/commits/c212780) update gitignore
 - [532c3e3](https://github.com/antistereov/web-kotlin-spring-baseline/commits/532c3e3) remove unused tests and set version to snapshot
 - [30c2759](https://github.com/antistereov/web-kotlin-spring-baseline/commits/30c2759) create module for autoconfiguration and for starter
+
+
+## Contributors
+We'd like to thank the following people for their contributions:
+antistereov
+
+## [0.1.7]
+
+## Changelog
+
+## 🚀 Features
+- [1e9c1dd](https://github.com/antistereov/web-kotlin-spring-baseline/commits/1e9c1dd) create dto for email verification cooldown
+- [93430f9](https://github.com/antistereov/web-kotlin-spring-baseline/commits/93430f9) **two-factor-auth**: implement recovery
+- [7645206](https://github.com/antistereov/web-kotlin-spring-baseline/commits/7645206) implement two-factor authentication
+- [e1ec3c2](https://github.com/antistereov/web-kotlin-spring-baseline/commits/e1ec3c2) user model is now more robust and can be used for multiple different projects
+- [421ca19](https://github.com/antistereov/web-kotlin-spring-baseline/commits/421ca19) initialize library
+- [81c99cf](https://github.com/antistereov/web-kotlin-spring-baseline/commits/81c99cf) initialize repository
+
+## 🐛 Fixes
+- [9395f4d](https://github.com/antistereov/web-kotlin-spring-baseline/commits/9395f4d) change frontend email verification path
+- [47e09d4](https://github.com/antistereov/web-kotlin-spring-baseline/commits/47e09d4) remove default values for backend and mail properties since there is an issue with config generation otherwise
+- [58c78de](https://github.com/antistereov/web-kotlin-spring-baseline/commits/58c78de) try to resolve annotation processing
+
+## 🔄️ Changes
+- [e50551f](https://github.com/antistereov/web-kotlin-spring-baseline/commits/e50551f) change project structure to make it more readable
+- [e87be17](https://github.com/antistereov/web-kotlin-spring-baseline/commits/e87be17) make naming of dtos consistent
+- [864f084](https://github.com/antistereov/web-kotlin-spring-baseline/commits/864f084) simplify code and add tests
+- [f768861](https://github.com/antistereov/web-kotlin-spring-baseline/commits/f768861) create separate configuration classes for easier maintainability
+- [4dc1840](https://github.com/antistereov/web-kotlin-spring-baseline/commits/4dc1840) remove idea config from repo
+- [c212780](https://github.com/antistereov/web-kotlin-spring-baseline/commits/c212780) update gitignore
+- [532c3e3](https://github.com/antistereov/web-kotlin-spring-baseline/commits/532c3e3) remove unused tests and set version to snapshot
+- [30c2759](https://github.com/antistereov/web-kotlin-spring-baseline/commits/30c2759) create module for autoconfiguration and for starter
+
+
+## Contributors
+We'd like to thank the following people for their contributions:
+antistereov
+
+## [0.1.6]
+
+## Changelog
+
+## 🔄️ Changes
+- [e50551f](https://github.com/antistereov/web-kotlin-spring-baseline/commits/e50551f) change project structure to make it more readable
 
 
 ## Contributors
