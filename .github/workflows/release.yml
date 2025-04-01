@@ -45,7 +45,7 @@ jobs:
           TAG_VERSION=${{ github.ref_name }}
           echo "Git Tag Version: $TAG_VERSION"
           
-          if [[ "$TAG_VERSION" != "$VERSION" ]]; then
+          if [[ "$TAG_VERSION" != "v$VERSION" ]]; then
               echo "❌ Version mismatch! Gradle version ($VERSION) does not match Git tag ($TAG_VERSION)"
               exit 1
           fi
