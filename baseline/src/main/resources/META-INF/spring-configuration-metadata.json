@@ -51,190 +51,223 @@
       "name": "baseline.app.base-url",
       "type": "java.lang.String",
       "sourceType": "io.stereov.web.properties.AppProperties",
-      "defaultValue": "http://localhost:8000"
+      "defaultValue": "http://localhost:8000",
+      "description": "Base URL for the application. This is used to generate links in emails and other notifications."
     },
     {
       "name": "baseline.app.name",
       "type": "java.lang.String",
       "sourceType": "io.stereov.web.properties.AppProperties",
-      "defaultValue": "Spring Application"
+      "defaultValue": "Spring Application",
+      "description": "The name of the application. This is used in various places, including the UI and emails."
     },
     {
       "name": "baseline.app.secure",
       "type": "java.lang.Boolean",
       "sourceType": "io.stereov.web.properties.AppProperties",
-      "defaultValue": false
+      "defaultValue": false,
+      "description": "Enable HTTPS and secure cookies for the application. Default is false."
     },
     {
       "name": "baseline.auth.admin-paths",
       "type": "java.util.List<java.lang.String>",
-      "sourceType": "io.stereov.web.properties.AuthProperties"
+      "sourceType": "io.stereov.web.properties.AuthProperties",
+      "description": "Paths that require admin authentication. This is a comma-separated list of paths."
     },
     {
       "name": "baseline.auth.public-paths",
       "type": "java.util.List<java.lang.String>",
-      "sourceType": "io.stereov.web.properties.AuthProperties"
+      "sourceType": "io.stereov.web.properties.AuthProperties",
+      "description": "Paths that do not require authentication. This is a comma-separated list of paths."
     },
     {
       "name": "baseline.auth.user-paths",
       "type": "java.util.List<java.lang.String>",
-      "sourceType": "io.stereov.web.properties.AuthProperties"
+      "sourceType": "io.stereov.web.properties.AuthProperties",
+      "description": "Paths that require user authentication. This is a comma-separated list of paths."
     },
     {
       "name": "baseline.mail.debug",
       "type": "java.lang.Boolean",
       "sourceType": "io.stereov.web.properties.MailProperties",
-      "defaultValue": false
+      "defaultValue": false,
+      "description": "Enable debug mode for email sending. This will log the email content to the console."
     },
     {
       "name": "baseline.mail.email",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.web.properties.MailProperties"
+      "sourceType": "io.stereov.web.properties.MailProperties",
+      "description": "The email address used to send emails. This is the 'from' address."
     },
     {
       "name": "baseline.mail.enable",
       "type": "java.lang.Boolean",
       "sourceType": "io.stereov.web.properties.MailProperties",
-      "defaultValue": false
+      "defaultValue": false,
+      "description": "Enable or disable email sending. Default is false."
     },
     {
       "name": "baseline.mail.host",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.web.properties.MailProperties"
+      "sourceType": "io.stereov.web.properties.MailProperties",
+      "defaultValue": "smtp.example.com"
     },
     {
       "name": "baseline.mail.password",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.web.properties.MailProperties"
+      "sourceType": "io.stereov.web.properties.MailProperties",
+      "description": "The password for the email account used to send emails."
     },
     {
       "name": "baseline.mail.password-reset-expiration",
       "type": "java.lang.Long",
       "sourceType": "io.stereov.web.properties.MailProperties",
-      "defaultValue": 900
+      "defaultValue": 900,
+      "description": "Expiration time for the password reset token in seconds. Default is 15 minutes."
     },
     {
       "name": "baseline.mail.password-reset-send-cooldown",
       "type": "java.lang.Long",
       "sourceType": "io.stereov.web.properties.MailProperties",
-      "defaultValue": 60
+      "defaultValue": 60,
+      "description": "Cooldown period in seconds for sending password reset emails."
     },
     {
       "name": "baseline.mail.port",
       "type": "java.lang.Integer",
       "sourceType": "io.stereov.web.properties.MailProperties",
-      "defaultValue": 587
+      "defaultValue": 587,
+      "description": "The port used for sending emails. Default is 587."
     },
     {
       "name": "baseline.mail.smtp-auth",
       "type": "java.lang.Boolean",
       "sourceType": "io.stereov.web.properties.MailProperties",
-      "defaultValue": true
+      "defaultValue": true,
+      "description": "Enable SMTP authentication for sending emails."
     },
     {
       "name": "baseline.mail.smtp-starttls",
       "type": "java.lang.Boolean",
       "sourceType": "io.stereov.web.properties.MailProperties",
-      "defaultValue": true
+      "defaultValue": true,
+      "description": "Enable STARTTLS for secure email transmission."
     },
     {
       "name": "baseline.mail.transport-protocol",
       "type": "java.lang.String",
       "sourceType": "io.stereov.web.properties.MailProperties",
-      "defaultValue": "smtp"
+      "defaultValue": "smtp",
+      "description": "The transport protocol used for sending emails. Default is 'smtp'."
     },
     {
       "name": "baseline.mail.ui-password-reset-path",
       "type": "java.lang.String",
       "sourceType": "io.stereov.web.properties.MailProperties",
-      "defaultValue": "/auth/password-reset"
+      "defaultValue": "/auth/password-reset",
+      "description": "The path to the password reset page in the UI application."
     },
     {
       "name": "baseline.mail.ui-verification-path",
       "type": "java.lang.String",
       "sourceType": "io.stereov.web.properties.MailProperties",
-      "defaultValue": "/auth/verify-email"
+      "defaultValue": "/auth/verify-email",
+      "description": "The path to the verification page in the UI application."
     },
     {
       "name": "baseline.mail.username",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.web.properties.MailProperties"
+      "sourceType": "io.stereov.web.properties.MailProperties",
+      "description": "The username for the email account used to send emails."
     },
     {
       "name": "baseline.mail.verification-expiration",
       "type": "java.lang.Long",
       "sourceType": "io.stereov.web.properties.MailProperties",
-      "defaultValue": 900
+      "defaultValue": 900,
+      "description": "Expiration time for the verification token in seconds. Default is 15 minutes."
     },
     {
       "name": "baseline.mail.verification-send-cooldown",
       "type": "java.lang.Long",
       "sourceType": "io.stereov.web.properties.MailProperties",
-      "defaultValue": 60
+      "defaultValue": 60,
+      "description": "Cooldown period in seconds for sending verification emails."
     },
     {
       "name": "baseline.security.encryption.secret-key",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.web.properties.EncryptionProperties"
+      "sourceType": "io.stereov.web.properties.EncryptionProperties",
+      "description": "The secret key used for encryption. You can generate one here: https://generate-random.org/encryption-key-generator."
     },
     {
       "name": "baseline.security.jwt.expires-in",
       "type": "java.lang.Long",
       "sourceType": "io.stereov.web.properties.JwtProperties",
-      "defaultValue": 900
+      "defaultValue": 900,
+      "description": "Expiration time for the JWT token in seconds. Default is 15 minutes."
     },
     {
       "name": "baseline.security.jwt.secret-key",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.web.properties.JwtProperties"
+      "sourceType": "io.stereov.web.properties.JwtProperties",
+      "description": "The secret key used to sign the JWT tokens. You can generate one here: https://generate-random.org/encryption-key-generator."
     },
     {
       "name": "baseline.security.rate-limit.ip-limit",
       "type": "java.lang.Long",
       "sourceType": "io.stereov.web.properties.RateLimitProperties",
-      "defaultValue": 200
+      "defaultValue": 200,
+      "description": "Maximum number of requests from a single IP address in the time window."
     },
     {
-      "name": "baseline.security.rate-limit.ip-time-window-minutes",
+      "name": "baseline.security.rate-limit.ip-time-window",
       "type": "java.lang.Long",
       "sourceType": "io.stereov.web.properties.RateLimitProperties",
-      "defaultValue": 1
+      "defaultValue": 1,
+      "description": "Time window in minutes for the IP limit."
     },
     {
       "name": "baseline.security.rate-limit.user-limit",
       "type": "java.lang.Long",
       "sourceType": "io.stereov.web.properties.RateLimitProperties",
-      "defaultValue": 200
+      "defaultValue": 200,
+      "description": "Maximum number of requests per user in the time window."
     },
     {
-      "name": "baseline.security.rate-limit.user-time-window-minutes",
+      "name": "baseline.security.rate-limit.user-time-window",
       "type": "java.lang.Long",
       "sourceType": "io.stereov.web.properties.RateLimitProperties",
-      "defaultValue": 1
+      "defaultValue": 1,
+      "description": "Time window in minutes for the user limit."
     },
     {
       "name": "baseline.security.login-attempt-limit.ip-limit",
       "type": "java.lang.Long",
       "sourceType": "io.stereov.web.properties.LoginAttemptLimitProperties",
-      "defaultValue": 10
+      "defaultValue": 10,
+      "description": "Maximum number of login attempts from a single IP address before being blocked."
     },
     {
-      "name": "baseline.security.login-attempt-limit.ip-time-window-minutes",
+      "name": "baseline.security.login-attempt-limit.ip-time-window",
       "type": "java.lang.Long",
       "sourceType": "io.stereov.web.properties.LoginAttemptLimitProperties",
-      "defaultValue": 5
+      "defaultValue": 5,
+      "description": "Time window in minutes for the IP limit."
     },
     {
       "name": "baseline.security.two-factor.recovery-code-length",
       "type": "java.lang.Integer",
       "sourceType": "io.stereov.web.properties.TwoFactorAuthProperties",
-      "defaultValue": 20
+      "defaultValue": 20,
+      "description": "Length of the recovery code. Default is 20 characters."
     },
     {
       "name": "baseline.ui.base-url",
       "type": "java.lang.String",
       "sourceType": "io.stereov.web.properties.UiProperties",
-      "defaultValue": "http://localhost:4200"
+      "defaultValue": "http://localhost:4200",
+      "description": "Base URL for the UI application. This is used to generate links in emails and other notifications."
     }
   ],
   "hints": []

@@ -12,10 +12,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties
  * It is prefixed with `baseline.security.login-attempt-limit` in the configuration file.
  *
  * @property ipLimit The maximum number of login attempts allowed from a single IP address.
- * @property ipTimeWindowMinutes The time window in minutes for the IP address limit.
+ * @property ipTimeWindow The time window in minutes for the IP address limit.
  */
 @ConfigurationProperties(prefix = "baseline.security.login-attempt-limit")
 data class LoginAttemptLimitProperties(
     val ipLimit: Long = 10,
-    val ipTimeWindowMinutes: Long = 5,
+    val ipTimeWindow: Long = 5,
 )

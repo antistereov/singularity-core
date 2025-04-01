@@ -61,7 +61,7 @@ class RateLimitService(
             val userBucket = resolveBucket(
                 "rate_limit_user:$userId",
                 rateLimitProperties.userLimit,
-                rateLimitProperties.userTimeWindowMinutes
+                rateLimitProperties.userTimeWindow
             )
             userBucket.flatMap { checkBucket(it, "Too many requests for current user") }
         }
@@ -80,7 +80,7 @@ class RateLimitService(
         return resolveBucket(
             "login_attempt_ip:$clientIp",
             loginAttemptLimitProperties.ipLimit,
-            loginAttemptLimitProperties.ipTimeWindowMinutes
+            loginAttemptLimitProperties.ipTimeWindow
         )
             .flatMap { checkBucket(it, "Too many requests from current IP address") }
     }

@@ -12,16 +12,16 @@ import org.springframework.boot.context.properties.ConfigurationProperties
  * It is prefixed with `baseline.security.rate-limit` in the configuration file.
  *
  * @property ipLimit The rate limit for IP addresses in requests per minute.
- * @property ipTimeWindowMinutes The time window for IP rate limiting in minutes.
+ * @property ipTimeWindow The time window for IP rate limiting in minutes.
  * @property userLimit The rate limit for users in requests per minute.
- * @property userTimeWindowMinutes The time window for user rate limiting in minutes.
+ * @property userTimeWindow The time window for user rate limiting in minutes.
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
 @ConfigurationProperties(prefix = "baseline.security.rate-limit")
 data class RateLimitProperties(
     val ipLimit: Long = 200,
-    val ipTimeWindowMinutes: Long = 1,
+    val ipTimeWindow: Long = 1,
     val userLimit: Long = 200,
-    val userTimeWindowMinutes: Long = 1,
+    val userTimeWindow: Long = 1,
 )

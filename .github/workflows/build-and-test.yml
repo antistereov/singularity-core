@@ -25,7 +25,7 @@ jobs:
 
       - name: Build with Gradle
         run: |
-          ./gradlew build -x test
+          ./gradlew assemble
 
       - name: Run Tests
         run: |

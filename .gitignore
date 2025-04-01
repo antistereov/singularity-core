@@ -48,3 +48,4 @@ bin/
 ### Environment Files ###
 .env
 /baseline/target/
+/logs/

@@ -11,7 +11,6 @@ plugins {
     id("io.spring.dependency-management") version "1.1.4"
     id("maven-publish")
     id("java-library")
-    id("org.jetbrains.kotlin.kapt") version "2.1.10"
     id("org.jreleaser") version "1.17.0"
 }
 
@@ -54,8 +53,6 @@ dependencies {
     api(platform("org.springframework.boot:spring-boot-dependencies:$springBootVersion"))
     api("org.springframework.boot:spring-boot-starter-actuator")
     api("org.springframework.boot:spring-boot-autoconfigure")
-    kapt("org.springframework.boot:spring-boot-configuration-processor")
-    compileOnly("org.springframework.boot:spring-boot-configuration-processor")
 
     // Security and JWT
     api("org.springframework.boot:spring-boot-starter-security")
@@ -73,14 +70,13 @@ dependencies {
     api("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:$kotlinxVersion")
     api("io.projectreactor.netty:reactor-netty:1.2.1")
 
+    // Development
+    api("org.springframework.boot:spring-boot-devtools:$springBootVersion")
+
     // Logging
-    api("io.github.oshai:kotlin-logging-jvm:7.0.0")
-    api("org.apache.logging.log4j:log4j-core:$log4jVersion")
-    api("org.apache.logging.log4j:log4j-api:$log4jVersion")
-    api("org.apache.logging.log4j:log4j-slf4j-impl:$log4jVersion")
-    api("org.apache.logging.log4j:log4j-spring-boot:$log4jVersion")
+    api("io.github.oshai:kotlin-logging-jvm:7.0.6")
     api("org.springframework.boot:spring-boot-starter-log4j2")
-    runtimeOnly("com.lmax:disruptor:3.4.4")
+    api("com.lmax:disruptor:3.4.4")
 
     // MongoDB
     api("org.springframework.boot:spring-boot-starter-data-mongodb-reactive")
@@ -102,16 +98,22 @@ dependencies {
     api("org.springframework.boot:spring-boot-starter-mail")
 
     // Tests
-    testImplementation("org.springframework.boot:spring-boot-starter-test") {
+    testApi("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
         exclude(group = "org.mockito")
     }
-    testImplementation("org.junit.jupiter:junit-jupiter")
-    testImplementation("io.mockk:mockk:1.13.13")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinxVersion")
-    testImplementation("org.testcontainers:testcontainers:$testContainersVersion")
-    testImplementation("org.testcontainers:junit-jupiter:$testContainersVersion")
-    testImplementation("org.testcontainers:mongodb:$testContainersVersion")
+    testApi("org.junit.jupiter:junit-jupiter")
+    testApi("io.mockk:mockk:1.13.13")
+    testApi("org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinxVersion")
+    testApi("org.testcontainers:testcontainers:$testContainersVersion")
+    testApi("org.testcontainers:junit-jupiter:$testContainersVersion")
+    testApi("org.testcontainers:mongodb:$testContainersVersion")
+}
+
+configurations.all {
+    exclude(group = "commons-logging", module = "commons-logging")
+    exclude(group = "org.springframework.boot", module = "spring-boot-starter-logging")
+    exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat")
 }
 
 java {

@@ -198,12 +198,13 @@ Here are the key properties you need to set in your `application.yaml`:
     ```yaml
     baseline:
       app:
-        # The name of your application
-        name: YourApplication
-        # The base URL of your API
+        # Optional: The name of your application. Default is "Spring Boot Application"
+        name: Your Application
+        # Optional: The base URL of your backend. Default is http://localhost:8000
         base-url: http://localhost:8000
-        # Whether SSL and the secure setting for HTTP-only cookies should be set
-        secure: true # You might need to set it to false during development
+        # Optional: Enable HTTPS and secure cookies for the application. Default is false.
+        # Important: Never set this to false in production!
+        secure: false
     ```
     
 - **UI Settings:**
@@ -213,7 +214,7 @@ Here are the key properties you need to set in your `application.yaml`:
     ```yaml
     baseline:
       ui:
-        # The base URL of your frontend
+        # Optional: The base URL of your frontend. Default is http://localhost:4200
         base-url: http://localhost:4200
     ```
       
@@ -225,35 +226,31 @@ Here are the key properties you need to set in your `application.yaml`:
         app:
           security:
             encryption:
-              # Generate an encryption key that is used to encrypt entries in the database
-              # You can create one here: https://generate-random.org/encryption-key-generator and use the Base64 value
+              # Generate an encryption key used to encrypt entries in the database
+              # Note: You can create one here: https://generate-random.org/encryption-key-generator and use the Base64 value
               secret-key: <your-encryption-key>
             jwt:
               # Your JWT secret
-              # You can generate a secret here: https://jwtsecret.com/generate
+              # Note: You can generate a secret here: https://jwtsecret.com/generate
               secret-key: <your-jwt-secret>
-              # In how many seconds should your JWT expire?
+              # Optional: Expiration time for access tokens in seconds
               expires-in: 900
-              rate-limit:
-                # How many requests can a user make in a given time window?
-                ip-limit: 200
-                # How long should the time window be?
-                ip-time-window-minutes: 1
-                # How many requests can a user make in a given time window?
-                user-limit: 100
-                # How long should the time window be?
-                user-time-window-minutes: 1
-              login-attempt-limit:
-                # How many login attempts can a user make in a given time window?
-                email-limit: 15
-                # How long should the time window be?
-                email-time-window-minutes: 15
-                # How many login attempts can a user make in a given time window?
-                ip-limit: 10
-                # How long should the time window be?
-                ip-time-window-minutes: 15
+            rate-limit:
+              # Optional: IP-based limit on requests in a given time window
+              ip-limit: 200
+              # Optional: Time window for IP-based rate limiting in minutes
+              ip-time-window: 1
+              # Optional: User-based limit on requests in a given time window
+              user-limit: 200
+              # Optional: Time window for user-based rate limiting in minutes
+              user-time-window: 1
+            login-attempt-limit:
+              # Optional: IP-based limit on login attempts in a given time window
+              ip-limit: 10
+              # Optional: Time window for IP-based login attempts in minutes
+              ip-time-window: 15
             two-factor:
-              # How long should the recovery code be?
+              # Optional: Length of the 2FA recovery code. Default is 20 characters.
               recovery-code-length: 20
       ```
 
