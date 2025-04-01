@@ -1,3 +1,20 @@
+## [v1.1.1]
+
+## Changelog
+
+## 🛠  Build
+- [5f9d874](https://github.com/antistereov/web-kotlin-spring-baseline/commits/5f9d874) bump version to 1.1.1
+- [16891f6](https://github.com/antistereov/web-kotlin-spring-baseline/commits/16891f6) fix release script
+- [3a6f9e0](https://github.com/antistereov/web-kotlin-spring-baseline/commits/3a6f9e0) bump version to 1.1.1-SNAPSHOT
+
+## 📝 Documentation
+- [732dbed](https://github.com/antistereov/web-kotlin-spring-baseline/commits/732dbed) update CHANGELOG.md
+
+
+## Contributors
+We'd like to thank the following people for their contributions:
+antistereov
+
 ## [v1.1.0]
 
 ## Changelog
