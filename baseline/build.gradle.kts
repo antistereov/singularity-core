@@ -171,6 +171,7 @@ jreleaser {
                 enabled.set(true)
                 preset.set("conventional-commits")
                 formatted.set(Active.ALWAYS)
+                links.set(true)
 
                 contributors {
                     enabled.set(true)
