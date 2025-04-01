@@ -1,3 +1,33 @@
+## [v1.0.5]
+
+## Changelog
+
+## 🐛 Fixes
+- 9632796 fix dependencies and logger configuration for tests
+
+## 🧪 Tests
+- 22da44b update configs in tests
+
+## 🛠  Build
+- eff13ce bump version to 1.0.5
+- a4efeac increase max number of retries for deployment to maven central
+- 16c8dc9 update ci workflows
+- c4c51aa move test dependencies to demo project
+- 0820f3d fix build and test workflow
+- ec2e8ab fix build and test workflow
+- 75b6d3c fix build step
+- c712e0b bump version to 1.0.5-SNAPSHOT
+
+## 📝 Documentation
+- cccaaee update changelog and changelog config
+- 62b8774 **readme**: update README.md
+- c1bfaae **changelog**: update CHANGELOG.md
+
+
+## Contributors
+We'd like to thank the following people for their contributions:
+antistereov
+
 ## [v1.0.4]
 
 ## Changelog
