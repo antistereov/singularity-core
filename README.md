@@ -146,9 +146,6 @@ Here are the key properties you need to set in your `application.yaml`:
       # The port the server should run on
       port: 8000
     spring:
-      main:
-        # This setting is really important to make your application reactive
-        web-application-type: reactive
       devtools:
         restart:
           # Do you want your application to restart if changes occur?
@@ -159,12 +156,7 @@ Here are the key properties you need to set in your `application.yaml`:
           # Set log levels for your packages
           io.stereov.web: DEBUG
     ```
-    If you want to enable dev tools, you have to add the following dependency:
-      
-    ```kotlin
-    developmentOnly("org.springframework.boot:spring-boot-devtools")
-    ```
-
+  
 - **MongoDB:**
    
     You need to connect your backend to a MongoDB instance. This instance is used to save information about the users.
@@ -293,22 +285,6 @@ Here are the key properties you need to set in your `application.yaml`:
     By default, it is set to `false`.
     
     **Note:** Password resets are not possible without email verification.
-
-#### *(Optional)* Test Setup
-   
-I recommend the following packages if you want to test your application properly:
-```kotlin
-testImplementation("org.springframework.boot:spring-boot-starter-test") {
-    exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
-    exclude(group = "org.mockito")
-}
-testImplementation("org.junit.jupiter:junit-jupiter")
-testImplementation("io.mockk:mockk:1.13.13")
-testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinxVersion")
-testImplementation("org.testcontainers:testcontainers:$testContainersVersion")
-testImplementation("org.testcontainers:junit-jupiter:$testContainersVersion")
-testImplementation("org.testcontainers:mongodb:$testContainersVersion")
-```
 
 ## Service Overview
 
