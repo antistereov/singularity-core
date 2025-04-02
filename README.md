@@ -165,7 +165,7 @@ Here are the key properties you need to set in your `application.yaml`:
     spring:
       data:
         mongodb:
-         uri: mongodb://<username>:<password>@<host>:<port>/<database>?authSource=admin
+         uri: mongodb://<username>:<password>@<host>:<port>/<database>?authSource=admin&tls=<enable-tls>
     ```
 
 - **Redis:**
@@ -246,10 +246,13 @@ Here are the key properties you need to set in your `application.yaml`:
               recovery-code-length: 20
       ```
 
-- **Email Verification Settings:**
+- **Email Settings:**
    
-    You can require users to enable their email. Therefore, you need to configure your own SMTP server.
-    This server will send the user an email with a link to verify their email address.
+    You can enable emails.
+    This is needed to allow recovery when the user forgets their password. 
+    To activate, you need to configure your own SMTP server.
+    The server will send the user an email with a link to verify their email address on register
+    and can email the user to recover the user account it the password is lost.
     ```yaml
     baseline:
       mail:
@@ -301,21 +304,26 @@ Here are the key properties you need to set in your `application.yaml`:
   The application automatically handles authentication per request using a filter. 
   You can access the current authenticated user via the [`AuthenticationService`](baseline/src/main/kotlin/io/stereov/web/auth/service/AuthenticationService.kt).
 
-### **Cache Management**
+### Cache Management
 - **RedisService**:  
   Interact with the cache using the [`RedisService`](baseline/src/main/kotlin/io/stereov/web/global/service/cache/RedisService.kt) for efficient data retrieval and storage.
 
-### **Encryption & Decryption**
+### Encryption & Decryption
 - **EncryptionService**:  
   Use the [`EncryptionService`](baseline/src/main/kotlin/io/stereov/web/global/service/encryption/EncryptionService.kt) to securely encrypt and decrypt values before storing them in the database.
 
-### **Hashing & Validation**
+### Hashing & Validation
 - **HashService**:  
   The [`HashService`](baseline/src/main/kotlin/io/stereov/web/global/service/hash/HashService.kt) allows you to hash sensitive data and validate hashed values for secure comparisons.
 
-### **JWT Encoding & Decoding**
+### JWT Encoding & Decoding
 - **JwtService**:  
   The [`JwtService`](baseline/src/main/kotlin/io/stereov/web/global/service/jwt/JwtService.kt) handles the encoding and decoding of JSON Web Tokens (JWT) for authentication and authorization.
+
+### Two-Factor Authentication
+- **TwoFactorAuthService**:  
+  The [`TwoFactorAuthService`](baseline/src/main/kotlin/io/stereov/web/global/service/twofactorauth/TwoFactorAuthService.kt) manages the setup, 
+  verification, and recovery of two-factor authentication (2FA) for user accounts.
 
 ## Endpoints
 
@@ -330,6 +338,7 @@ The related class is [`UserSessionController`](baseline/src/main/kotlin/io/stere
 - **POST /user/login**: Logs in the user and issues JWT access and refresh tokens.
 - **POST /user/register**: Registers a new user and issues JWT tokens.
 - **POST /user/logout**: Logs the user out and clears authentication cookies.
+- **POST /user/logout-all**: Logs out the user from all devices.
 - **POST /user/refresh**: Refreshes the user's JWT tokens.
 - **PUT /user/me/email**: Updates the user's email address.
 - **PUT /user/me/password**: Updates the user's password.
