@@ -38,7 +38,6 @@ jobs:
 
       # Checking versions
       - name: Verify version numbers
-        id: gradle_version
         run: |
           VERSION=$(./gradlew checkVersion --quiet)
           echo "Gradle Project Version: $VERSION"
