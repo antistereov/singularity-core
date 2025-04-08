@@ -1,3 +1,32 @@
+## [v1.1.2]
+
+## Changelog
+
+## 🚀 Features
+- [7448c50](https://github.com/antistereov/web-kotlin-spring-baseline/commits/7448c50) add token for step-up which is required for critical changes to the account, e.g., changing the password
+
+## 🧰 Tasks
+- [f1c5c45](https://github.com/antistereov/web-kotlin-spring-baseline/commits/f1c5c45) remove unused methods
+- [0b7f74b](https://github.com/antistereov/web-kotlin-spring-baseline/commits/0b7f74b) remove unused variables in test
+
+## 🛠  Build
+- [adad77e](https://github.com/antistereov/web-kotlin-spring-baseline/commits/adad77e) remove automated update of changelog
+- [b68de56](https://github.com/antistereov/web-kotlin-spring-baseline/commits/b68de56) bump version to 1.1.2
+- [b3fdf79](https://github.com/antistereov/web-kotlin-spring-baseline/commits/b3fdf79) remove an unused id in verification step of release workflow
+- [79d3d8d](https://github.com/antistereov/web-kotlin-spring-baseline/commits/79d3d8d) fix release workflow
+- [d20e1cf](https://github.com/antistereov/web-kotlin-spring-baseline/commits/d20e1cf) add automated update of changelog after release
+- [96ab591](https://github.com/antistereov/web-kotlin-spring-baseline/commits/96ab591) update jrealeaser config
+- [d80e74a](https://github.com/antistereov/web-kotlin-spring-baseline/commits/d80e74a) bump version to 1.1.2-SNAPSHOT
+
+## 📝 Documentation
+- [7f68893](https://github.com/antistereov/web-kotlin-spring-baseline/commits/7f68893) **readme**: update README.md
+- [90abb1d](https://github.com/antistereov/web-kotlin-spring-baseline/commits/90abb1d) update CHANGELOG.md
+
+
+## Contributors
+We'd like to thank the following people for their contributions:
+antistereov
+
 ## [v1.1.1]
 
 ## Changelog
