@@ -391,7 +391,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
     @Test fun `stepUpStatus requires authentication`() = runTest {
         val user = registerUser(twoFactorEnabled = true)
 
-        val res = webTestClient.get()
+        webTestClient.get()
             .uri("/user/step-up")
             .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken(user.info.idX, user.info.devices.first().id))
             .exchange()
@@ -478,7 +478,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val oldEmail = "old@email.com"
         val newEmail = "new@email.com"
         val password = "password"
-        val user = registerUser(oldEmail, password)
+        registerUser(oldEmail, password)
 
         webTestClient.put()
             .uri("/user/me/email")
@@ -502,7 +502,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val newEmail = "new@email.com"
         val password = "password"
         val user = registerUser(oldEmail, password)
-        val twoFactorCode = gAuth.getTotpPassword(user.twoFactorSecret)
+        gAuth.getTotpPassword(user.twoFactorSecret)
 
         webTestClient.put()
             .uri("/user/me/email")
@@ -558,7 +558,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val password = "password"
         val user = registerUser(oldEmail, password, twoFactorEnabled = true)
 
-        val res = webTestClient.put()
+        webTestClient.put()
             .uri("/user/me/email")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .cookie(
@@ -655,7 +655,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val oldPassword = "password"
         val newPassword = "newPassword"
         val user = registerUser(email, oldPassword)
-        val twoFactorCode = gAuth.getTotpPassword(user.twoFactorSecret)
+        gAuth.getTotpPassword(user.twoFactorSecret)
 
         webTestClient.put()
             .uri("/user/me/password")
@@ -679,7 +679,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val oldPassword = "password"
         val newPassword = "newPassword"
         val user = registerUser(email, oldPassword)
-        val twoFactorCode = gAuth.getTotpPassword(user.twoFactorSecret)
+        gAuth.getTotpPassword(user.twoFactorSecret)
 
         webTestClient.put()
             .uri("/user/me/password")
