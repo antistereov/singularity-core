@@ -97,7 +97,7 @@ class BaseSpringBootTest {
                 .exchange()
                 .expectStatus().isOk
                 .returnResult<Void>()
-                .responseCookies[Constants.TWO_FACTOR_AUTH_COOKIE]
+                .responseCookies[Constants.LOGIN_VERIFICATION_TOKEN]
                 ?.firstOrNull()
                 ?.value
         }

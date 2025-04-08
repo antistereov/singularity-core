@@ -337,8 +337,6 @@ The related class is [`UserSessionController`](baseline/src/main/kotlin/io/stere
 - **GET /user/me/app**: Retrieves application-specific information about the authenticated user.
 - **POST /user/login**: Logs in the user and issues JWT access and refresh tokens.
 - **POST /user/register**: Registers a new user and issues JWT tokens.
-- **POST /user/step-up**: If 2FA is enabled, this endpoint is used to set a new step-up token that enables critical changes to the user account, e.g., changing the password.
-- **GET /user/step-up**: Gets the status of the step-up needed for critical changes to the user account. Is true if 2FA is disabled.
 - **POST /user/logout**: Logs the user out and clears authentication cookies.
 - **POST /user/logout-all**: Logs out the user from all devices.
 - **POST /user/refresh**: Refreshes the user's JWT tokens.
@@ -376,9 +374,11 @@ They provide a secure way to enhance user account security.
 The related class is [`UserTwoFactorAuthController`](baseline/src/main/kotlin/io/stereov/web/user/controller/UserTwoFactorAuthController.kt).
 
 - **POST /user/2fa/setup**: Set up two-factor authentication for the user.
-- **POST /user/2fa/verify**: Verifies the user's 2FA code.
-- **GET /user/2fa/status**: Checks whether two-factor authentication is pending for the user.
+- **POST /user/2fa/verify-login**: Verifies the user's 2FA code.
+- **GET /user/2fa/login-status**: Checks whether two-factor authentication is pending for the user.
 - **POST /user/2fa/recovery**: Recovers the user's account using a recovery code.
+- **POST /user/2fa/verify-step-up**: If 2FA is enabled, this endpoint is used to set a new step-up token that enables critical changes to the user account, e.g., changing the password.
+- **GET /user/2fa/step-up-status**: Gets the status of the step-up needed for critical changes to the user account. Is true if 2FA is disabled.
 
 ## Technologies Used
 

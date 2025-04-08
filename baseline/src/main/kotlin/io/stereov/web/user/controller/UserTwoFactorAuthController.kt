@@ -1,7 +1,10 @@
 package io.stereov.web.user.controller
 
+import io.stereov.web.auth.exception.model.TwoFactorAuthDisabledException
 import io.stereov.web.auth.service.CookieService
+import io.stereov.web.global.service.jwt.exception.TokenException
 import io.stereov.web.user.dto.UserDto
+import io.stereov.web.user.dto.response.StepUpStatusResponse
 import io.stereov.web.user.dto.response.TwoFactorSetupResponse
 import io.stereov.web.user.dto.response.TwoFactorStatusResponse
 import io.stereov.web.user.service.twofactor.UserTwoFactorAuthService
@@ -36,7 +39,17 @@ class UserTwoFactorAuthController(
         return ResponseEntity.ok().body(res)
     }
 
-    @PostMapping("/verify")
+    @PostMapping("/recovery")
+    suspend fun recoverUser(@RequestParam("code") code: String, exchange: ServerWebExchange): ResponseEntity<UserDto> {
+        val userDto = twoFactorService.recoverUser(exchange, code)
+
+        val clearTwoFactorCookie = cookieService.clearTwoFactorSessionCookie()
+        return ResponseEntity.ok()
+            .header("Set-Cookie", clearTwoFactorCookie.toString())
+            .body(userDto)
+    }
+
+    @PostMapping("/verify-login")
     suspend fun verifyTwoFactorAuth(@RequestParam("code") code: Int, exchange: ServerWebExchange): ResponseEntity<UserDto> {
         val userDto = twoFactorService.validateTwoFactorCode(exchange, code)
 
@@ -46,7 +59,7 @@ class UserTwoFactorAuthController(
             .body(userDto)
     }
 
-    @GetMapping("/status")
+    @GetMapping("/login-status")
     suspend fun getTwoFactorAuthStatus(exchange: ServerWebExchange): ResponseEntity<TwoFactorStatusResponse> {
         val isPending = twoFactorService.twoFactorPending(exchange)
 
@@ -60,13 +73,40 @@ class UserTwoFactorAuthController(
         return res.body(TwoFactorStatusResponse(isPending))
     }
 
-    @PostMapping("/recovery")
-    suspend fun recoverUser(@RequestParam("code") code: String, exchange: ServerWebExchange): ResponseEntity<UserDto> {
-        val userDto = twoFactorService.recoverUser(exchange, code)
+    /**
+     * Set the step-up authentication status.
+     *
+     * @param code The step-up authentication code.
+     *
+     * @return A response indicating the success of the operation.
+     */
+    @PostMapping("/verify-step-up")
+    suspend fun setStepUp(@RequestParam code: Int): ResponseEntity<StepUpStatusResponse> {
+        val stepUpTokenCookie = cookieService.createStepUpCookie(code)
 
-        val clearTwoFactorCookie = cookieService.clearTwoFactorSessionCookie()
         return ResponseEntity.ok()
-            .header("Set-Cookie", clearTwoFactorCookie.toString())
-            .body(userDto)
+            .header("Set-Cookie", stepUpTokenCookie.toString())
+            .body(StepUpStatusResponse(true))
+    }
+
+    /**
+     * Get the step-up authentication status.
+     *
+     * @param exchange The server web exchange.
+     *
+     * @return The step-up authentication status as a [StepUpStatusResponse].
+     */
+    @GetMapping("/step-up-status")
+    suspend fun getStepUpStatus(exchange: ServerWebExchange): ResponseEntity<StepUpStatusResponse> {
+        val stepUpStatus = try {
+            cookieService.validateStepUpCookie(exchange)
+            true
+        } catch (e: TokenException) {
+            false
+        } catch (e: TwoFactorAuthDisabledException) {
+            true
+        }
+
+        return ResponseEntity.ok(StepUpStatusResponse(stepUpStatus))
     }
 }

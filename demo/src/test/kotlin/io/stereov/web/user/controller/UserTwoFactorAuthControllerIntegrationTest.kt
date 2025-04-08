@@ -1,16 +1,18 @@
 package io.stereov.web.user.controller
 
-import io.stereov.web.test.BaseIntegrationTest
 import io.stereov.web.config.Constants
-import io.stereov.web.user.dto.*
+import io.stereov.web.test.BaseIntegrationTest
+import io.stereov.web.user.dto.UserDto
 import io.stereov.web.user.dto.request.DeviceInfoRequest
 import io.stereov.web.user.dto.request.LoginRequest
 import io.stereov.web.user.dto.response.LoginResponse
+import io.stereov.web.user.dto.response.StepUpStatusResponse
 import io.stereov.web.user.dto.response.TwoFactorSetupResponse
 import io.stereov.web.user.dto.response.TwoFactorStatusResponse
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import java.time.Instant
 
 class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
 
@@ -45,7 +47,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
         val loginResBody = loginRes.responseBody
         requireNotNull(loginResBody)
 
-        val twoFactorToken = loginRes.responseCookies[Constants.TWO_FACTOR_AUTH_COOKIE]
+        val twoFactorToken = loginRes.responseCookies[Constants.LOGIN_VERIFICATION_TOKEN]
             ?.first()
             ?.value
 
@@ -55,8 +57,8 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
         assertEquals(user.info.id, loginResBody.user.id)
 
         val userRes = webTestClient.post()
-            .uri("/user/2fa/verify?code=$code")
-            .cookie(Constants.TWO_FACTOR_AUTH_COOKIE, twoFactorToken)
+            .uri("/user/2fa/verify-login?code=$code")
+            .cookie(Constants.LOGIN_VERIFICATION_TOKEN, twoFactorToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(UserDto::class.java)
@@ -76,57 +78,6 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
             .expectStatus().isUnauthorized
     }
 
-    @Test fun `2fa verification works`() = runTest {
-        val user = registerUser(twoFactorEnabled = true)
-        requireNotNull(user.twoFactorToken)
-
-        val code = gAuth.getTotpPassword(user.twoFactorSecret)
-
-        val res = webTestClient.post()
-            .uri("/user/2fa/verify?code=$code")
-            .cookie(Constants.TWO_FACTOR_AUTH_COOKIE, user.twoFactorToken)
-            .exchange()
-            .expectStatus().isOk
-            .expectBody(UserDto::class.java)
-            .returnResult()
-
-        val body = res.responseBody
-        requireNotNull(body)
-
-        assertEquals(user.info.toDto(), body)
-        val token = res.responseCookies[Constants.TWO_FACTOR_AUTH_COOKIE]
-            ?.first()
-            ?.value
-        assertEquals("", token)
-    }
-    @Test fun `2fa verification needs correct code`() = runTest {
-        val user = registerUser(twoFactorEnabled = true)
-        requireNotNull(user.twoFactorToken)
-
-        val code = gAuth.getTotpPassword(user.info.security.twoFactor.secret) + 1
-
-        webTestClient.post()
-            .uri("/user/2fa/verify?code=$code")
-            .cookie(Constants.TWO_FACTOR_AUTH_COOKIE, user.twoFactorToken)
-            .exchange()
-            .expectStatus().isUnauthorized
-    }
-    @Test fun `2fa verification needs param code`() = runTest {
-        val user = registerUser(twoFactorEnabled = true)
-        requireNotNull(user.twoFactorToken)
-
-        webTestClient.post()
-            .uri("/user/2fa/verify")
-            .cookie(Constants.TWO_FACTOR_AUTH_COOKIE, user.twoFactorToken)
-            .exchange()
-            .expectStatus().isBadRequest
-    }
-    @Test fun `2fa verification needs 2fa token`() = runTest {
-        webTestClient.post()
-            .uri("/user/2fa/verify?code=25234")
-            .exchange()
-            .expectStatus().isUnauthorized
-    }
 
     @Test fun `2fa recovery works`() = runTest {
         val user = registerUser(twoFactorEnabled = true)
@@ -135,7 +86,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
 
         val res = webTestClient.post()
             .uri("/user/2fa/recovery?code=${user.twoFactorRecovery}")
-            .cookie(Constants.TWO_FACTOR_AUTH_COOKIE, user.twoFactorToken)
+            .cookie(Constants.LOGIN_VERIFICATION_TOKEN, user.twoFactorToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(UserDto::class.java)
@@ -145,7 +96,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
         requireNotNull(body)
 
         assertEquals(user.info.id, body.id)
-        val token = res.responseCookies[Constants.TWO_FACTOR_AUTH_COOKIE]
+        val token = res.responseCookies[Constants.LOGIN_VERIFICATION_TOKEN]
             ?.first()
             ?.value
         assertEquals("", token)
@@ -158,7 +109,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
 
         webTestClient.post()
             .uri("/user/2fa/recovery?code=$code")
-            .cookie(Constants.TWO_FACTOR_AUTH_COOKIE, user.twoFactorToken)
+            .cookie(Constants.LOGIN_VERIFICATION_TOKEN, user.twoFactorToken)
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -168,7 +119,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
 
         webTestClient.post()
             .uri("/user/2fa/recovery")
-            .cookie(Constants.TWO_FACTOR_AUTH_COOKIE, user.twoFactorToken)
+            .cookie(Constants.LOGIN_VERIFICATION_TOKEN, user.twoFactorToken)
             .exchange()
             .expectStatus().isBadRequest
     }
@@ -179,9 +130,62 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
             .expectStatus().isUnauthorized
     }
 
-    @Test fun `2fa status works is not pending if no cookie is set`() = runTest {
+
+    @Test fun `verifyLogin works`() = runTest {
+        val user = registerUser(twoFactorEnabled = true)
+        requireNotNull(user.twoFactorToken)
+
+        val code = gAuth.getTotpPassword(user.twoFactorSecret)
+
+        val res = webTestClient.post()
+            .uri("/user/2fa/verify-login?code=$code")
+            .cookie(Constants.LOGIN_VERIFICATION_TOKEN, user.twoFactorToken)
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(UserDto::class.java)
+            .returnResult()
+
+        val body = res.responseBody
+        requireNotNull(body)
+
+        assertEquals(user.info.toDto(), body)
+        val token = res.responseCookies[Constants.LOGIN_VERIFICATION_TOKEN]
+            ?.first()
+            ?.value
+        assertEquals("", token)
+    }
+    @Test fun `verifyLogin needs correct code`() = runTest {
+        val user = registerUser(twoFactorEnabled = true)
+        requireNotNull(user.twoFactorToken)
+
+        val code = gAuth.getTotpPassword(user.info.security.twoFactor.secret) + 1
+
+        webTestClient.post()
+            .uri("/user/2fa/verify-login?code=$code")
+            .cookie(Constants.LOGIN_VERIFICATION_TOKEN, user.twoFactorToken)
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+    @Test fun `verifyLogin needs param code`() = runTest {
+        val user = registerUser(twoFactorEnabled = true)
+        requireNotNull(user.twoFactorToken)
+
+        webTestClient.post()
+            .uri("/user/2fa/verify-login")
+            .cookie(Constants.LOGIN_VERIFICATION_TOKEN, user.twoFactorToken)
+            .exchange()
+            .expectStatus().isBadRequest
+    }
+    @Test fun `verifyLogin needs 2fa token`() = runTest {
+        webTestClient.post()
+            .uri("/user/2fa/verify-login?code=25234")
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+
+    @Test fun `loginStatus works is not pending if no cookie is set`() = runTest {
         val status0 = webTestClient.get()
-            .uri("/user/2fa/status")
+            .uri("/user/2fa/login-status")
             .exchange()
             .expectStatus().isOk
             .expectBody(TwoFactorStatusResponse::class.java)
@@ -190,10 +194,10 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
 
         assertFalse(status0?.twoFactorRequired!!)
     }
-    @Test fun `2fa status not pending with invalid cookie`() = runTest {
+    @Test fun `loginStatus not pending with invalid cookie`() = runTest {
         val status1 = webTestClient.get()
-            .uri("/user/2fa/status")
-            .cookie(Constants.TWO_FACTOR_AUTH_COOKIE, "test")
+            .uri("/user/2fa/login-status")
+            .cookie(Constants.LOGIN_VERIFICATION_TOKEN, "test")
             .exchange()
             .expectStatus().isOk
             .expectBody(TwoFactorStatusResponse::class.java)
@@ -202,14 +206,14 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
 
         assertFalse(status1?.twoFactorRequired!!)
     }
-    @Test fun `2fa works when valid cookie is set`() = runTest {
+    @Test fun `loginStatus works when valid cookie is set`() = runTest {
         val user = registerUser(twoFactorEnabled = true)
 
         requireNotNull(user.twoFactorToken)
 
         val res = webTestClient.get()
-            .uri("/user/2fa/status")
-            .cookie(Constants.TWO_FACTOR_AUTH_COOKIE, user.twoFactorToken)
+            .uri("/user/2fa/login-status")
+            .cookie(Constants.LOGIN_VERIFICATION_TOKEN, user.twoFactorToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(TwoFactorStatusResponse::class.java)
@@ -217,5 +221,188 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
             .responseBody
 
         assertTrue(res?.twoFactorRequired!!)
+    }
+
+    @Test fun `verifyStepUp works`() = runTest {
+        val user = registerUser(twoFactorEnabled = true)
+        val twoFactorCode = gAuth.getTotpPassword(user.twoFactorSecret)
+
+        val res = webTestClient.post()
+            .uri("/user/2fa/verify-step-up?code=$twoFactorCode")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(StepUpStatusResponse::class.java)
+            .returnResult()
+
+        val token = res.responseCookies[Constants.STEP_UP_TOKEN_COOKIE]?.first()?.value
+
+        requireNotNull(token)
+    }
+    @Test fun `verifyStepUp requires authentication`() = runTest {
+        val user = registerUser(twoFactorEnabled = true)
+        val twoFactorCode = gAuth.getTotpPassword(user.twoFactorSecret)
+
+        webTestClient.post()
+            .uri("/user/2fa/verify-step-up?code=$twoFactorCode")
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+    @Test fun `verifyStepUp requires 2fa code`() = runTest {
+        val user = registerUser(twoFactorEnabled = true)
+
+        webTestClient.post()
+            .uri("/user/2fa/verify-step-up?code")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .exchange()
+            .expectStatus().isBadRequest
+    }
+    @Test fun `verifyStepUp requires valid 2fa code`() = runTest {
+        val user = registerUser(twoFactorEnabled = true)
+        val twoFactorCode = gAuth.getTotpPassword(user.twoFactorSecret) + 1
+
+        webTestClient.post()
+            .uri("/user/2fa/verify-step-up?code=$twoFactorCode")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+    @Test fun `verifyStepUp requires enabled 2fa`() = runTest {
+        val user = registerUser()
+        val twoFactorCode = gAuth.getTotpPassword(user.twoFactorSecret) + 1
+
+        webTestClient.post()
+            .uri("/user/2fa/verify-step-up?code=$twoFactorCode")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .exchange()
+            .expectStatus().isBadRequest
+    }
+
+    @Test fun `stepUpStatus works`() = runTest {
+        val user = registerUser(twoFactorEnabled = true)
+
+        val res = webTestClient.get()
+            .uri("/user/2fa/step-up-status")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken(user.info.idX, user.info.devices.first().id))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(StepUpStatusResponse::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        assertTrue(res.stepUp)
+    }
+    @Test fun `stepUpStatus requires token for same user`() = runTest {
+        val user = registerUser(twoFactorEnabled = true)
+
+        val res = webTestClient.get()
+            .uri("/user/2fa/step-up-status")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken("another-user", user.info.devices.first().id))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(StepUpStatusResponse::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        assertFalse(res.stepUp)
+    }
+    @Test fun `stepUpStatus requires token for same device`() = runTest {
+        val user = registerUser(twoFactorEnabled = true)
+
+        val res = webTestClient.get()
+            .uri("/user/2fa/step-up-status")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken(user.info.idX, "another-device"))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(StepUpStatusResponse::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        assertFalse(res.stepUp)
+    }
+    @Test fun `stepUpStatus requires valid token`() = runTest {
+        val user = registerUser(twoFactorEnabled = true)
+
+        val res = webTestClient.get()
+            .uri("/user/2fa/step-up-status")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(Constants.STEP_UP_TOKEN_COOKIE, "another-token")
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(StepUpStatusResponse::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        assertFalse(res.stepUp)
+    }
+    @Test fun `stepUpStatus requires unexpired token`() = runTest {
+        val user = registerUser(twoFactorEnabled = true)
+
+        val res = webTestClient.get()
+            .uri("/user/2fa/step-up-status")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken(user.info.idX, user.info.devices.first().id, Instant.ofEpochSecond(0)))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(StepUpStatusResponse::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        assertFalse(res.stepUp)
+    }
+    @Test fun `stepUpStatus requires authentication`() = runTest {
+        val user = registerUser(twoFactorEnabled = true)
+
+        webTestClient.get()
+            .uri("/user/2fa/step-up-status")
+            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken(user.info.idX, user.info.devices.first().id))
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+    @Test fun `stepUpStatus is true for disabled 2fa when cookie is set`() = runTest {
+        val user = registerUser()
+
+        val res = webTestClient.get()
+            .uri("/user/2fa/step-up-status")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken(user.info.idX, user.info.devices.first().id))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(StepUpStatusResponse::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        assertTrue(res.stepUp)
+    }
+    @Test fun `stepUpStatus is true for disabled 2fa when cookie is not set`() = runTest {
+        val user = registerUser()
+
+        val res = webTestClient.get()
+            .uri("/user/2fa/step-up-status")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(StepUpStatusResponse::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        assertTrue(res.stepUp)
     }
 }

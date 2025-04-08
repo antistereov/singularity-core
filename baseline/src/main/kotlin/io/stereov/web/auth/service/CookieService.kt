@@ -202,7 +202,7 @@ class CookieService(
     suspend fun createTwoFactorSessionCookie(userId: String): ResponseCookie {
         logger.debug { "Creating cookie for two factor authentication token" }
 
-        val cookie = ResponseCookie.from(Constants.TWO_FACTOR_AUTH_COOKIE, twoFactorAuthTokenService.createTwoFactorToken(userId))
+        val cookie = ResponseCookie.from(Constants.LOGIN_VERIFICATION_TOKEN, twoFactorAuthTokenService.createTwoFactorToken(userId))
             .httpOnly(true)
             .sameSite("Strict")
             .maxAge(jwtProperties.expiresIn)
@@ -227,7 +227,7 @@ class CookieService(
     suspend fun validateTwoFactorSessionCookieAndGetUserId(exchange: ServerWebExchange): String {
         logger.debug { "Validating two factor session cookie" }
 
-        val twoFactorCookie = exchange.request.cookies[Constants.TWO_FACTOR_AUTH_COOKIE]?.firstOrNull()?.value
+        val twoFactorCookie = exchange.request.cookies[Constants.LOGIN_VERIFICATION_TOKEN]?.firstOrNull()?.value
             ?: throw InvalidTokenException("No two factor authentication token provided")
 
         return twoFactorAuthTokenService.validateTwoFactorTokenAndExtractUserId(twoFactorCookie)
@@ -241,7 +241,7 @@ class CookieService(
     suspend fun clearTwoFactorSessionCookie(): ResponseCookie {
         logger.debug { "Clearing cookie for two factor authentication token" }
 
-        val cookie = ResponseCookie.from(Constants.TWO_FACTOR_AUTH_COOKIE, "")
+        val cookie = ResponseCookie.from(Constants.LOGIN_VERIFICATION_TOKEN, "")
             .httpOnly(true)
             .sameSite("Strict")
             .maxAge(0)

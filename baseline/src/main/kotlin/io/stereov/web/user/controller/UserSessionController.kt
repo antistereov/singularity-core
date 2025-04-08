@@ -2,15 +2,12 @@ package io.stereov.web.user.controller
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.web.auth.exception.model.TwoFactorAuthDisabledException
 import io.stereov.web.auth.service.AuthenticationService
 import io.stereov.web.auth.service.CookieService
-import io.stereov.web.global.service.jwt.exception.TokenException
 import io.stereov.web.user.dto.ApplicationInfoDto
 import io.stereov.web.user.dto.UserDto
 import io.stereov.web.user.dto.request.*
 import io.stereov.web.user.dto.response.LoginResponse
-import io.stereov.web.user.dto.response.StepUpStatusResponse
 import io.stereov.web.user.service.UserSessionService
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
@@ -113,43 +110,6 @@ class UserSessionController(
             .header("Set-Cookie", accessTokenCookie.toString())
             .header("Set-Cookie", refreshTokenCookie.toString())
             .body(user.toDto())
-    }
-
-    /**
-     * Set the step-up authentication status.
-     *
-     * @param code The step-up authentication code.
-     *
-     * @return A response indicating the success of the operation.
-     */
-    @PostMapping("/step-up")
-    suspend fun setStepUp(@RequestParam code: Int): ResponseEntity<StepUpStatusResponse> {
-        val stepUpTokenCookie = cookieService.createStepUpCookie(code)
-
-        return ResponseEntity.ok()
-            .header("Set-Cookie", stepUpTokenCookie.toString())
-            .body(StepUpStatusResponse(true))
-    }
-
-    /**
-     * Get the step-up authentication status.
-     *
-     * @param exchange The server web exchange.
-     *
-     * @return The step-up authentication status as a [StepUpStatusResponse].
-     */
-    @GetMapping("/step-up")
-    suspend fun getStepUpStatus(exchange: ServerWebExchange): ResponseEntity<StepUpStatusResponse> {
-        val stepUpStatus = try {
-            cookieService.validateStepUpCookie(exchange)
-            true
-        } catch (e: TokenException) {
-            false
-        } catch (e: TwoFactorAuthDisabledException) {
-            true
-        }
-
-        return ResponseEntity.ok(StepUpStatusResponse(stepUpStatus))
     }
 
     /**
