@@ -1,3 +1,19 @@
+## [v1.1.3]
+
+## Changelog
+
+## 🚀 Features
+- [dd220ff](https://github.com/antistereov/web-kotlin-spring-baseline/commits/dd220ff) **two-factor-auth**: setup different endpoints for login and step up
+
+## 🛠  Build
+- [1e5e556](https://github.com/antistereov/web-kotlin-spring-baseline/commits/1e5e556) bump version to 1.1.3
+- [d9d195f](https://github.com/antistereov/web-kotlin-spring-baseline/commits/d9d195f) bump version to 1.1.3-SNAPSHOT
+
+
+## Contributors
+We'd like to thank the following people for their contributions:
+antistereov
+
 ## [v1.1.2]
 
 ## Changelog
