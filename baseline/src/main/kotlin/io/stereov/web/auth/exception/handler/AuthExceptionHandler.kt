@@ -3,10 +3,7 @@ package io.stereov.web.auth.exception.handler
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.web.auth.exception.AuthException
-import io.stereov.web.auth.exception.model.InvalidCredentialsException
-import io.stereov.web.auth.exception.model.InvalidPrincipalException
-import io.stereov.web.auth.exception.model.NoTokenProvidedException
-import io.stereov.web.auth.exception.model.NoTwoFactorUserAttributeException
+import io.stereov.web.auth.exception.model.*
 import io.stereov.web.global.exception.BaseExceptionHandler
 import io.stereov.web.global.model.ErrorResponse
 import org.springframework.http.HttpStatus
@@ -43,6 +40,7 @@ class AuthExceptionHandler : BaseExceptionHandler<AuthException> {
             is InvalidPrincipalException -> HttpStatus.UNAUTHORIZED
             is NoTokenProvidedException -> HttpStatus.UNAUTHORIZED
             is NoTwoFactorUserAttributeException -> HttpStatus.BAD_REQUEST
+            is TwoFactorAuthDisabledException -> HttpStatus.BAD_REQUEST
             else -> HttpStatus.UNAUTHORIZED
         }
 

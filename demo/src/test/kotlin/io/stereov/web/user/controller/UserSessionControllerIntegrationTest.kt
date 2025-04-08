@@ -5,12 +5,14 @@ import io.stereov.web.test.BaseIntegrationTest
 import io.stereov.web.user.dto.UserDto
 import io.stereov.web.user.dto.request.*
 import io.stereov.web.user.dto.response.LoginResponse
+import io.stereov.web.user.dto.response.StepUpStatusResponse
 import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import java.time.Instant
 
 class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
 
@@ -246,17 +248,200 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
             .expectStatus().isBadRequest
     }
 
-    @Test fun `changeEmail works`() = runTest {
+    @Test fun `setStepUp works`() = runTest {
+        val user = registerUser(twoFactorEnabled = true)
+        val twoFactorCode = gAuth.getTotpPassword(user.twoFactorSecret)
+
+        val res = webTestClient.post()
+            .uri("/user/step-up?code=$twoFactorCode")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(StepUpStatusResponse::class.java)
+            .returnResult()
+
+        val token = res.responseCookies[Constants.STEP_UP_TOKEN_COOKIE]?.first()?.value
+
+        requireNotNull(token)
+    }
+    @Test fun `setStepUp requires authentication`() = runTest {
+        val user = registerUser(twoFactorEnabled = true)
+        val twoFactorCode = gAuth.getTotpPassword(user.twoFactorSecret)
+
+        webTestClient.post()
+            .uri("/user/step-up?code=$twoFactorCode")
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+    @Test fun `setStepUp requires 2fa code`() = runTest {
+        val user = registerUser(twoFactorEnabled = true)
+
+        webTestClient.post()
+            .uri("/user/step-up?code")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .exchange()
+            .expectStatus().isBadRequest
+    }
+    @Test fun `setStepUp requires valid 2fa code`() = runTest {
+        val user = registerUser(twoFactorEnabled = true)
+        val twoFactorCode = gAuth.getTotpPassword(user.twoFactorSecret) + 1
+
+        webTestClient.post()
+            .uri("/user/step-up?code=$twoFactorCode")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+    @Test fun `setStepUp requires enabled 2fa`() = runTest {
+        val user = registerUser()
+        val twoFactorCode = gAuth.getTotpPassword(user.twoFactorSecret) + 1
+
+        webTestClient.post()
+            .uri("/user/step-up?code=$twoFactorCode")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .exchange()
+            .expectStatus().isBadRequest
+    }
+
+    @Test fun `stepUpStatus works`() = runTest {
+        val user = registerUser(twoFactorEnabled = true)
+
+        val res = webTestClient.get()
+            .uri("/user/step-up")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken(user.info.idX, user.info.devices.first().id))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(StepUpStatusResponse::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        assertTrue(res.stepUp)
+    }
+    @Test fun `stepUpStatus requires token for same user`() = runTest {
+        val user = registerUser(twoFactorEnabled = true)
+
+        val res = webTestClient.get()
+            .uri("/user/step-up")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken("another-user", user.info.devices.first().id))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(StepUpStatusResponse::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        assertFalse(res.stepUp)
+    }
+    @Test fun `stepUpStatus requires token for same device`() = runTest {
+        val user = registerUser(twoFactorEnabled = true)
+
+        val res = webTestClient.get()
+            .uri("/user/step-up")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken(user.info.idX, "another-device"))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(StepUpStatusResponse::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        assertFalse(res.stepUp)
+    }
+    @Test fun `stepUpStatus requires valid token`() = runTest {
+        val user = registerUser(twoFactorEnabled = true)
+
+        val res = webTestClient.get()
+            .uri("/user/step-up")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(Constants.STEP_UP_TOKEN_COOKIE, "another-token")
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(StepUpStatusResponse::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        assertFalse(res.stepUp)
+    }
+    @Test fun `stepUpStatus requires unexpired token`() = runTest {
+        val user = registerUser(twoFactorEnabled = true)
+
+        val res = webTestClient.get()
+            .uri("/user/step-up")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken(user.info.idX, user.info.devices.first().id, Instant.ofEpochSecond(0)))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(StepUpStatusResponse::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        assertFalse(res.stepUp)
+    }
+    @Test fun `stepUpStatus requires authentication`() = runTest {
+        val user = registerUser(twoFactorEnabled = true)
+
+        val res = webTestClient.get()
+            .uri("/user/step-up")
+            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken(user.info.idX, user.info.devices.first().id))
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+    @Test fun `stepUpStatus is true for disabled 2fa when cookie is set`() = runTest {
+        val user = registerUser()
+
+        val res = webTestClient.get()
+            .uri("/user/step-up")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken(user.info.idX, user.info.devices.first().id))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(StepUpStatusResponse::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        assertTrue(res.stepUp)
+    }
+    @Test fun `stepUpStatus is true for disabled 2fa when cookie is not set`() = runTest {
+        val user = registerUser()
+
+        val res = webTestClient.get()
+            .uri("/user/step-up")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(StepUpStatusResponse::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        assertTrue(res.stepUp)
+    }
+
+    @Test fun `changeEmail works with 2fa`() = runTest {
         val oldEmail = "old@email.com"
         val newEmail = "new@email.com"
         val password = "password"
         val user = registerUser(oldEmail, password, twoFactorEnabled = true)
-        val twoFactorCode = gAuth.getTotpPassword(user.twoFactorSecret)
 
         val res = webTestClient.put()
             .uri("/user/me/email")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
-            .bodyValue(ChangeEmailRequest(newEmail, password, twoFactorCode))
+            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken(user.info.idX, user.info.devices.first().id))
+            .bodyValue(ChangeEmailRequest(newEmail, password))
             .exchange()
             .expectStatus().isOk
             .expectBody(UserDto::class.java)
@@ -277,7 +462,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val res = webTestClient.put()
             .uri("/user/me/email")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
-            .bodyValue(ChangeEmailRequest(newEmail, password, null))
+            .bodyValue(ChangeEmailRequest(newEmail, password))
             .exchange()
             .expectStatus().isOk
             .expectBody(UserDto::class.java)
@@ -294,11 +479,10 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val newEmail = "new@email.com"
         val password = "password"
         val user = registerUser(oldEmail, password)
-        val twoFactorCode = gAuth.getTotpPassword(user.twoFactorSecret)
 
         webTestClient.put()
             .uri("/user/me/email")
-            .bodyValue(ChangeEmailRequest(newEmail, password, twoFactorCode))
+            .bodyValue(ChangeEmailRequest(newEmail, password))
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -323,21 +507,82 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         webTestClient.put()
             .uri("/user/me/email")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
-            .bodyValue(ChangeEmailRequest(newEmail, "wrong-password", twoFactorCode))
+            .bodyValue(ChangeEmailRequest(newEmail, "wrong-password"))
             .exchange()
             .expectStatus().isUnauthorized
     }
-    @Test fun `changeEmail requires correct 2fa code`() = runTest {
+    @Test fun `changeEmail requires step up`() = runTest {
         val oldEmail = "old@email.com"
         val newEmail = "new@email.com"
         val password = "password"
         val user = registerUser(oldEmail, password, twoFactorEnabled = true)
-        val twoFactorCode = gAuth.getTotpPassword(user.twoFactorSecret) + 1
 
         webTestClient.put()
             .uri("/user/me/email")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
-            .bodyValue(ChangeEmailRequest(newEmail, "wrong-password", twoFactorCode))
+            .bodyValue(ChangeEmailRequest(newEmail, "wrong-password"))
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+    @Test fun `changeEmail requires step up token for same user`() = runTest {
+        val oldEmail = "old@email.com"
+        val newEmail = "new@email.com"
+        val password = "password"
+        val user = registerUser(oldEmail, password, twoFactorEnabled = true)
+
+        webTestClient.put()
+            .uri("/user/me/email")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken("another-user", user.info.devices.first().id))
+            .bodyValue(ChangeEmailRequest(newEmail, password))
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+    @Test fun `changeEmail requires step up token for same device`() = runTest {
+        val oldEmail = "old@email.com"
+        val newEmail = "new@email.com"
+        val password = "password"
+        val user = registerUser(oldEmail, password, twoFactorEnabled = true)
+
+        webTestClient.put()
+            .uri("/user/me/email")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken(user.info.idX, "another-device"))
+            .bodyValue(ChangeEmailRequest(newEmail, password))
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+    @Test fun `changeEmail requires unexpired step up token`() = runTest {
+        val oldEmail = "old@email.com"
+        val newEmail = "new@email.com"
+        val password = "password"
+        val user = registerUser(oldEmail, password, twoFactorEnabled = true)
+
+        val res = webTestClient.put()
+            .uri("/user/me/email")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(
+                Constants.STEP_UP_TOKEN_COOKIE,
+                twoFactorAuthTokenService.createStepUpToken(user.info.idX, user.info.devices.first().id, Instant.ofEpochSecond(0))
+            )
+            .bodyValue(ChangeEmailRequest(newEmail, password))
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+    @Test fun `changeEmail requires valid step up token`() = runTest {
+        val oldEmail = "old@email.com"
+        val newEmail = "new@email.com"
+        val password = "password"
+        val user = registerUser(oldEmail, password, twoFactorEnabled = true)
+
+        webTestClient.put()
+            .uri("/user/me/email")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(
+                Constants.STEP_UP_TOKEN_COOKIE,
+                "wrong-token"
+            )
+            .bodyValue(ChangeEmailRequest(newEmail, password))
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -346,28 +591,27 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val newEmail = "new@email.com"
         val password = "password"
         val user = registerUser(oldEmail, password)
-        val twoFactorCode = gAuth.getTotpPassword(user.twoFactorSecret)
         registerUser(newEmail)
 
         webTestClient.put()
             .uri("/user/me/email")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
-            .bodyValue(ChangeEmailRequest(newEmail, password, twoFactorCode))
+            .bodyValue(ChangeEmailRequest(newEmail, password))
             .exchange()
             .expectStatus().isEqualTo(HttpStatus.CONFLICT)
     }
 
-    @Test fun `changePassword works`() = runTest {
+    @Test fun `changePassword works with 2fa`() = runTest {
         val email = "old@email.com"
         val oldPassword = "password"
         val newPassword = "newPassword"
         val user = registerUser(email, oldPassword, twoFactorEnabled = true)
-        val twoFactorCode = gAuth.getTotpPassword(user.twoFactorSecret)
 
         val res = webTestClient.put()
             .uri("/user/me/password")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
-            .bodyValue(ChangePasswordRequest(oldPassword, newPassword, twoFactorCode))
+            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken(user.info.idX, user.info.devices.first().id))
+            .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
             .exchange()
             .expectStatus().isOk
             .expectBody(UserDto::class.java)
@@ -391,7 +635,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val res = webTestClient.put()
             .uri("/user/me/password")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
-            .bodyValue(ChangePasswordRequest(oldPassword, newPassword, null))
+            .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
             .exchange()
             .expectStatus().isOk
             .expectBody(UserDto::class.java)
@@ -415,7 +659,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
 
         webTestClient.put()
             .uri("/user/me/password")
-            .bodyValue(ChangePasswordRequest(oldPassword, newPassword, twoFactorCode))
+            .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -440,21 +684,76 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         webTestClient.put()
             .uri("/user/me/password")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
-            .bodyValue(ChangePasswordRequest("wrong-password", newPassword, twoFactorCode))
+            .bodyValue(ChangePasswordRequest("wrong-password", newPassword))
             .exchange()
             .expectStatus().isUnauthorized
     }
-    @Test fun `changePassword requires correct 2fa code`() = runTest {
+    @Test fun `changePassword requires step up`() = runTest {
         val email = "old@email.com"
         val oldPassword = "password"
         val newPassword = "newPassword"
         val user = registerUser(email, oldPassword, twoFactorEnabled = true)
-        val twoFactorCode = gAuth.getTotpPassword(user.twoFactorSecret) + 1
 
         webTestClient.put()
             .uri("/user/me/password")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
-            .bodyValue(ChangePasswordRequest(oldPassword, newPassword, twoFactorCode))
+            .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+    @Test fun `changePassword requires step up token for same user`() = runTest {
+        val email = "old@email.com"
+        val oldPassword = "password"
+        val newPassword = "newPassword"
+        val user = registerUser(email, oldPassword, twoFactorEnabled = true)
+
+        webTestClient.put()
+            .uri("/user/me/password")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken("another-user", user.info.devices.first().id))
+            .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+    @Test fun `changePassword requires step up token for same device`() = runTest {
+        val email = "old@email.com"
+        val oldPassword = "password"
+        val newPassword = "newPassword"
+        val user = registerUser(email, oldPassword, twoFactorEnabled = true)
+
+        webTestClient.put()
+            .uri("/user/me/password")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken(user.info.idX, "another-device"))
+            .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+    @Test fun `changePassword requires unexpired step up token`() = runTest {
+        val email = "old@email.com"
+        val oldPassword = "password"
+        val newPassword = "newPassword"
+        val user = registerUser(email, oldPassword, twoFactorEnabled = true)
+
+        webTestClient.put()
+            .uri("/user/me/password")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken(user.info.idX, user.info.devices.first().id, Instant.ofEpochSecond(0)))
+            .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+    @Test fun `changePassword requires valid step up token`() = runTest {
+        val email = "old@email.com"
+        val oldPassword = "password"
+        val newPassword = "newPassword"
+        val user = registerUser(email, oldPassword, twoFactorEnabled = true)
+
+        webTestClient.put()
+            .uri("/user/me/password")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(Constants.STEP_UP_TOKEN_COOKIE, "wrong-token")
+            .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
             .exchange()
             .expectStatus().isUnauthorized
     }

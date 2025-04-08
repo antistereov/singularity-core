@@ -1,6 +1,10 @@
 package io.stereov.web.global.service.twofactorauth
 
 import com.warrenstrange.googleauth.GoogleAuthenticator
+import io.stereov.web.auth.exception.AuthException
+import io.stereov.web.global.service.encryption.EncryptionService
+import io.stereov.web.user.exception.model.InvalidUserDocumentException
+import io.stereov.web.user.model.UserDocument
 import org.springframework.stereotype.Service
 import java.security.SecureRandom
 
@@ -17,7 +21,8 @@ import java.security.SecureRandom
  */
 @Service
 class TwoFactorAuthService(
-    private val gAuth: GoogleAuthenticator
+    private val gAuth: GoogleAuthenticator,
+    private val encryptionService: EncryptionService,
 ) {
 
     private val random = SecureRandom()
@@ -76,5 +81,26 @@ class TwoFactorAuthService(
      */
     fun getOtpAuthUrl(username: String, secret: String): String {
         return "otpauth://totp/$username?secret=$secret&issuer="
+    }
+
+    /**
+     * Validates the two-factor code for the given user. It throws an exception if the code is invalid.
+     *
+     * @param user The user to validate the code for.
+     * @param code The two-factor code to validate.
+     *
+     * @throws InvalidUserDocumentException If the user document does not contain a two-factor authentication secret.
+     * @throws AuthException If the two-factor code is invalid.
+     */
+    suspend fun validateTwoFactorCode(user: UserDocument, code: Int): UserDocument {
+        val encryptedSecret = user.security.twoFactor.secret
+            ?: throw InvalidUserDocumentException("No two factor authentication secret provided in UserDocument")
+        val decryptedSecret = encryptionService.decrypt(encryptedSecret)
+
+        if (!validateCode(decryptedSecret, code)) {
+            throw AuthException("Invalid 2FA code")
+        }
+
+        return user
     }
 }

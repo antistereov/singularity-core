@@ -5,9 +5,9 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.web.auth.exception.AuthException
 import io.stereov.web.auth.exception.model.InvalidCredentialsException
 import io.stereov.web.auth.service.AuthenticationService
+import io.stereov.web.auth.service.CookieService
 import io.stereov.web.global.service.cache.AccessTokenCache
 import io.stereov.web.global.service.hash.HashService
-import io.stereov.web.global.service.twofactorauth.exception.model.InvalidTwoFactorCodeException
 import io.stereov.web.user.dto.ApplicationInfoDto
 import io.stereov.web.user.dto.request.*
 import io.stereov.web.user.exception.model.EmailAlreadyExistsException
@@ -16,6 +16,7 @@ import io.stereov.web.user.model.UserDocument
 import io.stereov.web.user.service.device.UserDeviceService
 import io.stereov.web.user.service.twofactor.UserTwoFactorAuthService
 import org.springframework.stereotype.Service
+import org.springframework.web.server.ServerWebExchange
 
 /**
  * # Service for managing user sessions and authentication.
@@ -36,8 +37,8 @@ class UserSessionService(
     private val hashService: HashService,
     private val authenticationService: AuthenticationService,
     private val deviceService: UserDeviceService,
-    private val userTwoFactorAuthService: UserTwoFactorAuthService,
     private val accessTokenCache: AccessTokenCache,
+    private val cookieService: CookieService,
 ) {
 
     private val logger: KLogger
@@ -106,12 +107,13 @@ class UserSessionService(
      * Changes the user's email address and returns the updated user document.
      *
      * @param payload The request containing the new email, password, and two-factor code.
+     * @param exchange The server web exchange containing the request and response.
      *
      * @return The [UserDocument] of the updated user.
      *
      * @throws InvalidCredentialsException If the password is invalid.
      */
-    suspend fun changeEmail(payload: ChangeEmailRequest): UserDocument {
+    suspend fun changeEmail(payload: ChangeEmailRequest, exchange: ServerWebExchange): UserDocument {
         logger.debug { "Changing email" }
 
         val user = authenticationService.getCurrentUser()
@@ -125,9 +127,7 @@ class UserSessionService(
         }
 
         if (user.security.twoFactor.enabled) {
-            val twoFactorCode = payload.twoFactorCode
-                ?: throw InvalidTwoFactorCodeException()
-            userTwoFactorAuthService.validateTwoFactorCode(user, twoFactorCode)
+            cookieService.validateStepUpCookie(exchange)
         }
 
         user.email = payload.newEmail
@@ -139,12 +139,13 @@ class UserSessionService(
      * Changes the user's password and returns the updated user document.
      *
      * @param payload The request containing the old password, new password, and two-factor code.
+     * @param exchange The server web exchange containing the request and response.
      *
      * @return The [UserDocument] of the updated user.
      *
      * @throws InvalidCredentialsException If the old password is invalid.
      */
-    suspend fun changePassword(payload: ChangePasswordRequest): UserDocument {
+    suspend fun changePassword(payload: ChangePasswordRequest, exchange: ServerWebExchange): UserDocument {
         logger.debug { "Changing password" }
 
         val user = authenticationService.getCurrentUser()
@@ -154,9 +155,7 @@ class UserSessionService(
         }
 
         if (user.security.twoFactor.enabled) {
-            val twoFactorCode = payload.twoFactorCode
-                ?: throw InvalidTwoFactorCodeException()
-            userTwoFactorAuthService.validateTwoFactorCode(user, twoFactorCode)
+            cookieService.validateStepUpCookie(exchange)
         }
 
         user.password = hashService.hashBcrypt(payload.newPassword)

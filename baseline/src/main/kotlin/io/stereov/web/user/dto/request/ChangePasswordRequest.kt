@@ -10,7 +10,6 @@ import jakarta.validation.constraints.NotBlank
  *
  * @property oldPassword The user's current password.
  * @property newPassword The new password to be set.
- * @property twoFactorCode The two-factor authentication code for verification.
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
@@ -18,5 +17,4 @@ data class ChangePasswordRequest(
     val oldPassword: String,
     @field:NotBlank(message = "New password required")
     val newPassword: String,
-    val twoFactorCode: Int?,
 )

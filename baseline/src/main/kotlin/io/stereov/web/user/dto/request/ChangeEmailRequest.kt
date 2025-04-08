@@ -11,7 +11,6 @@ import jakarta.validation.constraints.NotBlank
  *
  * @property newEmail The new email address to be set for the user.
  * @property password The user's password for authentication.
- * @property twoFactorCode The two-factor authentication code for verification.
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
@@ -20,5 +19,4 @@ data class ChangeEmailRequest(
     @field:Email(message = "Invalid email format")
     val newEmail: String,
     val password: String,
-    val twoFactorCode: Int?,
 )

@@ -109,9 +109,11 @@ class AuthenticationConfiguration {
         appProperties: AppProperties,
         geoLocationService: GeoLocationService,
         userService: UserService,
-        twoFactorAuthTokenService: TwoFactorAuthTokenService
+        twoFactorAuthService: TwoFactorAuthService,
+        twoFactorAuthTokenService: TwoFactorAuthTokenService,
+        authenticationService: AuthenticationService
     ): CookieService {
-        return CookieService(userTokenService, jwtProperties, appProperties, geoLocationService, userService, twoFactorAuthTokenService)
+        return CookieService(userTokenService, jwtProperties, appProperties, geoLocationService, userService, twoFactorAuthService, twoFactorAuthTokenService, authenticationService)
     }
 
     @Bean
@@ -163,14 +165,14 @@ class AuthenticationConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun twoFactorAuthService(googleAuthenticator: GoogleAuthenticator): TwoFactorAuthService {
-        return TwoFactorAuthService(googleAuthenticator)
+    fun twoFactorAuthService(googleAuthenticator: GoogleAuthenticator, encryptionService: EncryptionService): TwoFactorAuthService {
+        return TwoFactorAuthService(googleAuthenticator, encryptionService)
     }
 
     @Bean
     @ConditionalOnMissingBean
-    fun twoFactorAuthTokenService(jwtService: JwtService, jwtProperties: JwtProperties): TwoFactorAuthTokenService {
-        return TwoFactorAuthTokenService(jwtService, jwtProperties)
+    fun twoFactorAuthTokenService(jwtService: JwtService, jwtProperties: JwtProperties, authenticationService: AuthenticationService): TwoFactorAuthTokenService {
+        return TwoFactorAuthTokenService(jwtService, jwtProperties, authenticationService)
     }
 
     @Bean
@@ -178,9 +180,11 @@ class AuthenticationConfiguration {
     fun userTokenService(
         jwtService: JwtService,
         accessTokenCache: AccessTokenCache,
-        jwtProperties: JwtProperties
+        jwtProperties: JwtProperties,
+        authenticationService: AuthenticationService,
+        appProperties: AppProperties,
     ): UserTokenService {
-        return UserTokenService(jwtService, accessTokenCache, jwtProperties)
+        return UserTokenService(jwtService, accessTokenCache, jwtProperties, authenticationService)
     }
 
     @Bean
@@ -208,19 +212,18 @@ class AuthenticationConfiguration {
     fun userSessionService(
         userService: UserService,
         hashService: HashService,
-        jwtService: JwtService,
         authenticationService: AuthenticationService,
         deviceService: UserDeviceService,
-        userTwoFactorAuthService: UserTwoFactorAuthService,
         accessTokenCache: AccessTokenCache,
+        cookieService: CookieService
     ): UserSessionService {
         return UserSessionService(
             userService,
             hashService,
             authenticationService,
             deviceService,
-            userTwoFactorAuthService,
-            accessTokenCache
+            accessTokenCache,
+            cookieService
         )
     }
 

@@ -2,9 +2,11 @@ package io.stereov.web.auth.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.web.auth.exception.model.TwoFactorAuthDisabledException
 import io.stereov.web.config.Constants
 import io.stereov.web.global.service.geolocation.GeoLocationService
 import io.stereov.web.global.service.jwt.exception.model.InvalidTokenException
+import io.stereov.web.global.service.twofactorauth.TwoFactorAuthService
 import io.stereov.web.properties.AppProperties
 import io.stereov.web.properties.JwtProperties
 import io.stereov.web.user.dto.UserDto
@@ -13,6 +15,7 @@ import io.stereov.web.user.model.DeviceInfo
 import io.stereov.web.user.service.UserService
 import io.stereov.web.user.service.token.TwoFactorAuthTokenService
 import io.stereov.web.user.service.token.UserTokenService
+import io.stereov.web.user.service.token.model.StepUpToken
 import org.springframework.http.ResponseCookie
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ServerWebExchange
@@ -33,7 +36,9 @@ class CookieService(
     private val appProperties: AppProperties,
     private val geoLocationService: GeoLocationService,
     private val userService: UserService,
+    private val twoFactorAuthService: TwoFactorAuthService,
     private val twoFactorAuthTokenService: TwoFactorAuthTokenService,
+    private val authenticationService: AuthenticationService,
 ) {
 
     private val logger: KLogger
@@ -200,7 +205,7 @@ class CookieService(
         val cookie = ResponseCookie.from(Constants.TWO_FACTOR_AUTH_COOKIE, twoFactorAuthTokenService.createTwoFactorToken(userId))
             .httpOnly(true)
             .sameSite("Strict")
-            .maxAge(0)
+            .maxAge(jwtProperties.expiresIn)
             .path("/")
 
         if (appProperties.secure) {
@@ -247,5 +252,77 @@ class CookieService(
         }
 
         return cookie.build()
+    }
+
+    /**
+     * Creates a step-up cookie for two-factor authentication.
+     *
+     * @param code The two-factor authentication code.
+     *
+     * @return The created step-up cookie.
+     */
+    suspend fun createStepUpCookie(code: Int): ResponseCookie {
+        logger.debug { "Creating step up cookie" }
+
+        val user = authenticationService.getCurrentUser()
+
+        if (!user.security.twoFactor.enabled) {
+            throw TwoFactorAuthDisabledException()
+        }
+
+        twoFactorAuthService.validateTwoFactorCode(user, code)
+
+        val token = twoFactorAuthTokenService.createStepUpToken(code)
+
+        val cookie = ResponseCookie.from(Constants.STEP_UP_TOKEN_COOKIE, token)
+            .httpOnly(true)
+            .sameSite("Strict")
+            .maxAge(jwtProperties.expiresIn)
+            .path("/")
+            .secure(appProperties.secure)
+            .build()
+
+        return cookie
+    }
+
+    /**
+     * Validates the step-up cookie and retrieves the token values.
+     *
+     * @param exchange The server web exchange.
+     *
+     * @return The step-up token.
+     *
+     * @throws InvalidTokenException If the step-up token is invalid or not provided.
+     */
+    suspend fun validateStepUpCookie(exchange: ServerWebExchange): StepUpToken {
+        logger.debug { "Validating step up token" }
+
+        if (!authenticationService.getCurrentUser().security.twoFactor.enabled) {
+            throw TwoFactorAuthDisabledException()
+        }
+
+        val stepUpCookie = exchange.request.cookies[Constants.STEP_UP_TOKEN_COOKIE]?.firstOrNull()?.value
+            ?: throw InvalidTokenException("No step up token provided")
+
+        return twoFactorAuthTokenService.validateAndExtractStepUpToken(stepUpCookie)
+    }
+
+    /**
+     * Clears the step-up cookie.
+     *
+     * @return The cleared step-up cookie.
+     */
+    suspend fun clearStepUpCookie(): ResponseCookie {
+        logger.debug { "Clearing cookie for step up token" }
+
+        val cookie = ResponseCookie.from(Constants.STEP_UP_TOKEN_COOKIE, "")
+            .httpOnly(true)
+            .sameSite("Strict")
+            .maxAge(0)
+            .path("/")
+            .secure(appProperties.secure)
+            .build()
+
+        return cookie
     }
 }

@@ -1,5 +1,6 @@
 package io.stereov.web.test
 
+import io.stereov.web.user.service.token.TwoFactorAuthTokenService
 import io.stereov.web.user.service.token.UserTokenService
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach
@@ -16,6 +17,9 @@ class BaseIntegrationTest : BaseSpringBootTest() {
 
     @Autowired
     lateinit var userTokenService: UserTokenService
+
+    @Autowired
+    lateinit var twoFactorAuthTokenService: TwoFactorAuthTokenService
 
     @AfterEach
     fun clearDatabase() = runBlocking {

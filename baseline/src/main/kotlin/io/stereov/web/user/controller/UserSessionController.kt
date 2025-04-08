@@ -2,12 +2,15 @@ package io.stereov.web.user.controller
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.web.auth.exception.model.TwoFactorAuthDisabledException
 import io.stereov.web.auth.service.AuthenticationService
 import io.stereov.web.auth.service.CookieService
+import io.stereov.web.global.service.jwt.exception.TokenException
 import io.stereov.web.user.dto.ApplicationInfoDto
 import io.stereov.web.user.dto.UserDto
 import io.stereov.web.user.dto.request.*
 import io.stereov.web.user.dto.response.LoginResponse
+import io.stereov.web.user.dto.response.StepUpStatusResponse
 import io.stereov.web.user.service.UserSessionService
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
@@ -113,15 +116,54 @@ class UserSessionController(
     }
 
     /**
+     * Set the step-up authentication status.
+     *
+     * @param code The step-up authentication code.
+     *
+     * @return A response indicating the success of the operation.
+     */
+    @PostMapping("/step-up")
+    suspend fun setStepUp(@RequestParam code: Int): ResponseEntity<StepUpStatusResponse> {
+        val stepUpTokenCookie = cookieService.createStepUpCookie(code)
+
+        return ResponseEntity.ok()
+            .header("Set-Cookie", stepUpTokenCookie.toString())
+            .body(StepUpStatusResponse(true))
+    }
+
+    /**
+     * Get the step-up authentication status.
+     *
+     * @param exchange The server web exchange.
+     *
+     * @return The step-up authentication status as a [StepUpStatusResponse].
+     */
+    @GetMapping("/step-up")
+    suspend fun getStepUpStatus(exchange: ServerWebExchange): ResponseEntity<StepUpStatusResponse> {
+        val stepUpStatus = try {
+            cookieService.validateStepUpCookie(exchange)
+            true
+        } catch (e: TokenException) {
+            false
+        } catch (e: TwoFactorAuthDisabledException) {
+            true
+        }
+
+        return ResponseEntity.ok(StepUpStatusResponse(stepUpStatus))
+    }
+
+    /**
      * Verify the two-factor authentication code.
      *
      * @param payload The two-factor authentication request payload.
+     * @param exchange The server web exchange.
+     *
      * @return The user's information as a [UserDto].
      */
     @PutMapping("/me/email")
-    suspend fun changeEmail(@RequestBody payload: ChangeEmailRequest): ResponseEntity<UserDto> {
+    suspend fun changeEmail(@RequestBody payload: ChangeEmailRequest, exchange: ServerWebExchange): ResponseEntity<UserDto> {
         return ResponseEntity.ok().body(
-            userSessionService.changeEmail(payload).toDto()
+            userSessionService.changeEmail(payload, exchange).toDto()
         )
     }
 
@@ -129,12 +171,14 @@ class UserSessionController(
      * Change the user's password.
      *
      * @param payload The change password request payload.
+     * @param exchange The server web exchange.
+     *
      * @return The user's information as a [UserDto].
      */
     @PutMapping("/me/password")
-    suspend fun changePassword(@RequestBody payload: ChangePasswordRequest): ResponseEntity<UserDto> {
+    suspend fun changePassword(@RequestBody payload: ChangePasswordRequest, exchange: ServerWebExchange): ResponseEntity<UserDto> {
         return ResponseEntity.ok().body(
-            userSessionService.changePassword(payload).toDto()
+            userSessionService.changePassword(payload, exchange).toDto()
         )
     }
 
@@ -175,12 +219,14 @@ class UserSessionController(
 
         val clearAccessTokenCookie = cookieService.clearAccessTokenCookie()
         val clearRefreshTokenCookie = cookieService.clearRefreshTokenCookie()
+        val clearStepUpTokenCookie = cookieService.clearStepUpCookie()
 
         userSessionService.logout(deviceInfo.id)
 
         return ResponseEntity.ok()
             .header("Set-Cookie", clearAccessTokenCookie.toString())
             .header("Set-Cookie", clearRefreshTokenCookie.toString())
+            .header("Set-Cookie", clearStepUpTokenCookie.toString())
             .body(mapOf("message" to "success"))
     }
 
@@ -195,12 +241,14 @@ class UserSessionController(
 
         val clearAccessTokenCookie = cookieService.clearAccessTokenCookie()
         val clearRefreshTokenCookie = cookieService.clearRefreshTokenCookie()
+        val clearStepUpTokenCookie = cookieService.clearStepUpCookie()
 
         userSessionService.logoutAllDevices()
 
         return ResponseEntity.ok()
             .header("Set-Cookie", clearAccessTokenCookie.toString())
             .header("Set-Cookie", clearRefreshTokenCookie.toString())
+            .header("Set-Cookie", clearStepUpTokenCookie.toString())
             .body(mapOf("message" to "success"))
     }
 
@@ -241,12 +289,14 @@ class UserSessionController(
     suspend fun delete(): ResponseEntity<Map<String, String>> {
         val clearAccessTokenCookie = cookieService.clearAccessTokenCookie()
         val clearRefreshTokenCookie = cookieService.clearRefreshTokenCookie()
+        val clearStepUpTokenCookie = cookieService.clearStepUpCookie()
 
         userSessionService.deleteUser()
 
         return ResponseEntity.ok()
             .header("Set-Cookie", clearAccessTokenCookie.toString())
             .header("Set-Cookie", clearRefreshTokenCookie.toString())
+            .header("Set-Cookie", clearStepUpTokenCookie.toString())
             .body(mapOf("message" to "success"))
     }
 }

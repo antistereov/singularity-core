@@ -36,7 +36,8 @@ class RateLimitingFilter(
             val path = exchange.request.path.toString()
             val isLoginAttempt = path.contains("/user/login") ||
                     path.contains("/user/2fa/recovery") ||
-                    path.contains("/user/mail/reset-password")
+                    path.contains("/user/mail/reset-password") ||
+                    path.contains("/user/step-up")
 
             rateLimitService.checkIpRateLimit(clientIp)
                 .then(rateLimitService.checkUserRateLimit())

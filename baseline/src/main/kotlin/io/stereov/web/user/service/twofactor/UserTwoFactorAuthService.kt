@@ -9,8 +9,8 @@ import io.stereov.web.global.service.encryption.EncryptionService
 import io.stereov.web.global.service.hash.HashService
 import io.stereov.web.global.service.twofactorauth.TwoFactorAuthService
 import io.stereov.web.properties.TwoFactorAuthProperties
-import io.stereov.web.user.dto.response.TwoFactorSetupResponse
 import io.stereov.web.user.dto.UserDto
+import io.stereov.web.user.dto.response.TwoFactorSetupResponse
 import io.stereov.web.user.exception.model.InvalidUserDocumentException
 import io.stereov.web.user.model.UserDocument
 import io.stereov.web.user.service.UserService
@@ -82,28 +82,25 @@ class UserTwoFactorAuthService(
 
         val user = userService.findById(userId)
 
-        return validateTwoFactorCode(user, code).toDto()
+        return twoFactorAuthService.validateTwoFactorCode(user, code).toDto()
     }
 
     /**
-     * Validates the two-factor code for the given user. It throws an exception if the code is invalid.
+     * Validates the two-factor code for the currently logged-in user.
      *
-     * @param user The user to validate the code for.
      * @param code The two-factor code to validate.
      *
      * @throws InvalidUserDocumentException If the user document does not contain a two-factor authentication secret.
      * @throws AuthException If the two-factor code is invalid.
+     *
+     * @return The user document after validation.
      */
-    suspend fun validateTwoFactorCode(user: UserDocument, code: Int): UserDocument {
-        val encryptedSecret = user.security.twoFactor.secret
-            ?: throw InvalidUserDocumentException("No two factor authentication secret provided in UserDocument")
-        val decryptedSecret = encryptionService.decrypt(encryptedSecret)
+    suspend fun validateTwoFactorCode(code: Int): UserDocument {
+        logger.debug { "Validation two factor for currently logged in user" }
 
-        if (!twoFactorAuthService.validateCode(decryptedSecret, code)) {
-            throw AuthException("Invalid 2FA code")
-        }
+        val user = authenticationService.getCurrentUser()
 
-        return user
+        return twoFactorAuthService.validateTwoFactorCode(user, code)
     }
 
     /**

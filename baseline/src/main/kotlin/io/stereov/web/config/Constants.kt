@@ -8,7 +8,7 @@ package io.stereov.web.config
  * @property ACCESS_TOKEN_COOKIE The name of the access token cookie.
  * @property REFRESH_TOKEN_COOKIE The name of the refresh token cookie.
  * @property TWO_FACTOR_AUTH_COOKIE The name of the two-factor authentication cookie.
- * @property EXCHANGE_ERROR_ATTRIBUTE An error that occurred during authentication.
+ * @property STEP_UP_TOKEN_COOKIE The name of the step-up token cookie.
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
@@ -17,5 +17,5 @@ object Constants {
     const val REFRESH_TOKEN_COOKIE = "refresh_token"
     const val TWO_FACTOR_AUTH_COOKIE = "2fa_token"
     const val JWT_DEVICE_CLAIM = "device"
-    const val EXCHANGE_ERROR_ATTRIBUTE = "error"
+    const val STEP_UP_TOKEN_COOKIE = "step_up_token"
 }
