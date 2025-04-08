@@ -2,7 +2,6 @@ package io.stereov.web.user.service.token
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.web.auth.service.AuthenticationService
 import io.stereov.web.config.Constants
 import io.stereov.web.global.service.cache.AccessTokenCache
 import io.stereov.web.global.service.jwt.JwtService
@@ -28,7 +27,6 @@ class UserTokenService(
     private val jwtService: JwtService,
     private val accessTokenCache: AccessTokenCache,
     jwtProperties: JwtProperties,
-    private val authenticationService: AuthenticationService,
 ) {
 
     private val logger: KLogger

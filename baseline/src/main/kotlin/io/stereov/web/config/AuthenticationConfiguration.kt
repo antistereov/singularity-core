@@ -181,10 +181,8 @@ class AuthenticationConfiguration {
         jwtService: JwtService,
         accessTokenCache: AccessTokenCache,
         jwtProperties: JwtProperties,
-        authenticationService: AuthenticationService,
-        appProperties: AppProperties,
     ): UserTokenService {
-        return UserTokenService(jwtService, accessTokenCache, jwtProperties, authenticationService)
+        return UserTokenService(jwtService, accessTokenCache, jwtProperties)
     }
 
     @Bean

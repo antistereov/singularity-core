@@ -12,7 +12,6 @@ import io.stereov.web.properties.TwoFactorAuthProperties
 import io.stereov.web.user.dto.UserDto
 import io.stereov.web.user.dto.response.TwoFactorSetupResponse
 import io.stereov.web.user.exception.model.InvalidUserDocumentException
-import io.stereov.web.user.model.UserDocument
 import io.stereov.web.user.service.UserService
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ServerWebExchange
@@ -83,24 +82,6 @@ class UserTwoFactorAuthService(
         val user = userService.findById(userId)
 
         return twoFactorAuthService.validateTwoFactorCode(user, code).toDto()
-    }
-
-    /**
-     * Validates the two-factor code for the currently logged-in user.
-     *
-     * @param code The two-factor code to validate.
-     *
-     * @throws InvalidUserDocumentException If the user document does not contain a two-factor authentication secret.
-     * @throws AuthException If the two-factor code is invalid.
-     *
-     * @return The user document after validation.
-     */
-    suspend fun validateTwoFactorCode(code: Int): UserDocument {
-        logger.debug { "Validation two factor for currently logged in user" }
-
-        val user = authenticationService.getCurrentUser()
-
-        return twoFactorAuthService.validateTwoFactorCode(user, code)
     }
 
     /**
