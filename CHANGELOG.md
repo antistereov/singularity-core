@@ -1,3 +1,28 @@
+## [v1.2.0]
+
+## Changelog
+
+## 🚀 Features
+- [6ecabfd](https://github.com/antistereov/web-kotlin-spring-baseline/commits/6ecabfd) **two-factor-auth**: all access tokens are cleared when 2FA gets enabled
+
+## 🐛 Fixes
+- [37c33b2](https://github.com/antistereov/web-kotlin-spring-baseline/commits/37c33b2) **two-factor-auth**: setup does not automatically enable 2FA - verification is needed
+
+## 🧪 Tests
+- [a73510c](https://github.com/antistereov/web-kotlin-spring-baseline/commits/a73510c) **two-factor-auth**: fix tests for new 2fa setup
+
+## 🛠  Build
+- [e2a6bbb](https://github.com/antistereov/web-kotlin-spring-baseline/commits/e2a6bbb) bump version to 1.2.0
+- [46560d1](https://github.com/antistereov/web-kotlin-spring-baseline/commits/46560d1) bump version to 1.1.4-SNAPSHOT
+
+## 📝 Documentation
+- [08ca557](https://github.com/antistereov/web-kotlin-spring-baseline/commits/08ca557) **changelog**: update changelog for v1.1.3
+
+
+## Contributors
+We'd like to thank the following people for their contributions:
+antistereov
+
 ## [v1.1.3]
 
 ## Changelog
