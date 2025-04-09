@@ -4,6 +4,7 @@ import io.stereov.web.auth.exception.model.TwoFactorAuthDisabledException
 import io.stereov.web.auth.service.CookieService
 import io.stereov.web.global.service.jwt.exception.TokenException
 import io.stereov.web.user.dto.UserDto
+import io.stereov.web.user.dto.request.DeviceInfoRequest
 import io.stereov.web.user.dto.request.TwoFactorSetupRequest
 import io.stereov.web.user.dto.response.StepUpStatusResponse
 import io.stereov.web.user.dto.response.TwoFactorSetupResponse
@@ -57,13 +58,24 @@ class UserTwoFactorAuthController(
     }
 
     @PostMapping("/verify-login")
-    suspend fun verifyTwoFactorAuth(@RequestParam("code") code: Int, exchange: ServerWebExchange): ResponseEntity<UserDto> {
-        val userDto = twoFactorService.validateTwoFactorCode(exchange, code)
+    suspend fun verifyTwoFactorAuth(
+        @RequestParam("code") code: Int,
+        exchange: ServerWebExchange,
+        @RequestBody device: DeviceInfoRequest
+    ): ResponseEntity<UserDto> {
+        val user = twoFactorService.validateTwoFactorCode(exchange, code)
+
+        val ipAddress = exchange.request.remoteAddress?.address?.hostAddress
+
+        val accessTokenCookie = cookieService.createAccessTokenCookie(user.idX, device.id)
+        val refreshTokenCookie = cookieService.createRefreshTokenCookie(user.idX, device, ipAddress)
 
         val clearTwoFactorCookie = cookieService.clearTwoFactorSessionCookie()
         return ResponseEntity.ok()
             .header("Set-Cookie", clearTwoFactorCookie.toString())
-            .body(userDto)
+            .header("Set-Cookie", accessTokenCookie.toString())
+            .header("Set-Cookie", refreshTokenCookie.toString())
+            .body(user.toDto())
     }
 
     @GetMapping("/login-status")

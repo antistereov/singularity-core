@@ -195,9 +195,10 @@ class AuthenticationConfiguration {
         twoFactorAuthProperties: TwoFactorAuthProperties,
         hashService: HashService,
         cookieService: CookieService,
-        twoFactorAuthTokenService: TwoFactorAuthTokenService
+        twoFactorAuthTokenService: TwoFactorAuthTokenService,
+        accessTokenCache: AccessTokenCache,
     ): UserTwoFactorAuthService {
-        return UserTwoFactorAuthService(userService, twoFactorAuthService, encryptionService, authenticationService, twoFactorAuthProperties, hashService, cookieService, twoFactorAuthTokenService)
+        return UserTwoFactorAuthService(userService, twoFactorAuthService, encryptionService, authenticationService, twoFactorAuthProperties, hashService, cookieService, twoFactorAuthTokenService, accessTokenCache)
     }
 
     @Bean

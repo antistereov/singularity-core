@@ -40,12 +40,12 @@ class TwoFactorAuthTokenService(
      *
      * @return The generated setup token.
      */
-    fun createSetupToken(userId: String, secret: String, recoveryCode: String): String {
+    fun createSetupToken(userId: String, secret: String, recoveryCode: String, issuedAt: Instant = Instant.now()): String {
         logger.debug { "Creating setup token for 2fa" }
 
         val claims = JwtClaimsSet.builder()
-            .issuedAt(Instant.now())
-            .expiresAt(Instant.now().plusSeconds(jwtProperties.expiresIn))
+            .issuedAt(issuedAt)
+            .expiresAt(issuedAt.plusSeconds(jwtProperties.expiresIn))
             .subject(userId)
             .claim(Constants.TWO_FACTOR_SECRET_CLAIM, secret)
             .claim(Constants.TWO_FACTOR_RECOVERY_CLAIM, recoveryCode)

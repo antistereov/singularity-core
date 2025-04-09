@@ -61,7 +61,7 @@ class BaseSpringBootTest {
     ): TestRegisterResponse {
         val device = DeviceInfoRequest(id = deviceId)
 
-        val responseCookies = webTestClient.post()
+        var responseCookies = webTestClient.post()
             .uri("/user/register")
             .bodyValue(RegisterUserRequest(email = email, password = password, device = device))
             .exchange()
@@ -69,8 +69,8 @@ class BaseSpringBootTest {
             .returnResult<Void>()
             .responseCookies
 
-        val accessToken = responseCookies[Constants.ACCESS_TOKEN_COOKIE]?.firstOrNull()?.value
-        val refreshToken = responseCookies[Constants.REFRESH_TOKEN_COOKIE]?.firstOrNull()?.value
+        var accessToken = responseCookies[Constants.ACCESS_TOKEN_COOKIE]?.firstOrNull()?.value
+        var refreshToken = responseCookies[Constants.REFRESH_TOKEN_COOKIE]?.firstOrNull()?.value
 
         requireNotNull(accessToken) { "No access token contained in response" }
         requireNotNull(refreshToken) { "No refresh token contained in response" }
@@ -116,6 +116,21 @@ class BaseSpringBootTest {
                 .responseCookies[Constants.LOGIN_VERIFICATION_TOKEN]
                 ?.firstOrNull()
                 ?.value
+
+            responseCookies = webTestClient.post()
+                .uri("/user/2fa/verify-login?code=${gAuth.getTotpPassword(twoFactorSecret)}")
+                .bodyValue(DeviceInfoRequest(deviceId))
+                .cookie(Constants.LOGIN_VERIFICATION_TOKEN, twoFactorToken!!)
+                .exchange()
+                .expectStatus().isOk
+                .returnResult<Void>()
+                .responseCookies
+
+            accessToken = responseCookies[Constants.ACCESS_TOKEN_COOKIE]?.firstOrNull()?.value
+            refreshToken = responseCookies[Constants.REFRESH_TOKEN_COOKIE]?.firstOrNull()?.value
+
+            requireNotNull(accessToken) { "No access token contained in response" }
+            requireNotNull(refreshToken) { "No refresh token contained in response" }
         }
 
 

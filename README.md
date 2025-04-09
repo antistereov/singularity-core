@@ -375,7 +375,7 @@ The related class is [`UserTwoFactorAuthController`](baseline/src/main/kotlin/io
 
 - **GET /user/2fa/setup**: Retrieves the setup information for two-factor authentication.
 - **POST /user/2fa/setup**: Set up two-factor authentication for the user.
-- **POST /user/2fa/verify-login**: Verifies the user's 2FA code.
+- **POST /user/2fa/verify-login**: Verifies the user's 2FA code and logs in the user.
 - **GET /user/2fa/login-status**: Checks whether two-factor authentication is pending for the user.
 - **POST /user/2fa/recovery**: Recovers the user's account using a recovery code.
 - **POST /user/2fa/verify-step-up**: If 2FA is enabled, this endpoint is used to set a new step-up token that enables critical changes to the user account, e.g., changing the password.

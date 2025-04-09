@@ -78,6 +78,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
         val userRes = webTestClient.post()
             .uri("/user/2fa/verify-login?code=$code")
             .cookie(Constants.LOGIN_VERIFICATION_TOKEN, twoFactorToken)
+            .bodyValue(DeviceInfoRequest(deviceId))
             .exchange()
             .expectStatus().isOk
             .expectBody(UserDto::class.java)
@@ -95,6 +96,165 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
             .uri("/user/2fa/setup")
             .exchange()
             .expectStatus().isUnauthorized
+    }
+    @Test fun `2fa setup clears all devices`() = runTest {
+        val email = "test@email.com"
+        val password = "password"
+        val deviceId = "device"
+        val user = registerUser(email, password, deviceId)
+
+        val response = webTestClient.get()
+            .uri("/user/2fa/setup")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(TwoFactorSetupResponse::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(response)
+
+        val code = gAuth.getTotpPassword(response.secret)
+
+        webTestClient.post()
+            .uri("/user/2fa/setup")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .bodyValue(TwoFactorSetupRequest(response.token, code))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(UserDto::class.java)
+            .returnResult()
+            .responseBody
+
+        val userWith2fa = userService.findById(user.info.idX)
+
+        assertTrue(userWith2fa.devices.isEmpty())
+    }
+
+    @Test fun `2fa setup validation works`() = runTest {
+        val email = "test@email.com"
+        val password = "password"
+        val deviceId = "device"
+        val user = registerUser(email, password, deviceId)
+
+        val secret = twoFactorAuthService.generateSecretKey()
+        val recoveryCode = twoFactorAuthService.generateRecoveryCode(10)
+        val token = twoFactorAuthTokenService.createSetupToken(user.info.idX, secret, recoveryCode)
+        val code = gAuth.getTotpPassword(secret)
+
+        val setupRes = webTestClient.post()
+            .uri("/user/2fa/setup")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .bodyValue(TwoFactorSetupRequest(token, code))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(UserDto::class.java)
+            .returnResult()
+            .responseBody
+
+        val userWith2fa = userService.findById(user.info.idX)
+
+        requireNotNull(setupRes)
+        assertTrue(userWith2fa.security.twoFactor.enabled)
+        assertTrue(setupRes.twoFactorAuthEnabled)
+        assertEquals(secret, encryptionService.decrypt(userWith2fa.security.twoFactor.secret!!))
+        assertTrue(hashService.checkBcrypt(recoveryCode, userWith2fa.security.twoFactor.recoveryCode!!))
+
+    }
+    @Test fun `2fa setup validation needs valid token`() = runTest {
+        val email = "test@email.com"
+        val password = "password"
+        val deviceId = "device"
+        val user = registerUser(email, password, deviceId)
+
+        val secret = twoFactorAuthService.generateSecretKey()
+        val recoveryCode = twoFactorAuthService.generateRecoveryCode(10)
+        val token = twoFactorAuthTokenService.createSetupToken(user.info.idX, secret, recoveryCode)
+        val code = gAuth.getTotpPassword(secret)
+
+        webTestClient.post()
+            .uri("/user/2fa/setup")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .bodyValue(TwoFactorSetupRequest(token + "a", code))
+            .exchange()
+            .expectStatus().isUnauthorized
+
+        val userWith2fa = userService.findById(user.info.idX)
+
+        assertFalse(userWith2fa.security.twoFactor.enabled)
+        assertNull(userWith2fa.security.twoFactor.secret)
+        assertNull(userWith2fa.security.twoFactor.recoveryCode)
+    }
+    @Test fun `2fa setup validation needs unexpired token`() = runTest {
+        val email = "test@email.com"
+        val password = "password"
+        val deviceId = "device"
+        val user = registerUser(email, password, deviceId)
+
+        val secret = twoFactorAuthService.generateSecretKey()
+        val recoveryCode = twoFactorAuthService.generateRecoveryCode(10)
+        val token = twoFactorAuthTokenService.createSetupToken(user.info.idX, secret, recoveryCode, Instant.ofEpochSecond(0))
+        val code = gAuth.getTotpPassword(secret)
+
+        webTestClient.post()
+            .uri("/user/2fa/setup")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .bodyValue(TwoFactorSetupRequest(token, code))
+            .exchange()
+            .expectStatus().isUnauthorized
+
+        val userWith2fa = userService.findById(user.info.idX)
+
+        assertFalse(userWith2fa.security.twoFactor.enabled)
+        assertNull(userWith2fa.security.twoFactor.secret)
+        assertNull(userWith2fa.security.twoFactor.recoveryCode)
+    }
+    @Test fun `2fa setup validation needs token for same user`() = runTest {
+        val email = "test@email.com"
+        val password = "password"
+        val deviceId = "device"
+        val user = registerUser(email, password, deviceId)
+
+        val secret = twoFactorAuthService.generateSecretKey()
+        val recoveryCode = twoFactorAuthService.generateRecoveryCode(10)
+        val token = twoFactorAuthTokenService.createSetupToken("another user", secret, recoveryCode)
+        val code = gAuth.getTotpPassword(secret)
+
+        webTestClient.post()
+            .uri("/user/2fa/setup")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .bodyValue(TwoFactorSetupRequest(token, code))
+            .exchange()
+            .expectStatus().isUnauthorized
+
+        val userWith2fa = userService.findById(user.info.idX)
+
+        assertFalse(userWith2fa.security.twoFactor.enabled)
+        assertNull(userWith2fa.security.twoFactor.secret)
+        assertNull(userWith2fa.security.twoFactor.recoveryCode)
+    }
+    @Test fun `2fa setup validation needs authentication`() = runTest {
+        val email = "test@email.com"
+        val password = "password"
+        val deviceId = "device"
+        val user = registerUser(email, password, deviceId)
+
+        val secret = twoFactorAuthService.generateSecretKey()
+        val recoveryCode = twoFactorAuthService.generateRecoveryCode(10)
+        val token = twoFactorAuthTokenService.createSetupToken(user.info.idX, secret, recoveryCode)
+        val code = gAuth.getTotpPassword(secret)
+
+        webTestClient.post()
+            .uri("/user/2fa/setup")
+            .bodyValue(TwoFactorSetupRequest(token + "a", code))
+            .exchange()
+            .expectStatus().isUnauthorized
+
+        val userWith2fa = userService.findById(user.info.idX)
+
+        assertFalse(userWith2fa.security.twoFactor.enabled)
+        assertNull(userWith2fa.security.twoFactor.secret)
+        assertNull(userWith2fa.security.twoFactor.recoveryCode)
     }
 
     @Test fun `2fa recovery works`() = runTest {
@@ -156,6 +316,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
 
         val res = webTestClient.post()
             .uri("/user/2fa/verify-login?code=$code")
+            .bodyValue(user.info.devices.first().toRequestDto())
             .cookie(Constants.LOGIN_VERIFICATION_TOKEN, user.twoFactorToken)
             .exchange()
             .expectStatus().isOk
@@ -179,6 +340,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
 
         webTestClient.post()
             .uri("/user/2fa/verify-login?code=$code")
+            .bodyValue(user.info.devices.first().toRequestDto())
             .cookie(Constants.LOGIN_VERIFICATION_TOKEN, user.twoFactorToken)
             .exchange()
             .expectStatus().isUnauthorized
@@ -190,14 +352,26 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
         webTestClient.post()
             .uri("/user/2fa/verify-login")
             .cookie(Constants.LOGIN_VERIFICATION_TOKEN, user.twoFactorToken)
+            .bodyValue(user.info.devices.first())
             .exchange()
             .expectStatus().isBadRequest
     }
     @Test fun `verifyLogin needs 2fa token`() = runTest {
         webTestClient.post()
             .uri("/user/2fa/verify-login?code=25234")
+            .bodyValue(DeviceInfoRequest("device"))
             .exchange()
             .expectStatus().isUnauthorized
+    }
+    @Test fun `verifyLogin needs body`() = runTest {
+        val user = registerUser(twoFactorEnabled = true)
+        requireNotNull(user.twoFactorToken)
+
+        webTestClient.post()
+            .uri("/user/2fa/verify-login")
+            .cookie(Constants.LOGIN_VERIFICATION_TOKEN, user.twoFactorToken)
+            .exchange()
+            .expectStatus().isBadRequest
     }
 
     @Test fun `loginStatus works is not pending if no cookie is set`() = runTest {

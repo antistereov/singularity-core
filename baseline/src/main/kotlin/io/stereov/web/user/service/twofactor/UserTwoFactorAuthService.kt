@@ -5,6 +5,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.web.auth.exception.AuthException
 import io.stereov.web.auth.service.AuthenticationService
 import io.stereov.web.auth.service.CookieService
+import io.stereov.web.global.service.cache.AccessTokenCache
 import io.stereov.web.global.service.encryption.EncryptionService
 import io.stereov.web.global.service.hash.HashService
 import io.stereov.web.global.service.twofactorauth.TwoFactorAuthService
@@ -12,6 +13,7 @@ import io.stereov.web.properties.TwoFactorAuthProperties
 import io.stereov.web.user.dto.UserDto
 import io.stereov.web.user.dto.response.TwoFactorSetupResponse
 import io.stereov.web.user.exception.model.InvalidUserDocumentException
+import io.stereov.web.user.model.UserDocument
 import io.stereov.web.user.service.UserService
 import io.stereov.web.user.service.token.TwoFactorAuthTokenService
 import org.springframework.stereotype.Service
@@ -38,6 +40,7 @@ class UserTwoFactorAuthService(
     private val hashService: HashService,
     private val cookieService: CookieService,
     private val twoFactorAuthTokenService: TwoFactorAuthTokenService,
+    private val accessTokenCache: AccessTokenCache,
 ) {
 
     private val logger: KLogger
@@ -87,8 +90,10 @@ class UserTwoFactorAuthService(
         val hashedRecoveryCode = hashService.hashBcrypt(setupToken.recoveryCode)
 
         user.setupTwoFactorAuth(encryptedSecret, hashedRecoveryCode)
+            .clearDevices()
 
         userService.save(user)
+        accessTokenCache.invalidateAllTokens(user.idX)
 
         return user.toDto()
     }
@@ -102,14 +107,14 @@ class UserTwoFactorAuthService(
      * @throws InvalidUserDocumentException If the user document does not contain a two-factor authentication secret.
      * @throws AuthException If the two-factor code is invalid.
      */
-    suspend fun validateTwoFactorCode(exchange: ServerWebExchange, code: Int): UserDto {
+    suspend fun validateTwoFactorCode(exchange: ServerWebExchange, code: Int): UserDocument {
         logger.debug { "Validating two factor code" }
 
         val userId = cookieService.validateTwoFactorSessionCookieAndGetUserId(exchange)
 
         val user = userService.findById(userId)
 
-        return twoFactorAuthService.validateTwoFactorCode(user, code).toDto()
+        return twoFactorAuthService.validateTwoFactorCode(user, code)
     }
 
     /**
