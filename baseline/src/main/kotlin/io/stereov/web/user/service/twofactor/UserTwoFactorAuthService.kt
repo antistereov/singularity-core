@@ -13,6 +13,7 @@ import io.stereov.web.user.dto.UserDto
 import io.stereov.web.user.dto.response.TwoFactorSetupResponse
 import io.stereov.web.user.exception.model.InvalidUserDocumentException
 import io.stereov.web.user.service.UserService
+import io.stereov.web.user.service.token.TwoFactorAuthTokenService
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ServerWebExchange
 
@@ -36,6 +37,7 @@ class UserTwoFactorAuthService(
     private val twoFactorAuthProperties: TwoFactorAuthProperties,
     private val hashService: HashService,
     private val cookieService: CookieService,
+    private val twoFactorAuthTokenService: TwoFactorAuthTokenService,
 ) {
 
     private val logger: KLogger
@@ -43,10 +45,10 @@ class UserTwoFactorAuthService(
 
     /**
      * Sets up two-factor authentication for the current user.
+     * It generates a secret key, an OTP auth URL, a recovery code, and a token.
+     * The token is used to validate the setup process and enable two-factor authentication for the current user.
      *
-     * @throws AuthException If the user document does not contain an ID.
-     *
-     * @return A [TwoFactorSetupResponse] containing the secret, OTP auth URL, and recovery code.
+     * @return A [TwoFactorSetupResponse] containing the secret, OTP auth URL, recovery code and setup token.
      */
     suspend fun setUpTwoFactorAuth(): TwoFactorSetupResponse {
         logger.debug { "Setting up two factor authentication" }
@@ -57,12 +59,38 @@ class UserTwoFactorAuthService(
         val otpAuthUrl = twoFactorAuthService.getOtpAuthUrl(user.email, secret)
         val recoveryCode = twoFactorAuthService.generateRecoveryCode(twoFactorAuthProperties.recoveryCodeLength)
 
-        val encryptedSecret = encryptionService.encrypt(secret)
-        val hashedRecoveryCode = hashService.hashBcrypt(recoveryCode)
+        val setupToken = twoFactorAuthTokenService.createSetupToken(user.idX, secret, recoveryCode)
 
-        userService.save(user.setupTwoFactorAuth(encryptedSecret, hashedRecoveryCode))
+        return TwoFactorSetupResponse(secret, otpAuthUrl, recoveryCode, setupToken)
+    }
 
-        return TwoFactorSetupResponse(secret, otpAuthUrl, recoveryCode)
+    /**
+     * Validates the setup token and enables two-factor authentication for the current user.
+     *
+     * @param token The setup token to validate.
+     * @param code The two-factor authentication code to validate.
+     *
+     * @throws InvalidUserDocumentException If the user document does not contain a two-factor authentication secret.
+     * @throws AuthException If the setup token is invalid.
+     *
+     * @return The updated user document.
+     */
+    suspend fun validateSetup(token: String, code: Int): UserDto {
+        val user = authenticationService.getCurrentUser()
+        val setupToken = twoFactorAuthTokenService.validateAndExtractSetupToken(token)
+
+        if (!twoFactorAuthService.validateCode(setupToken.secret, code)) {
+            throw AuthException("Invalid two-factor authentication code")
+        }
+
+        val encryptedSecret = encryptionService.encrypt(setupToken.secret)
+        val hashedRecoveryCode = hashService.hashBcrypt(setupToken.recoveryCode)
+
+        user.setupTwoFactorAuth(encryptedSecret, hashedRecoveryCode)
+
+        userService.save(user)
+
+        return user.toDto()
     }
 
     /**

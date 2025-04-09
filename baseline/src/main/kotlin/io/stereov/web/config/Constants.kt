@@ -18,4 +18,6 @@ object Constants {
     const val LOGIN_VERIFICATION_TOKEN = "login_verification_token"
     const val JWT_DEVICE_CLAIM = "device"
     const val STEP_UP_TOKEN_COOKIE = "step_up_token"
+    const val TWO_FACTOR_SECRET_CLAIM = "2fa_secret"
+    const val TWO_FACTOR_RECOVERY_CLAIM = "2fa_recovery"
 }

@@ -373,6 +373,7 @@ These endpoints are used for managing two-factor authentication (2FA) for user a
 They provide a secure way to enhance user account security.
 The related class is [`UserTwoFactorAuthController`](baseline/src/main/kotlin/io/stereov/web/user/controller/UserTwoFactorAuthController.kt).
 
+- **GET /user/2fa/setup**: Retrieves the setup information for two-factor authentication.
 - **POST /user/2fa/setup**: Set up two-factor authentication for the user.
 - **POST /user/2fa/verify-login**: Verifies the user's 2FA code.
 - **GET /user/2fa/login-status**: Checks whether two-factor authentication is pending for the user.

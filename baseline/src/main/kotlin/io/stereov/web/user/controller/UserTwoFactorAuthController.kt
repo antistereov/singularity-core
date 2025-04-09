@@ -4,16 +4,14 @@ import io.stereov.web.auth.exception.model.TwoFactorAuthDisabledException
 import io.stereov.web.auth.service.CookieService
 import io.stereov.web.global.service.jwt.exception.TokenException
 import io.stereov.web.user.dto.UserDto
+import io.stereov.web.user.dto.request.TwoFactorSetupRequest
 import io.stereov.web.user.dto.response.StepUpStatusResponse
 import io.stereov.web.user.dto.response.TwoFactorSetupResponse
 import io.stereov.web.user.dto.response.TwoFactorStatusResponse
 import io.stereov.web.user.service.twofactor.UserTwoFactorAuthService
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ServerWebExchange
 
 /**
@@ -32,11 +30,20 @@ class UserTwoFactorAuthController(
     private val cookieService: CookieService,
 ) {
 
-    @PostMapping("/setup")
+    @GetMapping("/setup")
     suspend fun setupTwoFactorAuth(): ResponseEntity<TwoFactorSetupResponse> {
         val res = twoFactorService.setUpTwoFactorAuth()
 
         return ResponseEntity.ok().body(res)
+    }
+
+    @PostMapping("/setup")
+    suspend fun validateTwoFactorSetup(
+        @RequestBody setupRequest: TwoFactorSetupRequest
+    ): ResponseEntity<UserDto> {
+        return ResponseEntity.ok(
+            twoFactorService.validateSetup(setupRequest.token, setupRequest.code)
+        )
     }
 
     @PostMapping("/recovery")

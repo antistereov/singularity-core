@@ -7,6 +7,7 @@ import io.stereov.web.config.Constants
 import io.stereov.web.global.service.jwt.JwtService
 import io.stereov.web.global.service.jwt.exception.model.InvalidTokenException
 import io.stereov.web.properties.JwtProperties
+import io.stereov.web.user.service.token.model.SetupToken
 import io.stereov.web.user.service.token.model.StepUpToken
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
 import org.springframework.stereotype.Service
@@ -31,6 +32,57 @@ class TwoFactorAuthTokenService(
         get() = KotlinLogging.logger {}
 
     /**
+     * Creates a setup token for two-factor authentication.
+     *
+     * @param userId The ID of the user.
+     * @param secret The secret key for two-factor authentication.
+     * @param recoveryCode The recovery code for two-factor authentication.
+     *
+     * @return The generated setup token.
+     */
+    fun createSetupToken(userId: String, secret: String, recoveryCode: String): String {
+        logger.debug { "Creating setup token for 2fa" }
+
+        val claims = JwtClaimsSet.builder()
+            .issuedAt(Instant.now())
+            .expiresAt(Instant.now().plusSeconds(jwtProperties.expiresIn))
+            .subject(userId)
+            .claim(Constants.TWO_FACTOR_SECRET_CLAIM, secret)
+            .claim(Constants.TWO_FACTOR_RECOVERY_CLAIM, recoveryCode)
+            .build()
+
+        return jwtService.encodeJwt(claims)
+    }
+
+    /**
+     * Validates the given setup token and extracts the two-factor authentication secret and recovery code.
+     *
+     * @param token The setup token to validate.
+     *
+     * @return A [SetupToken] object containing the secret and recovery code.
+     *
+     * @throws InvalidTokenException If the token is invalid or does not contain the required claims.
+     */
+    suspend fun validateAndExtractSetupToken(token: String): SetupToken {
+        val jwt = jwtService.decodeJwt(token, true)
+
+        val userId = authenticationService.getCurrentUserId()
+
+        if (jwt.subject != userId) {
+            throw InvalidTokenException("Setup token is not valid for current user")
+        }
+
+        val secret = jwt.claims[Constants.TWO_FACTOR_SECRET_CLAIM] as? String
+            ?: throw InvalidTokenException("JWT does not contain valid 2fa secret")
+
+
+        val recoveryCode = jwt.claims[Constants.TWO_FACTOR_RECOVERY_CLAIM] as? String
+            ?: throw InvalidTokenException("JWT does not contain valid 2fa recovery code")
+
+        return SetupToken(secret, recoveryCode)
+    }
+
+    /**
      * Creates a two-factor authentication token for the given user ID.
      *
      * @param userId The ID of the user.
@@ -38,7 +90,7 @@ class TwoFactorAuthTokenService(
      *
      * @return The generated two-factor authentication token.
      */
-    fun createTwoFactorToken(userId: String, expiration: Long = jwtProperties.expiresIn): String {
+    fun createLoginToken(userId: String, expiration: Long = jwtProperties.expiresIn): String {
         logger.debug { "Creating two factor token" }
 
         val claims = JwtClaimsSet.builder()
@@ -59,7 +111,7 @@ class TwoFactorAuthTokenService(
      *
      * @throws InvalidTokenException If the token is invalid or does not contain the required claims.
      */
-    suspend fun validateTwoFactorTokenAndExtractUserId(token: String): String {
+    suspend fun validateLoginTokenAndExtractUserId(token: String): String {
         logger.debug { "Validating two factor token" }
 
         val jwt = jwtService.decodeJwt(token, true)
