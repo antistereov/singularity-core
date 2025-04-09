@@ -7,6 +7,7 @@ import io.stereov.web.test.config.MockConfig
 import io.stereov.web.user.dto.request.DeviceInfoRequest
 import io.stereov.web.user.dto.request.LoginRequest
 import io.stereov.web.user.dto.request.RegisterUserRequest
+import io.stereov.web.user.dto.request.TwoFactorSetupRequest
 import io.stereov.web.user.dto.response.TwoFactorSetupResponse
 import io.stereov.web.user.model.UserDocument
 import io.stereov.web.user.service.UserService
@@ -79,7 +80,7 @@ class BaseSpringBootTest {
         var twoFactorSecret: String? = null
 
         if (twoFactorEnabled) {
-            val twoFactorRes = webTestClient.post()
+            val twoFactorRes = webTestClient.get()
                 .uri("/user/2fa/setup")
                 .cookie(Constants.ACCESS_TOKEN_COOKIE, accessToken)
                 .exchange()
@@ -90,6 +91,21 @@ class BaseSpringBootTest {
 
             twoFactorRecovery = twoFactorRes?.recoveryCode
             twoFactorSecret = twoFactorRes?.secret
+            val twoFactorVerifyToken = twoFactorRes?.token
+
+            requireNotNull(twoFactorVerifyToken)
+
+            val twoFactorSetupReq = TwoFactorSetupRequest(
+                twoFactorVerifyToken,
+                gAuth.getTotpPassword(twoFactorSecret)
+            )
+
+            webTestClient.post()
+                .uri("/user/2fa/setup")
+                .cookie(Constants.ACCESS_TOKEN_COOKIE, accessToken)
+                .bodyValue(twoFactorSetupReq)
+                .exchange()
+                .expectStatus().isOk
 
             twoFactorToken = webTestClient.post()
                 .uri("/user/login")

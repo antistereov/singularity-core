@@ -5,6 +5,7 @@ import io.stereov.web.test.BaseIntegrationTest
 import io.stereov.web.user.dto.UserDto
 import io.stereov.web.user.dto.request.DeviceInfoRequest
 import io.stereov.web.user.dto.request.LoginRequest
+import io.stereov.web.user.dto.request.TwoFactorSetupRequest
 import io.stereov.web.user.dto.response.LoginResponse
 import io.stereov.web.user.dto.response.StepUpStatusResponse
 import io.stereov.web.user.dto.response.TwoFactorSetupResponse
@@ -23,7 +24,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
         val user = registerUser(email, password, deviceId)
         val login = LoginRequest(email, password, DeviceInfoRequest(deviceId))
 
-        val response = webTestClient.post()
+        val response = webTestClient.get()
             .uri("/user/2fa/setup")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
@@ -35,6 +36,24 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
         requireNotNull(response)
 
         val code = gAuth.getTotpPassword(response.secret)
+
+        val setupRes = webTestClient.post()
+            .uri("/user/2fa/setup")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .bodyValue(TwoFactorSetupRequest(response.token, code))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(UserDto::class.java)
+            .returnResult()
+            .responseBody
+
+        val userWith2fa = userService.findById(user.info.idX)
+
+        requireNotNull(setupRes)
+        assertTrue(userWith2fa.security.twoFactor.enabled)
+        assertTrue(setupRes.twoFactorAuthEnabled)
+        assertEquals(response.secret, encryptionService.decrypt(userWith2fa.security.twoFactor.secret!!))
+        assertTrue(hashService.checkBcrypt(response.recoveryCode, userWith2fa.security.twoFactor.recoveryCode!!))
 
         val loginRes = webTestClient.post()
             .uri("/user/login")
@@ -72,12 +91,11 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
     }
     @Test fun `2fa setup requires authentication`() = runTest {
         registerUser()
-        webTestClient.post()
+        webTestClient.get()
             .uri("/user/2fa/setup")
             .exchange()
             .expectStatus().isUnauthorized
     }
-
 
     @Test fun `2fa recovery works`() = runTest {
         val user = registerUser(twoFactorEnabled = true)
@@ -129,7 +147,6 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isUnauthorized
     }
-
 
     @Test fun `verifyLogin works`() = runTest {
         val user = registerUser(twoFactorEnabled = true)

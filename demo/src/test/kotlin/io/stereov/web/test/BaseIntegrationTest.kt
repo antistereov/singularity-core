@@ -1,5 +1,7 @@
 package io.stereov.web.test
 
+import io.stereov.web.global.service.encryption.EncryptionService
+import io.stereov.web.global.service.hash.HashService
 import io.stereov.web.user.service.token.TwoFactorAuthTokenService
 import io.stereov.web.user.service.token.UserTokenService
 import kotlinx.coroutines.runBlocking
@@ -20,6 +22,12 @@ class BaseIntegrationTest : BaseSpringBootTest() {
 
     @Autowired
     lateinit var twoFactorAuthTokenService: TwoFactorAuthTokenService
+
+    @Autowired
+    lateinit var encryptionService: EncryptionService
+
+    @Autowired
+    lateinit var hashService: HashService
 
     @AfterEach
     fun clearDatabase() = runBlocking {
