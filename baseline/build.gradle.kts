@@ -19,7 +19,7 @@ kotlin {
 }
 
 group = "io.stereov.web"
-version = "1.3.0"
+version = "1.3.1-SNAPSHOT"
 
 repositories {
     mavenCentral()
