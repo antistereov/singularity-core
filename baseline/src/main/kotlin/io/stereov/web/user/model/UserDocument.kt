@@ -95,7 +95,7 @@ data class UserDocument(
      * This method enables two-factor authentication and sets the secret and recovery code.
      *
      * @param secret The secret key for the user.
-     * @param recoveryCode The recovery code for the user.
+     * @param recoveryCodes The recovery codes for the user.
      *
      * @return The updated [UserDocument].
      */

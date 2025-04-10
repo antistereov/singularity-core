@@ -3,7 +3,6 @@ package io.stereov.web.global.service.twofactorauth
 import com.warrenstrange.googleauth.GoogleAuthenticator
 import io.stereov.web.auth.exception.AuthException
 import io.stereov.web.global.service.encryption.EncryptionService
-import io.stereov.web.global.service.random.RandomService
 import io.stereov.web.user.exception.model.InvalidUserDocumentException
 import io.stereov.web.user.model.UserDocument
 import org.springframework.stereotype.Service
