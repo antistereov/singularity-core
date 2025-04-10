@@ -1,3 +1,25 @@
+## [v1.3.0]
+
+## Changelog
+
+## 🚀 Features
+- [4289713](https://github.com/antistereov/web-kotlin-spring-baseline/commits/4289713) **two-factor**: change 2FA recovery design
+
+## 🧰 Tasks
+- [a43cadd](https://github.com/antistereov/web-kotlin-spring-baseline/commits/a43cadd) remove unused imports and update docstrings
+
+## 🛠  Build
+- [295a604](https://github.com/antistereov/web-kotlin-spring-baseline/commits/295a604) bump version to 1.3.0
+- [2f1e020](https://github.com/antistereov/web-kotlin-spring-baseline/commits/2f1e020) bump version to 1.2.1-SNAPSHOT
+
+## 📝 Documentation
+- [e217ed0](https://github.com/antistereov/web-kotlin-spring-baseline/commits/e217ed0) **changelog**: update CHANGELOG.md for v1.2.0
+
+
+## Contributors
+We'd like to thank the following people for their contributions:
+antistereov
+
 ## [v1.2.0]
 
 ## Changelog
