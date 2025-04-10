@@ -59,6 +59,7 @@ baseline:
       ip-limit: 10
       ip-time-window: 15
     two-factor:
-      recovery-code-length: 20
+      recovery-code-length: 10
+      recovery-code-count: 6
   ui:
     base-url: ${UI_BASE_URL}

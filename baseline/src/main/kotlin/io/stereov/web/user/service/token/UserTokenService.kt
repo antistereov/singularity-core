@@ -6,13 +6,13 @@ import io.stereov.web.config.Constants
 import io.stereov.web.global.service.cache.AccessTokenCache
 import io.stereov.web.global.service.jwt.JwtService
 import io.stereov.web.global.service.jwt.exception.model.InvalidTokenException
+import io.stereov.web.global.service.random.RandomService
 import io.stereov.web.properties.JwtProperties
 import io.stereov.web.user.service.token.model.AccessToken
 import io.stereov.web.user.service.token.model.RefreshToken
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
 import org.springframework.stereotype.Service
 import java.time.Instant
-import java.util.*
 
 /**
  * # Service for managing user tokens.
@@ -46,7 +46,7 @@ class UserTokenService(
     suspend fun createAccessToken(userId: String, deviceId: String, issuedAt: Instant = Instant.now()): String {
         logger.debug { "Creating access token for user $userId and device $deviceId" }
 
-        val tokenId = UUID.randomUUID().toString()
+        val tokenId = RandomService.generateCode(20)
 
         accessTokenCache.addTokenId(userId, tokenId)
 
@@ -98,16 +98,17 @@ class UserTokenService(
      *
      * @param userId The ID of the user.
      * @param deviceId The ID of the device.
+     * @param tokenId The ID of the token.
      *
      * @return The generated refresh token.
      */
-    fun createRefreshToken(userId: String, deviceId: String): String {
+    fun createRefreshToken(userId: String, deviceId: String, tokenId: String): String {
         logger.debug { "Creating refresh token for user $userId and device $deviceId" }
 
         val claims = JwtClaimsSet.builder()
-            .id(UUID.randomUUID().toString())
+            .id(tokenId)
             .subject(userId)
-            .claim("device_id", deviceId)
+            .claim(Constants.JWT_DEVICE_CLAIM, deviceId)
             .issuedAt(Instant.now())
             .build()
 
@@ -133,9 +134,12 @@ class UserTokenService(
             throw InvalidTokenException("Cannot decode refresh token", e)
         }
 
-        val accountId = jwt.subject
+        val userId = jwt.subject
             ?: throw InvalidTokenException("Refresh token does not contain user id")
 
-        return RefreshToken(accountId, deviceId, refreshToken)
+        val tokenId = jwt.id
+            ?: throw InvalidTokenException("Refresh token does not contain token id")
+
+        return RefreshToken(userId, deviceId, tokenId)
     }
 }

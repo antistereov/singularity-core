@@ -99,12 +99,12 @@ data class UserDocument(
      *
      * @return The updated [UserDocument].
      */
-    fun setupTwoFactorAuth(secret: String, recoveryCode: String): UserDocument {
+    fun setupTwoFactorAuth(secret: String, recoveryCodes: List<String>): UserDocument {
         logger.debug { "Setting up two factor authentication" }
 
         this.security.twoFactor.enabled = true
         this.security.twoFactor.secret = secret
-        this.security.twoFactor.recoveryCode = recoveryCode
+        this.security.twoFactor.recoveryCodes = recoveryCodes.toMutableList()
 
         return this
     }
@@ -116,12 +116,14 @@ data class UserDocument(
      *
      * @return The updated [UserDocument].
      */
-    fun disableTwoFactorAuth() {
+    fun disableTwoFactorAuth(): UserDocument {
         logger.debug { "Disabling two factor authentication" }
 
         this.security.twoFactor.enabled = false
         this.security.twoFactor.secret = null
-        this.security.twoFactor.recoveryCode = null
+        this.security.twoFactor.recoveryCodes = mutableListOf()
+
+        return this
     }
 
     /**

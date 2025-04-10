@@ -36,11 +36,11 @@ class TwoFactorAuthTokenService(
      *
      * @param userId The ID of the user.
      * @param secret The secret key for two-factor authentication.
-     * @param recoveryCode The recovery code for two-factor authentication.
+     * @param recoveryCodes The recovery codes for two-factor authentication.
      *
      * @return The generated setup token.
      */
-    fun createSetupToken(userId: String, secret: String, recoveryCode: String, issuedAt: Instant = Instant.now()): String {
+    fun createSetupToken(userId: String, secret: String, recoveryCodes: List<String>, issuedAt: Instant = Instant.now()): String {
         logger.debug { "Creating setup token for 2fa" }
 
         val claims = JwtClaimsSet.builder()
@@ -48,7 +48,7 @@ class TwoFactorAuthTokenService(
             .expiresAt(issuedAt.plusSeconds(jwtProperties.expiresIn))
             .subject(userId)
             .claim(Constants.TWO_FACTOR_SECRET_CLAIM, secret)
-            .claim(Constants.TWO_FACTOR_RECOVERY_CLAIM, recoveryCode)
+            .claim(Constants.TWO_FACTOR_RECOVERY_CLAIM, recoveryCodes)
             .build()
 
         return jwtService.encodeJwt(claims)
@@ -76,10 +76,13 @@ class TwoFactorAuthTokenService(
             ?: throw InvalidTokenException("JWT does not contain valid 2fa secret")
 
 
-        val recoveryCode = jwt.claims[Constants.TWO_FACTOR_RECOVERY_CLAIM] as? String
-            ?: throw InvalidTokenException("JWT does not contain valid 2fa recovery code")
+        val recoveryCodes = jwt.claims[Constants.TWO_FACTOR_RECOVERY_CLAIM] as? List<*>
+            ?: throw InvalidTokenException("JWT does not contain valid 2fa recovery codes")
 
-        return SetupToken(secret, recoveryCode)
+        val recoveryCodeStrings = recoveryCodes
+            .map { it as? String ?: throw InvalidTokenException("Recovery codes contained in JWT cannot be casted to String") }
+
+        return SetupToken(secret, recoveryCodeStrings)
     }
 
     /**

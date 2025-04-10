@@ -6,6 +6,7 @@ import io.stereov.web.auth.exception.model.TwoFactorAuthDisabledException
 import io.stereov.web.config.Constants
 import io.stereov.web.global.service.geolocation.GeoLocationService
 import io.stereov.web.global.service.jwt.exception.model.InvalidTokenException
+import io.stereov.web.global.service.random.RandomService
 import io.stereov.web.global.service.twofactorauth.TwoFactorAuthService
 import io.stereov.web.properties.AppProperties
 import io.stereov.web.properties.JwtProperties
@@ -85,13 +86,14 @@ class CookieService(
     ): ResponseCookie {
         logger.info { "Creating refresh token cookie" }
 
-        val refreshToken = userTokenService.createRefreshToken(userId, deviceInfoDto.id)
+        val refreshTokenId = RandomService.generateCode(20)
+        val refreshToken = userTokenService.createRefreshToken(userId, deviceInfoDto.id, refreshTokenId)
 
         val location = ipAddress?.let { try { geoLocationService.getLocation(it) } catch(e: Exception) { null } }
 
         val deviceInfo = DeviceInfo(
             id = deviceInfoDto.id,
-            refreshTokenValue = refreshToken,
+            refreshTokenId = refreshTokenId,
             browser = deviceInfoDto.browser,
             os = deviceInfoDto.os,
             issuedAt = Instant.now(),
@@ -185,7 +187,7 @@ class CookieService(
 
         val user = userService.findById(refreshToken.accountId)
 
-        if (user.devices.any { it.id == refreshToken.deviceId && it.refreshTokenValue == refreshToken.value }) {
+        if (user.devices.any { it.id == refreshToken.deviceId && it.refreshTokenId == refreshToken.tokenId }) {
             return user.toDto()
         } else {
             throw InvalidTokenException("Invalid refresh token")
@@ -193,14 +195,14 @@ class CookieService(
     }
 
     /**
-     * Creates a cookie for the two-factor authentication token.
+     * Creates a cookie for the two-factor authentication for login verification.
      *
      * @param userId The ID of the user.
      *
      * @return The created two-factor authentication token cookie.
      */
-    suspend fun createTwoFactorSessionCookie(userId: String): ResponseCookie {
-        logger.debug { "Creating cookie for two factor authentication token" }
+    suspend fun createLoginVerificationCookie(userId: String): ResponseCookie {
+        logger.debug { "Creating cookie for two factor login verification token" }
 
         val cookie = ResponseCookie.from(Constants.LOGIN_VERIFICATION_TOKEN, twoFactorAuthTokenService.createLoginToken(userId))
             .httpOnly(true)
@@ -216,16 +218,16 @@ class CookieService(
     }
 
     /**
-     * Validates the two-factor authentication session cookie and retrieves the user ID.
+     * Validates the two-factor cookie for login verification and retrieves the user ID.
      *
      * @param exchange The server web exchange.
      *
-     * @return The user ID associated with the two-factor authentication session.
+     * @return The user ID associated with the login verification token.
      *
-     * @throws InvalidTokenException If the two-factor authentication token is invalid or not provided.
+     * @throws InvalidTokenException If the login verification token is invalid or not provided.
      */
-    suspend fun validateTwoFactorSessionCookieAndGetUserId(exchange: ServerWebExchange): String {
-        logger.debug { "Validating two factor session cookie" }
+    suspend fun validateLoginVerificationCookieAndGetUserId(exchange: ServerWebExchange): String {
+        logger.debug { "Validating login verification cookie" }
 
         val twoFactorCookie = exchange.request.cookies[Constants.LOGIN_VERIFICATION_TOKEN]?.firstOrNull()?.value
             ?: throw InvalidTokenException("No two factor authentication token provided")
@@ -234,11 +236,11 @@ class CookieService(
     }
 
     /**
-     * Clears the two-factor authentication session cookie.
+     * Clears the two-factor session cookie used for login verification.
      *
-     * @return The cleared two-factor authentication session cookie.
+     * @return The cleared two-factor session cookie for login verification.
      */
-    suspend fun clearTwoFactorSessionCookie(): ResponseCookie {
+    suspend fun clearLoginVerificationCookie(): ResponseCookie {
         logger.debug { "Clearing cookie for two factor authentication token" }
 
         val cookie = ResponseCookie.from(Constants.LOGIN_VERIFICATION_TOKEN, "")

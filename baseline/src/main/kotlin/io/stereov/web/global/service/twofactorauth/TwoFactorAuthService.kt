@@ -3,10 +3,10 @@ package io.stereov.web.global.service.twofactorauth
 import com.warrenstrange.googleauth.GoogleAuthenticator
 import io.stereov.web.auth.exception.AuthException
 import io.stereov.web.global.service.encryption.EncryptionService
+import io.stereov.web.global.service.random.RandomService
 import io.stereov.web.user.exception.model.InvalidUserDocumentException
 import io.stereov.web.user.model.UserDocument
 import org.springframework.stereotype.Service
-import java.security.SecureRandom
 
 /**
  * # Service for Two-Factor Authentication (2FA).
@@ -24,8 +24,6 @@ class TwoFactorAuthService(
     private val gAuth: GoogleAuthenticator,
     private val encryptionService: EncryptionService,
 ) {
-
-    private val random = SecureRandom()
 
     /**
      * Generates a new secret key for two-factor authentication.
@@ -55,20 +53,6 @@ class TwoFactorAuthService(
      */
     fun getTotpPassword(secret: String): Int {
         return gAuth.getTotpPassword(secret)
-    }
-
-    /**
-     * Generates a recovery code of the specified length.
-     *
-     * @param length The length of the recovery code to generate.
-     *
-     * @return A string representing the generated recovery code.
-     */
-    fun generateRecoveryCode(length: Int = 10): String {
-        val chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-        return (1..length)
-            .map { chars[random.nextInt(chars.length)] }
-            .joinToString("")
     }
 
     /**

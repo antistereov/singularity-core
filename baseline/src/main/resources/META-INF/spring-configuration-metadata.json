@@ -259,8 +259,15 @@
       "name": "baseline.security.two-factor.recovery-code-length",
       "type": "java.lang.Integer",
       "sourceType": "io.stereov.web.properties.TwoFactorAuthProperties",
-      "defaultValue": 20,
-      "description": "Length of the recovery code. Default is 20 characters."
+      "defaultValue": 10,
+      "description": "Length of the recovery code. Default is 10 characters."
+    },
+    {
+      "name": "baseline.security.two-factor.recovery-code-count",
+      "type": "java.lang.Integer",
+      "sourceType": "io.stereov.web.properties.TwoFactorAuthProperties",
+      "defaultValue": 6,
+      "description": "Count of recovery codes to generate. Default is 6."
     },
     {
       "name": "baseline.ui.base-url",

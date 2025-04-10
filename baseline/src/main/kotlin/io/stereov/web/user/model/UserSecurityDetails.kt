@@ -1,6 +1,6 @@
 package io.stereov.web.user.model
 
-import java.util.*
+import io.stereov.web.global.service.random.RandomService
 
 /**
  * # UserSecurityDetails
@@ -24,12 +24,12 @@ data class UserSecurityDetails(
      *
      * @property enabled Indicates whether two-factor authentication is enabled.
      * @property secret The secret key for the user.
-     * @property recoveryCode The recovery code for the user.
+     * @property recoveryCodes The list of recovery codes for the user.
      */
     data class TwoFactorDetails(
         var enabled: Boolean = false,
         var secret: String? = null,
-        var recoveryCode: String? = null
+        var recoveryCodes: MutableList<String> = mutableListOf()
     )
 
     /**
@@ -43,7 +43,7 @@ data class UserSecurityDetails(
      */
     data class MailVerificationDetails(
         var verified: Boolean = false,
-        var verificationSecret: String = UUID.randomUUID().toString(),
-        var passwordResetSecret: String = UUID.randomUUID().toString(),
+        var verificationSecret: String = RandomService.generateCode(20),
+        var passwordResetSecret: String = RandomService.generateCode(20),
     )
 }

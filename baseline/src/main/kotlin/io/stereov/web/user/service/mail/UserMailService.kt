@@ -8,13 +8,13 @@ import io.stereov.web.global.service.hash.HashService
 import io.stereov.web.global.service.mail.MailCooldownService
 import io.stereov.web.global.service.mail.MailService
 import io.stereov.web.global.service.mail.MailTokenService
-import io.stereov.web.user.dto.response.MailCooldownResponse
-import io.stereov.web.user.dto.request.ResetPasswordRequest
+import io.stereov.web.global.service.random.RandomService
 import io.stereov.web.user.dto.UserDto
+import io.stereov.web.user.dto.request.ResetPasswordRequest
+import io.stereov.web.user.dto.response.MailCooldownResponse
 import io.stereov.web.user.service.UserService
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
-import java.util.*
 
 /**
  * # Service for managing user email-related operations.
@@ -115,7 +115,7 @@ class UserMailService(
             throw AuthException("Password request secret does not match")
         }
 
-        user.security.mail.passwordResetSecret = UUID.randomUUID().toString()
+        user.security.mail.passwordResetSecret = RandomService.generateCode(20)
         user.password = hashService.hashBcrypt(req.newPassword)
         userService.save(user)
     }

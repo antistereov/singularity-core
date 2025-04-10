@@ -48,13 +48,24 @@ class UserTwoFactorAuthController(
     }
 
     @PostMapping("/recovery")
-    suspend fun recoverUser(@RequestParam("code") code: String, exchange: ServerWebExchange): ResponseEntity<UserDto> {
-        val userDto = twoFactorService.recoverUser(exchange, code)
+    suspend fun recoverUser(
+        @RequestParam("code") code: String,
+        exchange: ServerWebExchange,
+        @RequestBody device: DeviceInfoRequest
+    ): ResponseEntity<UserDto> {
+        val user = twoFactorService.recoverUser(exchange, code)
 
-        val clearTwoFactorCookie = cookieService.clearTwoFactorSessionCookie()
+        val ipAddress = exchange.request.remoteAddress?.address?.hostAddress
+
+        val accessTokenCookie = cookieService.createAccessTokenCookie(user.idX, device.id)
+        val refreshTokenCookie = cookieService.createRefreshTokenCookie(user.idX, device, ipAddress)
+
+        val clearTwoFactorCookie = cookieService.clearLoginVerificationCookie()
         return ResponseEntity.ok()
             .header("Set-Cookie", clearTwoFactorCookie.toString())
-            .body(userDto)
+            .header("Set-Cookie", accessTokenCookie.toString())
+            .header("Set-Cookie", refreshTokenCookie.toString())
+            .body(user.toDto())
     }
 
     @PostMapping("/verify-login")
@@ -70,7 +81,7 @@ class UserTwoFactorAuthController(
         val accessTokenCookie = cookieService.createAccessTokenCookie(user.idX, device.id)
         val refreshTokenCookie = cookieService.createRefreshTokenCookie(user.idX, device, ipAddress)
 
-        val clearTwoFactorCookie = cookieService.clearTwoFactorSessionCookie()
+        val clearTwoFactorCookie = cookieService.clearLoginVerificationCookie()
         return ResponseEntity.ok()
             .header("Set-Cookie", clearTwoFactorCookie.toString())
             .header("Set-Cookie", accessTokenCookie.toString())
@@ -85,7 +96,7 @@ class UserTwoFactorAuthController(
         val res = ResponseEntity.ok()
 
         if (!isPending) {
-            val clearTwoFactorTokenCookie = cookieService.clearTwoFactorSessionCookie()
+            val clearTwoFactorTokenCookie = cookieService.clearLoginVerificationCookie()
             res.header("Set-Cookie", clearTwoFactorTokenCookie.toString())
         }
 
@@ -127,5 +138,18 @@ class UserTwoFactorAuthController(
         }
 
         return ResponseEntity.ok(StepUpStatusResponse(stepUpStatus))
+    }
+
+    /**
+     * Disable two-factor authentication for the user.
+     * This requires a step-up authentication token.
+     *
+     * @param exchange The server web exchange.
+     *
+     * @return The updated user information as a [UserDto].
+     */
+    @PostMapping("/disable")
+    suspend fun disableTwoFactorAuth(exchange: ServerWebExchange): ResponseEntity<UserDto> {
+        return ResponseEntity.ok(twoFactorService.disable(exchange))
     }
 }

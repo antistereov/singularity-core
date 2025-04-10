@@ -242,8 +242,10 @@ Here are the key properties you need to set in your `application.yaml`:
               # Optional: Time window for IP-based login attempts in minutes
               ip-time-window: 15
             two-factor:
-              # Optional: Length of the 2FA recovery code. Default is 20 characters.
-              recovery-code-length: 20
+              # Optional: Length of the 2FA recovery codes. Default is 10 characters.
+              recovery-code-length: 10
+              # Optional: Count of 2FA recovery codes. Default is 6.
+              recovery-code-count: 6
       ```
 
 - **Email Settings:**
@@ -380,6 +382,7 @@ The related class is [`UserTwoFactorAuthController`](baseline/src/main/kotlin/io
 - **POST /user/2fa/recovery**: Recovers the user's account using a recovery code.
 - **POST /user/2fa/verify-step-up**: If 2FA is enabled, this endpoint is used to set a new step-up token that enables critical changes to the user account, e.g., changing the password.
 - **GET /user/2fa/step-up-status**: Gets the status of the step-up needed for critical changes to the user account. Is true if 2FA is disabled.
+- **POST /user/2fa/disable**: Disables two-factor authentication for the user.
 
 ## Technologies Used
 

@@ -13,5 +13,5 @@ package io.stereov.web.user.service.token.model
  */
 data class SetupToken(
     val secret: String,
-    val recoveryCode: String,
+    val recoveryCodes: List<String>,
 )

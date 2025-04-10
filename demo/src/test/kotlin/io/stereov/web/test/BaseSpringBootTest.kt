@@ -89,7 +89,7 @@ class BaseSpringBootTest {
                 .returnResult()
                 .responseBody
 
-            twoFactorRecovery = twoFactorRes?.recoveryCode
+            twoFactorRecovery = twoFactorRes?.recoveryCodes?.firstOrNull()
             twoFactorSecret = twoFactorRes?.secret
             val twoFactorVerifyToken = twoFactorRes?.token
 

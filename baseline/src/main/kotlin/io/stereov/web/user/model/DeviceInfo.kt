@@ -15,7 +15,7 @@ import java.time.Instant
  * IP address, and location information.
  *
  * @property id The ID of the device.
- * @property refreshTokenValue The refresh token value associated with the device.
+ * @property refreshTokenId The refresh token value associated with the device.
  * @property browser The browser used on the device.
  * @property os The operating system of the device.
  * @property issuedAt The time when the device information was issued.
@@ -26,7 +26,7 @@ import java.time.Instant
  */
 data class DeviceInfo(
     val id: String,
-    val refreshTokenValue: String? = null,
+    val refreshTokenId: String? = null,
     val browser: String? = null,
     val os: String? = null,
     val issuedAt: Instant,

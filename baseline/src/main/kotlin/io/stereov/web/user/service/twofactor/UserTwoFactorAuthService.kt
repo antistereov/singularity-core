@@ -8,6 +8,7 @@ import io.stereov.web.auth.service.CookieService
 import io.stereov.web.global.service.cache.AccessTokenCache
 import io.stereov.web.global.service.encryption.EncryptionService
 import io.stereov.web.global.service.hash.HashService
+import io.stereov.web.global.service.random.RandomService
 import io.stereov.web.global.service.twofactorauth.TwoFactorAuthService
 import io.stereov.web.properties.TwoFactorAuthProperties
 import io.stereov.web.user.dto.UserDto
@@ -60,11 +61,13 @@ class UserTwoFactorAuthService(
 
         val secret = twoFactorAuthService.generateSecretKey()
         val otpAuthUrl = twoFactorAuthService.getOtpAuthUrl(user.email, secret)
-        val recoveryCode = twoFactorAuthService.generateRecoveryCode(twoFactorAuthProperties.recoveryCodeLength)
+        val recoveryCodes = List(twoFactorAuthProperties.recoveryCodeCount) {
+            RandomService.generateCode(twoFactorAuthProperties.recoveryCodeLength)
+        }
 
-        val setupToken = twoFactorAuthTokenService.createSetupToken(user.idX, secret, recoveryCode)
+        val setupToken = twoFactorAuthTokenService.createSetupToken(user.idX, secret, recoveryCodes)
 
-        return TwoFactorSetupResponse(secret, otpAuthUrl, recoveryCode, setupToken)
+        return TwoFactorSetupResponse(secret, otpAuthUrl, recoveryCodes, setupToken)
     }
 
     /**
@@ -87,9 +90,11 @@ class UserTwoFactorAuthService(
         }
 
         val encryptedSecret = encryptionService.encrypt(setupToken.secret)
-        val hashedRecoveryCode = hashService.hashBcrypt(setupToken.recoveryCode)
+        val hashedRecoveryCodes = setupToken.recoveryCodes.map {
+            hashService.hashBcrypt(it)
+        }
 
-        user.setupTwoFactorAuth(encryptedSecret, hashedRecoveryCode)
+        user.setupTwoFactorAuth(encryptedSecret, hashedRecoveryCodes)
             .clearDevices()
 
         userService.save(user)
@@ -110,7 +115,7 @@ class UserTwoFactorAuthService(
     suspend fun validateTwoFactorCode(exchange: ServerWebExchange, code: Int): UserDocument {
         logger.debug { "Validating two factor code" }
 
-        val userId = cookieService.validateTwoFactorSessionCookieAndGetUserId(exchange)
+        val userId = cookieService.validateLoginVerificationCookieAndGetUserId(exchange)
 
         val user = userService.findById(userId)
 
@@ -128,7 +133,7 @@ class UserTwoFactorAuthService(
         logger.debug { "Checking two factor authentication status" }
 
         return try {
-            cookieService.validateTwoFactorSessionCookieAndGetUserId(exchange)
+            cookieService.validateLoginVerificationCookieAndGetUserId(exchange)
             true
         } catch (e: Exception) {
             false
@@ -142,26 +147,46 @@ class UserTwoFactorAuthService(
      * @param exchange The server web exchange containing the request and response.
      * @param recoveryCode The recovery code to validate.
      *
-     * @throws InvalidUserDocumentException If the user document does not contain a recovery code.
      * @throws AuthException If the recovery code is invalid.
      *
      * @return The user document after recovery.
      */
-    suspend fun recoverUser(exchange: ServerWebExchange, recoveryCode: String): UserDto {
+    suspend fun recoverUser(exchange: ServerWebExchange, recoveryCode: String): UserDocument {
         logger.debug { "Recovering user and clearing all devices" }
 
-        val userId = cookieService.validateTwoFactorSessionCookieAndGetUserId(exchange)
+        val userId = try {
+            authenticationService.getCurrentUserId()
+        } catch (e: Exception) {
+            cookieService.validateLoginVerificationCookieAndGetUserId(exchange)
+        }
 
         val user = userService.findById(userId)
-        val recoveryCodeHash = user.security.twoFactor.recoveryCode
-            ?: throw InvalidUserDocumentException("No recovery code saved in UserDocument")
+        val recoveryCodeHashes = user.security.twoFactor.recoveryCodes
 
-        if (!hashService.checkBcrypt(recoveryCode, recoveryCodeHash)) {
+        val match = recoveryCodeHashes.removeAll { hash ->
+            hashService.checkBcrypt(recoveryCode, hash)
+        }
+
+        if (!match) {
             throw AuthException("Invalid recovery code")
         }
 
+        return userService.save(user)
+    }
+
+    /**
+     * Disables two-factor authentication for the current user.
+     *
+     * @return The updated user document.
+     */
+    suspend fun disable(exchange: ServerWebExchange): UserDto {
+        logger.debug { "Disabling 2FA" }
+
+        cookieService.validateStepUpCookie(exchange)
+
+        val user = authenticationService.getCurrentUser()
+
         user.disableTwoFactorAuth()
-        user.clearDevices()
 
         return userService.save(user).toDto()
     }

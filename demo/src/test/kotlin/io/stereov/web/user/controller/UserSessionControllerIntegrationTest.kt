@@ -1,6 +1,7 @@
 package io.stereov.web.user.controller
 
 import io.stereov.web.config.Constants
+import io.stereov.web.global.service.random.RandomService
 import io.stereov.web.test.BaseIntegrationTest
 import io.stereov.web.user.dto.UserDto
 import io.stereov.web.user.dto.request.*
@@ -663,7 +664,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
     }
     @Test fun `refresh requires associated token to account`() = runTest {
         val user = registerUser()
-        val refreshToken = userTokenService.createRefreshToken(user.info.id!!, user.info.devices.first().id)
+        val refreshToken = userTokenService.createRefreshToken(user.info.id!!, user.info.devices.first().id, RandomService.generateCode(20))
         webTestClient.post()
             .uri("/user/refresh")
             .cookie(Constants.REFRESH_TOKEN_COOKIE, refreshToken)
