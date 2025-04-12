@@ -335,13 +335,16 @@ These endpoints are used for user management and authentication.
 They are designed to be secure and efficient, leveraging JWT for stateless authentication.
 The related class is [`UserSessionController`](baseline/src/main/kotlin/io/stereov/web/user/controller/UserSessionController.kt).
 
-- **GET /user/me**: Retrieves information about the currently authenticated user.
-- **GET /user/me/app**: Retrieves application-specific information about the authenticated user.
 - **POST /user/login**: Logs in the user and issues JWT access and refresh tokens.
 - **POST /user/register**: Registers a new user and issues JWT tokens.
 - **POST /user/logout**: Logs the user out and clears authentication cookies.
 - **POST /user/logout-all**: Logs out the user from all devices.
 - **POST /user/refresh**: Refreshes the user's JWT tokens.
+
+### `/user/me` 
+
+- **GET /user/me**: Retrieves information about the currently authenticated user.
+- **GET /user/me/app**: Retrieves application-specific information about the authenticated user.
 - **PUT /user/me/email**: Updates the user's email address.
 - **PUT /user/me/password**: Updates the user's password.
 - **PUT /user/me**: Updates the user's profile.

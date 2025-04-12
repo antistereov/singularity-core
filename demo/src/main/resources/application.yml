@@ -51,13 +51,13 @@ baseline:
       secret-key: ${JWT_SECRET_KEY}
       expires-in: 900
     rate-limit:
-      ip-limit: 200
+      ip-limit: 2000
       ip-time-window: 1
-      user-limit: 200
+      user-limit: 2000
       user-time-window: 1
     login-attempt-limit:
-      ip-limit: 10
-      ip-time-window: 15
+      ip-limit: 1000
+      ip-time-window: 1
     two-factor:
       recovery-code-length: 10
       recovery-code-count: 6

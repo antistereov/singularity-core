@@ -6,7 +6,6 @@ import io.stereov.web.global.service.jwt.exception.TokenException
 import io.stereov.web.user.dto.UserDto
 import io.stereov.web.user.dto.request.DeviceInfoRequest
 import io.stereov.web.user.dto.request.TwoFactorSetupRequest
-import io.stereov.web.user.dto.response.StepUpStatusResponse
 import io.stereov.web.user.dto.response.TwoFactorSetupResponse
 import io.stereov.web.user.dto.response.TwoFactorStatusResponse
 import io.stereov.web.user.service.twofactor.UserTwoFactorAuthService
@@ -91,7 +90,7 @@ class UserTwoFactorAuthController(
 
     @GetMapping("/login-status")
     suspend fun getTwoFactorAuthStatus(exchange: ServerWebExchange): ResponseEntity<TwoFactorStatusResponse> {
-        val isPending = twoFactorService.twoFactorPending(exchange)
+        val isPending = twoFactorService.loginVerificationNeeded(exchange)
 
         val res = ResponseEntity.ok()
 
@@ -111,12 +110,12 @@ class UserTwoFactorAuthController(
      * @return A response indicating the success of the operation.
      */
     @PostMapping("/verify-step-up")
-    suspend fun setStepUp(@RequestParam code: Int): ResponseEntity<StepUpStatusResponse> {
+    suspend fun setStepUp(@RequestParam code: Int): ResponseEntity<TwoFactorStatusResponse> {
         val stepUpTokenCookie = cookieService.createStepUpCookie(code)
 
         return ResponseEntity.ok()
             .header("Set-Cookie", stepUpTokenCookie.toString())
-            .body(StepUpStatusResponse(true))
+            .body(TwoFactorStatusResponse(true))
     }
 
     /**
@@ -124,20 +123,20 @@ class UserTwoFactorAuthController(
      *
      * @param exchange The server web exchange.
      *
-     * @return The step-up authentication status as a [StepUpStatusResponse].
+     * @return The step-up authentication status as a [TwoFactorStatusResponse].
      */
     @GetMapping("/step-up-status")
-    suspend fun getStepUpStatus(exchange: ServerWebExchange): ResponseEntity<StepUpStatusResponse> {
-        val stepUpStatus = try {
+    suspend fun getStepUpStatus(exchange: ServerWebExchange): ResponseEntity<TwoFactorStatusResponse> {
+        val twoFactorRequired = try {
             cookieService.validateStepUpCookie(exchange)
-            true
-        } catch (e: TokenException) {
             false
-        } catch (e: TwoFactorAuthDisabledException) {
+        } catch (e: TokenException) {
             true
+        } catch (e: TwoFactorAuthDisabledException) {
+            false
         }
 
-        return ResponseEntity.ok(StepUpStatusResponse(stepUpStatus))
+        return ResponseEntity.ok(TwoFactorStatusResponse(twoFactorRequired))
     }
 
     /**

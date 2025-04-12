@@ -129,8 +129,8 @@ class UserTwoFactorAuthService(
      *
      * @return True if two-factor authentication is pending, false otherwise.
      */
-    suspend fun twoFactorPending(exchange: ServerWebExchange): Boolean {
-        logger.debug { "Checking two factor authentication status" }
+    suspend fun loginVerificationNeeded(exchange: ServerWebExchange): Boolean {
+        logger.debug { "Checking login verification is needed" }
 
         return try {
             cookieService.validateLoginVerificationCookieAndGetUserId(exchange)

@@ -8,7 +8,6 @@ import io.stereov.web.user.dto.request.DeviceInfoRequest
 import io.stereov.web.user.dto.request.LoginRequest
 import io.stereov.web.user.dto.request.TwoFactorSetupRequest
 import io.stereov.web.user.dto.response.LoginResponse
-import io.stereov.web.user.dto.response.StepUpStatusResponse
 import io.stereov.web.user.dto.response.TwoFactorSetupResponse
 import io.stereov.web.user.dto.response.TwoFactorStatusResponse
 import kotlinx.coroutines.test.runTest
@@ -487,7 +486,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(StepUpStatusResponse::class.java)
+            .expectBody(TwoFactorStatusResponse::class.java)
             .returnResult()
 
         val token = res.responseCookies[Constants.STEP_UP_TOKEN_COOKIE]?.first()?.value
@@ -542,13 +541,13 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
             .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken(user.info.idX, user.info.devices.first().id))
             .exchange()
             .expectStatus().isOk
-            .expectBody(StepUpStatusResponse::class.java)
+            .expectBody(TwoFactorStatusResponse ::class.java)
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        assertTrue(res.stepUp)
+        assertFalse(res.twoFactorRequired)
     }
     @Test fun `stepUpStatus requires token for same user`() = runTest {
         val user = registerUser(twoFactorEnabled = true)
@@ -559,13 +558,13 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
             .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken("another-user", user.info.devices.first().id))
             .exchange()
             .expectStatus().isOk
-            .expectBody(StepUpStatusResponse::class.java)
+            .expectBody(TwoFactorStatusResponse::class.java)
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        assertFalse(res.stepUp)
+        assertTrue(res.twoFactorRequired)
     }
     @Test fun `stepUpStatus requires token for same device`() = runTest {
         val user = registerUser(twoFactorEnabled = true)
@@ -576,13 +575,13 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
             .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken(user.info.idX, "another-device"))
             .exchange()
             .expectStatus().isOk
-            .expectBody(StepUpStatusResponse::class.java)
+            .expectBody(TwoFactorStatusResponse::class.java)
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        assertFalse(res.stepUp)
+        assertTrue(res.twoFactorRequired)
     }
     @Test fun `stepUpStatus requires valid token`() = runTest {
         val user = registerUser(twoFactorEnabled = true)
@@ -593,13 +592,13 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
             .cookie(Constants.STEP_UP_TOKEN_COOKIE, "another-token")
             .exchange()
             .expectStatus().isOk
-            .expectBody(StepUpStatusResponse::class.java)
+            .expectBody(TwoFactorStatusResponse::class.java)
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        assertFalse(res.stepUp)
+        assertTrue(res.twoFactorRequired)
     }
     @Test fun `stepUpStatus requires unexpired token`() = runTest {
         val user = registerUser(twoFactorEnabled = true)
@@ -610,13 +609,13 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
             .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken(user.info.idX, user.info.devices.first().id, Instant.ofEpochSecond(0)))
             .exchange()
             .expectStatus().isOk
-            .expectBody(StepUpStatusResponse::class.java)
+            .expectBody(TwoFactorStatusResponse::class.java)
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        assertFalse(res.stepUp)
+        assertTrue(res.twoFactorRequired)
     }
     @Test fun `stepUpStatus requires authentication`() = runTest {
         val user = registerUser(twoFactorEnabled = true)
@@ -627,7 +626,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isUnauthorized
     }
-    @Test fun `stepUpStatus is true for disabled 2fa when cookie is set`() = runTest {
+    @Test fun `stepUpStatus 2fa is not required for disabled 2fa when cookie is set`() = runTest {
         val user = registerUser()
 
         val res = webTestClient.get()
@@ -636,15 +635,15 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
             .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken(user.info.idX, user.info.devices.first().id))
             .exchange()
             .expectStatus().isOk
-            .expectBody(StepUpStatusResponse::class.java)
+            .expectBody(TwoFactorStatusResponse::class.java)
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        assertTrue(res.stepUp)
+        assertFalse(res.twoFactorRequired)
     }
-    @Test fun `stepUpStatus is true for disabled 2fa when cookie is not set`() = runTest {
+    @Test fun `stepUpStatus is not required for disabled 2fa when cookie is not set`() = runTest {
         val user = registerUser()
 
         val res = webTestClient.get()
@@ -652,13 +651,13 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(StepUpStatusResponse::class.java)
+            .expectBody(TwoFactorStatusResponse::class.java)
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        assertTrue(res.stepUp)
+        assertFalse(res.twoFactorRequired)
     }
 
     @Test fun `disable works`() = runTest {
