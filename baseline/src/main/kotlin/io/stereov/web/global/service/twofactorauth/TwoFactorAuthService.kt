@@ -2,6 +2,7 @@ package io.stereov.web.global.service.twofactorauth
 
 import com.warrenstrange.googleauth.GoogleAuthenticator
 import io.stereov.web.auth.exception.AuthException
+import io.stereov.web.auth.exception.model.TwoFactorAuthDisabledException
 import io.stereov.web.global.service.encryption.EncryptionService
 import io.stereov.web.user.exception.model.InvalidUserDocumentException
 import io.stereov.web.user.model.UserDocument
@@ -77,7 +78,7 @@ class TwoFactorAuthService(
      */
     suspend fun validateTwoFactorCode(user: UserDocument, code: Int): UserDocument {
         val encryptedSecret = user.security.twoFactor.secret
-            ?: throw InvalidUserDocumentException("No two factor authentication secret provided in UserDocument")
+            ?: throw TwoFactorAuthDisabledException()
         val decryptedSecret = encryptionService.decrypt(encryptedSecret)
 
         if (!validateCode(decryptedSecret, code)) {

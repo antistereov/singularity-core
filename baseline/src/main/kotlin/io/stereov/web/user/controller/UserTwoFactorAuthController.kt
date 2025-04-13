@@ -54,17 +54,18 @@ class UserTwoFactorAuthController(
         @RequestBody device: DeviceInfoRequest
     ): ResponseEntity<UserDto> {
         val user = twoFactorService.recoverUser(exchange, code)
-
         val ipAddress = exchange.request.remoteAddress?.address?.hostAddress
 
+        val clearTwoFactorCookie = cookieService.clearLoginVerificationCookie()
         val accessTokenCookie = cookieService.createAccessTokenCookie(user.idX, device.id)
         val refreshTokenCookie = cookieService.createRefreshTokenCookie(user.idX, device, ipAddress)
+        val stepUpTokenCookie = cookieService.createStepUpCookie(user.idX, device.id)
 
-        val clearTwoFactorCookie = cookieService.clearLoginVerificationCookie()
         return ResponseEntity.ok()
             .header("Set-Cookie", clearTwoFactorCookie.toString())
             .header("Set-Cookie", accessTokenCookie.toString())
             .header("Set-Cookie", refreshTokenCookie.toString())
+            .header("Set-Cookie", stepUpTokenCookie.toString())
             .body(user.toDto())
     }
 

@@ -286,6 +286,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
 
         assertFalse(res.responseCookies[Constants.ACCESS_TOKEN_COOKIE]?.firstOrNull()?.value.isNullOrEmpty())
         assertFalse(res.responseCookies[Constants.REFRESH_TOKEN_COOKIE]?.firstOrNull()?.value.isNullOrEmpty())
+        assertFalse(res.responseCookies[Constants.STEP_UP_TOKEN_COOKIE]?.firstOrNull()?.value.isNullOrEmpty())
 
         val userAfterRecovery = userService.findById(user.info.idX)
         assertTrue(userAfterRecovery.security.twoFactor.enabled)
@@ -319,6 +320,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
 
         assertFalse(res.responseCookies[Constants.ACCESS_TOKEN_COOKIE]?.firstOrNull()?.value.isNullOrEmpty())
         assertFalse(res.responseCookies[Constants.REFRESH_TOKEN_COOKIE]?.firstOrNull()?.value.isNullOrEmpty())
+        assertFalse(res.responseCookies[Constants.STEP_UP_TOKEN_COOKIE]?.firstOrNull()?.value.isNullOrEmpty())
 
         val userAfterRecovery = userService.findById(user.info.idX)
         assertTrue(userAfterRecovery.security.twoFactor.enabled)
@@ -332,7 +334,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
         val code = gAuth.getTotpPassword(user.info.security.twoFactor.secret) + 1
 
         webTestClient.post()
-            .uri("/user/2fa/recovery?code=$code")
+            .uri("/user/2fa/recovery?code=$code?context=login")
             .cookie(Constants.LOGIN_VERIFICATION_TOKEN, user.twoFactorToken)
             .bodyValue(DeviceInfoRequest(user.info.devices.first().id))
             .exchange()

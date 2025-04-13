@@ -268,13 +268,21 @@ class CookieService(
 
         val user = authenticationService.getCurrentUser()
 
-        if (!user.security.twoFactor.enabled) {
-            throw TwoFactorAuthDisabledException()
-        }
-
         twoFactorAuthService.validateTwoFactorCode(user, code)
-
         val token = twoFactorAuthTokenService.createStepUpToken(code)
+
+        return createStepUpCookie(token)
+    }
+
+    suspend fun createStepUpCookie(userId: String, deviceId: String): ResponseCookie {
+        logger.debug { "Creating step up cookie" }
+
+        val token = twoFactorAuthTokenService.createStepUpToken(userId, deviceId)
+
+        return createStepUpCookie(token)
+    }
+
+    private suspend fun createStepUpCookie(token: String): ResponseCookie {
 
         val cookie = ResponseCookie.from(Constants.STEP_UP_TOKEN_COOKIE, token)
             .httpOnly(true)
