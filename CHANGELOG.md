@@ -1,3 +1,41 @@
+## [v1.4.0]
+
+## Changelog
+
+## 🚀 Features
+- [425686d](https://github.com/antistereov/web-kotlin-spring-baseline/commits/425686d) **file**: implement FileService
+
+## 🐛 Fixes
+- [72cfbcc](https://github.com/antistereov/web-kotlin-spring-baseline/commits/72cfbcc) **two-factor**: disabling 2FA requires password now
+
+## 🛠  Build
+- [d721e9d](https://github.com/antistereov/web-kotlin-spring-baseline/commits/d721e9d) bump version to 1.4.0
+- [b4b3429](https://github.com/antistereov/web-kotlin-spring-baseline/commits/b4b3429) bump version to 1.3.2-SNAPSHOT
+
+
+## Contributors
+We'd like to thank the following people for their contributions:
+antistereov
+
+## [v1.3.1]
+
+## Changelog
+
+## 🧰 Tasks
+- [04d4fde](https://github.com/antistereov/web-kotlin-spring-baseline/commits/04d4fde) **two-factor**: step-up endpoints now also return TwoFactorStatusResponse
+
+## 🛠  Build
+- [116f464](https://github.com/antistereov/web-kotlin-spring-baseline/commits/116f464) bump version to 1.3.1
+- [c04b08d](https://github.com/antistereov/web-kotlin-spring-baseline/commits/c04b08d) bump version to 1.3.1-SNAPSHOT
+
+## 📝 Documentation
+- [0722b44](https://github.com/antistereov/web-kotlin-spring-baseline/commits/0722b44) **changelog**: update CHANGELOG.md for v1.3.0
+
+
+## Contributors
+We'd like to thank the following people for their contributions:
+antistereov
+
 ## [v1.3.0]
 
 ## Changelog
