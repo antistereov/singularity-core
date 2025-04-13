@@ -12,6 +12,7 @@ import io.stereov.web.global.service.random.RandomService
 import io.stereov.web.global.service.twofactorauth.TwoFactorAuthService
 import io.stereov.web.properties.TwoFactorAuthProperties
 import io.stereov.web.user.dto.UserDto
+import io.stereov.web.user.dto.request.DisableTwoFactorRequest
 import io.stereov.web.user.dto.response.TwoFactorSetupResponse
 import io.stereov.web.user.exception.model.InvalidUserDocumentException
 import io.stereov.web.user.model.UserDocument
@@ -179,12 +180,16 @@ class UserTwoFactorAuthService(
      *
      * @return The updated user document.
      */
-    suspend fun disable(exchange: ServerWebExchange): UserDto {
+    suspend fun disable(exchange: ServerWebExchange, req: DisableTwoFactorRequest): UserDto {
         logger.debug { "Disabling 2FA" }
 
         cookieService.validateStepUpCookie(exchange)
 
         val user = authenticationService.getCurrentUser()
+
+        if (!hashService.checkBcrypt(req.password, user.password)) {
+            throw AuthException("Password is wrong")
+        }
 
         user.disableTwoFactorAuth()
 

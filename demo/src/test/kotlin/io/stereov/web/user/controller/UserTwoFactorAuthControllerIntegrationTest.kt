@@ -5,6 +5,7 @@ import io.stereov.web.global.service.random.RandomService
 import io.stereov.web.test.BaseIntegrationTest
 import io.stereov.web.user.dto.UserDto
 import io.stereov.web.user.dto.request.DeviceInfoRequest
+import io.stereov.web.user.dto.request.DisableTwoFactorRequest
 import io.stereov.web.user.dto.request.LoginRequest
 import io.stereov.web.user.dto.request.TwoFactorSetupRequest
 import io.stereov.web.user.dto.response.LoginResponse
@@ -661,12 +662,15 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
     }
 
     @Test fun `disable works`() = runTest {
+        val password = "password"
         val user = registerUser(twoFactorEnabled = true)
 
         val stepUp = twoFactorAuthTokenService.createStepUpToken(user.info.idX, user.info.devices.first().id)
+        val req = DisableTwoFactorRequest(password)
 
         val res = webTestClient.post()
             .uri("/user/2fa/disable")
+            .bodyValue(req)
             .cookie(Constants.STEP_UP_TOKEN_COOKIE, stepUp)
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
@@ -684,71 +688,105 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
         assertFalse(userAfterDisable.security.twoFactor.enabled)
     }
     @Test fun `disable requires authentication`() = runTest {
+        val password = "password"
         val user = registerUser(twoFactorEnabled = true)
+        val req = DisableTwoFactorRequest(password)
 
         webTestClient.post()
             .uri("/user/2fa/disable")
+            .bodyValue(req)
             .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken(user.info.idX, user.info.devices.first().id))
             .exchange()
             .expectStatus().isUnauthorized
     }
     @Test fun `disable requires step up token`() = runTest {
+        val password = "password"
         val user = registerUser(twoFactorEnabled = true)
+        val req = DisableTwoFactorRequest(password)
 
         webTestClient.post()
             .uri("/user/2fa/disable")
+            .bodyValue(req)
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectStatus().isUnauthorized
     }
     @Test fun `disable requires valid step up token`() = runTest {
+        val password = "password"
         val user = registerUser(twoFactorEnabled = true)
+        val req = DisableTwoFactorRequest(password)
 
         webTestClient.post()
             .uri("/user/2fa/disable")
+            .bodyValue(req)
             .cookie(Constants.STEP_UP_TOKEN_COOKIE, "test")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectStatus().isUnauthorized
     }
     @Test fun `disable requires unexpired step up token`() = runTest {
+        val password = "password"
         val user = registerUser(twoFactorEnabled = true)
+        val req = DisableTwoFactorRequest(password)
 
         webTestClient.post()
             .uri("/user/2fa/disable")
+            .bodyValue(req)
             .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken(user.info.idX, user.info.devices.first().id, Instant.ofEpochSecond(0)))
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectStatus().isUnauthorized
     }
     @Test fun `disable requires step up token for same user`() = runTest {
+        val password = "password"
         val user = registerUser(twoFactorEnabled = true)
+        val req = DisableTwoFactorRequest(password)
 
         webTestClient.post()
             .uri("/user/2fa/disable")
+            .bodyValue(req)
             .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken("another-user", user.info.devices.first().id))
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectStatus().isUnauthorized
     }
     @Test fun `disable requires step up token for same device`() = runTest {
+        val password = "password"
         val user = registerUser(twoFactorEnabled = true)
+        val req = DisableTwoFactorRequest(password)
 
         webTestClient.post()
             .uri("/user/2fa/disable")
+            .bodyValue(req)
             .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken(user.info.idX, "another-device"))
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectStatus().isUnauthorized
     }
     @Test fun `disable requires 2fa to be enabled`() = runTest {
-        val user = registerUser()
+        val password = "password"
+        val user = registerUser(password = password)
 
         webTestClient.post()
             .uri("/user/2fa/disable")
+            .bodyValue(DisableTwoFactorRequest(password))
             .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken(user.info.idX, user.info.devices.first().id))
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectStatus().isBadRequest
+    }
+    @Test fun `disable needs correct password`() = runTest {
+        val user = registerUser(twoFactorEnabled = true)
+
+        val stepUp = twoFactorAuthTokenService.createStepUpToken(user.info.idX, user.info.devices.first().id)
+        val req = DisableTwoFactorRequest("wrong-password")
+
+        webTestClient.post()
+            .uri("/user/2fa/disable")
+            .bodyValue(req)
+            .cookie(Constants.STEP_UP_TOKEN_COOKIE, stepUp)
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .exchange()
+            .expectStatus().isUnauthorized
     }
 }

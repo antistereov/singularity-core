@@ -5,6 +5,7 @@ import io.stereov.web.auth.service.CookieService
 import io.stereov.web.global.service.jwt.exception.TokenException
 import io.stereov.web.user.dto.UserDto
 import io.stereov.web.user.dto.request.DeviceInfoRequest
+import io.stereov.web.user.dto.request.DisableTwoFactorRequest
 import io.stereov.web.user.dto.request.TwoFactorSetupRequest
 import io.stereov.web.user.dto.response.TwoFactorSetupResponse
 import io.stereov.web.user.dto.response.TwoFactorStatusResponse
@@ -148,7 +149,7 @@ class UserTwoFactorAuthController(
      * @return The updated user information as a [UserDto].
      */
     @PostMapping("/disable")
-    suspend fun disableTwoFactorAuth(exchange: ServerWebExchange): ResponseEntity<UserDto> {
-        return ResponseEntity.ok(twoFactorService.disable(exchange))
+    suspend fun disableTwoFactorAuth(exchange: ServerWebExchange, @RequestBody req: DisableTwoFactorRequest): ResponseEntity<UserDto> {
+        return ResponseEntity.ok(twoFactorService.disable(exchange, req))
     }
 }
