@@ -27,6 +27,8 @@ baseline:
     name: TestApplication
     base-url: ${BACKEND_BASE_URL}
     secure: ${SECURE:false}
+  file:
+    base-path: ./files
   mail:
     enable: ${ENABLE_EMAIL:true}
     host: ${MAIL_HOST}

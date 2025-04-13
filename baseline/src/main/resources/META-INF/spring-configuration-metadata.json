@@ -11,6 +11,11 @@
       "sourceType": "io.stereov.web.properties.AuthProperties"
     },
     {
+      "name": "baseline.file",
+      "type": "io.stereov.web.properties.FileProperties",
+      "sourceType": "io.stereov.web.properties.FileProperties"
+    },
+    {
       "name": "baseline.mail",
       "type": "io.stereov.web.properties.MailProperties",
       "sourceType": "io.stereov.web.properties.MailProperties"
@@ -85,6 +90,13 @@
       "type": "java.util.List<java.lang.String>",
       "sourceType": "io.stereov.web.properties.AuthProperties",
       "description": "Paths that require user authentication. This is a comma-separated list of paths."
+    },
+    {
+      "name": "baseline.file.base-path",
+      "type": "java.util.List<java.lang.String>",
+      "sourceType": "io.stereov.web.properties.FileProperties",
+      "description": "The base path for file uploads.",
+      "defaultValue": "./files"
     },
     {
       "name": "baseline.mail.debug",

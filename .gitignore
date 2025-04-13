@@ -50,3 +50,4 @@ bin/
 /baseline/target/
 /logs/
 /demo/logs/
+/demo/tmp/

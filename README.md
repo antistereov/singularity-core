@@ -210,43 +210,43 @@ Here are the key properties you need to set in your `application.yaml`:
         base-url: http://localhost:4200
     ```
       
-  - **Security Settings:**
+- **Security Settings:**
    
-      You need to set up some measures to secure your web application:
-      ```yaml
-      baseline:
-        app:
-          security:
-            encryption:
-              # Generate an encryption key used to encrypt entries in the database
-              # Note: You can create one here: https://generate-random.org/encryption-key-generator and use the Base64 value
-              secret-key: <your-encryption-key>
-            jwt:
-              # Your JWT secret
-              # Note: You can generate a secret here: https://jwtsecret.com/generate
-              secret-key: <your-jwt-secret>
-              # Optional: Expiration time for access tokens in seconds
-              expires-in: 900
-            rate-limit:
-              # Optional: IP-based limit on requests in a given time window
-              ip-limit: 200
-              # Optional: Time window for IP-based rate limiting in minutes
-              ip-time-window: 1
-              # Optional: User-based limit on requests in a given time window
-              user-limit: 200
-              # Optional: Time window for user-based rate limiting in minutes
-              user-time-window: 1
-            login-attempt-limit:
-              # Optional: IP-based limit on login attempts in a given time window
-              ip-limit: 10
-              # Optional: Time window for IP-based login attempts in minutes
-              ip-time-window: 15
-            two-factor:
-              # Optional: Length of the 2FA recovery codes. Default is 10 characters.
-              recovery-code-length: 10
-              # Optional: Count of 2FA recovery codes. Default is 6.
-              recovery-code-count: 6
-      ```
+    You need to set up some measures to secure your web application:
+    ```yaml
+    baseline:
+      app:
+        security:
+          encryption:
+            # Generate an encryption key used to encrypt entries in the database
+            # Note: You can create one here: https://generate-random.org/encryption-key-generator and use the Base64 value
+            secret-key: <your-encryption-key>
+          jwt:
+            # Your JWT secret
+            # Note: You can generate a secret here: https://jwtsecret.com/generate
+            secret-key: <your-jwt-secret>
+            # Optional: Expiration time for access tokens in seconds
+            expires-in: 900
+          rate-limit:
+            # Optional: IP-based limit on requests in a given time window
+            ip-limit: 200
+            # Optional: Time window for IP-based rate limiting in minutes
+            ip-time-window: 1
+            # Optional: User-based limit on requests in a given time window
+            user-limit: 200
+            # Optional: Time window for user-based rate limiting in minutes
+            user-time-window: 1
+          login-attempt-limit:
+            # Optional: IP-based limit on login attempts in a given time window
+            ip-limit: 10
+            # Optional: Time window for IP-based login attempts in minutes
+            ip-time-window: 15
+          two-factor:
+            # Optional: Length of the 2FA recovery codes. Default is 10 characters.
+            recovery-code-length: 10
+            # Optional: Count of 2FA recovery codes. Default is 6.
+            recovery-code-count: 6
+    ```
 
 - **Email Settings:**
    
@@ -290,6 +290,18 @@ Here are the key properties you need to set in your `application.yaml`:
     By default, it is set to `false`.
     
     **Note:** Password resets are not possible without email verification.
+
+- **File Settings:**
+
+    Configure how and where files should be saved.
+  
+    ```yaml
+    baseline:
+      file:
+        # The base path where all your files should be saved
+        # Default is ./files
+        base-path: /tmp/downloads #or s3://my-bucket-name/uploads
+    ```
 
 ## Service Overview
 
