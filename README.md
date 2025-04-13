@@ -299,8 +299,8 @@ Here are the key properties you need to set in your `application.yaml`:
     baseline:
       file:
         # The base path where all your files should be saved
-        # Default is ./files
-        base-path: /tmp/downloads #or s3://my-bucket-name/uploads
+        # Default is file:/opt/app/uploads
+        base-path: file:/opt/app/uploads #or s3://my-bucket-name/uploads
     ```
 
 ## Service Overview

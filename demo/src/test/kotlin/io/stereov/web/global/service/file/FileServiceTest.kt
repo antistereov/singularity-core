@@ -1,27 +1,57 @@
 package io.stereov.web.global.service.file
 
+import io.mockk.every
+import io.mockk.mockk
 import io.stereov.web.global.service.file.exception.model.FileSecurityException
 import io.stereov.web.global.service.file.exception.model.NoSuchFileException
 import io.stereov.web.global.service.file.service.FileService
+import io.stereov.web.properties.AppProperties
 import io.stereov.web.properties.FileProperties
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Assertions.*
+import kotlinx.serialization.json.JsonNull.content
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.springframework.mock.web.MockMultipartFile
+import org.springframework.http.codec.multipart.FilePart
+import reactor.core.publisher.Mono
+import java.io.File
+import java.nio.file.Files
+import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.io.path.deleteIfExists
 import kotlin.io.path.exists
 
 class FileServiceTest {
     private val properties = FileProperties("./tmp/files")
-    val service = FileService(properties)
+    private val appProperties = AppProperties()
+    val service = FileService(properties, appProperties)
 
     private val filename = "test.txt"
     private val subfolder = "test"
-    private val fileContent = "This is a test text file."
-    private val uploadFile = MockMultipartFile("file", filename, "text/plain", fileContent.toByteArray())
+    private val uploadFile = mockk<FilePart>()
+
+    @BeforeEach
+    fun init() {
+        every { uploadFile.filename() } returns filename
+        every { uploadFile.transferTo(any<Path>()) } answers {
+            val target = firstArg<Path>()
+
+            Mono.fromCallable {
+                Files.write(target, content.toByteArray())
+                null
+            }
+        }
+        every { uploadFile.transferTo(any<File>()) } answers {
+            val target = firstArg<File>()
+
+            Mono.fromCallable {
+                Files.write(target.toPath(), content.toByteArray())
+                null
+            }
+        }
+    }
 
     @BeforeEach
     fun deleteFiles() {
@@ -57,15 +87,7 @@ class FileServiceTest {
         service.storeFile(uploadFile, subfolder)
 
         val file = service.loadFile(subfolder, filename)
-        val content = StringBuilder()
-
-        file.bufferedReader().use { reader ->
-            reader.forEachLine { line ->
-                content.append(line).append("\n")
-            }
-        }
-
-        assertEquals(fileContent, content.toString().trim())
+        file.readText().trim()
     }
     @Test fun `loadFile needs existing file`() = runTest {
         assertThrows<NoSuchFileException> {

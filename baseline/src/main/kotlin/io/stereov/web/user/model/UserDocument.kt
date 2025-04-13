@@ -40,6 +40,8 @@ data class UserDocument(
     val devices: MutableList<DeviceInfo> = mutableListOf(),
     var lastActive: Instant = Instant.now(),
     var app: ApplicationInfo? = null,
+    var avatarUrl: String? = null,
+    var avatarFilename: String? = null,
 ) {
 
     @get:Transient
@@ -54,6 +56,15 @@ data class UserDocument(
     @get:Transient
     val idX: String
         get() = this.id ?: throw InvalidUserDocumentException("No ID found in UserDocument")
+
+    /**
+     * Returns the path where user-specific information is stored.
+     *
+     * @throws InvalidUserDocumentException If [id] is null.
+     */
+    @get:Transient
+    val fileStoragePath: String
+        get() = "users/$idX"
 
     /**
      * Get the application info of the user.
@@ -85,7 +96,8 @@ data class UserDocument(
             devices.map { it.toResponseDto() },
             lastActive.toString(),
             security.twoFactor.enabled,
-            app?.toDto()
+            app?.toDto(),
+            avatarUrl
         )
     }
 

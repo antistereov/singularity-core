@@ -13,5 +13,5 @@ fun File.toResource(): FileResource {
         ?: "application/octet-stream"
     val mediaType = MediaType.parseMediaType(mimeType)
 
-    return FileResource(resource, mediaType)
+    return FileResource(resource, mediaType.type)
 }

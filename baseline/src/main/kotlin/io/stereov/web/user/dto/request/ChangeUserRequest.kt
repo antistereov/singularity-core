@@ -11,5 +11,5 @@ package io.stereov.web.user.dto.request
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
 data class ChangeUserRequest(
-    val name: String
+    val name: String?,
 )

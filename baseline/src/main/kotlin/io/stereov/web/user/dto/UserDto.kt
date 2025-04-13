@@ -22,6 +22,7 @@ import kotlinx.serialization.Serializable
  * @property lastActive The last active time of the user.
  * @property twoFactorAuthEnabled Indicates whether two-factor authentication is enabled for the user.
  * @property app The application information associated with the user (nullable).
+ * @property avatar The URL for the user's avatar. Is null if the user did not set a custom avatar.
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
@@ -36,4 +37,5 @@ data class UserDto(
     val lastActive: String,
     val twoFactorAuthEnabled: Boolean,
     val app: ApplicationInfoDto?,
+    val avatar: String?,
 )

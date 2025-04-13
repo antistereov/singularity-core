@@ -11,6 +11,7 @@ import io.stereov.web.user.dto.response.LoginResponse
 import io.stereov.web.user.service.UserSessionService
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
+import org.springframework.http.codec.multipart.FilePart
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ServerWebExchange
 
@@ -164,6 +165,20 @@ class UserSessionController(
     suspend fun getApplicationInfo(): ResponseEntity<ApplicationInfoDto> {
         return ResponseEntity.ok().body(
             userSessionService.getApplicationInfo()
+        )
+    }
+
+    @PutMapping("/me/avatar")
+    suspend fun setAvatar(@RequestPart file: FilePart): ResponseEntity<UserDto> {
+        return ResponseEntity.ok().body(
+            userSessionService.setAvatar(file)
+        )
+    }
+
+    @DeleteMapping("/me/avatar")
+    suspend fun deleteAvatar(): ResponseEntity<UserDto> {
+        return ResponseEntity.ok().body(
+            userSessionService.deleteAvatar()
         )
     }
 

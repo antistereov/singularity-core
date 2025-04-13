@@ -8,6 +8,7 @@ import io.stereov.web.global.service.file.exception.FileException
 import io.stereov.web.global.service.file.exception.model.DeleteFailedException
 import io.stereov.web.global.service.file.exception.model.FileSecurityException
 import io.stereov.web.global.service.file.exception.model.NoSuchFileException
+import io.stereov.web.global.service.file.exception.model.UnsupportedFileTypeException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
@@ -31,6 +32,7 @@ class FileExceptionHandler : BaseExceptionHandler<FileException> {
             is DeleteFailedException -> HttpStatus.INTERNAL_SERVER_ERROR
             is NoSuchFileException -> HttpStatus.NOT_FOUND
             is FileSecurityException -> HttpStatus.FORBIDDEN
+            is UnsupportedFileTypeException -> HttpStatus.BAD_REQUEST
             else -> HttpStatus.INTERNAL_SERVER_ERROR
         }
 

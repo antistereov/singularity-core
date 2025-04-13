@@ -7,16 +7,21 @@ import io.stereov.web.auth.exception.model.InvalidCredentialsException
 import io.stereov.web.auth.service.AuthenticationService
 import io.stereov.web.auth.service.CookieService
 import io.stereov.web.global.service.cache.AccessTokenCache
+import io.stereov.web.global.service.file.exception.model.UnsupportedFileTypeException
+import io.stereov.web.global.service.file.service.FileService
 import io.stereov.web.global.service.hash.HashService
 import io.stereov.web.user.dto.ApplicationInfoDto
+import io.stereov.web.user.dto.UserDto
 import io.stereov.web.user.dto.request.*
 import io.stereov.web.user.exception.model.EmailAlreadyExistsException
 import io.stereov.web.user.exception.model.NoAppInfoFoundException
 import io.stereov.web.user.model.UserDocument
 import io.stereov.web.user.service.device.UserDeviceService
 import io.stereov.web.user.service.twofactor.UserTwoFactorAuthService
+import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ServerWebExchange
+import java.util.*
 
 /**
  * # Service for managing user sessions and authentication.
@@ -39,6 +44,7 @@ class UserSessionService(
     private val deviceService: UserDeviceService,
     private val accessTokenCache: AccessTokenCache,
     private val cookieService: CookieService,
+    private val fileService: FileService,
 ) {
 
     private val logger: KLogger
@@ -173,9 +179,56 @@ class UserSessionService(
     suspend fun changeUser(payload: ChangeUserRequest): UserDocument {
         val user = authenticationService.getCurrentUser()
 
-        user.name = payload.name
+        if (payload.name != null) user.name = payload.name
 
         return userService.save(user)
+    }
+
+    suspend fun setAvatar(file: FilePart): UserDto {
+        val user = authenticationService.getCurrentUser()
+
+        val currentAvatar = user.avatarFilename
+
+        if (currentAvatar != null) {
+            fileService.removeFileIfExists(user.fileStoragePath, currentAvatar)
+        }
+
+        val avatarFileExtension = "." + file.filename()
+            .substringAfterLast('.', missingDelimiterValue = "")
+            .takeIf { it.isNotBlank() }
+
+        val allowedExtensions = listOf(".jpg", ".jpeg", ".png", ".gif")
+        if (avatarFileExtension.lowercase() !in allowedExtensions) {
+            throw UnsupportedFileTypeException("Unsupported file type: $avatarFileExtension")
+        }
+
+        val avatarFilename = "avatar-${UUID.randomUUID()}${avatarFileExtension}"
+
+        userService.save(user)
+
+        fileService.storeFile(file, user.fileStoragePath, avatarFilename)
+
+        val fileUrl = fileService.getFileUrl(user.fileStoragePath, avatarFilename)
+        user.avatarUrl = fileUrl
+        user.avatarFilename = avatarFilename
+
+        return userService.save(user).toDto()
+    }
+
+    suspend fun deleteAvatar(): UserDto {
+        val user = authenticationService.getCurrentUser()
+
+        val avatarFilename = user.avatarFilename
+
+        if (avatarFilename != null) {
+            fileService.removeFileIfExists(user.fileStoragePath, avatarFilename)
+        }
+
+        user.avatarUrl = null
+        user.avatarFilename = null
+
+
+        return userService.save(user).toDto()
     }
 
     /**

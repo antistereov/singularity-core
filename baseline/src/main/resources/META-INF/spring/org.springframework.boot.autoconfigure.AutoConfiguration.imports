@@ -5,4 +5,5 @@ io.stereov.web.config.JwtConfiguration
 io.stereov.web.config.MailConfiguration
 io.stereov.web.config.RedisConfiguration
 io.stereov.web.config.WebClientConfiguration
+io.stereov.web.config.WebFluxConfig
 io.stereov.web.config.WebSecurityConfiguration

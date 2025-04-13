@@ -10,6 +10,7 @@ import io.stereov.web.auth.service.CookieService
 import io.stereov.web.global.service.cache.AccessTokenCache
 import io.stereov.web.global.service.cache.RedisService
 import io.stereov.web.global.service.encryption.EncryptionService
+import io.stereov.web.global.service.file.service.FileService
 import io.stereov.web.global.service.geolocation.GeoLocationService
 import io.stereov.web.global.service.hash.HashService
 import io.stereov.web.global.service.jwt.JwtService
@@ -215,7 +216,8 @@ class AuthenticationConfiguration {
         authenticationService: AuthenticationService,
         deviceService: UserDeviceService,
         accessTokenCache: AccessTokenCache,
-        cookieService: CookieService
+        cookieService: CookieService,
+        fileService: FileService
     ): UserSessionService {
         return UserSessionService(
             userService,
@@ -223,7 +225,8 @@ class AuthenticationConfiguration {
             authenticationService,
             deviceService,
             accessTokenCache,
-            cookieService
+            cookieService,
+            fileService
         )
     }
 

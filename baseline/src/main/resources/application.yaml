@@ -1,1 +1,4 @@
 # Set default configuration
+spring:
+  main:
+    web-application-type: reactive

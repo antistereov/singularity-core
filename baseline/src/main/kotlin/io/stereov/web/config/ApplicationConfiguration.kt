@@ -54,7 +54,7 @@ import org.springframework.context.annotation.Configuration
 class ApplicationConfiguration {
 
     @Bean
-    fun fileService(fileProperties: FileProperties): FileService {
-        return FileService(fileProperties)
+    fun fileService(fileProperties: FileProperties, appProperties: AppProperties): FileService {
+        return FileService(fileProperties, appProperties)
     }
 }

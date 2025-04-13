@@ -96,7 +96,7 @@
       "type": "java.util.List<java.lang.String>",
       "sourceType": "io.stereov.web.properties.FileProperties",
       "description": "The base path for file uploads.",
-      "defaultValue": "./files"
+      "defaultValue": "file:/opt/app/uploads"
     },
     {
       "name": "baseline.mail.debug",
