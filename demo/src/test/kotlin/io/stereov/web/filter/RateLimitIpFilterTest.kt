@@ -29,6 +29,9 @@ class RateLimitIpFilterTest : BaseSpringBootTest() {
         @DynamicPropertySource
         @JvmStatic
         fun properties(registry: DynamicPropertyRegistry) {
+            registry.add("baseline.file.storage.s3.uri") { "amazon.com" }
+            registry.add("baseline.file.storage.s3.access-key") { "amazon.com" }
+            registry.add("baseline.file.storage.s3.secret-key") { "amazon.com" }
             registry.add("spring.data.mongodb.uri") { "${mongoDBContainer.connectionString}/test" }
             registry.add("baseline.app.name") { "TestApplication" }
             registry.add("baseline.security.jwt.expires-in") { 900 }
