@@ -57,9 +57,9 @@ class UserTwoFactorAuthController(
         val ipAddress = exchange.request.remoteAddress?.address?.hostAddress
 
         val clearTwoFactorCookie = cookieService.clearLoginVerificationCookie()
-        val accessTokenCookie = cookieService.createAccessTokenCookie(user.idX, device.id)
-        val refreshTokenCookie = cookieService.createRefreshTokenCookie(user.idX, device, ipAddress)
-        val stepUpTokenCookie = cookieService.createStepUpCookie(user.idX, device.id)
+        val accessTokenCookie = cookieService.createAccessTokenCookie(user.id, device.id)
+        val refreshTokenCookie = cookieService.createRefreshTokenCookie(user.id, device, ipAddress)
+        val stepUpTokenCookie = cookieService.createStepUpCookie(user.id, device.id)
 
         return ResponseEntity.ok()
             .header("Set-Cookie", clearTwoFactorCookie.toString())
@@ -79,8 +79,8 @@ class UserTwoFactorAuthController(
 
         val ipAddress = exchange.request.remoteAddress?.address?.hostAddress
 
-        val accessTokenCookie = cookieService.createAccessTokenCookie(user.idX, device.id)
-        val refreshTokenCookie = cookieService.createRefreshTokenCookie(user.idX, device, ipAddress)
+        val accessTokenCookie = cookieService.createAccessTokenCookie(user.id, device.id)
+        val refreshTokenCookie = cookieService.createRefreshTokenCookie(user.id, device, ipAddress)
 
         val clearTwoFactorCookie = cookieService.clearLoginVerificationCookie()
         return ResponseEntity.ok()

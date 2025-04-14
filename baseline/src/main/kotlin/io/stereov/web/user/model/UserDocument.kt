@@ -2,7 +2,7 @@ package io.stereov.web.user.model
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.web.global.service.file.model.StoredFileMetaData
+import io.stereov.web.global.service.file.model.FileMetaData
 import io.stereov.web.user.dto.UserDto
 import io.stereov.web.user.exception.model.InvalidUserDocumentException
 import org.springframework.data.annotation.Id
@@ -18,7 +18,7 @@ import java.time.Instant
  * It contains fields for user information, security details, and device information.
  * It also provides methods for managing two-factor authentication, devices, and roles.
  *
- * @property id The unique identifier for the user document.
+ * @property _id The unique identifier for the user document.
  * @property email The email address of the user.
  * @property name The name of the user.
  * @property password The hashed password of the user.
@@ -32,7 +32,7 @@ import java.time.Instant
  */
 @Document(collection = "users")
 data class UserDocument(
-    @Id val id: String? = null,
+    @Id val _id: String? = null,
     @Indexed(unique = true) var email: String,
     var name: String? = null,
     var password: String,
@@ -41,7 +41,7 @@ data class UserDocument(
     val devices: MutableList<DeviceInfo> = mutableListOf(),
     var lastActive: Instant = Instant.now(),
     var app: ApplicationInfo? = null,
-    var avatar: StoredFileMetaData? = null,
+    var avatar: FileMetaData? = null,
 ) {
 
     @get:Transient
@@ -49,22 +49,22 @@ data class UserDocument(
         get() = KotlinLogging.logger {}
 
     /**
-     * Return the [id] and throw a [InvalidUserDocumentException] if the [id] is null.
+     * Return the [_id] and throw a [InvalidUserDocumentException] if the [_id] is null.
      *
-     * @throws InvalidUserDocumentException If [id] is null
+     * @throws InvalidUserDocumentException If [_id] is null
      */
     @get:Transient
-    val idX: String
-        get() = this.id ?: throw InvalidUserDocumentException("No ID found in UserDocument")
+    val id: String
+        get() = this._id ?: throw InvalidUserDocumentException("No ID found in UserDocument")
 
     /**
      * Returns the path where user-specific information is stored.
      *
-     * @throws InvalidUserDocumentException If [id] is null.
+     * @throws InvalidUserDocumentException If [_id] is null.
      */
     @get:Transient
     val fileStoragePath: String
-        get() = "users/$idX"
+        get() = "users/$id"
 
     /**
      * Get the application info of the user.
@@ -88,7 +88,7 @@ data class UserDocument(
         logger.debug { "Creating UserDto" }
 
         return UserDto(
-            idX,
+            id,
             name,
             email,
             roles,
@@ -96,7 +96,8 @@ data class UserDocument(
             devices.map { it.toResponseDto() },
             lastActive.toString(),
             security.twoFactor.enabled,
-            app?.toDto()
+            app?.toDto(),
+            avatar
         )
     }
 

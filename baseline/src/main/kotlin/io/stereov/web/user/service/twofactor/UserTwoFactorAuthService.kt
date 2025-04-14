@@ -66,7 +66,7 @@ class UserTwoFactorAuthService(
             RandomService.generateCode(twoFactorAuthProperties.recoveryCodeLength)
         }
 
-        val setupToken = twoFactorAuthTokenService.createSetupToken(user.idX, secret, recoveryCodes)
+        val setupToken = twoFactorAuthTokenService.createSetupToken(user.id, secret, recoveryCodes)
 
         return TwoFactorSetupResponse(secret, otpAuthUrl, recoveryCodes, setupToken)
     }
@@ -99,7 +99,7 @@ class UserTwoFactorAuthService(
             .clearDevices()
 
         userService.save(user)
-        accessTokenCache.invalidateAllTokens(user.idX)
+        accessTokenCache.invalidateAllTokens(user.id)
 
         return user.toDto()
     }

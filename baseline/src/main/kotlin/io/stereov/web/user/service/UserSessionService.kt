@@ -7,10 +7,8 @@ import io.stereov.web.auth.exception.model.InvalidCredentialsException
 import io.stereov.web.auth.service.AuthenticationService
 import io.stereov.web.auth.service.CookieService
 import io.stereov.web.global.service.cache.AccessTokenCache
-import io.stereov.web.global.service.file.exception.model.NoSuchFileException
-import io.stereov.web.global.service.file.exception.model.UnsupportedFileTypeException
-import io.stereov.web.global.service.file.model.StoredFile
-import io.stereov.web.global.service.file.service.FileStorage
+import io.stereov.web.global.service.file.exception.model.UnsupportedMediaTypeException
+import io.stereov.web.global.service.file.service.S3FileStorage
 import io.stereov.web.global.service.hash.HashService
 import io.stereov.web.user.dto.ApplicationInfoDto
 import io.stereov.web.user.dto.UserDto
@@ -20,10 +18,10 @@ import io.stereov.web.user.exception.model.NoAppInfoFoundException
 import io.stereov.web.user.model.UserDocument
 import io.stereov.web.user.service.device.UserDeviceService
 import io.stereov.web.user.service.twofactor.UserTwoFactorAuthService
+import org.springframework.http.MediaType
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ServerWebExchange
-import java.util.*
 
 /**
  * # Service for managing user sessions and authentication.
@@ -46,7 +44,7 @@ class UserSessionService(
     private val deviceService: UserDeviceService,
     private val accessTokenCache: AccessTokenCache,
     private val cookieService: CookieService,
-    private val fileStorage: FileStorage,
+    private val fileStorage: S3FileStorage,
 ) {
 
     private val logger: KLogger
@@ -72,7 +70,7 @@ class UserSessionService(
             throw InvalidCredentialsException()
         }
 
-        if (user.id == null) {
+        if (user._id == null) {
             throw AuthException("Login failed: UserDocument contains no id")
         }
 
@@ -104,7 +102,7 @@ class UserSessionService(
 
         val savedUserDocument = userService.save(userDocument)
 
-        if (savedUserDocument.id == null) {
+        if (savedUserDocument._id == null) {
             throw AuthException("Login failed: UserDocument contains no id")
         }
 
@@ -186,37 +184,27 @@ class UserSessionService(
         return userService.save(user)
     }
 
-    suspend fun getAvatar(): StoredFile {
-        val user = authenticationService.getCurrentUser()
-
-        val currentAvatar = user.avatar ?: throw NoSuchFileException("No avatar set for user")
-
-        return fileStorage.loadFile(currentAvatar)
-    }
-
     suspend fun setAvatar(file: FilePart): UserDto {
         val user = authenticationService.getCurrentUser()
 
         val currentAvatar = user.avatar
 
         if (currentAvatar != null) {
-            fileStorage.removeFileIfExists(currentAvatar)
+            fileStorage.removeFileIfExists(currentAvatar.key)
         }
 
-        val avatarFileExtension = "." + file.filename()
-            .substringAfterLast('.', missingDelimiterValue = "")
-            .takeIf { it.isNotBlank() }
+        val allowedMediaTypes = listOf(MediaType.IMAGE_JPEG, MediaType.IMAGE_GIF, MediaType.IMAGE_PNG)
 
-        val allowedExtensions = listOf(".jpg", ".jpeg", ".png", ".gif")
-        if (avatarFileExtension.lowercase() !in allowedExtensions) {
-            throw UnsupportedFileTypeException("Unsupported file type: $avatarFileExtension")
+        val contentType = file.headers().contentType
+            ?: throw UnsupportedMediaTypeException("Media type is not set")
+
+        if (contentType !in allowedMediaTypes) {
+            throw UnsupportedMediaTypeException("Unsupported file type: $contentType")
         }
-
-        val avatarFilename = "avatar-${UUID.randomUUID()}${avatarFileExtension}"
 
         userService.save(user)
 
-        user.avatar = fileStorage.storeFile(file, user.fileStoragePath, avatarFilename)
+        user.avatar = fileStorage.upload(user.id, file, "${user.fileStoragePath}/avatar", true)
 
         return userService.save(user).toDto()
     }
@@ -227,7 +215,7 @@ class UserSessionService(
         val currentAvatar = user.avatar
 
         if (currentAvatar != null) {
-            fileStorage.removeFileIfExists(currentAvatar)
+            fileStorage.removeFileIfExists(currentAvatar.key)
         }
 
         user.avatar = null
@@ -248,7 +236,7 @@ class UserSessionService(
         val user = authenticationService.getCurrentUser()
 
         return user.app?.toDto()
-            ?: throw NoAppInfoFoundException(user.idX)
+            ?: throw NoAppInfoFoundException(user.id)
     }
 
     /**

@@ -116,7 +116,7 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
 
     @Test fun `resetPassword works`() = runTest {
         val user = registerUser()
-        val token = mailTokenService.createPasswordResetToken(user.info.idX, user.info.security.mail.passwordResetSecret)
+        val token = mailTokenService.createPasswordResetToken(user.info.id, user.info.security.mail.passwordResetSecret)
 
         assertFalse(user.info.security.mail.verified)
 
@@ -129,7 +129,7 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isOk
 
-        val verifiedUser = userService.findById(user.info.idX)
+        val verifiedUser = userService.findById(user.info.id)
 
         assertNotEquals(user.info.security.mail.passwordResetSecret, verifiedUser.security.mail.passwordResetSecret)
         assertNotEquals(user.info.password, verifiedUser.password)

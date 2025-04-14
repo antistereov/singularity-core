@@ -41,7 +41,7 @@ class MailService(
     suspend fun sendVerificationEmail(user: UserDocument) {
         logger.debug { "Sending verification email to ${user.email}" }
 
-        val userId = user.idX
+        val userId = user.id
 
         if (mailCooldownService.getRemainingVerificationCooldown(userId) > 0) {
             throw MailCooldownException(mailCooldownService.getRemainingVerificationCooldown(userId))
@@ -77,13 +77,13 @@ class MailService(
     suspend fun sendPasswordResetEmail(user: UserDocument) {
         logger.debug { "Sending password reset email to ${user.email}" }
 
-        val userId = user.idX
+        val userId = user.id
 
         if (mailCooldownService.getRemainingPasswordResetCooldown(userId) > 0) {
             throw MailCooldownException(mailCooldownService.getRemainingPasswordResetCooldown(userId))
         }
 
-        val token = mailTokenService.createPasswordResetToken(user.idX, user.security.mail.passwordResetSecret)
+        val token = mailTokenService.createPasswordResetToken(user.id, user.security.mail.passwordResetSecret)
         val passwordResetUrl = generatePasswordResetUrl(token)
         val message = SimpleMailMessage()
         message.from = mailProperties.email

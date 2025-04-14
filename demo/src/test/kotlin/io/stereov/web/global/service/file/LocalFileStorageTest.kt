@@ -1,8 +1,6 @@
 package io.stereov.web.global.service.file
 
 import io.mockk.mockk
-import io.stereov.web.global.service.file.service.LocalFileStorage
-import io.stereov.web.properties.LocalFileStorageProperties
 import org.springframework.http.codec.multipart.FilePart
 
 class LocalFileStorageTest {

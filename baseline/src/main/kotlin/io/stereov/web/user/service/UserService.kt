@@ -3,8 +3,7 @@ package io.stereov.web.user.service
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.web.global.service.file.exception.model.NoSuchFileException
-import io.stereov.web.global.service.file.model.StoredFile
-import io.stereov.web.global.service.file.service.FileStorage
+import io.stereov.web.global.service.file.model.FileMetaData
 import io.stereov.web.user.exception.model.UserDoesNotExistException
 import io.stereov.web.user.model.UserDocument
 import io.stereov.web.user.repository.UserRepository
@@ -22,7 +21,6 @@ import org.springframework.stereotype.Service
 @Service
 class UserService(
     private val userRepository: UserRepository,
-    private val fileStorage: FileStorage,
 ) {
 
     private val logger: KLogger
@@ -107,7 +105,7 @@ class UserService(
      * @return The saved [UserDocument].
      */
     suspend fun save(user: UserDocument): UserDocument {
-        logger.debug { "Saving user: ${user.id}" }
+        logger.debug { "Saving user: ${user._id}" }
 
         user.updateLastActive()
 
@@ -149,12 +147,10 @@ class UserService(
         return userRepository.findAll()
     }
 
-    suspend fun getAvatar(userId: String): StoredFile {
+    suspend fun getAvatar(userId: String): FileMetaData {
         logger.debug { "Finding avatar for user $userId" }
 
         val user = findById(userId)
-        val currentAvatar = user.avatar ?: throw NoSuchFileException("No avatar set for user")
-
-        return fileStorage.loadFile(currentAvatar)
+        return user.avatar ?: throw NoSuchFileException("No avatar set for user")
     }
 }

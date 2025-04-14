@@ -37,7 +37,7 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
     }
     @Test fun `unexpired token required`() = runTest {
         val user = registerUser()
-        val token = userTokenService.createAccessToken(user.info.id!!, "device", Instant.ofEpochSecond(0))
+        val token = userTokenService.createAccessToken(user.info._id!!, "device", Instant.ofEpochSecond(0))
 
         webTestClient.get()
             .uri("/user/me")
@@ -79,7 +79,7 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
     }
     @Test fun `invalid device will not be authorized`() = runTest {
         val user = registerUser(deviceId = "device")
-        val accessToken = userTokenService.createAccessToken(user.info.idX, "device")
+        val accessToken = userTokenService.createAccessToken(user.info.id, "device")
 
         webTestClient.get()
             .uri("/user/me")
@@ -87,7 +87,7 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isOk
 
-        val foundUser = userService.findById(user.info.idX)
+        val foundUser = userService.findById(user.info.id)
         foundUser.devices.clear()
         userService.save(foundUser)
 

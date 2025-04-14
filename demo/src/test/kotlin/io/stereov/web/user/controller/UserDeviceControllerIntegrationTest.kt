@@ -52,7 +52,7 @@ class UserDeviceControllerIntegrationTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isOk
 
-        val updatedUser = userService.findById(user.info.id!!)
+        val updatedUser = userService.findById(user.info._id!!)
         val devices = updatedUser.devices
 
         assertEquals(0, devices.size)
@@ -73,7 +73,7 @@ class UserDeviceControllerIntegrationTest : BaseIntegrationTest() {
             .expectStatus()
             .isOk
 
-        val updatedUser = userService.findById(user.info.id!!)
+        val updatedUser = userService.findById(user.info._id!!)
         val devices = updatedUser.devices
 
         assertEquals(0, devices.size)

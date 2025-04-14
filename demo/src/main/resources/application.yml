@@ -29,9 +29,6 @@ baseline:
     secure: ${SECURE:false}
   file:
     storage:
-      type: local
-      local:
-        base-path: ./files
       s3:
         uri: ${S3_URI}
         bucket: ${S3_BUCKET}

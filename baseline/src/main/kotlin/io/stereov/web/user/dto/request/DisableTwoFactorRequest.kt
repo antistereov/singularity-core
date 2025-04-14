@@ -1,5 +1,5 @@
 package io.stereov.web.user.dto.request
 
-data class DisableTwoFactorRequest(
+data class  DisableTwoFactorRequest(
     val password: String,
 )

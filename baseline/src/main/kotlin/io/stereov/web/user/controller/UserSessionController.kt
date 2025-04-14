@@ -10,7 +10,6 @@ import io.stereov.web.user.dto.request.*
 import io.stereov.web.user.dto.response.LoginResponse
 import io.stereov.web.user.service.UserSessionService
 import jakarta.validation.Valid
-import org.springframework.core.io.InputStreamResource
 import org.springframework.http.ResponseEntity
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.web.bind.annotation.*
@@ -70,7 +69,7 @@ class UserSessionController(
         val user = userSessionService.checkCredentialsAndGetUser(payload)
 
         if (user.security.twoFactor.enabled) {
-            val twoFactorCookie = cookieService.createLoginVerificationCookie(user.idX)
+            val twoFactorCookie = cookieService.createLoginVerificationCookie(user.id)
             return ResponseEntity.ok()
                 .header("Set-Cookie", twoFactorCookie.toString())
                 .body(LoginResponse(true, user.toDto()))
@@ -78,8 +77,8 @@ class UserSessionController(
 
         val ipAddress = exchange.request.remoteAddress?.address?.hostAddress
 
-        val accessTokenCookie = cookieService.createAccessTokenCookie(user.idX, payload.device.id)
-        val refreshTokenCookie = cookieService.createRefreshTokenCookie(user.idX, payload.device, ipAddress)
+        val accessTokenCookie = cookieService.createAccessTokenCookie(user.id, payload.device.id)
+        val refreshTokenCookie = cookieService.createRefreshTokenCookie(user.id, payload.device, ipAddress)
 
         return ResponseEntity.ok()
             .header("Set-Cookie", accessTokenCookie.toString())
@@ -105,8 +104,8 @@ class UserSessionController(
 
         val ipAddress = exchange.request.remoteAddress?.address?.hostAddress
 
-        val accessTokenCookie = cookieService.createAccessTokenCookie(user.idX, payload.device.id)
-        val refreshTokenCookie = cookieService.createRefreshTokenCookie(user.idX, payload.device, ipAddress)
+        val accessTokenCookie = cookieService.createAccessTokenCookie(user.id, payload.device.id)
+        val refreshTokenCookie = cookieService.createRefreshTokenCookie(user.id, payload.device, ipAddress)
 
         return ResponseEntity.ok()
             .header("Set-Cookie", accessTokenCookie.toString())
@@ -167,11 +166,6 @@ class UserSessionController(
         return ResponseEntity.ok().body(
             userSessionService.getApplicationInfo()
         )
-    }
-
-    @GetMapping("/me/avatar")
-    suspend fun getAvatar(): ResponseEntity<InputStreamResource> {
-        return userSessionService.getAvatar().toResponseEntity()
     }
 
     @PutMapping("/me/avatar")

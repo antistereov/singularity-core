@@ -30,7 +30,7 @@ class CustomAuthenticationToken(
     }
 
     override fun getCredentials(): Any? = null
-    override fun getPrincipal(): String = user.idX
+    override fun getPrincipal(): String = user.id
 
     /**
      * Constructs a [CustomAuthenticationToken] from a [UserDocument] and a device ID.

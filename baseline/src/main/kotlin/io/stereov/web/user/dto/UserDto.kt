@@ -1,5 +1,6 @@
 package io.stereov.web.user.dto
 
+import io.stereov.web.global.service.file.model.FileMetaData
 import io.stereov.web.user.dto.response.DeviceInfoResponse
 import io.stereov.web.user.model.Role
 import kotlinx.serialization.Serializable
@@ -36,5 +37,6 @@ data class UserDto(
     val devices: List<DeviceInfoResponse> = listOf(),
     val lastActive: String,
     val twoFactorAuthEnabled: Boolean,
-    val app: ApplicationInfoDto?
+    val app: ApplicationInfoDto?,
+    val avatar: FileMetaData?,
 )

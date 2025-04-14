@@ -1,7 +1,7 @@
 package io.stereov.web.user.controller
 
+import io.stereov.web.global.service.file.model.FileMetaData
 import io.stereov.web.user.service.UserService
-import org.springframework.core.io.InputStreamResource
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping
@@ -17,7 +17,7 @@ class UserController(
     @GetMapping("/{id}/avatar")
     suspend fun getAvatar(
         @PathVariable id: String
-    ): ResponseEntity<InputStreamResource> {
-        return userService.getAvatar(id).toResponseEntity()
+    ): ResponseEntity<FileMetaData> {
+        return ResponseEntity.ok().body(userService.getAvatar(id))
     }
 }

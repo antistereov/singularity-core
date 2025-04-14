@@ -39,7 +39,7 @@ class AuthenticationService {
         logger.debug {"Extracting user ID." }
 
         val auth = getCurrentAuthentication()
-        return auth.user.idX
+        return auth.user.id
     }
 
     /**
