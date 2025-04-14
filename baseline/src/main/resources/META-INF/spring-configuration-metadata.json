@@ -11,9 +11,19 @@
       "sourceType": "io.stereov.web.properties.AuthProperties"
     },
     {
-      "name": "baseline.file",
-      "type": "io.stereov.web.properties.FileProperties",
-      "sourceType": "io.stereov.web.properties.FileProperties"
+      "name": "baseline.file.storage",
+      "type": "io.stereov.web.properties.FileStorageProperties",
+      "sourceType": "io.stereov.web.properties.FileStorageProperties"
+    },
+    {
+      "name": "baseline.file.storage.local",
+      "type": "io.stereov.web.properties.LocalFileStorageProperties",
+      "sourceType": "io.stereov.web.properties.LocalFileStorageProperties"
+    },
+    {
+      "name": "baseline.file.storage.s3",
+      "type": "io.stereov.web.properties.S3FileStorageProperties",
+      "sourceType": "io.stereov.web.properties.S3FileStorageProperties"
     },
     {
       "name": "baseline.mail",
@@ -92,11 +102,45 @@
       "description": "Paths that require user authentication. This is a comma-separated list of paths."
     },
     {
-      "name": "baseline.file.base-path",
+      "name": "baseline.file.storage.type",
       "type": "java.util.List<java.lang.String>",
-      "sourceType": "io.stereov.web.properties.FileProperties",
+      "sourceType": "io.stereov.web.properties.FileStorageProperties",
+      "description": "The type of storage. Can be either local or S3.",
+      "defaultValue": "local",
+      "values": ["local", "s3"]
+    },
+    {
+      "name": "baseline.file.storage.local.base-path",
+      "type": "java.util.List<java.lang.String>",
+      "sourceType": "io.stereov.web.properties.LocalFileStorageProperties",
       "description": "The base path for file uploads.",
       "defaultValue": "file:/opt/app/uploads"
+    },
+    {
+      "name": "baseline.file.storage.s3.bucket",
+      "type": "java.util.List<java.lang.String>",
+      "sourceType": "io.stereov.web.properties.S3FileStorageProperties",
+      "description": "The bucket in your S3 storage.",
+      "defaultValue": "app"
+    },
+    {
+      "name": "baseline.file.storage.s3.uri",
+      "type": "java.util.List<java.lang.String>",
+      "sourceType": "io.stereov.web.properties.S3FileStorageProperties",
+      "description": "The URI of your S3",
+      "defaultValue": "http://localhost:9000"
+    },
+    {
+      "name": "baseline.file.storage.s3.access-key",
+      "type": "java.util.List<java.lang.String>",
+      "sourceType": "io.stereov.web.properties.S3FileStorageProperties",
+      "description": "Your S3 access key."
+    },
+    {
+      "name": "baseline.file.storage.s3.secret-key",
+      "type": "java.util.List<java.lang.String>",
+      "sourceType": "io.stereov.web.properties.S3FileStorageProperties",
+      "description": "Your S3 secret key."
     },
     {
       "name": "baseline.mail.debug",

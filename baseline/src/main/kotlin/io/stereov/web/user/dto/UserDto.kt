@@ -36,6 +36,5 @@ data class UserDto(
     val devices: List<DeviceInfoResponse> = listOf(),
     val lastActive: String,
     val twoFactorAuthEnabled: Boolean,
-    val app: ApplicationInfoDto?,
-    val avatar: String?,
+    val app: ApplicationInfoDto?
 )

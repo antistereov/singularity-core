@@ -2,6 +2,7 @@ package io.stereov.web.user.model
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.web.global.service.file.model.StoredFileMetaData
 import io.stereov.web.user.dto.UserDto
 import io.stereov.web.user.exception.model.InvalidUserDocumentException
 import org.springframework.data.annotation.Id
@@ -40,8 +41,7 @@ data class UserDocument(
     val devices: MutableList<DeviceInfo> = mutableListOf(),
     var lastActive: Instant = Instant.now(),
     var app: ApplicationInfo? = null,
-    var avatarUrl: String? = null,
-    var avatarFilename: String? = null,
+    var avatar: StoredFileMetaData? = null,
 ) {
 
     @get:Transient
@@ -96,8 +96,7 @@ data class UserDocument(
             devices.map { it.toResponseDto() },
             lastActive.toString(),
             security.twoFactor.enabled,
-            app?.toDto(),
-            avatarUrl
+            app?.toDto()
         )
     }
 

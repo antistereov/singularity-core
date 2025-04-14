@@ -10,7 +10,7 @@ import io.stereov.web.auth.service.CookieService
 import io.stereov.web.global.service.cache.AccessTokenCache
 import io.stereov.web.global.service.cache.RedisService
 import io.stereov.web.global.service.encryption.EncryptionService
-import io.stereov.web.global.service.file.service.FileService
+import io.stereov.web.global.service.file.service.FileStorage
 import io.stereov.web.global.service.geolocation.GeoLocationService
 import io.stereov.web.global.service.hash.HashService
 import io.stereov.web.global.service.jwt.JwtService
@@ -77,9 +77,7 @@ import org.springframework.web.reactive.function.client.WebClient
 @AutoConfiguration(
     after = [
         ApplicationConfiguration::class,
-        WebClientConfiguration::class,
-        RedisConfiguration::class,
-        JwtConfiguration::class,
+        S3Configuration::class,
     ]
 )
 @EnableReactiveMongoRepositories(
@@ -204,8 +202,8 @@ class AuthenticationConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun userService(userRepository: UserRepository): UserService {
-        return UserService(userRepository)
+    fun userService(userRepository: UserRepository, fileStorage: FileStorage): UserService {
+        return UserService(userRepository, fileStorage)
     }
 
     @Bean
@@ -217,7 +215,7 @@ class AuthenticationConfiguration {
         deviceService: UserDeviceService,
         accessTokenCache: AccessTokenCache,
         cookieService: CookieService,
-        fileService: FileService
+        fileStorage: FileStorage
     ): UserSessionService {
         return UserSessionService(
             userService,
@@ -226,7 +224,7 @@ class AuthenticationConfiguration {
             deviceService,
             accessTokenCache,
             cookieService,
-            fileService
+            fileStorage
         )
     }
 

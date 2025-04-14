@@ -1,8 +1,9 @@
 package io.stereov.web.config
 
-import io.stereov.web.global.service.file.service.FileService
+import io.stereov.web.global.service.file.service.LocalFileStorage
 import io.stereov.web.properties.*
 import org.springframework.boot.autoconfigure.AutoConfiguration
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
 import org.springframework.boot.autoconfigure.data.web.SpringDataWebAutoConfiguration
 import org.springframework.boot.autoconfigure.mongo.MongoReactiveAutoConfiguration
@@ -44,8 +45,9 @@ import org.springframework.context.annotation.Configuration
     AppProperties::class,
     AuthProperties::class,
     EncryptionProperties::class,
-    FileProperties::class,
+    FileStorageProperties::class,
     JwtProperties::class,
+    LocalFileStorageProperties::class,
     LoginAttemptLimitProperties::class,
     RateLimitProperties::class,
     TwoFactorAuthProperties::class,
@@ -54,7 +56,8 @@ import org.springframework.context.annotation.Configuration
 class ApplicationConfiguration {
 
     @Bean
-    fun fileService(fileProperties: FileProperties, appProperties: AppProperties): FileService {
-        return FileService(fileProperties, appProperties)
+    @ConditionalOnProperty(prefix = "baseline.file.storage", name = ["type"], havingValue = "local", matchIfMissing = false)
+    fun fileStorage(fileStorageProperties: LocalFileStorageProperties): LocalFileStorage {
+        return LocalFileStorage(fileStorageProperties)
     }
 }

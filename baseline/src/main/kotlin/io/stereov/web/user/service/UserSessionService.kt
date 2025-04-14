@@ -7,8 +7,10 @@ import io.stereov.web.auth.exception.model.InvalidCredentialsException
 import io.stereov.web.auth.service.AuthenticationService
 import io.stereov.web.auth.service.CookieService
 import io.stereov.web.global.service.cache.AccessTokenCache
+import io.stereov.web.global.service.file.exception.model.NoSuchFileException
 import io.stereov.web.global.service.file.exception.model.UnsupportedFileTypeException
-import io.stereov.web.global.service.file.service.FileService
+import io.stereov.web.global.service.file.model.StoredFile
+import io.stereov.web.global.service.file.service.FileStorage
 import io.stereov.web.global.service.hash.HashService
 import io.stereov.web.user.dto.ApplicationInfoDto
 import io.stereov.web.user.dto.UserDto
@@ -44,7 +46,7 @@ class UserSessionService(
     private val deviceService: UserDeviceService,
     private val accessTokenCache: AccessTokenCache,
     private val cookieService: CookieService,
-    private val fileService: FileService,
+    private val fileStorage: FileStorage,
 ) {
 
     private val logger: KLogger
@@ -184,13 +186,21 @@ class UserSessionService(
         return userService.save(user)
     }
 
+    suspend fun getAvatar(): StoredFile {
+        val user = authenticationService.getCurrentUser()
+
+        val currentAvatar = user.avatar ?: throw NoSuchFileException("No avatar set for user")
+
+        return fileStorage.loadFile(currentAvatar)
+    }
+
     suspend fun setAvatar(file: FilePart): UserDto {
         val user = authenticationService.getCurrentUser()
 
-        val currentAvatar = user.avatarFilename
+        val currentAvatar = user.avatar
 
         if (currentAvatar != null) {
-            fileService.removeFileIfExists(user.fileStoragePath, currentAvatar)
+            fileStorage.removeFileIfExists(currentAvatar)
         }
 
         val avatarFileExtension = "." + file.filename()
@@ -206,11 +216,7 @@ class UserSessionService(
 
         userService.save(user)
 
-        fileService.storeFile(file, user.fileStoragePath, avatarFilename)
-
-        val fileUrl = fileService.getFileUrl(user.fileStoragePath, avatarFilename)
-        user.avatarUrl = fileUrl
-        user.avatarFilename = avatarFilename
+        user.avatar = fileStorage.storeFile(file, user.fileStoragePath, avatarFilename)
 
         return userService.save(user).toDto()
     }
@@ -218,15 +224,13 @@ class UserSessionService(
     suspend fun deleteAvatar(): UserDto {
         val user = authenticationService.getCurrentUser()
 
-        val avatarFilename = user.avatarFilename
+        val currentAvatar = user.avatar
 
-        if (avatarFilename != null) {
-            fileService.removeFileIfExists(user.fileStoragePath, avatarFilename)
+        if (currentAvatar != null) {
+            fileStorage.removeFileIfExists(currentAvatar)
         }
 
-        user.avatarUrl = null
-        user.avatarFilename = null
-
+        user.avatar = null
 
         return userService.save(user).toDto()
     }

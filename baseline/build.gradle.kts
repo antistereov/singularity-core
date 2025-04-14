@@ -60,6 +60,10 @@ dependencies {
     api("org.springframework.security:spring-security-oauth2-resource-server")
     api("org.springframework.security:spring-security-oauth2-jose")
 
+    // File Storage
+    implementation(platform("software.amazon.awssdk:bom:2.27.21"))
+    implementation("software.amazon.awssdk:s3")
+
     // 2FA
     api("com.warrenstrange:googleauth:1.5.0")
 

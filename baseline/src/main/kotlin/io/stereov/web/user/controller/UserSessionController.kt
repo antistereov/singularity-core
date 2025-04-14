@@ -10,6 +10,7 @@ import io.stereov.web.user.dto.request.*
 import io.stereov.web.user.dto.response.LoginResponse
 import io.stereov.web.user.service.UserSessionService
 import jakarta.validation.Valid
+import org.springframework.core.io.InputStreamResource
 import org.springframework.http.ResponseEntity
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.web.bind.annotation.*
@@ -166,6 +167,11 @@ class UserSessionController(
         return ResponseEntity.ok().body(
             userSessionService.getApplicationInfo()
         )
+    }
+
+    @GetMapping("/me/avatar")
+    suspend fun getAvatar(): ResponseEntity<InputStreamResource> {
+        return userSessionService.getAvatar().toResponseEntity()
     }
 
     @PutMapping("/me/avatar")

@@ -2,7 +2,7 @@ package io.stereov.web.properties
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 
-@ConfigurationProperties(prefix = "baseline.file")
-data class FileProperties(
+@ConfigurationProperties("baseline.file.storage.local")
+data class LocalFileStorageProperties(
     val basePath: String = "file:/opt/app/uploads"
 )
