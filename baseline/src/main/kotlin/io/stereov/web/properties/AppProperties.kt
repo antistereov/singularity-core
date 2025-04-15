@@ -22,4 +22,11 @@ data class AppProperties(
     val name: String = "Spring Boot Application",
     val baseUrl: String = "http://localhost:8000",
     val secure: Boolean = false,
-)
+) {
+
+    val slug: String
+        get() = name
+            .trim()
+            .lowercase()
+            .replace(Regex("\\s+"), "-")
+}

@@ -48,17 +48,12 @@ class S3FileStorage(
     override suspend fun upload(userId: String, filePart: FilePart, key: String, public: Boolean): FileMetaData {
         logger.debug { "Uploading file: \"${filePart.filename()}\" as ${filePart.headers().contentType}" }
 
-        val appSlug = appProperties.name
-            .trim()
-            .lowercase()
-            .replace(Regex("\\s+"), "-")
-
         val extension = filePart.filename().substringAfterLast(".", "")
 
         val actualKey = if (extension.isBlank()) {
-            "$appSlug/$key-${UUID.randomUUID()}"
+            "${appProperties.slug}/$key-${UUID.randomUUID()}"
         } else {
-            "$appSlug/$key-${UUID.randomUUID()}.$extension"
+            "${appProperties.slug}/$key-${UUID.randomUUID()}.$extension"
         }
 
         val publisher = DataBufferPublisher(filePart.content())
