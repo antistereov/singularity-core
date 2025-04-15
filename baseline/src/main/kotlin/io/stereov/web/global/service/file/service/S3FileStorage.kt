@@ -8,8 +8,7 @@ import io.stereov.web.global.service.file.util.DataBufferPublisher
 import io.stereov.web.properties.AppProperties
 import io.stereov.web.properties.S3Properties
 import kotlinx.coroutines.future.await
-import kotlinx.coroutines.reactor.awaitSingle
-import org.springframework.core.io.buffer.DataBufferUtils
+import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.http.MediaType
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
@@ -56,21 +55,24 @@ class S3FileStorage(
             "${appProperties.slug}/$key-${UUID.randomUUID()}.$extension"
         }
 
-        val publisher = DataBufferPublisher(filePart.content())
+        val publisher = DataBufferPublisher(filePart.content()).toFlux()
+
+        val size = filePart.content()
+            .map { it.readableByteCount() }
+            .reduce(0L) { acc, bytes -> acc + bytes }
+            .awaitSingle()
 
         val contentType = filePart.headers().contentType?.toString() ?: MediaType.APPLICATION_OCTET_STREAM.toString()
-
-        val contentLength = DataBufferUtils.join(filePart.content()).awaitSingle().readableByteCount()
 
         val putRequest = PutObjectRequest.builder()
             .bucket(s3Properties.bucket)
             .key(actualKey)
-            .contentLength(contentLength.toLong())
+            .contentLength(size)
             .contentType(contentType)
             .acl(if (public) ObjectCannedACL.PUBLIC_READ else ObjectCannedACL.PRIVATE)
             .build()
 
-        val requestBody = AsyncRequestBody.fromPublisher(publisher.toFlux())
+        val requestBody = AsyncRequestBody.fromPublisher(publisher)
 
         s3Client.putObject(putRequest, requestBody).await()
 
@@ -81,7 +83,7 @@ class S3FileStorage(
             accessType = if (public) AccessType.PUBLIC else AccessType.SHARED,
             sharedWith = emptyList(),
             publicUrl = if (public) getPublicUrl(actualKey) else null,
-            size = filePart.headers().contentLength
+            size = size
         )
     }
 
