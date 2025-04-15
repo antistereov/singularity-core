@@ -8,7 +8,7 @@ import io.stereov.web.auth.service.AuthenticationService
 import io.stereov.web.auth.service.CookieService
 import io.stereov.web.global.service.cache.AccessTokenCache
 import io.stereov.web.global.service.file.exception.model.UnsupportedMediaTypeException
-import io.stereov.web.global.service.file.service.S3FileStorage
+import io.stereov.web.global.service.file.service.FileStorage
 import io.stereov.web.global.service.hash.HashService
 import io.stereov.web.user.dto.ApplicationInfoDto
 import io.stereov.web.user.dto.UserDto
@@ -44,7 +44,7 @@ class UserSessionService(
     private val deviceService: UserDeviceService,
     private val accessTokenCache: AccessTokenCache,
     private val cookieService: CookieService,
-    private val fileStorage: S3FileStorage,
+    private val fileStorage: FileStorage,
 ) {
 
     private val logger: KLogger

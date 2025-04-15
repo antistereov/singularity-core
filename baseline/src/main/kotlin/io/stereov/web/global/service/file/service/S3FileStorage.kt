@@ -4,11 +4,12 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.web.auth.model.AccessType
 import io.stereov.web.global.service.file.model.FileMetaData
+import io.stereov.web.global.service.file.util.DataBufferPublisher
+import io.stereov.web.properties.AppProperties
 import io.stereov.web.properties.S3Properties
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.await
-import kotlinx.coroutines.reactor.awaitSingleOrNull
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.reactor.awaitSingle
+import org.springframework.core.io.buffer.DataBufferUtils
 import org.springframework.http.MediaType
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
@@ -20,7 +21,6 @@ import software.amazon.awssdk.services.s3.model.ObjectCannedACL
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import software.amazon.awssdk.services.s3.presigner.S3Presigner
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest
-import java.nio.file.Files
 import java.time.Duration
 import java.util.*
 
@@ -29,7 +29,8 @@ class S3FileStorage(
     private val s3Properties: S3Properties,
     private val s3Client: S3AsyncClient,
     private val s3Presigner: S3Presigner,
-) {
+    private val appProperties: AppProperties,
+) : FileStorage {
 
     private val logger: KLogger
         get() = KotlinLogging.logger {}
@@ -44,26 +45,37 @@ class S3FileStorage(
      *
      * @return [FileMetaData] The metadata of the resulting upload.
      */
-    suspend fun upload(userId: String, filePart: FilePart, key: String, public: Boolean): FileMetaData {
-        logger.debug { "Uploading file: ${filePart.filename()} as ${filePart.headers().contentType} to key $key" }
+    override suspend fun upload(userId: String, filePart: FilePart, key: String, public: Boolean): FileMetaData {
+        logger.debug { "Uploading file: \"${filePart.filename()}\" as ${filePart.headers().contentType}" }
 
-        val tempFile = withContext(Dispatchers.IO) {
-            Files.createTempFile("upload-", ".tmp")
-        }.toFile()
+        val appSlug = appProperties.name
+            .trim()
+            .lowercase()
+            .replace(Regex("\\s+"), "-")
+
+        val extension = filePart.filename().substringAfterLast(".", "")
+
+        val actualKey = if (extension.isBlank()) {
+            "$appSlug/$key-${UUID.randomUUID()}"
+        } else {
+            "$appSlug/$key-${UUID.randomUUID()}.$extension"
+        }
+
+        val publisher = DataBufferPublisher(filePart.content())
+
         val contentType = filePart.headers().contentType?.toString() ?: MediaType.APPLICATION_OCTET_STREAM.toString()
 
-        val actualKey = "$key-${UUID.randomUUID()}"
-
-        filePart.transferTo(tempFile).awaitSingleOrNull()
+        val contentLength = DataBufferUtils.join(filePart.content()).awaitSingle().readableByteCount()
 
         val putRequest = PutObjectRequest.builder()
             .bucket(s3Properties.bucket)
             .key(actualKey)
+            .contentLength(contentLength.toLong())
             .contentType(contentType)
             .acl(if (public) ObjectCannedACL.PUBLIC_READ else ObjectCannedACL.PRIVATE)
             .build()
 
-        val requestBody = AsyncRequestBody.fromFile(tempFile)
+        val requestBody = AsyncRequestBody.fromPublisher(publisher.toFlux())
 
         s3Client.putObject(putRequest, requestBody).await()
 
@@ -78,7 +90,7 @@ class S3FileStorage(
         )
     }
 
-    suspend fun fileExists(key: String): Boolean {
+    override suspend fun fileExists(key: String): Boolean {
         logger.debug { "Checking existence of file: $key" }
 
         return try {
@@ -89,7 +101,7 @@ class S3FileStorage(
         }
     }
 
-    suspend fun removeFile(key: String) {
+    override suspend fun removeFile(key: String) {
         logger.debug { "Removing file: $key" }
 
         s3Client.deleteObject {
@@ -97,7 +109,7 @@ class S3FileStorage(
         }.await()
     }
 
-    suspend fun removeFileIfExists(key: String): Boolean {
+    override suspend fun removeFileIfExists(key: String): Boolean {
         logger.debug { "Removing file $key if it exists" }
 
         return try {
@@ -108,20 +120,11 @@ class S3FileStorage(
         }
     }
 
-    suspend fun getFileUrl(metaData: FileMetaData): String {
-        logger.debug { "Getting URL for file ${metaData.key}" }
-
-        return when (metaData.accessType) {
-            AccessType.PUBLIC -> getPublicUrl(metaData.key)
-            AccessType.PRIVATE, AccessType.SHARED -> getPresignedUrl(metaData.key)
-        }
+    override suspend fun getPublicUrl(key: String): String {
+        return  "${s3Properties.scheme}${s3Properties.bucket}.${s3Properties.domain}/$key"
     }
 
-    private suspend fun getPublicUrl(key: String): String {
-        return  "https://${s3Properties.bucket}.${s3Properties.uri}/$key"
-    }
-
-    private suspend fun getPresignedUrl(key: String): String {
+    override suspend fun getPresignedUrl(key: String): String {
         val getObjectRequest = GetObjectRequest.builder()
             .bucket(s3Properties.bucket)
             .key(key)

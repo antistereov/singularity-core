@@ -1,6 +1,7 @@
 package io.stereov.web.config
 
 import io.stereov.web.global.service.file.service.S3FileStorage
+import io.stereov.web.properties.AppProperties
 import io.stereov.web.properties.S3Properties
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
@@ -25,7 +26,7 @@ class S3Configuration {
     @ConditionalOnMissingBean
     fun s3Client(s3Properties: S3Properties): S3AsyncClient {
         return S3AsyncClient.builder()
-            .endpointOverride(URI.create("https://${s3Properties.uri}"))
+            .endpointOverride(URI.create("${s3Properties.scheme}${s3Properties.domain}"))
             .region(s3Properties.region)
             .credentialsProvider(
                StaticCredentialsProvider.create(
@@ -43,7 +44,7 @@ class S3Configuration {
     @ConditionalOnMissingBean
     fun s3Presigner(s3Properties: S3Properties): S3Presigner {
         return S3Presigner.builder()
-            .endpointOverride(URI.create(s3Properties.uri))
+            .endpointOverride(URI.create(s3Properties.domain))
             .region(s3Properties.region)
             .credentialsProvider(StaticCredentialsProvider.create(
                 AwsBasicCredentials.create(s3Properties.accessKey, s3Properties.secretKey)
@@ -53,7 +54,7 @@ class S3Configuration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun fileStorage(s3Properties: S3Properties, s3AsyncClient: S3AsyncClient, s3Presigner: S3Presigner): S3FileStorage {
-        return S3FileStorage(s3Properties, s3AsyncClient, s3Presigner)
+    fun fileStorage(s3Properties: S3Properties, s3AsyncClient: S3AsyncClient, s3Presigner: S3Presigner, appProperties: AppProperties): S3FileStorage {
+        return S3FileStorage(s3Properties, s3AsyncClient, s3Presigner, appProperties)
     }
 }

@@ -30,10 +30,11 @@ baseline:
   file:
     storage:
       s3:
-        uri: ${S3_URI}
+        domain: ${S3_DOMAIN}
         bucket: ${S3_BUCKET}
         access-key: ${S3_ACCESS_KEY}
         secret-key: ${S3_SECRET_KEY}
+        scheme: ${S3_SCHEME}
   mail:
     enable: ${ENABLE_EMAIL:true}
     host: ${MAIL_HOST}
