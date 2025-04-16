@@ -1,6 +1,8 @@
 package io.stereov.web.global.service.encryption
 
-import io.stereov.web.properties.EncryptionProperties
+import io.stereov.web.global.service.encryption.component.KeyManager
+import io.stereov.web.global.service.encryption.exception.model.SecretKeyNotFoundException
+import io.stereov.web.global.service.encryption.model.EncryptedField
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.*
@@ -17,29 +19,45 @@ import javax.crypto.spec.SecretKeySpec
  */
 @Service
 class EncryptionService(
-    private val properties: EncryptionProperties,
+    private val keyManager: KeyManager,
 ) {
 
     private val logger = LoggerFactory.getLogger(EncryptionService::class.java)
 
-    fun encrypt(strToEncrypt: String): String {
+    fun encrypt(strToEncrypt: String): EncryptedField {
         logger.debug("Encrypting...")
 
         val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
-        val secretKeySpec = SecretKeySpec(properties.secretKey.toByteArray(), "AES")
+        val secretKeyId = keyManager.getCurrentKeyId()
+        val secretKey = keyManager.getKeyById(secretKeyId)
+
+        val secretKeySpec = SecretKeySpec(secretKey.toByteArray(), "AES")
         cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec)
         val encrypted = cipher.doFinal(strToEncrypt.toByteArray())
-        return Base64.getUrlEncoder().encodeToString(encrypted)
+
+        val encryptedString = Base64.getUrlEncoder().encodeToString(encrypted)
+
+        return EncryptedField(secretKeyId, encryptedString)
     }
 
-    fun decrypt(strToDecrypt: String): String {
+    fun decrypt(fieldToDecrypt: EncryptedField): String {
         logger.debug("Decrypting...")
 
         val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
-        val secretKeySpec = SecretKeySpec(properties.secretKey.toByteArray(), "AES")
+        val secretKey = keyManager.getKeyById(fieldToDecrypt.keyId)
+            ?: throw SecretKeyNotFoundException(fieldToDecrypt.keyId)
+
+        val secretKeySpec = SecretKeySpec(secretKey.toByteArray(), "AES")
         cipher.init(Cipher.DECRYPT_MODE, secretKeySpec)
-        val decrypted = cipher.doFinal(Base64.getUrlDecoder().decode(strToDecrypt))
+        val decrypted = cipher.doFinal(Base64.getUrlDecoder().decode(fieldToDecrypt.data))
+
         return String(decrypted)
+    }
+
+    fun matches(input: String, encrypted: EncryptedField): Boolean {
+        val decrypted = decrypt(encrypted)
+
+        return input == decrypted
     }
 
 }
