@@ -1,6 +1,7 @@
 package io.stereov.web.user.model
 
-import io.stereov.web.global.service.random.RandomService
+import io.stereov.web.global.service.encryption.model.EncryptedField
+import io.stereov.web.global.service.hash.model.HashedField
 
 /**
  * # UserSecurityDetails
@@ -28,8 +29,8 @@ data class UserSecurityDetails(
      */
     data class TwoFactorDetails(
         var enabled: Boolean = false,
-        var secret: String? = null,
-        var recoveryCodes: MutableList<String> = mutableListOf()
+        var secret: EncryptedField? = null,
+        var recoveryCodes: MutableList<HashedField> = mutableListOf()
     )
 
     /**
@@ -43,7 +44,7 @@ data class UserSecurityDetails(
      */
     data class MailVerificationDetails(
         var verified: Boolean = false,
-        var verificationSecret: String = RandomService.generateCode(20),
-        var passwordResetSecret: String = RandomService.generateCode(20),
+        var verificationSecret: EncryptedField? = null,
+        var passwordResetSecret: EncryptedField? = null,
     )
 }

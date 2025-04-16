@@ -1,6 +1,7 @@
 package io.stereov.web.config
 
 import io.stereov.web.auth.service.AuthenticationService
+import io.stereov.web.global.service.encryption.EncryptionService
 import io.stereov.web.global.service.hash.HashService
 import io.stereov.web.global.service.jwt.JwtService
 import io.stereov.web.global.service.mail.MailCooldownService
@@ -14,7 +15,6 @@ import io.stereov.web.user.service.UserService
 import io.stereov.web.user.service.mail.UserMailService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
 import org.springframework.boot.autoconfigure.data.web.SpringDataWebAutoConfiguration
 import org.springframework.boot.autoconfigure.mongo.MongoReactiveAutoConfiguration
@@ -54,7 +54,6 @@ import org.springframework.mail.javamail.JavaMailSenderImpl
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
 @Configuration
-@ConditionalOnProperty(prefix = "baseline.mail", name = ["enable"], havingValue = "true", matchIfMissing = false)
 @AutoConfiguration(
     after = [
         ApplicationConfiguration::class,
@@ -90,8 +89,9 @@ class MailConfiguration {
         uiProperties: UiProperties,
         mailCooldownService: MailCooldownService,
         mailTokenService: MailTokenService,
+        encryptionService: EncryptionService
     ): MailService {
-        return MailService(mailSender, mailProperties, uiProperties, mailCooldownService, mailTokenService)
+        return MailService(mailSender, mailProperties, uiProperties, mailCooldownService, mailTokenService, encryptionService)
     }
 
     @Bean
@@ -120,9 +120,10 @@ class MailConfiguration {
         mailCooldownService: MailCooldownService,
         mailService: MailService,
         mailTokenService: MailTokenService,
-        hashService: HashService
+        hashService: HashService,
+        encryptionService: EncryptionService
     ): UserMailService {
-        return UserMailService(userService, authenticationService, mailCooldownService, mailService, mailTokenService, hashService)
+        return UserMailService(userService, authenticationService, mailCooldownService, mailService, mailTokenService, hashService, encryptionService)
     }
 
     // Controller

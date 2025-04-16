@@ -3,11 +3,11 @@ package io.stereov.web.user.controller
 import io.mockk.verify
 import io.stereov.web.config.Constants
 import io.stereov.web.global.service.mail.MailTokenService
-import io.stereov.web.test.BaseMailIntegrationTest
+import io.stereov.web.test.BaseIntegrationTest
 import io.stereov.web.user.dto.request.DeviceInfoRequest
 import io.stereov.web.user.dto.request.LoginRequest
-import io.stereov.web.user.dto.response.MailCooldownResponse
 import io.stereov.web.user.dto.request.ResetPasswordRequest
+import io.stereov.web.user.dto.response.MailCooldownResponse
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -15,14 +15,14 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.mail.SimpleMailMessage
 import java.time.Instant
 
-class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
+class UserMailControllerIntegrationTest : BaseIntegrationTest() {
 
     @Autowired
     private lateinit var mailTokenService: MailTokenService
 
     @Test fun `verifyEmail works`() = runTest {
         val user = registerUser()
-        val token = mailTokenService.createVerificationToken(user.info.email, user.info.security.mail.verificationSecret)
+        val token = mailTokenService.createVerificationToken(user.info.email, user.mailVerificationSecret)
 
         assertFalse(user.info.security.mail.verified)
 
@@ -49,7 +49,7 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
     }
     @Test fun `verifyEmail requires unexpired token`() = runTest {
         val user = registerUser()
-        val token = mailTokenService.createVerificationToken(user.info.email, user.info.security.mail.verificationSecret, Instant.ofEpochSecond(0))
+        val token = mailTokenService.createVerificationToken(user.info.email, user.mailVerificationSecret, Instant.ofEpochSecond(0))
 
         webTestClient.post()
             .uri("/user/mail/verify?token=$token")
@@ -116,7 +116,7 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
 
     @Test fun `resetPassword works`() = runTest {
         val user = registerUser()
-        val token = mailTokenService.createPasswordResetToken(user.info.id, user.info.security.mail.passwordResetSecret)
+        val token = mailTokenService.createPasswordResetToken(user.info.id, user.passwordResetSecret)
 
         assertFalse(user.info.security.mail.verified)
 
@@ -162,7 +162,7 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
     }
     @Test fun `resetPassword requires unexpired token`() = runTest {
         val user = registerUser()
-        val token = mailTokenService.createPasswordResetToken(user.info.email, user.info.security.mail.passwordResetSecret, Instant.ofEpochSecond(0))
+        val token = mailTokenService.createPasswordResetToken(user.info.email, user.passwordResetSecret, Instant.ofEpochSecond(0))
 
         val req = ResetPasswordRequest("Test")
 
@@ -174,7 +174,7 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
     }
     @Test fun `resetPassword needs body`() = runTest {
         val user = registerUser()
-        val token = mailTokenService.createPasswordResetToken(user.info.email, user.info.security.mail.passwordResetSecret)
+        val token = mailTokenService.createPasswordResetToken(user.info.email, user.passwordResetSecret)
 
 
         webTestClient.post()

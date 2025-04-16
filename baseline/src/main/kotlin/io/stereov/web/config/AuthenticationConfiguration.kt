@@ -15,6 +15,7 @@ import io.stereov.web.global.service.geolocation.GeoLocationService
 import io.stereov.web.global.service.hash.HashService
 import io.stereov.web.global.service.jwt.JwtService
 import io.stereov.web.global.service.jwt.exception.handler.TokenExceptionHandler
+import io.stereov.web.global.service.mail.MailService
 import io.stereov.web.global.service.ratelimit.RateLimitService
 import io.stereov.web.global.service.twofactorauth.TwoFactorAuthService
 import io.stereov.web.properties.*
@@ -108,11 +109,11 @@ class AuthenticationConfiguration {
         appProperties: AppProperties,
         geoLocationService: GeoLocationService,
         userService: UserService,
-        twoFactorAuthService: TwoFactorAuthService,
         twoFactorAuthTokenService: TwoFactorAuthTokenService,
-        authenticationService: AuthenticationService
+        authenticationService: AuthenticationService,
+        twoFactorAuthService: TwoFactorAuthService
     ): CookieService {
-        return CookieService(userTokenService, jwtProperties, appProperties, geoLocationService, userService, twoFactorAuthService, twoFactorAuthTokenService, authenticationService)
+        return CookieService(userTokenService, jwtProperties, appProperties, geoLocationService, userService, twoFactorAuthTokenService, authenticationService, twoFactorAuthService)
     }
 
     @Bean
@@ -170,8 +171,8 @@ class AuthenticationConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun twoFactorAuthTokenService(jwtService: JwtService, jwtProperties: JwtProperties, authenticationService: AuthenticationService): TwoFactorAuthTokenService {
-        return TwoFactorAuthTokenService(jwtService, jwtProperties, authenticationService)
+    fun twoFactorAuthTokenService(jwtService: JwtService, jwtProperties: JwtProperties, authenticationService: AuthenticationService, twoFactorAuthService: TwoFactorAuthService, hashService: HashService): TwoFactorAuthTokenService {
+        return TwoFactorAuthTokenService(jwtService, jwtProperties, authenticationService, twoFactorAuthService, hashService)
     }
 
     @Bean
@@ -215,7 +216,9 @@ class AuthenticationConfiguration {
         deviceService: UserDeviceService,
         accessTokenCache: AccessTokenCache,
         cookieService: CookieService,
-        fileStorage: FileStorage
+        fileStorage: FileStorage,
+        mailService: MailService,
+        encryptionService: EncryptionService
     ): UserSessionService {
         return UserSessionService(
             userService,
@@ -224,7 +227,9 @@ class AuthenticationConfiguration {
             deviceService,
             accessTokenCache,
             cookieService,
-            fileStorage
+            fileStorage,
+            mailService,
+            encryptionService
         )
     }
 
@@ -234,9 +239,10 @@ class AuthenticationConfiguration {
     @ConditionalOnMissingBean
     fun userTwoFactorAuthController(
         userTwoFactorAuthService: UserTwoFactorAuthService,
-        cookieService: CookieService
+        cookieService: CookieService,
+        authenticationService: AuthenticationService
     ): UserTwoFactorAuthController {
-        return UserTwoFactorAuthController(userTwoFactorAuthService, cookieService)
+        return UserTwoFactorAuthController(userTwoFactorAuthService, cookieService, authenticationService)
     }
 
     @Bean

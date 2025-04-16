@@ -3,12 +3,12 @@ package io.stereov.web
 import io.stereov.web.global.service.mail.MailService
 import io.stereov.web.global.service.mail.MailTokenService
 import io.stereov.web.properties.MailProperties
-import io.stereov.web.test.BaseMailIntegrationTest
+import io.stereov.web.test.BaseIntegrationTest
 import io.stereov.web.user.controller.UserMailController
 import io.stereov.web.user.service.mail.UserMailService
 import org.junit.jupiter.api.Test
 
-class ApplicationStartupTest : BaseMailIntegrationTest() {
+class ApplicationStartupTest : BaseIntegrationTest() {
 
     @Test
     fun `application context loads`() {}

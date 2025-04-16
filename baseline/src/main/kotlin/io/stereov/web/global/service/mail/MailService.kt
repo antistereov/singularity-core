@@ -2,11 +2,12 @@ package io.stereov.web.global.service.mail
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.web.global.service.encryption.EncryptionService
 import io.stereov.web.global.service.mail.exception.model.MailCooldownException
 import io.stereov.web.properties.MailProperties
 import io.stereov.web.properties.UiProperties
+import io.stereov.web.user.exception.model.InvalidUserDocumentException
 import io.stereov.web.user.model.UserDocument
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.stereotype.Service
@@ -21,13 +22,13 @@ import org.springframework.stereotype.Service
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
 @Service
-@ConditionalOnProperty(prefix = "baseline.mail", name = ["enable"], havingValue = "true", matchIfMissing = false)
 class MailService(
     private val mailSender: JavaMailSender,
     private val mailProperties: MailProperties,
     private val uiProperties: UiProperties,
     private val mailCooldownService: MailCooldownService,
     private val mailTokenService: MailTokenService,
+    private val encryptionService: EncryptionService,
 ) {
 
     private val logger: KLogger
@@ -47,7 +48,11 @@ class MailService(
             throw MailCooldownException(mailCooldownService.getRemainingVerificationCooldown(userId))
         }
 
-        val token = mailTokenService.createVerificationToken(user.email, user.security.mail.verificationSecret)
+        val encryptedSecret = user.security.mail.verificationSecret
+            ?: throw InvalidUserDocumentException("No email verification secret found")
+        val secret = encryptionService.decrypt(encryptedSecret)
+
+        val token = mailTokenService.createVerificationToken(user.email, secret)
         val verificationUrl = generateVerificationUrl(token)
         val message = SimpleMailMessage()
         message.from = mailProperties.email
@@ -83,7 +88,11 @@ class MailService(
             throw MailCooldownException(mailCooldownService.getRemainingPasswordResetCooldown(userId))
         }
 
-        val token = mailTokenService.createPasswordResetToken(user.id, user.security.mail.passwordResetSecret)
+        val encryptedSecret = user.security.mail.passwordResetSecret
+            ?: throw InvalidUserDocumentException("No password reset secret saved for user")
+        val secret = encryptionService.decrypt(encryptedSecret)
+
+        val token = mailTokenService.createPasswordResetToken(user.id, secret)
         val passwordResetUrl = generatePasswordResetUrl(token)
         val message = SimpleMailMessage()
         message.from = mailProperties.email

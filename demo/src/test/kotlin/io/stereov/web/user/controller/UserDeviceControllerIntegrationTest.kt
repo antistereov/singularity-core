@@ -1,7 +1,7 @@
 package io.stereov.web.user.controller
 
-import io.stereov.web.test.BaseIntegrationTest
 import io.stereov.web.config.Constants
+import io.stereov.web.test.BaseIntegrationTest
 import io.stereov.web.user.dto.response.DeviceInfoResponse
 import io.stereov.web.user.model.DeviceInfo
 import kotlinx.coroutines.test.runTest

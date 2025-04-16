@@ -16,7 +16,9 @@ class KeyManager {
 
     @PostConstruct
     fun initializeKeysFromEnv() {
-        System.getenv().forEach { (id, value) ->
+        logger.debug { "Initializing secret keys from environment variables" }
+
+        System.getenv().forEach { (id, _) ->
             if (id.startsWith("SECRET_KEY_ID_")) {
                 val parts = id.split("_")
                 if (parts.size == 4) {
@@ -36,11 +38,15 @@ class KeyManager {
     }
 
     fun getCurrentKeyId(): String {
+        logger.debug { "Getting ID of current encryption key" }
+
         return System.getenv("CURRENT_SECRET_KEY")
             ?: throw NoSecurityKeySetException()
     }
 
     fun getKeyById(keyId: String): String {
+        logger.debug { "Getting encryption key by ID $keyId" }
+
         return keys[keyId]
             ?: throw SecretKeyNotFoundException(keyId)
     }

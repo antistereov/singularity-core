@@ -1,7 +1,7 @@
 package io.stereov.web.config
 
 import io.stereov.web.global.service.encryption.EncryptionService
-import io.stereov.web.properties.EncryptionProperties
+import io.stereov.web.global.service.encryption.component.KeyManager
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
@@ -35,7 +35,13 @@ class EncryptionConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun encryptionService(encryptionProperties: EncryptionProperties): EncryptionService {
-        return EncryptionService(encryptionProperties)
+    fun keyManager(): KeyManager {
+        return KeyManager()
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun encryptionService(keyManager: KeyManager): EncryptionService {
+        return EncryptionService(keyManager)
     }
 }

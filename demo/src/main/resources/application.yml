@@ -36,7 +36,6 @@ baseline:
         secret-key: ${S3_SECRET_KEY}
         scheme: ${S3_SCHEME}
   mail:
-    enable: ${ENABLE_EMAIL:true}
     host: ${MAIL_HOST}
     port: ${MAIL_PORT}
     email: ${MAIL_EMAIL}

@@ -2,7 +2,9 @@ package io.stereov.web.user.model
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.web.global.service.encryption.model.EncryptedField
 import io.stereov.web.global.service.file.model.FileMetaData
+import io.stereov.web.global.service.hash.model.HashedField
 import io.stereov.web.user.dto.UserDto
 import io.stereov.web.user.exception.model.InvalidUserDocumentException
 import org.springframework.data.annotation.Id
@@ -35,13 +37,14 @@ data class UserDocument(
     @Id val _id: String? = null,
     @Indexed(unique = true) var email: String,
     var name: String? = null,
-    var password: String,
+    var password: HashedField,
     val roles: MutableList<Role> = mutableListOf(Role.USER),
     val security: UserSecurityDetails = UserSecurityDetails(),
     val devices: MutableList<DeviceInfo> = mutableListOf(),
     var lastActive: Instant = Instant.now(),
     var app: ApplicationInfo? = null,
     var avatar: FileMetaData? = null,
+    val created: Instant = Instant.now()
 ) {
 
     @get:Transient
@@ -97,7 +100,8 @@ data class UserDocument(
             lastActive.toString(),
             security.twoFactor.enabled,
             app?.toDto(),
-            avatar
+            avatar,
+            created.toString(),
         )
     }
 
@@ -111,7 +115,7 @@ data class UserDocument(
      *
      * @return The updated [UserDocument].
      */
-    fun setupTwoFactorAuth(secret: String, recoveryCodes: List<String>): UserDocument {
+    fun setupTwoFactorAuth(secret: EncryptedField, recoveryCodes: List<HashedField>): UserDocument {
         logger.debug { "Setting up two factor authentication" }
 
         this.security.twoFactor.enabled = true

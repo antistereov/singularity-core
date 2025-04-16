@@ -151,13 +151,6 @@
       "description": "The email address used to send emails. This is the 'from' address."
     },
     {
-      "name": "baseline.mail.enable",
-      "type": "java.lang.Boolean",
-      "sourceType": "io.stereov.web.properties.MailProperties",
-      "defaultValue": false,
-      "description": "Enable or disable email sending. Default is false."
-    },
-    {
       "name": "baseline.mail.host",
       "type": "java.lang.String",
       "sourceType": "io.stereov.web.properties.MailProperties",

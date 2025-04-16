@@ -75,10 +75,8 @@ class UserSessionController(
                 .body(LoginResponse(true, user.toDto()))
         }
 
-        val ipAddress = exchange.request.remoteAddress?.address?.hostAddress
-
         val accessTokenCookie = cookieService.createAccessTokenCookie(user.id, payload.device.id)
-        val refreshTokenCookie = cookieService.createRefreshTokenCookie(user.id, payload.device, ipAddress)
+        val refreshTokenCookie = cookieService.createRefreshTokenCookie(user.id, payload.device, exchange)
 
         return ResponseEntity.ok()
             .header("Set-Cookie", accessTokenCookie.toString())
@@ -96,16 +94,15 @@ class UserSessionController(
     @PostMapping("/register")
     suspend fun register(
         exchange: ServerWebExchange,
-        @RequestBody @Valid payload: RegisterUserRequest
+        @RequestBody @Valid payload: RegisterUserRequest,
+        @RequestParam("send-email") sendEmail: Boolean = true,
     ): ResponseEntity<UserDto> {
         logger.info { "Executing register" }
 
-        val user = userSessionService.registerAndGetUser(payload)
-
-        val ipAddress = exchange.request.remoteAddress?.address?.hostAddress
+        val user = userSessionService.registerAndGetUser(payload, sendEmail)
 
         val accessTokenCookie = cookieService.createAccessTokenCookie(user.id, payload.device.id)
-        val refreshTokenCookie = cookieService.createRefreshTokenCookie(user.id, payload.device, ipAddress)
+        val refreshTokenCookie = cookieService.createRefreshTokenCookie(user.id, payload.device, exchange)
 
         return ResponseEntity.ok()
             .header("Set-Cookie", accessTokenCookie.toString())
@@ -241,13 +238,11 @@ class UserSessionController(
     ): ResponseEntity<UserDto> {
         logger.debug { "Refreshing token" }
 
-        val ipAddress = exchange.request.remoteAddress?.address?.hostAddress
-
         val userDto = cookieService.validateRefreshTokenAndGetUserDto(exchange, deviceInfoDto.id)
         val userId = userDto.id
 
         val newAccessToken = cookieService.createAccessTokenCookie(userId, deviceInfoDto.id)
-        val newRefreshToken = cookieService.createRefreshTokenCookie(userId, deviceInfoDto, ipAddress)
+        val newRefreshToken = cookieService.createRefreshTokenCookie(userId, deviceInfoDto, exchange)
 
         return ResponseEntity.ok()
             .header("Set-Cookie", newAccessToken.toString())

@@ -1,7 +1,7 @@
 package io.stereov.web.global.service.cache
 
-import io.stereov.web.test.BaseIntegrationTest
 import io.stereov.web.global.service.cache.exception.model.RedisKeyNotFoundException
+import io.stereov.web.test.BaseIntegrationTest
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*

@@ -4,6 +4,7 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.web.auth.exception.AuthException
 import io.stereov.web.auth.service.AuthenticationService
+import io.stereov.web.global.service.encryption.EncryptionService
 import io.stereov.web.global.service.hash.HashService
 import io.stereov.web.global.service.mail.MailCooldownService
 import io.stereov.web.global.service.mail.MailService
@@ -12,8 +13,8 @@ import io.stereov.web.global.service.random.RandomService
 import io.stereov.web.user.dto.UserDto
 import io.stereov.web.user.dto.request.ResetPasswordRequest
 import io.stereov.web.user.dto.response.MailCooldownResponse
+import io.stereov.web.user.exception.model.InvalidUserDocumentException
 import io.stereov.web.user.service.UserService
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
 
 /**
@@ -25,14 +26,14 @@ import org.springframework.stereotype.Service
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
 @Service
-@ConditionalOnProperty(prefix = "baseline.mail", name = ["enable"], havingValue = "true", matchIfMissing = false)
 class UserMailService(
     private val userService: UserService,
     private val authenticationService: AuthenticationService,
     private val mailCooldownService: MailCooldownService,
     private val mailService: MailService,
     private val mailTokenService: MailTokenService,
-    private val hashService: HashService
+    private val hashService: HashService,
+    private val encryptionService: EncryptionService
 ) {
 
     private val logger: KLogger
@@ -53,7 +54,10 @@ class UserMailService(
         val verificationToken = mailTokenService.validateAndExtractVerificationToken(token)
         val user = userService.findByEmail(verificationToken.email)
 
-        return if (user.security.mail.verificationSecret == verificationToken.secret) {
+        val savedSecret = user.security.mail.verificationSecret
+            ?: throw InvalidUserDocumentException("No email verification secret found")
+
+        return if (encryptionService.matches(verificationToken.secret, savedSecret)) {
             user.security.mail.verified = true
             userService.save(user).toDto()
         } else {
@@ -109,13 +113,16 @@ class UserMailService(
         val resetToken = mailTokenService.validateAndExtractPasswordResetToken(token)
         val user = userService.findById(resetToken.userId)
 
-        val tokenIsValid = (user.security.mail.passwordResetSecret == resetToken.secret)
+        val savedSecret = user.security.mail.passwordResetSecret
+            ?: throw InvalidUserDocumentException("No passwort reset secret found for user")
+
+        val tokenIsValid = encryptionService.matches(resetToken.secret, savedSecret)
 
         if (!tokenIsValid) {
             throw AuthException("Password request secret does not match")
         }
 
-        user.security.mail.passwordResetSecret = RandomService.generateCode(20)
+        user.security.mail.passwordResetSecret = encryptionService.encrypt(RandomService.generateCode(20))
         user.password = hashService.hashBcrypt(req.newPassword)
         userService.save(user)
     }

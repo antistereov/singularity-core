@@ -1,12 +1,15 @@
 package io.stereov.web.user.controller
 
 import io.stereov.web.auth.exception.model.TwoFactorAuthDisabledException
+import io.stereov.web.auth.service.AuthenticationService
 import io.stereov.web.auth.service.CookieService
+import io.stereov.web.global.model.SuccessResponse
 import io.stereov.web.global.service.jwt.exception.TokenException
 import io.stereov.web.user.dto.UserDto
 import io.stereov.web.user.dto.request.DeviceInfoRequest
 import io.stereov.web.user.dto.request.DisableTwoFactorRequest
-import io.stereov.web.user.dto.request.TwoFactorSetupRequest
+import io.stereov.web.user.dto.request.TwoFactorStartSetupRequest
+import io.stereov.web.user.dto.request.TwoFactorVerifySetupRequest
 import io.stereov.web.user.dto.response.TwoFactorSetupResponse
 import io.stereov.web.user.dto.response.TwoFactorStatusResponse
 import io.stereov.web.user.service.twofactor.UserTwoFactorAuthService
@@ -29,18 +32,28 @@ import org.springframework.web.server.ServerWebExchange
 class UserTwoFactorAuthController(
     private val twoFactorService: UserTwoFactorAuthService,
     private val cookieService: CookieService,
+    private val authenticationService: AuthenticationService,
 ) {
 
+    @PostMapping("/start-setup")
+    suspend fun startTwoFactorAuthSetup(@RequestBody req: TwoFactorStartSetupRequest): ResponseEntity<SuccessResponse> {
+        val setupCookie = cookieService.createTwoFactorSetupCookie(req)
+
+        return ResponseEntity.ok()
+            .header("Set-Cookie", setupCookie.toString())
+            .body(SuccessResponse(true))
+    }
+
     @GetMapping("/setup")
-    suspend fun setupTwoFactorAuth(): ResponseEntity<TwoFactorSetupResponse> {
-        val res = twoFactorService.setUpTwoFactorAuth()
+    suspend fun setupTwoFactorAuth(exchange: ServerWebExchange): ResponseEntity<TwoFactorSetupResponse> {
+        val res = twoFactorService.setUpTwoFactorAuth(exchange)
 
         return ResponseEntity.ok().body(res)
     }
 
     @PostMapping("/setup")
     suspend fun validateTwoFactorSetup(
-        @RequestBody setupRequest: TwoFactorSetupRequest
+        @RequestBody setupRequest: TwoFactorVerifySetupRequest
     ): ResponseEntity<UserDto> {
         return ResponseEntity.ok(
             twoFactorService.validateSetup(setupRequest.token, setupRequest.code)
@@ -54,12 +67,11 @@ class UserTwoFactorAuthController(
         @RequestBody device: DeviceInfoRequest
     ): ResponseEntity<UserDto> {
         val user = twoFactorService.recoverUser(exchange, code)
-        val ipAddress = exchange.request.remoteAddress?.address?.hostAddress
 
         val clearTwoFactorCookie = cookieService.clearLoginVerificationCookie()
         val accessTokenCookie = cookieService.createAccessTokenCookie(user.id, device.id)
-        val refreshTokenCookie = cookieService.createRefreshTokenCookie(user.id, device, ipAddress)
-        val stepUpTokenCookie = cookieService.createStepUpCookie(user.id, device.id)
+        val refreshTokenCookie = cookieService.createRefreshTokenCookie(user.id, device, exchange)
+        val stepUpTokenCookie = cookieService.createStepUpCookieForRecovery(user.id, device.id, exchange)
 
         return ResponseEntity.ok()
             .header("Set-Cookie", clearTwoFactorCookie.toString())
@@ -77,10 +89,8 @@ class UserTwoFactorAuthController(
     ): ResponseEntity<UserDto> {
         val user = twoFactorService.validateTwoFactorCode(exchange, code)
 
-        val ipAddress = exchange.request.remoteAddress?.address?.hostAddress
-
         val accessTokenCookie = cookieService.createAccessTokenCookie(user.id, device.id)
-        val refreshTokenCookie = cookieService.createRefreshTokenCookie(user.id, device, ipAddress)
+        val refreshTokenCookie = cookieService.createRefreshTokenCookie(user.id, device, exchange)
 
         val clearTwoFactorCookie = cookieService.clearLoginVerificationCookie()
         return ResponseEntity.ok()
@@ -112,12 +122,13 @@ class UserTwoFactorAuthController(
      * @return A response indicating the success of the operation.
      */
     @PostMapping("/verify-step-up")
-    suspend fun setStepUp(@RequestParam code: Int): ResponseEntity<TwoFactorStatusResponse> {
+    suspend fun setStepUp(@RequestParam code: Int, exchange: ServerWebExchange): ResponseEntity<UserDto> {
+        val user = authenticationService.getCurrentUser()
         val stepUpTokenCookie = cookieService.createStepUpCookie(code)
 
         return ResponseEntity.ok()
             .header("Set-Cookie", stepUpTokenCookie.toString())
-            .body(TwoFactorStatusResponse(true))
+            .body(user.toDto())
     }
 
     /**

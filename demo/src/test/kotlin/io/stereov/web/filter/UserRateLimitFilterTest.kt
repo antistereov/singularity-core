@@ -81,8 +81,4 @@ class UserRateLimitFilterTest : BaseSpringBootTest() {
             .exchange()
             .expectStatus().isEqualTo(HttpStatus.TOO_MANY_REQUESTS)
     }
-
-    @Test fun `ip rate limit works`() {
-
-    }
 }

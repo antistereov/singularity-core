@@ -3,11 +3,10 @@ package io.stereov.web.test
 import com.warrenstrange.googleauth.GoogleAuthenticator
 import io.mockk.every
 import io.stereov.web.config.Constants
+import io.stereov.web.global.service.encryption.EncryptionService
 import io.stereov.web.test.config.MockConfig
-import io.stereov.web.user.dto.request.DeviceInfoRequest
-import io.stereov.web.user.dto.request.LoginRequest
-import io.stereov.web.user.dto.request.RegisterUserRequest
-import io.stereov.web.user.dto.request.TwoFactorSetupRequest
+import io.stereov.web.test.config.MockKeyManager
+import io.stereov.web.user.dto.request.*
 import io.stereov.web.user.dto.response.TwoFactorSetupResponse
 import io.stereov.web.user.model.UserDocument
 import io.stereov.web.user.service.UserService
@@ -20,8 +19,11 @@ import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.returnResult
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Import(MockConfig::class)
+@Import(MockConfig::class, MockKeyManager::class)
 class BaseSpringBootTest {
+
+    @Autowired
+    private lateinit var encryptionService: EncryptionService
 
     @Autowired
     lateinit var webTestClient: WebTestClient
@@ -51,6 +53,9 @@ class BaseSpringBootTest {
         val twoFactorToken: String?,
         val twoFactorSecret: String?,
         val twoFactorRecovery: String?,
+        val twoFactorSetupToken: String?,
+        val mailVerificationSecret: String,
+        val passwordResetSecret: String,
     )
 
     suspend fun registerUser(
@@ -62,7 +67,7 @@ class BaseSpringBootTest {
         val device = DeviceInfoRequest(id = deviceId)
 
         var responseCookies = webTestClient.post()
-            .uri("/user/register")
+            .uri("/user/register?send-email=false")
             .bodyValue(RegisterUserRequest(email = email, password = password, device = device))
             .exchange()
             .expectStatus().isOk
@@ -78,10 +83,28 @@ class BaseSpringBootTest {
         var twoFactorToken: String? = null
         var twoFactorRecovery: String? = null
         var twoFactorSecret: String? = null
+        var twoFactorStartSetupToken: String? = null
 
         if (twoFactorEnabled) {
+            val twoFactorSetupStartRes = webTestClient.post()
+                .uri("/user/2fa/start-setup")
+                .cookie(Constants.ACCESS_TOKEN_COOKIE, accessToken)
+                .bodyValue(TwoFactorStartSetupRequest(password))
+                .exchange()
+                .expectStatus().isOk
+                .expectBody()
+                .returnResult()
+                .responseCookies[Constants.TWO_FACTOR_SETUP_TOKEN_COOKIE]?.firstOrNull()?.value
+
+            requireNotNull(twoFactorSetupStartRes)
+
+            twoFactorStartSetupToken = twoFactorSetupStartRes
+
+
+
             val twoFactorRes = webTestClient.get()
                 .uri("/user/2fa/setup")
+                .cookie(Constants.TWO_FACTOR_SETUP_TOKEN_COOKIE, twoFactorStartSetupToken)
                 .cookie(Constants.ACCESS_TOKEN_COOKIE, accessToken)
                 .exchange()
                 .expectStatus().isOk
@@ -95,7 +118,7 @@ class BaseSpringBootTest {
 
             requireNotNull(twoFactorVerifyToken)
 
-            val twoFactorSetupReq = TwoFactorSetupRequest(
+            val twoFactorSetupReq = TwoFactorVerifySetupRequest(
                 twoFactorVerifyToken,
                 gAuth.getTotpPassword(twoFactorSecret)
             )
@@ -113,14 +136,14 @@ class BaseSpringBootTest {
                 .exchange()
                 .expectStatus().isOk
                 .returnResult<Void>()
-                .responseCookies[Constants.LOGIN_VERIFICATION_TOKEN]
+                .responseCookies[Constants.LOGIN_VERIFICATION_TOKEN_COOKIE]
                 ?.firstOrNull()
                 ?.value
 
             responseCookies = webTestClient.post()
                 .uri("/user/2fa/verify-login?code=${gAuth.getTotpPassword(twoFactorSecret)}")
                 .bodyValue(DeviceInfoRequest(deviceId))
-                .cookie(Constants.LOGIN_VERIFICATION_TOKEN, twoFactorToken!!)
+                .cookie(Constants.LOGIN_VERIFICATION_TOKEN_COOKIE, twoFactorToken!!)
                 .exchange()
                 .expectStatus().isOk
                 .returnResult<Void>()
@@ -137,7 +160,10 @@ class BaseSpringBootTest {
         val user = userService.findByEmailOrNull(email)
         requireNotNull(user) { "User associated to $email not saved" }
 
-        return TestRegisterResponse(user, accessToken, refreshToken, twoFactorToken, twoFactorSecret, twoFactorRecovery)
+        val mailVerificationToken = encryptionService.decrypt(user.security.mail.verificationSecret!!)
+        val passwordResetToken = encryptionService.decrypt(user.security.mail.passwordResetSecret!!)
+
+        return TestRegisterResponse(user, accessToken, refreshToken, twoFactorToken, twoFactorSecret, twoFactorRecovery, twoFactorStartSetupToken, mailVerificationToken, passwordResetToken)
     }
 
     suspend fun deleteAccount(response: TestRegisterResponse) {

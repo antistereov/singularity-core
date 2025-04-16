@@ -250,16 +250,13 @@ Here are the key properties you need to set in your `application.yaml`:
 
 - **Email Settings:**
    
-    You can enable emails.
-    This is needed to allow recovery when the user forgets their password. 
+    Emails are needed to allow recovery when the user forgets their password. 
     To activate, you need to configure your own SMTP server.
     The server will send the user an email with a link to verify their email address on register
     and can email the user to recover the user account it the password is lost.
     ```yaml
     baseline:
       mail:
-        # Enable email verification and password reset - false on default
-        enable: true 
         # Credentials for your smtp server
         host: <smtp_host>
         port: <smtp_port>
@@ -286,21 +283,23 @@ Here are the key properties you need to set in your `application.yaml`:
         # The path to the password reset page in the UI
         ui-password-reset-path: /auth/password-reset
     ```
-    This is optional. You can enable email verification by setting `enable-verification` to true. 
-    By default, it is set to `false`.
     
     **Note:** Password resets are not possible without email verification.
 
 - **File Settings:**
 
-    Configure how and where files should be saved.
+    Configure how and where files should be saved. You need an S3-compatible instance.
   
     ```yaml
     baseline:
       file:
-        # The base path where all your files should be saved
-        # Default is file:/opt/app/uploads
-        base-path: file:/opt/app/uploads #or s3://my-bucket-name/uploads
+        storage:
+          s3:
+            domain: your.s3.domain.com
+            bucket: your-bucket
+            access-key: <your-access-key>
+            secret-key: <your-secret-key>
+            scheme: https
     ```
 
 ## Service Overview
@@ -390,6 +389,7 @@ These endpoints are used for managing two-factor authentication (2FA) for user a
 They provide a secure way to enhance user account security.
 The related class is [`UserTwoFactorAuthController`](baseline/src/main/kotlin/io/stereov/web/user/controller/UserTwoFactorAuthController.kt).
 
+- **GET /user/2fa/start-setup**: Sets a token that enables the 2FA setup.
 - **GET /user/2fa/setup**: Retrieves the setup information for two-factor authentication.
 - **POST /user/2fa/setup**: Set up two-factor authentication for the user.
 - **POST /user/2fa/verify-login**: Verifies the user's 2FA code and logs in the user.

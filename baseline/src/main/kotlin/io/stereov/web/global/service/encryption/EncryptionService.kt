@@ -1,7 +1,6 @@
 package io.stereov.web.global.service.encryption
 
 import io.stereov.web.global.service.encryption.component.KeyManager
-import io.stereov.web.global.service.encryption.exception.model.SecretKeyNotFoundException
 import io.stereov.web.global.service.encryption.model.EncryptedField
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -45,7 +44,6 @@ class EncryptionService(
 
         val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
         val secretKey = keyManager.getKeyById(fieldToDecrypt.keyId)
-            ?: throw SecretKeyNotFoundException(fieldToDecrypt.keyId)
 
         val secretKeySpec = SecretKeySpec(secretKey.toByteArray(), "AES")
         cipher.init(Cipher.DECRYPT_MODE, secretKeySpec)

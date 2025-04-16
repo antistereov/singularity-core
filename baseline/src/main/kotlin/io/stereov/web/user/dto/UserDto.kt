@@ -39,4 +39,5 @@ data class UserDto(
     val twoFactorAuthEnabled: Boolean,
     val app: ApplicationInfoDto?,
     val avatar: FileMetaData?,
+    val created: String,
 )

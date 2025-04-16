@@ -1,13 +1,20 @@
 package io.stereov.web.global.service.encryption
 
-import io.stereov.web.properties.EncryptionProperties
+import io.stereov.web.test.config.MockKeyManager
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class EncryptionServiceTest {
 
-    private val encryptionProperties = EncryptionProperties("3eJAiq7XBjMc5AXkCwsjbA==")
-    private val encryptionService = EncryptionService(encryptionProperties)
+class EncryptionServiceTest {
+    private val mock = MockKeyManager().keyManager()
+
+    private val encryptionService = EncryptionService(mock)
+
+    @BeforeEach
+    fun mock() {
+
+    }
 
     @Test fun `encryption works`() {
         val originalText = "Hello, World!"

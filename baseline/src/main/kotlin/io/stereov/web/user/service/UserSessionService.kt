@@ -7,9 +7,12 @@ import io.stereov.web.auth.exception.model.InvalidCredentialsException
 import io.stereov.web.auth.service.AuthenticationService
 import io.stereov.web.auth.service.CookieService
 import io.stereov.web.global.service.cache.AccessTokenCache
+import io.stereov.web.global.service.encryption.EncryptionService
 import io.stereov.web.global.service.file.exception.model.UnsupportedMediaTypeException
 import io.stereov.web.global.service.file.service.FileStorage
 import io.stereov.web.global.service.hash.HashService
+import io.stereov.web.global.service.mail.MailService
+import io.stereov.web.global.service.random.RandomService
 import io.stereov.web.user.dto.ApplicationInfoDto
 import io.stereov.web.user.dto.UserDto
 import io.stereov.web.user.dto.request.*
@@ -45,6 +48,8 @@ class UserSessionService(
     private val accessTokenCache: AccessTokenCache,
     private val cookieService: CookieService,
     private val fileStorage: FileStorage,
+    private val mailService: MailService,
+    private val encryptionService: EncryptionService,
 ) {
 
     private val logger: KLogger
@@ -87,7 +92,7 @@ class UserSessionService(
      * @throws EmailAlreadyExistsException If the email already exists in the system.
      * @throws AuthException If the user document does not contain an ID.
      */
-    suspend fun registerAndGetUser(payload: RegisterUserRequest): UserDocument {
+    suspend fun registerAndGetUser(payload: RegisterUserRequest, sendEmail: Boolean): UserDocument {
         logger.debug { "Registering user ${payload.email}" }
 
         if (userService.existsByEmail(payload.email)) {
@@ -100,11 +105,16 @@ class UserSessionService(
             name = payload.name,
         )
 
+        userDocument.security.mail.verificationSecret = encryptionService.encrypt(RandomService.generateCode(20))
+        userDocument.security.mail.passwordResetSecret = encryptionService.encrypt(RandomService.generateCode(20))
+
         val savedUserDocument = userService.save(userDocument)
 
         if (savedUserDocument._id == null) {
             throw AuthException("Login failed: UserDocument contains no id")
         }
+
+        if (sendEmail) mailService.sendVerificationEmail(savedUserDocument)
 
         return savedUserDocument
     }
@@ -137,6 +147,9 @@ class UserSessionService(
         }
 
         user.email = payload.newEmail
+        user.security.mail.verified = false
+
+        mailService.sendVerificationEmail(user)
 
         return userService.save(user)
     }

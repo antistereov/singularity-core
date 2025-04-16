@@ -2,6 +2,7 @@ package io.stereov.web.auth.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.web.auth.exception.AuthException
 import io.stereov.web.auth.exception.model.TwoFactorAuthDisabledException
 import io.stereov.web.config.Constants
 import io.stereov.web.global.service.geolocation.GeoLocationService
@@ -12,6 +13,7 @@ import io.stereov.web.properties.AppProperties
 import io.stereov.web.properties.JwtProperties
 import io.stereov.web.user.dto.UserDto
 import io.stereov.web.user.dto.request.DeviceInfoRequest
+import io.stereov.web.user.dto.request.TwoFactorStartSetupRequest
 import io.stereov.web.user.model.DeviceInfo
 import io.stereov.web.user.service.UserService
 import io.stereov.web.user.service.token.TwoFactorAuthTokenService
@@ -37,9 +39,9 @@ class CookieService(
     private val appProperties: AppProperties,
     private val geoLocationService: GeoLocationService,
     private val userService: UserService,
-    private val twoFactorAuthService: TwoFactorAuthService,
     private val twoFactorAuthTokenService: TwoFactorAuthTokenService,
     private val authenticationService: AuthenticationService,
+    private val twoFactorAuthService: TwoFactorAuthService,
 ) {
 
     private val logger: KLogger
@@ -75,20 +77,21 @@ class CookieService(
      *
      * @param userId The ID of the user.
      * @param deviceInfoDto The device information.
-     * @param ipAddress The IP address of the user.
+     * @param exchange The server web exchange.
      *
      * @return The created refresh token cookie.
      */
     suspend fun createRefreshTokenCookie(
         userId: String,
         deviceInfoDto: DeviceInfoRequest,
-        ipAddress: String?
+        exchange: ServerWebExchange
     ): ResponseCookie {
         logger.info { "Creating refresh token cookie" }
 
         val refreshTokenId = RandomService.generateCode(20)
         val refreshToken = userTokenService.createRefreshToken(userId, deviceInfoDto.id, refreshTokenId)
 
+        val ipAddress = exchange.request.remoteAddress?.address?.hostAddress
         val location = ipAddress?.let { try { geoLocationService.getLocation(it) } catch(e: Exception) { null } }
 
         val deviceInfo = DeviceInfo(
@@ -204,7 +207,7 @@ class CookieService(
     suspend fun createLoginVerificationCookie(userId: String): ResponseCookie {
         logger.debug { "Creating cookie for two factor login verification token" }
 
-        val cookie = ResponseCookie.from(Constants.LOGIN_VERIFICATION_TOKEN, twoFactorAuthTokenService.createLoginToken(userId))
+        val cookie = ResponseCookie.from(Constants.LOGIN_VERIFICATION_TOKEN_COOKIE, twoFactorAuthTokenService.createLoginToken(userId))
             .httpOnly(true)
             .sameSite("Strict")
             .maxAge(jwtProperties.expiresIn)
@@ -229,7 +232,7 @@ class CookieService(
     suspend fun validateLoginVerificationCookieAndGetUserId(exchange: ServerWebExchange): String {
         logger.debug { "Validating login verification cookie" }
 
-        val twoFactorCookie = exchange.request.cookies[Constants.LOGIN_VERIFICATION_TOKEN]?.firstOrNull()?.value
+        val twoFactorCookie = exchange.request.cookies[Constants.LOGIN_VERIFICATION_TOKEN_COOKIE]?.firstOrNull()?.value
             ?: throw InvalidTokenException("No two factor authentication token provided")
 
         return twoFactorAuthTokenService.validateLoginTokenAndExtractUserId(twoFactorCookie)
@@ -243,7 +246,7 @@ class CookieService(
     suspend fun clearLoginVerificationCookie(): ResponseCookie {
         logger.debug { "Clearing cookie for two factor authentication token" }
 
-        val cookie = ResponseCookie.from(Constants.LOGIN_VERIFICATION_TOKEN, "")
+        val cookie = ResponseCookie.from(Constants.LOGIN_VERIFICATION_TOKEN_COOKIE, "")
             .httpOnly(true)
             .sameSite("Strict")
             .maxAge(0)
@@ -274,10 +277,22 @@ class CookieService(
         return createStepUpCookie(token)
     }
 
-    suspend fun createStepUpCookie(userId: String, deviceId: String): ResponseCookie {
+    /**
+     * Create a step-up token.
+     * This function is only allowed to be called if the request path is /auth/2fa/recovery.
+     * Therefore,
+     * it can only be used if the user wants to recover his account after they lost access to their 2FA codes.
+     *
+     * @param userId The ID of the user.
+     * @param deviceId The device ID of the device the user is trying to create a step-up token from.
+     * @param exchange The server web exchange.
+     *
+     * @throws AuthException If this function is called from a path that is not /auth/2fa/recovery
+     */
+    internal suspend fun createStepUpCookieForRecovery(userId: String, deviceId: String, exchange: ServerWebExchange): ResponseCookie {
         logger.debug { "Creating step up cookie" }
 
-        val token = twoFactorAuthTokenService.createStepUpToken(userId, deviceId)
+        val token = twoFactorAuthTokenService.createStepUpTokenForRecovery(userId, deviceId, exchange)
 
         return createStepUpCookie(token)
     }
@@ -334,5 +349,27 @@ class CookieService(
             .build()
 
         return cookie
+    }
+
+    suspend fun createTwoFactorSetupCookie(req: TwoFactorStartSetupRequest): ResponseCookie {
+        val token = twoFactorAuthTokenService.createSetupToken(req)
+
+        val cookie = ResponseCookie.from(Constants.TWO_FACTOR_SETUP_TOKEN_COOKIE, token)
+            .httpOnly(true)
+            .sameSite("Strict")
+            .maxAge(jwtProperties.expiresIn)
+            .path("/")
+            .secure(appProperties.secure)
+            .build()
+
+        return cookie
+    }
+
+    suspend fun validateTwoFactorSetupCookie(exchange: ServerWebExchange) {
+
+        val token = exchange.request.cookies[Constants.TWO_FACTOR_SETUP_TOKEN_COOKIE]?.firstOrNull()?.value
+            ?: throw InvalidTokenException("No setup token provided")
+
+        twoFactorAuthTokenService.validateSetupToken(token)
     }
 }

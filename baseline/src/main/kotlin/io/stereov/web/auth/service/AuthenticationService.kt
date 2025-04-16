@@ -46,7 +46,7 @@ class AuthenticationService {
      * Get the currently authenticated user document.
      *
      * @throws InvalidPrincipalException If the security context or authentication is missing.
-     * @throws InvalidTokenException If the authentication does not contain the needed properties.
+     * @throws InvalidTokenException If the authentication does not contain the necessary properties.
      */
     suspend fun getCurrentUser(): UserDocument {
         logger.debug { "Extracting current user" }

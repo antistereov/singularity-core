@@ -2,15 +2,23 @@ package io.stereov.web.user.service.token
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.web.auth.exception.AuthException
+import io.stereov.web.auth.exception.model.InvalidCredentialsException
 import io.stereov.web.auth.service.AuthenticationService
 import io.stereov.web.config.Constants
+import io.stereov.web.global.service.hash.HashService
 import io.stereov.web.global.service.jwt.JwtService
 import io.stereov.web.global.service.jwt.exception.model.InvalidTokenException
+import io.stereov.web.global.service.twofactorauth.TwoFactorAuthService
+import io.stereov.web.global.service.twofactorauth.exception.model.InvalidTwoFactorCodeException
 import io.stereov.web.properties.JwtProperties
+import io.stereov.web.user.dto.request.TwoFactorStartSetupRequest
+import io.stereov.web.user.exception.model.InvalidUserDocumentException
 import io.stereov.web.user.service.token.model.SetupToken
 import io.stereov.web.user.service.token.model.StepUpToken
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
 import org.springframework.stereotype.Service
+import org.springframework.web.server.ServerWebExchange
 import java.time.Instant
 
 /**
@@ -26,6 +34,8 @@ class TwoFactorAuthTokenService(
     private val jwtService: JwtService,
     private val jwtProperties: JwtProperties,
     private val authenticationService: AuthenticationService,
+    private val twoFactorAuthService: TwoFactorAuthService,
+    private val hashService: HashService,
 ) {
 
     private val logger: KLogger
@@ -126,17 +136,42 @@ class TwoFactorAuthTokenService(
     }
 
     /**
-     * Creates a step-up token for currently logged-in user.
+     * Creates a step-up token based on the current user's password.
      *
-     * @param issuedAt The time the token is issued. Default is the current time.
+     * @param code The 2FA code for the current user.
+     * @param issuedAt The issue date of the token. This parameter is only used for testing. Leave it empty in production code.
      *
-     * @return The generated step-up token.
+     * @return A step-up token for the current user.
+     *
+     * @throws InvalidUserDocumentException If the user document does not contain a two-factor authentication secret.
+     * @throws InvalidTwoFactorCodeException If the two-factor code is invalid.
      */
     suspend fun createStepUpToken(code: Int, issuedAt: Instant = Instant.now()): String {
         logger.debug { "Creating step up token" }
 
-        val userId = authenticationService.getCurrentUserId()
+
+        val user = authenticationService.getCurrentUser()
         val deviceId = authenticationService.getCurrentDeviceId()
+
+        twoFactorAuthService.validateTwoFactorCode(user, code)
+
+        return createStepUpToken(user.id, deviceId, issuedAt)
+    }
+
+    /**
+     * Create a step-up token for 2FA recovery.
+     *
+     * @param userId The ID of the user to be recovered.
+     * @param deviceId The ID of the device the user is trying to recover from.
+     * @param issuedAt The time the token is issued. This is used in testing. Leave empty for production code.
+     *
+     * @throws AuthException If this function is called from a path that does not match `/auth/2fa/recovery`.
+     */
+    suspend fun createStepUpTokenForRecovery(userId: String, deviceId: String, exchange: ServerWebExchange, issuedAt: Instant = Instant.now()): String {
+        logger.debug { "Creating step up token" }
+
+        if (exchange.request.path.toString() != "/user/2fa/recovery")
+            throw AuthException("Cannot create step up token. This function call is only allowed when it is called from /auth/2fa/recovery")
 
         return createStepUpToken(userId, deviceId, issuedAt)
     }
@@ -192,5 +227,43 @@ class TwoFactorAuthTokenService(
         }
 
         return StepUpToken(userId, deviceId)
+    }
+
+    suspend fun createSetupToken(req: TwoFactorStartSetupRequest, issuedAt: Instant = Instant.now()): String {
+        logger.debug { "Creating setup token" }
+
+        val user = authenticationService.getCurrentUser()
+        val deviceId = authenticationService.getCurrentDeviceId()
+
+        if (!hashService.checkBcrypt(req.password, user.password)) throw InvalidCredentialsException("Wrong password")
+
+        val claims = JwtClaimsSet.builder()
+            .issuedAt(issuedAt)
+            .expiresAt(issuedAt.plusSeconds(jwtProperties.expiresIn))
+            .subject(user.id)
+            .claim(Constants.JWT_DEVICE_CLAIM, deviceId)
+            .build()
+
+        return jwtService.encodeJwt(claims)
+    }
+
+    suspend fun validateSetupToken(token: String) {
+        logger.debug { "Validating setup token" }
+
+        val jwt = jwtService.decodeJwt(token,true)
+
+        val userId = jwt.subject
+            ?: throw InvalidTokenException("JWT does not contain sub")
+
+        if (userId != authenticationService.getCurrentUserId()) {
+            throw InvalidTokenException("Step up token is not valid for currently logged in user")
+        }
+
+        val deviceId = jwt.claims[Constants.JWT_DEVICE_CLAIM] as? String
+            ?: throw InvalidTokenException("JWT does not contain device id")
+
+        if (deviceId != authenticationService.getCurrentDeviceId()) {
+            throw InvalidTokenException("Step up token is not valid for current device")
+        }
     }
 }

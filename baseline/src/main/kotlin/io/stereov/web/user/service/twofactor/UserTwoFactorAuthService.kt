@@ -53,10 +53,14 @@ class UserTwoFactorAuthService(
      * It generates a secret key, an OTP auth URL, a recovery code, and a token.
      * The token is used to validate the setup process and enable two-factor authentication for the current user.
      *
+     * It needs a valid step-up token to perform this action.
+     *
      * @return A [TwoFactorSetupResponse] containing the secret, OTP auth URL, recovery code and setup token.
      */
-    suspend fun setUpTwoFactorAuth(): TwoFactorSetupResponse {
+    suspend fun setUpTwoFactorAuth(exchange: ServerWebExchange): TwoFactorSetupResponse {
         logger.debug { "Setting up two factor authentication" }
+
+        cookieService.validateTwoFactorSetupCookie(exchange)
 
         val user = authenticationService.getCurrentUser()
 

@@ -1,6 +1,5 @@
 package io.stereov.web.properties
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.ConfigurationProperties
 
 /**
@@ -13,7 +12,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties
  * It is prefixed with `baseline.mail` in the configuration file and only set if
  * the `enable` property is set to `true`.
  *
- * @property enable Indicates whether email verification is enabled.
  * @property host The SMTP server host.
  * @property port The SMTP server port.
  * @property email The email address used for sending emails.
@@ -33,9 +31,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
 @ConfigurationProperties(prefix = "baseline.mail")
-@ConditionalOnProperty(prefix = "baseline.mail", name = ["enable"], havingValue = "true", matchIfMissing = false)
 data class MailProperties(
-    val enable: Boolean = false,
     val host: String,
     val port: Int = 0,
     val email: String,

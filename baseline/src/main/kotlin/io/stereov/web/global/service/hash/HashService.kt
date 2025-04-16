@@ -1,5 +1,6 @@
 package io.stereov.web.global.service.hash
 
+import io.stereov.web.global.service.hash.model.HashedField
 import org.springframework.security.crypto.bcrypt.BCrypt
 import org.springframework.stereotype.Service
 
@@ -23,8 +24,8 @@ class HashService {
      *
      * @return True if the input matches the hash, false otherwise.
      */
-    fun checkBcrypt(input: String, hash: String): Boolean {
-        return BCrypt.checkpw(input, hash)
+    fun checkBcrypt(input: String, hash: HashedField): Boolean {
+        return BCrypt.checkpw(input, hash.data)
     }
 
     /**
@@ -34,7 +35,7 @@ class HashService {
      *
      * @return The hashed string.
      */
-    fun hashBcrypt(input: String): String {
-        return BCrypt.hashpw(input, BCrypt.gensalt(10))
+    fun hashBcrypt(input: String): HashedField {
+        return HashedField(BCrypt.hashpw(input, BCrypt.gensalt(10)))
     }
 }

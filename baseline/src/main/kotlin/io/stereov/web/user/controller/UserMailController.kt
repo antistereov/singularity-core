@@ -4,7 +4,6 @@ import io.stereov.web.user.dto.UserDto
 import io.stereov.web.user.dto.request.ResetPasswordRequest
 import io.stereov.web.user.dto.response.MailCooldownResponse
 import io.stereov.web.user.service.mail.UserMailService
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.*
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
 @Controller
-@ConditionalOnProperty(prefix = "baseline.mail", name = ["enable"], havingValue = "true", matchIfMissing = false)
 @RequestMapping("/user/mail")
 class UserMailController(
     private val userMailService: UserMailService,

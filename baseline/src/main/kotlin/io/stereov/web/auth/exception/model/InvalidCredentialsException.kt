@@ -11,6 +11,4 @@ import io.stereov.web.auth.exception.AuthException
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
-class InvalidCredentialsException : AuthException(
-    message = "Login failed: Invalid credentials",
-)
+class InvalidCredentialsException(msg: String = "Login failed: Invalid credentials") : AuthException(msg)
