@@ -18,7 +18,7 @@ import org.springframework.context.annotation.Configuration
         ApplicationConfiguration::class,
     ]
 )
-@EnableConfigurationProperties(BitwardenKeyManagerProperties::class) // TODO: Update properties in json and README
+@EnableConfigurationProperties(BitwardenKeyManagerProperties::class)
 @ConditionalOnProperty(prefix = "baseline.secrets", value = ["key-manager"], havingValue = "bitwarden", matchIfMissing = false)
 class BitwardenSecretsConfiguration {
 
