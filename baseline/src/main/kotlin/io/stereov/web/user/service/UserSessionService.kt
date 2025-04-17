@@ -7,12 +7,10 @@ import io.stereov.web.auth.exception.model.InvalidCredentialsException
 import io.stereov.web.auth.service.AuthenticationService
 import io.stereov.web.auth.service.CookieService
 import io.stereov.web.global.service.cache.AccessTokenCache
-import io.stereov.web.global.service.encryption.service.EncryptionService
 import io.stereov.web.global.service.file.exception.model.UnsupportedMediaTypeException
 import io.stereov.web.global.service.file.service.FileStorage
 import io.stereov.web.global.service.hash.HashService
 import io.stereov.web.global.service.mail.MailService
-import io.stereov.web.global.service.random.RandomService
 import io.stereov.web.user.dto.ApplicationInfoDto
 import io.stereov.web.user.dto.UserDto
 import io.stereov.web.user.dto.request.*
@@ -49,7 +47,6 @@ class UserSessionService(
     private val cookieService: CookieService,
     private val fileStorage: FileStorage,
     private val mailService: MailService,
-    private val encryptionService: EncryptionService,
 ) {
 
     private val logger: KLogger
@@ -105,9 +102,6 @@ class UserSessionService(
             name = payload.name,
         )
 
-        userDocument.security.mail.verificationSecret = encryptionService.encrypt(RandomService.generateCode(20))
-        userDocument.security.mail.passwordResetSecret = encryptionService.encrypt(RandomService.generateCode(20))
-
         val savedUserDocument = userService.save(userDocument)
 
         if (savedUserDocument._id == null) {
@@ -142,12 +136,12 @@ class UserSessionService(
             throw InvalidCredentialsException()
         }
 
-        if (user.security.twoFactor.enabled) {
+        if (user.sensitive.security.twoFactor.enabled) {
             cookieService.validateStepUpCookie(exchange)
         }
 
-        user.email = payload.newEmail
-        user.security.mail.verified = false
+        user.sensitive.email = payload.newEmail
+        user.sensitive.security.mail.verified = false
 
         mailService.sendVerificationEmail(user)
 
@@ -173,7 +167,7 @@ class UserSessionService(
             throw InvalidCredentialsException()
         }
 
-        if (user.security.twoFactor.enabled) {
+        if (user.sensitive.security.twoFactor.enabled) {
             cookieService.validateStepUpCookie(exchange)
         }
 
@@ -192,7 +186,7 @@ class UserSessionService(
     suspend fun changeUser(payload: ChangeUserRequest): UserDocument {
         val user = authenticationService.getCurrentUser()
 
-        if (payload.name != null) user.name = payload.name
+        if (payload.name != null) user.sensitive.name = payload.name
 
         return userService.save(user)
     }
@@ -200,7 +194,7 @@ class UserSessionService(
     suspend fun setAvatar(file: FilePart): UserDto {
         val user = authenticationService.getCurrentUser()
 
-        val currentAvatar = user.avatar
+        val currentAvatar = user.sensitive.avatar
 
         if (currentAvatar != null) {
             fileStorage.removeFileIfExists(currentAvatar.key)
@@ -217,7 +211,7 @@ class UserSessionService(
 
         userService.save(user)
 
-        user.avatar = fileStorage.upload(user.id, file, "${user.fileStoragePath}/avatar", true)
+        user.sensitive.avatar = fileStorage.upload(user.id, file, "${user.fileStoragePath}/avatar", true)
 
         return userService.save(user).toDto()
     }
@@ -225,13 +219,13 @@ class UserSessionService(
     suspend fun deleteAvatar(): UserDto {
         val user = authenticationService.getCurrentUser()
 
-        val currentAvatar = user.avatar
+        val currentAvatar = user.sensitive.avatar
 
         if (currentAvatar != null) {
             fileStorage.removeFileIfExists(currentAvatar.key)
         }
 
-        user.avatar = null
+        user.sensitive.avatar = null
 
         return userService.save(user).toDto()
     }

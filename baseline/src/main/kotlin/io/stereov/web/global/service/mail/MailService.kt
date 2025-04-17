@@ -2,11 +2,9 @@ package io.stereov.web.global.service.mail
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.web.global.service.encryption.service.EncryptionService
 import io.stereov.web.global.service.mail.exception.model.MailCooldownException
 import io.stereov.web.properties.MailProperties
 import io.stereov.web.properties.UiProperties
-import io.stereov.web.user.exception.model.InvalidUserDocumentException
 import io.stereov.web.user.model.UserDocument
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSender
@@ -28,7 +26,6 @@ class MailService(
     private val uiProperties: UiProperties,
     private val mailCooldownService: MailCooldownService,
     private val mailTokenService: MailTokenService,
-    private val encryptionService: EncryptionService,
 ) {
 
     private val logger: KLogger
@@ -40,7 +37,7 @@ class MailService(
      * @param user The user to send the verification email to.
     */
     suspend fun sendVerificationEmail(user: UserDocument) {
-        logger.debug { "Sending verification email to ${user.email}" }
+        logger.debug { "Sending verification email to ${user.sensitive.email}" }
 
         val userId = user.id
 
@@ -48,17 +45,15 @@ class MailService(
             throw MailCooldownException(mailCooldownService.getRemainingVerificationCooldown(userId))
         }
 
-        val encryptedSecret = user.security.mail.verificationSecret
-            ?: throw InvalidUserDocumentException("No email verification secret found")
-        val secret = encryptionService.decrypt(encryptedSecret)
+        val secret = user.sensitive.security.mail.verificationSecret
 
-        val token = mailTokenService.createVerificationToken(user.email, secret)
+        val token = mailTokenService.createVerificationToken(user.sensitive.email, secret)
         val verificationUrl = generateVerificationUrl(token)
         val message = SimpleMailMessage()
         message.from = mailProperties.email
-        message.setTo(user.email)
+        message.setTo(user.sensitive.email)
         message.subject = "Email Verification"
-        message.text = "Hey ${user.name}! Please verify your email by clicking on the following link: $verificationUrl"
+        message.text = "Hey ${user.sensitive.name}! Please verify your email by clicking on the following link: $verificationUrl"
 
         mailSender.send(message)
         mailCooldownService.startVerificationCooldown(userId)
@@ -80,7 +75,7 @@ class MailService(
      * @param user The user to send the password reset email to.
      */
     suspend fun sendPasswordResetEmail(user: UserDocument) {
-        logger.debug { "Sending password reset email to ${user.email}" }
+        logger.debug { "Sending password reset email to ${user.sensitive.email}" }
 
         val userId = user.id
 
@@ -88,17 +83,15 @@ class MailService(
             throw MailCooldownException(mailCooldownService.getRemainingPasswordResetCooldown(userId))
         }
 
-        val encryptedSecret = user.security.mail.passwordResetSecret
-            ?: throw InvalidUserDocumentException("No password reset secret saved for user")
-        val secret = encryptionService.decrypt(encryptedSecret)
+        val secret = user.sensitive.security.mail.passwordResetSecret
 
         val token = mailTokenService.createPasswordResetToken(user.id, secret)
         val passwordResetUrl = generatePasswordResetUrl(token)
         val message = SimpleMailMessage()
         message.from = mailProperties.email
-        message.setTo(user.email)
+        message.setTo(user.sensitive.email)
         message.subject = "Password Reset"
-        message.text = "Hey ${user.name}! You can reset your password by clicking on the following link: $passwordResetUrl"
+        message.text = "Hey ${user.sensitive.name}! You can reset your password by clicking on the following link: $passwordResetUrl"
 
         mailSender.send(message)
         mailCooldownService.startPasswordResetCooldown(userId)

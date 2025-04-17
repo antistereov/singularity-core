@@ -40,7 +40,7 @@ class CustomAuthenticationToken(
      */
     constructor(userDocument: UserDocument, deviceId: String, tokenId: String): this(
         user = userDocument,
-        authorities = userDocument.roles.map { SimpleGrantedAuthority("ROLE_$it") },
+        authorities = userDocument.sensitive.roles.map { SimpleGrantedAuthority("ROLE_$it") },
         deviceId = deviceId,
         tokenId = tokenId
     )

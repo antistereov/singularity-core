@@ -51,7 +51,7 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
         webTestClient.post()
             .uri("/user/logout")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
-            .bodyValue(DeviceInfoRequest(user.info.devices.first().id))
+            .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.first().id))
             .exchange()
             .expectStatus().isOk
 
@@ -67,7 +67,7 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
         webTestClient.post()
             .uri("/user/logout-all")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
-            .bodyValue(DeviceInfoRequest(user.info.devices.first().id))
+            .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.first().id))
             .exchange()
             .expectStatus().isOk
 
@@ -88,7 +88,7 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
             .expectStatus().isOk
 
         val foundUser = userService.findById(user.info.id)
-        foundUser.devices.clear()
+        foundUser.sensitive.devices.clear()
         userService.save(foundUser)
 
         webTestClient.get()

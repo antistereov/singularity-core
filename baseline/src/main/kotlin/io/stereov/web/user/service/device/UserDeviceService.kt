@@ -34,7 +34,7 @@ class UserDeviceService(
     suspend fun getDevices(): List<DeviceInfo> {
         logger.debug { "Getting devices" }
 
-        return authenticationService.getCurrentUser().devices
+        return authenticationService.getCurrentUser().sensitive.devices
     }
 
     /**

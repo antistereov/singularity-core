@@ -4,7 +4,6 @@ import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.stereov.web.global.service.cache.AccessTokenCache
-import io.stereov.web.global.service.encryption.service.EncryptionService
 import io.stereov.web.global.service.hash.HashService
 import io.stereov.web.global.service.twofactorauth.TwoFactorAuthService
 import io.stereov.web.properties.secrets.KeyManagerImplementation
@@ -38,9 +37,6 @@ class BaseIntegrationTest : BaseSpringBootTest() {
 
     @Autowired
     lateinit var twoFactorAuthTokenService: TwoFactorAuthTokenService
-
-    @Autowired
-    lateinit var encryptionService: EncryptionService
 
     @Autowired
     lateinit var hashService: HashService

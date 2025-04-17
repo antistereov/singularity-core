@@ -190,7 +190,7 @@ class CookieService(
 
         val user = userService.findById(refreshToken.accountId)
 
-        if (user.devices.any { it.id == refreshToken.deviceId && it.refreshTokenId == refreshToken.tokenId }) {
+        if (user.sensitive.devices.any { it.id == refreshToken.deviceId && it.refreshTokenId == refreshToken.tokenId }) {
             return user.toDto()
         } else {
             throw InvalidTokenException("Invalid refresh token")
@@ -322,7 +322,7 @@ class CookieService(
     suspend fun validateStepUpCookie(exchange: ServerWebExchange): StepUpToken {
         logger.debug { "Validating step up token" }
 
-        if (!authenticationService.getCurrentUser().security.twoFactor.enabled) {
+        if (!authenticationService.getCurrentUser().sensitive.security.twoFactor.enabled) {
             throw TwoFactorAuthDisabledException()
         }
 

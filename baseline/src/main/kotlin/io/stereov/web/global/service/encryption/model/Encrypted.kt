@@ -2,7 +2,7 @@ package io.stereov.web.global.service.encryption.model
 
 import java.util.*
 
-data class EncryptedField(
-    val keyId: UUID,
-    val data: String,
+data class Encrypted<T>(
+    val secretId: UUID,
+    val ciphertext: String
 )

@@ -68,7 +68,7 @@ class UserSessionController(
 
         val user = userSessionService.checkCredentialsAndGetUser(payload)
 
-        if (user.security.twoFactor.enabled) {
+        if (user.sensitive.security.twoFactor.enabled) {
             val twoFactorCookie = cookieService.createLoginVerificationCookie(user.id)
             return ResponseEntity.ok()
                 .header("Set-Cookie", twoFactorCookie.toString())

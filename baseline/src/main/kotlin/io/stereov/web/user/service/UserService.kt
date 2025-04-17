@@ -2,14 +2,21 @@ package io.stereov.web.user.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.web.global.service.encryption.service.EncryptionService
+import io.stereov.web.global.database.service.SensitiveCrudService
+import io.stereov.web.global.service.encryption.component.EncryptedTransformer
 import io.stereov.web.global.service.file.exception.model.NoSuchFileException
 import io.stereov.web.global.service.file.model.FileMetaData
+import io.stereov.web.global.service.hash.HashService
+import io.stereov.web.global.service.secrets.component.KeyManager
 import io.stereov.web.user.exception.model.UserDoesNotExistException
+import io.stereov.web.user.model.EncryptedUserDocument
+import io.stereov.web.user.model.SensitiveUserData
 import io.stereov.web.user.model.UserDocument
 import io.stereov.web.user.repository.UserRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.serializer
 import org.springframework.stereotype.Service
 
 /**
@@ -23,39 +30,33 @@ import org.springframework.stereotype.Service
 @Service
 class UserService(
     private val userRepository: UserRepository,
-    private val encryptionService: EncryptionService,
-) {
+    private val transformer: EncryptedTransformer,
+    json: Json,
+    private val hashService: HashService,
+    keyManager: KeyManager,
+) : SensitiveCrudService<SensitiveUserData, UserDocument, EncryptedUserDocument>(userRepository, keyManager) {
 
     private val logger: KLogger
         get() = KotlinLogging.logger {}
 
-    /**
-     * Finds a user by their ID.
-     *
-     * @param userId The ID of the user to find.
-     *
-     * @return The [UserDocument] of the found user.
-     *
-     * @throws UserDoesNotExistException If no user is found with the given ID.
-     */
-    suspend fun findById(userId: String): UserDocument {
-        logger.debug { "Finding user by ID: $userId" }
+    override val serializer = json.serializersModule.serializer<SensitiveUserData>()
 
-        return userRepository.findById(userId)
-            ?: throw UserDoesNotExistException("No user account found with id $userId")
+    override suspend fun encrypt(document: UserDocument, otherValues: List<Any>): EncryptedUserDocument {
+
+        if (otherValues.getOrNull(0) == true || otherValues.getOrNull(0) == null) document.updateLastActive()
+
+        val hashedEmail = hashService.hashBcrypt(document.sensitive.email)
+        return this.transformer.encrypt(document, this.serializer, listOf(hashedEmail)) as EncryptedUserDocument
     }
 
-    /**
-     * Finds a user by their ID, returning null if not found.
-     *
-     * @param userId The ID of the user to find.
-     *
-     * @return The [UserDocument] of the found user, or null if not found.
-     */
-    suspend fun findByIdOrNull(userId: String): UserDocument? {
-        logger.debug { "Finding user by ID: $userId" }
+    override suspend fun decrypt(encrypted: EncryptedUserDocument, otherValues: List<Any>): UserDocument {
+        return this.transformer.decrypt(encrypted, this.serializer) as UserDocument
+    }
 
-        return userRepository.findById(userId)
+    override suspend fun rotateKey(): Flow<EncryptedUserDocument> {
+        return this.userRepository.findAll().map {
+            this.userRepository.save(this.encrypt(this.decrypt(it), listOf(false)))
+        }
     }
 
     /**
@@ -70,8 +71,11 @@ class UserService(
     suspend fun findByEmail(email: String): UserDocument {
         logger.debug { "Fetching user with email $email" }
 
-        return userRepository.findByEmail(email)
+        val hashedEmail = hashService.hashBcrypt(email)
+        val encrypted =  this.userRepository.findByEmail(hashedEmail)
             ?: throw UserDoesNotExistException("No user account found with email $email")
+
+        return this.decrypt(encrypted)
     }
 
     /**
@@ -84,7 +88,9 @@ class UserService(
     suspend fun findByEmailOrNull(email: String): UserDocument? {
         logger.debug { "Fetching user with email $email" }
 
-        return userRepository.findByEmail(email)
+        val hashedEmail = hashService.hashBcrypt(email)
+        return this.userRepository.findByEmail(hashedEmail)
+            ?.let { this. decrypt(it) }
     }
 
     /**
@@ -97,77 +103,14 @@ class UserService(
     suspend fun existsByEmail(email: String): Boolean {
         logger.debug { "Checking if email $email already exists" }
 
-        return userRepository.existsByEmail(email)
-    }
-
-    /**
-     * Saves a user account.
-     *
-     * @param user The [UserDocument] to save.
-     *
-     * @return The saved [UserDocument].
-     */
-    suspend fun save(user: UserDocument): UserDocument {
-        logger.debug { "Saving user: ${user._id}" }
-
-        user.updateLastActive()
-
-        val savedUser = userRepository.save(user)
-
-        logger.debug { "Successfully saved user" }
-
-        return savedUser
-    }
-
-    /**
-     * Deletes a user account by their ID.
-     */
-    suspend fun deleteById(userId: String) {
-        logger.debug { "Deleting user $userId" }
-
-        userRepository.deleteById(userId)
-    }
-
-    /**
-     * Deletes all user accounts.
-     *
-     * @throws Exception If an error occurs during deletion.
-     */
-    suspend fun deleteAll() {
-        logger.debug { "Deleting all user accounts" }
-
-        return userRepository.deleteAll()
-    }
-
-    /**
-     * Finds all user accounts.
-     *
-     * @return A [Flow] of [UserDocument] representing all user accounts.
-     */
-    suspend fun findAll(): Flow<UserDocument> {
-        logger.debug { "Finding all user accounts" }
-
-        return userRepository.findAll()
+        val hashedEmail = hashService.hashBcrypt(email)
+        return this.userRepository.existsByEmail(hashedEmail)
     }
 
     suspend fun getAvatar(userId: String): FileMetaData {
         logger.debug { "Finding avatar for user $userId" }
 
         val user = findById(userId)
-        return user.avatar ?: throw NoSuchFileException("No avatar set for user")
-    }
-
-    suspend fun rotateKeys() {
-        this.findAll().map { user ->
-            user.security.mail.passwordResetSecret = user.security.mail.passwordResetSecret?.let {
-                encryptionService.rotateKey(it)
-            }
-            user.security.mail.verificationSecret = user.security.mail.verificationSecret?.let {
-                encryptionService.rotateKey(it)
-            }
-            user.security.twoFactor.secret = user.security.twoFactor.secret?.let {
-                encryptionService.rotateKey(it)
-            }
-        }
+        return user.sensitive.avatar ?: throw NoSuchFileException("No avatar set for user")
     }
 }

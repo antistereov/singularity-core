@@ -2,9 +2,10 @@ package io.stereov.web.config
 
 import io.stereov.web.config.secrets.BitwardenSecretsConfiguration
 import io.stereov.web.config.secrets.SecretsConfiguration
-import io.stereov.web.global.service.encryption.service.EncryptionService
+import io.stereov.web.global.service.encryption.component.EncryptedTransformer
 import io.stereov.web.global.service.secrets.component.EnvKeyManager
 import io.stereov.web.global.service.secrets.component.KeyManager
+import kotlinx.serialization.json.Json
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
@@ -45,7 +46,7 @@ class EncryptionConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun encryptionService(keyManager: KeyManager): EncryptionService {
-        return EncryptionService(keyManager)
+    fun encryptionTransformer(keyManager: KeyManager, json: Json): EncryptedTransformer {
+        return EncryptedTransformer(keyManager, json)
     }
 }

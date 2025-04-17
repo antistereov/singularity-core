@@ -22,18 +22,18 @@ class UserMailControllerIntegrationTest : BaseIntegrationTest() {
 
     @Test fun `verifyEmail works`() = runTest {
         val user = registerUser()
-        val token = mailTokenService.createVerificationToken(user.info.email, user.mailVerificationSecret)
+        val token = mailTokenService.createVerificationToken(user.info.sensitive.email, user.mailVerificationSecret)
 
-        assertFalse(user.info.security.mail.verified)
+        assertFalse(user.info.sensitive.security.mail.verified)
 
         webTestClient.post()
             .uri("/user/mail/verify?token=$token")
             .exchange()
             .expectStatus().isOk
 
-        val verifiedUser = userService.findByEmail(user.info.email)
+        val verifiedUser = userService.findByEmail(user.info.sensitive.email)
 
-        assertTrue(verifiedUser.security.mail.verified)
+        assertTrue(verifiedUser.sensitive.security.mail.verified)
     }
     @Test fun `verifyEmail requires token`() = runTest {
         webTestClient.post()
@@ -49,7 +49,7 @@ class UserMailControllerIntegrationTest : BaseIntegrationTest() {
     }
     @Test fun `verifyEmail requires unexpired token`() = runTest {
         val user = registerUser()
-        val token = mailTokenService.createVerificationToken(user.info.email, user.mailVerificationSecret, Instant.ofEpochSecond(0))
+        val token = mailTokenService.createVerificationToken(user.info.sensitive.email, user.mailVerificationSecret, Instant.ofEpochSecond(0))
 
         webTestClient.post()
             .uri("/user/mail/verify?token=$token")
@@ -118,7 +118,7 @@ class UserMailControllerIntegrationTest : BaseIntegrationTest() {
         val user = registerUser()
         val token = mailTokenService.createPasswordResetToken(user.info.id, user.passwordResetSecret)
 
-        assertFalse(user.info.security.mail.verified)
+        assertFalse(user.info.sensitive.security.mail.verified)
 
         val newPassword = "new-password878"
         val req = ResetPasswordRequest(newPassword)
@@ -131,10 +131,10 @@ class UserMailControllerIntegrationTest : BaseIntegrationTest() {
 
         val verifiedUser = userService.findById(user.info.id)
 
-        assertNotEquals(user.info.security.mail.passwordResetSecret, verifiedUser.security.mail.passwordResetSecret)
+        assertNotEquals(user.info.sensitive.security.mail.passwordResetSecret, verifiedUser.sensitive.security.mail.passwordResetSecret)
         assertNotEquals(user.info.password, verifiedUser.password)
 
-        val credentials = LoginRequest(user.info.email, newPassword, DeviceInfoRequest("test"))
+        val credentials = LoginRequest(user.info.sensitive.email, newPassword, DeviceInfoRequest("test"))
 
         webTestClient.post()
             .uri("/user/login")
@@ -162,7 +162,7 @@ class UserMailControllerIntegrationTest : BaseIntegrationTest() {
     }
     @Test fun `resetPassword requires unexpired token`() = runTest {
         val user = registerUser()
-        val token = mailTokenService.createPasswordResetToken(user.info.email, user.passwordResetSecret, Instant.ofEpochSecond(0))
+        val token = mailTokenService.createPasswordResetToken(user.info.sensitive.email, user.passwordResetSecret, Instant.ofEpochSecond(0))
 
         val req = ResetPasswordRequest("Test")
 
@@ -174,7 +174,7 @@ class UserMailControllerIntegrationTest : BaseIntegrationTest() {
     }
     @Test fun `resetPassword needs body`() = runTest {
         val user = registerUser()
-        val token = mailTokenService.createPasswordResetToken(user.info.email, user.passwordResetSecret)
+        val token = mailTokenService.createPasswordResetToken(user.info.sensitive.email, user.passwordResetSecret)
 
 
         webTestClient.post()
@@ -187,7 +187,7 @@ class UserMailControllerIntegrationTest : BaseIntegrationTest() {
         val user = registerUser()
 
         webTestClient.post()
-            .uri("/user/mail/reset-password/send?email=${user.info.email}")
+            .uri("/user/mail/reset-password/send?email=${user.info.sensitive.email}")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectStatus().isOk
@@ -208,7 +208,7 @@ class UserMailControllerIntegrationTest : BaseIntegrationTest() {
         val user = registerUser()
 
         webTestClient.post()
-            .uri("/user/mail/reset-password/send?email=${user.info.email}")
+            .uri("/user/mail/reset-password/send?email=${user.info.sensitive.email}")
             .exchange()
             .expectStatus().isOk
 

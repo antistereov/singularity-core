@@ -1,7 +1,6 @@
 package io.stereov.web.config
 
 import io.stereov.web.auth.service.AuthenticationService
-import io.stereov.web.global.service.encryption.service.EncryptionService
 import io.stereov.web.global.service.hash.HashService
 import io.stereov.web.global.service.jwt.JwtService
 import io.stereov.web.global.service.mail.MailCooldownService
@@ -89,9 +88,8 @@ class MailConfiguration {
         uiProperties: UiProperties,
         mailCooldownService: MailCooldownService,
         mailTokenService: MailTokenService,
-        encryptionService: EncryptionService
     ): MailService {
-        return MailService(mailSender, mailProperties, uiProperties, mailCooldownService, mailTokenService, encryptionService)
+        return MailService(mailSender, mailProperties, uiProperties, mailCooldownService, mailTokenService)
     }
 
     @Bean
@@ -121,9 +119,8 @@ class MailConfiguration {
         mailService: MailService,
         mailTokenService: MailTokenService,
         hashService: HashService,
-        encryptionService: EncryptionService
     ): UserMailService {
-        return UserMailService(userService, authenticationService, mailCooldownService, mailService, mailTokenService, hashService, encryptionService)
+        return UserMailService(userService, authenticationService, mailCooldownService, mailService, mailTokenService, hashService)
     }
 
     // Controller

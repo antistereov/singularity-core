@@ -10,7 +10,7 @@ import io.stereov.web.auth.service.CookieService
 import io.stereov.web.config.storage.S3Configuration
 import io.stereov.web.global.service.cache.AccessTokenCache
 import io.stereov.web.global.service.cache.RedisService
-import io.stereov.web.global.service.encryption.service.EncryptionService
+import io.stereov.web.global.service.encryption.component.EncryptedTransformer
 import io.stereov.web.global.service.file.service.FileStorage
 import io.stereov.web.global.service.geolocation.GeoLocationService
 import io.stereov.web.global.service.hash.HashService
@@ -18,6 +18,7 @@ import io.stereov.web.global.service.jwt.JwtService
 import io.stereov.web.global.service.jwt.exception.handler.TokenExceptionHandler
 import io.stereov.web.global.service.mail.MailService
 import io.stereov.web.global.service.ratelimit.RateLimitService
+import io.stereov.web.global.service.secrets.component.KeyManager
 import io.stereov.web.global.service.twofactorauth.TwoFactorAuthService
 import io.stereov.web.properties.*
 import io.stereov.web.user.controller.UserDeviceController
@@ -30,6 +31,7 @@ import io.stereov.web.user.service.device.UserDeviceService
 import io.stereov.web.user.service.token.TwoFactorAuthTokenService
 import io.stereov.web.user.service.token.UserTokenService
 import io.stereov.web.user.service.twofactor.UserTwoFactorAuthService
+import kotlinx.serialization.json.Json
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
@@ -166,8 +168,8 @@ class AuthenticationConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun twoFactorAuthService(googleAuthenticator: GoogleAuthenticator, encryptionService: EncryptionService): TwoFactorAuthService {
-        return TwoFactorAuthService(googleAuthenticator, encryptionService)
+    fun twoFactorAuthService(googleAuthenticator: GoogleAuthenticator): TwoFactorAuthService {
+        return TwoFactorAuthService(googleAuthenticator)
     }
 
     @Bean
@@ -191,7 +193,6 @@ class AuthenticationConfiguration {
     fun userTwoFactorAuthService(
         userService: UserService,
         twoFactorAuthService: TwoFactorAuthService,
-        encryptionService: EncryptionService,
         authenticationService: AuthenticationService,
         twoFactorAuthProperties: TwoFactorAuthProperties,
         hashService: HashService,
@@ -199,13 +200,13 @@ class AuthenticationConfiguration {
         twoFactorAuthTokenService: TwoFactorAuthTokenService,
         accessTokenCache: AccessTokenCache,
     ): UserTwoFactorAuthService {
-        return UserTwoFactorAuthService(userService, twoFactorAuthService, encryptionService, authenticationService, twoFactorAuthProperties, hashService, cookieService, twoFactorAuthTokenService, accessTokenCache)
+        return UserTwoFactorAuthService(userService, twoFactorAuthService, authenticationService, twoFactorAuthProperties, hashService, cookieService, twoFactorAuthTokenService, accessTokenCache)
     }
 
     @Bean
     @ConditionalOnMissingBean
-    fun userService(userRepository: UserRepository, encryptionService: EncryptionService): UserService {
-        return UserService(userRepository, encryptionService)
+    fun userService(userRepository: UserRepository, encryptionTransformer: EncryptedTransformer, json: Json, hashService: HashService, keyManager: KeyManager): UserService {
+        return UserService(userRepository, encryptionTransformer, json, hashService, keyManager)
     }
 
     @Bean
@@ -219,7 +220,6 @@ class AuthenticationConfiguration {
         cookieService: CookieService,
         fileStorage: FileStorage,
         mailService: MailService,
-        encryptionService: EncryptionService
     ): UserSessionService {
         return UserSessionService(
             userService,
@@ -230,7 +230,6 @@ class AuthenticationConfiguration {
             cookieService,
             fileStorage,
             mailService,
-            encryptionService
         )
     }
 

@@ -1,7 +1,8 @@
 package io.stereov.web.user.model
 
-import io.stereov.web.global.service.encryption.model.EncryptedField
 import io.stereov.web.global.service.hash.model.HashedField
+import io.stereov.web.global.service.random.RandomService
+import kotlinx.serialization.Serializable
 
 /**
  * # UserSecurityDetails
@@ -13,6 +14,7 @@ import io.stereov.web.global.service.hash.model.HashedField
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
+@Serializable
 data class UserSecurityDetails(
     val twoFactor: TwoFactorDetails = TwoFactorDetails(),
     val mail: MailVerificationDetails = MailVerificationDetails(),
@@ -27,9 +29,10 @@ data class UserSecurityDetails(
      * @property secret The secret key for the user.
      * @property recoveryCodes The list of recovery codes for the user.
      */
+    @Serializable
     data class TwoFactorDetails(
         var enabled: Boolean = false,
-        var secret: EncryptedField? = null,
+        var secret: String? = null,
         var recoveryCodes: MutableList<HashedField> = mutableListOf()
     )
 
@@ -42,9 +45,10 @@ data class UserSecurityDetails(
      * @property verificationSecret The secret key for email verification.
      * @property passwordResetSecret The secret key for password reset.
      */
+    @Serializable
     data class MailVerificationDetails(
         var verified: Boolean = false,
-        var verificationSecret: EncryptedField? = null,
-        var passwordResetSecret: EncryptedField? = null,
+        var verificationSecret: String = RandomService.generateCode(20),
+        var passwordResetSecret: String = RandomService.generateCode(20),
     )
 }

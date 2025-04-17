@@ -2,6 +2,7 @@ package io.stereov.web.user.model
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.web.global.serializer.InstantSerializer
 import io.stereov.web.user.dto.request.DeviceInfoRequest
 import io.stereov.web.user.dto.response.DeviceInfoResponse
 import kotlinx.serialization.Serializable
@@ -24,11 +25,13 @@ import java.time.Instant
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
+@Serializable
 data class DeviceInfo(
     val id: String,
     val refreshTokenId: String? = null,
     val browser: String? = null,
     val os: String? = null,
+    @Serializable(with = InstantSerializer::class)
     val issuedAt: Instant,
     val ipAddress: String? = null,
     val location: LocationInfo? = null

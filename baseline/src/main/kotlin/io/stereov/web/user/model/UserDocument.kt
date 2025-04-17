@@ -2,15 +2,14 @@ package io.stereov.web.user.model
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.web.global.service.encryption.model.EncryptedField
+import io.stereov.web.global.exception.model.MissingFunctionParameterException
+import io.stereov.web.global.service.encryption.model.Encrypted
+import io.stereov.web.global.service.encryption.model.SensitiveDocument
 import io.stereov.web.global.service.file.model.FileMetaData
 import io.stereov.web.global.service.hash.model.HashedField
 import io.stereov.web.user.dto.UserDto
 import io.stereov.web.user.exception.model.InvalidUserDocumentException
-import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Transient
-import org.springframework.data.mongodb.core.index.Indexed
-import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
 
 /**
@@ -32,20 +31,28 @@ import java.time.Instant
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
-@Document(collection = "users")
 data class UserDocument(
-    @Id val _id: String? = null,
-    @Indexed(unique = true) var email: String,
-    var name: String? = null,
+    var _id: String? = null,
     var password: HashedField,
-    val roles: MutableList<Role> = mutableListOf(Role.USER),
-    val security: UserSecurityDetails = UserSecurityDetails(),
-    val devices: MutableList<DeviceInfo> = mutableListOf(),
+    val created: Instant = Instant.now(),
     var lastActive: Instant = Instant.now(),
     var app: ApplicationInfo? = null,
-    var avatar: FileMetaData? = null,
-    val created: Instant = Instant.now()
-) {
+    override var sensitive: SensitiveUserData,
+)  : SensitiveDocument<SensitiveUserData>(sensitive) {
+
+    constructor(
+        _id: String? = null,
+        password: HashedField,
+        created: Instant = Instant.now(),
+        lastActive: Instant = Instant.now(),
+        app: ApplicationInfo? = null,
+        name: String? = null,
+        email: String,
+        roles: MutableList<Role> = mutableListOf(Role.USER),
+        security: UserSecurityDetails = UserSecurityDetails(),
+        devices: MutableList<DeviceInfo> = mutableListOf(),
+        avatar: FileMetaData? = null,
+    ): this(_id, password, created, lastActive, app, SensitiveUserData(name, email, roles, security, devices, avatar))
 
     @get:Transient
     private val logger: KLogger
@@ -80,6 +87,18 @@ data class UserDocument(
         return app as? T ?: throw InvalidUserDocumentException("No application info found in UserDocument")
     }
 
+    override fun toEncryptedDocument(
+        encryptedSensitiveData: Encrypted<SensitiveUserData>,
+        otherValues: List<Any>
+    ): EncryptedUserDocument {
+        val hashedEmail = otherValues[0] as? HashedField
+            ?: throw MissingFunctionParameterException("Please provide the hashed email as parameter.")
+
+        return EncryptedUserDocument(
+            _id, hashedEmail, password, created, lastActive, app, encryptedSensitiveData
+        )
+    }
+
     /**
      * Convert this [UserDocument] to a [UserDto].
      *
@@ -92,15 +111,15 @@ data class UserDocument(
 
         return UserDto(
             id,
-            name,
-            email,
-            roles,
-            security.mail.verified,
-            devices.map { it.toResponseDto() },
+            sensitive.name,
+            sensitive.email,
+            sensitive.roles,
+            sensitive.security.mail.verified,
+            sensitive.devices.map { it.toResponseDto() },
             lastActive.toString(),
-            security.twoFactor.enabled,
+            sensitive.security.twoFactor.enabled,
             app?.toDto(),
-            avatar,
+            sensitive.avatar,
             created.toString(),
         )
     }
@@ -115,12 +134,12 @@ data class UserDocument(
      *
      * @return The updated [UserDocument].
      */
-    fun setupTwoFactorAuth(secret: EncryptedField, recoveryCodes: List<HashedField>): UserDocument {
+    fun setupTwoFactorAuth(secret: String, recoveryCodes: List<HashedField>): UserDocument {
         logger.debug { "Setting up two factor authentication" }
 
-        this.security.twoFactor.enabled = true
-        this.security.twoFactor.secret = secret
-        this.security.twoFactor.recoveryCodes = recoveryCodes.toMutableList()
+        this.sensitive.security.twoFactor.enabled = true
+        this.sensitive.security.twoFactor.secret = secret
+        this.sensitive.security.twoFactor.recoveryCodes = recoveryCodes.toMutableList()
 
         return this
     }
@@ -135,9 +154,9 @@ data class UserDocument(
     fun disableTwoFactorAuth(): UserDocument {
         logger.debug { "Disabling two factor authentication" }
 
-        this.security.twoFactor.enabled = false
-        this.security.twoFactor.secret = null
-        this.security.twoFactor.recoveryCodes = mutableListOf()
+        this.sensitive.security.twoFactor.enabled = false
+        this.sensitive.security.twoFactor.secret = null
+        this.sensitive.security.twoFactor.recoveryCodes = mutableListOf()
 
         return this
     }
@@ -155,7 +174,7 @@ data class UserDocument(
         logger.debug { "Adding or updating device ${deviceInfo.id}" }
 
         removeDevice(deviceInfo.id)
-        this.devices.add(deviceInfo)
+        this.sensitive.devices.add(deviceInfo)
 
         return this
     }
@@ -172,7 +191,7 @@ data class UserDocument(
     fun removeDevice(deviceId: String): UserDocument {
         logger.debug { "Removing device $deviceId" }
 
-        this.devices.removeAll { device -> device.id == deviceId }
+        this.sensitive.devices.removeAll { device -> device.id == deviceId }
 
         return this
     }
@@ -185,7 +204,7 @@ data class UserDocument(
     fun clearDevices() {
         logger.debug { "Clearing devices" }
 
-        this.devices.clear()
+        this.sensitive.devices.clear()
     }
 
     /**
@@ -198,8 +217,8 @@ data class UserDocument(
      * @return The updated list of roles.
      */
     fun addRole(role: Role): List<Role> {
-        this.roles.add(role)
-        return this.roles
+        this.sensitive.roles.add(role)
+        return this.sensitive.roles
     }
 
     /**
@@ -212,7 +231,7 @@ data class UserDocument(
      * @return True if the role was removed, false otherwise.
      */
     fun removeRole(role: Role): Boolean {
-        return this.roles.remove(role)
+        return this.sensitive.roles.remove(role)
     }
 
     /**

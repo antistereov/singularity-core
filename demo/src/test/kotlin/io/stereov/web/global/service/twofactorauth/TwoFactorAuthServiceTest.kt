@@ -1,18 +1,14 @@
 package io.stereov.web.global.service.twofactorauth
 
 import com.warrenstrange.googleauth.GoogleAuthenticator
-import io.stereov.web.global.service.encryption.service.EncryptionService
-import io.stereov.web.test.config.MockKeyManager
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class TwoFactorAuthServiceTest {
 
-    private val keyManager = MockKeyManager().keyManager()
     private val gAuth = GoogleAuthenticator()
-    private val encryptionService = EncryptionService(keyManager)
-    private val twoFactorAuthService = TwoFactorAuthService(gAuth, encryptionService)
+    private val twoFactorAuthService = TwoFactorAuthService(gAuth)
 
     @Test
     fun `2FA works as expected`() {

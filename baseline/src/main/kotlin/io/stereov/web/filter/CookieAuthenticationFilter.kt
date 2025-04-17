@@ -47,7 +47,7 @@ class CookieAuthenticationFilter(
                 return@mono setSecurityContext(chain, exchange, e)
             }
 
-            if (!user.devices.any { it.id == accessToken.deviceId }) {
+            if (!user.sensitive.devices.any { it.id == accessToken.deviceId }) {
                 val e = InvalidTokenException("Trying to login from invalid device")
                 return@mono setSecurityContext(chain, exchange, e)
             }

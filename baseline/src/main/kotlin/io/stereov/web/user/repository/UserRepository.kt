@@ -1,6 +1,8 @@
 package io.stereov.web.user.repository
 
-import io.stereov.web.user.model.UserDocument
+import io.stereov.web.global.database.repository.SensitiveCrudRepository
+import io.stereov.web.global.service.hash.model.HashedField
+import io.stereov.web.user.model.EncryptedUserDocument
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import org.springframework.stereotype.Repository
 
@@ -14,23 +16,9 @@ import org.springframework.stereotype.Repository
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
 @Repository
-interface UserRepository : CoroutineCrudRepository<UserDocument, String> {
+interface UserRepository : SensitiveCrudRepository<EncryptedUserDocument> {
 
-    /**
-     * Finds a user by their email.
-     *
-     * @param email The email of the user to find.
-     *
-     * @return The [UserDocument] of the found user, or null if not found.
-     */
-    suspend fun existsByEmail(email: String): Boolean
+    suspend fun existsByEmail(email: HashedField): Boolean
 
-    /**
-     * Finds a user by their email address.
-     *
-     * @param email The email address of the user to find.
-     *
-     * @return The [UserDocument] of the found user, or null if not found.
-     */
-    suspend fun findByEmail(email: String): UserDocument?
+    suspend fun findByEmail(email: HashedField): EncryptedUserDocument?
 }

@@ -52,7 +52,7 @@ class BitwardenKeyManager(
         this.logger.debug { "Getting current encryption secret" }
 
         return this.encryptionSecret
-            ?: loadCurrentEncryptionSecret()
+            ?: this.loadCurrentEncryptionSecret()
     }
 
     fun loadCurrentEncryptionSecret(): Secret {
@@ -77,7 +77,7 @@ class BitwardenKeyManager(
         val newSecret = create(key, secret, note)
         this.encryptionSecret = newSecret
 
-        this.createOrUpdateKey(Constants.CURRENT_ENCRYPTION_SECRET, key, note)
+        this.createOrUpdateKey(Constants.CURRENT_ENCRYPTION_SECRET, newSecret.id.toString(), note)
 
         return newSecret
     }
@@ -123,8 +123,8 @@ class BitwardenKeyManager(
     fun getCurrentSecretByKey(key: String): Secret? {
         this.logger.debug { "Getting current secret by key $key" }
 
-        return getSecretByKey(key)?.let {
-            getSecretByKey(it.value)
+        return this.getSecretByKey(key)?.let {
+            this.getSecretById(it.id)
         }
     }
 

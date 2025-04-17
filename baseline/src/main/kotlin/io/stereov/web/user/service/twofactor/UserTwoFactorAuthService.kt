@@ -6,7 +6,6 @@ import io.stereov.web.auth.exception.AuthException
 import io.stereov.web.auth.service.AuthenticationService
 import io.stereov.web.auth.service.CookieService
 import io.stereov.web.global.service.cache.AccessTokenCache
-import io.stereov.web.global.service.encryption.service.EncryptionService
 import io.stereov.web.global.service.hash.HashService
 import io.stereov.web.global.service.random.RandomService
 import io.stereov.web.global.service.twofactorauth.TwoFactorAuthService
@@ -36,7 +35,6 @@ import org.springframework.web.server.ServerWebExchange
 class UserTwoFactorAuthService(
     private val userService: UserService,
     private val twoFactorAuthService: TwoFactorAuthService,
-    private val encryptionService: EncryptionService,
     private val authenticationService: AuthenticationService,
     private val twoFactorAuthProperties: TwoFactorAuthProperties,
     private val hashService: HashService,
@@ -65,7 +63,7 @@ class UserTwoFactorAuthService(
         val user = authenticationService.getCurrentUser()
 
         val secret = twoFactorAuthService.generateSecretKey()
-        val otpAuthUrl = twoFactorAuthService.getOtpAuthUrl(user.email, secret)
+        val otpAuthUrl = twoFactorAuthService.getOtpAuthUrl(user.sensitive.email, secret)
         val recoveryCodes = List(twoFactorAuthProperties.recoveryCodeCount) {
             RandomService.generateCode(twoFactorAuthProperties.recoveryCodeLength)
         }
@@ -94,7 +92,7 @@ class UserTwoFactorAuthService(
             throw AuthException("Invalid two-factor authentication code")
         }
 
-        val encryptedSecret = encryptionService.encrypt(setupToken.secret)
+        val encryptedSecret = setupToken.secret
         val hashedRecoveryCodes = setupToken.recoveryCodes.map {
             hashService.hashBcrypt(it)
         }
@@ -166,7 +164,7 @@ class UserTwoFactorAuthService(
         }
 
         val user = userService.findById(userId)
-        val recoveryCodeHashes = user.security.twoFactor.recoveryCodes
+        val recoveryCodeHashes = user.sensitive.security.twoFactor.recoveryCodes
 
         val match = recoveryCodeHashes.removeAll { hash ->
             hashService.checkBcrypt(recoveryCode, hash)

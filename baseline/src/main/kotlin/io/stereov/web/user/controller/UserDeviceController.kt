@@ -49,7 +49,7 @@ class UserDeviceController(
     suspend fun removeDevice(@PathVariable deviceId: String): ResponseEntity<List<DeviceInfoResponse>> {
         val updatedUser = deviceService.removeDevice(deviceId)
 
-        return ResponseEntity.ok(updatedUser.devices.map { it.toResponseDto()})
+        return ResponseEntity.ok(updatedUser.sensitive.devices.map { it.toResponseDto()})
     }
 
     /**

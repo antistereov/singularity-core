@@ -15,7 +15,7 @@ class UserDeviceControllerIntegrationTest : BaseIntegrationTest() {
 
     @Test fun `getDevices returns devices`() = runTest {
         val user = registerUser(deviceId = "first")
-        user.info.devices.addAll(listOf(DeviceInfo("second", issuedAt = Instant.now()), DeviceInfo("third", issuedAt = Instant.now())))
+        user.info.sensitive.devices.addAll(listOf(DeviceInfo("second", issuedAt = Instant.now()), DeviceInfo("third", issuedAt = Instant.now())))
 
         userService.save(user.info)
 
@@ -53,7 +53,7 @@ class UserDeviceControllerIntegrationTest : BaseIntegrationTest() {
             .expectStatus().isOk
 
         val updatedUser = userService.findById(user.info._id!!)
-        val devices = updatedUser.devices
+        val devices = updatedUser.sensitive.devices
 
         assertEquals(0, devices.size)
     }
@@ -74,7 +74,7 @@ class UserDeviceControllerIntegrationTest : BaseIntegrationTest() {
             .isOk
 
         val updatedUser = userService.findById(user.info._id!!)
-        val devices = updatedUser.devices
+        val devices = updatedUser.sensitive.devices
 
         assertEquals(0, devices.size)
     }

@@ -3,7 +3,6 @@ package io.stereov.web.test
 import com.warrenstrange.googleauth.GoogleAuthenticator
 import io.mockk.every
 import io.stereov.web.config.Constants
-import io.stereov.web.global.service.encryption.service.EncryptionService
 import io.stereov.web.test.config.MockConfig
 import io.stereov.web.test.config.MockKeyManager
 import io.stereov.web.user.dto.request.*
@@ -22,8 +21,6 @@ import org.springframework.test.web.reactive.server.returnResult
 @Import(MockConfig::class, MockKeyManager::class)
 class BaseSpringBootTest {
 
-    @Autowired
-    private lateinit var encryptionService: EncryptionService
 
     @Autowired
     lateinit var webTestClient: WebTestClient
@@ -160,8 +157,8 @@ class BaseSpringBootTest {
         val user = userService.findByEmailOrNull(email)
         requireNotNull(user) { "User associated to $email not saved" }
 
-        val mailVerificationToken = encryptionService.decrypt(user.security.mail.verificationSecret!!)
-        val passwordResetToken = encryptionService.decrypt(user.security.mail.passwordResetSecret!!)
+        val mailVerificationToken = user.sensitive.security.mail.verificationSecret
+        val passwordResetToken = user.sensitive.security.mail.passwordResetSecret
 
         return TestRegisterResponse(user, accessToken, refreshToken, twoFactorToken, twoFactorSecret, twoFactorRecovery, twoFactorStartSetupToken, mailVerificationToken, passwordResetToken)
     }
