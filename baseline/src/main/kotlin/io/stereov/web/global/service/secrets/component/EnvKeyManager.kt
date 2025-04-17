@@ -1,14 +1,14 @@
-package io.stereov.web.global.service.encryption.component
+package io.stereov.web.global.service.secrets.component
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.web.global.service.encryption.exception.model.NoSecurityKeySetException
-import io.stereov.web.global.service.encryption.exception.model.SecretKeyNotFoundException
+import io.stereov.web.global.service.secrets.exception.model.NoCurrentEncryptionKeyException
+import io.stereov.web.global.service.secrets.exception.model.SecretKeyNotFoundException
 import jakarta.annotation.PostConstruct
 import org.springframework.stereotype.Component
 
 @Component
-class KeyManager {
+class EnvKeyManager {
 
     private val keys = mutableMapOf<String, String>()
     private val logger: KLogger
@@ -41,7 +41,7 @@ class KeyManager {
         logger.debug { "Getting ID of current encryption key" }
 
         return System.getenv("CURRENT_SECRET_KEY")
-            ?: throw NoSecurityKeySetException()
+            ?: throw NoCurrentEncryptionKeyException()
     }
 
     fun getKeyById(keyId: String): String {

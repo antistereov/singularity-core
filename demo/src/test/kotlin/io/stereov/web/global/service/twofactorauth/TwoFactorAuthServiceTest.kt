@@ -1,7 +1,7 @@
 package io.stereov.web.global.service.twofactorauth
 
 import com.warrenstrange.googleauth.GoogleAuthenticator
-import io.stereov.web.global.service.encryption.EncryptionService
+import io.stereov.web.global.service.encryption.service.EncryptionService
 import io.stereov.web.test.config.MockKeyManager
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue

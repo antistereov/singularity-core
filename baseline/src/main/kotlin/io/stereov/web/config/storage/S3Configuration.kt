@@ -1,10 +1,11 @@
-package io.stereov.web.config
+package io.stereov.web.config.storage
 
 import io.stereov.web.global.service.file.service.S3FileStorage
 import io.stereov.web.properties.AppProperties
-import io.stereov.web.properties.S3Properties
+import io.stereov.web.properties.storage.S3Properties
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
@@ -16,10 +17,11 @@ import java.net.URI
 
 @AutoConfiguration(
     after = [
-        ApplicationConfiguration::class,
+        StorageConfiguration::class,
     ]
 )
 @EnableConfigurationProperties(S3Properties::class)
+@ConditionalOnProperty(prefix = "baseline.file.storage", value = ["type"], havingValue = "s3", matchIfMissing = false)
 class S3Configuration {
 
     @Bean

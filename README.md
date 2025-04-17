@@ -323,7 +323,7 @@ Here are the key properties you need to set in your `application.yaml`:
 
 ### Encryption & Decryption
 - **EncryptionService**:  
-  Use the [`EncryptionService`](baseline/src/main/kotlin/io/stereov/web/global/service/encryption/EncryptionService.kt) to securely encrypt and decrypt values before storing them in the database.
+  Use the [`EncryptionService`](baseline/src/main/kotlin/io/stereov/web/global/service/secrets/EncryptionService.kt) to securely encrypt and decrypt values before storing them in the database.
 
 ### Hashing & Validation
 - **HashService**:  

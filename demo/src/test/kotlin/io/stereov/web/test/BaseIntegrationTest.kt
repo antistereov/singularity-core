@@ -4,9 +4,10 @@ import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.stereov.web.global.service.cache.AccessTokenCache
-import io.stereov.web.global.service.encryption.EncryptionService
+import io.stereov.web.global.service.encryption.service.EncryptionService
 import io.stereov.web.global.service.hash.HashService
 import io.stereov.web.global.service.twofactorauth.TwoFactorAuthService
+import io.stereov.web.properties.secrets.KeyManagerImplementation
 import io.stereov.web.test.config.MockMailSenderConfig
 import io.stereov.web.user.service.token.TwoFactorAuthTokenService
 import io.stereov.web.user.service.token.UserTokenService
@@ -77,6 +78,7 @@ class BaseIntegrationTest : BaseSpringBootTest() {
         @DynamicPropertySource
         @JvmStatic
         fun properties(registry: DynamicPropertyRegistry) {
+            registry.add("baseline.secrets.key-manager") { KeyManagerImplementation.Mock }
             registry.add("baseline.file.storage.s3.domain") { "amazon.com" }
             registry.add("baseline.file.storage.s3.access-key") { "amazon.com" }
             registry.add("baseline.file.storage.s3.secret-key") { "amazon.com" }

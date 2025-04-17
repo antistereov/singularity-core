@@ -2,8 +2,9 @@ package io.stereov.web.config
 
 import com.nimbusds.jose.jwk.source.ImmutableSecret
 import com.nimbusds.jose.proc.SecurityContext
+import io.stereov.web.config.secrets.SecretsConfiguration
 import io.stereov.web.global.service.jwt.JwtService
-import io.stereov.web.properties.JwtProperties
+import io.stereov.web.global.service.secrets.component.KeyManager
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
@@ -40,14 +41,15 @@ import javax.crypto.spec.SecretKeySpec
 @AutoConfiguration(
     after = [
         ApplicationConfiguration::class,
+        SecretsConfiguration::class,
     ]
 )
 class JwtConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun reactiveJwtDecoder(jwtProperties: JwtProperties): ReactiveJwtDecoder {
-        val jwtKey = jwtProperties.secretKey
+    fun reactiveJwtDecoder(keyManager: KeyManager): ReactiveJwtDecoder {
+        val jwtKey = keyManager.getJwtSecret().value
         val secretKey = SecretKeySpec(jwtKey.toByteArray(), "HmacSHA256")
 
         return NimbusReactiveJwtDecoder.withSecretKey(secretKey).build()
@@ -55,8 +57,8 @@ class JwtConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun jwtEncoder(jwtProperties: JwtProperties): JwtEncoder {
-        val jwtKey = jwtProperties.secretKey
+    fun jwtEncoder(keyManager: KeyManager): JwtEncoder {
+        val jwtKey = keyManager.getJwtSecret().value
         val secretKey = SecretKeySpec(jwtKey.toByteArray(), "HmacSHA256")
         val secret = ImmutableSecret<SecurityContext>(secretKey)
         return NimbusJwtEncoder(secret)

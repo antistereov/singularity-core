@@ -11,9 +11,14 @@
       "sourceType": "io.stereov.web.properties.AuthProperties"
     },
     {
+      "name": "baseline.file.storage",
+      "type": "io.stereov.web.properties.storage.StorageProperties",
+      "sourceType": "io.stereov.web.properties.storage.StorageProperties"
+    },
+    {
       "name": "baseline.file.storage.s3",
-      "type": "io.stereov.web.properties.S3Properties",
-      "sourceType": "io.stereov.web.properties.S3Properties"
+      "type": "io.stereov.web.properties.storage.S3Properties",
+      "sourceType": "io.stereov.web.properties.storage.S3Properties"
     },
     {
       "name": "baseline.mail",
@@ -21,9 +26,14 @@
       "sourceType": "io.stereov.web.properties.MailProperties"
     },
     {
-      "name": "baseline.security.encryption",
-      "type": "io.stereov.web.properties.EncryptionProperties",
-      "sourceType": "io.stereov.web.properties.EncryptionProperties"
+      "name": "baseline.secrets",
+      "type": "io.stereov.web.properties.secrets.KeyManagerProperties",
+      "sourceType": "io.stereov.web.properties.secrets.KeyManagerProperties"
+    },
+    {
+      "name": "baseline.secrets.bitwarden",
+      "type": "io.stereov.web.properties.secrets.BitwardenKeyManagerProperties",
+      "sourceType": "io.stereov.web.properties.secrets.BitwardenKeyManagerProperties"
     },
     {
       "name": "baseline.security.jwt",
@@ -92,9 +102,16 @@
       "description": "Paths that require user authentication. This is a comma-separated list of paths."
     },
     {
+      "name": "baseline.file.storage.type",
+      "type": "io.stereov.web.properties.storage.StorageType",
+      "sourceType": "io.stereov.web.properties.storage.S3Properties",
+      "description": "The type of storage you prefer.",
+      "defaultValue": "s3"
+    },
+    {
       "name": "baseline.file.storage.s3.domain",
-      "type": "java.util.List<java.lang.String>",
-      "sourceType": "io.stereov.web.properties.S3Properties",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.web.properties.storage.S3Properties",
       "description": "The URI of your S3"
     },
     {
@@ -106,8 +123,8 @@
     },
     {
       "name": "baseline.file.storage.s3.bucket",
-      "type": "java.util.List<java.lang.String>",
-      "sourceType": "io.stereov.web.properties.S3Properties",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.web.properties.storage.S3Properties",
       "description": "The bucket in your S3 storage.",
       "defaultValue": "app"
     },
@@ -121,19 +138,19 @@
     {
       "name": "baseline.file.storage.s3.access-key",
       "type": "java.util.List<java.lang.String>",
-      "sourceType": "io.stereov.web.properties.S3Properties",
+      "sourceType": "io.stereov.web.properties.storage.S3Properties",
       "description": "Your S3 access key."
     },
     {
       "name": "baseline.file.storage.s3.secret-key",
       "type": "java.util.List<java.lang.String>",
-      "sourceType": "io.stereov.web.properties.S3Properties",
+      "sourceType": "io.stereov.web.properties.storage.S3Properties",
       "description": "Your S3 secret key."
     },
     {
       "name": "baseline.file.storage.s3.signature-duration",
       "type": "java.util.List<java.lang.Long>",
-      "sourceType": "io.stereov.web.properties.S3Properties",
+      "sourceType": "io.stereov.web.properties.storage.S3Properties",
       "description": "How many minutes should presigned URLs be valid? Default is 5 min.",
       "defaultValue": 5
     },
@@ -239,10 +256,50 @@
       "description": "Cooldown period in seconds for sending verification emails."
     },
     {
-      "name": "baseline.security.encryption.secret-key",
+      "name": "baseline.secrets.key-manager",
+      "type": "io.stereov.web.properties.secrets.KeyManagerImplementation",
+      "sourceType": "io.stereov.web.properties.secrets.KeyManagerProperties",
+      "defaultValue": "bitwarden",
+      "description": "The key manager you want to use. Default value is bitwarden."
+    },
+    {
+      "name": "baseline.secrets.bitwarden.api-url",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.web.properties.EncryptionProperties",
-      "description": "The secret key used for encryption. You can generate one here: https://generate-random.org/encryption-key-generator."
+      "sourceType": "io.stereov.web.properties.secrets.BitwardenKeyManagerProperties",
+      "defaultValue": "https://api.bitwarden.com",
+      "description": "The API URL for Bitwarden."
+    },
+    {
+      "name": "baseline.secrets.bitwarden.identity-url",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.web.properties.secrets.BitwardenKeyManagerProperties",
+      "defaultValue": "https://identity.bitwarden.com",
+      "description": "The identity URL for Bitwarden."
+    },
+    {
+      "name": "baseline.secrets.bitwarden.access-token",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.web.properties.secrets.BitwardenKeyManagerProperties",
+      "description": "Your access token for Bitwarden."
+    },
+    {
+      "name": "baseline.secrets.bitwarden.organization-id",
+      "type": "java.util.UUID",
+      "sourceType": "io.stereov.web.properties.secrets.BitwardenKeyManagerProperties",
+      "description": "Your organization ID within Bitwarden."
+    },
+    {
+      "name": "baseline.secrets.bitwarden.project-id",
+      "type": "java.util.UUID",
+      "sourceType": "io.stereov.web.properties.secrets.BitwardenKeyManagerProperties",
+      "description": "Your project ID within Bitwarden."
+    },
+    {
+      "name": "baseline.secrets.bitwarden.state-file",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.web.properties.secrets.BitwardenKeyManagerProperties",
+      "description": "The path to your state file",
+      "defaultValue": "~/.bitwarden/application/state"
     },
     {
       "name": "baseline.security.jwt.expires-in",
@@ -250,12 +307,6 @@
       "sourceType": "io.stereov.web.properties.JwtProperties",
       "defaultValue": 900,
       "description": "Expiration time for the JWT token in seconds. Default is 15 minutes."
-    },
-    {
-      "name": "baseline.security.jwt.secret-key",
-      "type": "java.lang.String",
-      "sourceType": "io.stereov.web.properties.JwtProperties",
-      "description": "The secret key used to sign the JWT tokens. You can generate one here: https://generate-random.org/encryption-key-generator."
     },
     {
       "name": "baseline.security.rate-limit.ip-limit",

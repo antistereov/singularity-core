@@ -1,7 +1,10 @@
 package io.stereov.web.config
 
-import io.stereov.web.global.service.encryption.EncryptionService
-import io.stereov.web.global.service.encryption.component.KeyManager
+import io.stereov.web.config.secrets.BitwardenSecretsConfiguration
+import io.stereov.web.config.secrets.SecretsConfiguration
+import io.stereov.web.global.service.encryption.service.EncryptionService
+import io.stereov.web.global.service.secrets.component.EnvKeyManager
+import io.stereov.web.global.service.secrets.component.KeyManager
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
@@ -28,15 +31,16 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 @AutoConfiguration(
     after = [
-        ApplicationConfiguration::class,
+        SecretsConfiguration::class,
+        BitwardenSecretsConfiguration::class,
     ]
 )
 class EncryptionConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun keyManager(): KeyManager {
-        return KeyManager()
+    fun keyManager(): EnvKeyManager {
+        return EnvKeyManager()
     }
 
     @Bean

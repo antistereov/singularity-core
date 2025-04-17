@@ -21,7 +21,6 @@ import org.springframework.context.annotation.Configuration
  * This class enables the following configuration properties:
  * - [AppProperties]
  * - [AuthProperties]
- * - [EncryptionProperties]
  * - [UiProperties]
  * - [JwtProperties]
  * - [RateLimitProperties]
@@ -41,7 +40,6 @@ import org.springframework.context.annotation.Configuration
 @EnableConfigurationProperties(
     AppProperties::class,
     AuthProperties::class,
-    EncryptionProperties::class,
     JwtProperties::class,
     LoginAttemptLimitProperties::class,
     RateLimitProperties::class,

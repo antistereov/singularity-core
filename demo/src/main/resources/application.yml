@@ -29,12 +29,22 @@ baseline:
     secure: ${SECURE:false}
   file:
     storage:
+      type: s3
       s3:
         domain: ${S3_DOMAIN}
         bucket: ${S3_BUCKET}
         access-key: ${S3_ACCESS_KEY}
         secret-key: ${S3_SECRET_KEY}
         scheme: ${S3_SCHEME}
+  secrets:
+    key-manager: bitwarden
+    bitwarden:
+      access-token: ${BITWARDEN_ACCESS_TOKEN}
+      api-url: ${BITWARDEN_API_URL}
+      identity-url: ${BITWARDEN_IDENTITY_URL}
+      project-id: ${BITWARDEN_PROJECT_ID}
+      organization-id: ${BITWARDEN_ORGANIZATION_ID}
+      state-file: ${BITWARDEN_STATE_FILE}
   mail:
     host: ${MAIL_HOST}
     port: ${MAIL_PORT}
@@ -52,10 +62,7 @@ baseline:
     ui-verification-path: ${EMAIL_VERIFICATION_PATH:/auth/verify-email}
     ui-password-reset-path: ${PASSWORD_RESET_PATH:/auth/password-reset}
   security:
-    encryption:
-      secret-key: ${SECRET_KEY}
     jwt:
-      secret-key: ${JWT_SECRET_KEY}
       expires-in: 900
     rate-limit:
       ip-limit: 2000

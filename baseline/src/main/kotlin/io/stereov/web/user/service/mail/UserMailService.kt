@@ -4,7 +4,7 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.web.auth.exception.AuthException
 import io.stereov.web.auth.service.AuthenticationService
-import io.stereov.web.global.service.encryption.EncryptionService
+import io.stereov.web.global.service.encryption.service.EncryptionService
 import io.stereov.web.global.service.hash.HashService
 import io.stereov.web.global.service.mail.MailCooldownService
 import io.stereov.web.global.service.mail.MailService

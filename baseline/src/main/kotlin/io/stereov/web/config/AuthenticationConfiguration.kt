@@ -7,9 +7,10 @@ import io.lettuce.core.api.coroutines.RedisCoroutinesCommands
 import io.stereov.web.auth.exception.handler.AuthExceptionHandler
 import io.stereov.web.auth.service.AuthenticationService
 import io.stereov.web.auth.service.CookieService
+import io.stereov.web.config.storage.S3Configuration
 import io.stereov.web.global.service.cache.AccessTokenCache
 import io.stereov.web.global.service.cache.RedisService
-import io.stereov.web.global.service.encryption.EncryptionService
+import io.stereov.web.global.service.encryption.service.EncryptionService
 import io.stereov.web.global.service.file.service.FileStorage
 import io.stereov.web.global.service.geolocation.GeoLocationService
 import io.stereov.web.global.service.hash.HashService
@@ -203,8 +204,8 @@ class AuthenticationConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun userService(userRepository: UserRepository): UserService {
-        return UserService(userRepository)
+    fun userService(userRepository: UserRepository, encryptionService: EncryptionService): UserService {
+        return UserService(userRepository, encryptionService)
     }
 
     @Bean

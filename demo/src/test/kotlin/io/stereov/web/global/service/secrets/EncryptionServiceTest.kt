@@ -1,5 +1,6 @@
-package io.stereov.web.global.service.encryption
+package io.stereov.web.global.service.secrets
 
+import io.stereov.web.global.service.encryption.service.EncryptionService
 import io.stereov.web.test.config.MockKeyManager
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach

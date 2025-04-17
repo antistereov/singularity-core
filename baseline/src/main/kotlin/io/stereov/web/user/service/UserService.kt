@@ -2,12 +2,14 @@ package io.stereov.web.user.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.web.global.service.encryption.service.EncryptionService
 import io.stereov.web.global.service.file.exception.model.NoSuchFileException
 import io.stereov.web.global.service.file.model.FileMetaData
 import io.stereov.web.user.exception.model.UserDoesNotExistException
 import io.stereov.web.user.model.UserDocument
 import io.stereov.web.user.repository.UserRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import org.springframework.stereotype.Service
 
 /**
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Service
 @Service
 class UserService(
     private val userRepository: UserRepository,
+    private val encryptionService: EncryptionService,
 ) {
 
     private val logger: KLogger
@@ -152,5 +155,19 @@ class UserService(
 
         val user = findById(userId)
         return user.avatar ?: throw NoSuchFileException("No avatar set for user")
+    }
+
+    suspend fun rotateKeys() {
+        this.findAll().map { user ->
+            user.security.mail.passwordResetSecret = user.security.mail.passwordResetSecret?.let {
+                encryptionService.rotateKey(it)
+            }
+            user.security.mail.verificationSecret = user.security.mail.verificationSecret?.let {
+                encryptionService.rotateKey(it)
+            }
+            user.security.twoFactor.secret = user.security.twoFactor.secret?.let {
+                encryptionService.rotateKey(it)
+            }
+        }
     }
 }

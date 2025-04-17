@@ -6,9 +6,10 @@ import io.stereov.web.auth.model.AccessType
 import io.stereov.web.global.service.file.model.FileMetaData
 import io.stereov.web.global.service.file.util.DataBufferPublisher
 import io.stereov.web.properties.AppProperties
-import io.stereov.web.properties.S3Properties
+import io.stereov.web.properties.storage.S3Properties
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.reactive.awaitSingle
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.http.MediaType
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
@@ -24,6 +25,7 @@ import java.time.Duration
 import java.util.*
 
 @Service
+@ConditionalOnProperty(prefix = "baseline.file.storage", value = ["type"], havingValue = "s3", matchIfMissing = false)
 class S3FileStorage(
     private val s3Properties: S3Properties,
     private val s3Client: S3AsyncClient,

@@ -2,7 +2,7 @@ package io.stereov.web.global.service.mail
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.web.global.service.encryption.EncryptionService
+import io.stereov.web.global.service.encryption.service.EncryptionService
 import io.stereov.web.global.service.mail.exception.model.MailCooldownException
 import io.stereov.web.properties.MailProperties
 import io.stereov.web.properties.UiProperties

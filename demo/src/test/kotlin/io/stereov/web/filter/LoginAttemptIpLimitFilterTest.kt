@@ -1,6 +1,7 @@
 package io.stereov.web.filter
 
 import io.stereov.web.properties.LoginAttemptLimitProperties
+import io.stereov.web.properties.secrets.KeyManagerImplementation
 import io.stereov.web.test.BaseSpringBootTest
 import io.stereov.web.user.dto.request.DeviceInfoRequest
 import io.stereov.web.user.dto.request.LoginRequest
@@ -14,6 +15,7 @@ import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.MongoDBContainer
 import org.testcontainers.utility.DockerImageName
+import java.util.*
 
 class LoginAttemptIpLimitFilterTest : BaseSpringBootTest() {
 
@@ -31,6 +33,13 @@ class LoginAttemptIpLimitFilterTest : BaseSpringBootTest() {
         @DynamicPropertySource
         @JvmStatic
         fun properties(registry: DynamicPropertyRegistry) {
+            registry.add("baseline.secrets.key-manager") { KeyManagerImplementation.Mock }
+            registry.add("baseline.secrets.bitwarden.api-url") { "https//api.bitwarden.com" }
+            registry.add("baseline.secrets.bitwarden.identity-url") { "https//identity.bitwarden.com" }
+            registry.add("baseline.secrets.bitwarden.organization-id") { UUID.randomUUID() }
+            registry.add("baseline.secrets.bitwarden.project-id") { UUID.randomUUID() }
+            registry.add("baseline.secrets.bitwarden.access-token") { "asghaosg" }
+            registry.add("baseline.secrets.bitwarden.state-file") { "asghaosg" }
             registry.add("baseline.file.storage.s3.domain") { "amazon.com" }
             registry.add("baseline.file.storage.s3.access-key") { "amazon.com" }
             registry.add("baseline.file.storage.s3.secret-key") { "amazon.com" }

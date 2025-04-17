@@ -6,7 +6,7 @@ import io.stereov.web.auth.exception.AuthException
 import io.stereov.web.auth.service.AuthenticationService
 import io.stereov.web.auth.service.CookieService
 import io.stereov.web.global.service.cache.AccessTokenCache
-import io.stereov.web.global.service.encryption.EncryptionService
+import io.stereov.web.global.service.encryption.service.EncryptionService
 import io.stereov.web.global.service.hash.HashService
 import io.stereov.web.global.service.random.RandomService
 import io.stereov.web.global.service.twofactorauth.TwoFactorAuthService

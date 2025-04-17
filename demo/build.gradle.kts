@@ -14,6 +14,16 @@ val accessToken = properties["maven.accessToken"] as String?
 
 repositories {
     mavenCentral()
+
+    maven {
+        url = uri("https://maven.pkg.github.com/bitwarden/sdk-sm")
+        credentials {
+            username = properties["gpr.user"] as String?
+                ?: System.getenv("GPR_USER")
+            password = properties["gpr.key"] as String?
+                ?: System.getenv("GPR_KEY")
+        }
+    }
 }
 
 val kotlinxVersion = "1.10.1"

@@ -3,7 +3,7 @@ package io.stereov.web.test
 import com.warrenstrange.googleauth.GoogleAuthenticator
 import io.mockk.every
 import io.stereov.web.config.Constants
-import io.stereov.web.global.service.encryption.EncryptionService
+import io.stereov.web.global.service.encryption.service.EncryptionService
 import io.stereov.web.test.config.MockConfig
 import io.stereov.web.test.config.MockKeyManager
 import io.stereov.web.user.dto.request.*

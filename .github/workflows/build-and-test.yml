@@ -8,6 +8,10 @@ on:
     branches:
       - main
 
+env:
+  GPR_KEY: ${{ secrets.GPR_KEY }}
+  GPR_USER: ${{ secrets.GPR_USER }}
+
 jobs:
   build_and_test:
     name: Build and Test
