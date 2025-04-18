@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.serialization.KSerializer
-import org.springframework.scheduling.annotation.Scheduled
 
 abstract class SensitiveCrudService<S, D: SensitiveDocument<S>, E: EncryptedSensitiveDocument<S>>(
     private val repository: SensitiveCrudRepository<E>,
@@ -87,7 +86,6 @@ abstract class SensitiveCrudService<S, D: SensitiveDocument<S>, E: EncryptedSens
         }
     }
 
-    @Scheduled(cron = "\${baseline.secrets.key-rotation-cron}")
     open suspend fun rotateKey() {
         logger.debug { "Rotating encryption secret" }
 

@@ -3,9 +3,11 @@ package io.stereov.web.auth.service
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.web.auth.exception.model.InvalidPrincipalException
+import io.stereov.web.auth.exception.model.NotAuthorizedException
 import io.stereov.web.auth.model.CustomAuthenticationToken
 import io.stereov.web.auth.model.ErrorAuthenticationToken
 import io.stereov.web.global.service.jwt.exception.model.InvalidTokenException
+import io.stereov.web.user.model.Role
 import io.stereov.web.user.model.UserDocument
 import io.stereov.web.user.service.UserService
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -78,6 +80,22 @@ class AuthenticationService {
 
         val auth = getCurrentAuthentication()
         return auth.tokenId
+    }
+
+    /**
+     * Validate the authority of the current user.
+     * It throws a [NotAuthorizedException] if the user does not have the required role.
+     *
+     * @param role The required role.
+     *
+     * @throws NotAuthorizedException If the user does not have the required role.
+     */
+    suspend fun validateAuthorization(role: Role) {
+        logger.debug { "Validating authorization" }
+
+        val valid = this.getCurrentUser().sensitive.roles.contains(role)
+
+        if (!valid) throw NotAuthorizedException("User does not have sufficient permission: User does not have role $role")
     }
 
     /**

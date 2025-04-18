@@ -38,6 +38,7 @@ class AuthExceptionHandler : BaseExceptionHandler<AuthException> {
         val status = when (ex) {
             is InvalidCredentialsException -> HttpStatus.UNAUTHORIZED
             is InvalidPrincipalException -> HttpStatus.UNAUTHORIZED
+            is NotAuthorizedException -> HttpStatus.FORBIDDEN
             is NoTokenProvidedException -> HttpStatus.UNAUTHORIZED
             is NoTwoFactorUserAttributeException -> HttpStatus.BAD_REQUEST
             is TwoFactorAuthDisabledException -> HttpStatus.BAD_REQUEST

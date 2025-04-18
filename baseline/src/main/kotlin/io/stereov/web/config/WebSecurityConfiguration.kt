@@ -6,6 +6,7 @@ import io.stereov.web.filter.RateLimitingFilter
 import io.stereov.web.global.service.ratelimit.RateLimitService
 import io.stereov.web.properties.AuthProperties
 import io.stereov.web.properties.UiProperties
+import io.stereov.web.user.model.Role
 import io.stereov.web.user.service.UserService
 import io.stereov.web.user.service.token.UserTokenService
 import org.springframework.boot.autoconfigure.AutoConfiguration
@@ -102,6 +103,7 @@ class WebSecurityConfiguration {
                 authProperties.adminPaths.forEach { path ->
                     it.pathMatchers(path).hasRole("ADMIN")
                 }
+                it.pathMatchers("/admin/**").hasRole(Role.ADMIN.name)
                 it.anyExchange().permitAll()
             }
             .addFilterBefore(RateLimitingFilter(rateLimitService), SecurityWebFiltersOrder.FIRST)

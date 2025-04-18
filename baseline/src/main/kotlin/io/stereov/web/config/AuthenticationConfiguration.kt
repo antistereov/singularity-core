@@ -4,6 +4,8 @@ import com.warrenstrange.googleauth.GoogleAuthenticator
 import io.github.bucket4j.redis.lettuce.cas.LettuceBasedProxyManager
 import io.lettuce.core.ExperimentalLettuceCoroutinesApi
 import io.lettuce.core.api.coroutines.RedisCoroutinesCommands
+import io.stereov.web.admin.controller.AdminController
+import io.stereov.web.admin.service.AdminService
 import io.stereov.web.auth.exception.handler.AuthExceptionHandler
 import io.stereov.web.auth.service.AuthenticationService
 import io.stereov.web.auth.service.CookieService
@@ -37,6 +39,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
 import org.springframework.boot.autoconfigure.data.web.SpringDataWebAutoConfiguration
 import org.springframework.boot.autoconfigure.mongo.MongoReactiveAutoConfiguration
+import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRepositories
@@ -103,6 +106,12 @@ class AuthenticationConfiguration {
     }
 
     // Services
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun adminService(keyManager: KeyManager, context: ApplicationContext): AdminService {
+        return AdminService(keyManager, context)
+    }
 
     @Bean
     @ConditionalOnMissingBean
@@ -234,6 +243,12 @@ class AuthenticationConfiguration {
     }
 
     // Controller
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun adminController(adminService: AdminService): AdminController {
+        return AdminController(adminService)
+    }
 
     @Bean
     @ConditionalOnMissingBean
