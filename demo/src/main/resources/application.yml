@@ -45,6 +45,7 @@ baseline:
       project-id: ${BITWARDEN_PROJECT_ID}
       organization-id: ${BITWARDEN_ORGANIZATION_ID}
       state-file: ${BITWARDEN_STATE_FILE}
+    key-rotation-cron: 0 0 4 1 1,4,7,10 *
   mail:
     host: ${MAIL_HOST}
     port: ${MAIL_PORT}

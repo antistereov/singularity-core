@@ -1,6 +1,5 @@
 package io.stereov.web.global.service.encryption
 
-import io.stereov.web.global.service.encryption.service.EncryptionService
 import io.stereov.web.global.service.secrets.component.KeyManager
 import io.stereov.web.test.BaseIntegrationTest
 import io.stereov.web.test.config.MockKeyManager
@@ -11,9 +10,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 class EncryptionServiceTest : BaseIntegrationTest() {
-
-    @Autowired
-    private lateinit var encryptionTransformer: EncryptionService
 
     @Autowired
     private lateinit var keyManager: KeyManager

@@ -263,6 +263,13 @@
       "description": "The key manager you want to use. Default value is bitwarden."
     },
     {
+      "name": "baseline.secrets.key-rotation-cron",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.web.properties.secrets.KeyManagerProperties",
+      "defaultValue": "0 0 4 1 1,4,7,10 *",
+      "description": "The cron expression for key rotation. The default value is the 1st day of January, April, July, and October at 4:00:00 AM."
+    },
+    {
       "name": "baseline.secrets.bitwarden.api-url",
       "type": "java.lang.String",
       "sourceType": "io.stereov.web.properties.secrets.BitwardenKeyManagerProperties",

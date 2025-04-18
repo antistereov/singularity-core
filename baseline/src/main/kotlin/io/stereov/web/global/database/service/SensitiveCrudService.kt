@@ -9,6 +9,7 @@ import io.stereov.web.global.service.encryption.model.SensitiveDocument
 import io.stereov.web.global.service.secrets.component.KeyManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.serialization.KSerializer
 import org.springframework.scheduling.annotation.Scheduled
 
@@ -86,6 +87,21 @@ abstract class SensitiveCrudService<S, D: SensitiveDocument<S>, E: EncryptedSens
         }
     }
 
-    @Scheduled
-    abstract suspend fun rotateKey()
+    @Scheduled(cron = "\${baseline.secrets.key-rotation-cron}")
+    open suspend fun rotateKey() {
+        logger.debug { "Rotating encryption secret" }
+
+        this.repository.findAll()
+            .map {
+                if (it.sensitive.secretId == keyManager.getEncryptionSecret().id) {
+                    logger.debug { "Skipping rotation of document ${it._id}: Encryption secret did not change" }
+                    return@map it
+                }
+
+                this.logger.debug { "Rotating key of document ${it._id}" }
+                this.repository.save(this.encrypt(this.decrypt(it)))
+            }
+            .onCompletion { logger.debug { "Key successfully rotated" } }
+            .collect {}
+    }
 }

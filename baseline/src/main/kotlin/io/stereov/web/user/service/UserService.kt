@@ -54,16 +54,16 @@ class UserService(
     }
 
     override suspend fun rotateKey() {
-        logger.debug { "Rotating encryption secret" }
+        logger.debug { "Rotating encryption secrets for users" }
 
         this.userRepository.findAll()
             .map {
                 if (it.sensitive.secretId == keyManager.getEncryptionSecret().id) {
-                    logger.debug { "Skipping rotation of document ${it._id}: Encryption secret did not change" }
+                    logger.debug { "Skipping rotation of user document ${it._id}: Encryption secret did not change" }
                     return@map it
                 }
 
-                this.logger.debug { "Rotating key of document ${it._id}" }
+                this.logger.debug { "Rotating key of user document ${it._id}" }
                 this.userRepository.save(this.encrypt(this.decrypt(it), listOf(false)))
             }
             .onCompletion { logger.debug { "Key successfully rotated" } }

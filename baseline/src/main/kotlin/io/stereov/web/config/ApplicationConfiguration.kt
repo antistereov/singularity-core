@@ -10,6 +10,7 @@ import org.springframework.boot.autoconfigure.mongo.MongoReactiveAutoConfigurati
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.scheduling.annotation.EnableScheduling
 
 /**
  * # Application configuration class.
@@ -49,6 +50,7 @@ import org.springframework.context.annotation.Configuration
     TwoFactorAuthProperties::class,
     UiProperties::class,
 )
+@EnableScheduling
 class ApplicationConfiguration {
 
     @Bean

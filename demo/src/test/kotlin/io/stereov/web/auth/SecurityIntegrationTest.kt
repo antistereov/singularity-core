@@ -11,14 +11,10 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.security.oauth2.jwt.JwtEncoder
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder
 import java.time.Instant
 
 class SecurityIntegrationTest : BaseIntegrationTest() {
-
-    @Autowired
-    private lateinit var jwtEncoder: JwtEncoder
 
     @Autowired
     private lateinit var jwtDecoder: ReactiveJwtDecoder

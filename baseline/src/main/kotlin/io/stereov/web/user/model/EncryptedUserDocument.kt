@@ -10,7 +10,7 @@ import java.time.Instant
 
 @Document(collection = "users")
 data class EncryptedUserDocument(
-    @Id val _id: String? = null,
+    @Id override val _id: String? = null,
     val email: SearchableHash,
     var password: SecureHash,
     val created: Instant = Instant.now(),
