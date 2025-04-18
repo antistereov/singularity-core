@@ -109,7 +109,7 @@ class BitwardenKeyManager(
         val note = "Jwt secret generated on ${Instant.now()}"
 
         val newSecret = createOrUpdateKey(key, secret, note)
-        this.encryptionSecret = newSecret
+        this.jwtSecret = newSecret
 
         this.createOrUpdateKey(Constants.CURRENT_JWT_SECRET, newSecret.id.toString(), note)
 
