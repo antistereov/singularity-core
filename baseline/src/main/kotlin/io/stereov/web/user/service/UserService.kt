@@ -45,7 +45,7 @@ class UserService(
 
         if (otherValues.getOrNull(0) == true || otherValues.getOrNull(0) == null) document.updateLastActive()
 
-        val hashedEmail = hashService.hashBcrypt(document.sensitive.email)
+        val hashedEmail = hashService.hashSha256(document.sensitive.email)
         return this.transformer.encrypt(document, this.serializer, listOf(hashedEmail)) as EncryptedUserDocument
     }
 
@@ -71,7 +71,7 @@ class UserService(
     suspend fun findByEmail(email: String): UserDocument {
         logger.debug { "Fetching user with email $email" }
 
-        val hashedEmail = hashService.hashBcrypt(email)
+        val hashedEmail = hashService.hashSha256(email)
         val encrypted =  this.userRepository.findByEmail(hashedEmail)
             ?: throw UserDoesNotExistException("No user account found with email $email")
 
@@ -88,7 +88,7 @@ class UserService(
     suspend fun findByEmailOrNull(email: String): UserDocument? {
         logger.debug { "Fetching user with email $email" }
 
-        val hashedEmail = hashService.hashBcrypt(email)
+        val hashedEmail = hashService.hashSha256(email)
         return this.userRepository.findByEmail(hashedEmail)
             ?.let { this. decrypt(it) }
     }
@@ -103,7 +103,7 @@ class UserService(
     suspend fun existsByEmail(email: String): Boolean {
         logger.debug { "Checking if email $email already exists" }
 
-        val hashedEmail = hashService.hashBcrypt(email)
+        val hashedEmail = hashService.hashSha256(email)
         return this.userRepository.existsByEmail(hashedEmail)
     }
 

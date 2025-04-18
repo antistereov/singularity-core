@@ -4,7 +4,7 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.web.auth.exception.AuthException
 import io.stereov.web.global.exception.BaseExceptionHandler
-import io.stereov.web.global.exception.BaseWebException
+import io.stereov.web.global.exception.GlobalBaseWebException
 import io.stereov.web.global.exception.model.DocumentNotFoundException
 import io.stereov.web.global.exception.model.MissingFunctionParameterException
 import io.stereov.web.global.model.ErrorResponse
@@ -25,14 +25,14 @@ import org.springframework.web.server.ServerWebExchange
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
 @ControllerAdvice
-class BaseWebExceptionHandler : BaseExceptionHandler<BaseWebException> {
+class GlobalBaseWebExceptionHandler : BaseExceptionHandler<GlobalBaseWebException> {
 
     private val logger: KLogger
         get() = KotlinLogging.logger {}
 
-    @ExceptionHandler(BaseWebException::class)
+    @ExceptionHandler(GlobalBaseWebException::class)
     override suspend fun handleException(
-        ex: BaseWebException,
+        ex: GlobalBaseWebException,
         exchange: ServerWebExchange
     ): ResponseEntity<ErrorResponse> {
         logger.warn { "${ex.javaClass.simpleName} - ${ex.message}" }

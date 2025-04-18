@@ -1,8 +1,10 @@
 package io.stereov.web.filter
 
+import io.stereov.web.auth.exception.AuthException
 import io.stereov.web.auth.model.CustomAuthenticationToken
 import io.stereov.web.auth.model.ErrorAuthenticationToken
 import io.stereov.web.config.Constants
+import io.stereov.web.global.exception.model.DocumentNotFoundException
 import io.stereov.web.global.service.jwt.exception.TokenException
 import io.stereov.web.global.service.jwt.exception.model.InvalidTokenException
 import io.stereov.web.user.service.UserService
@@ -43,8 +45,9 @@ class CookieAuthenticationFilter(
 
             val user = try {
                 userService.findById(accessToken.userId)
-            } catch (e: Exception) {
-                return@mono setSecurityContext(chain, exchange, e)
+            } catch (e: DocumentNotFoundException) {
+                val authException = AuthException("Invalid access token: user does not exist")
+                return@mono setSecurityContext(chain, exchange, authException)
             }
 
             if (!user.sensitive.devices.any { it.id == accessToken.deviceId }) {

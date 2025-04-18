@@ -1,8 +1,11 @@
 package io.stereov.web.global.service.hash
 
-import io.stereov.web.global.service.hash.model.HashedField
+import io.stereov.web.global.service.hash.model.SearchableHash
+import io.stereov.web.global.service.hash.model.SecureHash
 import org.springframework.security.crypto.bcrypt.BCrypt
 import org.springframework.stereotype.Service
+import java.security.MessageDigest
+import java.util.*
 
 /**
  * # HashService
@@ -24,7 +27,7 @@ class HashService {
      *
      * @return True if the input matches the hash, false otherwise.
      */
-    fun checkBcrypt(input: String, hash: HashedField): Boolean {
+    fun checkBcrypt(input: String, hash: SecureHash): Boolean {
         return BCrypt.checkpw(input, hash.data)
     }
 
@@ -35,7 +38,13 @@ class HashService {
      *
      * @return The hashed string.
      */
-    fun hashBcrypt(input: String): HashedField {
-        return HashedField(BCrypt.hashpw(input, BCrypt.gensalt(10)))
+    fun hashBcrypt(input: String): SecureHash {
+        return SecureHash(BCrypt.hashpw(input, BCrypt.gensalt(10)))
+    }
+
+    fun hashSha256(input: String): SearchableHash {
+        val digest = MessageDigest.getInstance("SHA-256")
+        val hash = digest.digest(input.toByteArray())
+        return SearchableHash(Base64.getUrlEncoder().withoutPadding().encodeToString(hash))
     }
 }

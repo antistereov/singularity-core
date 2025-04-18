@@ -124,7 +124,7 @@ class BitwardenKeyManager(
         this.logger.debug { "Getting current secret by key $key" }
 
         return this.getSecretByKey(key)?.let {
-            this.getSecretById(it.id)
+            this.getSecretById(UUID.fromString(it.value))
         }
     }
 

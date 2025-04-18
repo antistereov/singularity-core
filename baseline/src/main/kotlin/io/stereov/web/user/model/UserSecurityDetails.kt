@@ -1,6 +1,6 @@
 package io.stereov.web.user.model
 
-import io.stereov.web.global.service.hash.model.HashedField
+import io.stereov.web.global.service.hash.model.SecureHash
 import io.stereov.web.global.service.random.RandomService
 import kotlinx.serialization.Serializable
 
@@ -33,7 +33,7 @@ data class UserSecurityDetails(
     data class TwoFactorDetails(
         var enabled: Boolean = false,
         var secret: String? = null,
-        var recoveryCodes: MutableList<HashedField> = mutableListOf()
+        var recoveryCodes: MutableList<SecureHash> = mutableListOf()
     )
 
     /**

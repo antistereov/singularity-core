@@ -37,20 +37,9 @@ class EncryptedTransformer(
         serializer: KSerializer<S>,
         otherValues: List<Any> = emptyList(),
     ): SensitiveDocument<S> {
-        val unwrapped = unwrap(encryptedDocument.sensitiveData, serializer)
+        val unwrapped = unwrap(encryptedDocument.sensitive, serializer)
 
         return encryptedDocument.toSensitiveDocument(unwrapped, otherValues)
-    }
-
-    fun <S, E: EncryptedSensitiveDocument<S>> rotate(
-        encryptedDocument: E,
-        serializer: KSerializer<S>,
-        decryptionValues: List<Any> = emptyList(),
-        encryptionValues: List<Any> = emptyList()
-    ): EncryptedSensitiveDocument<S> {
-        val decrypted = this.decrypt(encryptedDocument, serializer, decryptionValues)
-
-        return this.encrypt(decrypted, serializer, encryptionValues)
     }
 
     private fun <T> wrap(value: T, serializer: KSerializer<T>): Encrypted<T> {

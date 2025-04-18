@@ -6,43 +6,30 @@ import io.stereov.web.global.exception.model.MissingFunctionParameterException
 import io.stereov.web.global.service.encryption.model.Encrypted
 import io.stereov.web.global.service.encryption.model.SensitiveDocument
 import io.stereov.web.global.service.file.model.FileMetaData
-import io.stereov.web.global.service.hash.model.HashedField
+import io.stereov.web.global.service.hash.model.SearchableHash
+import io.stereov.web.global.service.hash.model.SecureHash
 import io.stereov.web.user.dto.UserDto
 import io.stereov.web.user.exception.model.InvalidUserDocumentException
 import org.springframework.data.annotation.Transient
 import java.time.Instant
 
 /**
- * # UserDocument
- *
- * This class represents a user document in the database.
- * It contains fields for user information, security details, and device information.
- * It also provides methods for managing two-factor authentication, devices, and roles.
- *
- * @property _id The unique identifier for the user document.
- * @property email The email address of the user.
- * @property name The name of the user.
- * @property password The hashed password of the user.
- * @property roles The roles assigned to the user.
- * @property security The security details of the user.
- * @property devices The list of devices associated with the user.
- * @property lastActive The last active timestamp of the user.
- * @property app The application information associated with the user.
- *
+ * # The User Document
+
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
 data class UserDocument(
     var _id: String? = null,
-    var password: HashedField,
+    var password: SecureHash,
     val created: Instant = Instant.now(),
     var lastActive: Instant = Instant.now(),
     var app: ApplicationInfo? = null,
     override var sensitive: SensitiveUserData,
-)  : SensitiveDocument<SensitiveUserData>(sensitive) {
+)  : SensitiveDocument<SensitiveUserData>() {
 
     constructor(
         _id: String? = null,
-        password: HashedField,
+        password: SecureHash,
         created: Instant = Instant.now(),
         lastActive: Instant = Instant.now(),
         app: ApplicationInfo? = null,
@@ -91,7 +78,7 @@ data class UserDocument(
         encryptedSensitiveData: Encrypted<SensitiveUserData>,
         otherValues: List<Any>
     ): EncryptedUserDocument {
-        val hashedEmail = otherValues[0] as? HashedField
+        val hashedEmail = otherValues[0] as? SearchableHash
             ?: throw MissingFunctionParameterException("Please provide the hashed email as parameter.")
 
         return EncryptedUserDocument(
@@ -134,7 +121,7 @@ data class UserDocument(
      *
      * @return The updated [UserDocument].
      */
-    fun setupTwoFactorAuth(secret: String, recoveryCodes: List<HashedField>): UserDocument {
+    fun setupTwoFactorAuth(secret: String, recoveryCodes: List<SecureHash>): UserDocument {
         logger.debug { "Setting up two factor authentication" }
 
         this.sensitive.security.twoFactor.enabled = true
