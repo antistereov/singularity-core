@@ -3,7 +3,6 @@ package io.stereov.web.config
 import io.stereov.web.config.secrets.BitwardenSecretsConfiguration
 import io.stereov.web.config.secrets.SecretsConfiguration
 import io.stereov.web.global.service.encryption.service.EncryptionService
-import io.stereov.web.global.service.secrets.component.EnvKeyManager
 import io.stereov.web.global.service.secrets.component.KeyManager
 import kotlinx.serialization.json.Json
 import org.springframework.boot.autoconfigure.AutoConfiguration
@@ -37,12 +36,6 @@ import org.springframework.context.annotation.Configuration
     ]
 )
 class EncryptionConfiguration {
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun keyManager(): EnvKeyManager {
-        return EnvKeyManager()
-    }
 
     @Bean
     @ConditionalOnMissingBean
