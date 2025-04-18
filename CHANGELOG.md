@@ -1,3 +1,48 @@
+## [v1.5.0]
+
+## Changelog
+
+## 🚀 Features
+- [e42130e](https://github.com/antistereov/web-kotlin-spring-baseline/commits/e42130e) enable key rotation for jwt
+- [d2f8475](https://github.com/antistereov/web-kotlin-spring-baseline/commits/d2f8475) create abstract classes to simplify handling encryption
+- [9ec8ac9](https://github.com/antistereov/web-kotlin-spring-baseline/commits/9ec8ac9) **key-manager**: implement a KeyManager interface to enable future implementations of key rotation
+- [4c423ad](https://github.com/antistereov/web-kotlin-spring-baseline/commits/4c423ad) various improvements
+- [8c7307f](https://github.com/antistereov/web-kotlin-spring-baseline/commits/8c7307f) implement S3 compatibility
+
+## 🐛 Fixes
+- [7d9129c](https://github.com/antistereov/web-kotlin-spring-baseline/commits/7d9129c) fix encryption secret not being set after initialization of BitwardenKeyManager
+- [8080347](https://github.com/antistereov/web-kotlin-spring-baseline/commits/8080347) fix some bugs that were introduced by the new encryption strategy
+- [c0b7b78](https://github.com/antistereov/web-kotlin-spring-baseline/commits/c0b7b78) **s3-file-storage**: fix calculation of file size
+- [055d6aa](https://github.com/antistereov/web-kotlin-spring-baseline/commits/055d6aa) **file**: fix file upload and download and add static resources
+
+## 🧪 Tests
+- [8f7e20e](https://github.com/antistereov/web-kotlin-spring-baseline/commits/8f7e20e) explicitly set application property for domain
+- [df1a76c](https://github.com/antistereov/web-kotlin-spring-baseline/commits/df1a76c) fix tests after configuration update
+
+## 🧰 Tasks
+- [060b2d0](https://github.com/antistereov/web-kotlin-spring-baseline/commits/060b2d0) remove unused EnvKeyManager
+- [e419d9f](https://github.com/antistereov/web-kotlin-spring-baseline/commits/e419d9f) enable scheduled key rotation and update properties
+- [38cae45](https://github.com/antistereov/web-kotlin-spring-baseline/commits/38cae45) remove done todos
+- [83d22ad](https://github.com/antistereov/web-kotlin-spring-baseline/commits/83d22ad) **encryption**: make encryption ready for key-rotation
+- [de38ef6](https://github.com/antistereov/web-kotlin-spring-baseline/commits/de38ef6) **file**: add information about upload date
+- [63d78f9](https://github.com/antistereov/web-kotlin-spring-baseline/commits/63d78f9) add slug getter to AppProperties
+- [7fead50](https://github.com/antistereov/web-kotlin-spring-baseline/commits/7fead50) **file-storage**: create interface for FileStorage and remove necessity for temp file in upload
+- [38b2a70](https://github.com/antistereov/web-kotlin-spring-baseline/commits/38b2a70) remove unused classes
+- [2e8bc32](https://github.com/antistereov/web-kotlin-spring-baseline/commits/2e8bc32) **s3**: make some changes to file handling
+- [dab933f](https://github.com/antistereov/web-kotlin-spring-baseline/commits/dab933f) **two-factor**: recovery now sets step-up token automatically, so no more 2FA is needed to deactivate 2FA
+
+## 🛠  Build
+- [f8c7ee9](https://github.com/antistereov/web-kotlin-spring-baseline/commits/f8c7ee9) bump version to 1.5.0
+- [c466f22](https://github.com/antistereov/web-kotlin-spring-baseline/commits/c466f22) bump version to 1.4.1-SNAPSHOT
+
+## 📝 Documentation
+- [64012ba](https://github.com/antistereov/web-kotlin-spring-baseline/commits/64012ba) **changelog**: update CHANGELOG.md for 1.4.0
+
+
+## Contributors
+We'd like to thank the following people for their contributions:
+antistereov
+
 ## [v1.4.0]
 
 ## Changelog
