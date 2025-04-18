@@ -3,7 +3,7 @@ package io.stereov.web.user.service
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.web.global.database.service.SensitiveCrudService
-import io.stereov.web.global.service.encryption.component.EncryptedTransformer
+import io.stereov.web.global.service.encryption.service.EncryptionService
 import io.stereov.web.global.service.file.exception.model.NoSuchFileException
 import io.stereov.web.global.service.file.model.FileMetaData
 import io.stereov.web.global.service.hash.HashService
@@ -13,8 +13,8 @@ import io.stereov.web.user.model.EncryptedUserDocument
 import io.stereov.web.user.model.SensitiveUserData
 import io.stereov.web.user.model.UserDocument
 import io.stereov.web.user.repository.UserRepository
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import org.springframework.stereotype.Service
@@ -30,10 +30,10 @@ import org.springframework.stereotype.Service
 @Service
 class UserService(
     private val userRepository: UserRepository,
-    private val transformer: EncryptedTransformer,
+    private val transformer: EncryptionService,
     json: Json,
     private val hashService: HashService,
-    keyManager: KeyManager,
+    private val keyManager: KeyManager,
 ) : SensitiveCrudService<SensitiveUserData, UserDocument, EncryptedUserDocument>(userRepository, keyManager) {
 
     private val logger: KLogger
@@ -53,10 +53,21 @@ class UserService(
         return this.transformer.decrypt(encrypted, this.serializer) as UserDocument
     }
 
-    override suspend fun rotateKey(): Flow<EncryptedUserDocument> {
-        return this.userRepository.findAll().map {
-            this.userRepository.save(this.encrypt(this.decrypt(it), listOf(false)))
-        }
+    override suspend fun rotateKey() {
+        logger.debug { "Rotating encryption secret" }
+
+        this.userRepository.findAll()
+            .map {
+                if (it.sensitive.secretId == keyManager.getEncryptionSecret().id) {
+                    logger.debug { "Skipping rotation of document ${it._id}: Encryption secret did not change" }
+                    return@map it
+                }
+
+                this.logger.debug { "Rotating key of document ${it._id}" }
+                this.userRepository.save(this.encrypt(this.decrypt(it), listOf(false)))
+            }
+            .onCompletion { logger.debug { "Key successfully rotated" } }
+            .collect {}
     }
 
     /**

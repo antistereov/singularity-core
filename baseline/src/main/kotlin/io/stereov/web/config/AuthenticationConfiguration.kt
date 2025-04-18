@@ -10,7 +10,7 @@ import io.stereov.web.auth.service.CookieService
 import io.stereov.web.config.storage.S3Configuration
 import io.stereov.web.global.service.cache.AccessTokenCache
 import io.stereov.web.global.service.cache.RedisService
-import io.stereov.web.global.service.encryption.component.EncryptedTransformer
+import io.stereov.web.global.service.encryption.service.EncryptionService
 import io.stereov.web.global.service.file.service.FileStorage
 import io.stereov.web.global.service.geolocation.GeoLocationService
 import io.stereov.web.global.service.hash.HashService
@@ -205,7 +205,7 @@ class AuthenticationConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun userService(userRepository: UserRepository, encryptionTransformer: EncryptedTransformer, json: Json, hashService: HashService, keyManager: KeyManager): UserService {
+    fun userService(userRepository: UserRepository, encryptionTransformer: EncryptionService, json: Json, hashService: HashService, keyManager: KeyManager): UserService {
         return UserService(userRepository, encryptionTransformer, json, hashService, keyManager)
     }
 

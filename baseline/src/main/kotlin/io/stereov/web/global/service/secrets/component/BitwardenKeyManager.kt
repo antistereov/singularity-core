@@ -83,15 +83,20 @@ class BitwardenKeyManager(
     }
 
     override fun getJwtSecret(): Secret {
-        this.logger.debug { "Getting JWT secret" }
+        this.logger.debug { "Getting current JWT secret" }
 
-        val currentSecret = this.jwtSecret
-        if (currentSecret != null) return currentSecret
+        return this.jwtSecret
+            ?: loadCurrentJwtSecret()
+    }
 
-        val secret = getSecretByKey(Constants.CURRENT_JWT_SECRET)
+    fun loadCurrentJwtSecret(): Secret {
+        logger.debug { "Loading current JWT secret" }
+
+        val secret = this.getCurrentSecretByKey(Constants.CURRENT_JWT_SECRET)
             ?: updateJwtSecret()
 
         this.jwtSecret = secret
+        this.loadedKeys.add(secret)
 
         return secret
     }
@@ -99,12 +104,14 @@ class BitwardenKeyManager(
     override fun updateJwtSecret(): Secret {
         logger.info { "Updating current jwt secret "}
 
-        val key = Constants.CURRENT_JWT_SECRET
+        val key = "jwt-secret-${Instant.now()}"
         val secret = generateKey(algorithm = "HmacSHA256")
         val note = "Jwt secret generated on ${Instant.now()}"
 
         val newSecret = createOrUpdateKey(key, secret, note)
         this.encryptionSecret = newSecret
+
+        this.createOrUpdateKey(Constants.CURRENT_JWT_SECRET, newSecret.id.toString(), note)
 
         return newSecret
     }

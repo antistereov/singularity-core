@@ -28,18 +28,30 @@ abstract class SensitiveCrudService<S, D: SensitiveDocument<S>, E: EncryptedSens
     suspend fun findById(id: String): D {
         logger.debug { "Finding document by ID: $id" }
 
-        val document = repository.findById(id)
-            ?: throw DocumentNotFoundException("No document found with id $id")
+        val document = this.findEncryptedById(id)
 
         return this.decrypt(document)
+    }
+
+    suspend fun findEncryptedById(id: String): E {
+        logger.debug { "Getting encrypted document with ID: $id" }
+
+        return repository.findById(id)
+            ?: throw DocumentNotFoundException("No document found with id $id")
     }
 
     suspend fun findByIdOrNull(id: String): D? {
         logger.debug { "Finding document by ID: $id" }
 
-        return repository.findById(id)?.let {
+        return this.findEncryptedByIdOrNull(id)?.let {
             this.decrypt(it)
         }
+    }
+
+    suspend fun findEncryptedByIdOrNull(id: String): E? {
+        logger.debug { "Getting encrypted document with ID: $id" }
+
+        return repository.findById(id)
     }
 
     suspend fun save(document: D): D {
@@ -75,5 +87,5 @@ abstract class SensitiveCrudService<S, D: SensitiveDocument<S>, E: EncryptedSens
     }
 
     @Scheduled
-    abstract suspend fun rotateKey(): Flow<E>
+    abstract suspend fun rotateKey()
 }

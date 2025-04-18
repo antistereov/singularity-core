@@ -1,4 +1,4 @@
-package io.stereov.web.global.service.encryption.component
+package io.stereov.web.global.service.encryption.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -8,13 +8,13 @@ import io.stereov.web.global.service.encryption.model.SensitiveDocument
 import io.stereov.web.global.service.secrets.component.KeyManager
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 import java.util.*
 import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
 
-@Component
-class EncryptedTransformer(
+@Service
+class EncryptionService(
     private val keyManager: KeyManager,
     private val json: Json
 ) {
