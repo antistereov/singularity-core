@@ -53,6 +53,9 @@ class TwoFactorAuthTokenService(
     fun createSetupToken(userId: String, secret: String, recoveryCodes: List<String>, issuedAt: Instant = Instant.now()): String {
         logger.debug { "Creating setup token for 2fa" }
 
+        // TODO: token nicht als cookie speichern, sondern im body einer get
+        //  response schicken und body von post bekommen
+
         val claims = JwtClaimsSet.builder()
             .issuedAt(issuedAt)
             .expiresAt(issuedAt.plusSeconds(jwtProperties.expiresIn))
