@@ -19,6 +19,9 @@ import io.stereov.web.user.exception.model.NoAppInfoFoundException
 import io.stereov.web.user.model.UserDocument
 import io.stereov.web.user.service.device.UserDeviceService
 import io.stereov.web.user.service.twofactor.UserTwoFactorAuthService
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.springframework.http.MediaType
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
@@ -51,6 +54,8 @@ class UserSessionService(
 
     private val logger: KLogger
         get() = KotlinLogging.logger {}
+
+    private val emailScope = CoroutineScope(Dispatchers.Default)
 
     /**
      * Logs in a user and returns the user document.
@@ -108,7 +113,7 @@ class UserSessionService(
             throw AuthException("Login failed: UserDocument contains no id")
         }
 
-        if (sendEmail) mailService.sendVerificationEmail(savedUserDocument)
+        if (sendEmail) emailScope.launch { mailService.sendVerificationEmail(savedUserDocument) }
 
         return savedUserDocument
     }
