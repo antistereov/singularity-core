@@ -4,6 +4,9 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.web.global.database.service.SensitiveCrudService
 import io.stereov.web.global.service.secrets.component.KeyManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.springframework.context.ApplicationContext
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
@@ -20,6 +23,8 @@ class AdminService(
 
     private val rotationOngoing = AtomicBoolean(false)
 
+    private val keyRotationScope = CoroutineScope(Dispatchers.Default)
+
     @Scheduled(cron = "\${baseline.secrets.key-rotation-cron}")
     suspend fun rotateKeys() {
         this.logger.info { "Rotating keys" }
@@ -31,17 +36,19 @@ class AdminService(
 
         this.rotationOngoing.set(true)
 
-        this.logger.info { "Rotating JWT secret" }
-        this.keyManager.updateJwtSecret()
+        this.keyRotationScope.launch {
+            logger.info { "Rotating JWT secret" }
+            keyManager.updateJwtSecret()
 
-        this.logger.info { "Rotating encryption secrets" }
-        this.context.getBeansOfType(SensitiveCrudService::class.java).forEach { (name, service) ->
-            logger.info { "Rotating keys for documents defined in $name" }
-            service.rotateKey()
+            logger.info { "Rotating encryption secrets" }
+            context.getBeansOfType(SensitiveCrudService::class.java).forEach { (name, service) ->
+                logger.info { "Rotating keys for documents defined in $name" }
+                service.rotateKey()
+            }
+
+            rotationOngoing.set(false)
+            logger.info { "Rotation finished successfully" }
         }
-
-        this.rotationOngoing.set(false)
-        this.logger.info { "Rotation finished successfully" }
     }
 
     suspend fun rotationOngoing(): Boolean {
