@@ -1,6 +1,6 @@
 package io.stereov.web.config
 
-import com.nimbusds.jose.Algorithm
+import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.jwk.OctetSequenceKey
 import com.nimbusds.jose.jwk.source.JWKSource
 import com.nimbusds.jose.proc.SecurityContext
@@ -59,7 +59,11 @@ class JwtConfiguration {
     fun reactiveJwtDecoder(keyManager: KeyManager): ReactiveJwtDecoder {
         return ReactiveJwtDecoder { token ->
             mono {
-                val jwt = SignedJWT.parse(token)
+                val jwt = try {
+                    SignedJWT.parse(token)
+                } catch (e: Exception) {
+                    throw InvalidTokenException("Cannot parse token: $e", e)
+                }
                 val keyId = jwt.header.keyID
 
                 if (keyId.isNullOrEmpty()) throw InvalidTokenException("No key for JWT secret found in header")
@@ -107,7 +111,7 @@ class JwtConfiguration {
             val secret = keyManager.getJwtSecret().value.toByteArray()
             val secretKey = SecretKeySpec(secret, "HmacSHA256")
             val jwk = OctetSequenceKey.Builder(secretKey)
-                .algorithm(Algorithm.parse("HmacSHA256"))
+                .algorithm(JWSAlgorithm.HS256)
                 .build()
             listOf(jwk)
         }

@@ -38,7 +38,7 @@ class JwtService(
      *
      * @return The decoded JWT.
      */
-    suspend fun decodeJwt(token: String, checkExpiration: Boolean): Jwt {
+    suspend fun decodeJwt(token: String, checkExpiration: Boolean = true): Jwt {
         logger.debug { "Decoding jwt" }
 
         val jwt = try {
@@ -46,6 +46,10 @@ class JwtService(
         } catch(e: Exception) {
             logger.error(e) {}
             throw InvalidTokenException("Cannot decode access token", e)
+        }
+
+        if (jwt.notBefore != null && jwt.notBefore > Instant.now()) {
+            throw InvalidTokenException("Token not valid before ${jwt.notBefore}")
         }
 
         if (checkExpiration) {
@@ -75,6 +79,10 @@ class JwtService(
             .keyId(currentJwt.id.toString())
             .build()
 
-        return jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, claims)).tokenValue
+        return this.encodeJwt(JwtEncoderParameters.from(jwsHeader, claims))
+    }
+
+    fun encodeJwt(parameters: JwtEncoderParameters): String {
+        return jwtEncoder.encode(parameters).tokenValue
     }
 }
