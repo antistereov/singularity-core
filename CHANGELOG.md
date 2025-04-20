@@ -1,3 +1,40 @@
+## [v1.6.0]
+
+## Changelog
+
+## 🚀 Features
+- [be49273](https://github.com/antistereov/web-kotlin-spring-baseline/commits/be49273) create abstract SecretService to split responsibilities between key manager and secret manager
+- [3398917](https://github.com/antistereov/web-kotlin-spring-baseline/commits/3398917) create admin user on startup
+- [93961b3](https://github.com/antistereov/web-kotlin-spring-baseline/commits/93961b3) implement endpoints for admin and move schedule for key rotation to AdminService
+
+## 🐛 Fixes
+- [8aad1e8](https://github.com/antistereov/web-kotlin-spring-baseline/commits/8aad1e8) **secret-service**: fix loading of current secret
+
+## 🧪 Tests
+- [a55d88d](https://github.com/antistereov/web-kotlin-spring-baseline/commits/a55d88d) **jwt**: simplify test
+- [0bc90e3](https://github.com/antistereov/web-kotlin-spring-baseline/commits/0bc90e3) **jwt-service**: create tests for jwt decoding and encoding
+
+## 🧰 Tasks
+- [d0413ae](https://github.com/antistereov/web-kotlin-spring-baseline/commits/d0413ae) update version to 1.6.0
+- [60fb426](https://github.com/antistereov/web-kotlin-spring-baseline/commits/60fb426) use Instant serializer for all Instant fields
+- [64b7d89](https://github.com/antistereov/web-kotlin-spring-baseline/commits/64b7d89) remove unused imports
+- [b073ccb](https://github.com/antistereov/web-kotlin-spring-baseline/commits/b073ccb) remove unused imports
+- [2a634f2](https://github.com/antistereov/web-kotlin-spring-baseline/commits/2a634f2) **token-service**: improve naming
+- [4dfc163](https://github.com/antistereov/web-kotlin-spring-baseline/commits/4dfc163) **token-service**: add todo
+- [87db6e2](https://github.com/antistereov/web-kotlin-spring-baseline/commits/87db6e2) **admin-service**: key rotation is now async and does not block thread
+- [d8e75d0](https://github.com/antistereov/web-kotlin-spring-baseline/commits/d8e75d0) **user-session-service**: sending verification email is now async and does not block response
+
+## 🛠  Build
+- [2364cc1](https://github.com/antistereov/web-kotlin-spring-baseline/commits/2364cc1) bump version to 1.5.1-SNAPSHOT
+
+## 📝 Documentation
+- [f193a10](https://github.com/antistereov/web-kotlin-spring-baseline/commits/f193a10) **changelog**: update CHANGELOG.md for 1.5.0
+
+
+## Contributors
+We'd like to thank the following people for their contributions:
+antistereov
+
 ## [v1.5.0]
 
 ## Changelog
