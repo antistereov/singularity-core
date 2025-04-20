@@ -42,6 +42,48 @@ class TwoFactorAuthTokenService(
         get() = KotlinLogging.logger {}
 
     /**
+     * This token will be set when the user successfully authenticates with their password.
+     * It is necessary to start the 2FA setup.
+     */
+    suspend fun createSetupStartToken(req: TwoFactorStartSetupRequest, issuedAt: Instant = Instant.now()): String {
+        logger.debug { "Creating setup token" }
+
+        val user = authenticationService.getCurrentUser()
+        val deviceId = authenticationService.getCurrentDeviceId()
+
+        if (!hashService.checkBcrypt(req.password, user.password)) throw InvalidCredentialsException("Wrong password")
+
+        val claims = JwtClaimsSet.builder()
+            .issuedAt(issuedAt)
+            .expiresAt(issuedAt.plusSeconds(jwtProperties.expiresIn))
+            .subject(user.id)
+            .claim(Constants.JWT_DEVICE_CLAIM, deviceId)
+            .build()
+
+        return jwtService.encodeJwt(claims)
+    }
+
+    suspend fun validateSetupStartToken(token: String) {
+        logger.debug { "Validating setup token" }
+
+        val jwt = jwtService.decodeJwt(token,true)
+
+        val userId = jwt.subject
+            ?: throw InvalidTokenException("JWT does not contain sub")
+
+        if (userId != authenticationService.getCurrentUserId()) {
+            throw InvalidTokenException("Step up token is not valid for currently logged in user")
+        }
+
+        val deviceId = jwt.claims[Constants.JWT_DEVICE_CLAIM] as? String
+            ?: throw InvalidTokenException("JWT does not contain device id")
+
+        if (deviceId != authenticationService.getCurrentDeviceId()) {
+            throw InvalidTokenException("Step up token is not valid for current device")
+        }
+    }
+
+    /**
      * Creates a setup token for two-factor authentication.
      *
      * @param userId The ID of the user.
@@ -52,9 +94,6 @@ class TwoFactorAuthTokenService(
      */
     fun createSetupToken(userId: String, secret: String, recoveryCodes: List<String>, issuedAt: Instant = Instant.now()): String {
         logger.debug { "Creating setup token for 2fa" }
-
-        // TODO: token nicht als cookie speichern, sondern im body einer get
-        //  response schicken und body von post bekommen
 
         val claims = JwtClaimsSet.builder()
             .issuedAt(issuedAt)
@@ -230,43 +269,5 @@ class TwoFactorAuthTokenService(
         }
 
         return StepUpToken(userId, deviceId)
-    }
-
-    suspend fun createSetupToken(req: TwoFactorStartSetupRequest, issuedAt: Instant = Instant.now()): String {
-        logger.debug { "Creating setup token" }
-
-        val user = authenticationService.getCurrentUser()
-        val deviceId = authenticationService.getCurrentDeviceId()
-
-        if (!hashService.checkBcrypt(req.password, user.password)) throw InvalidCredentialsException("Wrong password")
-
-        val claims = JwtClaimsSet.builder()
-            .issuedAt(issuedAt)
-            .expiresAt(issuedAt.plusSeconds(jwtProperties.expiresIn))
-            .subject(user.id)
-            .claim(Constants.JWT_DEVICE_CLAIM, deviceId)
-            .build()
-
-        return jwtService.encodeJwt(claims)
-    }
-
-    suspend fun validateSetupToken(token: String) {
-        logger.debug { "Validating setup token" }
-
-        val jwt = jwtService.decodeJwt(token,true)
-
-        val userId = jwt.subject
-            ?: throw InvalidTokenException("JWT does not contain sub")
-
-        if (userId != authenticationService.getCurrentUserId()) {
-            throw InvalidTokenException("Step up token is not valid for currently logged in user")
-        }
-
-        val deviceId = jwt.claims[Constants.JWT_DEVICE_CLAIM] as? String
-            ?: throw InvalidTokenException("JWT does not contain device id")
-
-        if (deviceId != authenticationService.getCurrentDeviceId()) {
-            throw InvalidTokenException("Step up token is not valid for current device")
-        }
     }
 }

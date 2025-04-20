@@ -352,7 +352,7 @@ class CookieService(
     }
 
     suspend fun createTwoFactorSetupCookie(req: TwoFactorStartSetupRequest): ResponseCookie {
-        val token = twoFactorAuthTokenService.createSetupToken(req)
+        val token = twoFactorAuthTokenService.createSetupStartToken(req)
 
         val cookie = ResponseCookie.from(Constants.TWO_FACTOR_SETUP_TOKEN_COOKIE, token)
             .httpOnly(true)
@@ -370,6 +370,6 @@ class CookieService(
         val token = exchange.request.cookies[Constants.TWO_FACTOR_SETUP_TOKEN_COOKIE]?.firstOrNull()?.value
             ?: throw InvalidTokenException("No setup token provided")
 
-        twoFactorAuthTokenService.validateSetupToken(token)
+        twoFactorAuthTokenService.validateSetupStartToken(token)
     }
 }
