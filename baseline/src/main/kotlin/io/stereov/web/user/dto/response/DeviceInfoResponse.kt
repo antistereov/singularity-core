@@ -1,7 +1,9 @@
 package io.stereov.web.user.dto.response
 
+import io.stereov.web.global.serializer.InstantSerializer
 import io.stereov.web.user.model.DeviceInfo
 import kotlinx.serialization.Serializable
+import java.time.Instant
 
 /**
  * # Device information response.
@@ -26,5 +28,6 @@ data class DeviceInfoResponse(
     val os: String? = null,
     val ipAddress: String?,
     val location: DeviceInfo.LocationInfo?,
-    val lastActive: String
+    @Serializable(with = InstantSerializer::class)
+    val lastActive: Instant
 )

@@ -3,6 +3,7 @@ package io.stereov.web.global.service.file.model
 import io.stereov.web.auth.model.AccessType
 import io.stereov.web.auth.model.Permission
 import io.stereov.web.auth.model.SharedPermission
+import io.stereov.web.global.serializer.InstantSerializer
 import kotlinx.serialization.Serializable
 import java.time.Instant
 
@@ -15,7 +16,8 @@ data class FileMetaData(
     val sharedWith: List<SharedPermission>,
     val publicUrl: String?,
     val size: Long,
-    val uploaded: String = Instant.now().toString()
+    @Serializable(with = InstantSerializer::class)
+    val uploaded: Instant = Instant.now()
 ) {
 
     fun hasPermission(userId: String, permission: Permission): Boolean {

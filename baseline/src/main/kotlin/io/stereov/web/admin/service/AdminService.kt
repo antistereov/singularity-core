@@ -97,7 +97,7 @@ class AdminService(
 
         return RotationStatusResponse(
             this.rotationOngoing.get(),
-            this.getLastRotation().toString()
+            this.getLastRotation()
         )
     }
 

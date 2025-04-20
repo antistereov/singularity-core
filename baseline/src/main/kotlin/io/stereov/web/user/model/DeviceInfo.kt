@@ -94,7 +94,7 @@ data class DeviceInfo(
         logger.debug { "Creating response dto" }
 
         return DeviceInfoResponse(
-            id, browser, os, ipAddress, location, issuedAt.toString()
+            id, browser, os, ipAddress, location, issuedAt
         )
     }
 }
