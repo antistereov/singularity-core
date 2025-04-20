@@ -9,4 +9,7 @@ import org.springframework.context.annotation.Bean
 class MockConfig {
     @Bean
     fun googleAuthenticator(): GoogleAuthenticator = mockk(relaxed = true)
+
+    @Bean
+    fun keyManager(): MockKeyManager = MockKeyManager()
 }

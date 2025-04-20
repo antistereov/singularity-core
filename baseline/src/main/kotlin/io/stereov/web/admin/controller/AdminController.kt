@@ -27,7 +27,7 @@ class AdminController(
     @GetMapping("/rotate-keys/status")
     suspend fun rotationOngoing(): ResponseEntity<RotationStatusResponse> {
         return ResponseEntity.ok(
-            RotationStatusResponse(this.adminService.rotationOngoing())
+            this.adminService.getRotationStatus()
         )
     }
 }

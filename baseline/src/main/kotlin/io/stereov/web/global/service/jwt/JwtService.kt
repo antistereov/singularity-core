@@ -4,7 +4,7 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.web.global.service.jwt.exception.model.InvalidTokenException
 import io.stereov.web.global.service.jwt.exception.model.TokenExpiredException
-import io.stereov.web.global.service.secrets.component.KeyManager
+import io.stereov.web.global.service.secrets.service.JwtSecretService
 import kotlinx.coroutines.reactive.awaitFirst
 import org.springframework.security.oauth2.jwt.*
 import org.springframework.stereotype.Service
@@ -22,7 +22,7 @@ import java.time.Instant
 class JwtService(
     private val jwtDecoder: ReactiveJwtDecoder,
     private val jwtEncoder: JwtEncoder,
-    private val keyManager: KeyManager
+    private val jwtSecretService: JwtSecretService
 ) {
 
     private val logger: KLogger
@@ -72,7 +72,7 @@ class JwtService(
      * @return The encoded JWT token as a string.
      */
     fun encodeJwt(claims: JwtClaimsSet): String {
-        val currentJwt = keyManager.getJwtSecret()
+        val currentJwt = jwtSecretService.getCurrentSecret()
 
         val jwsHeader = JwsHeader
             .with { "HS256" }

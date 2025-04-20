@@ -3,13 +3,10 @@ package io.stereov.web.global.service.secrets.component
 import com.bitwarden.sdk.BitwardenClient
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.web.config.Constants
 import io.stereov.web.global.service.secrets.model.Secret
 import io.stereov.web.properties.secrets.BitwardenKeyManagerProperties
-import jakarta.annotation.PostConstruct
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
-import java.time.Instant
 import java.time.OffsetDateTime
 import java.util.*
 
@@ -23,16 +20,7 @@ class BitwardenKeyManager(
     private val logger: KLogger
         get() = KotlinLogging.logger {}
 
-    private var encryptionSecret: Secret? = null
-    private var jwtSecret: Secret? = null
-
     private val loadedKeys = mutableSetOf<Secret>()
-
-    @PostConstruct
-    fun init() {
-        getJwtSecret()
-        getEncryptionSecret()
-    }
 
     override fun getSecretById(id: UUID): Secret {
         logger.debug { "Getting secret by ID $id" }
@@ -42,120 +30,55 @@ class BitwardenKeyManager(
 
         this.bitwardenClient.secrets().sync(properties.organizationId, OffsetDateTime.now())
         val secretResponse = bitwardenClient.secrets().get(id)
-        val secret = Secret(secretResponse.id, secretResponse.value)
+        val secret = Secret(secretResponse.id, secretResponse.key, secretResponse.value, secretResponse.creationDate.toInstant())
 
         this.loadedKeys.add(secret)
         return secret
     }
 
-    override fun getEncryptionSecret(): Secret {
-        this.logger.debug { "Getting current encryption secret" }
-
-        return this.encryptionSecret
-            ?: this.loadCurrentEncryptionSecret()
-    }
-
-    fun loadCurrentEncryptionSecret(): Secret {
-        logger.debug { "Loading current encryption secret" }
-
-        val secret = this.getCurrentSecretByKey(Constants.CURRENT_ENCRYPTION_SECRET)
-            ?: updateEncryptionSecret()
-
-        this.encryptionSecret = secret
-        this.loadedKeys.add(secret)
-
-        return secret
-    }
-
-    override fun updateEncryptionSecret(): Secret {
-        logger.info { "Updating current encryption secret "}
-
-        val key = "encryption-secret-${Instant.now()}"
-        val secret = generateKey()
-        val note = "Encryption secret generated on ${Instant.now()}"
-
-        val newSecret = create(key, secret, note)
-        this.encryptionSecret = newSecret
-
-        this.createOrUpdateKey(Constants.CURRENT_ENCRYPTION_SECRET, newSecret.id.toString(), note)
-
-        return newSecret
-    }
-
-    override fun getJwtSecret(): Secret {
-        this.logger.debug { "Getting current JWT secret" }
-
-        return this.jwtSecret
-            ?: loadCurrentJwtSecret()
-    }
-
-    fun loadCurrentJwtSecret(): Secret {
-        logger.debug { "Loading current JWT secret" }
-
-        val secret = this.getCurrentSecretByKey(Constants.CURRENT_JWT_SECRET)
-            ?: updateJwtSecret()
-
-        this.jwtSecret = secret
-        this.loadedKeys.add(secret)
-
-        return secret
-    }
-
-    override fun updateJwtSecret(): Secret {
-        logger.info { "Updating current jwt secret "}
-
-        val key = "jwt-secret-${Instant.now()}"
-        val secret = generateKey(algorithm = "HmacSHA256")
-        val note = "Jwt secret generated on ${Instant.now()}"
-
-        val newSecret = createOrUpdateKey(key, secret, note)
-        this.jwtSecret = newSecret
-
-        this.createOrUpdateKey(Constants.CURRENT_JWT_SECRET, newSecret.id.toString(), note)
-
-        return newSecret
-    }
-
-    fun getSecretByKey(key: String): Secret? {
+    override fun getSecretByKey(key: String): Secret? {
         this.logger.debug { "Getting secret by key $key" }
 
-        val res = this.bitwardenClient.secrets().list(properties.organizationId).data
-            .firstOrNull { secret ->
-                secret.key == key
-            }
-
-        return res?.let { getSecretById(res.id) }
+        return this.loadedKeys
+            .firstOrNull { it.key == key }
+            ?: this.bitwardenClient.secrets().list(properties.organizationId).data
+                .firstOrNull { secret -> secret.key == key }
+                ?.let { getSecretById(it.id) }
     }
 
-    fun getCurrentSecretByKey(key: String): Secret? {
-        this.logger.debug { "Getting current secret by key $key" }
-
-        return this.getSecretByKey(key)?.let {
-            this.getSecretById(UUID.fromString(it.value))
-        }
-    }
-
-    fun create(key: String, value: String, note: String): Secret {
+    override fun create(key: String, value: String, note: String): Secret {
         this.logger.debug { "Creating secret with key $key" }
 
         val secretResponse = bitwardenClient.secrets().create(properties.organizationId, key, value, note, arrayOf(properties.projectId))
 
         val id = secretResponse.id
 
-        return Secret(id, value)
+        val secret =  Secret(id, key, value, secretResponse.creationDate.toInstant())
+        loadedKeys.add(secret)
+
+        return secret
     }
 
-    fun createOrUpdateKey(key: String, value: String, note: String): Secret {
+    override fun createOrUpdateKey(key: String, value: String, note: String): Secret {
         this.logger.debug { "Creating or updating key $key" }
 
         val existingSecret = getSecretByKey(key) ?: return this.create(key, value, note)
 
-        return update(existingSecret.id, key, value, note)
+        val updatedSecret = update(existingSecret.id, key, value, note)
+        loadedKeys.remove(existingSecret)
+        loadedKeys.add(updatedSecret)
+
+        return updatedSecret
     }
 
-    fun update(id: UUID, key: String, value: String, note: String): Secret {
+    override fun update(id: UUID, key: String, value: String, note: String): Secret {
         val res = this.bitwardenClient.secrets().update(properties.organizationId, id, key, value, note, arrayOf(properties.projectId))
 
-        return Secret(res.id, res.value)
+        val updatedSecret = Secret(res.id, key, res.value, res.creationDate.toInstant())
+
+        loadedKeys.removeAll { it.id == id }
+        loadedKeys.add(updatedSecret)
+
+        return updatedSecret
     }
 }

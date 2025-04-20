@@ -6,7 +6,7 @@ import io.stereov.web.global.database.repository.SensitiveCrudRepository
 import io.stereov.web.global.exception.model.DocumentNotFoundException
 import io.stereov.web.global.service.encryption.model.EncryptedSensitiveDocument
 import io.stereov.web.global.service.encryption.model.SensitiveDocument
-import io.stereov.web.global.service.secrets.component.KeyManager
+import io.stereov.web.global.service.secrets.service.EncryptionSecretService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
@@ -14,7 +14,7 @@ import kotlinx.serialization.KSerializer
 
 abstract class SensitiveCrudService<S, D: SensitiveDocument<S>, E: EncryptedSensitiveDocument<S>>(
     private val repository: SensitiveCrudRepository<E>,
-    private val keyManager: KeyManager,
+    private val encryptionSecretService: EncryptionSecretService,
 ) {
 
     abstract val serializer: KSerializer<S>
@@ -91,7 +91,7 @@ abstract class SensitiveCrudService<S, D: SensitiveDocument<S>, E: EncryptedSens
 
         this.repository.findAll()
             .map {
-                if (it.sensitive.secretId == keyManager.getEncryptionSecret().id) {
+                if (it.sensitive.secretId == encryptionSecretService.getCurrentSecret().id) {
                     logger.debug { "Skipping rotation of document ${it._id}: Encryption secret did not change" }
                     return@map it
                 }

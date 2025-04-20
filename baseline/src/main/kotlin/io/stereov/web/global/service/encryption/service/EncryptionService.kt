@@ -6,6 +6,7 @@ import io.stereov.web.global.service.encryption.model.Encrypted
 import io.stereov.web.global.service.encryption.model.EncryptedSensitiveDocument
 import io.stereov.web.global.service.encryption.model.SensitiveDocument
 import io.stereov.web.global.service.secrets.component.KeyManager
+import io.stereov.web.global.service.secrets.service.EncryptionSecretService
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import org.springframework.stereotype.Service
@@ -15,6 +16,7 @@ import javax.crypto.spec.SecretKeySpec
 
 @Service
 class EncryptionService(
+    private val encryptionSecretService: EncryptionSecretService,
     private val keyManager: KeyManager,
     private val json: Json
 ) {
@@ -56,7 +58,7 @@ class EncryptionService(
         this.logger.debug { "Encrypting..." }
 
         val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
-        val secret = keyManager.getEncryptionSecret()
+        val secret = encryptionSecretService.getCurrentSecret()
 
         cipher.init(Cipher.ENCRYPT_MODE, getKeyFromBase64(secret.value))
         val encrypted = cipher.doFinal(strToEncrypt.toByteArray())
@@ -70,7 +72,7 @@ class EncryptionService(
        this. logger.debug { "Decrypting..." }
 
         val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
-        val secret = keyManager.getSecretById(encrypted.secretId)
+        val secret = this.keyManager.getSecretById(encrypted.secretId)
 
         cipher.init(Cipher.DECRYPT_MODE, getKeyFromBase64(secret.value))
 

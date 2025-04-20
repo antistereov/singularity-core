@@ -2,9 +2,11 @@ package io.stereov.web.admin.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.web.admin.dto.RotationStatusResponse
 import io.stereov.web.global.database.service.SensitiveCrudService
 import io.stereov.web.global.service.hash.HashService
 import io.stereov.web.global.service.secrets.component.KeyManager
+import io.stereov.web.global.service.secrets.service.SecretService
 import io.stereov.web.properties.AppProperties
 import io.stereov.web.user.model.Role
 import io.stereov.web.user.model.UserDocument
@@ -17,6 +19,7 @@ import kotlinx.coroutines.runBlocking
 import org.springframework.context.ApplicationContext
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
+import java.time.Instant
 import java.util.concurrent.atomic.AtomicBoolean
 
 @Service
@@ -37,6 +40,7 @@ class AdminService(
 
     @PostConstruct
     fun init() {
+        this.getSecretServices().forEach { it.getCurrentSecret() }
         runBlocking { initRootAccount() }
     }
 
@@ -56,12 +60,16 @@ class AdminService(
         }
     }
 
+    private fun getSecretServices(): List<SecretService> {
+        return this.context.getBeansOfType(SecretService::class.java).values.toList()
+    }
+
 
     @Scheduled(cron = "\${baseline.secrets.key-rotation-cron}")
     suspend fun rotateKeys() {
         this.logger.info { "Rotating keys" }
 
-        if (this.rotationOngoing()) {
+        if (this.rotationOngoing.get()) {
             this.logger.warn { "Rotation is currently ongoing. Stopping new attempt" }
             return
         }
@@ -70,8 +78,10 @@ class AdminService(
 
         this.keyRotationScope.launch {
             logger.info { "Rotating JWT secret" }
-            keyManager.updateJwtSecret()
-            keyManager.updateEncryptionSecret()
+            context.getBeansOfType(SecretService::class.java).forEach { (name, service) ->
+                logger.info { "Rotating keys for secrets defined in $name}" }
+                service.updateSecret()
+            }
 
             logger.info { "Rotating encryption secrets" }
             context.getBeansOfType(SensitiveCrudService::class.java).forEach { (name, service) ->
@@ -84,9 +94,21 @@ class AdminService(
         }
     }
 
-    suspend fun rotationOngoing(): Boolean {
+    suspend fun getRotationStatus(): RotationStatusResponse {
         this.logger.debug { "Checking rotation status" }
 
-        return this.rotationOngoing.get()
+        return RotationStatusResponse(
+            this.rotationOngoing.get(),
+            this.getLastRotation().toString()
+        )
+    }
+
+    suspend fun getLastRotation(): Instant? {
+        this.logger.debug { "Getting last rotation" }
+
+        return context.getBeansOfType(SecretService::class.java)
+            .map { (_, service) -> service.getLastUpdate() }
+            .sortedBy { it?.toEpochMilli() }
+            .firstOrNull()
     }
 }

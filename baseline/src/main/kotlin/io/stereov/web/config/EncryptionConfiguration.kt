@@ -4,6 +4,7 @@ import io.stereov.web.config.secrets.BitwardenSecretsConfiguration
 import io.stereov.web.config.secrets.SecretsConfiguration
 import io.stereov.web.global.service.encryption.service.EncryptionService
 import io.stereov.web.global.service.secrets.component.KeyManager
+import io.stereov.web.global.service.secrets.service.EncryptionSecretService
 import kotlinx.serialization.json.Json
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
@@ -39,7 +40,7 @@ class EncryptionConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun encryptionTransformer(keyManager: KeyManager, json: Json): EncryptionService {
-        return EncryptionService(keyManager, json)
+    fun encryptionService(encryptionSecretService: EncryptionSecretService, keyManager: KeyManager, json: Json): EncryptionService {
+        return EncryptionService(encryptionSecretService, keyManager, json)
     }
 }

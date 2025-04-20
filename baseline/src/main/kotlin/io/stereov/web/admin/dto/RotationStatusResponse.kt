@@ -4,5 +4,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class RotationStatusResponse(
-    val isOngoing: Boolean
+    val isOngoing: Boolean,
+    val lastRotation: String,
 )

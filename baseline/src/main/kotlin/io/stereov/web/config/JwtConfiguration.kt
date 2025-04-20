@@ -9,6 +9,7 @@ import io.stereov.web.config.secrets.SecretsConfiguration
 import io.stereov.web.global.service.jwt.JwtService
 import io.stereov.web.global.service.jwt.exception.model.InvalidTokenException
 import io.stereov.web.global.service.secrets.component.KeyManager
+import io.stereov.web.global.service.secrets.service.JwtSecretService
 import kotlinx.coroutines.reactor.mono
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
@@ -106,9 +107,9 @@ class JwtConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun jwtEncoder(keyManager: KeyManager): JwtEncoder {
+    fun jwtEncoder(jwtSecretService: JwtSecretService): JwtEncoder {
         val jwkSource = JWKSource<SecurityContext> { _, _ ->
-            val secret = keyManager.getJwtSecret().value.toByteArray()
+            val secret = jwtSecretService.getCurrentSecret().value.toByteArray()
             val secretKey = SecretKeySpec(secret, "HmacSHA256")
             val jwk = OctetSequenceKey.Builder(secretKey)
                 .algorithm(JWSAlgorithm.HS256)
@@ -123,8 +124,8 @@ class JwtConfiguration {
     fun jwtService(
         jwtDecoder: ReactiveJwtDecoder,
         jwtEncoder: JwtEncoder,
-        keyManager: KeyManager
+        jwtSecretService: JwtSecretService
     ): JwtService {
-        return JwtService(jwtDecoder, jwtEncoder, keyManager)
+        return JwtService(jwtDecoder, jwtEncoder, jwtSecretService)
     }
 }

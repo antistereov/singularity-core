@@ -7,7 +7,7 @@ import io.stereov.web.global.service.encryption.service.EncryptionService
 import io.stereov.web.global.service.file.exception.model.NoSuchFileException
 import io.stereov.web.global.service.file.model.FileMetaData
 import io.stereov.web.global.service.hash.HashService
-import io.stereov.web.global.service.secrets.component.KeyManager
+import io.stereov.web.global.service.secrets.service.EncryptionSecretService
 import io.stereov.web.user.exception.model.UserDoesNotExistException
 import io.stereov.web.user.model.EncryptedUserDocument
 import io.stereov.web.user.model.SensitiveUserData
@@ -30,11 +30,11 @@ import org.springframework.stereotype.Service
 @Service
 class UserService(
     private val userRepository: UserRepository,
-    private val transformer: EncryptionService,
+    private val encryptionService: EncryptionService,
     json: Json,
     private val hashService: HashService,
-    private val keyManager: KeyManager,
-) : SensitiveCrudService<SensitiveUserData, UserDocument, EncryptedUserDocument>(userRepository, keyManager) {
+    private val encryptionSecretService: EncryptionSecretService,
+) : SensitiveCrudService<SensitiveUserData, UserDocument, EncryptedUserDocument>(userRepository, encryptionSecretService) {
 
     private val logger: KLogger
         get() = KotlinLogging.logger {}
@@ -46,11 +46,11 @@ class UserService(
         if (otherValues.getOrNull(0) == true || otherValues.getOrNull(0) == null) document.updateLastActive()
 
         val hashedEmail = hashService.hashSha256(document.sensitive.email)
-        return this.transformer.encrypt(document, this.serializer, listOf(hashedEmail)) as EncryptedUserDocument
+        return this.encryptionService.encrypt(document, this.serializer, listOf(hashedEmail)) as EncryptedUserDocument
     }
 
     override suspend fun decrypt(encrypted: EncryptedUserDocument, otherValues: List<Any>): UserDocument {
-        return this.transformer.decrypt(encrypted, this.serializer) as UserDocument
+        return this.encryptionService.decrypt(encrypted, this.serializer) as UserDocument
     }
 
     override suspend fun rotateKey() {
@@ -58,7 +58,7 @@ class UserService(
 
         this.userRepository.findAll()
             .map {
-                if (it.sensitive.secretId == keyManager.getEncryptionSecret().id) {
+                if (it.sensitive.secretId == encryptionSecretService.getCurrentSecret().id) {
                     logger.debug { "Skipping rotation of user document ${it._id}: Encryption secret did not change" }
                     return@map it
                 }
