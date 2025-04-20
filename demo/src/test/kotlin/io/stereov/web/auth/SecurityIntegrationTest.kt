@@ -21,9 +21,6 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
     @Autowired
     private lateinit var jwtSecretService: JwtSecretService
 
-    @Autowired
-    private lateinit var mockKeyManager: MockKeyManager
-
     @Test fun `access with valid token`() = runTest {
         val user = registerUser()
 

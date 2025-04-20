@@ -24,7 +24,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 @Service
 class AdminService(
-    private val keyManager: KeyManager,
     private val context: ApplicationContext,
     private val userService: UserService,
     private val appProperties: AppProperties,

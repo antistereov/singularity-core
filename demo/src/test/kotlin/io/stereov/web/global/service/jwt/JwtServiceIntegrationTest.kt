@@ -7,11 +7,9 @@ import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import io.stereov.web.global.service.jwt.exception.model.InvalidTokenException
 import io.stereov.web.global.service.jwt.exception.model.TokenExpiredException
-import io.stereov.web.global.service.secrets.component.KeyManager
 import io.stereov.web.global.service.secrets.model.Secret
 import io.stereov.web.global.service.secrets.service.JwtSecretService
 import io.stereov.web.test.BaseIntegrationTest
-import io.stereov.web.test.config.MockKeyManager
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

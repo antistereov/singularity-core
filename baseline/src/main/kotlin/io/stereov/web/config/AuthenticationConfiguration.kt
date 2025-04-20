@@ -20,7 +20,6 @@ import io.stereov.web.global.service.jwt.JwtService
 import io.stereov.web.global.service.jwt.exception.handler.TokenExceptionHandler
 import io.stereov.web.global.service.mail.MailService
 import io.stereov.web.global.service.ratelimit.RateLimitService
-import io.stereov.web.global.service.secrets.component.KeyManager
 import io.stereov.web.global.service.secrets.service.EncryptionSecretService
 import io.stereov.web.global.service.twofactorauth.TwoFactorAuthService
 import io.stereov.web.properties.*
@@ -110,8 +109,8 @@ class AuthenticationConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun adminService(keyManager: KeyManager, context: ApplicationContext, userService: UserService, hashService: HashService, appProperties: AppProperties): AdminService {
-        return AdminService(keyManager, context, userService, appProperties, hashService)
+    fun adminService(context: ApplicationContext, userService: UserService, hashService: HashService, appProperties: AppProperties): AdminService {
+        return AdminService(context, userService, appProperties, hashService)
     }
 
     @Bean
