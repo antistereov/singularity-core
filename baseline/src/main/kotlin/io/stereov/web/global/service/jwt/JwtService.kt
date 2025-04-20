@@ -82,7 +82,7 @@ class JwtService(
         return this.encodeJwt(JwtEncoderParameters.from(jwsHeader, claims))
     }
 
-    fun encodeJwt(parameters: JwtEncoderParameters): String {
+    private fun encodeJwt(parameters: JwtEncoderParameters): String {
         return jwtEncoder.encode(parameters).tokenValue
     }
 }

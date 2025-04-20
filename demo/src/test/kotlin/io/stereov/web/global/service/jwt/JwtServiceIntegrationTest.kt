@@ -16,9 +16,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.security.oauth2.jwt.JwsHeader
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
-import org.springframework.security.oauth2.jwt.JwtEncoderParameters
 import java.time.Instant
 import java.util.*
 
@@ -100,13 +98,7 @@ class JwtServiceIntegrationTest : BaseIntegrationTest() {
             .claim("role", "admin")
             .build()
 
-        val jwsHeader = JwsHeader
-            .with { "HS256" }
-            .keyId(keyId.toString())
-            .build()
-
-        val encoded = jwtService.encodeJwt(JwtEncoderParameters.from(jwsHeader, claims))
-
+        val encoded = jwtService.encodeJwt(claims)
         val jwt = jwtService.decodeJwt(encoded)
 
         assertEquals("test-user", jwt.subject)
