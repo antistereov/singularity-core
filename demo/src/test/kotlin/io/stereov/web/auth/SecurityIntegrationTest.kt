@@ -3,7 +3,6 @@ package io.stereov.web.auth
 import io.stereov.web.config.Constants
 import io.stereov.web.global.service.secrets.service.JwtSecretService
 import io.stereov.web.test.BaseIntegrationTest
-import io.stereov.web.test.config.MockKeyManager
 import io.stereov.web.user.dto.request.DeviceInfoRequest
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.test.runTest

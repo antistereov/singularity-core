@@ -5,7 +5,6 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.web.admin.dto.RotationStatusResponse
 import io.stereov.web.global.database.service.SensitiveCrudService
 import io.stereov.web.global.service.hash.HashService
-import io.stereov.web.global.service.secrets.component.KeyManager
 import io.stereov.web.global.service.secrets.service.SecretService
 import io.stereov.web.properties.AppProperties
 import io.stereov.web.user.model.Role
