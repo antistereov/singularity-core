@@ -1,24 +1,21 @@
-package io.stereov.web.filter
+package io.stereov.web.admin.service
 
-import io.stereov.web.properties.RateLimitProperties
 import io.stereov.web.properties.secrets.KeyManagerImplementation
 import io.stereov.web.test.BaseSpringBootTest
+import io.stereov.web.user.model.Role
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpStatus
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.MongoDBContainer
 import org.testcontainers.utility.DockerImageName
-import java.util.*
 
-class RateLimitIpFilterTest : BaseSpringBootTest() {
+class AdminServiceIntegrationTest : BaseSpringBootTest() {
 
     companion object {
-        private val mongoDBContainer = MongoDBContainer("mongo:latest").apply {
+        val mongoDBContainer = MongoDBContainer("mongo:latest").apply {
             start()
         }
 
@@ -31,14 +28,10 @@ class RateLimitIpFilterTest : BaseSpringBootTest() {
         @DynamicPropertySource
         @JvmStatic
         fun properties(registry: DynamicPropertyRegistry) {
-            registry.add("baseline.app.create-root-user") { "false" }
+            registry.add("baseline.app.create-root-user") { "true" }
+            registry.add("baseline.app.root-email") { "root@email.com" }
+            registry.add("baseline.app.root-password") { "root-password" }
             registry.add("baseline.secrets.key-manager") { KeyManagerImplementation.Mock }
-            registry.add("baseline.secrets.bitwarden.api-url") { "https//api.bitwarden.com" }
-            registry.add("baseline.secrets.bitwarden.identity-url") { "https//identity.bitwarden.com" }
-            registry.add("baseline.secrets.bitwarden.organization-id") { UUID.randomUUID() }
-            registry.add("baseline.secrets.bitwarden.project-id") { UUID.randomUUID() }
-            registry.add("baseline.secrets.bitwarden.access-token") { "asghaosg" }
-            registry.add("baseline.secrets.bitwarden.state-file") { "asghaosg" }
             registry.add("baseline.file.storage.s3.domain") { "amazon.com" }
             registry.add("baseline.file.storage.s3.access-key") { "amazon.com" }
             registry.add("baseline.file.storage.s3.secret-key") { "amazon.com" }
@@ -57,32 +50,18 @@ class RateLimitIpFilterTest : BaseSpringBootTest() {
             registry.add("spring.data.redis.host") { redisContainer.host }
             registry.add("spring.data.redis.port") { redisContainer.getMappedPort(6379) }
             registry.add("spring.data.redis.password") { "" }
-            registry.add("baseline.security.rate-limit.user-limit") { 4 }
-            registry.add("baseline.security.rate-limit.user-time-window") { 2 }
-            registry.add("baseline.security.rate-limit.ip-limit") { 2 }
-            registry.add("baseline.security.rate-limit.ip-time-window") { 2 }
+            registry.add("baseline.security.rate-limit.user-limit") { 10000 }
+            registry.add("baseline.security.rate-limit.user-time-window") { 1 }
+            registry.add("baseline.security.rate-limit.ip-limit") { 10000 }
+            registry.add("baseline.security.rate-limit.ip-time-window") { 1 }
+            registry.add("baseline.security.login-attempt-limit.ip-limit") { 10000 }
+            registry.add("baseline.security.login-attempt-limit.ip-time-window") { 1 }
         }
     }
 
-    @Autowired
-    private lateinit var rateLimitProperties: RateLimitProperties
+    @Test fun `root account will be created at start`() = runTest {
+        val root = userService.findByEmail("root@email.com")
 
-    @Test fun `ip rate limit works`() = runTest {
-        assertEquals(2, rateLimitProperties.ipLimit)
-
-        webTestClient.get()
-            .uri("/user/me")
-            .exchange()
-            .expectStatus().isUnauthorized
-
-        webTestClient.get()
-            .uri("/user/me")
-            .exchange()
-            .expectStatus().isUnauthorized
-
-        webTestClient.get()
-            .uri("/user/me")
-            .exchange()
-            .expectStatus().isEqualTo(HttpStatus.TOO_MANY_REQUESTS)
+        assertTrue(root.sensitive.roles.contains(Role.ADMIN))
     }
 }

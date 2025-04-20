@@ -109,8 +109,8 @@ class AuthenticationConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun adminService(keyManager: KeyManager, context: ApplicationContext): AdminService {
-        return AdminService(keyManager, context)
+    fun adminService(keyManager: KeyManager, context: ApplicationContext, userService: UserService, hashService: HashService, appProperties: AppProperties): AdminService {
+        return AdminService(keyManager, context, userService, appProperties, hashService)
     }
 
     @Bean

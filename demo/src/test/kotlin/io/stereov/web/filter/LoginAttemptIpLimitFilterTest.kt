@@ -33,6 +33,7 @@ class LoginAttemptIpLimitFilterTest : BaseSpringBootTest() {
         @DynamicPropertySource
         @JvmStatic
         fun properties(registry: DynamicPropertyRegistry) {
+            registry.add("baseline.app.create-root-user") { "false" }
             registry.add("baseline.secrets.key-manager") { KeyManagerImplementation.Mock }
             registry.add("baseline.secrets.bitwarden.api-url") { "https//api.bitwarden.com" }
             registry.add("baseline.secrets.bitwarden.identity-url") { "https//identity.bitwarden.com" }

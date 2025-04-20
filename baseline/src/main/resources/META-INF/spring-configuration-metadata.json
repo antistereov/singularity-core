@@ -77,6 +77,25 @@
       "description": "The name of the application. This is used in various places, including the UI and emails."
     },
     {
+      "name": "baseline.app.create-root-user",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.stereov.web.properties.AppProperties",
+      "defaultValue": "False",
+      "description": "Should the application create a root user at application start?"
+    },
+    {
+      "name": "baseline.app.root-email",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.web.properties.AppProperties",
+      "description": "The email associated to the root user."
+    },
+    {
+      "name": "baseline.app.root-password",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.web.properties.AppProperties",
+      "description": "The password associated to the root user."
+    },
+    {
       "name": "baseline.app.secure",
       "type": "java.lang.Boolean",
       "sourceType": "io.stereov.web.properties.AppProperties",

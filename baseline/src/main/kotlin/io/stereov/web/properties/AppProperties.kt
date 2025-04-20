@@ -22,6 +22,9 @@ data class AppProperties(
     val name: String = "Spring Boot Application",
     val baseUrl: String = "http://localhost:8000",
     val secure: Boolean = false,
+    val createRootUser: Boolean = false,
+    val rootEmail: String = "admin@example.com",
+    val rootPassword: String = "strong-password"
 ) {
 
     val slug: String
