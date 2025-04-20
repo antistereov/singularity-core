@@ -26,13 +26,13 @@ abstract class SecretService(
             ?: this.loadCurrentSecret()
     }
 
-    fun loadCurrentSecret(): Secret {
+    private fun loadCurrentSecret(): Secret {
         this.logger.debug { "Loading current secret from key manager" }
 
         val currentSecret = this.keyManager.getSecretByKey(key)
 
         val secret = currentSecret?.let {
-            this.keyManager.getSecretById(currentSecret.id)
+            this.keyManager.getSecretById(UUID.fromString(currentSecret.value))
         } ?: this.updateSecret()
 
         this.currentSecret = secret
@@ -47,7 +47,7 @@ abstract class SecretService(
         val newValue = this.generateKey(algorithm = algorithm)
         val newNote = "Generated on ${Instant.now()}"
 
-        val newSecret = this.keyManager.createOrUpdateKey(newKey, newValue, newNote)
+        val newSecret = this.keyManager.create(newKey, newValue, newNote)
         this.currentSecret = newSecret
 
         this.keyManager.createOrUpdateKey(this.key, newSecret.id.toString(), newNote)

@@ -39,9 +39,11 @@ class BitwardenKeyManager(
     override fun getSecretByKey(key: String): Secret? {
         this.logger.debug { "Getting secret by key $key" }
 
-        return this.loadedKeys
-            .firstOrNull { it.key == key }
-            ?: this.bitwardenClient.secrets().list(properties.organizationId).data
+        val loadedSecret = this.loadedKeys.firstOrNull { it.key == key }
+
+        if (loadedSecret != null) return loadedSecret
+
+        return this.bitwardenClient.secrets().list(properties.organizationId).data
                 .firstOrNull { secret -> secret.key == key }
                 ?.let { getSecretById(it.id) }
     }
