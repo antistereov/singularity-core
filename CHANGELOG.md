@@ -1,3 +1,25 @@
+## [v1.6.2]
+
+## Changelog
+
+## 🐛 Fixes
+- [f64c2e6](https://github.com/antistereov/web-kotlin-spring-baseline/commits/f64c2e6) **mail**: several minor fixes in mail services
+
+## 🧰 Tasks
+- [1ec9d66](https://github.com/antistereov/web-kotlin-spring-baseline/commits/1ec9d66) update version to 1.6.2-SNAPSHOT
+
+## 🛠  Build
+- [b6b4db6](https://github.com/antistereov/web-kotlin-spring-baseline/commits/b6b4db6) bump version to 1.6.2
+- [37d7a0b](https://github.com/antistereov/web-kotlin-spring-baseline/commits/37d7a0b) add changelog task to automate release process
+
+## 📝 Documentation
+- [3ad521e](https://github.com/antistereov/web-kotlin-spring-baseline/commits/3ad521e) **changelog**: add changelog entries for version 1.6.1
+
+
+## Contributors
+We'd like to thank the following people for their contributions:
+antistereov
+
 ## [v1.6.1]
 
 ## Changelog
