@@ -4,6 +4,7 @@ import com.bitwarden.sdk.BitwardenClient
 import com.bitwarden.sdk.BitwardenSettings
 import io.stereov.web.config.ApplicationConfiguration
 import io.stereov.web.global.service.secrets.component.BitwardenKeyManager
+import io.stereov.web.global.service.secrets.component.SecretCache
 import io.stereov.web.properties.secrets.BitwardenKeyManagerProperties
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
@@ -25,8 +26,8 @@ class BitwardenSecretsConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun bitwardenKeyManager(client: BitwardenClient, properties: BitwardenKeyManagerProperties): BitwardenKeyManager {
-        return BitwardenKeyManager(client, properties)
+    fun bitwardenKeyManager(client: BitwardenClient, properties: BitwardenKeyManagerProperties, secretCache: SecretCache): BitwardenKeyManager {
+        return BitwardenKeyManager(client, properties, secretCache)
     }
 
     @Bean

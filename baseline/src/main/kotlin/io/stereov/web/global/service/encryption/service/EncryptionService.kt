@@ -24,7 +24,7 @@ class EncryptionService(
     private val logger: KLogger
         get() = KotlinLogging.logger {}
 
-    fun <S, D: SensitiveDocument<S>> encrypt(
+    suspend fun <S, D: SensitiveDocument<S>> encrypt(
         document: D,
         serializer: KSerializer<S>,
         otherValues: List<Any> = emptyList()
@@ -34,7 +34,7 @@ class EncryptionService(
         return document.toEncryptedDocument(wrapped, otherValues)
     }
 
-    fun <S, E: EncryptedSensitiveDocument<S>> decrypt(
+    suspend fun <S, E: EncryptedSensitiveDocument<S>> decrypt(
         encryptedDocument: E,
         serializer: KSerializer<S>,
         otherValues: List<Any> = emptyList(),
@@ -44,17 +44,17 @@ class EncryptionService(
         return encryptedDocument.toSensitiveDocument(unwrapped, otherValues)
     }
 
-    private fun <T> wrap(value: T, serializer: KSerializer<T>): Encrypted<T> {
+    private suspend fun <T> wrap(value: T, serializer: KSerializer<T>): Encrypted<T> {
         val jsonStr = json.encodeToString(serializer, value)
         return this.encrypt(jsonStr)
     }
 
-    private fun <T> unwrap(encrypted: Encrypted<T>, serializer: KSerializer<T>): T {
+    private suspend fun <T> unwrap(encrypted: Encrypted<T>, serializer: KSerializer<T>): T {
         val decryptedJson = this.decrypt(encrypted)
         return json.decodeFromString(serializer, decryptedJson)
     }
 
-    private fun <T> encrypt(strToEncrypt: String): Encrypted<T> {
+    private suspend fun <T> encrypt(strToEncrypt: String): Encrypted<T> {
         this.logger.debug { "Encrypting..." }
 
         val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
@@ -68,7 +68,7 @@ class EncryptionService(
         return Encrypted(secret.id, encryptedString)
     }
 
-    private fun <T> decrypt(encrypted: Encrypted<T>): String {
+    private suspend fun <T> decrypt(encrypted: Encrypted<T>): String {
        this. logger.debug { "Decrypting..." }
 
         val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")

@@ -10,22 +10,22 @@ import java.util.*
 class MockKeyManager : KeyManager {
     private val secrets: MutableList<Secret> = mutableListOf()
 
-    override fun getSecretByKey(key: String): Secret? {
+    override suspend fun getSecretByKey(key: String): Secret? {
         return secrets.firstOrNull { it.key == key }
     }
 
-    override fun getSecretById(id: UUID): Secret {
+    override suspend fun getSecretById(id: UUID): Secret {
         return secrets.first { it.id == id }
     }
 
-    override fun create(key: String, value: String, note: String): Secret {
+    override suspend fun create(key: String, value: String, note: String): Secret {
         val secret = Secret(UUID.randomUUID(), key, value, Instant.now())
         this.secrets.add(secret)
 
         return secret
     }
 
-    override fun createOrUpdateKey(key: String, value: String, note: String): Secret {
+    override suspend fun createOrUpdateKey(key: String, value: String, note: String): Secret {
         val secret = Secret(UUID.randomUUID(), key, value, Instant.now())
         this.secrets.removeAll { it.key == key }
         this.secrets.add(secret)
@@ -33,7 +33,7 @@ class MockKeyManager : KeyManager {
         return secret
     }
 
-    override fun update(id: UUID, key: String, value: String, note: String): Secret {
+    override suspend fun update(id: UUID, key: String, value: String, note: String): Secret {
         val secret = Secret(id, key, value, Instant.now())
         this.secrets.removeAll { it.id == id }
         this.secrets.add(secret)

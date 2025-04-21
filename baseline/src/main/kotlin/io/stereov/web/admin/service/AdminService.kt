@@ -38,7 +38,7 @@ class AdminService(
 
     @PostConstruct
     fun init() {
-        this.getSecretServices().forEach { it.getCurrentSecret() }
+        this.getSecretServices().forEach { runBlocking { it.getCurrentSecret() } }
         runBlocking { initRootAccount() }
     }
 

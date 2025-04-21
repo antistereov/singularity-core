@@ -40,7 +40,7 @@ class MailTokenService(
      *
      * @return The generated JWT token.
      */
-    fun createVerificationToken(email: String, secret: String, issuedAt: Instant = Instant.now()): String {
+    suspend fun createVerificationToken(email: String, secret: String, issuedAt: Instant = Instant.now()): String {
         logger.debug { "Creating email verification token" }
 
         val claims = JwtClaimsSet.builder()
@@ -87,7 +87,7 @@ class MailTokenService(
      *
      * @return The generated JWT token.
      */
-    fun createPasswordResetToken(userId: String, secret: String, issuedAt: Instant = Instant.now()): String {
+    suspend fun createPasswordResetToken(userId: String, secret: String, issuedAt: Instant = Instant.now()): String {
         logger.debug { "Creating password reset token" }
 
         val claims = JwtClaimsSet.builder()

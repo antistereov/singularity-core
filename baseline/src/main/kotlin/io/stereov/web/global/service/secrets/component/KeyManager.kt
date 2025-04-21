@@ -5,10 +5,10 @@ import java.util.*
 
 interface KeyManager {
 
-    fun getSecretById(id: UUID): Secret
-    fun getSecretByKey(key: String): Secret?
+    suspend fun getSecretById(id: UUID): Secret
+    suspend fun getSecretByKey(key: String): Secret?
 
-    fun create(key: String, value: String, note: String): Secret
-    fun createOrUpdateKey(key: String, value: String, note: String): Secret
-    fun update(id: UUID, key: String, value: String, note: String): Secret
+    suspend fun create(key: String, value: String, note: String): Secret
+    suspend fun createOrUpdateKey(key: String, value: String, note: String): Secret
+    suspend fun update(id: UUID, key: String, value: String, note: String): Secret
 }

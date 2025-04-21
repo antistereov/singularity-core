@@ -19,14 +19,14 @@ abstract class SecretService(
 
     private var currentSecret: Secret? = null
 
-    fun getCurrentSecret(): Secret {
+    suspend fun getCurrentSecret(): Secret {
         this.logger.debug { "Getting current secret" }
 
         return this.currentSecret
             ?: this.loadCurrentSecret()
     }
 
-    private fun loadCurrentSecret(): Secret {
+    private suspend fun loadCurrentSecret(): Secret {
         this.logger.debug { "Loading current secret from key manager" }
 
         val currentSecret = this.keyManager.getSecretByKey(key)
@@ -40,7 +40,7 @@ abstract class SecretService(
         return secret
     }
 
-    fun updateSecret(): Secret {
+    suspend fun updateSecret(): Secret {
         this.logger.debug { "Updating current secret" }
 
         val newKey = "$key-${Instant.now()}"

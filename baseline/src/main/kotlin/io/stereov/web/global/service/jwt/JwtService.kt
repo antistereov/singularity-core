@@ -71,7 +71,7 @@ class JwtService(
      *
      * @return The encoded JWT token as a string.
      */
-    fun encodeJwt(claims: JwtClaimsSet): String {
+    suspend fun encodeJwt(claims: JwtClaimsSet): String {
         val currentJwt = jwtSecretService.getCurrentSecret()
 
         val jwsHeader = JwsHeader

@@ -2,6 +2,7 @@ package io.stereov.web.config.secrets
 
 import io.stereov.web.config.ApplicationConfiguration
 import io.stereov.web.global.service.secrets.component.KeyManager
+import io.stereov.web.global.service.secrets.component.SecretCache
 import io.stereov.web.global.service.secrets.service.EncryptionSecretService
 import io.stereov.web.global.service.secrets.service.JwtSecretService
 import io.stereov.web.properties.secrets.KeyManagerProperties
@@ -30,5 +31,11 @@ class SecretsConfiguration {
     @ConditionalOnMissingBean
     fun encryptionSecretService(keyManager: KeyManager): EncryptionSecretService {
         return EncryptionSecretService(keyManager)
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun secretCache(keyManagerProperties: KeyManagerProperties): SecretCache {
+        return SecretCache(keyManagerProperties)
     }
 }

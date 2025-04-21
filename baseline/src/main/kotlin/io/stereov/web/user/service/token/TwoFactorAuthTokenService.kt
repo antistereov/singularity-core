@@ -92,7 +92,7 @@ class TwoFactorAuthTokenService(
      *
      * @return The generated setup token.
      */
-    fun createSetupToken(userId: String, secret: String, recoveryCodes: List<String>, issuedAt: Instant = Instant.now()): String {
+    suspend fun createSetupToken(userId: String, secret: String, recoveryCodes: List<String>, issuedAt: Instant = Instant.now()): String {
         logger.debug { "Creating setup token for 2fa" }
 
         val claims = JwtClaimsSet.builder()
@@ -145,7 +145,7 @@ class TwoFactorAuthTokenService(
      *
      * @return The generated two-factor authentication token.
      */
-    fun createLoginToken(userId: String, expiration: Long = jwtProperties.expiresIn): String {
+    suspend fun createLoginToken(userId: String, expiration: Long = jwtProperties.expiresIn): String {
         logger.debug { "Creating two factor token" }
 
         val claims = JwtClaimsSet.builder()

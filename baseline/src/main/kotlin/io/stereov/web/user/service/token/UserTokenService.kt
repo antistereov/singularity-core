@@ -102,7 +102,7 @@ class UserTokenService(
      *
      * @return The generated refresh token.
      */
-    fun createRefreshToken(userId: String, deviceId: String, tokenId: String): String {
+    suspend fun createRefreshToken(userId: String, deviceId: String, tokenId: String): String {
         logger.debug { "Creating refresh token for user $userId and device $deviceId" }
 
         val claims = JwtClaimsSet.builder()

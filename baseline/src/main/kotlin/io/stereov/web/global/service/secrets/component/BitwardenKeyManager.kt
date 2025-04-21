@@ -5,9 +5,10 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.web.global.service.secrets.model.Secret
 import io.stereov.web.properties.secrets.BitwardenKeyManagerProperties
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
-import java.time.OffsetDateTime
 import java.util.*
 
 @Component
@@ -15,72 +16,68 @@ import java.util.*
 class BitwardenKeyManager(
     private val bitwardenClient: BitwardenClient,
     private val properties: BitwardenKeyManagerProperties,
+    private val cache: SecretCache
 ) : KeyManager {
 
     private val logger: KLogger
         get() = KotlinLogging.logger {}
 
-    private val loadedKeys = mutableSetOf<Secret>()
-
-    override fun getSecretById(id: UUID): Secret {
+    override suspend fun getSecretById(id: UUID): Secret = withContext(Dispatchers.IO) {
         logger.debug { "Getting secret by ID $id" }
 
-        val cachedSecret = this.loadedKeys.firstOrNull { it.id == id }
-        if (cachedSecret != null) return cachedSecret
+        val cachedSecret = cache.get(id)
+        if (cachedSecret != null) return@withContext cachedSecret
 
-        this.bitwardenClient.secrets().sync(properties.organizationId, OffsetDateTime.now())
         val secretResponse = bitwardenClient.secrets().get(id)
         val secret = Secret(secretResponse.id, secretResponse.key, secretResponse.value, secretResponse.creationDate.toInstant())
 
-        this.loadedKeys.add(secret)
-        return secret
+        cache.put(secret)
+        return@withContext secret
     }
 
-    override fun getSecretByKey(key: String): Secret? {
-        this.logger.debug { "Getting secret by key $key" }
+    override suspend fun getSecretByKey(key: String): Secret? = withContext(Dispatchers.IO) {
+        logger.debug { "Getting secret by key $key" }
 
-        val loadedSecret = this.loadedKeys.firstOrNull { it.key == key }
+        val loadedSecret = cache.getByKey(key)
 
-        if (loadedSecret != null) return loadedSecret
+        if (loadedSecret != null) return@withContext loadedSecret
 
-        return this.bitwardenClient.secrets().list(properties.organizationId).data
-                .firstOrNull { secret -> secret.key == key }
-                ?.let { getSecretById(it.id) }
+        return@withContext bitwardenClient.secrets().list(properties.organizationId).data
+            .firstOrNull { secret -> secret.key == key }
+            ?.let { getSecretById(it.id) }
     }
 
-    override fun create(key: String, value: String, note: String): Secret {
-        this.logger.debug { "Creating secret with key $key" }
+    override suspend fun create(key: String, value: String, note: String): Secret = withContext(Dispatchers.IO) {
+        logger.debug { "Creating secret with key $key" }
 
         val secretResponse = bitwardenClient.secrets().create(properties.organizationId, key, value, note, arrayOf(properties.projectId))
 
         val id = secretResponse.id
 
         val secret =  Secret(id, key, value, secretResponse.creationDate.toInstant())
-        loadedKeys.add(secret)
+        cache.put(secret)
 
-        return secret
+        return@withContext secret
     }
 
-    override fun createOrUpdateKey(key: String, value: String, note: String): Secret {
-        this.logger.debug { "Creating or updating key $key" }
+    override suspend fun createOrUpdateKey(key: String, value: String, note: String): Secret = withContext(Dispatchers.IO) {
+        logger.debug { "Creating or updating key $key" }
 
-        val existingSecret = getSecretByKey(key) ?: return this.create(key, value, note)
+        val existingSecret = getSecretByKey(key) ?: return@withContext create(key, value, note)
 
         val updatedSecret = update(existingSecret.id, key, value, note)
-        loadedKeys.remove(existingSecret)
-        loadedKeys.add(updatedSecret)
+        cache.put(updatedSecret)
 
-        return updatedSecret
+        return@withContext updatedSecret
     }
 
-    override fun update(id: UUID, key: String, value: String, note: String): Secret {
-        val res = this.bitwardenClient.secrets().update(properties.organizationId, id, key, value, note, arrayOf(properties.projectId))
+    override suspend fun update(id: UUID, key: String, value: String, note: String): Secret = withContext(Dispatchers.IO) {
+        val res = bitwardenClient.secrets().update(properties.organizationId, id, key, value, note, arrayOf(properties.projectId))
 
         val updatedSecret = Secret(res.id, key, res.value, res.creationDate.toInstant())
 
-        loadedKeys.removeAll { it.id == id }
-        loadedKeys.add(updatedSecret)
+        cache.put(updatedSecret)
 
-        return updatedSecret
+        return@withContext updatedSecret
     }
 }
