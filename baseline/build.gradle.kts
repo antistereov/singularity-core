@@ -131,6 +131,13 @@ tasks.getByName<BootJar>("bootJar") {
     enabled = false
 }
 
+tasks.register("changelog") {
+    group = "release"
+    description = "Runs clean, publish, and jReleaserChangelog tasks in sequence."
+
+    dependsOn("clean", "publish", "jreleaserChangelog")
+}
+
 publishing {
     publications {
         create<MavenPublication>("maven") {
