@@ -1,3 +1,22 @@
+## [v1.6.1]
+
+## Changelog
+
+## 🐛 Fixes
+- [f9f228a](https://github.com/antistereov/web-kotlin-spring-baseline/commits/f9f228a) add expiration when caching secrets and make KeyManager async by using suspend in IO operations
+
+## 🧰 Tasks
+- [dba2fe3](https://github.com/antistereov/web-kotlin-spring-baseline/commits/dba2fe3) update version to 1.6.1
+- [d7db761](https://github.com/antistereov/web-kotlin-spring-baseline/commits/d7db761) update version to 1.6.1-SNAPSHOT
+
+## 📝 Documentation
+- [75e128c](https://github.com/antistereov/web-kotlin-spring-baseline/commits/75e128c) **changelog**: update CHANGELOG.md for version 1.6.0
+
+
+## Contributors
+We'd like to thank the following people for their contributions:
+antistereov
+
 ## [v1.6.0]
 
 ## Changelog
