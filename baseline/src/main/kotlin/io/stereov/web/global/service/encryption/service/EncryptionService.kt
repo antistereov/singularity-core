@@ -54,7 +54,7 @@ class EncryptionService(
         return json.decodeFromString(serializer, decryptedJson)
     }
 
-    private suspend fun <T> encrypt(strToEncrypt: String): Encrypted<T> {
+    suspend fun <T> encrypt(strToEncrypt: String): Encrypted<T> {
         this.logger.debug { "Encrypting..." }
 
         val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
@@ -68,7 +68,7 @@ class EncryptionService(
         return Encrypted(secret.id, encryptedString)
     }
 
-    private suspend fun <T> decrypt(encrypted: Encrypted<T>): String {
+    suspend fun <T> decrypt(encrypted: Encrypted<T>): String {
        this. logger.debug { "Decrypting..." }
 
         val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")

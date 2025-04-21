@@ -2,6 +2,8 @@ package io.stereov.web.global.service.mail
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.web.global.service.encryption.model.Encrypted
+import io.stereov.web.global.service.encryption.service.EncryptionService
 import io.stereov.web.global.service.jwt.JwtService
 import io.stereov.web.global.service.jwt.exception.model.InvalidTokenException
 import io.stereov.web.global.service.jwt.exception.model.TokenExpiredException
@@ -11,6 +13,7 @@ import io.stereov.web.properties.MailProperties
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
 import org.springframework.stereotype.Service
 import java.time.Instant
+import java.util.*
 
 /**
  * # Service for managing email tokens.
@@ -24,6 +27,7 @@ import java.time.Instant
 class MailTokenService(
     private val mailProperties: MailProperties,
     private val jwtService: JwtService,
+    private val encryptionService: EncryptionService,
 ) {
 
     private val logger: KLogger
@@ -90,11 +94,14 @@ class MailTokenService(
     suspend fun createPasswordResetToken(userId: String, secret: String, issuedAt: Instant = Instant.now()): String {
         logger.debug { "Creating password reset token" }
 
+        val encryptedSecret = encryptionService.encrypt<String>(secret)
+
         val claims = JwtClaimsSet.builder()
             .issuedAt(issuedAt)
             .expiresAt(issuedAt.plusSeconds(mailProperties.passwordResetExpiration))
             .subject(userId)
-            .id(secret)
+            .claim("secret", encryptedSecret.ciphertext)
+            .claim("encryption-key-id", encryptedSecret.secretId)
             .build()
         
         return jwtService.encodeJwt(claims)
@@ -118,7 +125,12 @@ class MailTokenService(
         val jwt = jwtService.decodeJwt(token, true)
 
         val userId = jwt.subject
-        val secret = jwt.id
+        val encryptedSecret = jwt.claims["secret"] as? String
+            ?: throw InvalidTokenException("No secret found in claims")
+        val kid = jwt.claims["encryption-key-id"] as? String
+            ?: throw InvalidTokenException("No key ID found in claims")
+
+        val secret = encryptionService.decrypt(Encrypted<String>(UUID.fromString(kid), encryptedSecret))
 
         return PasswordResetToken(userId, secret)
     }

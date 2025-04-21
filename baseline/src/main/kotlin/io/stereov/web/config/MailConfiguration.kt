@@ -1,6 +1,7 @@
 package io.stereov.web.config
 
 import io.stereov.web.auth.service.AuthenticationService
+import io.stereov.web.global.service.encryption.service.EncryptionService
 import io.stereov.web.global.service.hash.HashService
 import io.stereov.web.global.service.jwt.JwtService
 import io.stereov.web.global.service.mail.MailCooldownService
@@ -105,9 +106,10 @@ class MailConfiguration {
     @ConditionalOnMissingBean
     fun mailTokenService(
         mailProperties: MailProperties,
-        jwtService: JwtService
+        jwtService: JwtService,
+        encryptionService: EncryptionService
     ): MailTokenService {
-        return MailTokenService(mailProperties, jwtService)
+        return MailTokenService(mailProperties, jwtService, encryptionService)
     }
 
     @Bean

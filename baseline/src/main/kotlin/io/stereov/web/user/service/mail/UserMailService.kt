@@ -11,7 +11,9 @@ import io.stereov.web.global.service.mail.MailTokenService
 import io.stereov.web.global.service.random.RandomService
 import io.stereov.web.user.dto.UserDto
 import io.stereov.web.user.dto.request.ResetPasswordRequest
+import io.stereov.web.user.dto.request.SendPasswordResetRequest
 import io.stereov.web.user.dto.response.MailCooldownResponse
+import io.stereov.web.user.exception.model.UserDoesNotExistException
 import io.stereov.web.user.service.UserService
 import org.springframework.stereotype.Service
 
@@ -96,11 +98,15 @@ class UserMailService(
      *
      * @param email The email address of the user to send the password reset email to.
      */
-    suspend fun sendPasswordReset(email: String) {
+    suspend fun sendPasswordReset(req: SendPasswordResetRequest) {
         logger.debug { "Sending password reset email" }
 
-        val user = userService.findByEmail(email)
-        return mailService.sendPasswordResetEmail(user)
+        try {
+            val user = userService.findByEmail(req.email)
+            return mailService.sendPasswordResetEmail(user)
+        } catch (e: UserDoesNotExistException) {
+            return
+        }
     }
 
     suspend fun resetPassword(token: String, req: ResetPasswordRequest) {

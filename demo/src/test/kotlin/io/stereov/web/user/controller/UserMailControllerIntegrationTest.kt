@@ -7,6 +7,7 @@ import io.stereov.web.test.BaseIntegrationTest
 import io.stereov.web.user.dto.request.DeviceInfoRequest
 import io.stereov.web.user.dto.request.LoginRequest
 import io.stereov.web.user.dto.request.ResetPasswordRequest
+import io.stereov.web.user.dto.request.SendPasswordResetRequest
 import io.stereov.web.user.dto.response.MailCooldownResponse
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*
@@ -187,7 +188,8 @@ class UserMailControllerIntegrationTest : BaseIntegrationTest() {
         val user = registerUser()
 
         webTestClient.post()
-            .uri("/user/mail/reset-password/send?email=${user.info.sensitive.email}")
+            .uri("/user/mail/reset-password/send")
+            .bodyValue(SendPasswordResetRequest(user.info.sensitive.email))
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectStatus().isOk
@@ -208,7 +210,8 @@ class UserMailControllerIntegrationTest : BaseIntegrationTest() {
         val user = registerUser()
 
         webTestClient.post()
-            .uri("/user/mail/reset-password/send?email=${user.info.sensitive.email}")
+            .uri("/user/mail/reset-password/send")
+            .bodyValue(SendPasswordResetRequest(user.info.sensitive.email))
             .exchange()
             .expectStatus().isOk
 

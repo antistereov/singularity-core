@@ -369,9 +369,9 @@ The related class is [`UserMailController`](baseline/src/main/kotlin/io/stereov/
 - **POST /user/mail/verify**: Verifies the user's email address using a token.
 - **GET /user/mail/verify/cooldown**: Retrieves the remaining cooldown time before the user can request another email verification.
 - **POST /user/mail/verify/send**: Send the email verification token.
-- **POST /user/mail/password-reset**: Resets the user's password.
-- **GET /user/mail/password-reset/cooldown**: Retrieves the remaining cooldown time before the user can request another password reset email.
-- **POST /user/mail/password-reset/send**: Sends a password reset email to the user.
+- **POST /user/mail/reset-password**: Resets the user's password.
+- **GET /user/mail/reset-password/cooldown**: Retrieves the remaining cooldown time before the user can request another password reset email.
+- **POST /user/mail/reset-password/send**: Sends a password reset email to the user.
 
 ### `/user/devices`
 

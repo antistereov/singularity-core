@@ -2,6 +2,7 @@ package io.stereov.web.user.controller
 
 import io.stereov.web.user.dto.UserDto
 import io.stereov.web.user.dto.request.ResetPasswordRequest
+import io.stereov.web.user.dto.request.SendPasswordResetRequest
 import io.stereov.web.user.dto.response.MailCooldownResponse
 import io.stereov.web.user.service.mail.UserMailService
 import org.springframework.http.ResponseEntity
@@ -102,8 +103,8 @@ class UserMailController(
      * @return A message indicating the success of the operation.
      */
     @PostMapping("/reset-password/send")
-    suspend fun sendPasswordResetEmail(@RequestParam email: String): ResponseEntity<Map<String, String>> {
-        userMailService.sendPasswordReset(email)
+    suspend fun sendPasswordResetEmail(@RequestBody req: SendPasswordResetRequest): ResponseEntity<Map<String, String>> {
+        userMailService.sendPasswordReset(req)
 
         return ResponseEntity.ok().body(
             mapOf("message" to "Successfully send password reset email")

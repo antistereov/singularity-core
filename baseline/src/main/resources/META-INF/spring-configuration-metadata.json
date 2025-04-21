@@ -244,7 +244,7 @@
       "name": "baseline.mail.ui-password-reset-path",
       "type": "java.lang.String",
       "sourceType": "io.stereov.web.properties.MailProperties",
-      "defaultValue": "/auth/password-reset",
+      "defaultValue": "/auth/reset-password",
       "description": "The path to the password reset page in the UI application."
     },
     {

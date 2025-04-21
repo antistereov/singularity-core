@@ -55,8 +55,6 @@ class UserSessionService(
     private val logger: KLogger
         get() = KotlinLogging.logger {}
 
-    private val emailScope = CoroutineScope(Dispatchers.Default)
-
     /**
      * Logs in a user and returns the user document.
      *
@@ -113,7 +111,7 @@ class UserSessionService(
             throw AuthException("Login failed: UserDocument contains no id")
         }
 
-        if (sendEmail) emailScope.launch { mailService.sendVerificationEmail(savedUserDocument) }
+        if (sendEmail) mailService.sendVerificationEmail(savedUserDocument)
 
         return savedUserDocument
     }

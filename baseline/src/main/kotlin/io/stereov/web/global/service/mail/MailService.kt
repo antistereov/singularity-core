@@ -6,6 +6,9 @@ import io.stereov.web.global.service.mail.exception.model.MailCooldownException
 import io.stereov.web.properties.MailProperties
 import io.stereov.web.properties.UiProperties
 import io.stereov.web.user.model.UserDocument
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.stereotype.Service
@@ -31,6 +34,8 @@ class MailService(
     private val logger: KLogger
         get() = KotlinLogging.logger {}
 
+    private val sendMailScope = CoroutineScope(Dispatchers.Default)
+
     /**
      * Sends a verification email to the user.
      *
@@ -55,7 +60,7 @@ class MailService(
         message.subject = "Email Verification"
         message.text = "Hey ${user.sensitive.name}! Please verify your email by clicking on the following link: $verificationUrl"
 
-        mailSender.send(message)
+        sendMailScope.launch { mailSender.send(message) }
         mailCooldownService.startVerificationCooldown(userId)
     }
 
@@ -93,7 +98,7 @@ class MailService(
         message.subject = "Password Reset"
         message.text = "Hey ${user.sensitive.name}! You can reset your password by clicking on the following link: $passwordResetUrl"
 
-        mailSender.send(message)
+        sendMailScope.launch { mailSender.send(message) }
         mailCooldownService.startPasswordResetCooldown(userId)
     }
 
