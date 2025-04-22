@@ -1,7 +1,7 @@
 package io.stereov.web.user.model
 
+import io.stereov.web.global.database.model.EncryptedSensitiveDocument
 import io.stereov.web.global.service.encryption.model.Encrypted
-import io.stereov.web.global.service.encryption.model.EncryptedSensitiveDocument
 import io.stereov.web.global.service.hash.model.SearchableHash
 import io.stereov.web.global.service.hash.model.SecureHash
 import org.springframework.data.annotation.Id

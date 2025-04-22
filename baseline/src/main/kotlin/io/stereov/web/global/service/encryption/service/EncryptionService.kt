@@ -3,8 +3,8 @@ package io.stereov.web.global.service.encryption.service
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.web.global.service.encryption.model.Encrypted
-import io.stereov.web.global.service.encryption.model.EncryptedSensitiveDocument
-import io.stereov.web.global.service.encryption.model.SensitiveDocument
+import io.stereov.web.global.database.model.EncryptedSensitiveDocument
+import io.stereov.web.global.database.model.SensitiveDocument
 import io.stereov.web.global.service.secrets.component.KeyManager
 import io.stereov.web.global.service.secrets.service.EncryptionSecretService
 import kotlinx.serialization.KSerializer

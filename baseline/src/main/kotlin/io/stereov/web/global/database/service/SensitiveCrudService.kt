@@ -2,10 +2,10 @@ package io.stereov.web.global.database.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.web.global.database.model.EncryptedSensitiveDocument
+import io.stereov.web.global.database.model.SensitiveDocument
 import io.stereov.web.global.database.repository.SensitiveCrudRepository
 import io.stereov.web.global.exception.model.DocumentNotFoundException
-import io.stereov.web.global.service.encryption.model.EncryptedSensitiveDocument
-import io.stereov.web.global.service.encryption.model.SensitiveDocument
 import io.stereov.web.global.service.secrets.service.EncryptionSecretService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map

@@ -1,4 +1,6 @@
-package io.stereov.web.global.service.encryption.model
+package io.stereov.web.global.database.model
+
+import io.stereov.web.global.service.encryption.model.Encrypted
 
 abstract class SensitiveDocument<S> {
 

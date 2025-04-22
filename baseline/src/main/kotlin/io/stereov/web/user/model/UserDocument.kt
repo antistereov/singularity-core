@@ -2,9 +2,9 @@ package io.stereov.web.user.model
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.web.global.database.model.SensitiveDocument
 import io.stereov.web.global.exception.model.MissingFunctionParameterException
 import io.stereov.web.global.service.encryption.model.Encrypted
-import io.stereov.web.global.service.encryption.model.SensitiveDocument
 import io.stereov.web.global.service.file.model.FileMetaData
 import io.stereov.web.global.service.hash.model.SearchableHash
 import io.stereov.web.global.service.hash.model.SecureHash
