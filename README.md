@@ -3,7 +3,7 @@
 [![Maven Central](https://img.shields.io/maven-central/v/io.stereov.web/baseline.svg)](https://central.sonatype.com/artifact/io.stereov.web/baseline)
 
 This is a Kotlin-based Spring Web application template designed to provide essential features for secure and efficient web applications. 
-It incorporates a wide range of functionality, such as user management, two-factor authentication, JWT-based authentication, encryption, and more, making it an excellent starting point for building production-ready applications.
+It incorporates a wide range of functionality, such as user management, encryption, JWT-based authentication, file storage, and more, making it an excellent starting point for building production-ready applications.
 
 **Note:** 
 This repository goes hand in hand with my Angular baseline. You can find it [here](https://github.com/antistereov/web-angular-baseline).
@@ -23,24 +23,27 @@ This repository isn't just for personal use—it's meant to be a **collaborative
 
 ## Features
 
-### **Authentication & Security**
-- **JWT Authentication**: Provides secure authentication using JWT with configurable access token expiration, refresh tokens bound to devices, and configurable token lifetimes.
-- **Two-Factor Authentication (2FA)**: Full 2FA setup, verification, and recovery flow to enhance user security.
-- **HTTP-Only Authentication**: Uses secure, HTTP-only cookies to store authentication information, ensuring enhanced security.
-- **Email Verification**: Configurable email verification system, including token expiration time and resend cooldown for a smooth user experience.
-- **Encryption and Hashing**: Implements encryption for sensitive data, along with secure password and token hashing.
+### **Security & Key Management**
+- **Secret Manager Integration**: Secure connection to a secret manager enables fully automated key rotation for encryption and JWT keys, enhancing security and management efficiency.
 
-### **User Management**
-- **User Roles**: Supports user roles and includes application-specific information via the `ApplicationInfo` interface.
-- **Custom Exceptions**: Custom exceptions built on top of `BaseWebException`, allowing for better error handling and meaningful error messages.
+### **Authentication & User Management**
+- **JWT Authentication**: Provides secure authentication using JWT with configurable access token expiration, refresh tokens bound to devices, and customizable token lifetimes.
+- **Two-Factor Authentication (2FA)**: Full 2FA setup, verification, and recovery flow to enhance user security.
+- **HTTP-Only Authentication**: Uses secure, HTTP-only cookies for storing authentication information to improve security.
+- **Email Verification**: Configurable email verification system with token expiration and resend cooldown for a smooth user experience.
+- **User Roles**: Supports user roles and application-specific information through the `ApplicationInfo` interface.
+- **Custom Exceptions**: Custom exceptions built on top of `BaseWebException` to provide better error handling and clearer error messages.
 
 ### **Data Storage & Caching**
-- **MongoDB Integration**: Fully integrated with MongoDB for seamless data storage.
-- **Redis Caching**: Utilizes Redis for efficient caching and performance improvement.
+- **MongoDB Integration**: Seamlessly integrated with MongoDB for data storage.
+- **Redis Caching**: Utilizes Redis for efficient caching, boosting performance.
 
 ### **Performance & Rate Limiting**
-- **Rate Limiting**: Configurable rate-limiting for both IP and user account-based limits to prevent abuse.
-- **Asynchronous Programming**: Built with Kotlin coroutines for async processing, and integrates Log4j for asynchronous logging.
+- **Rate Limiting**: Configurable rate limiting for both IP and user accounts to prevent abuse and ensure fair usage.
+- **Asynchronous Programming**: Built with Kotlin coroutines for asynchronous processing, integrating Log4j for logging.
+
+### **Data Storage & Connectivity**
+- **S3 Object Storage**: Integration with S3 for seamless object storage handling.
 
 ## Example
 
@@ -116,13 +119,13 @@ Add the dependency to your `build.gradle.kts`, `build.gradle` or `pom.xml` if us
 
 **For Kotlin DSL:**
 ```kotlin
-implementation("io.stereov.web:baseline:<version>") // Check for the latest version
+implementation("io.stereov.web:baseline:<version>") // Check the maven status batch for the latest version
 ```
 
 **For Gradle:**
 ```groovy
 dependencies {
-   implementation 'io.stereov.web:baseline:<version>' // Check for the latest version
+   implementation 'io.stereov.web:baseline:<version>' // Check the maven status batch for the latest version
 }
 ```
 
@@ -131,8 +134,26 @@ dependencies {
 <dependency>
    <groupId>io.stereov.web</groupId>
    <artifactId>baseline</artifactId>
-   <version>_version_</version> <!-- Check for the latest version -->
+   <version>_version_</version> <!-- Check the maven status batch for the latest version -->
 </dependency>
+```
+
+**Note:** If you want to use the Bitwarden Secret Manager, you need to [set up the GitHub Package Registry](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry#installing-a-package):
+
+```kotlin
+repositories {
+    mavenCentral()
+
+    maven {
+        url = uri("https://maven.pkg.github.com/bitwarden/sdk-sm")
+        credentials {
+            username = properties["gpr.user"] as String? // Set your GPR user in your gradle.properties
+                ?: System.getenv("GPR_USER")             // or as an environment variable
+            password = properties["gpr.key"] as String?  // Do the same with your GPR token
+                ?: System.getenv("GPR_KEY")
+        }
+    }
+}
 ```
 
 #### Configuration
@@ -197,6 +218,33 @@ Here are the key properties you need to set in your `application.yaml`:
         # Optional: Enable HTTPS and secure cookies for the application. Default is false.
         # Important: Never set this to false in production!
         secure: false
+        # Should a root user be created on startup?
+        # It can be useful if you don't want to manually set up a root user.
+        # Please set it to false as soon as you created one and change the password.
+        create-root-user: false
+        root-email: admin@email.com
+        root-password: <root-password>
+    ```
+  
+- **Secrets Settings:**
+
+    Your application secrets such as encryption keys and JWT secrets will be stored in a secret manager.
+    Currently, only Bitwarden Secret Manager is available.
+    ```yaml
+    key-manager: bitwarden
+    # The CRON string that defines automatic key rotation
+    key-rotation-cron: 0 0 4 1 1,4,7,10 *
+    # Secrets are cached locally to improve performance and to limit calls to the secret manager
+    # You can define the expiration of these cached secrets here in milliseconds.
+    cache-expiration: 900000
+    bitwarden:
+      access-token: <your-bitwarden-access-token>
+      api-url: <your-bitwarden-api-url>
+      identity-url: <your-bitwarden-identity-url>
+      project-id: <your-bitwarden-project-id>
+      organization-id: <your-bitwarden-organization-id>
+      # Bitwarden needs access to a state file where it can save necessary information
+      state-file: ~/.bitwarden/secrets-manager/demo-application/state
     ```
     
 - **UI Settings:**
@@ -302,6 +350,87 @@ Here are the key properties you need to set in your `application.yaml`:
             scheme: https
     ```
 
+## Managing Sensitive Data
+The abstract class [`SenstiveCrudService`](baseline/src/main/kotlin/io/stereov/web/global/database/service/SensitiveCrudService.kt) and interface [`SensitiveCrudRepository`](baseline/src/main/kotlin/io/stereov/web/global/database/repository/SensitiveCrudRepository.kt)
+define a way to handle documents that contain sensitive information.
+
+There is a class for
+[`EncryptedSensitiveDocument`](baseline/src/main/kotlin/io/stereov/web/global/database/model/EncryptedSensitiveDocument.kt)
+and [`SensitiveDocument`](baseline/src/main/kotlin/io/stereov/web/global/database/model/SensitiveDocument.kt)
+share a common type parameter which defines the class of the encrypted information.
+You can take a look at the implementation of
+[`UserDocument`](baseline/src/main/kotlin/io/stereov/web/user/model/UserDocument.kt) and
+[`EncryptedUserDocument`](baseline/src/main/kotlin/io/stereov/web/user/model/EncryptedUserDocument.kt)
+which share [`SensitiveUserData`](baseline/src/main/kotlin/io/stereov/web/user/model/SensitiveUserData.kt)
+in decrypted and encrypted form respectively.
+
+Encryption and decryption is handled by the `SensitiveCrudService` automatically.
+You will only work with the decrypted document.
+
+The only thing you need to set up is the `encrypt()` and `decrypt()` method and to override the `serializer` value.
+
+Here`s an example:
+
+```kotlin
+/**
+ * The class defining sensitive properties.
+ */
+@Serializable
+data class SensitiveExampleData(
+    var favoriteColor: String,
+)
+
+/**
+ * The document containing the sensitive data in decrypted form.
+ * This is the document you will actually work with.
+ */
+@Serializable
+data class SensitiveDocument(
+    var id: String?,
+    override var sensitive: SensitiveExampleData
+) : SensitiveDocument<SensitiveExampleData>()
+
+/**
+ * The document containing the sensitive data in encrypted form.
+ * This will be stored to the database.
+ */
+@Serializable
+data class EncryptionSensitiveDocument(
+    var id: String,
+    override var sensitive: Encrypted<SensitiveExampleData>
+) : EncryptionSensitiveDocument<SensitiveExampleData>()
+
+
+/**
+ * The repository uses the encrypted document.
+ */
+interface ExampleRepository : SensitiveCrudRepository<EncryptedSensitiveDocument>
+
+/**
+ * This is the service. You need to override the `serializer` and the `encrypt()` and `decrypt()` methods.
+ */
+class ExampleService(
+    private val encryptionService: EncryptionService,
+    exampleRepository: ExampleRepository,
+    encryptionSecretService: EncryptionSecretService,
+    json: Json
+) : SensitiveCrudService<SensitiveExampleData, ExampleDocument, EncryptedExampleDocument>(exampleRepository, encryptionSecretService) {
+
+    /**
+     * If you make sure to add the @Serializable annotation to all your documents, you can import the serializer like this.
+     */
+    override val serializer = json.serializersModule.serializer<SensitiveExampleData>()
+  
+    override suspend fun encrypt(document: ExampleDocument, otherValues: List<any>): EncryptedExampleDocument {
+        return encryptionService.encrypt(document, serializer) as EncryptedExampleDocument
+    }
+
+    override suspend fun decrypt(encrypted: EncryptedExampleDocument, otherValues: List<any>): ExampleDocument {
+        return encryptionService.decrypt(encrypted, serializer) as EncryptedExampleDocument
+    }
+}
+```
+
 ## Service Overview
 
 > **Note**:  
@@ -319,7 +448,7 @@ Here are the key properties you need to set in your `application.yaml`:
 
 ### Cache Management
 - **RedisService**:  
-  Interact with the cache using the [`RedisService`](baseline/src/main/kotlin/io/stereov/web/global/service/cache/RedisService.kt) for efficient data retrieval and storage.
+  Interact with the cache using the [`RedisService`](baseline/src/main/kotlin/io/stereov/web/global/service/cache/RedisService.kt) or the `redisCoroutinesCommands` bean for efficient data retrieval and storage.
 
 ### Encryption & Decryption
 - **EncryptionService**:  
@@ -404,6 +533,8 @@ The related class is [`UserTwoFactorAuthController`](baseline/src/main/kotlin/io
 - **Kotlin**: A modern, statically typed language for the JVM.
 - **Spring WebFlux**: A reactive framework for building non-blocking applications.
 - **MongoDB**: NoSQL database for data storage.
+- **Bitwarden Secret Manager**: For managing sensitive data and secrets.
+- **S3 Object Storage**: For file storage and management.
 - **Redis**: In-memory caching for enhanced performance.
 - **JWT**: For stateless authentication with secure tokens.
 - **Two-Factor Authentication (2FA)**: Adds an extra layer of security to user accounts.
