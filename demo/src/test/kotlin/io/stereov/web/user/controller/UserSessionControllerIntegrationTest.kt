@@ -1,7 +1,9 @@
 package io.stereov.web.user.controller
 
 import io.stereov.web.config.Constants
+import io.stereov.web.global.service.mail.MailTokenService
 import io.stereov.web.global.service.random.RandomService
+import io.stereov.web.global.service.secrets.service.EncryptionSecretService
 import io.stereov.web.test.BaseIntegrationTest
 import io.stereov.web.user.dto.UserDto
 import io.stereov.web.user.dto.request.*
@@ -10,11 +12,18 @@ import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import java.time.Instant
 
 class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
+
+    @Autowired
+    private lateinit var encryptionSecretService: EncryptionSecretService
+
+    @Autowired
+    private lateinit var mailTokenService: MailTokenService
 
     @Test fun `getAccount returns user account`() = runTest {
         val user = registerUser()
@@ -254,11 +263,22 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val password = "password"
         val user = registerUser(oldEmail, password, twoFactorEnabled = true)
 
-        val res = webTestClient.put()
+
+        webTestClient.put()
             .uri("/user/me/email")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken(user.info.id, user.info.sensitive.devices.first().id))
             .bodyValue(ChangeEmailRequest(newEmail, password))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(UserDto::class.java)
+            .returnResult()
+            .responseBody
+
+        val token = mailTokenService.createVerificationToken(user.info.id, newEmail, user.mailVerificationSecret)
+
+        val res = webTestClient.post()
+            .uri("/user/mail/verify?token=$token")
             .exchange()
             .expectStatus().isOk
             .expectBody(UserDto::class.java)
@@ -276,6 +296,37 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val password = "password"
         val user = registerUser(oldEmail, password)
 
+        webTestClient.put()
+            .uri("/user/me/email")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .bodyValue(ChangeEmailRequest(newEmail, password))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(UserDto::class.java)
+            .returnResult()
+            .responseBody
+
+        val token = mailTokenService.createVerificationToken(user.info.id, newEmail, user.mailVerificationSecret)
+
+        val res = webTestClient.post()
+            .uri("/user/mail/verify?token=$token")
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(UserDto::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        assertEquals(newEmail, res.email)
+        userService.findByEmail(newEmail)
+    }
+    @Test fun `changeEmail does nothing without validation`() = runTest {
+        val oldEmail = "old@email.com"
+        val newEmail = "new@email.com"
+        val password = "password"
+        val user = registerUser(oldEmail, password)
+
         val res = webTestClient.put()
             .uri("/user/me/email")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
@@ -287,9 +338,9 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
             .responseBody
 
         requireNotNull(res)
-
-        assertEquals(newEmail, res.email)
-        userService.findByEmail(newEmail)
+        assertEquals(oldEmail, res.email)
+        val foundUser = userService.findByEmail(oldEmail)
+        assertEquals(user.info.id, foundUser.id)
     }
     @Test fun `changeEmail requires authentication`() = runTest {
         val oldEmail = "old@email.com"

@@ -19,9 +19,6 @@ import io.stereov.web.user.exception.model.NoAppInfoFoundException
 import io.stereov.web.user.model.UserDocument
 import io.stereov.web.user.service.device.UserDeviceService
 import io.stereov.web.user.service.twofactor.UserTwoFactorAuthService
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import org.springframework.http.MediaType
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
@@ -143,10 +140,7 @@ class UserSessionService(
             cookieService.validateStepUpCookie(exchange)
         }
 
-        user.sensitive.email = payload.newEmail
-        user.sensitive.security.mail.verified = false
-
-        mailService.sendVerificationEmail(user)
+        mailService.sendVerificationEmail(user, payload.newEmail)
 
         return userService.save(user)
     }

@@ -51,15 +51,17 @@ class UserMailService(
         logger.debug { "Verifying email" }
 
         val verificationToken = mailTokenService.validateAndExtractVerificationToken(token)
-        val user = userService.findByEmail(verificationToken.email)
+        val user = userService.findByIdOrNull(verificationToken.userId)
+            ?: throw AuthException("User does not exist")
 
         val savedSecret = user.sensitive.security.mail.verificationSecret
 
         return if (verificationToken.secret == savedSecret) {
             user.sensitive.security.mail.verified = true
+            user.sensitive.email = verificationToken.email
             userService.save(user).toDto()
         } else {
-            user.toDto()
+            throw AuthException("Verification token does not match")
         }
     }
 

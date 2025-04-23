@@ -12,6 +12,7 @@ package io.stereov.web.global.service.mail.model
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
 data class EmailVerificationToken(
+    val userId: String,
     val email: String,
     val secret: String,
 )

@@ -41,8 +41,8 @@ class MailService(
      *
      * @param user The user to send the verification email to.
     */
-    suspend fun sendVerificationEmail(user: UserDocument) {
-        logger.debug { "Sending verification email to ${user.sensitive.email}" }
+    suspend fun sendVerificationEmail(user: UserDocument, newEmail: String? = null) {
+        logger.debug { "Sending verification email to ${newEmail ?: user.sensitive.email}" }
 
         val userId = user.id
 
@@ -52,11 +52,12 @@ class MailService(
 
         val secret = user.sensitive.security.mail.verificationSecret
 
-        val token = mailTokenService.createVerificationToken(user.sensitive.email, secret)
+        val email = newEmail ?: user.sensitive.email
+        val token = mailTokenService.createVerificationToken(userId, email, secret)
         val verificationUrl = generateVerificationUrl(token)
         val message = SimpleMailMessage()
         message.from = mailProperties.email
-        message.setTo(user.sensitive.email)
+        if (newEmail != null) message.setTo(newEmail) else message.setTo(user.sensitive.email)
         message.subject = "Email Verification"
         message.text = "Hey ${user.sensitive.name}! Please verify your email by clicking on the following link: $verificationUrl"
 

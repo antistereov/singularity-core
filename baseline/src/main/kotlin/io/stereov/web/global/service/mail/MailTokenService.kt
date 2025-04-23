@@ -44,13 +44,14 @@ class MailTokenService(
      *
      * @return The generated JWT token.
      */
-    suspend fun createVerificationToken(email: String, secret: String, issuedAt: Instant = Instant.now()): String {
+    suspend fun createVerificationToken(userId: String, email: String, secret: String, issuedAt: Instant = Instant.now()): String {
         logger.debug { "Creating email verification token" }
 
         val claims = JwtClaimsSet.builder()
             .issuedAt(issuedAt)
             .expiresAt(issuedAt.plusSeconds(mailProperties.verificationExpiration))
-            .subject(email)
+            .subject(userId)
+            .claim("email", email)
             .id(secret)
             .build()
 
@@ -74,10 +75,12 @@ class MailTokenService(
 
         val jwt = jwtService.decodeJwt(token, true)
 
-        val email = jwt.subject
+        val userId = jwt.subject
+        val email = jwt.claims["email"] as? String
+            ?: throw InvalidTokenException("No email found in claims")
         val secret = jwt.id
 
-        return EmailVerificationToken(email, secret)
+        return EmailVerificationToken(userId, email, secret)
     }
 
     /**

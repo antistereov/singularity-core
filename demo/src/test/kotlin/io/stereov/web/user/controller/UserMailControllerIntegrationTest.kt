@@ -3,6 +3,7 @@ package io.stereov.web.user.controller
 import io.mockk.verify
 import io.stereov.web.config.Constants
 import io.stereov.web.global.service.mail.MailTokenService
+import io.stereov.web.global.service.secrets.service.EncryptionSecretService
 import io.stereov.web.test.BaseIntegrationTest
 import io.stereov.web.user.dto.request.DeviceInfoRequest
 import io.stereov.web.user.dto.request.LoginRequest
@@ -19,11 +20,14 @@ import java.time.Instant
 class UserMailControllerIntegrationTest : BaseIntegrationTest() {
 
     @Autowired
+    private lateinit var encryptionSecretService: EncryptionSecretService
+
+    @Autowired
     private lateinit var mailTokenService: MailTokenService
 
     @Test fun `verifyEmail works`() = runTest {
         val user = registerUser()
-        val token = mailTokenService.createVerificationToken(user.info.sensitive.email, user.mailVerificationSecret)
+        val token = mailTokenService.createVerificationToken(user.info.id, user.info.sensitive.email,user.mailVerificationSecret)
 
         assertFalse(user.info.sensitive.security.mail.verified)
 
@@ -48,9 +52,18 @@ class UserMailControllerIntegrationTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isUnauthorized
     }
+    @Test fun `verifyEmail requires right token`() = runTest {
+        val user = registerUser()
+        val token = mailTokenService.createVerificationToken(user.info.id, user.info.sensitive.email, encryptionSecretService.getCurrentSecret().value)
+
+        webTestClient.post()
+            .uri("/user/mail/verify?token=$token")
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
     @Test fun `verifyEmail requires unexpired token`() = runTest {
         val user = registerUser()
-        val token = mailTokenService.createVerificationToken(user.info.sensitive.email, user.mailVerificationSecret, Instant.ofEpochSecond(0))
+        val token = mailTokenService.createVerificationToken(user.info.id, user.info.sensitive.email, user.mailVerificationSecret, Instant.ofEpochSecond(0))
 
         webTestClient.post()
             .uri("/user/mail/verify?token=$token")
