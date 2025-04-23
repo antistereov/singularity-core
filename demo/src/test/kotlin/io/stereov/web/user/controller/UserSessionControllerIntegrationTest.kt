@@ -3,7 +3,6 @@ package io.stereov.web.user.controller
 import io.stereov.web.config.Constants
 import io.stereov.web.global.service.mail.MailTokenService
 import io.stereov.web.global.service.random.RandomService
-import io.stereov.web.global.service.secrets.service.EncryptionSecretService
 import io.stereov.web.test.BaseIntegrationTest
 import io.stereov.web.user.dto.UserDto
 import io.stereov.web.user.dto.request.*
@@ -18,9 +17,6 @@ import org.springframework.http.HttpStatus
 import java.time.Instant
 
 class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
-
-    @Autowired
-    private lateinit var encryptionSecretService: EncryptionSecretService
 
     @Autowired
     private lateinit var mailTokenService: MailTokenService
