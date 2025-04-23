@@ -6,7 +6,6 @@ import io.stereov.web.global.database.model.EncryptedSensitiveDocument
 import io.stereov.web.global.database.model.SensitiveDocument
 import io.stereov.web.global.database.repository.SensitiveCrudRepository
 import io.stereov.web.global.exception.model.DocumentNotFoundException
-import io.stereov.web.global.service.encryption.service.EncryptionService
 import io.stereov.web.global.service.secrets.service.EncryptionSecretService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -16,7 +15,6 @@ import kotlinx.serialization.KSerializer
 abstract class SensitiveCrudService<S, D: SensitiveDocument<S>, E: EncryptedSensitiveDocument<S>>(
     private val repository: SensitiveCrudRepository<E>,
     private val encryptionSecretService: EncryptionSecretService,
-    private val encryptionService: EncryptionService,
 ) {
 
     abstract val serializer: KSerializer<S>
