@@ -94,11 +94,11 @@ class UserMailService(
     }
 
     /**
-     * Sends a password reset email to the user.
+     * Sends a password-reset email to the user.
      *
      * This method generates a password reset token and sends it to the user's email address.
      *
-     * @param email The email address of the user to send the password reset email to.
+     * @param req The email address of the user to send the password-reset email to.
      */
     suspend fun sendPasswordReset(req: SendPasswordResetRequest) {
         logger.debug { "Sending password reset email" }
@@ -106,7 +106,7 @@ class UserMailService(
         try {
             val user = userService.findByEmail(req.email)
             return mailService.sendPasswordResetEmail(user)
-        } catch (e: UserDoesNotExistException) {
+        } catch (_: UserDoesNotExistException) {
             return
         }
     }
