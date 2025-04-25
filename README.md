@@ -135,21 +135,21 @@ Add the dependency to your `build.gradle.kts`, `build.gradle` or `pom.xml` if us
 
 **For Kotlin DSL:**
 ```kotlin
-implementation("io.stereov.web:baseline:<version>") // Check the maven status batch for the latest version
+implementation("io.stereov.singularity:core:<version>") // Check the maven status batch for the latest version
 ```
 
 **For Gradle:**
 ```groovy
 dependencies {
-   implementation 'io.stereov.web:baseline:<version>' // Check the maven status batch for the latest version
+   implementation 'io.stereov.singularity:core:<version>' // Check the maven status batch for the latest version
 }
 ```
 
 **For Maven:**
 ```xml
 <dependency>
-   <groupId>io.stereov.web</groupId>
-   <artifactId>baseline</artifactId>
+   <groupId>io.stereov.singularity</groupId>
+   <artifactId>core</artifactId>
    <version>_version_</version> <!-- Check the maven status batch for the latest version -->
 </dependency>
 ```
