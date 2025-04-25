@@ -1,4 +1,4 @@
-rootProject.name = "web-kotlin-spring-baseline"
+rootProject.name = "singularity"
 
-include("baseline")
-include("demo")
+include("libs:core")
+include("apps:demo")

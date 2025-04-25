@@ -1,49 +1,65 @@
-# Singularity
+# **Singularity**
 
 [![Maven Central](https://img.shields.io/maven-central/v/io.stereov.web/baseline.svg)](https://central.sonatype.com/artifact/io.stereov.web/baseline)
 
-This is a Kotlin-based Spring Web application template designed to provide essential features for secure and efficient web applications. 
-It incorporates a wide range of functionality, such as user management, encryption, JWT-based authentication, file storage, and more, making it an excellent starting point for building production-ready applications.
+> A monorepo for all my Kotlin-based Spring Web backend projects — secure, scalable, and production-ready by default.
 
-**Note:** 
-This repository goes hand in hand with my Angular baseline. You can find it [here](https://github.com/antistereov/web-angular-baseline).
+This repository is the central home for all my **web backend projects**, built using **Kotlin + Spring (WebFlux)** and designed around modular, reusable libraries. Whether I’m spinning up a new SaaS idea or prototyping a service, this monorepo provides a shared, well-structured foundation to build on — with **security, performance, and developer experience baked in**.
 
-## **Why Use This?**
+---
 
-This baseline serves as a **foundation for all my projects**, allowing me to avoid rewriting the same authentication, security, and backend setup every time. Instead of duplicating code, I maintain a **single, well-structured repository** where all essential features are readily available.
+## 🧱 **What's Inside**
 
-By using this template, you get:
+The monorepo is organized into:
 
-- ✅ **A Pre-Built, Secure Backend** – No need to implement authentication, JWT handling, 2FA, and email verification from scratch.
-- ✅ **Consistency Across Projects** – Ensures all my projects follow the same best practices and architecture.
-- ✅ **Time-Saving Development** – Focus on building features instead of setting up authentication, caching, and rate-limiting.
-- ✅ **Open for Contributions** – If you like this approach, feel free to contribute! The goal is to refine and expand this baseline so others can benefit as well.
+- `apps/`: Production-ready web applications and APIs.
+- `libs/`: Reusable core libraries for authentication, storage, security, and more.
 
-This repository isn't just for personal use—it's meant to be a **collaborative and evolving** foundation for secure, scalable applications. 🚀
+All apps in this repo share a set of internal libraries, making it easy to **get started fast**, maintain consistency, and avoid reimplementing common features.
 
-## Features
+---
+
+## ⚡ Why Use This?
+
+- ✅ **Batteries Included** – JWT auth, 2FA, email verification, file storage, and key rotation already set up.
+- ✅ **Code Reuse Made Easy** – Shared libraries mean no more copying boilerplate between projects.
+- ✅ **Production-Ready by Default** – All components are built with real-world usage and scalability in mind.
+- ✅ **Fast Start, Every Time** – Create a new backend app in minutes using the existing architecture and libs.
+- ✅ **Open & Extensible** – Contributions welcome! Let’s refine this into a toolkit others can benefit from too.
+
+---
+
+## 🔐 Features at a Glance (Provided by Internal Libraries)
 
 ### **Security & Key Management**
-- **Secret Manager Integration**: Secure connection to a secret manager enables fully automated key rotation for encryption and JWT keys, enhancing security and management efficiency.
+- 🔑 Secret manager integration with **automated key rotation** for JWT & encryption keys.
 
 ### **Authentication & User Management**
-- **JWT Authentication**: Provides secure authentication using JWT with configurable access token expiration, refresh tokens bound to devices, and customizable token lifetimes.
-- **Two-Factor Authentication (2FA)**: Full 2FA setup, verification, and recovery flow to enhance user security.
-- **HTTP-Only Authentication**: Uses secure, HTTP-only cookies for storing authentication information to improve security.
-- **Email Verification**: Configurable email verification system with token expiration and resend cooldown for a smooth user experience.
-- **User Roles**: Supports user roles and application-specific information through the `ApplicationInfo` interface.
-- **Custom Exceptions**: Custom exceptions built on top of `BaseWebException` to provide better error handling and clearer error messages.
+- 🔒 JWT auth with refresh tokens, 2FA, secure HTTP-only cookies.
+- 📧 Email verification with expiration and resend control.
+- 🧑‍💻 Role-based user access with custom exceptions for better error handling.
 
-### **Data Storage & Caching**
-- **MongoDB Integration**: Seamlessly integrated with MongoDB for data storage.
-- **Redis Caching**: Utilizes Redis for efficient caching, boosting performance.
+### **Data & Caching**
+- 💾 MongoDB for persistence, Redis for caching and session storage.
+- 🗂️ S3-based object storage abstraction with local fallback.
 
-### **Performance & Rate Limiting**
-- **Rate Limiting**: Configurable rate limiting for both IP and user accounts to prevent abuse and ensure fair usage.
-- **Asynchronous Programming**: Built with Kotlin coroutines for asynchronous processing, integrating Log4j for logging.
+### **Performance**
+- ⚙️ Kotlin Coroutines for async flows.
+- 🚦 Configurable rate limiting (IP & user-based).
 
-### **Data Storage & Connectivity**
-- **S3 Object Storage**: Integration with S3 for seamless object storage handling.
+---
+
+## 🔗 Related
+
+Check out the matching Angular frontend baseline:  
+👉 [web-angular-baseline](https://github.com/antistereov/web-angular-baseline)
+
+---
+
+## 🚀 Getting Started
+
+Want to bootstrap a new web backend project? Just add a new app to the `apps/` folder and hook into the existing libraries in `libs/` — all the groundwork is already done.
+
 
 ## Example
 
@@ -351,17 +367,17 @@ Here are the key properties you need to set in your `application.yaml`:
     ```
 
 ## Managing Sensitive Data
-The abstract class [`SenstiveCrudService`](baseline/src/main/kotlin/io/stereov/web/global/database/service/SensitiveCrudService.kt) and interface [`SensitiveCrudRepository`](baseline/src/main/kotlin/io/stereov/web/global/database/repository/SensitiveCrudRepository.kt)
+The abstract class [`SenstiveCrudService`](libs/core/src/main/kotlin/io/stereov/web/global/database/service/SensitiveCrudService.kt) and interface [`SensitiveCrudRepository`](libs/core/src/main/kotlin/io/stereov/web/global/database/repository/SensitiveCrudRepository.kt)
 define a way to handle documents that contain sensitive information.
 
 There is a class for
-[`EncryptedSensitiveDocument`](baseline/src/main/kotlin/io/stereov/web/global/database/model/EncryptedSensitiveDocument.kt)
-and [`SensitiveDocument`](baseline/src/main/kotlin/io/stereov/web/global/database/model/SensitiveDocument.kt)
+[`EncryptedSensitiveDocument`](libs/core/src/main/kotlin/io/stereov/web/global/database/model/EncryptedSensitiveDocument.kt)
+and [`SensitiveDocument`](libs/core/src/main/kotlin/io/stereov/web/global/database/model/SensitiveDocument.kt)
 share a common type parameter which defines the class of the encrypted information.
 You can take a look at the implementation of
-[`UserDocument`](baseline/src/main/kotlin/io/stereov/web/user/model/UserDocument.kt) and
-[`EncryptedUserDocument`](baseline/src/main/kotlin/io/stereov/web/user/model/EncryptedUserDocument.kt)
-which share [`SensitiveUserData`](baseline/src/main/kotlin/io/stereov/web/user/model/SensitiveUserData.kt)
+[`UserDocument`](libs/core/src/main/kotlin/io/stereov/web/user/model/UserDocument.kt) and
+[`EncryptedUserDocument`](libs/core/src/main/kotlin/io/stereov/web/user/model/EncryptedUserDocument.kt)
+which share [`SensitiveUserData`](libs/core/src/main/kotlin/io/stereov/web/user/model/SensitiveUserData.kt)
 in decrypted and encrypted form respectively.
 
 Encryption and decryption is handled by the `SensitiveCrudService` automatically.
@@ -439,32 +455,32 @@ class ExampleService(
 
 ### **User Management**
 - **UserService**:  
-  Access and manage user information using the [`UserService`](baseline/src/main/kotlin/io/stereov/web/user/service/UserService.kt).
+  Access and manage user information using the [`UserService`](libs/core/src/main/kotlin/io/stereov/web/user/service/UserService.kt).
 
 ### **Authentication**
 - **AuthenticationService**:  
   The application automatically handles authentication per request using a filter. 
-  You can access the current authenticated user via the [`AuthenticationService`](baseline/src/main/kotlin/io/stereov/web/auth/service/AuthenticationService.kt).
+  You can access the current authenticated user via the [`AuthenticationService`](libs/core/src/main/kotlin/io/stereov/web/auth/service/AuthenticationService.kt).
 
 ### Cache Management
 - **RedisService**:  
-  Interact with the cache using the [`RedisService`](baseline/src/main/kotlin/io/stereov/web/global/service/cache/RedisService.kt) or the `redisCoroutinesCommands` bean for efficient data retrieval and storage.
+  Interact with the cache using the [`RedisService`](libs/core/src/main/kotlin/io/stereov/web/global/service/cache/RedisService.kt) or the `redisCoroutinesCommands` bean for efficient data retrieval and storage.
 
 ### Encryption & Decryption
 - **EncryptionService**:  
-  Use the [`EncryptionService`](baseline/src/main/kotlin/io/stereov/web/global/service/secrets/EncryptionService.kt) to securely encrypt and decrypt values before storing them in the database.
+  Use the [`EncryptionService`](libs/core/src/main/kotlin/io/stereov/web/global/service/secrets/EncryptionService.kt) to securely encrypt and decrypt values before storing them in the database.
 
 ### Hashing & Validation
 - **HashService**:  
-  The [`HashService`](baseline/src/main/kotlin/io/stereov/web/global/service/hash/HashService.kt) allows you to hash sensitive data and validate hashed values for secure comparisons.
+  The [`HashService`](libs/core/src/main/kotlin/io/stereov/web/global/service/hash/HashService.kt) allows you to hash sensitive data and validate hashed values for secure comparisons.
 
 ### JWT Encoding & Decoding
 - **JwtService**:  
-  The [`JwtService`](baseline/src/main/kotlin/io/stereov/web/global/service/jwt/JwtService.kt) handles the encoding and decoding of JSON Web Tokens (JWT) for authentication and authorization.
+  The [`JwtService`](libs/core/src/main/kotlin/io/stereov/web/global/service/jwt/JwtService.kt) handles the encoding and decoding of JSON Web Tokens (JWT) for authentication and authorization.
 
 ### Two-Factor Authentication
 - **TwoFactorAuthService**:  
-  The [`TwoFactorAuthService`](baseline/src/main/kotlin/io/stereov/web/global/service/twofactorauth/TwoFactorAuthService.kt) manages the setup, 
+  The [`TwoFactorAuthService`](libs/core/src/main/kotlin/io/stereov/web/global/service/twofactorauth/TwoFactorAuthService.kt) manages the setup, 
   verification, and recovery of two-factor authentication (2FA) for user accounts.
 
 ## Endpoints
@@ -473,7 +489,7 @@ class ExampleService(
 
 These endpoints are used for user management and authentication. 
 They are designed to be secure and efficient, leveraging JWT for stateless authentication.
-The related class is [`UserSessionController`](baseline/src/main/kotlin/io/stereov/web/user/controller/UserSessionController.kt).
+The related class is [`UserSessionController`](libs/core/src/main/kotlin/io/stereov/web/user/controller/UserSessionController.kt).
 
 - **POST /user/login**: Logs in the user and issues JWT access and refresh tokens.
 - **POST /user/register**: Registers a new user and issues JWT tokens.
@@ -493,7 +509,7 @@ The related class is [`UserSessionController`](baseline/src/main/kotlin/io/stere
 
 These endpoints are used for email verification and password reset functionalities.
 They are designed to enhance security and user experience.
-The related class is [`UserMailController`](baseline/src/main/kotlin/io/stereov/web/user/controller/UserMailController.kt).
+The related class is [`UserMailController`](libs/core/src/main/kotlin/io/stereov/web/user/controller/UserMailController.kt).
 
 - **POST /user/mail/verify**: Verifies the user's email address using a token.
 - **GET /user/mail/verify/cooldown**: Retrieves the remaining cooldown time before the user can request another email verification.
@@ -506,7 +522,7 @@ The related class is [`UserMailController`](baseline/src/main/kotlin/io/stereov/
 
 These endpoints are used for managing user devices and sessions.
 They allow users to view and manage their active sessions and devices.
-The related class is [`UserDeviceController`](baseline/src/main/kotlin/io/stereov/web/user/controller/UserDeviceController.kt).
+The related class is [`UserDeviceController`](libs/core/src/main/kotlin/io/stereov/web/user/controller/UserDeviceController.kt).
 
 - **GET /user/devices**: Retrieves a list of devices associated with the authenticated user.
 - **DELETE /user/devices/{deviceId}**: Removes a specific device from the user's account.
@@ -516,7 +532,7 @@ The related class is [`UserDeviceController`](baseline/src/main/kotlin/io/stereo
 
 These endpoints are used for managing two-factor authentication (2FA) for user accounts.
 They provide a secure way to enhance user account security.
-The related class is [`UserTwoFactorAuthController`](baseline/src/main/kotlin/io/stereov/web/user/controller/UserTwoFactorAuthController.kt).
+The related class is [`UserTwoFactorAuthController`](libs/core/src/main/kotlin/io/stereov/web/user/controller/UserTwoFactorAuthController.kt).
 
 - **GET /user/2fa/start-setup**: Sets a token that enables the 2FA setup.
 - **GET /user/2fa/setup**: Retrieves the setup information for two-factor authentication.

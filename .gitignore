@@ -47,7 +47,7 @@ bin/
 
 ### Environment Files ###
 .env
-/baseline/target/
+/libs/core/target/
 /logs/
 /demo/logs/
 /demo/tmp/

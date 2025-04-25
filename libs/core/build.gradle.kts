@@ -18,7 +18,7 @@ kotlin {
     jvmToolchain(21)
 }
 
-group = "io.stereov.web"
+group = "io.stereov.singularity"
 version = "1.6.4-SNAPSHOT"
 
 repositories {
@@ -146,7 +146,7 @@ publishing {
             pom {
                 name = "baseline"
                 description = "Spring Boot Web Baseline"
-                url = "https://github.com/antistereov/web-kotlin-spring-baseline"
+                url = "https://github.com/antistereov/singularity"
                 inceptionYear = "2025"
                 licenses {
                     license {
@@ -164,9 +164,9 @@ publishing {
                 }
 
                 scm {
-                    url = "https://github.com/antistereov/web-kotlin-spring-baseline"
-                    connection = "scm:git:git://github.com/antistereov/web-kotlin-spring-baseline.git"
-                    developerConnection = "scm:git:ssh://github.com/antistereov/web-kotlin-spring-baseline.git"
+                    url = "https://github.com/antistereov/singularity"
+                    connection = "scm:git:git://github.com/antistereov/singularity.git"
+                    developerConnection = "scm:git:ssh://github.com/antistereov/singularity.git"
                 }
             }
         }
@@ -185,7 +185,7 @@ jreleaser {
     release {
         github {
             repoOwner.set("antistereov")
-            name.set("web-kotlin-spring-baseline")
+            name.set("singularity")
             overwrite.set(true)
             skipTag.set(false)
             sign.set(true)
@@ -221,7 +221,7 @@ jreleaser {
         authors.set(listOf("André Antimonov"))
         license.set("GPL")
         links {
-            homepage = "https://github.com/antistereov/web-kotlin-spring-baseline"
+            homepage = "https://github.com/antistereov/singularity"
         }
         inceptionYear = "2025"
     }

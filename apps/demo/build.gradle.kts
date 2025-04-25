@@ -7,7 +7,7 @@ plugins {
     id("maven-publish")
 }
 
-group = "io.stereov.web"
+group = "io.stereov.singularity"
 version = "0.0.1-SNAPSHOT"
 
 val accessToken = properties["maven.accessToken"] as String?
@@ -36,7 +36,7 @@ dependencies {
     // Since this is configured as a module on the same repository, it uses a direct import.
     // You should use:
     // implementation("io.stereov.web:baseline:<version>")
-    api(project(":baseline"))
+    api(project(":libs:core"))
 
     // Tests
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
