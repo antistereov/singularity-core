@@ -1,4 +1,4 @@
-# Kotlin + Spring Web Baseline
+# Singularity
 
 [![Maven Central](https://img.shields.io/maven-central/v/io.stereov.web/baseline.svg)](https://central.sonatype.com/artifact/io.stereov.web/baseline)
 
