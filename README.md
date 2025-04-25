@@ -1,6 +1,6 @@
 # **Singularity**
 
-[![Maven Central](https://img.shields.io/maven-central/v/io.stereov/singularity.svg)](https://central.sonatype.com/artifact/io.stereov/singularity)
+[![Maven Central](https://img.shields.io/maven-central/v/io.stereov.singularity/core.svg)](https://central.sonatype.com/artifact/io.stereov.singularity/core)
 
 > A monorepo for all my Kotlin-based Spring Web backend projects — secure, scalable, and production-ready by default.
 
