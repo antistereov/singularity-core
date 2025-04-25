@@ -6,8 +6,6 @@
 
 This repository is the central home for all my **web backend projects**, built using **Kotlin + Spring (WebFlux)** and designed around modular, reusable libraries. Whether I’m spinning up a new SaaS idea or prototyping a service, this monorepo provides a shared, well-structured foundation to build on — with **security, performance, and developer experience baked in**.
 
----
-
 ## 🧱 **What's Inside**
 
 The monorepo is organized into:
@@ -17,8 +15,6 @@ The monorepo is organized into:
 
 All apps in this repo share a set of internal libraries, making it easy to **get started fast**, maintain consistency, and avoid reimplementing common features.
 
----
-
 ## ⚡ Why Use This?
 
 - ✅ **Batteries Included** – JWT auth, 2FA, email verification, file storage, and key rotation already set up.
@@ -26,8 +22,6 @@ All apps in this repo share a set of internal libraries, making it easy to **get
 - ✅ **Production-Ready by Default** – All components are built with real-world usage and scalability in mind.
 - ✅ **Fast Start, Every Time** – Create a new backend app in minutes using the existing architecture and libs.
 - ✅ **Open & Extensible** – Contributions welcome! Let’s refine this into a toolkit others can benefit from too.
-
----
 
 ## 🔐 Features at a Glance (Provided by Internal Libraries)
 
@@ -47,19 +41,14 @@ All apps in this repo share a set of internal libraries, making it easy to **get
 - ⚙️ Kotlin Coroutines for async flows.
 - 🚦 Configurable rate limiting (IP & user-based).
 
----
-
 ## 🔗 Related
 
 Check out the matching Angular frontend baseline:  
 👉 [web-angular-baseline](https://github.com/antistereov/web-angular-baseline)
 
----
-
 ## 🚀 Getting Started
 
 Want to bootstrap a new web backend project? Just add a new app to the `apps/` folder and hook into the existing libraries in `libs/` — all the groundwork is already done.
-
 
 ## Example
 
