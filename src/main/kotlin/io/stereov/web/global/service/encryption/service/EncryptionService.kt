@@ -1,0 +1,88 @@
+package io.stereov.web.global.service.encryption.service
+
+import io.github.oshai.kotlinlogging.KLogger
+import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.web.global.service.encryption.model.Encrypted
+import io.stereov.web.global.database.model.EncryptedSensitiveDocument
+import io.stereov.web.global.database.model.SensitiveDocument
+import io.stereov.web.global.service.secrets.component.KeyManager
+import io.stereov.web.global.service.secrets.service.EncryptionSecretService
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.json.Json
+import org.springframework.stereotype.Service
+import java.util.*
+import javax.crypto.Cipher
+import javax.crypto.spec.SecretKeySpec
+
+@Service
+class EncryptionService(
+    private val encryptionSecretService: EncryptionSecretService,
+    private val keyManager: KeyManager,
+    private val json: Json
+) {
+
+    private val logger: KLogger
+        get() = KotlinLogging.logger {}
+
+    suspend fun <S, D: SensitiveDocument<S>> encrypt(
+        document: D,
+        serializer: KSerializer<S>,
+        otherValues: List<Any> = emptyList()
+    ): EncryptedSensitiveDocument<S> {
+        val wrapped = wrap(document.sensitive, serializer)
+
+        return document.toEncryptedDocument(wrapped, otherValues)
+    }
+
+    suspend fun <S, E: EncryptedSensitiveDocument<S>> decrypt(
+        encryptedDocument: E,
+        serializer: KSerializer<S>,
+        otherValues: List<Any> = emptyList(),
+    ): SensitiveDocument<S> {
+        val unwrapped = unwrap(encryptedDocument.sensitive, serializer)
+
+        return encryptedDocument.toSensitiveDocument(unwrapped, otherValues)
+    }
+
+    private suspend fun <T> wrap(value: T, serializer: KSerializer<T>): Encrypted<T> {
+        val jsonStr = json.encodeToString(serializer, value)
+        return this.encrypt(jsonStr)
+    }
+
+    private suspend fun <T> unwrap(encrypted: Encrypted<T>, serializer: KSerializer<T>): T {
+        val decryptedJson = this.decrypt(encrypted)
+        return json.decodeFromString(serializer, decryptedJson)
+    }
+
+    suspend fun <T> encrypt(strToEncrypt: String): Encrypted<T> {
+        this.logger.debug { "Encrypting..." }
+
+        val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
+        val secret = encryptionSecretService.getCurrentSecret()
+
+        cipher.init(Cipher.ENCRYPT_MODE, getKeyFromBase64(secret.value))
+        val encrypted = cipher.doFinal(strToEncrypt.toByteArray())
+
+        val encryptedString = Base64.getUrlEncoder().encodeToString(encrypted)
+
+        return Encrypted(secret.id, encryptedString)
+    }
+
+    suspend fun <T> decrypt(encrypted: Encrypted<T>): String {
+       this. logger.debug { "Decrypting..." }
+
+        val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
+        val secret = this.keyManager.getSecretById(encrypted.secretId)
+
+        cipher.init(Cipher.DECRYPT_MODE, getKeyFromBase64(secret.value))
+
+        val decrypted = cipher.doFinal(Base64.getUrlDecoder().decode(encrypted.ciphertext))
+
+        return String(decrypted)
+    }
+
+    private fun getKeyFromBase64(base64Key: String, algorithm: String = "AES"): SecretKeySpec {
+        val decodedKey = Base64.getDecoder().decode(base64Key)
+        return SecretKeySpec(decodedKey, algorithm)
+    }
+}
