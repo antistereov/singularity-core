@@ -10,8 +10,6 @@ plugins {
 group = "io.stereov.singularity"
 version = "0.0.1-SNAPSHOT"
 
-val accessToken = properties["maven.accessToken"] as String?
-
 repositories {
     mavenCentral()
 
@@ -27,9 +25,7 @@ repositories {
 }
 
 val kotlinxVersion = "1.10.1"
-val springBootVersion = "3.4.1"
 val testContainersVersion = "1.19.0"
-val log4jVersion = "2.24.3"
 
 dependencies {
     api(project(":libs:core"))
