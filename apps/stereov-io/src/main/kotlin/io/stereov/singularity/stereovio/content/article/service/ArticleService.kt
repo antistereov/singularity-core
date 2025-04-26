@@ -2,11 +2,11 @@ package io.stereov.singularity.stereovio.content.article.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.core.global.exception.model.DocumentNotFoundException
 import io.stereov.singularity.stereovio.content.article.model.Article
 import io.stereov.singularity.stereovio.content.article.repository.ArticleRepository
-import io.stereov.singularity.core.global.exception.model.DocumentNotFoundException
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.reactive.asFlow
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.query.Query
@@ -47,12 +47,17 @@ class ArticleService(
         return findByKeyOrNull(key) ?: throw DocumentNotFoundException("No article with key $key found")
     }
 
-    suspend fun getArticlesPaged(page: Int, size: Int): List<Article> {
+    suspend fun getLatestArticles(limit: Long): List<Article> {
         val query = Query()
-            .with(Sort.by(Sort.Direction.DESC, "publishedAt"))
-            .skip((page * size).toLong())
-            .limit(size)
+            .with(Sort.by(Sort.Order.desc("_id")))
+            .limit(limit.toInt())
 
-        return reactiveMongoTemplate.find(query, Article::class.java).asFlow().toList()
+        return reactiveMongoTemplate.find(query, Article::class.java)
+            .collectList()
+            .awaitFirstOrNull() ?: emptyList()
+    }
+
+    suspend fun getNextArticles(lastLoadedId: String, limit: Long): List<Article> {
+        return repository.findByIdLessThanOrderByIdDesc(lastLoadedId, limit).toList()
     }
 }

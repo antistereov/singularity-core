@@ -1,5 +1,6 @@
 package io.stereov.singularity.stereovio.content.article.controller
 
+import io.stereov.singularity.stereovio.content.article.dto.ArticleDto
 import io.stereov.singularity.stereovio.content.article.model.Article
 import io.stereov.singularity.stereovio.content.article.service.ArticleService
 import org.springframework.http.ResponseEntity
@@ -16,17 +17,22 @@ class ArticleController(
 ) {
 
     @GetMapping("{id}")
-    suspend fun findById(@PathVariable id: String): ResponseEntity<Article> {
+    suspend fun findById(@PathVariable id: String): ResponseEntity<ArticleDto> {
         return ResponseEntity.ok().body(
-            articleService.findById(id)
+            articleService.findById(id).toDto()
         )
     }
 
-    @GetMapping
+    @GetMapping("/latest")
+    suspend fun getLatestArticles(@RequestParam limit: Long = 10): ResponseEntity<List<Article>> {
+        return ResponseEntity.ok(articleService.getLatestArticles(limit))
+    }
+
+    @GetMapping("/next")
     suspend fun getArticles(
-        @RequestParam page: Int = 0,
-        @RequestParam size: Int = 10
+        @RequestParam id: String,
+        @RequestParam limit: Long = 10
     ): ResponseEntity<List<Article>> {
-        return ResponseEntity.ok(articleService.getArticlesPaged(page, size))
+        return ResponseEntity.ok(articleService.getNextArticles(id, limit))
     }
 }
