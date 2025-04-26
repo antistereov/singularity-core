@@ -6,6 +6,7 @@ import io.stereov.web.auth.exception.AuthException
 import io.stereov.web.global.exception.BaseExceptionHandler
 import io.stereov.web.global.exception.GlobalBaseWebException
 import io.stereov.web.global.exception.model.DocumentNotFoundException
+import io.stereov.web.global.exception.model.InvalidDocumentException
 import io.stereov.web.global.exception.model.MissingFunctionParameterException
 import io.stereov.web.global.model.ErrorResponse
 import org.springframework.http.HttpStatus
@@ -40,6 +41,7 @@ class GlobalBaseWebExceptionHandler : BaseExceptionHandler<GlobalBaseWebExceptio
         val status = when (ex) {
             is MissingFunctionParameterException -> HttpStatus.INTERNAL_SERVER_ERROR
             is DocumentNotFoundException -> HttpStatus.NOT_FOUND
+            is InvalidDocumentException -> HttpStatus.INTERNAL_SERVER_ERROR
             else -> HttpStatus.INTERNAL_SERVER_ERROR
         }
 

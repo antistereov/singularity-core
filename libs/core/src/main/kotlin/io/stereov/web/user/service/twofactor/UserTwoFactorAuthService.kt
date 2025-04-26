@@ -13,7 +13,7 @@ import io.stereov.web.properties.TwoFactorAuthProperties
 import io.stereov.web.user.dto.UserDto
 import io.stereov.web.user.dto.request.DisableTwoFactorRequest
 import io.stereov.web.user.dto.response.TwoFactorSetupResponse
-import io.stereov.web.user.exception.model.InvalidUserDocumentException
+import io.stereov.web.global.exception.model.InvalidDocumentException
 import io.stereov.web.user.model.UserDocument
 import io.stereov.web.user.service.UserService
 import io.stereov.web.user.service.token.TwoFactorAuthTokenService
@@ -79,7 +79,7 @@ class UserTwoFactorAuthService(
      * @param token The setup token to validate.
      * @param code The two-factor authentication code to validate.
      *
-     * @throws InvalidUserDocumentException If the user document does not contain a two-factor authentication secret.
+     * @throws InvalidDocumentException If the user document does not contain a two-factor authentication secret.
      * @throws AuthException If the setup token is invalid.
      *
      * @return The updated user document.
@@ -112,7 +112,7 @@ class UserTwoFactorAuthService(
      * @param exchange The server web exchange containing the request and response.
      * @param code The two-factor code to validate.
      *
-     * @throws InvalidUserDocumentException If the user document does not contain a two-factor authentication secret.
+     * @throws InvalidDocumentException If the user document does not contain a two-factor authentication secret.
      * @throws AuthException If the two-factor code is invalid.
      */
     suspend fun validateTwoFactorCode(exchange: ServerWebExchange, code: Int): UserDocument {

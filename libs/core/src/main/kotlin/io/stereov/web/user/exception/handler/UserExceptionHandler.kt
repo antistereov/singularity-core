@@ -34,7 +34,6 @@ class UserExceptionHandler {
         val status = when (ex) {
             is UserDoesNotExistException -> HttpStatus.UNAUTHORIZED
             is EmailAlreadyExistsException -> HttpStatus.CONFLICT
-            is InvalidUserDocumentException -> HttpStatus.INTERNAL_SERVER_ERROR
             is InvalidRoleException -> HttpStatus.INTERNAL_SERVER_ERROR
             is NoAppInfoFoundException -> HttpStatus.NOT_FOUND
             else -> HttpStatus.INTERNAL_SERVER_ERROR
