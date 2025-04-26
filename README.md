@@ -57,11 +57,11 @@ updates the application info for the user.
 
 ```kotlin
 import org.springframework.stereotype.Service
-import io.stereov.web.user.dto.ApplicationInfoDto
-import io.stereov.web.user.dto.ApplicationInfoDto
-import io.stereov.web.auth.service.AuthenticationService
-import io.stereov.web.user.model.UserDocument
-import io.stereov.web.user.service.UserService
+import io.stereov.singularity.user.dto.ApplicationInfoDto
+import io.stereov.singularity.user.dto.ApplicationInfoDto
+import io.stereov.singularity.auth.service.AuthenticationService
+import io.stereov.singularity.user.model.UserDocument
+import io.stereov.singularity.user.service.UserService
 
 /**
  * This is an example of how to set up custom application info for the user.
@@ -180,7 +180,7 @@ Here are the key properties you need to set in your `application.yaml`:
         logging:
           level:
           # Set log levels for your packages
-          io.stereov.web: DEBUG
+          io.stereov.singularity: DEBUG
     ```
   
 - **MongoDB:**
@@ -356,17 +356,17 @@ Here are the key properties you need to set in your `application.yaml`:
     ```
 
 ## Managing Sensitive Data
-The abstract class [`SenstiveCrudService`](libs/core/src/main/kotlin/io/stereov/web/global/database/service/SensitiveCrudService.kt) and interface [`SensitiveCrudRepository`](libs/core/src/main/kotlin/io/stereov/web/global/database/repository/SensitiveCrudRepository.kt)
+The abstract class [`SenstiveCrudService`](libs/core/src/main/kotlin/io/stereov/singularity/global/database/service/SensitiveCrudService.kt) and interface [`SensitiveCrudRepository`](libs/core/src/main/kotlin/io/stereov/singularity/global/database/repository/SensitiveCrudRepository.kt)
 define a way to handle documents that contain sensitive information.
 
 There is a class for
-[`EncryptedSensitiveDocument`](libs/core/src/main/kotlin/io/stereov/web/global/database/model/EncryptedSensitiveDocument.kt)
-and [`SensitiveDocument`](libs/core/src/main/kotlin/io/stereov/web/global/database/model/SensitiveDocument.kt)
+[`EncryptedSensitiveDocument`](libs/core/src/main/kotlin/io/stereov/singularity/global/database/model/EncryptedSensitiveDocument.kt)
+and [`SensitiveDocument`](libs/core/src/main/kotlin/io/stereov/singularity/global/database/model/SensitiveDocument.kt)
 share a common type parameter which defines the class of the encrypted information.
 You can take a look at the implementation of
-[`UserDocument`](libs/core/src/main/kotlin/io/stereov/web/user/model/UserDocument.kt) and
-[`EncryptedUserDocument`](libs/core/src/main/kotlin/io/stereov/web/user/model/EncryptedUserDocument.kt)
-which share [`SensitiveUserData`](libs/core/src/main/kotlin/io/stereov/web/user/model/SensitiveUserData.kt)
+[`UserDocument`](libs/core/src/main/kotlin/io/stereov/singularity/user/model/UserDocument.kt) and
+[`EncryptedUserDocument`](libs/core/src/main/kotlin/io/stereov/singularity/user/model/EncryptedUserDocument.kt)
+which share [`SensitiveUserData`](libs/core/src/main/kotlin/io/stereov/singularity/user/model/SensitiveUserData.kt)
 in decrypted and encrypted form respectively.
 
 Encryption and decryption is handled by the `SensitiveCrudService` automatically.
@@ -444,32 +444,32 @@ class ExampleService(
 
 ### **User Management**
 - **UserService**:  
-  Access and manage user information using the [`UserService`](libs/core/src/main/kotlin/io/stereov/web/user/service/UserService.kt).
+  Access and manage user information using the [`UserService`](libs/core/src/main/kotlin/io/stereov/singularity/user/service/UserService.kt).
 
 ### **Authentication**
 - **AuthenticationService**:  
   The application automatically handles authentication per request using a filter. 
-  You can access the current authenticated user via the [`AuthenticationService`](libs/core/src/main/kotlin/io/stereov/web/auth/service/AuthenticationService.kt).
+  You can access the current authenticated user via the [`AuthenticationService`](libs/core/src/main/kotlin/io/stereov/singularity/auth/service/AuthenticationService.kt).
 
 ### Cache Management
 - **RedisService**:  
-  Interact with the cache using the [`RedisService`](libs/core/src/main/kotlin/io/stereov/web/global/service/cache/RedisService.kt) or the `redisCoroutinesCommands` bean for efficient data retrieval and storage.
+  Interact with the cache using the [`RedisService`](libs/core/src/main/kotlin/io/stereov/singularity/global/service/cache/RedisService.kt) or the `redisCoroutinesCommands` bean for efficient data retrieval and storage.
 
 ### Encryption & Decryption
 - **EncryptionService**:  
-  Use the [`EncryptionService`](libs/core/src/main/kotlin/io/stereov/web/global/service/secrets/EncryptionService.kt) to securely encrypt and decrypt values before storing them in the database.
+  Use the [`EncryptionService`](libs/core/src/main/kotlin/io/stereov/singularity/global/service/secrets/EncryptionService.kt) to securely encrypt and decrypt values before storing them in the database.
 
 ### Hashing & Validation
 - **HashService**:  
-  The [`HashService`](libs/core/src/main/kotlin/io/stereov/web/global/service/hash/HashService.kt) allows you to hash sensitive data and validate hashed values for secure comparisons.
+  The [`HashService`](libs/core/src/main/kotlin/io/stereov/singularity/global/service/hash/HashService.kt) allows you to hash sensitive data and validate hashed values for secure comparisons.
 
 ### JWT Encoding & Decoding
 - **JwtService**:  
-  The [`JwtService`](libs/core/src/main/kotlin/io/stereov/web/global/service/jwt/JwtService.kt) handles the encoding and decoding of JSON Web Tokens (JWT) for authentication and authorization.
+  The [`JwtService`](libs/core/src/main/kotlin/io/stereov/singularity/global/service/jwt/JwtService.kt) handles the encoding and decoding of JSON Web Tokens (JWT) for authentication and authorization.
 
 ### Two-Factor Authentication
 - **TwoFactorAuthService**:  
-  The [`TwoFactorAuthService`](libs/core/src/main/kotlin/io/stereov/web/global/service/twofactorauth/TwoFactorAuthService.kt) manages the setup, 
+  The [`TwoFactorAuthService`](libs/core/src/main/kotlin/io/stereov/singularity/global/service/twofactorauth/TwoFactorAuthService.kt) manages the setup, 
   verification, and recovery of two-factor authentication (2FA) for user accounts.
 
 ## Endpoints
@@ -478,7 +478,7 @@ class ExampleService(
 
 These endpoints are used for user management and authentication. 
 They are designed to be secure and efficient, leveraging JWT for stateless authentication.
-The related class is [`UserSessionController`](libs/core/src/main/kotlin/io/stereov/web/user/controller/UserSessionController.kt).
+The related class is [`UserSessionController`](libs/core/src/main/kotlin/io/stereov/singularity/user/controller/UserSessionController.kt).
 
 - **POST /user/login**: Logs in the user and issues JWT access and refresh tokens.
 - **POST /user/register**: Registers a new user and issues JWT tokens.
@@ -498,7 +498,7 @@ The related class is [`UserSessionController`](libs/core/src/main/kotlin/io/ster
 
 These endpoints are used for email verification and password reset functionalities.
 They are designed to enhance security and user experience.
-The related class is [`UserMailController`](libs/core/src/main/kotlin/io/stereov/web/user/controller/UserMailController.kt).
+The related class is [`UserMailController`](libs/core/src/main/kotlin/io/stereov/singularity/user/controller/UserMailController.kt).
 
 - **POST /user/mail/verify**: Verifies the user's email address using a token.
 - **GET /user/mail/verify/cooldown**: Retrieves the remaining cooldown time before the user can request another email verification.
@@ -511,7 +511,7 @@ The related class is [`UserMailController`](libs/core/src/main/kotlin/io/stereov
 
 These endpoints are used for managing user devices and sessions.
 They allow users to view and manage their active sessions and devices.
-The related class is [`UserDeviceController`](libs/core/src/main/kotlin/io/stereov/web/user/controller/UserDeviceController.kt).
+The related class is [`UserDeviceController`](libs/core/src/main/kotlin/io/stereov/singularity/user/controller/UserDeviceController.kt).
 
 - **GET /user/devices**: Retrieves a list of devices associated with the authenticated user.
 - **DELETE /user/devices/{deviceId}**: Removes a specific device from the user's account.
@@ -521,7 +521,7 @@ The related class is [`UserDeviceController`](libs/core/src/main/kotlin/io/stere
 
 These endpoints are used for managing two-factor authentication (2FA) for user accounts.
 They provide a secure way to enhance user account security.
-The related class is [`UserTwoFactorAuthController`](libs/core/src/main/kotlin/io/stereov/web/user/controller/UserTwoFactorAuthController.kt).
+The related class is [`UserTwoFactorAuthController`](libs/core/src/main/kotlin/io/stereov/singularity/user/controller/UserTwoFactorAuthController.kt).
 
 - **GET /user/2fa/start-setup**: Sets a token that enables the 2FA setup.
 - **GET /user/2fa/setup**: Retrieves the setup information for two-factor authentication.
