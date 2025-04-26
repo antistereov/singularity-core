@@ -1,9 +1,9 @@
 package io.stereov.singularity.user.controller
 
-import io.stereov.singularity.config.Constants
+import io.stereov.singularity.core.config.Constants
 import io.stereov.singularity.test.BaseIntegrationTest
-import io.stereov.singularity.user.dto.response.DeviceInfoResponse
-import io.stereov.singularity.user.model.DeviceInfo
+import io.stereov.singularity.core.user.dto.response.DeviceInfoResponse
+import io.stereov.singularity.core.user.model.DeviceInfo
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue

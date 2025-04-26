@@ -5,10 +5,11 @@ import com.nimbusds.jose.JWSHeader
 import com.nimbusds.jose.crypto.MACSigner
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
-import io.stereov.singularity.global.service.jwt.exception.model.InvalidTokenException
-import io.stereov.singularity.global.service.jwt.exception.model.TokenExpiredException
-import io.stereov.singularity.global.service.secrets.model.Secret
-import io.stereov.singularity.global.service.secrets.service.JwtSecretService
+import io.stereov.singularity.core.global.service.jwt.JwtService
+import io.stereov.singularity.core.global.service.jwt.exception.model.InvalidTokenException
+import io.stereov.singularity.core.global.service.jwt.exception.model.TokenExpiredException
+import io.stereov.singularity.core.global.service.secrets.model.Secret
+import io.stereov.singularity.core.global.service.secrets.service.JwtSecretService
 import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals

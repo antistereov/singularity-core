@@ -1,8 +1,8 @@
 package io.stereov.singularity.filter
 
-import io.stereov.singularity.config.Constants
-import io.stereov.singularity.properties.RateLimitProperties
-import io.stereov.singularity.properties.secrets.KeyManagerImplementation
+import io.stereov.singularity.core.config.Constants
+import io.stereov.singularity.core.properties.RateLimitProperties
+import io.stereov.singularity.core.properties.secrets.KeyManagerImplementation
 import io.stereov.singularity.test.BaseSpringBootTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals

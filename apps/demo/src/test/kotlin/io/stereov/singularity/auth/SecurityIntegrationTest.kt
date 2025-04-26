@@ -1,9 +1,9 @@
 package io.stereov.singularity.auth
 
-import io.stereov.singularity.config.Constants
-import io.stereov.singularity.global.service.secrets.service.JwtSecretService
+import io.stereov.singularity.core.config.Constants
+import io.stereov.singularity.core.global.service.secrets.service.JwtSecretService
+import io.stereov.singularity.core.user.dto.request.DeviceInfoRequest
 import io.stereov.singularity.test.BaseIntegrationTest
-import io.stereov.singularity.user.dto.request.DeviceInfoRequest
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertNotEquals

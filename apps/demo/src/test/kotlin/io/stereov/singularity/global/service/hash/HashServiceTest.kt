@@ -1,5 +1,6 @@
 package io.stereov.singularity.global.service.hash
 
+import io.stereov.singularity.core.global.service.hash.HashService
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 

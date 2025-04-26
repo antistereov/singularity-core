@@ -1,15 +1,15 @@
 package io.stereov.singularity.user.controller
 
 import io.mockk.verify
-import io.stereov.singularity.config.Constants
-import io.stereov.singularity.global.service.mail.MailTokenService
-import io.stereov.singularity.global.service.secrets.service.EncryptionSecretService
+import io.stereov.singularity.core.config.Constants
+import io.stereov.singularity.core.global.service.mail.MailTokenService
+import io.stereov.singularity.core.global.service.secrets.service.EncryptionSecretService
 import io.stereov.singularity.test.BaseIntegrationTest
-import io.stereov.singularity.user.dto.request.DeviceInfoRequest
-import io.stereov.singularity.user.dto.request.LoginRequest
-import io.stereov.singularity.user.dto.request.ResetPasswordRequest
-import io.stereov.singularity.user.dto.request.SendPasswordResetRequest
-import io.stereov.singularity.user.dto.response.MailCooldownResponse
+import io.stereov.singularity.core.user.dto.request.DeviceInfoRequest
+import io.stereov.singularity.core.user.dto.request.LoginRequest
+import io.stereov.singularity.core.user.dto.request.ResetPasswordRequest
+import io.stereov.singularity.core.user.dto.request.SendPasswordResetRequest
+import io.stereov.singularity.core.user.dto.response.MailCooldownResponse
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test

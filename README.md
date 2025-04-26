@@ -57,11 +57,11 @@ updates the application info for the user.
 
 ```kotlin
 import org.springframework.stereotype.Service
-import io.stereov.singularity.user.dto.ApplicationInfoDto
-import io.stereov.singularity.user.dto.ApplicationInfoDto
+import io.stereov.singularity.core.user.dto.ApplicationInfoDto
+import io.stereov.singularity.core.user.dto.ApplicationInfoDto
 import io.stereov.singularity.auth.service.AuthenticationService
-import io.stereov.singularity.user.model.UserDocument
-import io.stereov.singularity.user.service.UserService
+import io.stereov.singularity.core.user.model.UserDocument
+import io.stereov.singularity.core.user.service.UserService
 
 /**
  * This is an example of how to set up custom application info for the user.

@@ -1,12 +1,12 @@
 package io.stereov.singularity.user.controller
 
-import io.stereov.singularity.config.Constants
-import io.stereov.singularity.global.service.mail.MailTokenService
-import io.stereov.singularity.global.service.random.RandomService
+import io.stereov.singularity.core.config.Constants
+import io.stereov.singularity.core.global.service.mail.MailTokenService
+import io.stereov.singularity.core.global.service.random.RandomService
 import io.stereov.singularity.test.BaseIntegrationTest
-import io.stereov.singularity.user.dto.UserDto
-import io.stereov.singularity.user.dto.request.*
-import io.stereov.singularity.user.dto.response.LoginResponse
+import io.stereov.singularity.core.user.dto.UserDto
+import io.stereov.singularity.core.user.dto.request.*
+import io.stereov.singularity.core.user.dto.response.LoginResponse
 import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*

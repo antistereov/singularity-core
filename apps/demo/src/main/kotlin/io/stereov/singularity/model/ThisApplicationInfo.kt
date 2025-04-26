@@ -1,8 +1,8 @@
 package io.stereov.singularity.model
 
+import io.stereov.singularity.core.user.dto.ApplicationInfoDto
+import io.stereov.singularity.core.user.model.ApplicationInfo
 import io.stereov.singularity.dto.ThisAppDto
-import io.stereov.singularity.user.dto.ApplicationInfoDto
-import io.stereov.singularity.user.model.ApplicationInfo
 
 data class ThisApplicationInfo(
     val favoriteColor: String

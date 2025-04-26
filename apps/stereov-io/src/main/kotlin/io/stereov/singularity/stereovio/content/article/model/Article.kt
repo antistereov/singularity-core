@@ -1,8 +1,8 @@
 package io.stereov.singularity.stereovio.content.article.model
 
-import io.stereov.singularity.global.service.file.model.FileMetaData
-import io.stereov.singularity.global.exception.model.InvalidDocumentException
-import io.stereov.singularity.global.serializer.InstantSerializer
+import io.stereov.singularity.core.global.service.file.model.FileMetaData
+import io.stereov.singularity.core.global.exception.model.InvalidDocumentException
+import io.stereov.singularity.core.global.serializer.InstantSerializer
 import kotlinx.serialization.Serializable
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.index.Indexed

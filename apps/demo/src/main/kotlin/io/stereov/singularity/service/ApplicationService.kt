@@ -1,7 +1,7 @@
 package io.stereov.singularity.service
 
+import io.stereov.singularity.core.user.model.UserDocument
 import io.stereov.singularity.model.ThisApplicationInfo
-import io.stereov.singularity.user.model.UserDocument
 import org.springframework.stereotype.Service
 
 @Service

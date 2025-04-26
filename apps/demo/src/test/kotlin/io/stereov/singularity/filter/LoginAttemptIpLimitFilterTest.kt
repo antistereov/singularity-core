@@ -1,10 +1,10 @@
 package io.stereov.singularity.filter
 
-import io.stereov.singularity.properties.LoginAttemptLimitProperties
-import io.stereov.singularity.properties.secrets.KeyManagerImplementation
+import io.stereov.singularity.core.properties.LoginAttemptLimitProperties
+import io.stereov.singularity.core.properties.secrets.KeyManagerImplementation
 import io.stereov.singularity.test.BaseSpringBootTest
-import io.stereov.singularity.user.dto.request.DeviceInfoRequest
-import io.stereov.singularity.user.dto.request.LoginRequest
+import io.stereov.singularity.core.user.dto.request.DeviceInfoRequest
+import io.stereov.singularity.core.user.dto.request.LoginRequest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

@@ -1,8 +1,8 @@
 package io.stereov.singularity.admin.service
 
-import io.stereov.singularity.properties.secrets.KeyManagerImplementation
+import io.stereov.singularity.core.properties.secrets.KeyManagerImplementation
 import io.stereov.singularity.test.BaseSpringBootTest
-import io.stereov.singularity.user.model.Role
+import io.stereov.singularity.core.user.model.Role
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

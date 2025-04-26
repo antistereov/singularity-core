@@ -1,11 +1,11 @@
 package io.stereov.singularity
 
-import io.stereov.singularity.global.service.mail.MailService
-import io.stereov.singularity.global.service.mail.MailTokenService
-import io.stereov.singularity.properties.MailProperties
+import io.stereov.singularity.core.global.service.mail.MailService
+import io.stereov.singularity.core.global.service.mail.MailTokenService
+import io.stereov.singularity.core.properties.MailProperties
+import io.stereov.singularity.core.user.controller.UserMailController
+import io.stereov.singularity.core.user.service.mail.UserMailService
 import io.stereov.singularity.test.BaseIntegrationTest
-import io.stereov.singularity.user.controller.UserMailController
-import io.stereov.singularity.user.service.mail.UserMailService
 import org.junit.jupiter.api.Test
 
 class ApplicationStartupTest : BaseIntegrationTest() {

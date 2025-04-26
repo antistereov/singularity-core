@@ -2,13 +2,13 @@ package io.stereov.singularity.test
 
 import com.warrenstrange.googleauth.GoogleAuthenticator
 import io.mockk.every
-import io.stereov.singularity.config.Constants
+import io.stereov.singularity.core.config.Constants
+import io.stereov.singularity.core.user.dto.request.*
+import io.stereov.singularity.core.user.dto.response.TwoFactorSetupResponse
+import io.stereov.singularity.core.user.model.UserDocument
+import io.stereov.singularity.core.user.service.UserService
 import io.stereov.singularity.test.config.MockConfig
 import io.stereov.singularity.test.config.MockKeyManager
-import io.stereov.singularity.user.dto.request.*
-import io.stereov.singularity.user.dto.response.TwoFactorSetupResponse
-import io.stereov.singularity.user.model.UserDocument
-import io.stereov.singularity.user.service.UserService
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
