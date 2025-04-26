@@ -3,7 +3,7 @@ package io.stereov.web.global.service.twofactorauth
 import com.warrenstrange.googleauth.GoogleAuthenticator
 import io.stereov.web.auth.exception.model.TwoFactorAuthDisabledException
 import io.stereov.web.global.service.twofactorauth.exception.model.InvalidTwoFactorCodeException
-import io.stereov.web.user.exception.model.InvalidUserDocumentException
+import io.stereov.web.global.exception.model.InvalidDocumentException
 import io.stereov.web.user.model.UserDocument
 import org.springframework.stereotype.Service
 
@@ -71,7 +71,7 @@ class TwoFactorAuthService(
      * @param user The user to validate the code for.
      * @param code The two-factor code to validate.
      *
-     * @throws InvalidUserDocumentException If the user document does not contain a two-factor authentication secret.
+     * @throws InvalidDocumentException If the user document does not contain a two-factor authentication secret.
      * @throws InvalidTwoFactorCodeException If the two-factor code is invalid.
      */
     suspend fun validateTwoFactorCode(user: UserDocument, code: Int): UserDocument {

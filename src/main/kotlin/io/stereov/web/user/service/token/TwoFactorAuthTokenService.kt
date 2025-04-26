@@ -13,7 +13,7 @@ import io.stereov.web.global.service.twofactorauth.TwoFactorAuthService
 import io.stereov.web.global.service.twofactorauth.exception.model.InvalidTwoFactorCodeException
 import io.stereov.web.properties.JwtProperties
 import io.stereov.web.user.dto.request.TwoFactorStartSetupRequest
-import io.stereov.web.user.exception.model.InvalidUserDocumentException
+import io.stereov.web.global.exception.model.InvalidDocumentException
 import io.stereov.web.user.service.token.model.SetupToken
 import io.stereov.web.user.service.token.model.StepUpToken
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
@@ -185,7 +185,7 @@ class TwoFactorAuthTokenService(
      *
      * @return A step-up token for the current user.
      *
-     * @throws InvalidUserDocumentException If the user document does not contain a two-factor authentication secret.
+     * @throws InvalidDocumentException If the user document does not contain a two-factor authentication secret.
      * @throws InvalidTwoFactorCodeException If the two-factor code is invalid.
      */
     suspend fun createStepUpToken(code: Int, issuedAt: Instant = Instant.now()): String {

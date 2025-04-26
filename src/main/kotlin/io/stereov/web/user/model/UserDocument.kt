@@ -9,7 +9,7 @@ import io.stereov.web.global.service.file.model.FileMetaData
 import io.stereov.web.global.service.hash.model.SearchableHash
 import io.stereov.web.global.service.hash.model.SecureHash
 import io.stereov.web.user.dto.UserDto
-import io.stereov.web.user.exception.model.InvalidUserDocumentException
+import io.stereov.web.global.exception.model.InvalidDocumentException
 import org.springframework.data.annotation.Transient
 import java.time.Instant
 
@@ -46,18 +46,18 @@ data class UserDocument(
         get() = KotlinLogging.logger {}
 
     /**
-     * Return the [_id] and throw a [InvalidUserDocumentException] if the [_id] is null.
+     * Return the [_id] and throw a [InvalidDocumentException] if the [_id] is null.
      *
-     * @throws InvalidUserDocumentException If [_id] is null
+     * @throws InvalidDocumentException If [_id] is null
      */
     @get:Transient
     val id: String
-        get() = this._id ?: throw InvalidUserDocumentException("No ID found in UserDocument")
+        get() = this._id ?: throw InvalidDocumentException("No ID found in UserDocument")
 
     /**
      * Returns the path where user-specific information is stored.
      *
-     * @throws InvalidUserDocumentException If [_id] is null.
+     * @throws InvalidDocumentException If [_id] is null.
      */
     @get:Transient
     val fileStoragePath: String
@@ -68,10 +68,10 @@ data class UserDocument(
      *
      * This method returns the application info associated with the user cast to the given class [T].
      *
-     * @throws InvalidUserDocumentException If the application info is not of the expected type.
+     * @throws InvalidDocumentException If the application info is not of the expected type.
      */
     inline fun <reified T: ApplicationInfo> getApplicationInfo(): T {
-        return app as? T ?: throw InvalidUserDocumentException("No application info found in UserDocument")
+        return app as? T ?: throw InvalidDocumentException("No application info found in UserDocument")
     }
 
     override fun toEncryptedDocument(
