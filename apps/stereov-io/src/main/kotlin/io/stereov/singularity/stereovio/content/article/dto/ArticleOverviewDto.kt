@@ -1,13 +1,14 @@
 package io.stereov.singularity.stereovio.content.article.dto
 
 import io.stereov.singularity.core.global.serializer.InstantSerializer
+import io.stereov.singularity.core.global.service.file.model.FileMetaData
+import io.stereov.singularity.stereovio.content.article.model.ArticleColors
 import io.stereov.singularity.stereovio.content.article.model.ArticleState
-import io.stereov.singularity.stereovio.content.article.model.Slide
 import kotlinx.serialization.Serializable
 import java.time.Instant
 
 @Serializable
-data class ArticleDto(
+open class ArticleOverviewDto(
     val id: String? = null,
     val key: String,
     @Serializable(with = InstantSerializer::class)
@@ -16,7 +17,10 @@ data class ArticleDto(
     val publishedAt: Instant?,
     @Serializable(with = InstantSerializer::class)
     val updatedAt: Instant,
-    val url: String,
+    val path: String,
     val state: ArticleState = ArticleState.DRAFT,
-    val slide: Slide,
+    val title: String,
+    val colors: ArticleColors,
+    val summary: String,
+    val image: FileMetaData
 )

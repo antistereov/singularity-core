@@ -1,7 +1,7 @@
 package io.stereov.singularity.stereovio.content.article.controller
 
-import io.stereov.singularity.stereovio.content.article.dto.ArticleDto
-import io.stereov.singularity.stereovio.content.article.model.Article
+import io.stereov.singularity.stereovio.content.article.dto.FullArticleDto
+import io.stereov.singularity.stereovio.content.article.dto.ArticleOverviewDto
 import io.stereov.singularity.stereovio.content.article.service.ArticleService
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
@@ -16,23 +16,23 @@ class ArticleController(
     private val articleService: ArticleService,
 ) {
 
-    @GetMapping("{id}")
-    suspend fun findById(@PathVariable id: String): ResponseEntity<ArticleDto> {
+    @GetMapping("{key}")
+    suspend fun findByKey(@PathVariable key: String): ResponseEntity<FullArticleDto> {
         return ResponseEntity.ok().body(
-            articleService.findById(id).toDto()
+            articleService.findByKey(key).toContentDto()
         )
     }
 
     @GetMapping("/latest")
-    suspend fun getLatestArticles(@RequestParam limit: Long = 10): ResponseEntity<List<Article>> {
-        return ResponseEntity.ok(articleService.getLatestArticles(limit))
+    suspend fun getLatestArticles(@RequestParam limit: Long = 10): ResponseEntity<List<ArticleOverviewDto>> {
+        return ResponseEntity.ok(articleService.getLatestArticles(limit).map { it.toSlideDto() })
     }
 
     @GetMapping("/next")
     suspend fun getArticles(
         @RequestParam id: String,
         @RequestParam limit: Long = 10
-    ): ResponseEntity<List<Article>> {
-        return ResponseEntity.ok(articleService.getNextArticles(id, limit))
+    ): ResponseEntity<List<ArticleOverviewDto>> {
+        return ResponseEntity.ok(articleService.getNextArticles(id, limit).map { it.toSlideDto() })
     }
 }
