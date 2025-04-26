@@ -4,18 +4,22 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.web.global.service.secrets.component.KeyManager
 import io.stereov.web.global.service.secrets.model.Secret
+import io.stereov.web.properties.AppProperties
 import java.time.Instant
 import java.util.*
 import javax.crypto.KeyGenerator
 
 abstract class SecretService(
     private val keyManager: KeyManager,
-    private val key: String,
-    private val algorithm: String
+    key: String,
+    private val algorithm: String,
+    appProperties: AppProperties
 ) {
 
     protected val logger: KLogger
         get() = KotlinLogging.logger {}
+
+    private val actualKey = "${appProperties.slug}-$key"
 
     private var currentSecret: Secret? = null
 
@@ -29,7 +33,7 @@ abstract class SecretService(
     private suspend fun loadCurrentSecret(): Secret {
         this.logger.debug { "Loading current secret from key manager" }
 
-        val currentSecret = this.keyManager.getSecretByKey(key)
+        val currentSecret = this.keyManager.getSecretByKey(actualKey)
 
         val secret = currentSecret?.let {
             this.keyManager.getSecretById(UUID.fromString(currentSecret.value))
@@ -43,14 +47,14 @@ abstract class SecretService(
     suspend fun updateSecret(): Secret {
         this.logger.debug { "Updating current secret" }
 
-        val newKey = "$key-${Instant.now()}"
+        val newKey = "$actualKey-${Instant.now()}"
         val newValue = this.generateKey(algorithm = algorithm)
         val newNote = "Generated on ${Instant.now()}"
 
         val newSecret = this.keyManager.create(newKey, newValue, newNote)
         this.currentSecret = newSecret
 
-        this.keyManager.createOrUpdateKey(this.key, newSecret.id.toString(), newNote)
+        this.keyManager.createOrUpdateKey(this.actualKey, newSecret.id.toString(), newNote)
 
         return newSecret
     }

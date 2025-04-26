@@ -5,6 +5,7 @@ import io.stereov.web.global.service.secrets.component.KeyManager
 import io.stereov.web.global.service.secrets.component.SecretCache
 import io.stereov.web.global.service.secrets.service.EncryptionSecretService
 import io.stereov.web.global.service.secrets.service.JwtSecretService
+import io.stereov.web.properties.AppProperties
 import io.stereov.web.properties.secrets.KeyManagerProperties
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
@@ -23,14 +24,14 @@ class SecretsConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun jwtSecretService(keyManager: KeyManager): JwtSecretService {
-        return JwtSecretService(keyManager)
+    fun jwtSecretService(keyManager: KeyManager, appProperties: AppProperties): JwtSecretService {
+        return JwtSecretService(keyManager, appProperties)
     }
 
     @Bean
     @ConditionalOnMissingBean
-    fun encryptionSecretService(keyManager: KeyManager): EncryptionSecretService {
-        return EncryptionSecretService(keyManager)
+    fun encryptionSecretService(keyManager: KeyManager, appProperties: AppProperties): EncryptionSecretService {
+        return EncryptionSecretService(keyManager, appProperties)
     }
 
     @Bean
