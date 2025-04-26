@@ -1,0 +1,84 @@
+server:
+  port: ${BACKEND_PORT}
+
+spring:
+  data:
+    mongodb:
+      uri: mongodb://${MONGO_DB_USERNAME}:${MONGO_DB_PASSWORD}@${MONGO_DB_HOST}:${MONGO_DB_PORT}/${MONGO_DB_DATABASE_NAME}?authSource=admin&tls=${MONGO_DB_SSL_ENABLED:false}
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
+      database: ${REDIS_DATABASE:0}
+      timeout: ${REDIS_TIMEOUT:5000ms}
+      ssl:
+        enabled: ${REDIS_SSL_ENABLED:false}
+  devtools:
+    restart:
+      enabled: ${DEV_MODE:false}
+      additional-paths: src/main
+
+logging:
+  level:
+    io.stereov: ${LOG_LEVEL:DEBUG}
+
+baseline:
+  app:
+    name: ${APP_NAME}
+    base-url: ${BACKEND_BASE_URL}
+    secure: ${SECURE:false}
+    create-root-user: ${CREATE_ROOT_USER}
+    root-email: ${ROOT_EMAIL}
+    root-password: ${ROOT_PASSWORD}
+  file:
+    storage:
+      type: s3
+      s3:
+        domain: ${S3_DOMAIN}
+        bucket: ${S3_BUCKET}
+        access-key: ${S3_ACCESS_KEY}
+        secret-key: ${S3_SECRET_KEY}
+        scheme: ${S3_SCHEME}
+  secrets:
+    key-manager: bitwarden
+    key-rotation-cron: 0 0 4 1 1,4,7,10 *
+    cache-expiration: 900000
+    bitwarden:
+      access-token: ${BITWARDEN_ACCESS_TOKEN}
+      api-url: ${BITWARDEN_API_URL}
+      identity-url: ${BITWARDEN_IDENTITY_URL}
+      project-id: ${BITWARDEN_PROJECT_ID}
+      organization-id: ${BITWARDEN_ORGANIZATION_ID}
+      state-file: ${BITWARDEN_STATE_FILE}
+  mail:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    email: ${MAIL_EMAIL}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    transport-protocol: ${MAIL_TRANSPORT_PROTOCOL:smtp}
+    smtp-auth: ${MAIL_SMTP_AUTH:true}
+    smtp-starttls: ${MAIL_SMTP_STARTTLS:true}
+    debug: ${MAIL_DEBUG:false}
+    verification-expiration: ${MAIL_VERIFICATION_EXPIRATION:900}
+    verification-send-cooldown: ${MAIL_VERIFICATION_SEND_COOLDOWN:60}
+    password-reset-expiration: 900
+    password-reset-send-cooldown: 60
+    ui-verification-path: ${EMAIL_VERIFICATION_PATH:/auth/verify-email}
+    ui-password-reset-path: ${PASSWORD_RESET_PATH:/auth/reset-password}
+  security:
+    jwt:
+      expires-in: 900
+    rate-limit:
+      ip-limit: 2000
+      ip-time-window: 1
+      user-limit: 2000
+      user-time-window: 1
+    login-attempt-limit:
+      ip-limit: 1000
+      ip-time-window: 1
+    two-factor:
+      recovery-code-length: 10
+      recovery-code-count: 6
+  ui:
+    base-url: ${UI_BASE_URL}
