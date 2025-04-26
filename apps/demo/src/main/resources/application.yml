@@ -24,7 +24,7 @@ logging:
 
 baseline:
   app:
-    name: TestApplication
+    name: ${APP_NAME}
     base-url: ${BACKEND_BASE_URL}
     secure: ${SECURE:false}
     create-root-user: ${CREATE_ROOT_USER}
