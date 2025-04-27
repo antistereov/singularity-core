@@ -60,12 +60,13 @@ class BaseSpringBootTest {
         password: String = "password",
         deviceId: String = "device",
         twoFactorEnabled: Boolean = false,
+        name: String = "Name",
     ): TestRegisterResponse {
         val device = DeviceInfoRequest(id = deviceId)
 
         var responseCookies = webTestClient.post()
             .uri("/user/register?send-email=false")
-            .bodyValue(RegisterUserRequest(email = email, password = password, device = device))
+            .bodyValue(RegisterUserRequest(email = email, password = password, name = name, device = device))
             .exchange()
             .expectStatus().isOk
             .returnResult<Void>()

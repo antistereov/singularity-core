@@ -3,10 +3,10 @@ package io.stereov.singularity.user.controller
 import io.stereov.singularity.core.config.Constants
 import io.stereov.singularity.core.global.service.mail.MailTokenService
 import io.stereov.singularity.core.global.service.random.RandomService
-import io.stereov.singularity.test.BaseIntegrationTest
 import io.stereov.singularity.core.user.dto.UserDto
 import io.stereov.singularity.core.user.dto.request.*
 import io.stereov.singularity.core.user.dto.response.LoginResponse
+import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*
@@ -190,7 +190,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
 
         val response = webTestClient.post()
             .uri("/user/register")
-            .bodyValue(RegisterUserRequest(email = email, password = password, device = deviceInfo))
+            .bodyValue(RegisterUserRequest(email = email, password = password, name = "Name", device = deviceInfo))
             .exchange()
             .expectStatus().isOk
             .expectBody(UserDto::class.java)
@@ -230,19 +230,19 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val deviceInfo = DeviceInfoRequest("device")
         webTestClient.post()
             .uri("/user/register")
-            .bodyValue(RegisterUserRequest(email = "invalid", password = "password", device = deviceInfo))
+            .bodyValue(RegisterUserRequest(email = "invalid", password = "password", name = "Name", device = deviceInfo))
             .exchange()
             .expectStatus().isBadRequest
 
         webTestClient.post()
             .uri("/user/register")
-            .bodyValue(RegisterUserRequest(email = "", password = "password", device = deviceInfo))
+            .bodyValue(RegisterUserRequest(email = "", password = "password", name = "Name", device = deviceInfo))
             .exchange()
             .expectStatus().isBadRequest
 
         webTestClient.post()
             .uri("/user/register")
-            .bodyValue(RegisterUserRequest(email = "test@email.com", password = "", device = deviceInfo))
+            .bodyValue(RegisterUserRequest(email = "test@email.com", password = "", name = "Name", device = deviceInfo))
             .exchange()
             .expectStatus().isBadRequest
     }

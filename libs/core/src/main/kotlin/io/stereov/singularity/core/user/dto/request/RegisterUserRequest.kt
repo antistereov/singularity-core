@@ -22,6 +22,7 @@ data class RegisterUserRequest(
     val email: String,
     @field:NotBlank(message = "Password is required")
     val password: String,
-    val name: String? = null,
+    @field:NotBlank
+    val name: String,
     val device: DeviceInfoRequest,
 )
