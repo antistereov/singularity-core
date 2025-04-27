@@ -30,7 +30,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class UserDto(
     val id: String,
-    val name: String?,
+    val name: String,
     val email: String,
     val roles: List<Role> = listOf(Role.USER),
     val emailVerified: Boolean = false,

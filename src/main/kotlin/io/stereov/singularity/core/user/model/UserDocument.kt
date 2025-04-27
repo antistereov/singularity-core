@@ -3,13 +3,14 @@ package io.stereov.singularity.core.user.model
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.core.global.database.model.SensitiveDocument
+import io.stereov.singularity.core.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.core.global.exception.model.MissingFunctionParameterException
 import io.stereov.singularity.core.global.service.encryption.model.Encrypted
 import io.stereov.singularity.core.global.service.file.model.FileMetaData
 import io.stereov.singularity.core.global.service.hash.model.SearchableHash
 import io.stereov.singularity.core.global.service.hash.model.SecureHash
 import io.stereov.singularity.core.user.dto.UserDto
-import io.stereov.singularity.core.global.exception.model.InvalidDocumentException
+import io.stereov.singularity.core.user.dto.UserOverviewDto
 import org.springframework.data.annotation.Transient
 import java.time.Instant
 
@@ -33,7 +34,7 @@ data class UserDocument(
         created: Instant = Instant.now(),
         lastActive: Instant = Instant.now(),
         app: ApplicationInfo? = null,
-        name: String? = null,
+        name: String,
         email: String,
         roles: MutableList<Role> = mutableListOf(Role.USER),
         security: UserSecurityDetails = UserSecurityDetails(),
@@ -110,6 +111,8 @@ data class UserDocument(
             created.toString(),
         )
     }
+
+    fun toOverviewDto() = UserOverviewDto(id, sensitive.name, sensitive.avatar)
 
     /**
      * Set up two-factor authentication for the user.
