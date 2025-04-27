@@ -3,6 +3,8 @@ package io.stereov.singularity.stereovio.content.article.service
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.core.global.exception.model.DocumentNotFoundException
+import io.stereov.singularity.core.user.service.UserService
+import io.stereov.singularity.stereovio.content.article.dto.FullArticleDto
 import io.stereov.singularity.stereovio.content.article.model.Article
 import io.stereov.singularity.stereovio.content.article.repository.ArticleRepository
 import kotlinx.coroutines.flow.toList
@@ -15,7 +17,8 @@ import org.springframework.stereotype.Service
 @Service
 class ArticleService(
     private val repository: ArticleRepository,
-    private val reactiveMongoTemplate: ReactiveMongoTemplate
+    private val reactiveMongoTemplate: ReactiveMongoTemplate,
+    private val userService: UserService,
 ) {
 
     private val logger: KLogger
@@ -47,6 +50,10 @@ class ArticleService(
         return findByKeyOrNull(key) ?: throw DocumentNotFoundException("No article with key $key found")
     }
 
+    suspend fun findFullArticleDtoByKey(key: String): FullArticleDto {
+        return fullArticledDtoFrom(findByKey(key))
+    }
+
     suspend fun getLatestArticles(limit: Long): List<Article> {
         val query = Query()
             .with(Sort.by(Sort.Order.desc("_id")))
@@ -59,5 +66,10 @@ class ArticleService(
 
     suspend fun getNextArticles(lastLoadedId: String, limit: Long): List<Article> {
         return repository.findByIdLessThanOrderByIdDesc(lastLoadedId, limit).toList()
+    }
+
+    suspend fun fullArticledDtoFrom(article: Article): FullArticleDto {
+        val creator = userService.findById(article.creatorId)
+        return FullArticleDto(article, creator)
     }
 }

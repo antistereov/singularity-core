@@ -3,7 +3,6 @@ package io.stereov.singularity.stereovio.content.article.model
 import io.stereov.singularity.core.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.core.global.service.file.model.FileMetaData
 import io.stereov.singularity.stereovio.content.article.dto.ArticleOverviewDto
-import io.stereov.singularity.stereovio.content.article.dto.FullArticleDto
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
@@ -15,6 +14,7 @@ data class Article(
     val _id: String? = null,
     @Indexed(unique = true)
     val key: String,
+    val creatorId: String,
     val createdAt: Instant,
     val publishedAt: Instant?,
     val updatedAt: Instant,
@@ -30,9 +30,6 @@ data class Article(
     val id: String
         get() = _id ?: throw InvalidDocumentException("No id found")
 
-    fun toContentDto() = FullArticleDto(id, key, createdAt, publishedAt, updatedAt, path, state,
-        title, colors, summary, image, content)
-
-    fun toSlideDto() = ArticleOverviewDto(id, key, createdAt, publishedAt, updatedAt, path, state,
+    fun toOverviewDto() = ArticleOverviewDto(id, key, createdAt, publishedAt, updatedAt, path, state,
         title, colors, summary, image)
 }

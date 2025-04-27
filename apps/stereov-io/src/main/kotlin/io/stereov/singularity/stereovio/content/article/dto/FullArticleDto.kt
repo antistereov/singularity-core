@@ -2,6 +2,9 @@ package io.stereov.singularity.stereovio.content.article.dto
 
 import io.stereov.singularity.core.global.serializer.InstantSerializer
 import io.stereov.singularity.core.global.service.file.model.FileMetaData
+import io.stereov.singularity.core.user.dto.UserOverviewDto
+import io.stereov.singularity.core.user.model.UserDocument
+import io.stereov.singularity.stereovio.content.article.model.Article
 import io.stereov.singularity.stereovio.content.article.model.ArticleColors
 import io.stereov.singularity.stereovio.content.article.model.ArticleContent
 import io.stereov.singularity.stereovio.content.article.model.ArticleState
@@ -18,6 +21,7 @@ data class FullArticleDto(
     val publishedAt: Instant?,
     @Serializable(with = InstantSerializer::class)
     val updatedAt: Instant,
+    val creator: UserOverviewDto?,
     val path: String,
     val state: ArticleState = ArticleState.DRAFT,
     val title: String,
@@ -25,4 +29,10 @@ data class FullArticleDto(
     val summary: String,
     val image: FileMetaData,
     val content: ArticleContent,
-)
+) {
+
+    constructor(article: Article, creator: UserDocument?): this(
+        article.id, article.key, article.createdAt, article.publishedAt, article.updatedAt, creator?.toOverviewDto(),
+        article.path, article.state, article.title, article.colors, article.summary, article.image, article.content
+    )
+}
