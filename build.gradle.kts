@@ -48,7 +48,7 @@ val mavenCentralPassword: String? = properties["mavencentral.password"] as Strin
     ?: System.getenv("MAVENCENTRAL_PASSWORD")
 val gpgPassphrase: String? = properties["gpg.passphrase"] as String?
     ?: System.getenv("GPG_PASSPHRASE")
-val gpgUseFileCondition: String = properties["gpg.use-file"] as String?
+val gpgUseFileCondition: String? = properties["gpg.use-file"] as String?
     ?: "false"
 val gpgUseFile: Boolean = gpgUseFileCondition.toBoolean()
 val gpgSecretKey: String? = properties["gpg.private-key"] as String?
