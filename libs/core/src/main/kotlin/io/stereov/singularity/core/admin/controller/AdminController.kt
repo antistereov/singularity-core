@@ -1,11 +1,9 @@
 package io.stereov.singularity.core.admin.controller
 
-import io.lettuce.core.KillArgs.Builder.user
 import io.stereov.singularity.core.admin.dto.RotationStatusResponse
 import io.stereov.singularity.core.admin.service.AdminService
 import io.stereov.singularity.core.global.model.SuccessResponse
 import io.stereov.singularity.core.user.dto.UserDto
-import io.stereov.singularity.core.user.model.UserDocument
 import io.stereov.singularity.core.user.service.UserService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
