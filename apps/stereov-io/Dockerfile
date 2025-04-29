@@ -61,7 +61,7 @@ ARG GPR_KEY=""
 RUN chmod +x ./gradlew && \
     ./gradlew :apps:stereov-io:bootJar -x test --no-daemon
 
-FROM eclipse-temurin:21-jre-alpine AS runtime
+FROM eclipse-temurin:21-jdk AS runtime
 
 WORKDIR /app
 
