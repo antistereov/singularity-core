@@ -272,7 +272,6 @@ class AuthenticationConfiguration {
     @ConditionalOnMissingBean
     fun userSessionController(
         authenticationService: AuthenticationService,
-        userService: UserService,
         userSessionService: UserSessionService,
         cookieService: CookieService,
     ): UserSessionController {
