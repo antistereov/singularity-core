@@ -55,10 +55,10 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: stereov.io
+    - host: api.stereov.io
       http:
         paths:
-          - path: /api
+          - path: /
             pathType: Prefix
             backend:
               service:
@@ -86,7 +86,7 @@ data:
   UI_BASE_URL: https://stereov.io
   MONGO_DB_HOST: dev.stereov.io
   MONGO_DB_PORT: "28017"
-  MONGO_DB_DATABASE_NAME: stereov-io
+  MONGO_DB_DATABASE_NAME: stereov
   MONGO_DB_SSL_ENABLED: "true"
   REDIS_HOST: dev.stereov.io
   REDIS_PORT: "6479"
