@@ -1,0 +1,113 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stereov-io-singularity
+  namespace: stereov-io
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: stereov-io-singularity
+  template:
+    metadata:
+      labels:
+        app: stereov-io-singularity
+    spec:
+      containers:
+        - name: stereov-io-singularity
+          image: ghcr.io/antistereov/stereov-io-singularity:latest
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: stereov-io-singularity-config
+            - secretRef:
+                name: stereov-io-singularity-secrets
+      imagePullSecrets:
+        - name: ghcr-secret
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: stereov-io-singularity-service
+  namespace: stereov-io
+spec:
+  selector:
+    app: stereov-io-singularity
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+  type: ClusterIP
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: stereov-io-singularity-ingress
+  namespace: stereov-io
+  annotations:
+    cert-manager.io/cluster-issuer: acme-issuer
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: stereov.io
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: stereov-io-singularity-service
+                port:
+                  number: 8000
+  tls:
+    - hosts:
+        - stereov.io
+      secretName: stereov-io-singularity-cert
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: stereov-io-singularity-config
+data:
+  APP_NAME: stereov-io
+  BACKEND_BASE_URL: https://stereov.io/api
+  BACKEND_PORT: "8000"
+  SECURE: "true"
+  DEV_MODE: "false"
+  CREATE_ROOT_USER: "false"
+  UI_BASE_URL: https://stereov.io
+  MONGO_DB_HOST: dev.stereov.io
+  MONGO_DB_PORT: "28017"
+  MONGO_DB_DATABASE_NAME: stereov-io
+  MONGO_DB_SSL_ENABLED: "true"
+  REDIS_HOST: dev.stereov.io
+  REDIS_PORT: "6479"
+  REDIS_SSL_ENABLED: "true"
+  REDIS_DATABASE: "0"
+  REDIS_TIMEOUT: 5000ms
+  S3_DOMAIN: nbg1.your-objectstorage.com
+  S3_SCHEME: https
+  S3_BUCKET: stereov
+  BITWARDEN_API_URL: https://api.bitwarden.eu
+  BITWARDEN_IDENTITY_URL: https://identity.bitwarden.eu
+  BITWARDEN_STATE_FILE: ~/.bitwarden/secrets-manager/demo-application/state
+  ENABLE_EMAIL_VERIFICATION: "true"
+  MAIL_HOST: smtp.protonmail.ch
+  MAIL_PORT: "587"
+  MAIL_EMAIL: noreply@stereov.io
+  MAIL_TRANSPORT_PROTOCOL: smtp
+  MAIL_SMTP_AUTH: "true"
+  MAIL_SMTP_STARTTLS: "true"
+  MAIL_DEBUG: "false"
+  EMAIL_VERIFICATION_PATH: /auth/verify-email
+  PASSWORD_RESET_PATH: /auth/password-reset
+  LOG_LEVEL: DEBUG
+  LOG_PATH: logs
