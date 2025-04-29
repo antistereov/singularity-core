@@ -246,8 +246,8 @@ class AuthenticationConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun adminController(adminService: AdminService): AdminController {
-        return AdminController(adminService)
+    fun adminController(adminService: AdminService, userService: UserService): AdminController {
+        return AdminController(adminService, userService)
     }
 
     @Bean
