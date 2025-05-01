@@ -4,7 +4,6 @@ import io.stereov.singularity.content.article.controller.ArticleController
 import io.stereov.singularity.content.article.repository.ArticleRepository
 import io.stereov.singularity.content.article.service.ArticleService
 import io.stereov.singularity.core.auth.service.AuthenticationService
-import io.stereov.singularity.core.config.ApplicationConfiguration
 import io.stereov.singularity.core.config.AuthenticationConfiguration
 import io.stereov.singularity.core.user.service.UserService
 import org.springframework.boot.autoconfigure.AutoConfiguration
