@@ -26,6 +26,7 @@ class LoggingFilter : WebFilter {
         val request = exchange.request
         val method = request.method
         val path = request.uri.path
+        val ipAddress = request.remoteAddress?.address?.hostAddress
 
         logger.debug { "Incoming request  - $method $path" }
 
@@ -33,7 +34,7 @@ class LoggingFilter : WebFilter {
             .doOnSuccess {
 
                 val status = exchange.response.statusCode
-                logger.debug { "Outgoing response - $method $path: $status" }
+                logger.debug { "Outgoing response - $method $path: $status from $ipAddress" }
             }
             .onErrorResume { error ->
                 val status = if (error is ResponseStatusException) {
