@@ -28,8 +28,9 @@ class LoggingFilter : WebFilter {
         val path = request.uri.path
         val ipAddress = request.remoteAddress?.address?.hostAddress
         val origin = request.headers.origin
+        val cookies = request.cookies.values.joinToString("; ")
 
-        logger.debug { "Incoming request  - $method $path from $ipAddress with origin $origin" }
+        logger.debug { "Incoming request  - $method $path from $ipAddress with origin $origin and cookies $cookies" }
 
         return chain.filter(exchange)
             .doOnSuccess {
