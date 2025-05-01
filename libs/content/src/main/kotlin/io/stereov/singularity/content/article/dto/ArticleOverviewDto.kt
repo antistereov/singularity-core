@@ -1,9 +1,9 @@
-package io.stereov.singularity.stereovio.content.article.dto
+package io.stereov.singularity.content.article.dto
 
 import io.stereov.singularity.core.global.serializer.InstantSerializer
 import io.stereov.singularity.core.global.service.file.model.FileMetaData
-import io.stereov.singularity.stereovio.content.article.model.ArticleColors
-import io.stereov.singularity.stereovio.content.article.model.ArticleState
+import io.stereov.singularity.content.article.model.ArticleColors
+import io.stereov.singularity.content.article.model.ArticleState
 import kotlinx.serialization.Serializable
 import java.time.Instant
 

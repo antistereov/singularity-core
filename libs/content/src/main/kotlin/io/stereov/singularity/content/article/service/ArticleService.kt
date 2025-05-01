@@ -1,12 +1,16 @@
-package io.stereov.singularity.stereovio.content.article.service
+package io.stereov.singularity.content.article.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.content.article.dto.FullArticleDto
+import io.stereov.singularity.content.article.exception.model.ArticleKeyExistsException
+import io.stereov.singularity.content.article.exception.model.InvalidArticleRequestException
+import io.stereov.singularity.content.article.model.Article
+import io.stereov.singularity.content.article.repository.ArticleRepository
+import io.stereov.singularity.core.auth.service.AuthenticationService
 import io.stereov.singularity.core.global.exception.model.DocumentNotFoundException
+import io.stereov.singularity.core.user.model.Role
 import io.stereov.singularity.core.user.service.UserService
-import io.stereov.singularity.stereovio.content.article.dto.FullArticleDto
-import io.stereov.singularity.stereovio.content.article.model.Article
-import io.stereov.singularity.stereovio.content.article.repository.ArticleRepository
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.data.domain.Sort
@@ -19,6 +23,7 @@ class ArticleService(
     private val repository: ArticleRepository,
     private val reactiveMongoTemplate: ReactiveMongoTemplate,
     private val userService: UserService,
+    private val authenticationService: AuthenticationService,
 ) {
 
     private val logger: KLogger
@@ -28,6 +33,12 @@ class ArticleService(
         logger.debug { "Saving article" }
 
         return repository.save(article)
+    }
+
+    suspend fun save(dto: FullArticleDto): FullArticleDto {
+        val article = articleFromDto(dto)
+        val savedArticle = save(article)
+        return fullArticledDtoFrom(savedArticle)
     }
 
     suspend fun findByIdOrNull(id: String): Article? {
@@ -54,6 +65,14 @@ class ArticleService(
         return fullArticledDtoFrom(findByKey(key))
     }
 
+    suspend fun setTrustedState(key: String, trusted: Boolean): Article {
+        authenticationService.validateAuthorization(Role.ADMIN)
+
+        val article = findByKey(key)
+        article.trusted = trusted
+        return save(article)
+    }
+
     suspend fun getLatestArticles(limit: Long): List<Article> {
         val query = Query()
             .with(Sort.by(Sort.Order.desc("_id")))
@@ -71,5 +90,16 @@ class ArticleService(
     suspend fun fullArticledDtoFrom(article: Article): FullArticleDto {
         val creator = userService.findById(article.creatorId)
         return FullArticleDto(article, creator)
+    }
+
+    suspend fun articleFromDto(dto: FullArticleDto): Article {
+        val savedArticle = findByKeyOrNull(dto.key)
+        val creatorId = dto.creator?.id ?: throw InvalidArticleRequestException("No creator for article specified")
+
+        if (savedArticle != null && dto.id == null) throw ArticleKeyExistsException("An article with the key ${dto.key} already exists")
+
+        val trusted = savedArticle?.trusted ?: false
+        return Article(dto.id, dto.key, creatorId, dto.createdAt, dto.publishedAt, dto.updatedAt, dto.path, dto.state,
+            dto.title, dto.summary, dto.colors, dto.image, dto.content, dto.accessType, dto.canEdit, dto.canView, trusted)
     }
 }

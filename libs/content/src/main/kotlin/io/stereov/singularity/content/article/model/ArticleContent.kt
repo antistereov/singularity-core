@@ -1,4 +1,4 @@
-package io.stereov.singularity.stereovio.content.article.model
+package io.stereov.singularity.content.article.model
 
 import io.stereov.singularity.core.global.service.file.model.FileMetaData
 import kotlinx.serialization.Serializable

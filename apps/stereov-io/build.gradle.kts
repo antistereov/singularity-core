@@ -29,6 +29,7 @@ val testContainersVersion = "1.19.0"
 
 dependencies {
     api(project(":libs:core"))
+    api(project(":libs:content"))
 
     // Tests
     testImplementation("org.springframework.boot:spring-boot-starter-test") {

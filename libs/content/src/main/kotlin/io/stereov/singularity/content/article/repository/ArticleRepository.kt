@@ -1,6 +1,6 @@
-package io.stereov.singularity.stereovio.content.article.repository
+package io.stereov.singularity.content.article.repository
 
-import io.stereov.singularity.stereovio.content.article.model.Article
+import io.stereov.singularity.content.article.model.Article
 import kotlinx.coroutines.flow.Flow
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import org.springframework.stereotype.Repository
