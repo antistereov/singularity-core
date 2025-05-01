@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 
 @Controller
-@RequestMapping("/user")
+@RequestMapping("/api/user")
 class UserController(
     private val userService: UserService,
 ) {

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 
 @Controller
-@RequestMapping("/admin")
+@RequestMapping("/api/admin")
 class AdminController(
     private val adminService: AdminService,
     private val userService: UserService,

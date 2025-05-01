@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
 @Controller
-@RequestMapping("/user/devices")
+@RequestMapping("/api/user/devices")
 class UserDeviceController(
     private val deviceService: UserDeviceService
 ) {
