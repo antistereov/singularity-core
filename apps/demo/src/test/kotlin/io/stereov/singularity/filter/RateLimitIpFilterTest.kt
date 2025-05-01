@@ -71,17 +71,17 @@ class RateLimitIpFilterTest : BaseSpringBootTest() {
         assertEquals(2, rateLimitProperties.ipLimit)
 
         webTestClient.get()
-            .uri("/user/me")
+            .uri("/api/user/me")
             .exchange()
             .expectStatus().isUnauthorized
 
         webTestClient.get()
-            .uri("/user/me")
+            .uri("/api/user/me")
             .exchange()
             .expectStatus().isUnauthorized
 
         webTestClient.get()
-            .uri("/user/me")
+            .uri("/api/user/me")
             .exchange()
             .expectStatus().isEqualTo(HttpStatus.TOO_MANY_REQUESTS)
     }

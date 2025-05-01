@@ -212,7 +212,7 @@ class TwoFactorAuthTokenService(
     suspend fun createStepUpTokenForRecovery(userId: String, deviceId: String, exchange: ServerWebExchange, issuedAt: Instant = Instant.now()): String {
         logger.debug { "Creating step up token" }
 
-        if (exchange.request.path.toString() != "/user/2fa/recovery")
+        if (exchange.request.path.toString() != "/api/user/2fa/recovery")
             throw AuthException("Cannot create step up token. This function call is only allowed when it is called from /auth/2fa/recovery")
 
         return createStepUpToken(userId, deviceId, issuedAt)

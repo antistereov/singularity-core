@@ -24,14 +24,14 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
         val user = registerUser()
 
         webTestClient.get()
-            .uri("/user/me")
+            .uri("/api/user/me")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectStatus().isOk
     }
     @Test fun `valid token required`() = runTest {
         webTestClient.get()
-            .uri("/user/me")
+            .uri("/api/user/me")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, "access_token")
             .exchange()
             .expectStatus().isUnauthorized
@@ -41,7 +41,7 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
         deleteAccount(user)
 
         webTestClient.get()
-            .uri("/user/me")
+            .uri("/api/user/me")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectStatus().isUnauthorized
@@ -51,7 +51,7 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
         val token = userTokenService.createAccessToken(user.info._id!!, "device", Instant.ofEpochSecond(0))
 
         webTestClient.get()
-            .uri("/user/me")
+            .uri("/api/user/me")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, token)
             .exchange()
             .expectStatus().isUnauthorized
@@ -60,14 +60,14 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
         val user = registerUser()
 
         webTestClient.post()
-            .uri("/user/logout")
+            .uri("/api/user/logout")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.first().id))
             .exchange()
             .expectStatus().isOk
 
         webTestClient.get()
-            .uri("/user/me")
+            .uri("/api/user/me")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectStatus().isUnauthorized
@@ -76,14 +76,14 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
         val user = registerUser()
 
         webTestClient.post()
-            .uri("/user/logout-all")
+            .uri("/api/user/logout-all")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.first().id))
             .exchange()
             .expectStatus().isOk
 
         webTestClient.get()
-            .uri("/user/me")
+            .uri("/api/user/me")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectStatus().isUnauthorized
@@ -93,7 +93,7 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
         val accessToken = userTokenService.createAccessToken(user.info.id, "device")
 
         webTestClient.get()
-            .uri("/user/me")
+            .uri("/api/user/me")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, accessToken)
             .exchange()
             .expectStatus().isOk
@@ -103,7 +103,7 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
         userService.save(foundUser)
 
         webTestClient.get()
-            .uri("/user/me")
+            .uri("/api/user/me")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, accessToken)
             .exchange()
             .expectStatus().isUnauthorized

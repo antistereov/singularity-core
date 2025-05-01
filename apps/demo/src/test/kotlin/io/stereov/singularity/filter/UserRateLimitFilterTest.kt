@@ -74,19 +74,19 @@ class UserRateLimitFilterTest : BaseSpringBootTest() {
         assertEquals(2, rateLimitProperties.userLimit)
 
         webTestClient.get()
-            .uri("/user/me")
+            .uri("/api/user/me")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectStatus().isOk
 
         webTestClient.get()
-            .uri("/user/me")
+            .uri("/api/user/me")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectStatus().isOk
 
         webTestClient.get()
-            .uri("/user/me")
+            .uri("/api/user/me")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectStatus().isEqualTo(HttpStatus.TOO_MANY_REQUESTS)

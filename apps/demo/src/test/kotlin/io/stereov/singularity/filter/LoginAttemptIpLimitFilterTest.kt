@@ -77,19 +77,19 @@ class LoginAttemptIpLimitFilterTest : BaseSpringBootTest() {
         val device = DeviceInfoRequest("device")
 
         webTestClient.post()
-            .uri("/user/login")
+            .uri("/api/user/login")
             .bodyValue(LoginRequest("test@email.com", "password1", device))
             .exchange()
             .expectStatus().isUnauthorized
 
         webTestClient.post()
-            .uri("/user/login")
+            .uri("/api/user/login")
             .bodyValue(LoginRequest("test1@email.com", "password1", device))
             .exchange()
             .expectStatus().isUnauthorized
 
         webTestClient.post()
-            .uri("/user/login")
+            .uri("/api/user/login")
             .bodyValue(LoginRequest("test2@email.com", "password1", device))
             .exchange()
             .expectStatus().isEqualTo(HttpStatus.TOO_MANY_REQUESTS)

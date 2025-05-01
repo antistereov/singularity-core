@@ -20,7 +20,7 @@ class UserDeviceControllerIntegrationTest : BaseIntegrationTest() {
         userService.save(user.info)
 
         val response = webTestClient.get()
-            .uri("/user/devices")
+            .uri("/api/user/devices")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectStatus().isOk
@@ -37,7 +37,7 @@ class UserDeviceControllerIntegrationTest : BaseIntegrationTest() {
     }
     @Test fun `getDevices requires authentication`() = runTest {
         webTestClient.get()
-            .uri("/user/devices")
+            .uri("/api/user/devices")
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -47,7 +47,7 @@ class UserDeviceControllerIntegrationTest : BaseIntegrationTest() {
         val user = registerUser(deviceId = deviceId)
 
         webTestClient.delete()
-            .uri("/user/devices/$deviceId")
+            .uri("/api/user/devices/$deviceId")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectStatus().isOk
@@ -59,7 +59,7 @@ class UserDeviceControllerIntegrationTest : BaseIntegrationTest() {
     }
     @Test fun `removeDevice requires authentication`() = runTest {
         webTestClient.delete()
-            .uri("/user/devices/device")
+            .uri("/api/user/devices/device")
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -67,7 +67,7 @@ class UserDeviceControllerIntegrationTest : BaseIntegrationTest() {
     @Test fun `clearDevices deletes devices`() = runTest {
         val user = registerUser()
         webTestClient.delete()
-            .uri("/user/devices")
+            .uri("/api/user/devices")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectStatus()
@@ -80,7 +80,7 @@ class UserDeviceControllerIntegrationTest : BaseIntegrationTest() {
     }
     @Test fun `clearDevices requires authentication`() = runTest {
         webTestClient.delete()
-            .uri("/user/devices")
+            .uri("/api/user/devices")
             .exchange()
             .expectStatus().isUnauthorized
     }
