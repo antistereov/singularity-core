@@ -55,10 +55,10 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: api.stereov.io
+    - host: stereov.io
       http:
         paths:
-          - path: /
+          - path: /api
             pathType: Prefix
             backend:
               service:
@@ -68,7 +68,7 @@ spec:
   tls:
     - hosts:
         - stereov.io
-      secretName: stereov-io-singularity-cert
+      secretName: stereov-io-orbit-cert
 
 ---
 

@@ -28,7 +28,7 @@ import org.springframework.web.server.ServerWebExchange
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
 @Controller
-@RequestMapping("/user/2fa")
+@RequestMapping("/api/user/2fa")
 class UserTwoFactorAuthController(
     private val twoFactorService: UserTwoFactorAuthService,
     private val cookieService: CookieService,

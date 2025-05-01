@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
 @Controller
-@RequestMapping("/user/mail")
+@RequestMapping("/api/user/mail")
 class UserMailController(
     private val userMailService: UserMailService,
 ) {

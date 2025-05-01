@@ -32,7 +32,7 @@ import org.springframework.web.server.ServerWebExchange
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/api/user")
 class UserSessionController(
     private val authenticationService: AuthenticationService,
     private val userSessionService: UserSessionService,
