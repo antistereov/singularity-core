@@ -24,7 +24,7 @@ data class Article(
     val title: String,
     val summary: String,
     val colors: ArticleColors,
-    val image: FileMetaData,
+    val image: FileMetaData?,
     val content: ArticleContent,
     val accessType: AccessType,
     val canEdit: List<String>,

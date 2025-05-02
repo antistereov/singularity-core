@@ -22,5 +22,5 @@ open class ArticleOverviewDto(
     val title: String,
     val colors: ArticleColors,
     val summary: String,
-    val image: FileMetaData
+    val image: FileMetaData?
 )

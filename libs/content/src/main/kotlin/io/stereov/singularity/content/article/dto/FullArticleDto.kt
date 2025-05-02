@@ -28,7 +28,7 @@ data class FullArticleDto(
     val title: String,
     val colors: ArticleColors,
     val summary: String,
-    val image: FileMetaData,
+    val image: FileMetaData?,
     val content: ArticleContent,
     val accessType: AccessType,
     val canView: List<String>,
