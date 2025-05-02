@@ -36,7 +36,7 @@ data class UserDocument(
         app: ApplicationInfo? = null,
         name: String,
         email: String,
-        roles: MutableList<Role> = mutableListOf(Role.USER),
+        roles: MutableSet<Role> = mutableSetOf(Role.USER),
         security: UserSecurityDetails = UserSecurityDetails(),
         devices: MutableList<DeviceInfo> = mutableListOf(),
         avatar: FileMetaData? = null,
