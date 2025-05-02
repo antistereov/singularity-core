@@ -54,6 +54,7 @@ COPY ./settings.gradle.kts /app/settings.gradle.kts
 COPY ./gradlew /app/gradlew
 COPY ./apps/stereov-io/ ./apps/stereov-io/
 COPY ./libs/core/ ./libs/core/
+COPY ./libs/content/ ./libs/content/
 
 ARG GPR_USER=""
 ARG GPR_KEY=""
