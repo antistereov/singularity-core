@@ -36,6 +36,8 @@ class ArticleService(
     }
 
     suspend fun save(dto: FullArticleDto): FullArticleDto {
+        authenticationService.validateAuthentication()
+
         val article = articleFromDto(dto)
         val savedArticle = save(article)
         return fullArticledDtoFrom(savedArticle)
@@ -101,5 +103,11 @@ class ArticleService(
         val trusted = savedArticle?.trusted ?: false
         return Article(dto.id, dto.key, creatorId, dto.createdAt, dto.publishedAt, dto.updatedAt, dto.path, dto.state,
             dto.title, dto.summary, dto.colors, dto.image, dto.content, dto.accessType, dto.canEdit, dto.canView, trusted)
+    }
+
+    suspend fun deleteAll() {
+        logger.debug { "Deleting all articles" }
+
+        repository.deleteAll()
     }
 }
