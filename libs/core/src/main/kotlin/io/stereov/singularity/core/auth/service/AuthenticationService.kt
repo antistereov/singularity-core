@@ -82,6 +82,10 @@ class AuthenticationService {
         return auth.tokenId
     }
 
+    suspend fun validateAuthentication() {
+        getCurrentAuthentication()
+    }
+
     /**
      * Validate the authority of the current user.
      * It throws a [NotAuthorizedException] if the user does not have the required role.
