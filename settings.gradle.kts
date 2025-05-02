@@ -1,8 +1,7 @@
 rootProject.name = "singularity"
 
-include("libs:core")
-include("apps:demo")
-
+include("apps:integration-tests")
 include("apps:stereov-io")
 
+include("libs:core")
 include("libs:content")
