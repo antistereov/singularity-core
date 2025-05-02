@@ -32,7 +32,7 @@ data class UserDto(
     val id: String,
     val name: String,
     val email: String,
-    val roles: List<Role> = listOf(Role.USER),
+    val roles: Set<Role> = setOf(Role.USER),
     val emailVerified: Boolean = false,
     val devices: List<DeviceInfoResponse> = listOf(),
     val lastActive: String,

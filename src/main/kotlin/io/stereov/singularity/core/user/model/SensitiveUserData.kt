@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 data class SensitiveUserData(
     var name: String,
     var email: String,
-    val roles: MutableList<Role> = mutableListOf(Role.USER),
+    val roles: MutableSet<Role> = mutableSetOf(Role.USER),
     val security: UserSecurityDetails = UserSecurityDetails(),
     val devices: MutableList<DeviceInfo> = mutableListOf(),
     var avatar: FileMetaData? = null,
