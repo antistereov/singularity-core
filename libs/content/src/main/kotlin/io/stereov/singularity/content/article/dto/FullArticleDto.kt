@@ -31,13 +31,27 @@ data class FullArticleDto(
     val image: FileMetaData?,
     val content: ArticleContent,
     val accessType: AccessType,
-    val canView: List<String>,
-    val canEdit: List<String>
+    val canView: MutableSet<String>,
+    val canEdit: MutableSet<String>
 ) {
 
     constructor(article: Article, creator: UserDocument?): this(
         article.id, article.key, article.createdAt, article.publishedAt, article.updatedAt, creator?.toOverviewDto(),
         article.path, article.state, article.title, article.colors, article.summary, article.image, article.content,
         article.accessType, article.canView, article.canEdit
+    )
+
+    fun toOverview() = ArticleOverviewDto(
+        id = id,
+        key = key,
+        createdAt = createdAt,
+        publishedAt = publishedAt,
+        updatedAt = updatedAt,
+        path = path,
+        state = state,
+        title = title,
+        colors = colors,
+        summary = summary,
+        image = image
     )
 }

@@ -29,6 +29,8 @@ import org.testcontainers.utility.DockerImageName
 @Import(MockMailSenderConfig::class)
 class BaseIntegrationTest : BaseSpringBootTest() {
 
+    val basePath = "/api"
+
     @Autowired
     lateinit var userTokenService: UserTokenService
 

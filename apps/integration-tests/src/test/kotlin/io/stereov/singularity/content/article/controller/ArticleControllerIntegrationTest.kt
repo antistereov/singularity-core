@@ -1,76 +1,14 @@
 package io.stereov.singularity.content.article.controller
 
-import io.lettuce.core.KillArgs.Builder.user
-import io.stereov.singularity.content.article.dto.FullArticleDto
-import io.stereov.singularity.content.article.model.Article
-import io.stereov.singularity.content.article.model.ArticleColors
-import io.stereov.singularity.content.article.model.ArticleContent
-import io.stereov.singularity.content.article.model.ArticleState
-import io.stereov.singularity.content.article.service.ArticleService
-import io.stereov.singularity.core.auth.model.AccessType
 import io.stereov.singularity.core.config.Constants
-import io.stereov.singularity.core.global.service.file.model.FileMetaData
 import io.stereov.singularity.core.user.model.Role
-import io.stereov.singularity.core.user.model.UserDocument
-import io.stereov.singularity.test.BaseIntegrationTest
-import kotlinx.coroutines.runBlocking
+import io.stereov.singularity.test.BaseContentTest
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
-import java.time.Instant
 
-class ArticleControllerIntegrationTest : BaseIntegrationTest() {
-
-    @Autowired
-    private lateinit var articleService: ArticleService
-
-    @BeforeEach
-    fun cleanUp() = runBlocking {
-        articleService.deleteAll()
-        userService.deleteAll()
-    }
-
-    val fullArticle = FullArticleDto(
-        id = null,
-        key = "article-key",
-        createdAt = Instant.now(),
-        updatedAt = Instant.now(),
-        publishedAt = null,
-        creator = null,
-        path = Article.basePath + "/article-key",
-        state = ArticleState.DRAFT,
-        title = "Title",
-        colors = ArticleColors("black", "white"),
-        summary = "Summary",
-        image = null,
-        content = ArticleContent("content", listOf()),
-        accessType = AccessType.PUBLIC,
-        canView = listOf(),
-        canEdit = listOf(),
-    )
-
-    suspend fun save(user: TestRegisterResponse? = null, article: FullArticleDto = fullArticle): FullArticleDto {
-        val actualUser = user ?: registerUser()
-        val actualArticle = article.copy(creator = actualUser.info.toOverviewDto())
-
-        val res = webTestClient.put()
-            .uri("/api/content/articles")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, actualUser.accessToken)
-            .bodyValue(actualArticle)
-            .exchange()
-            .expectStatus().isOk
-            .expectBody(FullArticleDto::class.java)
-            .returnResult()
-            .responseBody
-
-        requireNotNull(res)
-
-        return res
-    }
+class ArticleControllerIntegrationTest : BaseContentTest() {
 
     @Test fun `save works`() = runTest {
         val user = registerUser()
@@ -96,7 +34,7 @@ class ArticleControllerIntegrationTest : BaseIntegrationTest() {
 
     @Test fun `setTrusted can only be called by an admin`() = runTest {
         val user = registerUser()
-        val article = save(user = user)
+        val article = save(creator = user)
 
         webTestClient.put()
             .uri("/api/content/articles/trusted/${article.key}?trusted=false")
@@ -109,7 +47,7 @@ class ArticleControllerIntegrationTest : BaseIntegrationTest() {
 
     @Test fun `setTrusted can works`() = runTest {
         val user = registerUser(roles = listOf(Role.USER, Role.ADMIN))
-        val article = save(user = user)
+        val article = save(creator = user)
 
         assertFalse(articleService.findByKey(article.key).trusted)
 

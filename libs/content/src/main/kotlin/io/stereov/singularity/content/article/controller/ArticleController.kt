@@ -1,9 +1,10 @@
 package io.stereov.singularity.content.article.controller
 
-import io.stereov.singularity.content.article.dto.ArticleOverviewDto
+import io.stereov.singularity.content.article.dto.ArticleResponse
 import io.stereov.singularity.content.article.dto.ArticleTrustedResponse
 import io.stereov.singularity.content.article.dto.FullArticleDto
 import io.stereov.singularity.content.article.service.ArticleService
+import io.stereov.singularity.content.article.service.UserArticleService
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api/content/articles")
 class ArticleController(
     private val articleService: ArticleService,
+    private val userArticleService: UserArticleService,
 ) {
 
     @GetMapping("{key}")
@@ -36,17 +38,9 @@ class ArticleController(
         )
     }
 
-    @GetMapping("/latest")
-    suspend fun getLatestArticles(@RequestParam limit: Long = 10): ResponseEntity<List<ArticleOverviewDto>> {
-        return ResponseEntity.ok(articleService.getLatestArticles(limit).map { it.toOverviewDto() })
-    }
-
-    @GetMapping("/next")
-    suspend fun getArticles(
-        @RequestParam id: String,
-        @RequestParam limit: Long = 10
-    ): ResponseEntity<List<ArticleOverviewDto>> {
-        return ResponseEntity.ok(articleService.getNextArticles(id, limit).map { it.toOverviewDto() })
+    @GetMapping
+    suspend fun getLatestArticles(@RequestParam limit: Long = 10, @RequestParam after: String? = null): ResponseEntity<ArticleResponse> {
+        return ResponseEntity.ok(userArticleService.getAccessibleArticles(limit, after))
     }
 
     @PutMapping

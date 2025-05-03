@@ -11,11 +11,7 @@ import io.stereov.singularity.core.auth.service.AuthenticationService
 import io.stereov.singularity.core.global.exception.model.DocumentNotFoundException
 import io.stereov.singularity.core.user.model.Role
 import io.stereov.singularity.core.user.service.UserService
-import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.reactive.awaitFirstOrNull
-import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
-import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Service
 
 @Service
@@ -73,20 +69,6 @@ class ArticleService(
         val article = findByKey(key)
         article.trusted = trusted
         return save(article)
-    }
-
-    suspend fun getLatestArticles(limit: Long): List<Article> {
-        val query = Query()
-            .with(Sort.by(Sort.Order.desc("_id")))
-            .limit(limit.toInt())
-
-        return reactiveMongoTemplate.find(query, Article::class.java)
-            .collectList()
-            .awaitFirstOrNull() ?: emptyList()
-    }
-
-    suspend fun getNextArticles(lastLoadedId: String, limit: Long): List<Article> {
-        return repository.findByIdLessThanOrderByIdDesc(lastLoadedId, limit).toList()
     }
 
     suspend fun fullArticledDtoFrom(article: Article): FullArticleDto {

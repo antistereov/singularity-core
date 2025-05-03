@@ -27,8 +27,8 @@ data class Article(
     val image: FileMetaData?,
     val content: ArticleContent,
     val accessType: AccessType,
-    val canEdit: List<String>,
-    val canView: List<String>,
+    val canEdit: MutableSet<String>,
+    val canView: MutableSet<String>,
     var trusted: Boolean,
 ) {
 
@@ -61,8 +61,8 @@ data class Article(
                 image = image,
                 content = content,
                 accessType = accessType,
-                canEdit = listOf(creatorId),
-                canView = listOf(creatorId),
+                canEdit = mutableSetOf(creatorId),
+                canView = mutableSetOf(creatorId),
                 trusted = trusted
             )
         }
