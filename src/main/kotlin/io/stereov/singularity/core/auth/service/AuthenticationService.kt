@@ -2,10 +2,12 @@ package io.stereov.singularity.core.auth.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.core.auth.exception.AuthException
 import io.stereov.singularity.core.auth.exception.model.InvalidPrincipalException
 import io.stereov.singularity.core.auth.exception.model.NotAuthorizedException
 import io.stereov.singularity.core.auth.model.CustomAuthenticationToken
 import io.stereov.singularity.core.auth.model.ErrorAuthenticationToken
+import io.stereov.singularity.core.global.service.jwt.exception.TokenException
 import io.stereov.singularity.core.global.service.jwt.exception.model.InvalidTokenException
 import io.stereov.singularity.core.user.model.Role
 import io.stereov.singularity.core.user.model.UserDocument
@@ -42,6 +44,16 @@ class AuthenticationService {
 
         val auth = getCurrentAuthentication()
         return auth.user.id
+    }
+
+    suspend fun getCurrentUserIdOrNull(): String? {
+        return try {
+            getCurrentUserId()
+        } catch (_: TokenException) {
+            null
+        } catch (_: AuthException) {
+            null
+        }
     }
 
     /**
