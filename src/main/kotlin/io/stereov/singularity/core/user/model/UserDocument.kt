@@ -20,7 +20,7 @@ import java.time.Instant
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
 data class UserDocument(
-    var _id: String? = null,
+    private var _id: String? = null,
     var password: SecureHash,
     val created: Instant = Instant.now(),
     var lastActive: Instant = Instant.now(),
@@ -37,10 +37,11 @@ data class UserDocument(
         name: String,
         email: String,
         roles: MutableSet<Role> = mutableSetOf(Role.USER),
+        groups: MutableSet<String> = mutableSetOf(),
         security: UserSecurityDetails = UserSecurityDetails(),
         devices: MutableList<DeviceInfo> = mutableListOf(),
         avatar: FileMetaData? = null,
-    ): this(_id, password, created, lastActive, app, SensitiveUserData(name, email, roles, security, devices, avatar))
+    ): this(_id, password, created, lastActive, app, SensitiveUserData(name, email, roles, groups, security, devices, avatar))
 
     @get:Transient
     private val logger: KLogger
