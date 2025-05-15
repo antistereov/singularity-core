@@ -40,10 +40,6 @@ class ArticleService(
         return fullArticledDtoFrom(savedArticle, user)
     }
 
-    suspend fun findFullArticleDtoByKey(key: String): FullArticleResponse {
-        return fullArticledDtoFrom(findByKey(key))
-    }
-
     suspend fun setTrustedState(key: String, trusted: Boolean): Article {
         authenticationService.validateAuthorization(Role.ADMIN)
 
