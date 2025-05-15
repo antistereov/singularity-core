@@ -22,6 +22,8 @@ import io.stereov.singularity.core.global.service.mail.MailService
 import io.stereov.singularity.core.global.service.ratelimit.RateLimitService
 import io.stereov.singularity.core.global.service.secrets.service.EncryptionSecretService
 import io.stereov.singularity.core.global.service.twofactorauth.TwoFactorAuthService
+import io.stereov.singularity.core.group.repository.GroupRepository
+import io.stereov.singularity.core.group.service.GroupService
 import io.stereov.singularity.core.properties.*
 import io.stereov.singularity.core.user.controller.UserDeviceController
 import io.stereov.singularity.core.user.controller.UserSessionController
@@ -88,7 +90,7 @@ import org.springframework.web.reactive.function.client.WebClient
     ]
 )
 @EnableReactiveMongoRepositories(
-    basePackageClasses = [UserRepository::class]
+    basePackageClasses = [UserRepository::class, GroupRepository::class]
 )
 @OptIn(ExperimentalLettuceCoroutinesApi::class)
 class AuthenticationConfiguration {
@@ -164,6 +166,14 @@ class AuthenticationConfiguration {
         loginAttemptLimitProperties: LoginAttemptLimitProperties,
     ): RateLimitService {
         return RateLimitService(authenticationService, proxyManager, rateLimitProperties, loginAttemptLimitProperties)
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun groupService(
+        groupRepository: GroupRepository
+    ): GroupService {
+        return GroupService(groupRepository)
     }
 
     @Bean
