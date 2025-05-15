@@ -2,11 +2,10 @@ package io.stereov.singularity.content.article.exception.handler
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.content.article.exception.ArticleException
 import io.stereov.singularity.content.article.exception.model.InvalidArticleRequestException
 import io.stereov.singularity.core.global.exception.BaseExceptionHandler
 import io.stereov.singularity.core.global.model.ErrorResponse
-import io.stereov.singularity.content.article.exception.ArticleException
-import io.stereov.singularity.content.article.exception.model.ArticleKeyExistsException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
@@ -27,7 +26,6 @@ class ArticleExceptionHandler : BaseExceptionHandler<ArticleException> {
         logger.warn { "${ex.javaClass.simpleName} - ${ex.message}" }
 
         val status = when (ex) {
-            is ArticleKeyExistsException -> HttpStatus.CONFLICT
             is InvalidArticleRequestException -> HttpStatus.FORBIDDEN
             else -> HttpStatus.INTERNAL_SERVER_ERROR
         }

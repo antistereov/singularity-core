@@ -1,6 +1,10 @@
 package io.stereov.singularity.content.article.model
 
 import io.stereov.singularity.content.article.dto.ArticleOverviewDto
+import io.stereov.singularity.content.article.dto.FullArticleResponse
+import io.stereov.singularity.content.common.model.ContentAccessDetails
+import io.stereov.singularity.content.common.model.ContentAccessPermissions
+import io.stereov.singularity.content.common.model.ContentDocument
 import io.stereov.singularity.core.auth.model.AccessType
 import io.stereov.singularity.core.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.core.global.service.file.model.FileMetaData
@@ -11,45 +15,42 @@ import java.time.Instant
 
 @Document(collection = "articles")
 data class Article(
-    @Id
-    val _id: String? = null,
-    @Indexed(unique = true)
-    val key: String,
-    val creatorId: String,
-    val createdAt: Instant,
-    val publishedAt: Instant?,
-    val updatedAt: Instant,
+    @Id private val _id: String? = null,
+    @Indexed(unique = true) override val key: String,
+    override val createdAt: Instant = Instant.now(),
+    override var updatedAt: Instant = Instant.now(),
+    override val access: ContentAccessDetails,
+    val publishedAt: Instant? = null,
     val path: String,
-    val state: ArticleState = ArticleState.DRAFT,
+    var state: ArticleState = ArticleState.DRAFT,
     val title: String,
-    val summary: String,
-    val colors: ArticleColors,
-    val image: FileMetaData?,
-    val content: ArticleContent,
-    val accessType: AccessType,
-    val canEdit: MutableSet<String>,
-    val canView: MutableSet<String>,
+    val summary: String = "",
+    val colors: ArticleColors = ArticleColors(),
+    val image: FileMetaData? = null,
+    val content: String = "",
     var trusted: Boolean,
-) {
+) : ContentDocument<Article>() {
 
-    val id: String
+    override val id: String
         get() = _id ?: throw InvalidDocumentException("No id found")
 
     fun toOverviewDto() = ArticleOverviewDto(id, key, createdAt, publishedAt, updatedAt, path, state,
-        title, colors, summary, image)
+        title, colors, summary, image, access)
 
     companion object {
-        val basePath: String
+        private val basePath: String
             get() = "/content/articles"
 
-        fun create(key: String, creatorId: String, title: String, summary: String,
-                   colors: ArticleColors, image: FileMetaData, content: ArticleContent,
-                   accessType: AccessType, state: ArticleState = ArticleState.DRAFT, trusted: Boolean
+        fun create(key: String, ownerId: String, title: String = "", summary: String = "",
+                   colors: ArticleColors = ArticleColors(), image: FileMetaData? = null, content: String = "",
+                   accessType: AccessType = AccessType.PRIVATE, state: ArticleState = ArticleState.DRAFT,
+                   trusted: Boolean = false,
+                   userPermissions: ContentAccessPermissions = ContentAccessPermissions(),
+                   groupPermissions: ContentAccessPermissions = ContentAccessPermissions()
         ): Article {
             return Article(
                 _id = null,
                 key = key,
-                creatorId = creatorId,
                 createdAt = Instant.now(),
                 publishedAt = null,
                 updatedAt = Instant.now(),
@@ -60,10 +61,27 @@ data class Article(
                 colors = colors,
                 image = image,
                 content = content,
-                accessType = accessType,
-                canEdit = mutableSetOf(creatorId),
-                canView = mutableSetOf(creatorId),
-                trusted = trusted
+                trusted = trusted,
+                access = ContentAccessDetails(ownerId, accessType, users = userPermissions, groups = groupPermissions)
+            )
+        }
+
+        fun create(dto: FullArticleResponse): Article {
+            return Article(
+                _id = dto.id,
+                key = dto.key,
+                createdAt = dto.createdAt,
+                publishedAt = dto.publishedAt,
+                updatedAt = dto.updatedAt,
+                path = dto.path,
+                state = dto.state,
+                title = dto.title,
+                summary = dto.summary,
+                colors = dto.colors,
+                image = dto.image,
+                content = dto.content,
+                trusted = dto.trusted,
+                access = dto.access
             )
         }
     }

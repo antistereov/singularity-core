@@ -1,19 +1,18 @@
 package io.stereov.singularity.content.article.dto
 
-import io.stereov.singularity.core.auth.model.AccessType
+import io.stereov.singularity.content.article.model.Article
+import io.stereov.singularity.content.article.model.ArticleColors
+import io.stereov.singularity.content.article.model.ArticleState
+import io.stereov.singularity.content.common.model.ContentAccessDetails
 import io.stereov.singularity.core.global.serializer.InstantSerializer
 import io.stereov.singularity.core.global.service.file.model.FileMetaData
 import io.stereov.singularity.core.user.dto.UserOverviewDto
 import io.stereov.singularity.core.user.model.UserDocument
-import io.stereov.singularity.content.article.model.Article
-import io.stereov.singularity.content.article.model.ArticleColors
-import io.stereov.singularity.content.article.model.ArticleContent
-import io.stereov.singularity.content.article.model.ArticleState
 import kotlinx.serialization.Serializable
 import java.time.Instant
 
 @Serializable
-data class FullArticleDto(
+data class FullArticleResponse(
     val id: String? = null,
     val key: String,
     @Serializable(with = InstantSerializer::class)
@@ -22,23 +21,22 @@ data class FullArticleDto(
     val publishedAt: Instant?,
     @Serializable(with = InstantSerializer::class)
     val updatedAt: Instant,
-    val creator: UserOverviewDto?,
+    val owner: UserOverviewDto,
     val path: String,
-    val state: ArticleState = ArticleState.DRAFT,
+    var state: ArticleState = ArticleState.DRAFT,
     val title: String,
     val colors: ArticleColors,
     val summary: String,
     val image: FileMetaData?,
-    val content: ArticleContent,
-    val accessType: AccessType,
-    val canView: MutableSet<String>,
-    val canEdit: MutableSet<String>
+    val content: String,
+    val trusted: Boolean,
+    val access: ContentAccessDetails
 ) {
 
-    constructor(article: Article, creator: UserDocument?): this(
-        article.id, article.key, article.createdAt, article.publishedAt, article.updatedAt, creator?.toOverviewDto(),
+    constructor(article: Article, creator: UserDocument): this(
+        article.id, article.key, article.createdAt, article.publishedAt, article.updatedAt, creator.toOverviewDto(),
         article.path, article.state, article.title, article.colors, article.summary, article.image, article.content,
-        article.accessType, article.canView, article.canEdit
+        article.trusted, article.access
     )
 
     fun toOverview() = ArticleOverviewDto(
@@ -52,6 +50,7 @@ data class FullArticleDto(
         title = title,
         colors = colors,
         summary = summary,
-        image = image
+        image = image,
+        access = access
     )
 }

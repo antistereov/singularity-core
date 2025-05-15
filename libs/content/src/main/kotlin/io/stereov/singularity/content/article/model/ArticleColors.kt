@@ -4,6 +4,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ArticleColors(
-    val text: String,
-    val background: String,
+    val text: String = "white",
+    val background: String = "#00008B",
 )

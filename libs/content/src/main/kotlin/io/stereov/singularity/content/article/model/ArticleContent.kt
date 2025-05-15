@@ -5,6 +5,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ArticleContent(
-    val content: String,
-    val files: List<FileMetaData>,
+    val content: String = "",
+    val files: List<FileMetaData> = emptyList(),
 )
