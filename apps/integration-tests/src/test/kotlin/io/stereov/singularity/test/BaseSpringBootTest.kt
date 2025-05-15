@@ -62,7 +62,8 @@ class BaseSpringBootTest {
         deviceId: String = "device",
         twoFactorEnabled: Boolean = false,
         name: String = "Name",
-        roles: List<Role> = listOf(Role.USER)
+        roles: List<Role> = listOf(Role.USER),
+        groups: List<String> = listOf(),
     ): TestRegisterResponse {
         val device = DeviceInfoRequest(id = deviceId)
 
@@ -157,16 +158,15 @@ class BaseSpringBootTest {
         }
 
 
-        var user = userService.findByEmailOrNull(email)
-        requireNotNull(user) { "User associated to $email not saved" }
+        var user = userService.findByEmail(email)
 
         if (roles != listOf(Role.USER)) {
             roles.forEach { role ->
                 user.addRole(role)
             }
-
-            user = userService.save(user)
         }
+        user.sensitive.groups.addAll(groups)
+        user = userService.save(user)
 
         val mailVerificationToken = user.sensitive.security.mail.verificationSecret
         val passwordResetToken = user.sensitive.security.mail.passwordResetSecret
