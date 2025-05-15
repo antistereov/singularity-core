@@ -2,8 +2,9 @@ package io.stereov.singularity.content.config
 
 import io.stereov.singularity.content.article.controller.ArticleController
 import io.stereov.singularity.content.article.repository.ArticleRepository
+import io.stereov.singularity.content.article.service.ArticleManagementService
 import io.stereov.singularity.content.article.service.ArticleService
-import io.stereov.singularity.content.article.service.UserArticleService
+import io.stereov.singularity.content.common.util.AccessCriteria
 import io.stereov.singularity.core.auth.service.AuthenticationService
 import io.stereov.singularity.core.config.AuthenticationConfiguration
 import io.stereov.singularity.core.user.service.UserService
@@ -29,23 +30,28 @@ import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRep
 @EnableReactiveMongoRepositories(basePackageClasses = [ArticleRepository::class])
 class ContentAutoConfiguration {
 
-
     @Bean
     @ConditionalOnMissingBean
-    fun articleController(articleService: ArticleService, userArticleService: UserArticleService): ArticleController {
-        return ArticleController(articleService, userArticleService)
+    fun accessCriteria(authenticationService: AuthenticationService): AccessCriteria {
+        return AccessCriteria(authenticationService)
     }
 
     @Bean
     @ConditionalOnMissingBean
-    fun articleService(articleRepository: ArticleRepository, reactiveMongoTemplate: ReactiveMongoTemplate, userService: UserService, authenticationService: AuthenticationService): ArticleService {
-        return ArticleService(articleRepository, reactiveMongoTemplate, userService, authenticationService)
+    fun articleController(articleService: ArticleService, articleManagementService: ArticleManagementService): ArticleController {
+        return ArticleController(articleService, articleManagementService)
     }
 
     @Bean
     @ConditionalOnMissingBean
-    fun userArticleService(authenticationService: AuthenticationService, reactiveMongoTemplate: ReactiveMongoTemplate): UserArticleService {
-        return UserArticleService(reactiveMongoTemplate, authenticationService)
+    fun articleService(articleRepository: ArticleRepository, userService: UserService, authenticationService: AuthenticationService): ArticleService {
+        return ArticleService(articleRepository, userService, authenticationService)
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun userArticleService(reactiveMongoTemplate: ReactiveMongoTemplate, accessCriteria: AccessCriteria): ArticleManagementService {
+        return ArticleManagementService(reactiveMongoTemplate, accessCriteria)
     }
 
 
