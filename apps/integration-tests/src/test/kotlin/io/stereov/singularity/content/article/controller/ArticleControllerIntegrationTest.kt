@@ -10,34 +10,12 @@ import org.junit.jupiter.api.Test
 
 class ArticleControllerIntegrationTest : BaseContentTest() {
 
-    @Test fun `save works`() = runTest {
-        val user = registerUser()
-        val article = fullArticle.copy(creator = user.info.toOverviewDto())
-
-        webTestClient.put()
-            .uri("/api/content/articles")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
-            .bodyValue(article)
-            .exchange()
-            .expectStatus().isOk
-    }
-    @Test fun `save requires authentication`() = runTest {
-        val user = registerUser()
-        val article = fullArticle.copy(creator = user.info.toOverviewDto())
-
-        webTestClient.put()
-            .uri("/api/content/articles")
-            .bodyValue(article)
-            .exchange()
-            .expectStatus().isUnauthorized
-    }
-
     @Test fun `setTrusted can only be called by an admin`() = runTest {
         val user = registerUser()
         val article = save(creator = user)
 
         webTestClient.put()
-            .uri("/api/content/articles/trusted/${article.key}?trusted=false")
+            .uri("/api/content/articles/${article.key}/trusted?trusted=false")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectStatus()
@@ -52,7 +30,7 @@ class ArticleControllerIntegrationTest : BaseContentTest() {
         assertFalse(articleService.findByKey(article.key).trusted)
 
         webTestClient.put()
-            .uri("/api/content/articles/trusted/${article.key}?trusted=true")
+            .uri("/api/content/articles/${article.key}/trusted?trusted=true")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectStatus()

@@ -1,0 +1,257 @@
+package io.stereov.singularity.content.article.controller
+
+import io.stereov.singularity.content.article.dto.ArticleResponse
+import io.stereov.singularity.content.article.model.ArticleState
+import io.stereov.singularity.content.common.model.ContentAccessRole
+import io.stereov.singularity.content.common.model.ContentAccessSubject
+import io.stereov.singularity.core.auth.model.AccessType
+import io.stereov.singularity.core.config.Constants
+import io.stereov.singularity.test.BaseContentTest
+import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
+
+class ArticleManagementControllerIntegrationTest : BaseContentTest() {
+
+    private val articleBasePath = "$contentBasePath/articles"
+
+    @Test fun `getAccessible works with no authentication`() = runTest {
+        val article = save()
+        article.access.visibility = AccessType.PUBLIC
+        article.state = ArticleState.PUBLISHED
+        articleService.save(article)
+
+        val res = webTestClient.get()
+            .uri(articleBasePath)
+            .exchange()
+            .expectBody(ArticleResponse::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        assertEquals(0, res.remainingCount)
+        assertEquals(1, res.articles.size)
+        assertEquals(article.id, res.articles.first().id)
+    }
+    @Test fun `getAccessible works with draft`() = runTest {
+        val article = save()
+        article.access.visibility = AccessType.PUBLIC
+        article.state = ArticleState.DRAFT
+        articleService.save(article)
+
+        val res = webTestClient.get()
+            .uri(articleBasePath)
+            .exchange()
+            .expectBody(ArticleResponse::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        assertEquals(0, res.remainingCount)
+        assertEquals(0, res.articles.size)
+    }
+    @Test fun `getAccessible works with archived`() = runTest {
+        val article = save()
+        article.access.visibility = AccessType.PUBLIC
+        article.state = ArticleState.ARCHIVED
+        articleService.save(article)
+
+        val res = webTestClient.get()
+            .uri(articleBasePath)
+            .exchange()
+            .expectBody(ArticleResponse::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        assertEquals(0, res.remainingCount)
+        assertEquals(0, res.articles.size)
+    }
+    @Test fun `getAccessible works with shared`() = runTest {
+        val article = save()
+        article.access.visibility = AccessType.SHARED
+        article.state = ArticleState.PUBLISHED
+        articleService.save(article)
+
+        val res = webTestClient.get()
+            .uri(articleBasePath)
+            .exchange()
+            .expectBody(ArticleResponse::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        assertEquals(0, res.remainingCount)
+        assertEquals(0, res.articles.size)
+    }
+    @Test fun `getAccessible works with private`() = runTest {
+        val article = save()
+        article.access.visibility = AccessType.PRIVATE
+        article.state = ArticleState.PUBLISHED
+        articleService.save(article)
+
+        val res = webTestClient.get()
+            .uri(articleBasePath)
+            .exchange()
+            .expectBody(ArticleResponse::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        assertEquals(0, res.remainingCount)
+        assertEquals(0, res.articles.size)
+    }
+    @Test fun `getAccessible works with creator`() = runTest {
+        val user = registerUser()
+        val article = save(creator = user)
+        article.access.visibility = AccessType.PRIVATE
+        article.state = ArticleState.PUBLISHED
+
+        articleService.save(article)
+
+        val res = webTestClient.get()
+            .uri(articleBasePath)
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .exchange()
+            .expectBody(ArticleResponse::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        assertEquals(0, res.remainingCount)
+        assertEquals(1, res.articles.size)
+        assertEquals(article.id, res.articles.first().id)
+    }
+    @Test fun `getAccessible works with user viewer`() = runTest {
+        val user = registerUser(email = "another@email.com")
+        val article = save()
+        article.share(ContentAccessSubject.USER, user.info.id, ContentAccessRole.VIEWER)
+        article.state = ArticleState.PUBLISHED
+        articleService.save(article)
+
+        val res = webTestClient.get()
+            .uri(articleBasePath)
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .exchange()
+            .expectBody(ArticleResponse::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        assertEquals(0, res.remainingCount)
+        assertEquals(1, res.articles.size)
+        assertEquals(article.id, res.articles.first().id)
+    }
+    @Test fun `getAccessible works with user editor`() = runTest {
+        val user = registerUser(email = "another@email.com")
+        val article = save()
+        article.share(ContentAccessSubject.USER, user.info.id, ContentAccessRole.EDITOR)
+        article.state = ArticleState.PUBLISHED
+        articleService.save(article)
+
+        val res = webTestClient.get()
+            .uri(articleBasePath)
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .exchange()
+            .expectBody(ArticleResponse::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        assertEquals(0, res.remainingCount)
+        assertEquals(1, res.articles.size)
+        assertEquals(article.id, res.articles.first().id)
+    }
+    @Test fun `getAccessible works with user admin`() = runTest {
+        val user = registerUser(email = "another@email.com")
+        val article = save()
+        article.share(ContentAccessSubject.USER, user.info.id, ContentAccessRole.ADMIN)
+        article.state = ArticleState.PUBLISHED
+        articleService.save(article)
+
+        val res = webTestClient.get()
+            .uri(articleBasePath)
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .exchange()
+            .expectBody(ArticleResponse::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        assertEquals(0, res.remainingCount)
+        assertEquals(1, res.articles.size)
+        assertEquals(article.id, res.articles.first().id)
+    }
+    @Test fun `getAccessible works with group viewer`() = runTest {
+        val user = registerUser(email = "another@email.com", groups = listOf("group"))
+        val article = save()
+        article.share(ContentAccessSubject.GROUP, user.info.sensitive.groups.first(), ContentAccessRole.VIEWER)
+        article.state = ArticleState.PUBLISHED
+        articleService.save(article)
+
+        val res = webTestClient.get()
+            .uri(articleBasePath)
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .exchange()
+            .expectBody(ArticleResponse::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        assertEquals(0, res.remainingCount)
+        assertEquals(1, res.articles.size)
+        assertEquals(article.id, res.articles.first().id)
+    }
+    @Test fun `getAccessible works with group editor`() = runTest {
+        val user = registerUser(email = "another@email.com", groups = listOf("group"))
+        val article = save()
+        article.share(ContentAccessSubject.GROUP, user.info.sensitive.groups.first(), ContentAccessRole.EDITOR)
+        article.state = ArticleState.PUBLISHED
+        articleService.save(article)
+
+        val res = webTestClient.get()
+            .uri(articleBasePath)
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .exchange()
+            .expectBody(ArticleResponse::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        assertEquals(0, res.remainingCount)
+        assertEquals(1, res.articles.size)
+        assertEquals(article.id, res.articles.first().id)
+    }
+    @Test fun `getAccessible works with group admin`() = runTest {
+        val user = registerUser(email = "another@email.com", groups = listOf("group"))
+        val article = save()
+        article.share(ContentAccessSubject.GROUP, user.info.sensitive.groups.first(), ContentAccessRole.ADMIN)
+        article.state = ArticleState.PUBLISHED
+        articleService.save(article)
+
+        val res = webTestClient.get()
+            .uri(articleBasePath)
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .exchange()
+            .expectBody(ArticleResponse::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        assertEquals(0, res.remainingCount)
+        assertEquals(1, res.articles.size)
+        assertEquals(article.id, res.articles.first().id)
+    }
+}
