@@ -1,0 +1,84 @@
+package io.stereov.singularity.content.common.util
+
+import io.stereov.singularity.content.common.model.ContentAccessDetails
+import io.stereov.singularity.content.common.model.ContentAccessPermissions
+import io.stereov.singularity.content.common.model.ContentDocument
+import io.stereov.singularity.core.auth.model.AccessType
+import io.stereov.singularity.core.auth.service.AuthenticationService
+import io.stereov.singularity.core.user.model.UserDocument
+import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.stereotype.Component
+
+@Component
+class AccessCriteria(
+    private val authenticationService: AuthenticationService
+) {
+
+    private final val accessField = ContentDocument<*>::access.name
+    private final val visibilityField = "$accessField.${ContentAccessDetails::visibility.name}"
+
+    private final val ownerIdField = "$accessField.${ContentAccessDetails::ownerId.name}"
+
+    private final val userPermissionsField = "$accessField.${ContentAccessDetails::users.name}"
+    private final val canViewUsersField: String = "$userPermissionsField.${ContentAccessPermissions::viewer.name}"
+    private final val canEditUsersField = "$userPermissionsField.${ContentAccessPermissions::editor.name}"
+    private final val isAdminUsersField = "$userPermissionsField.${ContentAccessPermissions::admin.name}"
+
+    private final val groupPermissionsField = "$accessField.${ContentAccessDetails::groups.name}"
+    private final val canViewGroupsField = "$groupPermissionsField.${ContentAccessPermissions::viewer.name}"
+    private final val canEditGroupsField = "$groupPermissionsField.${ContentAccessPermissions::editor.name}"
+    private final val isAdminGroupsField = "$groupPermissionsField.${ContentAccessPermissions::admin.name}"
+
+    private final val isPublic = Criteria.where(visibilityField).`is`(AccessType.PUBLIC.toString())
+    private final val isShared = Criteria.where(visibilityField).`is`(AccessType.SHARED.toString())
+
+    private fun isOwner(userId: String) = Criteria.where(ownerIdField).`is`(userId)
+
+    private fun canViewUser(userId: String) = Criteria().andOperator(Criteria.where(canViewUsersField).`in`(userId), isShared)
+    private fun canEditUser(userId: String) = Criteria().andOperator(Criteria.where(canEditUsersField).`in`(userId), isShared)
+    private fun isAdminUser(userId: String) = Criteria.where(isAdminUsersField).`in`(userId)
+
+    private fun canViewGroup(user: UserDocument) = Criteria.where(canViewGroupsField).`in`(user.sensitive.groups)
+    private fun canEditGroup(user: UserDocument) = Criteria.where(canEditGroupsField).`in`(user.sensitive.groups)
+    private fun isAdminGroup(user: UserDocument) = Criteria.where(isAdminGroupsField).`in`(user.sensitive.groups)
+
+    suspend fun getViewCriteria(): Criteria {
+        val user = authenticationService.getCurrentUserOrNull()
+
+        return if (user != null) {
+            Criteria().orOperator(
+                isPublic,
+                canViewUser(user.id),
+                canEditUser(user.id),
+                isAdminUser(user.id),
+                canViewGroup(user),
+                canEditGroup(user),
+                isAdminGroup(user),
+                isOwner(user.id)
+            )
+        } else isPublic
+    }
+
+    suspend fun getEditCriteria(): Criteria {
+        val user = authenticationService.getCurrentUser()
+
+        return Criteria().orOperator(
+            canEditUser(user.id),
+            isAdminUser(user.id),
+            canEditGroup(user),
+            isAdminGroup(user),
+            isOwner(user.id)
+        )
+    }
+
+    suspend fun getDeleteCriteria(): Criteria {
+        val user = authenticationService.getCurrentUser()
+
+        return Criteria().orOperator(
+            isAdminUser(user.id),
+            isAdminGroup(user),
+            isOwner(user.id)
+        )
+    }
+
+}
