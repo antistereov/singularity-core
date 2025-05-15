@@ -46,9 +46,9 @@ class AuthenticationService {
         return auth.user.id
     }
 
-    suspend fun getCurrentUserIdOrNull(): String? {
+    suspend fun getCurrentUserOrNull(): UserDocument? {
         return try {
-            getCurrentUserId()
+            getCurrentUser()
         } catch (_: TokenException) {
             null
         } catch (_: AuthException) {
