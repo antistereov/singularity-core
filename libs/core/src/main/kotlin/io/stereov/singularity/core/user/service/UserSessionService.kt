@@ -72,10 +72,6 @@ class UserSessionService(
             throw InvalidCredentialsException()
         }
 
-        if (user._id == null) {
-            throw AuthException("Login failed: UserDocument contains no id")
-        }
-
         return userService.save(user)
     }
 
@@ -103,10 +99,6 @@ class UserSessionService(
         )
 
         val savedUserDocument = userService.save(userDocument)
-
-        if (savedUserDocument._id == null) {
-            throw AuthException("Login failed: UserDocument contains no id")
-        }
 
         if (sendEmail) mailService.sendVerificationEmail(savedUserDocument)
 
