@@ -1,9 +1,9 @@
 package io.stereov.singularity.core.user.controller
 
 import io.stereov.singularity.core.config.Constants
-import io.stereov.singularity.test.BaseIntegrationTest
 import io.stereov.singularity.core.user.dto.response.DeviceInfoResponse
 import io.stereov.singularity.core.user.model.DeviceInfo
+import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -52,7 +52,7 @@ class UserDeviceControllerIntegrationTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isOk
 
-        val updatedUser = userService.findById(user.info._id!!)
+        val updatedUser = userService.findById(user.info.id)
         val devices = updatedUser.sensitive.devices
 
         assertEquals(0, devices.size)
@@ -73,7 +73,7 @@ class UserDeviceControllerIntegrationTest : BaseIntegrationTest() {
             .expectStatus()
             .isOk
 
-        val updatedUser = userService.findById(user.info._id!!)
+        val updatedUser = userService.findById(user.info.id)
         val devices = updatedUser.sensitive.devices
 
         assertEquals(0, devices.size)

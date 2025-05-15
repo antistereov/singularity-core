@@ -71,7 +71,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
 
         assertTrue(accessToken.isNotBlank())
         assertTrue(refreshToken.isNotBlank())
-        assertEquals(user.info._id, account.id)
+        assertEquals(user.info.id, account.id)
 
         val userDto = webTestClient.get()
             .uri("/api/user/me")
@@ -84,7 +84,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
 
         requireNotNull(userDto)
 
-        assertEquals(user.info._id, userDto.id)
+        assertEquals(user.info.id, userDto.id)
         assertEquals(user.info.sensitive.email, userDto.email)
 
         assertEquals(deviceId, user.info.sensitive.devices.firstOrNull()?.id)
@@ -683,7 +683,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
 
         requireNotNull(response) { "Response body is empty" }
 
-        assertEquals(user.info._id, response.id)
+        assertEquals(user.info.id, response.id)
     }
 
     @Test fun `refresh requires body`() = runTest {
@@ -711,7 +711,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
     }
     @Test fun `refresh requires associated token to account`() = runTest {
         val user = registerUser()
-        val refreshToken = userTokenService.createRefreshToken(user.info._id!!, user.info.sensitive.devices.first().id, RandomService.generateCode(20))
+        val refreshToken = userTokenService.createRefreshToken(user.info.id, user.info.sensitive.devices.first().id, RandomService.generateCode(20))
         webTestClient.post()
             .uri("/api/user/refresh")
             .cookie(Constants.REFRESH_TOKEN_COOKIE, refreshToken)
@@ -768,7 +768,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         assertTrue(accessToken.isNotBlank())
         assertTrue(refreshToken.isNotBlank())
 
-        assertEquals(user.info._id, account.id)
+        assertEquals(user.info.id, account.id)
 
         webTestClient.post()
             .uri("/api/user/refresh")

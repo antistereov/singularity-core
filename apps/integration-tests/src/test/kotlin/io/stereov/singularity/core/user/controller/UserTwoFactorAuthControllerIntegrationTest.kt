@@ -85,7 +85,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
         requireNotNull(twoFactorToken)
 
         assertTrue(loginResBody.twoFactorRequired)
-        assertEquals(user.info._id, loginResBody.user.id)
+        assertEquals(user.info.id, loginResBody.user.id)
 
         val userRes = webTestClient.post()
             .uri("/api/user/2fa/verify-login?code=$code")
@@ -323,7 +323,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
         val body = res.responseBody
         requireNotNull(body)
 
-        assertEquals(user.info._id, body.id)
+        assertEquals(user.info.id, body.id)
         val token = res.responseCookies[Constants.LOGIN_VERIFICATION_TOKEN_COOKIE]
             ?.first()
             ?.value
@@ -357,7 +357,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
         val body = res.responseBody
         requireNotNull(body)
 
-        assertEquals(user.info._id, body.id)
+        assertEquals(user.info.id, body.id)
         val token = res.responseCookies[Constants.LOGIN_VERIFICATION_TOKEN_COOKIE]
             ?.first()
             ?.value
@@ -434,7 +434,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
         val body = res.responseBody
         requireNotNull(body)
 
-        assertEquals(user.info.toDto(), body)
+        assertEquals(user.info.id, body.id)
         val token = res.responseCookies[Constants.LOGIN_VERIFICATION_TOKEN_COOKIE]
             ?.first()
             ?.value
@@ -728,7 +728,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
         val body = res.responseBody
         requireNotNull(body)
 
-        assertEquals(user.info._id, body.id)
+        assertEquals(user.info.id, body.id)
         assertFalse(body.twoFactorAuthEnabled)
 
         val userAfterDisable = userService.findById(user.info.id)

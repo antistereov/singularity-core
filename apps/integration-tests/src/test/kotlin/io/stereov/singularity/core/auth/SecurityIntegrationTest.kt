@@ -48,7 +48,7 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
     }
     @Test fun `unexpired token required`() = runTest {
         val user = registerUser()
-        val token = userTokenService.createAccessToken(user.info._id!!, "device", Instant.ofEpochSecond(0))
+        val token = userTokenService.createAccessToken(user.info.id, "device", Instant.ofEpochSecond(0))
 
         webTestClient.get()
             .uri("/api/user/me")
