@@ -1,5 +1,6 @@
 package io.stereov.singularity.content.article.controller
 
+import io.stereov.singularity.content.article.dto.ArticleOverviewResponse
 import io.stereov.singularity.content.article.dto.ArticleResponse
 import io.stereov.singularity.content.article.model.ArticleState
 import io.stereov.singularity.content.common.model.ContentAccessRole
@@ -15,14 +16,202 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
 
     private val articleBasePath = "$contentBasePath/articles"
 
-    @Test fun `getAccessible works with no authentication`() = runTest {
+    data class ArticleOverviewPage(
+        val totalElements: Int,
+        val content: List<ArticleOverviewResponse>
+    )
+    
+    @Test fun `getArticles works with no authentication`() = runTest {
+        val article = save()
+        article.access.visibility = AccessType.PUBLIC
+        articleService.save(article)
+
+        val res = webTestClient.get()
+            .uri(articleBasePath)
+            .exchange()
+            .expectBody(ArticleOverviewPage::class.java)
+            .returnResult()
+            .responseBody
+        requireNotNull(res)
+
+        assertEquals(1, res.totalElements)
+        assertEquals(article.id, res.content.first().id)
+    }
+    @Test fun `getArticles works with shared`() = runTest {
+        val article = save()
+        article.access.visibility = AccessType.SHARED
+        articleService.save(article)
+
+        val res = webTestClient.get()
+            .uri(articleBasePath)
+            .exchange()
+            .expectBody(ArticleOverviewPage::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        assertEquals(0, res.totalElements)
+    }
+    @Test fun `getArticles works with private`() = runTest {
+        val article = save()
+        article.access.visibility = AccessType.PRIVATE
+        articleService.save(article)
+
+        val res = webTestClient.get()
+            .uri(articleBasePath)
+            .exchange()
+            .expectBody(ArticleOverviewPage::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        assertEquals(0, res.totalElements)
+    }
+    @Test fun `getArticles works with creator`() = runTest {
+        val user = registerUser()
+        val article = save(creator = user)
+        article.access.visibility = AccessType.PRIVATE
+
+        articleService.save(article)
+
+        val res = webTestClient.get()
+            .uri(articleBasePath)
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .exchange()
+            .expectBody(ArticleOverviewPage::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        assertEquals(1, res.totalElements)
+        assertEquals(article.id, res.content.first().id)
+    }
+    @Test fun `getArticles works with user viewer`() = runTest {
+        val user = registerUser(email = "another@email.com")
+        val article = save()
+        article.share(ContentAccessSubject.USER, user.info.id, ContentAccessRole.VIEWER)
+        articleService.save(article)
+
+        val res = webTestClient.get()
+            .uri(articleBasePath)
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .exchange()
+            .expectBody(ArticleOverviewPage::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        assertEquals(1, res.totalElements)
+        assertEquals(article.id, res.content.first().id)
+    }
+    @Test fun `getArticles works with user editor`() = runTest {
+        val user = registerUser(email = "another@email.com")
+        val article = save()
+        article.share(ContentAccessSubject.USER, user.info.id, ContentAccessRole.EDITOR)
+        articleService.save(article)
+
+        val res = webTestClient.get()
+            .uri(articleBasePath)
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .exchange()
+            .expectBody(ArticleOverviewPage::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        assertEquals(1, res.totalElements)
+        assertEquals(article.id, res.content.first().id)
+    }
+    @Test fun `getArticles works with user admin`() = runTest {
+        val user = registerUser(email = "another@email.com")
+        val article = save()
+        article.share(ContentAccessSubject.USER, user.info.id, ContentAccessRole.ADMIN)
+        articleService.save(article)
+
+        val res = webTestClient.get()
+            .uri(articleBasePath)
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .exchange()
+            .expectBody(ArticleOverviewPage::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        assertEquals(1, res.totalElements)
+        assertEquals(article.id, res.content.first().id)
+    }
+    @Test fun `getArticles works with group viewer`() = runTest {
+        val user = registerUser(email = "another@email.com", groups = listOf("group"))
+        val article = save()
+        article.share(ContentAccessSubject.GROUP, user.info.sensitive.groups.first(), ContentAccessRole.VIEWER)
+        articleService.save(article)
+
+        val res = webTestClient.get()
+            .uri(articleBasePath)
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .exchange()
+            .expectBody(ArticleOverviewPage::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        assertEquals(1, res.totalElements)
+        assertEquals(article.id, res.content.first().id)
+    }
+    @Test fun `getArticles works with group editor`() = runTest {
+        val user = registerUser(email = "another@email.com", groups = listOf("group"))
+        val article = save()
+        article.share(ContentAccessSubject.GROUP, user.info.sensitive.groups.first(), ContentAccessRole.EDITOR)
+        articleService.save(article)
+
+        val res = webTestClient.get()
+            .uri(articleBasePath)
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .exchange()
+            .expectBody(ArticleOverviewPage::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        assertEquals(1, res.totalElements)
+        assertEquals(article.id, res.content.first().id)
+    }
+    @Test fun `getArticles works with group admin`() = runTest {
+        val user = registerUser(email = "another@email.com", groups = listOf("group"))
+        val article = save()
+        article.share(ContentAccessSubject.GROUP, user.info.sensitive.groups.first(), ContentAccessRole.ADMIN)
+        articleService.save(article)
+
+        val res = webTestClient.get()
+            .uri(articleBasePath)
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .exchange()
+            .expectBody(ArticleOverviewPage::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        assertEquals(1, res.totalElements)
+        assertEquals(article.id, res.content.first().id)
+    }
+
+    @Test fun `getLatestArticles works with no authentication`() = runTest {
         val article = save()
         article.access.visibility = AccessType.PUBLIC
         article.state = ArticleState.PUBLISHED
         articleService.save(article)
 
         val res = webTestClient.get()
-            .uri(articleBasePath)
+            .uri("$articleBasePath/scroll")
             .exchange()
             .expectBody(ArticleResponse::class.java)
             .returnResult()
@@ -34,14 +223,14 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         assertEquals(1, res.articles.size)
         assertEquals(article.id, res.articles.first().id)
     }
-    @Test fun `getAccessible works with draft`() = runTest {
+    @Test fun `getLatestArticles works with draft`() = runTest {
         val article = save()
         article.access.visibility = AccessType.PUBLIC
         article.state = ArticleState.DRAFT
         articleService.save(article)
 
         val res = webTestClient.get()
-            .uri(articleBasePath)
+            .uri("$articleBasePath/scroll")
             .exchange()
             .expectBody(ArticleResponse::class.java)
             .returnResult()
@@ -52,14 +241,14 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         assertEquals(0, res.remainingCount)
         assertEquals(0, res.articles.size)
     }
-    @Test fun `getAccessible works with archived`() = runTest {
+    @Test fun `getLatestArticles works with archived`() = runTest {
         val article = save()
         article.access.visibility = AccessType.PUBLIC
         article.state = ArticleState.ARCHIVED
         articleService.save(article)
 
         val res = webTestClient.get()
-            .uri(articleBasePath)
+            .uri("$articleBasePath/scroll")
             .exchange()
             .expectBody(ArticleResponse::class.java)
             .returnResult()
@@ -70,14 +259,14 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         assertEquals(0, res.remainingCount)
         assertEquals(0, res.articles.size)
     }
-    @Test fun `getAccessible works with shared`() = runTest {
+    @Test fun `getLatestArticles works with shared`() = runTest {
         val article = save()
         article.access.visibility = AccessType.SHARED
         article.state = ArticleState.PUBLISHED
         articleService.save(article)
 
         val res = webTestClient.get()
-            .uri(articleBasePath)
+            .uri("$articleBasePath/scroll")
             .exchange()
             .expectBody(ArticleResponse::class.java)
             .returnResult()
@@ -88,14 +277,14 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         assertEquals(0, res.remainingCount)
         assertEquals(0, res.articles.size)
     }
-    @Test fun `getAccessible works with private`() = runTest {
+    @Test fun `getLatestArticles works with private`() = runTest {
         val article = save()
         article.access.visibility = AccessType.PRIVATE
         article.state = ArticleState.PUBLISHED
         articleService.save(article)
 
         val res = webTestClient.get()
-            .uri(articleBasePath)
+            .uri("$articleBasePath/scroll")
             .exchange()
             .expectBody(ArticleResponse::class.java)
             .returnResult()
@@ -106,7 +295,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         assertEquals(0, res.remainingCount)
         assertEquals(0, res.articles.size)
     }
-    @Test fun `getAccessible works with creator`() = runTest {
+    @Test fun `getLatestArticles works with creator`() = runTest {
         val user = registerUser()
         val article = save(creator = user)
         article.access.visibility = AccessType.PRIVATE
@@ -115,7 +304,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         articleService.save(article)
 
         val res = webTestClient.get()
-            .uri(articleBasePath)
+            .uri("$articleBasePath/scroll")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectBody(ArticleResponse::class.java)
@@ -128,7 +317,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         assertEquals(1, res.articles.size)
         assertEquals(article.id, res.articles.first().id)
     }
-    @Test fun `getAccessible works with user viewer`() = runTest {
+    @Test fun `getLatestArticles works with user viewer`() = runTest {
         val user = registerUser(email = "another@email.com")
         val article = save()
         article.share(ContentAccessSubject.USER, user.info.id, ContentAccessRole.VIEWER)
@@ -136,7 +325,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         articleService.save(article)
 
         val res = webTestClient.get()
-            .uri(articleBasePath)
+            .uri("$articleBasePath/scroll")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectBody(ArticleResponse::class.java)
@@ -149,7 +338,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         assertEquals(1, res.articles.size)
         assertEquals(article.id, res.articles.first().id)
     }
-    @Test fun `getAccessible works with user editor`() = runTest {
+    @Test fun `getLatestArticles works with user editor`() = runTest {
         val user = registerUser(email = "another@email.com")
         val article = save()
         article.share(ContentAccessSubject.USER, user.info.id, ContentAccessRole.EDITOR)
@@ -157,7 +346,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         articleService.save(article)
 
         val res = webTestClient.get()
-            .uri(articleBasePath)
+            .uri("$articleBasePath/scroll")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectBody(ArticleResponse::class.java)
@@ -170,7 +359,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         assertEquals(1, res.articles.size)
         assertEquals(article.id, res.articles.first().id)
     }
-    @Test fun `getAccessible works with user admin`() = runTest {
+    @Test fun `getLatestArticles works with user admin`() = runTest {
         val user = registerUser(email = "another@email.com")
         val article = save()
         article.share(ContentAccessSubject.USER, user.info.id, ContentAccessRole.ADMIN)
@@ -178,7 +367,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         articleService.save(article)
 
         val res = webTestClient.get()
-            .uri(articleBasePath)
+            .uri("$articleBasePath/scroll")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectBody(ArticleResponse::class.java)
@@ -191,7 +380,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         assertEquals(1, res.articles.size)
         assertEquals(article.id, res.articles.first().id)
     }
-    @Test fun `getAccessible works with group viewer`() = runTest {
+    @Test fun `getLatestArticles works with group viewer`() = runTest {
         val user = registerUser(email = "another@email.com", groups = listOf("group"))
         val article = save()
         article.share(ContentAccessSubject.GROUP, user.info.sensitive.groups.first(), ContentAccessRole.VIEWER)
@@ -199,7 +388,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         articleService.save(article)
 
         val res = webTestClient.get()
-            .uri(articleBasePath)
+            .uri("$articleBasePath/scroll")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectBody(ArticleResponse::class.java)
@@ -212,7 +401,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         assertEquals(1, res.articles.size)
         assertEquals(article.id, res.articles.first().id)
     }
-    @Test fun `getAccessible works with group editor`() = runTest {
+    @Test fun `getLatestArticles works with group editor`() = runTest {
         val user = registerUser(email = "another@email.com", groups = listOf("group"))
         val article = save()
         article.share(ContentAccessSubject.GROUP, user.info.sensitive.groups.first(), ContentAccessRole.EDITOR)
@@ -220,7 +409,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         articleService.save(article)
 
         val res = webTestClient.get()
-            .uri(articleBasePath)
+            .uri("$articleBasePath/scroll")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectBody(ArticleResponse::class.java)
@@ -233,7 +422,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         assertEquals(1, res.articles.size)
         assertEquals(article.id, res.articles.first().id)
     }
-    @Test fun `getAccessible works with group admin`() = runTest {
+    @Test fun `getLatestArticles works with group admin`() = runTest {
         val user = registerUser(email = "another@email.com", groups = listOf("group"))
         val article = save()
         article.share(ContentAccessSubject.GROUP, user.info.sensitive.groups.first(), ContentAccessRole.ADMIN)
@@ -241,7 +430,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         articleService.save(article)
 
         val res = webTestClient.get()
-            .uri(articleBasePath)
+            .uri("$articleBasePath/scroll")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectBody(ArticleResponse::class.java)
