@@ -393,11 +393,12 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val newEmail = "new@email.com"
         val password = "password"
         val user = registerUser(oldEmail, password, twoFactorEnabled = true)
+        val anotherUser = registerUser("ttest@email.com")
 
         webTestClient.put()
             .uri("/api/user/me/email")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
-            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken("another-user", user.info.sensitive.devices.first().id))
+            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken(anotherUser.info.id, user.info.sensitive.devices.first().id))
             .bodyValue(ChangeEmailRequest(newEmail, password))
             .exchange()
             .expectStatus().isUnauthorized
@@ -570,11 +571,12 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val oldPassword = "password"
         val newPassword = "newPassword"
         val user = registerUser(email, oldPassword, twoFactorEnabled = true)
+        val anotherUser = registerUser("another@email.com")
 
         webTestClient.put()
             .uri("/api/user/me/password")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
-            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken("another-user", user.info.sensitive.devices.first().id))
+            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken(anotherUser.info.id, user.info.sensitive.devices.first().id))
             .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
             .exchange()
             .expectStatus().isUnauthorized

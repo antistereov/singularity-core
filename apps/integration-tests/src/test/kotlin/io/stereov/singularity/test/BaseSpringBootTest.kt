@@ -3,6 +3,8 @@ package io.stereov.singularity.test
 import com.warrenstrange.googleauth.GoogleAuthenticator
 import io.mockk.every
 import io.stereov.singularity.core.config.Constants
+import io.stereov.singularity.core.group.model.GroupDocument
+import io.stereov.singularity.core.group.service.GroupService
 import io.stereov.singularity.core.user.dto.request.*
 import io.stereov.singularity.core.user.dto.response.TwoFactorSetupResponse
 import io.stereov.singularity.core.user.model.Role
@@ -10,6 +12,7 @@ import io.stereov.singularity.core.user.model.UserDocument
 import io.stereov.singularity.core.user.service.UserService
 import io.stereov.singularity.test.config.MockConfig
 import io.stereov.singularity.test.config.MockKeyManager
+import org.bson.types.ObjectId
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -22,6 +25,9 @@ import org.springframework.test.web.reactive.server.returnResult
 @Import(MockConfig::class, MockKeyManager::class)
 class BaseSpringBootTest {
 
+
+    @Autowired
+    private lateinit var groupService: GroupService
 
     @Autowired
     lateinit var webTestClient: WebTestClient
@@ -56,6 +62,11 @@ class BaseSpringBootTest {
         val passwordResetSecret: String,
     )
 
+    suspend fun createGroup(key: String = "test-group"): GroupDocument {
+        val group = GroupDocument(key = key, name = key)
+        return groupService.save(group)
+    }
+
     suspend fun registerUser(
         email: String = "test@email.com",
         password: String = "password",
@@ -63,7 +74,7 @@ class BaseSpringBootTest {
         twoFactorEnabled: Boolean = false,
         name: String = "Name",
         roles: List<Role> = listOf(Role.USER),
-        groups: List<String> = listOf(),
+        groups: List<ObjectId> = listOf(),
     ): TestRegisterResponse {
         val device = DeviceInfoRequest(id = deviceId)
 

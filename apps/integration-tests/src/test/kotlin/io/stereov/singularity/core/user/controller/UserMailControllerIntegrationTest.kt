@@ -4,12 +4,12 @@ import io.mockk.verify
 import io.stereov.singularity.core.config.Constants
 import io.stereov.singularity.core.global.service.mail.MailTokenService
 import io.stereov.singularity.core.global.service.secrets.service.EncryptionSecretService
-import io.stereov.singularity.test.BaseIntegrationTest
 import io.stereov.singularity.core.user.dto.request.DeviceInfoRequest
 import io.stereov.singularity.core.user.dto.request.LoginRequest
 import io.stereov.singularity.core.user.dto.request.ResetPasswordRequest
 import io.stereov.singularity.core.user.dto.request.SendPasswordResetRequest
 import io.stereov.singularity.core.user.dto.response.MailCooldownResponse
+import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -176,7 +176,7 @@ class UserMailControllerIntegrationTest : BaseIntegrationTest() {
     }
     @Test fun `resetPassword requires unexpired token`() = runTest {
         val user = registerUser()
-        val token = mailTokenService.createPasswordResetToken(user.info.sensitive.email, user.passwordResetSecret, Instant.ofEpochSecond(0))
+        val token = mailTokenService.createPasswordResetToken(user.info.id, user.passwordResetSecret, Instant.ofEpochSecond(0))
 
         val req = ResetPasswordRequest("Test")
 
@@ -188,7 +188,7 @@ class UserMailControllerIntegrationTest : BaseIntegrationTest() {
     }
     @Test fun `resetPassword needs body`() = runTest {
         val user = registerUser()
-        val token = mailTokenService.createPasswordResetToken(user.info.sensitive.email, user.passwordResetSecret)
+        val token = mailTokenService.createPasswordResetToken(user.info.id, user.passwordResetSecret)
 
 
         webTestClient.post()

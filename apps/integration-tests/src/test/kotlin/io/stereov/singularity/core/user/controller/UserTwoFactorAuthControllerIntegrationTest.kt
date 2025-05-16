@@ -2,12 +2,12 @@ package io.stereov.singularity.core.user.controller
 
 import io.stereov.singularity.core.config.Constants
 import io.stereov.singularity.core.global.service.random.RandomService
-import io.stereov.singularity.test.BaseIntegrationTest
 import io.stereov.singularity.core.user.dto.UserDto
 import io.stereov.singularity.core.user.dto.request.*
 import io.stereov.singularity.core.user.dto.response.LoginResponse
 import io.stereov.singularity.core.user.dto.response.TwoFactorSetupResponse
 import io.stereov.singularity.core.user.dto.response.TwoFactorStatusResponse
+import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -261,10 +261,11 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
         val password = "password"
         val deviceId = "device"
         val user = registerUser(email, password, deviceId)
+        val anotherUser = registerUser("another@email.com")
 
         val secret = twoFactorAuthService.generateSecretKey()
         val recoveryCode = RandomService.generateCode(10)
-        val token = twoFactorAuthTokenService.createSetupToken("another user", secret, listOf(recoveryCode))
+        val token = twoFactorAuthTokenService.createSetupToken(anotherUser.info.id, secret, listOf(recoveryCode))
         val code = gAuth.getTotpPassword(secret)
 
         webTestClient.post()
@@ -599,11 +600,12 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
     }
     @Test fun `stepUpStatus requires token for same user`() = runTest {
         val user = registerUser(twoFactorEnabled = true)
+        val anotherUser = registerUser("another@email.com")
 
         val res = webTestClient.get()
             .uri("/api/user/2fa/step-up-status")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
-            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken("another-user", user.info.sensitive.devices.first().id))
+            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken(anotherUser.info.id, user.info.sensitive.devices.first().id))
             .exchange()
             .expectStatus().isOk
             .expectBody(TwoFactorStatusResponse::class.java)
@@ -789,10 +791,12 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
         val user = registerUser(twoFactorEnabled = true)
         val req = DisableTwoFactorRequest(password)
 
+        val anotherUser = registerUser("another@email.com")
+
         webTestClient.post()
             .uri("/api/user/2fa/disable")
             .bodyValue(req)
-            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken("another-user", user.info.sensitive.devices.first().id))
+            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken(anotherUser.info.id, user.info.sensitive.devices.first().id))
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectStatus().isUnauthorized
