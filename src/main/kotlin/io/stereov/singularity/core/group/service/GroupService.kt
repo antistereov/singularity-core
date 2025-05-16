@@ -31,10 +31,4 @@ class GroupService(
     suspend fun findById(id: ObjectId): GroupDocument {
         return findByIdOrNull(id) ?: throw DocumentNotFoundException("No group with ID $id found")
     }
-
-    suspend fun findByKeyOrNull(key: String): GroupDocument? {
-        logger.debug { "Fining group by key: $key" }
-
-        return repository.findByKey(key)
-    }
 }
