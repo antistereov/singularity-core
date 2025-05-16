@@ -16,9 +16,4 @@ abstract class ContentManagementService<T: ContentDocument<T>>(
     suspend fun findAccessible(pageable: Pageable): Page<T> {
         return paginateWithQuery(reactiveMongoTemplate, accessCriteria.getViewCriteria(), pageable, collectionClass)
     }
-
-    suspend fun findEditable(pageable: Pageable): Page<T> {
-        return paginateWithQuery(reactiveMongoTemplate, accessCriteria.getEditCriteria(), pageable, collectionClass)
-    }
-
 }
