@@ -6,9 +6,4 @@ import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface GroupRepository : CoroutineCrudRepository<GroupDocument, ObjectId> {
-
-    suspend fun findByKey(key: String): GroupDocument?
-
-    suspend fun deleteByKey(key: String)
-}
+interface GroupRepository : CoroutineCrudRepository<GroupDocument, ObjectId>
