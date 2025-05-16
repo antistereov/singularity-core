@@ -42,7 +42,7 @@ class S3FileStorage(
      *
      * @param userId The ID of the user who performs the upload.
      * @param filePart The file that should be uploaded.
-     * @param key The key the file will get in the storage.
+     * @param key The key to the file will get in the storage.
      * @param public Whether the file should be publicly accessible.
      *
      * @return [FileMetaData] The metadata of the resulting upload.
@@ -94,7 +94,7 @@ class S3FileStorage(
         return try {
             s3Client.headObject { it.bucket(s3Properties.bucket).key(key) }.await()
             true
-        } catch (e: NoSuchKeyException) {
+        } catch (_: NoSuchKeyException) {
             false
         }
     }
@@ -113,7 +113,7 @@ class S3FileStorage(
         return try {
             removeFile(key)
             true
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             false
         }
     }

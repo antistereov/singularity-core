@@ -37,21 +37,4 @@ class GroupService(
 
         return repository.findByKey(key)
     }
-
-    suspend fun findByKey(key: String): GroupDocument {
-        return findByKeyOrNull(key) ?: throw DocumentNotFoundException("No group with key $key found")
-    }
-
-    suspend fun deleteById(id: ObjectId) {
-        logger.debug { "Deleting group with ID: $id" }
-
-        return repository.deleteById(id)
-    }
-
-    suspend fun deleteByKey(key: String) {
-        logger.debug { "Deleting group by key: $key" }
-
-        return repository.deleteByKey(key)
-    }
-
 }

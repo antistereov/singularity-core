@@ -38,7 +38,7 @@ class AuthenticationService {
      * Get the ID of the currently authenticated user.
      *
      * @throws InvalidPrincipalException If the security context or authentication is missing.
-     * @throws InvalidTokenException If the authentication does not contain the needed properties.
+     * @throws InvalidTokenException If the authentication does not contain the necessary properties.
      */
     suspend fun getCurrentUserId(): ObjectId {
         logger.debug {"Extracting user ID." }
@@ -73,7 +73,7 @@ class AuthenticationService {
      * Get the ID of the currently authenticated device.
      *
      * @throws InvalidPrincipalException If the security context or authentication is missing.
-     * @throws InvalidTokenException If the authentication does not contain the needed properties.
+     * @throws InvalidTokenException If the authentication does not contain the necessary properties.
      */
     suspend fun getCurrentDeviceId(): String {
         logger.debug { "Extracting device ID" }
@@ -86,17 +86,13 @@ class AuthenticationService {
      * Get the ID of the currently authenticated token.
      *
      * @throws InvalidPrincipalException If the security context or authentication is missing.
-     * @throws InvalidTokenException If the authentication does not contain the needed properties.
+     * @throws InvalidTokenException If the authentication does not contain the necessary properties.
      */
     suspend fun getCurrentTokenId(): String {
         logger.debug { "Extracting token ID" }
 
         val auth = getCurrentAuthentication()
         return auth.tokenId
-    }
-
-    suspend fun validateAuthentication() {
-        getCurrentAuthentication()
     }
 
     /**
@@ -121,7 +117,7 @@ class AuthenticationService {
      * This method retrieves the current authentication token from the security context.
      *
      * @throws InvalidPrincipalException If the security context or authentication is missing.
-     * @throws InvalidTokenException If the authentication does not contain the needed properties.
+     * @throws InvalidTokenException If the authentication does not contain the necessary properties.
      */
     private suspend fun getCurrentAuthentication(): CustomAuthenticationToken {
         val securityContext: SecurityContext = ReactiveSecurityContextHolder.getContext().awaitFirstOrNull()

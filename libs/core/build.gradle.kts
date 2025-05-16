@@ -37,8 +37,6 @@ repositories {
 val kotlinVersion = "2.0.21"
 val kotlinxVersion = "1.10.1"
 val springBootVersion = "3.4.4"
-val log4jVersion = "2.24.3"
-val testContainersVersion = "1.19.0"
 val bucket4jVersion = "8.14.0"
 
 val mavenCentralUsername: String? = properties["mavencentral.username"] as String?
