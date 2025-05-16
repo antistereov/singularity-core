@@ -6,6 +6,7 @@ import io.stereov.singularity.content.common.model.ContentDocument
 import io.stereov.singularity.core.auth.model.AccessType
 import io.stereov.singularity.core.auth.service.AuthenticationService
 import io.stereov.singularity.core.user.model.UserDocument
+import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.stereotype.Component
 
@@ -32,11 +33,11 @@ class AccessCriteria(
     private final val isPublic = Criteria.where(visibilityField).`is`(AccessType.PUBLIC.toString())
     private final val isShared = Criteria.where(visibilityField).`is`(AccessType.SHARED.toString())
 
-    private fun isOwner(userId: String) = Criteria.where(ownerIdField).`is`(userId)
+    private fun isOwner(userId: ObjectId) = Criteria.where(ownerIdField).`is`(userId)
 
-    private fun canViewUser(userId: String) = Criteria().andOperator(Criteria.where(canViewUsersField).`in`(userId), isShared)
-    private fun canEditUser(userId: String) = Criteria().andOperator(Criteria.where(canEditUsersField).`in`(userId), isShared)
-    private fun isAdminUser(userId: String) = Criteria.where(isAdminUsersField).`in`(userId)
+    private fun canViewUser(userId: ObjectId) = Criteria().andOperator(Criteria.where(canViewUsersField).`in`(userId), isShared)
+    private fun canEditUser(userId: ObjectId) = Criteria().andOperator(Criteria.where(canEditUsersField).`in`(userId), isShared)
+    private fun isAdminUser(userId: ObjectId) = Criteria.where(isAdminUsersField).`in`(userId)
 
     private fun canViewGroup(user: UserDocument) = Criteria.where(canViewGroupsField).`in`(user.sensitive.groups)
     private fun canEditGroup(user: UserDocument) = Criteria.where(canEditGroupsField).`in`(user.sensitive.groups)

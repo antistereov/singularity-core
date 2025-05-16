@@ -34,10 +34,10 @@ class ArticleService(
             "$baseKey-${UUID.randomUUID().toString().substring(0, 8)}"
         } else baseKey
 
-        val article = Article.create(key = key, ownerId = user.id)
+        val article = Article.create(key = key, ownerId = user.id, title = req.title)
         val savedArticle = save(article)
 
-        return fullArticledDtoFrom(savedArticle, user)
+        return fullArticledResponseFrom(savedArticle, user)
     }
 
     suspend fun setTrustedState(key: String, trusted: Boolean): Article {
@@ -49,8 +49,14 @@ class ArticleService(
         return save(article)
     }
 
-    suspend fun fullArticledDtoFrom(article: Article, owner: UserDocument? = null): FullArticleResponse {
+    suspend fun getFullArticleResponseByKey(key: String): FullArticleResponse {
+        return fullArticledResponseFrom(findByKey(key))
+    }
+
+    suspend fun fullArticledResponseFrom(article: Article, owner: UserDocument? = null): FullArticleResponse {
+        val currentUser = authenticationService.getCurrentUserOrNull()
+
         val actualOwner = owner ?: userService.findById(article.access.ownerId)
-        return FullArticleResponse(article, actualOwner)
+        return FullArticleResponse(article, actualOwner, currentUser)
     }
 }

@@ -2,12 +2,15 @@ package io.stereov.singularity.content.article.model
 
 import io.stereov.singularity.content.article.dto.ArticleOverviewResponse
 import io.stereov.singularity.content.article.dto.FullArticleResponse
+import io.stereov.singularity.content.common.dto.ContentAccessDetailsResponse
 import io.stereov.singularity.content.common.model.ContentAccessDetails
 import io.stereov.singularity.content.common.model.ContentAccessPermissions
 import io.stereov.singularity.content.common.model.ContentDocument
 import io.stereov.singularity.core.auth.model.AccessType
 import io.stereov.singularity.core.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.core.global.service.file.model.FileMetaData
+import io.stereov.singularity.core.user.model.UserDocument
+import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
@@ -15,7 +18,7 @@ import java.time.Instant
 
 @Document(collection = "articles")
 data class Article(
-    @Id private val _id: String? = null,
+    @Id private val _id: ObjectId? = null,
     @Indexed(unique = true) override val key: String,
     override val createdAt: Instant = Instant.now(),
     override var updatedAt: Instant = Instant.now(),
@@ -28,20 +31,21 @@ data class Article(
     val colors: ArticleColors = ArticleColors(),
     val image: FileMetaData? = null,
     val content: String = "",
-    var trusted: Boolean,
+    override var trusted: Boolean,
+    override val tags: MutableSet<String> = mutableSetOf()
 ) : ContentDocument<Article>() {
 
-    override val id: String
+    override val id: ObjectId
         get() = _id ?: throw InvalidDocumentException("No id found")
 
-    fun toOverviewResponse() = ArticleOverviewResponse(id, key, createdAt, publishedAt, updatedAt, path, state,
-        title, colors, summary, image, access)
+    fun toOverviewResponse(viewer: UserDocument?) = ArticleOverviewResponse(id, key, createdAt, publishedAt, updatedAt, path, state,
+        title, colors, summary, image, ContentAccessDetailsResponse.create(access, viewer), tags)
 
     companion object {
         private val basePath: String
-            get() = "/content/articles"
+            get() = "/articles"
 
-        fun create(key: String, ownerId: String, title: String = "", summary: String = "",
+        fun create(key: String, ownerId: ObjectId, title: String = "", summary: String = "",
                    colors: ArticleColors = ArticleColors(), image: FileMetaData? = null, content: String = "",
                    accessType: AccessType = AccessType.PRIVATE, state: ArticleState = ArticleState.DRAFT,
                    trusted: Boolean = false,
@@ -81,7 +85,7 @@ data class Article(
                 image = dto.image,
                 content = dto.content,
                 trusted = dto.trusted,
-                access = dto.access
+                access = ContentAccessDetails(dto.access)
             )
         }
     }

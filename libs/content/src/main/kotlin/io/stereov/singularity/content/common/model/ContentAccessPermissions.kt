@@ -1,18 +1,17 @@
 package io.stereov.singularity.content.common.model
 
-import kotlinx.serialization.Serializable
+import org.bson.types.ObjectId
 
-@Serializable
 data class ContentAccessPermissions(
-    val admin: MutableSet<String> = mutableSetOf(),
-    val editor: MutableSet<String> = mutableSetOf(),
-    val viewer: MutableSet<String> = mutableSetOf(),
+    val admin: MutableSet<ObjectId> = mutableSetOf(),
+    val editor: MutableSet<ObjectId> = mutableSetOf(),
+    val viewer: MutableSet<ObjectId> = mutableSetOf(),
 ) {
 
     /**
      * Remove all permissions for a given subject.
      */
-    fun remove(subjectId: String): Boolean {
+    fun remove(subjectId: ObjectId): Boolean {
         val removedFromAdmins = this.admin.remove(subjectId)
         val removedFromEditors = this.editor.remove(subjectId)
         val removedFromViewers = this.viewer.remove(subjectId)
@@ -23,7 +22,7 @@ data class ContentAccessPermissions(
     /**
      * Add a permission for a given subject.
      */
-    fun put(subjectId: String, role: ContentAccessRole) {
+    fun put(subjectId: ObjectId, role: ContentAccessRole) {
         remove(subjectId)
 
         when(role) {
@@ -43,7 +42,7 @@ data class ContentAccessPermissions(
         this.viewer.clear()
     }
 
-    fun hasAccess(subjectId: String, role: ContentAccessRole): Boolean {
+    fun hasAccess(subjectId: ObjectId, role: ContentAccessRole): Boolean {
         return when (role) {
             ContentAccessRole.VIEWER -> admin.contains(subjectId) || editor.contains(subjectId) || viewer.contains(subjectId)
             ContentAccessRole.EDITOR -> admin.contains(subjectId) || editor.contains(subjectId)

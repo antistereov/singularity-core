@@ -7,6 +7,7 @@ import io.stereov.singularity.content.article.model.Article
 import io.stereov.singularity.content.article.model.ArticleState
 import io.stereov.singularity.content.common.service.ContentManagementService
 import io.stereov.singularity.content.common.util.AccessCriteria
+import io.stereov.singularity.core.auth.service.AuthenticationService
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service
 class ArticleManagementService(
     reactiveMongoTemplate: ReactiveMongoTemplate,
     accessCriteria: AccessCriteria,
+    private val authenticationService: AuthenticationService,
 ) : ContentManagementService<Article>(reactiveMongoTemplate, accessCriteria, Article::class.java) {
 
     private val logger: KLogger
@@ -25,8 +27,10 @@ class ArticleManagementService(
 
     private val isPublished = Criteria.where(Article::state.name).`is`(ArticleState.PUBLISHED.toString())
 
-    suspend fun getAccessibleArticles(limit: Long, afterId: String? = null): ArticleResponse {
+    suspend fun getAccessibleArticles(limit: Long = 10, afterId: String? = null): ArticleResponse {
         logger.debug { "Getting accessible articles limit=$limit${afterId?.let { " after $it" } ?: ""}" }
+
+        val currentUser = authenticationService.getCurrentUserOrNull()
 
         val query = Query()
             .with(Sort.by(Sort.Order.desc("_id")))
@@ -58,6 +62,6 @@ class ArticleManagementService(
             ).awaitFirstOrNull() ?: 0
         } else 0
 
-        return ArticleResponse(articles.map { it.toOverviewResponse() }, remainingCount)
+        return ArticleResponse(articles.map { it.toOverviewResponse(currentUser) }, remainingCount)
     }
 }

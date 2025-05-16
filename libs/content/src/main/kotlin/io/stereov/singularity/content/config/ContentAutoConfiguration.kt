@@ -38,8 +38,8 @@ class ContentAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun articleController(articleService: ArticleService, articleManagementService: ArticleManagementService): ArticleController {
-        return ArticleController(articleService, articleManagementService)
+    fun articleController(articleService: ArticleService, articleManagementService: ArticleManagementService, authenticationService: AuthenticationService): ArticleController {
+        return ArticleController(articleService, articleManagementService, authenticationService)
     }
 
     @Bean
@@ -50,8 +50,8 @@ class ContentAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun userArticleService(reactiveMongoTemplate: ReactiveMongoTemplate, accessCriteria: AccessCriteria): ArticleManagementService {
-        return ArticleManagementService(reactiveMongoTemplate, accessCriteria)
+    fun userArticleService(reactiveMongoTemplate: ReactiveMongoTemplate, accessCriteria: AccessCriteria, authenticationService: AuthenticationService): ArticleManagementService {
+        return ArticleManagementService(reactiveMongoTemplate, accessCriteria, authenticationService)
     }
 
 
