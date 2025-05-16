@@ -6,26 +6,34 @@ import io.stereov.singularity.core.global.database.model.EncryptedSensitiveDocum
 import io.stereov.singularity.core.global.database.model.SensitiveDocument
 import io.stereov.singularity.core.global.database.repository.SensitiveCrudRepository
 import io.stereov.singularity.core.global.exception.model.DocumentNotFoundException
+import io.stereov.singularity.core.global.service.encryption.service.EncryptionService
 import io.stereov.singularity.core.global.service.secrets.service.EncryptionSecretService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
-import kotlinx.serialization.KSerializer
+import org.bson.types.ObjectId
 
 abstract class SensitiveCrudService<S, D: SensitiveDocument<S>, E: EncryptedSensitiveDocument<S>>(
     private val repository: SensitiveCrudRepository<E>,
     private val encryptionSecretService: EncryptionSecretService,
+    private val encryptionService: EncryptionService
 ) {
+    abstract val clazz: Class<S>
 
-    abstract val serializer: KSerializer<S>
+    @Suppress("UNCHECKED_CAST")
+    open suspend fun encrypt(document: D, otherValues: List<Any> = emptyList()): E {
+        return this.encryptionService.encrypt(document) as E
+    }
 
-    abstract suspend fun encrypt(document: D, otherValues: List<Any> = emptyList()): E
-    abstract suspend fun decrypt(encrypted: E, otherValues: List<Any> = emptyList()): D
+    @Suppress("UNCHECKED_CAST")
+    open suspend fun decrypt(encrypted: E, otherValues: List<Any> = emptyList()): D {
+        return encryptionService.decrypt(encrypted, otherValues, clazz) as D
+    }
 
     private val logger: KLogger
         get() = KotlinLogging.logger {}
 
-    suspend fun findById(id: String): D {
+    suspend fun findById(id: ObjectId): D {
         logger.debug { "Finding document by ID: $id" }
 
         val document = this.findEncryptedById(id)
@@ -33,14 +41,14 @@ abstract class SensitiveCrudService<S, D: SensitiveDocument<S>, E: EncryptedSens
         return this.decrypt(document)
     }
 
-    suspend fun findEncryptedById(id: String): E {
+    suspend fun findEncryptedById(id: ObjectId): E {
         logger.debug { "Getting encrypted document with ID: $id" }
 
         return repository.findById(id)
             ?: throw DocumentNotFoundException("No document found with id $id")
     }
 
-    suspend fun findByIdOrNull(id: String): D? {
+    suspend fun findByIdOrNull(id: ObjectId): D? {
         logger.debug { "Finding document by ID: $id" }
 
         return this.findEncryptedByIdOrNull(id)?.let {
@@ -48,7 +56,7 @@ abstract class SensitiveCrudService<S, D: SensitiveDocument<S>, E: EncryptedSens
         }
     }
 
-    suspend fun findEncryptedByIdOrNull(id: String): E? {
+    suspend fun findEncryptedByIdOrNull(id: ObjectId): E? {
         logger.debug { "Getting encrypted document with ID: $id" }
 
         return repository.findById(id)
@@ -65,7 +73,7 @@ abstract class SensitiveCrudService<S, D: SensitiveDocument<S>, E: EncryptedSens
         return this.decrypt(savedDoc)
     }
 
-    suspend fun deleteById(id: String) {
+    suspend fun deleteById(id: ObjectId) {
         logger.debug { "Deleting document by ID $id" }
 
         repository.deleteById(id)

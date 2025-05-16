@@ -1,11 +1,10 @@
 package io.stereov.singularity.core.user.dto
 
 import io.stereov.singularity.core.global.service.file.model.FileMetaData
-import kotlinx.serialization.Serializable
+import org.bson.types.ObjectId
 
-@Serializable
 data class UserOverviewDto(
-    val id: String,
+    val id: ObjectId,
     val name: String,
     val avatar: FileMetaData?
 )

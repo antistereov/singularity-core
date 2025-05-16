@@ -13,6 +13,7 @@ import io.stereov.singularity.core.user.model.Role
 import io.stereov.singularity.core.user.model.UserDocument
 import io.stereov.singularity.core.user.service.UserService
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import org.bson.types.ObjectId
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.stereotype.Service
@@ -39,7 +40,7 @@ class AuthenticationService {
      * @throws InvalidPrincipalException If the security context or authentication is missing.
      * @throws InvalidTokenException If the authentication does not contain the needed properties.
      */
-    suspend fun getCurrentUserId(): String {
+    suspend fun getCurrentUserId(): ObjectId {
         logger.debug {"Extracting user ID." }
 
         val auth = getCurrentAuthentication()

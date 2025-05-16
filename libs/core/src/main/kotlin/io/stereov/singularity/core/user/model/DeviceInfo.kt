@@ -2,10 +2,8 @@ package io.stereov.singularity.core.user.model
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.core.global.serializer.InstantSerializer
 import io.stereov.singularity.core.user.dto.request.DeviceInfoRequest
 import io.stereov.singularity.core.user.dto.response.DeviceInfoResponse
-import kotlinx.serialization.Serializable
 import java.time.Instant
 
 /**
@@ -25,13 +23,11 @@ import java.time.Instant
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
-@Serializable
 data class DeviceInfo(
     val id: String,
     val refreshTokenId: String? = null,
     val browser: String? = null,
     val os: String? = null,
-    @Serializable(with = InstantSerializer::class)
     val issuedAt: Instant,
     val ipAddress: String? = null,
     val location: LocationInfo? = null
@@ -53,7 +49,6 @@ data class DeviceInfo(
      * @property regionName The name of the region where the device is located.
      * @property countryCode The country code of the device's location.
      */
-    @Serializable
     data class LocationInfo(
         val latitude: Double,
         val longitude: Double,

@@ -1,6 +1,7 @@
 package io.stereov.singularity.core.user.exception.model
 
 import io.stereov.singularity.core.user.exception.UserException
+import org.bson.types.ObjectId
 
 /**
  * # No application info found exception.
@@ -11,6 +12,6 @@ import io.stereov.singularity.core.user.exception.UserException
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
-class NoAppInfoFoundException(userId: String) : UserException(
+class NoAppInfoFoundException(userId: ObjectId) : UserException(
     message = "No application info found for user $userId"
 )

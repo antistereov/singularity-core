@@ -1,5 +1,7 @@
 package io.stereov.singularity.core.user.service.token.model
 
+import org.bson.types.ObjectId
+
 /**
  * # StepUpToken data class.
  *
@@ -12,6 +14,6 @@ package io.stereov.singularity.core.user.service.token.model
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
 data class StepUpToken(
-    val userId: String,
+    val userId: ObjectId,
     val deviceId: String,
 )

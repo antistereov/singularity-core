@@ -10,6 +10,7 @@ import io.stereov.singularity.core.global.service.random.RandomService
 import io.stereov.singularity.core.properties.JwtProperties
 import io.stereov.singularity.core.user.service.token.model.AccessToken
 import io.stereov.singularity.core.user.service.token.model.RefreshToken
+import org.bson.types.ObjectId
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
 import org.springframework.stereotype.Service
 import java.time.Instant
@@ -43,7 +44,7 @@ class UserTokenService(
      *
      * @return The generated access token.
      */
-    suspend fun createAccessToken(userId: String, deviceId: String, issuedAt: Instant = Instant.now()): String {
+    suspend fun createAccessToken(userId: ObjectId, deviceId: String, issuedAt: Instant = Instant.now()): String {
         logger.debug { "Creating access token for user $userId and device $deviceId" }
 
         val tokenId = RandomService.generateCode(20)
@@ -53,7 +54,7 @@ class UserTokenService(
         val claims = JwtClaimsSet.builder()
             .issuedAt(issuedAt)
             .expiresAt(issuedAt.plusSeconds(expiresIn))
-            .subject(userId)
+            .subject(userId.toHexString())
             .claim(Constants.JWT_DEVICE_CLAIM, deviceId)
             .id(tokenId)
             .build()
@@ -75,7 +76,7 @@ class UserTokenService(
 
         val jwt = jwtService.decodeJwt(token, true)
 
-        val userId = jwt.subject
+        val userId = jwt.subject?.let { ObjectId(it) }
             ?: throw InvalidTokenException("JWT does not contain sub")
 
         val deviceId = jwt.claims[Constants.JWT_DEVICE_CLAIM] as? String
@@ -102,12 +103,12 @@ class UserTokenService(
      *
      * @return The generated refresh token.
      */
-    suspend fun createRefreshToken(userId: String, deviceId: String, tokenId: String): String {
+    suspend fun createRefreshToken(userId: ObjectId, deviceId: String, tokenId: String): String {
         logger.debug { "Creating refresh token for user $userId and device $deviceId" }
 
         val claims = JwtClaimsSet.builder()
             .id(tokenId)
-            .subject(userId)
+            .subject(userId.toHexString())
             .claim(Constants.JWT_DEVICE_CLAIM, deviceId)
             .issuedAt(Instant.now())
             .build()
@@ -134,7 +135,7 @@ class UserTokenService(
             throw InvalidTokenException("Cannot decode refresh token", e)
         }
 
-        val userId = jwt.subject
+        val userId = jwt.subject?.let { ObjectId(it) }
             ?: throw InvalidTokenException("Refresh token does not contain user id")
 
         val tokenId = jwt.id

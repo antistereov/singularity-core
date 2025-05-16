@@ -1,7 +1,5 @@
 package io.stereov.singularity.core.user.dto.request
 
-import kotlinx.serialization.Serializable
-
 /**
  * # DeviceInfoRequest data class.
  *
@@ -14,7 +12,6 @@ import kotlinx.serialization.Serializable
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
-@Serializable
 data class DeviceInfoRequest(
     val id: String,
     val browser: String? = null,

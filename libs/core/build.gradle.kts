@@ -6,7 +6,6 @@ import org.springframework.boot.gradle.tasks.bundling.BootJar
 plugins {
     kotlin("jvm") version "2.0.21"
     kotlin("plugin.spring") version "2.0.21"
-    kotlin("plugin.serialization") version "2.0.21"
     id("org.springframework.boot") version "3.4.1"
     id("io.spring.dependency-management") version "1.1.4"
     id("maven-publish")
@@ -106,7 +105,7 @@ dependencies {
 
     // Serialization and Validation
     api("org.springframework.boot:spring-boot-starter-validation")
-    api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+    api("com.fasterxml.jackson.module:jackson-module-kotlin")
 
     // Mail
     api("org.springframework.boot:spring-boot-starter-mail")

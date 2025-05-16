@@ -2,7 +2,6 @@ package io.stereov.singularity.core.user.model
 
 import io.stereov.singularity.core.global.service.hash.model.SecureHash
 import io.stereov.singularity.core.global.service.random.RandomService
-import kotlinx.serialization.Serializable
 
 /**
  * # UserSecurityDetails
@@ -14,7 +13,6 @@ import kotlinx.serialization.Serializable
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
-@Serializable
 data class UserSecurityDetails(
     val twoFactor: TwoFactorDetails = TwoFactorDetails(),
     val mail: MailVerificationDetails = MailVerificationDetails(),
@@ -29,7 +27,6 @@ data class UserSecurityDetails(
      * @property secret The secret key for the user.
      * @property recoveryCodes The list of recovery codes for the user.
      */
-    @Serializable
     data class TwoFactorDetails(
         var enabled: Boolean = false,
         var secret: String? = null,
@@ -45,7 +42,6 @@ data class UserSecurityDetails(
      * @property verificationSecret The secret key for email verification.
      * @property passwordResetSecret The secret key for password reset.
      */
-    @Serializable
     data class MailVerificationDetails(
         var verified: Boolean = false,
         var verificationSecret: String = RandomService.generateCode(20),

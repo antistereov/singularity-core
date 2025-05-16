@@ -1,14 +1,15 @@
 package io.stereov.singularity.core.global.service.encryption.service
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.core.global.service.encryption.model.Encrypted
 import io.stereov.singularity.core.global.database.model.EncryptedSensitiveDocument
 import io.stereov.singularity.core.global.database.model.SensitiveDocument
+import io.stereov.singularity.core.global.service.encryption.model.Encrypted
 import io.stereov.singularity.core.global.service.secrets.component.KeyManager
 import io.stereov.singularity.core.global.service.secrets.service.EncryptionSecretService
-import kotlinx.serialization.KSerializer
-import kotlinx.serialization.json.Json
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.springframework.stereotype.Service
 import java.util.*
 import javax.crypto.Cipher
@@ -18,7 +19,7 @@ import javax.crypto.spec.SecretKeySpec
 class EncryptionService(
     private val encryptionSecretService: EncryptionSecretService,
     private val keyManager: KeyManager,
-    private val json: Json
+    private val objectMapper: ObjectMapper
 ) {
 
     private val logger: KLogger
@@ -26,32 +27,31 @@ class EncryptionService(
 
     suspend fun <S, D: SensitiveDocument<S>> encrypt(
         document: D,
-        serializer: KSerializer<S>,
         otherValues: List<Any> = emptyList()
     ): EncryptedSensitiveDocument<S> {
-        val wrapped = wrap(document.sensitive, serializer)
+        val wrapped = wrap(document.sensitive)
 
         return document.toEncryptedDocument(wrapped, otherValues)
     }
 
     suspend fun <S, E: EncryptedSensitiveDocument<S>> decrypt(
         encryptedDocument: E,
-        serializer: KSerializer<S>,
         otherValues: List<Any> = emptyList(),
+        clazz: Class<S>
     ): SensitiveDocument<S> {
-        val unwrapped = unwrap(encryptedDocument.sensitive, serializer)
+        val unwrapped = unwrap(encryptedDocument.sensitive, clazz)
 
         return encryptedDocument.toSensitiveDocument(unwrapped, otherValues)
     }
 
-    private suspend fun <T> wrap(value: T, serializer: KSerializer<T>): Encrypted<T> {
-        val jsonStr = json.encodeToString(serializer, value)
-        return this.encrypt(jsonStr)
+    private suspend fun <T> wrap(value: T): Encrypted<T> = withContext(Dispatchers.IO) {
+        val jsonStr = objectMapper.writeValueAsString(value)
+        encrypt(jsonStr)
     }
 
-    private suspend fun <T> unwrap(encrypted: Encrypted<T>, serializer: KSerializer<T>): T {
-        val decryptedJson = this.decrypt(encrypted)
-        return json.decodeFromString(serializer, decryptedJson)
+    private suspend fun <T> unwrap(encrypted: Encrypted<T>, clazz: Class<T>): T = withContext(Dispatchers.IO) {
+        val decryptedJson = decrypt(encrypted)
+        objectMapper.readValue(decryptedJson, clazz)
     }
 
     suspend fun <T> encrypt(strToEncrypt: String): Encrypted<T> {

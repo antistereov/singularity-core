@@ -1,6 +1,7 @@
 package io.stereov.singularity.core.auth.model
 
 import io.stereov.singularity.core.user.model.UserDocument
+import org.bson.types.ObjectId
 import org.springframework.security.authentication.AbstractAuthenticationToken
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
@@ -30,7 +31,7 @@ class CustomAuthenticationToken(
     }
 
     override fun getCredentials(): Any? = null
-    override fun getPrincipal(): String = user.id
+    override fun getPrincipal(): ObjectId = user.id
 
     /**
      * Constructs a [CustomAuthenticationToken] from a [UserDocument] and a device ID.

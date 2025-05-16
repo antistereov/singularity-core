@@ -2,7 +2,6 @@ package io.stereov.singularity.core.user.dto.request
 
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
-
 /**
  * # RegisterUserRequest data class.
  *

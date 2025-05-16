@@ -4,13 +4,14 @@ import io.stereov.singularity.core.global.database.model.EncryptedSensitiveDocum
 import io.stereov.singularity.core.global.service.encryption.model.Encrypted
 import io.stereov.singularity.core.global.service.hash.model.SearchableHash
 import io.stereov.singularity.core.global.service.hash.model.SecureHash
+import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
 
 @Document(collection = "users")
 data class EncryptedUserDocument(
-    @Id override val _id: String? = null,
+    @Id override val _id: ObjectId? = null,
     val email: SearchableHash,
     var password: SecureHash,
     val created: Instant = Instant.now(),

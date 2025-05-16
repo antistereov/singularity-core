@@ -1,11 +1,11 @@
 package io.stereov.singularity.core.config
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.stereov.singularity.core.config.secrets.BitwardenSecretsConfiguration
 import io.stereov.singularity.core.config.secrets.SecretsConfiguration
 import io.stereov.singularity.core.global.service.encryption.service.EncryptionService
 import io.stereov.singularity.core.global.service.secrets.component.KeyManager
 import io.stereov.singularity.core.global.service.secrets.service.EncryptionSecretService
-import kotlinx.serialization.json.Json
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
@@ -40,7 +40,7 @@ class EncryptionConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun encryptionService(encryptionSecretService: EncryptionSecretService, keyManager: KeyManager, json: Json): EncryptionService {
-        return EncryptionService(encryptionSecretService, keyManager, json)
+    fun encryptionService(encryptionSecretService: EncryptionSecretService, keyManager: KeyManager, objectMapper: ObjectMapper): EncryptionService {
+        return EncryptionService(encryptionSecretService, keyManager, objectMapper)
     }
 }
