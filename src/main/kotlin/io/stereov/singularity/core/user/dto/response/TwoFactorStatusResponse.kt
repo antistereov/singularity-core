@@ -1,7 +1,5 @@
 package io.stereov.singularity.core.user.dto.response
 
-import kotlinx.serialization.Serializable
-
 /**
  * # TwoFactorStatusResponse
  *
@@ -13,7 +11,6 @@ import kotlinx.serialization.Serializable
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
-@Serializable
 data class TwoFactorStatusResponse(
     val twoFactorRequired: Boolean,
 )

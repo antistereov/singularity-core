@@ -6,6 +6,7 @@ import io.lettuce.core.ExperimentalLettuceCoroutinesApi
 import io.lettuce.core.api.coroutines.RedisCoroutinesCommands
 import io.stereov.singularity.core.properties.JwtProperties
 import kotlinx.coroutines.flow.map
+import org.bson.types.ObjectId
 import org.springframework.stereotype.Service
 
 /**
@@ -35,10 +36,10 @@ class AccessTokenCache(
      * @param userId The ID of the user.
      * @param tokenId The token ID to be added.
      */
-    suspend fun addTokenId(userId: String, tokenId: String) {
+    suspend fun addTokenId(userId: ObjectId, tokenId: String) {
         logger.debug { "Adding token ID for user $userId" }
 
-        val key = "$activeTokenKey:$userId:$tokenId"
+        val key = "$activeTokenKey:${userId.toHexString()}:$tokenId"
         commands.sadd(key, tokenId.toByteArray())
         commands.expire(key, expiresIn)
     }
@@ -50,10 +51,10 @@ class AccessTokenCache(
      * @param tokenId The token ID to be checked.
      * @return True if the token ID is valid, false otherwise.
      */
-    suspend fun isTokenIdValid(userId: String, tokenId: String): Boolean {
+    suspend fun isTokenIdValid(userId: ObjectId, tokenId: String): Boolean {
         logger.debug { "Checking validity of token for user $userId" }
 
-        val key = "$activeTokenKey:$userId:$tokenId"
+        val key = "$activeTokenKey:${userId.toHexString()}:$tokenId"
         return commands.exists(key) == 1L
     }
 
@@ -64,10 +65,10 @@ class AccessTokenCache(
      * @param tokenId The token ID to be checked.
      * @return True if the token ID is valid, false otherwise.
      */
-    suspend fun removeTokenId(userId: String, tokenId: String): Boolean {
+    suspend fun removeTokenId(userId: ObjectId, tokenId: String): Boolean {
         logger.debug { "Removing token for user $userId" }
 
-        val key = "$activeTokenKey:$userId:$tokenId"
+        val key = "$activeTokenKey:${userId.toHexString()}:$tokenId"
         return commands.del(key) == 1L
     }
 
@@ -76,7 +77,7 @@ class AccessTokenCache(
      *
      * @param userId The ID of the user.
      */
-    suspend fun invalidateAllTokens(userId: String) {
+    suspend fun invalidateAllTokens(userId: ObjectId) {
         logger.debug { "Invalidating all tokens for user $userId" }
 
         val keys = commands.keys("$activeTokenKey:$userId:*")

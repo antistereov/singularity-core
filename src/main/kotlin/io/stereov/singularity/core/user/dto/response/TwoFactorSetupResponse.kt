@@ -1,7 +1,5 @@
 package io.stereov.singularity.core.user.dto.response
 
-import kotlinx.serialization.Serializable
-
 /**
  * # Response object for two-factor authentication setup.
  *
@@ -14,7 +12,6 @@ import kotlinx.serialization.Serializable
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
-@Serializable
 data class TwoFactorSetupResponse(
     val secret: String,
     val optAuthUrl: String,

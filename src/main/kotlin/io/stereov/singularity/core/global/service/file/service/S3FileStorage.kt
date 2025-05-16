@@ -9,6 +9,7 @@ import io.stereov.singularity.core.properties.AppProperties
 import io.stereov.singularity.core.properties.storage.S3Properties
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.reactive.awaitSingle
+import org.bson.types.ObjectId
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.http.MediaType
 import org.springframework.http.codec.multipart.FilePart
@@ -46,7 +47,7 @@ class S3FileStorage(
      *
      * @return [FileMetaData] The metadata of the resulting upload.
      */
-    override suspend fun upload(userId: String, filePart: FilePart, key: String, public: Boolean): FileMetaData {
+    override suspend fun upload(userId: ObjectId, filePart: FilePart, key: String, public: Boolean): FileMetaData {
         logger.debug { "Uploading file: \"${filePart.filename()}\" as ${filePart.headers().contentType}" }
 
         val extension = filePart.filename().substringAfterLast(".", "")
@@ -80,10 +81,8 @@ class S3FileStorage(
 
         return FileMetaData(
             key = actualKey,
-            owner = userId,
             contentType = contentType,
             accessType = if (public) AccessType.PUBLIC else AccessType.SHARED,
-            sharedWith = emptyList(),
             publicUrl = if (public) getPublicUrl(actualKey) else null,
             size = size
         )

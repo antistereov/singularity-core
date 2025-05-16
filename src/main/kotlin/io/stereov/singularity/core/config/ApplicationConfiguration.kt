@@ -1,14 +1,11 @@
 package io.stereov.singularity.core.config
 
 import io.stereov.singularity.core.properties.*
-import kotlinx.serialization.json.Json
 import org.springframework.boot.autoconfigure.AutoConfiguration
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
 import org.springframework.boot.autoconfigure.data.web.SpringDataWebAutoConfiguration
 import org.springframework.boot.autoconfigure.mongo.MongoReactiveAutoConfiguration
 import org.springframework.boot.context.properties.EnableConfigurationProperties
-import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.scheduling.annotation.EnableScheduling
 
@@ -51,11 +48,4 @@ import org.springframework.scheduling.annotation.EnableScheduling
     UiProperties::class,
 )
 @EnableScheduling
-class ApplicationConfiguration {
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun json(): Json {
-        return Json
-    }
-}
+class ApplicationConfiguration

@@ -5,6 +5,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.core.global.exception.model.DocumentNotFoundException
 import io.stereov.singularity.core.group.model.GroupDocument
 import io.stereov.singularity.core.group.repository.GroupRepository
+import org.bson.types.ObjectId
 import org.springframework.stereotype.Service
 
 @Service
@@ -21,13 +22,13 @@ class GroupService(
         return repository.save(group)
     }
 
-    suspend fun findByIdOrNull(id: String): GroupDocument? {
+    suspend fun findByIdOrNull(id: ObjectId): GroupDocument? {
         logger.debug { "Fining group by ID: $id" }
 
         return repository.findById(id)
     }
 
-    suspend fun findById(id: String): GroupDocument {
+    suspend fun findById(id: ObjectId): GroupDocument {
         return findByIdOrNull(id) ?: throw DocumentNotFoundException("No group with ID $id found")
     }
 
@@ -41,7 +42,7 @@ class GroupService(
         return findByKeyOrNull(key) ?: throw DocumentNotFoundException("No group with key $key found")
     }
 
-    suspend fun deleteById(id: String) {
+    suspend fun deleteById(id: ObjectId) {
         logger.debug { "Deleting group with ID: $id" }
 
         return repository.deleteById(id)

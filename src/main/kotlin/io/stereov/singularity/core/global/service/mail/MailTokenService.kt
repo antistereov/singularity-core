@@ -10,6 +10,7 @@ import io.stereov.singularity.core.global.service.jwt.exception.model.TokenExpir
 import io.stereov.singularity.core.global.service.mail.model.EmailVerificationToken
 import io.stereov.singularity.core.global.service.mail.model.PasswordResetToken
 import io.stereov.singularity.core.properties.MailProperties
+import org.bson.types.ObjectId
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
 import org.springframework.stereotype.Service
 import java.time.Instant
@@ -44,13 +45,13 @@ class MailTokenService(
      *
      * @return The generated JWT token.
      */
-    suspend fun createVerificationToken(userId: String, email: String, secret: String, issuedAt: Instant = Instant.now()): String {
+    suspend fun createVerificationToken(userId: ObjectId, email: String, secret: String, issuedAt: Instant = Instant.now()): String {
         logger.debug { "Creating email verification token" }
 
         val claims = JwtClaimsSet.builder()
             .issuedAt(issuedAt)
             .expiresAt(issuedAt.plusSeconds(mailProperties.verificationExpiration))
-            .subject(userId)
+            .subject(userId.toHexString())
             .claim("email", email)
             .id(secret)
             .build()
@@ -75,7 +76,7 @@ class MailTokenService(
 
         val jwt = jwtService.decodeJwt(token, true)
 
-        val userId = jwt.subject
+        val userId = ObjectId(jwt.subject)
         val email = jwt.claims["email"] as? String
             ?: throw InvalidTokenException("No email found in claims")
         val secret = jwt.id
@@ -94,7 +95,7 @@ class MailTokenService(
      *
      * @return The generated JWT token.
      */
-    suspend fun createPasswordResetToken(userId: String, secret: String, issuedAt: Instant = Instant.now()): String {
+    suspend fun createPasswordResetToken(userId: ObjectId, secret: String, issuedAt: Instant = Instant.now()): String {
         logger.debug { "Creating password reset token" }
 
         val encryptedSecret = encryptionService.encrypt<String>(secret)
@@ -102,7 +103,7 @@ class MailTokenService(
         val claims = JwtClaimsSet.builder()
             .issuedAt(issuedAt)
             .expiresAt(issuedAt.plusSeconds(mailProperties.passwordResetExpiration))
-            .subject(userId)
+            .subject(userId.toHexString())
             .claim("secret", encryptedSecret.ciphertext)
             .claim("encryption-key-id", encryptedSecret.secretId)
             .build()
@@ -127,7 +128,7 @@ class MailTokenService(
 
         val jwt = jwtService.decodeJwt(token, true)
 
-        val userId = jwt.subject
+        val userId = ObjectId(jwt.subject)
         val encryptedSecret = jwt.claims["secret"] as? String
             ?: throw InvalidTokenException("No secret found in claims")
         val kid = jwt.claims["encryption-key-id"] as? String

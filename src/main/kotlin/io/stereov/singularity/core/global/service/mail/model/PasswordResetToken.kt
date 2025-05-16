@@ -1,5 +1,7 @@
 package io.stereov.singularity.core.global.service.mail.model
 
+import org.bson.types.ObjectId
+
 /**
  * # Password reset token.
  *
@@ -12,6 +14,6 @@ package io.stereov.singularity.core.global.service.mail.model
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
 data class PasswordResetToken(
-    val userId: String,
+    val userId: ObjectId,
     val secret: String,
 )

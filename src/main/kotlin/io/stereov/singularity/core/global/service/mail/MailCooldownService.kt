@@ -4,6 +4,7 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.core.properties.MailProperties
 import kotlinx.coroutines.reactor.awaitSingleOrNull
+import org.bson.types.ObjectId
 import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.stereotype.Service
 import java.time.Duration
@@ -34,7 +35,7 @@ class MailCooldownService(
      *
      * @return The remaining cooldown time in seconds.
      */
-    suspend fun getRemainingVerificationCooldown(userId: String): Long {
+    suspend fun getRemainingVerificationCooldown(userId: ObjectId): Long {
         logger.debug { "Getting remaining cooldown for email verification" }
 
         val key = "email-verification-cooldown:$userId"
@@ -52,7 +53,7 @@ class MailCooldownService(
      *
      * @return True if the cooldown was successfully started, false if it was already in progress.
      */
-    suspend fun startVerificationCooldown(userId: String): Boolean {
+    suspend fun startVerificationCooldown(userId: ObjectId): Boolean {
         logger.debug { "Starting cooldown for email verification" }
 
         val key = "email-verification-cooldown:$userId"
@@ -73,7 +74,7 @@ class MailCooldownService(
      *
      * @return True if the cooldown was successfully started, false if it was already in progress.
      */
-    suspend fun startPasswordResetCooldown(userId: String): Boolean {
+    suspend fun startPasswordResetCooldown(userId: ObjectId): Boolean {
         logger.debug { "Starting cooldown for password reset" }
 
         val key = "password-reset-cooldown:$userId"
@@ -94,7 +95,7 @@ class MailCooldownService(
      *
      * @return The remaining cooldown time in seconds.
      */
-    suspend fun getRemainingPasswordResetCooldown(userId: String): Long {
+    suspend fun getRemainingPasswordResetCooldown(userId: ObjectId): Long {
         logger.debug { "Getting remaining cooldown for password resets" }
 
         val key = "password-reset-cooldown:$userId"

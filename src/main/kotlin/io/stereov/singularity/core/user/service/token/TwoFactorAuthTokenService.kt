@@ -6,6 +6,7 @@ import io.stereov.singularity.core.auth.exception.AuthException
 import io.stereov.singularity.core.auth.exception.model.InvalidCredentialsException
 import io.stereov.singularity.core.auth.service.AuthenticationService
 import io.stereov.singularity.core.config.Constants
+import io.stereov.singularity.core.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.core.global.service.hash.HashService
 import io.stereov.singularity.core.global.service.jwt.JwtService
 import io.stereov.singularity.core.global.service.jwt.exception.model.InvalidTokenException
@@ -13,9 +14,9 @@ import io.stereov.singularity.core.global.service.twofactorauth.TwoFactorAuthSer
 import io.stereov.singularity.core.global.service.twofactorauth.exception.model.InvalidTwoFactorCodeException
 import io.stereov.singularity.core.properties.JwtProperties
 import io.stereov.singularity.core.user.dto.request.TwoFactorStartSetupRequest
-import io.stereov.singularity.core.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.core.user.service.token.model.SetupToken
 import io.stereov.singularity.core.user.service.token.model.StepUpToken
+import org.bson.types.ObjectId
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ServerWebExchange
@@ -56,7 +57,7 @@ class TwoFactorAuthTokenService(
         val claims = JwtClaimsSet.builder()
             .issuedAt(issuedAt)
             .expiresAt(issuedAt.plusSeconds(jwtProperties.expiresIn))
-            .subject(user.id)
+            .subject(user.id.toHexString())
             .claim(Constants.JWT_DEVICE_CLAIM, deviceId)
             .build()
 
@@ -68,7 +69,7 @@ class TwoFactorAuthTokenService(
 
         val jwt = jwtService.decodeJwt(token,true)
 
-        val userId = jwt.subject
+        val userId = jwt.subject?.let { ObjectId(it) }
             ?: throw InvalidTokenException("JWT does not contain sub")
 
         if (userId != authenticationService.getCurrentUserId()) {
@@ -92,13 +93,13 @@ class TwoFactorAuthTokenService(
      *
      * @return The generated setup token.
      */
-    suspend fun createSetupToken(userId: String, secret: String, recoveryCodes: List<String>, issuedAt: Instant = Instant.now()): String {
+    suspend fun createSetupToken(userId: ObjectId, secret: String, recoveryCodes: List<String>, issuedAt: Instant = Instant.now()): String {
         logger.debug { "Creating setup token for 2fa" }
 
         val claims = JwtClaimsSet.builder()
             .issuedAt(issuedAt)
             .expiresAt(issuedAt.plusSeconds(jwtProperties.expiresIn))
-            .subject(userId)
+            .subject(userId.toHexString())
             .claim(Constants.TWO_FACTOR_SECRET_CLAIM, secret)
             .claim(Constants.TWO_FACTOR_RECOVERY_CLAIM, recoveryCodes)
             .build()
@@ -119,8 +120,9 @@ class TwoFactorAuthTokenService(
         val jwt = jwtService.decodeJwt(token, true)
 
         val userId = authenticationService.getCurrentUserId()
+        val subject = jwt.subject?.let { ObjectId(it) }
 
-        if (jwt.subject != userId) {
+        if (subject != userId) {
             throw InvalidTokenException("Setup token is not valid for current user")
         }
 
@@ -145,13 +147,13 @@ class TwoFactorAuthTokenService(
      *
      * @return The generated two-factor authentication token.
      */
-    suspend fun createLoginToken(userId: String, expiration: Long = jwtProperties.expiresIn): String {
+    suspend fun createLoginToken(userId: ObjectId, expiration: Long = jwtProperties.expiresIn): String {
         logger.debug { "Creating two factor token" }
 
         val claims = JwtClaimsSet.builder()
             .issuedAt(Instant.now())
             .expiresAt(Instant.now().plusSeconds(expiration))
-            .subject(userId)
+            .subject(userId.toHexString())
             .build()
 
         return jwtService.encodeJwt(claims)
@@ -166,12 +168,12 @@ class TwoFactorAuthTokenService(
      *
      * @throws InvalidTokenException If the token is invalid or does not contain the required claims.
      */
-    suspend fun validateLoginTokenAndExtractUserId(token: String): String {
+    suspend fun validateLoginTokenAndExtractUserId(token: String): ObjectId {
         logger.debug { "Validating two factor token" }
 
         val jwt = jwtService.decodeJwt(token, true)
 
-        val userId = jwt.subject
+        val userId = jwt.subject?.let { ObjectId(it) }
             ?: throw InvalidTokenException("JWT does not contain sub")
 
         return userId
@@ -209,7 +211,7 @@ class TwoFactorAuthTokenService(
      *
      * @throws AuthException If this function is called from a path that does not match `/auth/2fa/recovery`.
      */
-    suspend fun createStepUpTokenForRecovery(userId: String, deviceId: String, exchange: ServerWebExchange, issuedAt: Instant = Instant.now()): String {
+    suspend fun createStepUpTokenForRecovery(userId: ObjectId, deviceId: String, exchange: ServerWebExchange, issuedAt: Instant = Instant.now()): String {
         logger.debug { "Creating step up token" }
 
         if (exchange.request.path.toString() != "/api/user/2fa/recovery")
@@ -227,13 +229,13 @@ class TwoFactorAuthTokenService(
      *
      * @return The generated step-up token.
      */
-    suspend fun createStepUpToken(userId: String, deviceId: String, issuedAt: Instant = Instant.now()): String {
+    suspend fun createStepUpToken(userId: ObjectId, deviceId: String, issuedAt: Instant = Instant.now()): String {
         logger.debug { "Creating step up token" }
 
         val claims = JwtClaimsSet.builder()
             .issuedAt(issuedAt)
             .expiresAt(issuedAt.plusSeconds(jwtProperties.expiresIn))
-            .subject(userId)
+            .subject(userId.toHexString())
             .claim(Constants.JWT_DEVICE_CLAIM, deviceId)
             .build()
 
@@ -254,7 +256,7 @@ class TwoFactorAuthTokenService(
 
         val jwt = jwtService.decodeJwt(token, true)
 
-        val userId = jwt.subject
+        val userId = jwt.subject?.let { ObjectId(it) }
             ?: throw InvalidTokenException("JWT does not contain sub")
 
         if (userId != authenticationService.getCurrentUserId()) {

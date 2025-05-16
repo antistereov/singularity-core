@@ -1,5 +1,7 @@
 package io.stereov.singularity.core.global.service.mail.model
 
+import org.bson.types.ObjectId
+
 /**
  * # Email verification token.
  *
@@ -12,7 +14,7 @@ package io.stereov.singularity.core.global.service.mail.model
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
 data class EmailVerificationToken(
-    val userId: String,
+    val userId: ObjectId,
     val email: String,
     val secret: String,
 )

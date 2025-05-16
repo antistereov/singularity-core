@@ -1,8 +1,6 @@
 package io.stereov.singularity.core.user.dto.response
 
-import io.stereov.singularity.core.global.serializer.InstantSerializer
 import io.stereov.singularity.core.user.model.DeviceInfo
-import kotlinx.serialization.Serializable
 import java.time.Instant
 
 /**
@@ -21,13 +19,11 @@ import java.time.Instant
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
-@Serializable
 data class DeviceInfoResponse(
     val id: String,
     val browser: String? = null,
     val os: String? = null,
     val ipAddress: String?,
     val location: DeviceInfo.LocationInfo?,
-    @Serializable(with = InstantSerializer::class)
     val lastActive: Instant
 )

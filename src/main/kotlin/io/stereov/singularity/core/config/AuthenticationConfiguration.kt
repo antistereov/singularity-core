@@ -35,7 +35,6 @@ import io.stereov.singularity.core.user.service.device.UserDeviceService
 import io.stereov.singularity.core.user.service.token.TwoFactorAuthTokenService
 import io.stereov.singularity.core.user.service.token.UserTokenService
 import io.stereov.singularity.core.user.service.twofactor.UserTwoFactorAuthService
-import kotlinx.serialization.json.Json
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
@@ -224,8 +223,8 @@ class AuthenticationConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun userService(userRepository: UserRepository, encryptionTransformer: EncryptionService, json: Json, hashService: HashService, encryptionSecretService: EncryptionSecretService): UserService {
-        return UserService(userRepository, encryptionTransformer, json, hashService, encryptionSecretService)
+    fun userService(userRepository: UserRepository, encryptionTransformer: EncryptionService, hashService: HashService, encryptionSecretService: EncryptionSecretService): UserService {
+        return UserService(userRepository, encryptionTransformer, hashService, encryptionSecretService)
     }
 
     @Bean

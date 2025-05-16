@@ -19,6 +19,7 @@ import io.stereov.singularity.core.user.service.UserService
 import io.stereov.singularity.core.user.service.token.TwoFactorAuthTokenService
 import io.stereov.singularity.core.user.service.token.UserTokenService
 import io.stereov.singularity.core.user.service.token.model.StepUpToken
+import org.bson.types.ObjectId
 import org.springframework.http.ResponseCookie
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ServerWebExchange
@@ -55,7 +56,7 @@ class CookieService(
      *
      * @return The created access token cookie.
      */
-    suspend fun createAccessTokenCookie(userId: String, deviceId: String): ResponseCookie {
+    suspend fun createAccessTokenCookie(userId: ObjectId, deviceId: String): ResponseCookie {
         logger.debug { "Creating access token cookie for user $userId" }
 
         val accessToken = userTokenService.createAccessToken(userId, deviceId)
@@ -82,7 +83,7 @@ class CookieService(
      * @return The created refresh token cookie.
      */
     suspend fun createRefreshTokenCookie(
-        userId: String,
+        userId: ObjectId,
         deviceInfoDto: DeviceInfoRequest,
         exchange: ServerWebExchange
     ): ResponseCookie {
@@ -188,7 +189,7 @@ class CookieService(
 
         val refreshToken = userTokenService.extractRefreshToken(refreshTokenCookie, deviceId)
 
-        val user = userService.findById(refreshToken.accountId)
+        val user = userService.findById(refreshToken.userId)
 
         if (user.sensitive.devices.any { it.id == refreshToken.deviceId && it.refreshTokenId == refreshToken.tokenId }) {
             return user.toDto()
@@ -204,7 +205,7 @@ class CookieService(
      *
      * @return The created two-factor authentication token cookie.
      */
-    suspend fun createLoginVerificationCookie(userId: String): ResponseCookie {
+    suspend fun createLoginVerificationCookie(userId: ObjectId): ResponseCookie {
         logger.debug { "Creating cookie for two factor login verification token" }
 
         val cookie = ResponseCookie.from(Constants.LOGIN_VERIFICATION_TOKEN_COOKIE, twoFactorAuthTokenService.createLoginToken(userId))
@@ -229,7 +230,7 @@ class CookieService(
      *
      * @throws InvalidTokenException If the login verification token is invalid or not provided.
      */
-    suspend fun validateLoginVerificationCookieAndGetUserId(exchange: ServerWebExchange): String {
+    suspend fun validateLoginVerificationCookieAndGetUserId(exchange: ServerWebExchange): ObjectId {
         logger.debug { "Validating login verification cookie" }
 
         val twoFactorCookie = exchange.request.cookies[Constants.LOGIN_VERIFICATION_TOKEN_COOKIE]?.firstOrNull()?.value
@@ -289,7 +290,7 @@ class CookieService(
      *
      * @throws AuthException If this function is called from a path that is not /auth/2fa/recovery
      */
-    internal suspend fun createStepUpCookieForRecovery(userId: String, deviceId: String, exchange: ServerWebExchange): ResponseCookie {
+    internal suspend fun createStepUpCookieForRecovery(userId: ObjectId, deviceId: String, exchange: ServerWebExchange): ResponseCookie {
         logger.debug { "Creating step up cookie" }
 
         val token = twoFactorAuthTokenService.createStepUpTokenForRecovery(userId, deviceId, exchange)

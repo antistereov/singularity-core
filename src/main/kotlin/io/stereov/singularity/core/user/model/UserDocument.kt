@@ -11,6 +11,7 @@ import io.stereov.singularity.core.global.service.hash.model.SearchableHash
 import io.stereov.singularity.core.global.service.hash.model.SecureHash
 import io.stereov.singularity.core.user.dto.UserDto
 import io.stereov.singularity.core.user.dto.UserOverviewDto
+import org.bson.types.ObjectId
 import org.springframework.data.annotation.Transient
 import java.time.Instant
 
@@ -20,16 +21,16 @@ import java.time.Instant
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
 data class UserDocument(
-    private var _id: String? = null,
+    private var _id: ObjectId? = null,
     var password: SecureHash,
     val created: Instant = Instant.now(),
     var lastActive: Instant = Instant.now(),
     var app: ApplicationInfo? = null,
     override var sensitive: SensitiveUserData,
-)  : SensitiveDocument<SensitiveUserData>() {
+) : SensitiveDocument<SensitiveUserData>() {
 
     constructor(
-        _id: String? = null,
+        _id: ObjectId? = null,
         password: SecureHash,
         created: Instant = Instant.now(),
         lastActive: Instant = Instant.now(),
@@ -37,7 +38,7 @@ data class UserDocument(
         name: String,
         email: String,
         roles: MutableSet<Role> = mutableSetOf(Role.USER),
-        groups: MutableSet<String> = mutableSetOf(),
+        groups: MutableSet<ObjectId> = mutableSetOf(),
         security: UserSecurityDetails = UserSecurityDetails(),
         devices: MutableList<DeviceInfo> = mutableListOf(),
         avatar: FileMetaData? = null,
@@ -53,7 +54,7 @@ data class UserDocument(
      * @throws InvalidDocumentException If [_id] is null
      */
     @get:Transient
-    val id: String
+    val id: ObjectId
         get() = this._id ?: throw InvalidDocumentException("No ID found in UserDocument")
 
     /**

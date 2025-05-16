@@ -7,6 +7,7 @@ io.stereov.singularity.core.config.storage.S3Configuration
 io.stereov.singularity.core.config.ApplicationConfiguration
 io.stereov.singularity.core.config.AuthenticationConfiguration
 io.stereov.singularity.core.config.EncryptionConfiguration
+io.stereov.singularity.core.config.JsonConfiguration
 io.stereov.singularity.core.config.JwtConfiguration
 io.stereov.singularity.core.config.MailConfiguration
 io.stereov.singularity.core.config.RedisConfiguration

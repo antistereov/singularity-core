@@ -15,8 +15,7 @@ import io.stereov.singularity.core.user.model.UserDocument
 import io.stereov.singularity.core.user.repository.UserRepository
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.serializer
+import org.bson.types.ObjectId
 import org.springframework.stereotype.Service
 
 /**
@@ -31,26 +30,21 @@ import org.springframework.stereotype.Service
 class UserService(
     private val userRepository: UserRepository,
     private val encryptionService: EncryptionService,
-    json: Json,
     private val hashService: HashService,
     private val encryptionSecretService: EncryptionSecretService,
-) : SensitiveCrudService<SensitiveUserData, UserDocument, EncryptedUserDocument>(userRepository, encryptionSecretService) {
+) : SensitiveCrudService<SensitiveUserData, UserDocument, EncryptedUserDocument>(userRepository, encryptionSecretService, encryptionService) {
 
     private val logger: KLogger
         get() = KotlinLogging.logger {}
 
-    override val serializer = json.serializersModule.serializer<SensitiveUserData>()
+    override val clazz = SensitiveUserData::class.java
 
     override suspend fun encrypt(document: UserDocument, otherValues: List<Any>): EncryptedUserDocument {
 
         if (otherValues.getOrNull(0) == true || otherValues.getOrNull(0) == null) document.updateLastActive()
 
         val hashedEmail = hashService.hashSha256(document.sensitive.email)
-        return this.encryptionService.encrypt(document, this.serializer, listOf(hashedEmail)) as EncryptedUserDocument
-    }
-
-    override suspend fun decrypt(encrypted: EncryptedUserDocument, otherValues: List<Any>): UserDocument {
-        return this.encryptionService.decrypt(encrypted, this.serializer) as UserDocument
+        return this.encryptionService.encrypt(document, listOf(hashedEmail)) as EncryptedUserDocument
     }
 
     override suspend fun rotateKey() {
@@ -118,7 +112,7 @@ class UserService(
         return this.userRepository.existsByEmail(hashedEmail)
     }
 
-    suspend fun getAvatar(userId: String): FileMetaData {
+    suspend fun getAvatar(userId: ObjectId): FileMetaData {
         logger.debug { "Finding avatar for user $userId" }
 
         val user = findById(userId)

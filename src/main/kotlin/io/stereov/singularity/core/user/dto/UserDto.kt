@@ -3,7 +3,7 @@ package io.stereov.singularity.core.user.dto
 import io.stereov.singularity.core.global.service.file.model.FileMetaData
 import io.stereov.singularity.core.user.dto.response.DeviceInfoResponse
 import io.stereov.singularity.core.user.model.Role
-import kotlinx.serialization.Serializable
+import org.bson.types.ObjectId
 
 /**
  * # User Data Transfer Object (DTO).
@@ -27,9 +27,8 @@ import kotlinx.serialization.Serializable
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
-@Serializable
 data class UserDto(
-    val id: String,
+    val id: ObjectId,
     val name: String,
     val email: String,
     val roles: Set<Role> = setOf(Role.USER),
