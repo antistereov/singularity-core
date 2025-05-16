@@ -17,14 +17,26 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
     private val articleBasePath = "$contentBasePath/articles"
 
     data class ArticleOverviewPage(
-        val totalElements: Int,
-        val content: List<ArticleOverviewResponse>
+        val content: List<ArticleOverviewResponse>,
+        val pageNumber: Int,
+        val pageSize: Int,
+        val numberOfElements: Int,
+        val totalElements: Long,
+        val totalPages: Int,
+        val first: Boolean,
+        val last: Boolean,
+        val hasNext: Boolean,
+        val hasPrevious: Boolean
     )
     
     @Test fun `getArticles works with no authentication`() = runTest {
         val article = save()
         article.access.visibility = AccessType.PUBLIC
         articleService.save(article)
+
+        val foundArticle = articleService.findById(article.id)
+        foundArticle.toString()
+        foundArticle.toOverviewResponse(null).toString()
 
         val res = webTestClient.get()
             .uri(articleBasePath)
@@ -147,7 +159,9 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         assertEquals(article.id, res.content.first().id)
     }
     @Test fun `getArticles works with group viewer`() = runTest {
-        val user = registerUser(email = "another@email.com", groups = listOf("group"))
+        val group = createGroup()
+
+        val user = registerUser(email = "another@email.com", groups = listOf(group.id))
         val article = save()
         article.share(ContentAccessSubject.GROUP, user.info.sensitive.groups.first(), ContentAccessRole.VIEWER)
         articleService.save(article)
@@ -166,7 +180,8 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         assertEquals(article.id, res.content.first().id)
     }
     @Test fun `getArticles works with group editor`() = runTest {
-        val user = registerUser(email = "another@email.com", groups = listOf("group"))
+        val group = createGroup()
+        val user = registerUser(email = "another@email.com", groups = listOf(group.id))
         val article = save()
         article.share(ContentAccessSubject.GROUP, user.info.sensitive.groups.first(), ContentAccessRole.EDITOR)
         articleService.save(article)
@@ -185,7 +200,8 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         assertEquals(article.id, res.content.first().id)
     }
     @Test fun `getArticles works with group admin`() = runTest {
-        val user = registerUser(email = "another@email.com", groups = listOf("group"))
+        val group = createGroup()
+        val user = registerUser(email = "another@email.com", groups = listOf(group.id))
         val article = save()
         article.share(ContentAccessSubject.GROUP, user.info.sensitive.groups.first(), ContentAccessRole.ADMIN)
         articleService.save(article)
@@ -381,7 +397,8 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         assertEquals(article.id, res.articles.first().id)
     }
     @Test fun `getLatestArticles works with group viewer`() = runTest {
-        val user = registerUser(email = "another@email.com", groups = listOf("group"))
+        val group = createGroup()
+        val user = registerUser(email = "another@email.com", groups = listOf(group.id))
         val article = save()
         article.share(ContentAccessSubject.GROUP, user.info.sensitive.groups.first(), ContentAccessRole.VIEWER)
         article.state = ArticleState.PUBLISHED
@@ -402,7 +419,8 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         assertEquals(article.id, res.articles.first().id)
     }
     @Test fun `getLatestArticles works with group editor`() = runTest {
-        val user = registerUser(email = "another@email.com", groups = listOf("group"))
+        val group = createGroup()
+        val user = registerUser(email = "another@email.com", groups = listOf(group.id))
         val article = save()
         article.share(ContentAccessSubject.GROUP, user.info.sensitive.groups.first(), ContentAccessRole.EDITOR)
         article.state = ArticleState.PUBLISHED
@@ -423,7 +441,8 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         assertEquals(article.id, res.articles.first().id)
     }
     @Test fun `getLatestArticles works with group admin`() = runTest {
-        val user = registerUser(email = "another@email.com", groups = listOf("group"))
+        val group = createGroup()
+        val user = registerUser(email = "another@email.com", groups = listOf(group.id))
         val article = save()
         article.share(ContentAccessSubject.GROUP, user.info.sensitive.groups.first(), ContentAccessRole.ADMIN)
         article.state = ArticleState.PUBLISHED
