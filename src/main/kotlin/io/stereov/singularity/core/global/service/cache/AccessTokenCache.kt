@@ -5,6 +5,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.lettuce.core.ExperimentalLettuceCoroutinesApi
 import io.lettuce.core.api.coroutines.RedisCoroutinesCommands
 import io.stereov.singularity.core.properties.JwtProperties
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.map
 import org.bson.types.ObjectId
 import org.springframework.stereotype.Service
@@ -84,6 +85,6 @@ class AccessTokenCache(
 
         keys.map { key ->
             commands.del(key)
-        }
+        }.collect()
     }
 }

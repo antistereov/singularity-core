@@ -214,20 +214,6 @@ data class UserDocument(
     }
 
     /**
-     * Remove a role from the user.
-     *
-     * This method removes a role from the user's role list.
-     *
-     * @param role The role to remove.
-     *
-     * @return True if the role was removed, false otherwise.
-     */
-    fun removeRole(role: Role): UserDocument {
-        this.sensitive.roles.remove(role)
-        return this
-    }
-
-    /**
      * Update the last active timestamp of the user.
      *
      * This method sets the last active timestamp to the current time.

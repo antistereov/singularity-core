@@ -93,7 +93,7 @@ class CookieService(
         val refreshToken = userTokenService.createRefreshToken(userId, deviceInfoDto.id, refreshTokenId)
 
         val ipAddress = exchange.request.remoteAddress?.address?.hostAddress
-        val location = ipAddress?.let { try { geoLocationService.getLocation(it) } catch(e: Exception) { null } }
+        val location = ipAddress?.let { try { geoLocationService.getLocation(it) } catch(_: Exception) { null } }
 
         val deviceInfo = DeviceInfo(
             id = deviceInfoDto.id,
