@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 import java.time.Instant
 
 @Serializable
-data class ArticleOverviewDto(
+data class ArticleOverviewResponse(
     val id: String? = null,
     val key: String,
     @Serializable(with = InstantSerializer::class)

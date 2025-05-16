@@ -58,6 +58,6 @@ class ArticleManagementService(
             ).awaitFirstOrNull() ?: 0
         } else 0
 
-        return ArticleResponse(articles.map { it.toOverviewDto() }, remainingCount)
+        return ArticleResponse(articles.map { it.toOverviewResponse() }, remainingCount)
     }
 }

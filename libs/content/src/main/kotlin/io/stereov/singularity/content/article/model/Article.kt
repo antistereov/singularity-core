@@ -1,6 +1,6 @@
 package io.stereov.singularity.content.article.model
 
-import io.stereov.singularity.content.article.dto.ArticleOverviewDto
+import io.stereov.singularity.content.article.dto.ArticleOverviewResponse
 import io.stereov.singularity.content.article.dto.FullArticleResponse
 import io.stereov.singularity.content.common.model.ContentAccessDetails
 import io.stereov.singularity.content.common.model.ContentAccessPermissions
@@ -34,7 +34,7 @@ data class Article(
     override val id: String
         get() = _id ?: throw InvalidDocumentException("No id found")
 
-    fun toOverviewDto() = ArticleOverviewDto(id, key, createdAt, publishedAt, updatedAt, path, state,
+    fun toOverviewResponse() = ArticleOverviewResponse(id, key, createdAt, publishedAt, updatedAt, path, state,
         title, colors, summary, image, access)
 
     companion object {

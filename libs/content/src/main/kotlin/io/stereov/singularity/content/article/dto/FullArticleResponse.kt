@@ -39,7 +39,7 @@ data class FullArticleResponse(
         article.trusted, article.access
     )
 
-    fun toOverview() = ArticleOverviewDto(
+    fun toOverview() = ArticleOverviewResponse(
         id = id,
         key = key,
         createdAt = createdAt,
