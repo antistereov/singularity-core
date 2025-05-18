@@ -2,10 +2,11 @@ package io.stereov.singularity.content.common.tag.controller
 
 import io.stereov.singularity.content.common.tag.dto.CreateTagRequest
 import io.stereov.singularity.content.common.tag.dto.NameContainsResponse
+import io.stereov.singularity.content.common.tag.dto.TagResponse
 import io.stereov.singularity.content.common.tag.dto.UpdateTagRequest
-import io.stereov.singularity.content.common.tag.model.TagDocument
 import io.stereov.singularity.content.common.tag.service.TagService
 import io.stereov.singularity.core.global.model.SuccessResponse
+import org.bson.types.ObjectId
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
@@ -17,22 +18,27 @@ class TagController(
 ) {
 
     @PostMapping
-    suspend fun create(@RequestBody req: CreateTagRequest): ResponseEntity<TagDocument> {
-        return ResponseEntity.ok(service.create(req))
+    suspend fun create(@RequestBody req: CreateTagRequest): ResponseEntity<TagResponse> {
+        return ResponseEntity.ok(service.create(req).toResponse())
+    }
+
+    @GetMapping("/{id}")
+    suspend fun findById(@PathVariable id: String): ResponseEntity<TagResponse> {
+        return ResponseEntity.ok(service.findById(ObjectId(id)).toResponse())
     }
 
     @GetMapping
-    suspend fun findNameContains(@RequestParam substring: String): ResponseEntity<NameContainsResponse> {
-        val tagList = service.findNameContains(substring)
+    suspend fun findByNameContains(@RequestParam substring: String): ResponseEntity<NameContainsResponse> {
+        val tagList = service.findByNameContains(substring)
 
         return ResponseEntity.ok(
-            NameContainsResponse(tagList, tagList.size)
+            NameContainsResponse(tagList.map { it.toResponse() }, tagList.size)
         )
     }
 
     @PutMapping("/{id}")
-    suspend fun updateTag(@PathVariable id: String, @RequestBody req: UpdateTagRequest): ResponseEntity<TagDocument> {
-        return ResponseEntity.ok(service.updateTag(id, req))
+    suspend fun updateTag(@PathVariable id: String, @RequestBody req: UpdateTagRequest): ResponseEntity<TagResponse> {
+        return ResponseEntity.ok(service.updateTag(id, req).toResponse())
     }
 
     @DeleteMapping("/{id}")
