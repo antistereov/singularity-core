@@ -2,7 +2,7 @@ package io.stereov.singularity.content.article.dto
 
 import io.stereov.singularity.content.article.model.ArticleColors
 import io.stereov.singularity.content.article.model.ArticleState
-import io.stereov.singularity.content.common.dto.ContentAccessDetailsResponse
+import io.stereov.singularity.content.common.content.dto.ContentAccessDetailsResponse
 import io.stereov.singularity.core.global.service.file.model.FileMetaData
 import org.bson.types.ObjectId
 import java.time.Instant

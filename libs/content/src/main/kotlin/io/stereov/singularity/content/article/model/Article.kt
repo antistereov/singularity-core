@@ -2,10 +2,10 @@ package io.stereov.singularity.content.article.model
 
 import io.stereov.singularity.content.article.dto.ArticleOverviewResponse
 import io.stereov.singularity.content.article.dto.FullArticleResponse
-import io.stereov.singularity.content.common.dto.ContentAccessDetailsResponse
-import io.stereov.singularity.content.common.model.ContentAccessDetails
-import io.stereov.singularity.content.common.model.ContentAccessPermissions
-import io.stereov.singularity.content.common.model.ContentDocument
+import io.stereov.singularity.content.common.content.dto.ContentAccessDetailsResponse
+import io.stereov.singularity.content.common.content.model.ContentAccessDetails
+import io.stereov.singularity.content.common.content.model.ContentAccessPermissions
+import io.stereov.singularity.content.common.content.model.ContentDocument
 import io.stereov.singularity.core.auth.model.AccessType
 import io.stereov.singularity.core.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.core.global.service.file.model.FileMetaData

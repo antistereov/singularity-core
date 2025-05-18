@@ -3,8 +3,8 @@ package io.stereov.singularity.content.article.controller
 import io.stereov.singularity.content.article.dto.ArticleOverviewResponse
 import io.stereov.singularity.content.article.dto.ArticleResponse
 import io.stereov.singularity.content.article.model.ArticleState
-import io.stereov.singularity.content.common.model.ContentAccessRole
-import io.stereov.singularity.content.common.model.ContentAccessSubject
+import io.stereov.singularity.content.common.content.model.ContentAccessRole
+import io.stereov.singularity.content.common.content.model.ContentAccessSubject
 import io.stereov.singularity.core.auth.model.AccessType
 import io.stereov.singularity.core.config.Constants
 import io.stereov.singularity.test.BaseContentTest

@@ -5,7 +5,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.content.article.dto.ArticleResponse
 import io.stereov.singularity.content.article.model.Article
 import io.stereov.singularity.content.article.model.ArticleState
-import io.stereov.singularity.content.common.service.ContentManagementService
+import io.stereov.singularity.content.common.content.service.ContentManagementService
 import io.stereov.singularity.content.common.util.AccessCriteria
 import io.stereov.singularity.core.auth.service.AuthenticationService
 import kotlinx.coroutines.reactive.awaitFirstOrNull

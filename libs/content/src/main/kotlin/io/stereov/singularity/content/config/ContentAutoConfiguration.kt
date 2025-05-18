@@ -4,6 +4,9 @@ import io.stereov.singularity.content.article.controller.ArticleController
 import io.stereov.singularity.content.article.repository.ArticleRepository
 import io.stereov.singularity.content.article.service.ArticleManagementService
 import io.stereov.singularity.content.article.service.ArticleService
+import io.stereov.singularity.content.common.tag.controller.TagController
+import io.stereov.singularity.content.common.tag.repository.TagRepository
+import io.stereov.singularity.content.common.tag.service.TagService
 import io.stereov.singularity.content.common.util.AccessCriteria
 import io.stereov.singularity.core.auth.service.AuthenticationService
 import io.stereov.singularity.core.config.AuthenticationConfiguration
@@ -27,7 +30,7 @@ import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRep
         AuthenticationConfiguration::class,
     ]
 )
-@EnableReactiveMongoRepositories(basePackageClasses = [ArticleRepository::class])
+@EnableReactiveMongoRepositories(basePackageClasses = [ArticleRepository::class, TagRepository::class])
 class ContentAutoConfiguration {
 
     @Bean
@@ -50,9 +53,19 @@ class ContentAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun userArticleService(reactiveMongoTemplate: ReactiveMongoTemplate, accessCriteria: AccessCriteria, authenticationService: AuthenticationService): ArticleManagementService {
+    fun articleManagementService(reactiveMongoTemplate: ReactiveMongoTemplate, accessCriteria: AccessCriteria, authenticationService: AuthenticationService): ArticleManagementService {
         return ArticleManagementService(reactiveMongoTemplate, accessCriteria, authenticationService)
     }
 
+    @Bean
+    @ConditionalOnMissingBean
+    fun tagController(service: TagService): TagController {
+        return TagController(service)
+    }
 
+    @Bean
+    @ConditionalOnMissingBean
+    fun tagService(repository: TagRepository, reactiveMongoTemplate: ReactiveMongoTemplate): TagService {
+        return TagService(repository, reactiveMongoTemplate)
+    }
 }

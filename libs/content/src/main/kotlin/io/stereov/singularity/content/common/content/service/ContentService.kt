@@ -1,9 +1,9 @@
-package io.stereov.singularity.content.common.service
+package io.stereov.singularity.content.common.content.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.content.common.model.ContentDocument
-import io.stereov.singularity.content.common.repository.ContentRepository
+import io.stereov.singularity.content.common.content.model.ContentDocument
+import io.stereov.singularity.content.common.content.repository.ContentRepository
 import io.stereov.singularity.core.global.exception.model.DocumentNotFoundException
 import org.bson.types.ObjectId
 import java.time.Instant

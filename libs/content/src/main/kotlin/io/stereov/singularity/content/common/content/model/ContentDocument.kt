@@ -1,4 +1,4 @@
-package io.stereov.singularity.content.common.model
+package io.stereov.singularity.content.common.content.model
 
 import org.bson.types.ObjectId
 import java.time.Instant

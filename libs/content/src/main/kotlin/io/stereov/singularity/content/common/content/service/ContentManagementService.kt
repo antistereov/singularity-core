@@ -1,6 +1,6 @@
-package io.stereov.singularity.content.common.service
+package io.stereov.singularity.content.common.content.service
 
-import io.stereov.singularity.content.common.model.ContentDocument
+import io.stereov.singularity.content.common.content.model.ContentDocument
 import io.stereov.singularity.content.common.util.AccessCriteria
 import io.stereov.singularity.core.global.util.paginateWithQuery
 import org.springframework.data.domain.Page

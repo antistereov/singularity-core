@@ -1,8 +1,8 @@
 package io.stereov.singularity.content.common.util
 
-import io.stereov.singularity.content.common.model.ContentAccessDetails
-import io.stereov.singularity.content.common.model.ContentAccessPermissions
-import io.stereov.singularity.content.common.model.ContentDocument
+import io.stereov.singularity.content.common.content.model.ContentAccessDetails
+import io.stereov.singularity.content.common.content.model.ContentAccessPermissions
+import io.stereov.singularity.content.common.content.model.ContentDocument
 import io.stereov.singularity.core.auth.model.AccessType
 import io.stereov.singularity.core.auth.service.AuthenticationService
 import io.stereov.singularity.core.user.model.UserDocument

@@ -6,8 +6,8 @@ import io.stereov.singularity.content.article.dto.CreateArticleRequest
 import io.stereov.singularity.content.article.dto.FullArticleResponse
 import io.stereov.singularity.content.article.model.Article
 import io.stereov.singularity.content.article.repository.ArticleRepository
-import io.stereov.singularity.content.common.service.ContentService
-import io.stereov.singularity.content.common.util.toSlug
+import io.stereov.singularity.content.common.content.service.ContentService
+import io.stereov.singularity.content.common.content.util.toSlug
 import io.stereov.singularity.core.auth.service.AuthenticationService
 import io.stereov.singularity.core.user.model.Role
 import io.stereov.singularity.core.user.model.UserDocument

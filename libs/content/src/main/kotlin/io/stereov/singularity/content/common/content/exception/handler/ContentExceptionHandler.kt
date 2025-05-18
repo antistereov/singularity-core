@@ -1,9 +1,9 @@
-package io.stereov.singularity.content.common.exception.handler
+package io.stereov.singularity.content.common.content.exception.handler
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.content.common.exception.ContentException
-import io.stereov.singularity.content.common.exception.model.ContentKeyExistsException
+import io.stereov.singularity.content.common.content.exception.ContentException
+import io.stereov.singularity.content.common.content.exception.model.ContentKeyExistsException
 import io.stereov.singularity.core.global.exception.BaseExceptionHandler
 import io.stereov.singularity.core.global.model.ErrorResponse
 import org.springframework.http.HttpStatus

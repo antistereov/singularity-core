@@ -1,6 +1,6 @@
-package io.stereov.singularity.content.common.repository
+package io.stereov.singularity.content.common.content.repository
 
-import io.stereov.singularity.content.common.model.ContentDocument
+import io.stereov.singularity.content.common.content.model.ContentDocument
 import org.bson.types.ObjectId
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 
