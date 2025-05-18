@@ -26,3 +26,8 @@ suspend fun <T> paginateWithQuery(
 
     return PageImpl(content, pageable, totalCount)
 }
+
+fun getFieldContainsCriteria(field: String, substring: String): Criteria {
+    val regexPattern = ".*${Regex.escape(substring)}.*"
+    return Criteria.where(field).regex(regexPattern, "i")
+}
