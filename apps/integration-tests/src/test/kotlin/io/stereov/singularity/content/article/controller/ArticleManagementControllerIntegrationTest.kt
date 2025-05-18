@@ -5,11 +5,13 @@ import io.stereov.singularity.content.article.dto.ArticleResponse
 import io.stereov.singularity.content.article.model.ArticleState
 import io.stereov.singularity.content.common.content.model.ContentAccessRole
 import io.stereov.singularity.content.common.content.model.ContentAccessSubject
+import io.stereov.singularity.content.common.tag.dto.CreateTagRequest
 import io.stereov.singularity.core.auth.model.AccessType
 import io.stereov.singularity.core.config.Constants
 import io.stereov.singularity.test.BaseContentTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class ArticleManagementControllerIntegrationTest : BaseContentTest() {
@@ -218,6 +220,56 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
 
         assertEquals(1, res.totalElements)
         assertEquals(article.id, res.content.first().id)
+    }
+    @Test fun `getArticles correctly filters tags`() = runTest {
+        val user = registerUser()
+        val article = save(creator = user)
+        val tag = tagService.create(CreateTagRequest("test"))
+
+        article.tags.add(tag.id)
+        articleService.save(article)
+
+        save(creator = user)
+
+        val res = webTestClient.get()
+            .uri("$articleBasePath?tagIds=${tag.id}")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .exchange()
+            .expectBody(ArticleOverviewPage::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        assertEquals(1, res.totalElements)
+        assertEquals(article.id, res.content.first().id)
+    }
+    @Test fun `getArticles correctly filters when multiple tags`() = runTest {
+        val user = registerUser()
+        val article = save(creator = user)
+        val tag = tagService.create(CreateTagRequest("test"))
+        val anotherTag = tagService.create(CreateTagRequest("test2"))
+
+        article.tags.add(tag.id)
+        articleService.save(article)
+
+        val anotherArticle = save(creator = user)
+        anotherArticle.tags.add(anotherTag.id)
+        articleService.save(anotherArticle)
+
+        val res = webTestClient.get()
+            .uri("$articleBasePath?tagIds=${tag.id},${anotherTag.id}")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .exchange()
+            .expectBody(ArticleOverviewPage::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        assertEquals(2, res.totalElements)
+        assertTrue(res.content.any { it.id == article.id })
+        assertTrue(res.content.any { it.id == anotherArticle.id })
     }
 
     @Test fun `getLatestArticles works with no authentication`() = runTest {
