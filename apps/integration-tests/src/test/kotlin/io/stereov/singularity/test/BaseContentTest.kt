@@ -4,6 +4,7 @@ import io.stereov.singularity.content.article.dto.CreateArticleRequest
 import io.stereov.singularity.content.article.dto.FullArticleResponse
 import io.stereov.singularity.content.article.model.Article
 import io.stereov.singularity.content.article.service.ArticleService
+import io.stereov.singularity.content.common.tag.service.TagService
 import io.stereov.singularity.core.config.Constants
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach
@@ -11,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired
 
 class BaseContentTest : BaseIntegrationTest() {
 
+    @Autowired
+    lateinit var tagService: TagService
     final val contentBasePath = "$basePath/content"
 
     @Autowired
@@ -19,6 +22,7 @@ class BaseContentTest : BaseIntegrationTest() {
     @AfterEach
     fun clearArticleDatabase() = runBlocking {
         articleService.deleteAll()
+        tagService.deleteAll()
     }
 
     suspend fun save(creator: TestRegisterResponse? = null, title: String? = null): Article {
