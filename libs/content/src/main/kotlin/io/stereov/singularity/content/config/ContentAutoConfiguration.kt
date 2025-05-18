@@ -8,6 +8,7 @@ import io.stereov.singularity.content.common.tag.controller.TagController
 import io.stereov.singularity.content.common.tag.repository.TagRepository
 import io.stereov.singularity.content.common.tag.service.TagService
 import io.stereov.singularity.content.common.util.AccessCriteria
+import io.stereov.singularity.content.properties.ContentProperties
 import io.stereov.singularity.core.auth.service.AuthenticationService
 import io.stereov.singularity.core.config.AuthenticationConfiguration
 import io.stereov.singularity.core.user.service.UserService
@@ -16,6 +17,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
 import org.springframework.boot.autoconfigure.data.web.SpringDataWebAutoConfiguration
 import org.springframework.boot.autoconfigure.mongo.MongoReactiveAutoConfiguration
+import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
@@ -30,6 +32,7 @@ import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRep
         AuthenticationConfiguration::class,
     ]
 )
+@EnableConfigurationProperties(ContentProperties::class)
 @EnableReactiveMongoRepositories(basePackageClasses = [ArticleRepository::class, TagRepository::class])
 class ContentAutoConfiguration {
 
@@ -47,8 +50,14 @@ class ContentAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun articleService(articleRepository: ArticleRepository, userService: UserService, authenticationService: AuthenticationService): ArticleService {
-        return ArticleService(articleRepository, userService, authenticationService)
+    fun articleService(
+        articleRepository: ArticleRepository,
+        userService: UserService,
+        authenticationService: AuthenticationService,
+        reactiveMongoTemplate: ReactiveMongoTemplate,
+        accessCriteria: AccessCriteria,
+    ): ArticleService {
+        return ArticleService(articleRepository, userService, authenticationService, reactiveMongoTemplate, accessCriteria)
     }
 
     @Bean
@@ -65,7 +74,7 @@ class ContentAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun tagService(repository: TagRepository, reactiveMongoTemplate: ReactiveMongoTemplate): TagService {
-        return TagService(repository, reactiveMongoTemplate)
+    fun tagService(repository: TagRepository, reactiveMongoTemplate: ReactiveMongoTemplate, contentProperties: ContentProperties): TagService {
+        return TagService(repository, reactiveMongoTemplate, contentProperties)
     }
 }
