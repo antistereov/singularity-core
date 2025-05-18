@@ -26,7 +26,7 @@ data class FullArticleResponse(
     val content: String,
     val trusted: Boolean,
     val access: ContentAccessDetailsResponse,
-    val tags: Set<String>
+    val tags: Set<ObjectId>
 ) {
 
     constructor(article: Article, creator: UserDocument, viewer: UserDocument?): this(

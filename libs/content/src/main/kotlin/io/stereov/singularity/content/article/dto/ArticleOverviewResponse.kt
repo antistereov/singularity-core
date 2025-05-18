@@ -20,5 +20,5 @@ data class ArticleOverviewResponse(
     val summary: String,
     val image: FileMetaData?,
     val access: ContentAccessDetailsResponse,
-    val tags: Set<String>
+    val tags: Set<ObjectId>
 )
