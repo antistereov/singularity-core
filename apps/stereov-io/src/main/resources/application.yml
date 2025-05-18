@@ -82,3 +82,8 @@ baseline:
       recovery-code-count: 6
   ui:
     base-url: ${UI_BASE_URL}
+  content:
+    tags:
+      - name: Music
+      - name: Arts
+      - name: Coding
