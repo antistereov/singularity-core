@@ -32,7 +32,7 @@ data class Article(
     val image: FileMetaData? = null,
     val content: String = "",
     override var trusted: Boolean,
-    override val tags: MutableSet<ObjectId> = mutableSetOf()
+    override val tags: MutableSet<String> = mutableSetOf()
 ) : ContentDocument<Article>() {
 
     override val id: ObjectId

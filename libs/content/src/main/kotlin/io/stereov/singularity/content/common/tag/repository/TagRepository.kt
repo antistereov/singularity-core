@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository
 @Repository
 interface TagRepository : CoroutineCrudRepository<TagDocument, ObjectId> {
 
-    suspend fun existsByName(name: String): Boolean
+    suspend fun existsByKey(name: String): Boolean
 }

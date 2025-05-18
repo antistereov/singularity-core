@@ -11,13 +11,13 @@ import org.springframework.data.mongodb.core.mapping.Document
 @Document(collection = "tags")
 data class TagDocument(
     @Id private val _id: ObjectId? = null,
-    @Indexed(unique = true) var name: String,
+    @Indexed(unique = true) var key: String,
     var description: String,
 ) {
 
     constructor(req: CreateTagRequest): this(
         _id = null,
-        name = req.name,
+        key = req.key,
         description = req.description ?: ""
     )
 
@@ -25,6 +25,6 @@ data class TagDocument(
         get() = _id ?: throw InvalidDocumentException("TagDocument contains no ID")
 
     fun toResponse(): TagResponse {
-        return TagResponse(id, name, description)
+        return TagResponse(key, description)
     }
 }

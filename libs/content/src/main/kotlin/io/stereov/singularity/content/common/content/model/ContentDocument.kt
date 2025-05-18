@@ -10,7 +10,7 @@ abstract class ContentDocument<T: ContentDocument<T>> {
     abstract var updatedAt: Instant
     abstract val access: ContentAccessDetails
     abstract val trusted: Boolean
-    abstract val tags: MutableSet<ObjectId>
+    abstract val tags: MutableSet<String>
 
     @Suppress("UNCHECKED_CAST")
     fun share(type: ContentAccessSubject, subjectId: ObjectId, role: ContentAccessRole): T {

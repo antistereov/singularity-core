@@ -33,9 +33,9 @@ class TagService(
         contentProperties.tags?.forEach { tagRequest ->
             try {
                 runBlocking { create(tagRequest) }
-                logger.info { "Created tag with name \"${tagRequest.name}\""}
+                logger.info { "Created tag with key \"${tagRequest.key}\""}
             } catch (_: TagNameExistsException) {
-                logger.info { "Skipping creation of tag with name \"${tagRequest.name}\" because it already exists"}
+                logger.info { "Skipping creation of tag with key \"${tagRequest.key}\" because it already exists"}
             }
         }
     }
@@ -44,23 +44,23 @@ class TagService(
         get() = KotlinLogging.logger {}
 
     suspend fun create(req: CreateTagRequest): TagDocument {
-        logger.debug { "Creating tag with name ${req.name}" }
+        logger.debug { "Creating tag with key ${req.key}" }
 
-        if (existsByName(req.name)) throw TagNameExistsException(req.name)
+        if (existsByKey(req.key)) throw TagNameExistsException(req.key)
 
         return save(TagDocument(req))
     }
 
     suspend fun save(tag: TagDocument): TagDocument {
-        logger.debug { "Saving tag with name \"${tag.name}\"" }
+        logger.debug { "Saving tag with key \"${tag.key}\"" }
 
         return repository.save(tag)
     }
 
-    suspend fun existsByName(name: String): Boolean {
-        logger.debug { "Checking if there is a tag with name \"$name\" already" }
+    suspend fun existsByKey(name: String): Boolean {
+        logger.debug { "Checking if there is a tag with key \"$name\" already" }
 
-        return repository.existsByName(name)
+        return repository.existsByKey(name)
     }
 
     suspend fun findById(id: ObjectId): TagDocument {
@@ -69,10 +69,10 @@ class TagService(
         return repository.findById(id) ?: throw DocumentNotFoundException("No tag with id \"$id\" found")
     }
 
-    suspend fun findByNameContains(substring: String): List<TagDocument> {
-        logger.debug { "Finding tags with name containing \"$substring\"" }
+    suspend fun findByKeyContains(substring: String): List<TagDocument> {
+        logger.debug { "Finding tags with key containing \"$substring\"" }
 
-        val criteria = getFieldContainsCriteria(TagDocument::name.name, substring)
+        val criteria = getFieldContainsCriteria(TagDocument::key.name, substring)
 
         return reactiveMongoTemplate.find<TagDocument>(Query.query(criteria))
             .collectList()
@@ -85,7 +85,7 @@ class TagService(
 
         val tag = findById(ObjectId(id))
 
-        tag.name = req.name ?: tag.name
+        tag.key = req.key ?: tag.key
         tag.description = req.description ?: tag.description
 
         return save(tag)

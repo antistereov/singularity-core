@@ -1,7 +1,7 @@
 package io.stereov.singularity.content.common.tag.controller
 
 import io.stereov.singularity.content.common.tag.dto.CreateTagRequest
-import io.stereov.singularity.content.common.tag.dto.NameContainsResponse
+import io.stereov.singularity.content.common.tag.dto.KeyContainsResponse
 import io.stereov.singularity.content.common.tag.dto.TagResponse
 import io.stereov.singularity.content.common.tag.dto.UpdateTagRequest
 import io.stereov.singularity.content.common.tag.service.TagService
@@ -28,11 +28,11 @@ class TagController(
     }
 
     @GetMapping
-    suspend fun findByNameContains(@RequestParam substring: String): ResponseEntity<NameContainsResponse> {
-        val tagList = service.findByNameContains(substring)
+    suspend fun findByKeyContains(@RequestParam substring: String): ResponseEntity<KeyContainsResponse> {
+        val tagList = service.findByKeyContains(substring)
 
         return ResponseEntity.ok(
-            NameContainsResponse(tagList.map { it.toResponse() }, tagList.size)
+            KeyContainsResponse(tagList.map { it.toResponse() }, tagList.size)
         )
     }
 

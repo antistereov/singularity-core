@@ -226,13 +226,13 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         val article = save(creator = user)
         val tag = tagService.create(CreateTagRequest("test"))
 
-        article.tags.add(tag.id)
+        article.tags.add(tag.key)
         articleService.save(article)
 
         save(creator = user)
 
         val res = webTestClient.get()
-            .uri("$articleBasePath?tagIds=${tag.id}")
+            .uri("$articleBasePath?tags=${tag.key}")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectBody(ArticleOverviewPage::class.java)
@@ -250,15 +250,15 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         val tag = tagService.create(CreateTagRequest("test"))
         val anotherTag = tagService.create(CreateTagRequest("test2"))
 
-        article.tags.add(tag.id)
+        article.tags.add(tag.key)
         articleService.save(article)
 
         val anotherArticle = save(creator = user)
-        anotherArticle.tags.add(anotherTag.id)
+        anotherArticle.tags.add(anotherTag.key)
         articleService.save(anotherArticle)
 
         val res = webTestClient.get()
-            .uri("$articleBasePath?tagIds=${tag.id},${anotherTag.id}")
+            .uri("$articleBasePath?tags=${tag.key},${anotherTag.key}")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectBody(ArticleOverviewPage::class.java)

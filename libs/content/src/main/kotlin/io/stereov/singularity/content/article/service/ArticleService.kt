@@ -14,7 +14,6 @@ import io.stereov.singularity.core.global.util.paginateWithQuery
 import io.stereov.singularity.core.user.model.Role
 import io.stereov.singularity.core.user.model.UserDocument
 import io.stereov.singularity.core.user.service.UserService
-import org.bson.types.ObjectId
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
@@ -69,13 +68,13 @@ class ArticleService(
         return FullArticleResponse(article, actualOwner, currentUser)
     }
 
-    suspend fun getArticles(pageable: Pageable, tagIds: List<String>): Page<Article> {
-        val criteria = if (tagIds.isEmpty()) {
+    suspend fun getArticles(pageable: Pageable, tags: List<String>): Page<Article> {
+        val criteria = if (tags.isEmpty()) {
             accessCriteria.getViewCriteria()
         } else {
             Criteria().andOperator(
                 accessCriteria.getViewCriteria(),
-                Criteria.where(Article::tags.name).`in`(tagIds.map { ObjectId(it) })
+                Criteria.where(Article::tags.name).`in`(tags)
             )
         }
 

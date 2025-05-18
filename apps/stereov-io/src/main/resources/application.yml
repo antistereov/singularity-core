@@ -84,6 +84,6 @@ baseline:
     base-url: ${UI_BASE_URL}
   content:
     tags:
-      - name: Music
-      - name: Arts
-      - name: Coding
+      - key: music
+      - key: arts
+      - key: coding

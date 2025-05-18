@@ -49,15 +49,13 @@ class ArticleController(
     suspend fun getArticles(
         @RequestParam page: Int = 0,
         @RequestParam size: Int = 10,
-        @RequestParam tagIds: List<String> = emptyList()
+        @RequestParam tags: List<String> = emptyList()
     ): ResponseEntity<Page<ArticleOverviewResponse>> {
         val pageable = Pageable.ofSize(size).withPage(page)
         val currentUser = authenticationService.getCurrentUserOrNull()
 
-        println(tagIds)
-
         return ResponseEntity.ok(
-            articleService.getArticles(pageable, tagIds).map { it.toOverviewResponse(currentUser) }
+            articleService.getArticles(pageable, tags).map { it.toOverviewResponse(currentUser) }
         )
     }
 
