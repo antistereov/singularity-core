@@ -10,7 +10,7 @@ import java.time.Instant
 
 abstract class ContentService<T: ContentDocument<T>>(
     private val repository: ContentRepository<T>,
-    private val contentClass: Class<T>
+    protected val contentClass: Class<T>
 ) {
 
     private val logger: KLogger

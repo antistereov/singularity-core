@@ -8,10 +8,17 @@ import io.stereov.singularity.content.article.model.Article
 import io.stereov.singularity.content.article.repository.ArticleRepository
 import io.stereov.singularity.content.common.content.service.ContentService
 import io.stereov.singularity.content.common.content.util.toSlug
+import io.stereov.singularity.content.common.util.AccessCriteria
 import io.stereov.singularity.core.auth.service.AuthenticationService
+import io.stereov.singularity.core.global.util.paginateWithQuery
 import io.stereov.singularity.core.user.model.Role
 import io.stereov.singularity.core.user.model.UserDocument
 import io.stereov.singularity.core.user.service.UserService
+import org.bson.types.ObjectId
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate
+import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -20,6 +27,8 @@ class ArticleService(
     repository: ArticleRepository,
     private val userService: UserService,
     private val authenticationService: AuthenticationService,
+    private val reactiveMongoTemplate: ReactiveMongoTemplate,
+    private val accessCriteria: AccessCriteria,
 ) : ContentService<Article>(repository, Article::class.java) {
 
     private val logger: KLogger
@@ -58,5 +67,18 @@ class ArticleService(
 
         val actualOwner = owner ?: userService.findById(article.access.ownerId)
         return FullArticleResponse(article, actualOwner, currentUser)
+    }
+
+    suspend fun getArticles(pageable: Pageable, tagIds: List<String>): Page<Article> {
+        val criteria = if (tagIds.isEmpty()) {
+            accessCriteria.getViewCriteria()
+        } else {
+            Criteria().andOperator(
+                accessCriteria.getViewCriteria(),
+                Criteria.where(Article::tags.name).`in`(tagIds.map { ObjectId(it) })
+            )
+        }
+
+        return paginateWithQuery(reactiveMongoTemplate, criteria, pageable, contentClass)
     }
 }
