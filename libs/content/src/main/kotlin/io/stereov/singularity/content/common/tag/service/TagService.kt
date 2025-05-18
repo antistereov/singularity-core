@@ -7,9 +7,12 @@ import io.stereov.singularity.content.common.tag.dto.UpdateTagRequest
 import io.stereov.singularity.content.common.tag.exception.model.TagNameExistsException
 import io.stereov.singularity.content.common.tag.model.TagDocument
 import io.stereov.singularity.content.common.tag.repository.TagRepository
+import io.stereov.singularity.content.properties.ContentProperties
 import io.stereov.singularity.core.global.exception.model.DocumentNotFoundException
 import io.stereov.singularity.core.global.util.getFieldContainsCriteria
+import jakarta.annotation.PostConstruct
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import kotlinx.coroutines.runBlocking
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.find
@@ -20,7 +23,22 @@ import org.springframework.stereotype.Service
 class TagService(
     private val repository: TagRepository,
     private val reactiveMongoTemplate: ReactiveMongoTemplate,
+    private val contentProperties: ContentProperties,
 ) {
+
+    @PostConstruct
+    fun initializeTags() {
+        logger.info { "Creating initial tags" }
+
+        contentProperties.tags?.forEach { tagRequest ->
+            try {
+                runBlocking { create(tagRequest) }
+                logger.info { "Created tag with name \"${tagRequest.name}\""}
+            } catch (_: TagNameExistsException) {
+                logger.info { "Skipping creation of tag with name \"${tagRequest.name}\" because it already exists"}
+            }
+        }
+    }
 
     private val logger: KLogger
         get() = KotlinLogging.logger {}
@@ -46,12 +64,12 @@ class TagService(
     }
 
     suspend fun findById(id: ObjectId): TagDocument {
-        logger.debug { "Fining tag with id \"id\"" }
+        logger.debug { "Fining tag with id \"$id\"" }
 
         return repository.findById(id) ?: throw DocumentNotFoundException("No tag with id \"$id\" found")
     }
 
-    suspend fun findNameContains(substring: String): List<TagDocument> {
+    suspend fun findByNameContains(substring: String): List<TagDocument> {
         logger.debug { "Finding tags with name containing \"$substring\"" }
 
         val criteria = getFieldContainsCriteria(TagDocument::name.name, substring)
@@ -78,5 +96,11 @@ class TagService(
 
         repository.deleteById(ObjectId(id))
         return true
+    }
+
+    suspend fun deleteAll() {
+        logger.debug { "Deleting all tags" }
+
+        repository.deleteAll()
     }
 }
