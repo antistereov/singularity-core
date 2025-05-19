@@ -5,6 +5,6 @@ import io.stereov.singularity.core.global.language.model.Language
 data class CreateArticleRequest(
     val lang: Language,
     val title: String,
-    val summary: String,
-    val content: String,
+    val summary: String = "",
+    val content: String = "",
 )
