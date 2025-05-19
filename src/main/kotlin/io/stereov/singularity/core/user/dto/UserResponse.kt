@@ -34,4 +34,5 @@ data class UserResponse(
     val twoFactorAuthEnabled: Boolean,
     val avatar: FileMetaData?,
     val created: String,
+    val groups: Set<String>,
 )

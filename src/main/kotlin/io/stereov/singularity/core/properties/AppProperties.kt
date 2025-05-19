@@ -1,5 +1,6 @@
 package io.stereov.singularity.core.properties
 
+import io.stereov.singularity.core.group.dto.CreateGroupMultiLangRequest
 import org.springframework.boot.context.properties.ConfigurationProperties
 
 /**
@@ -24,7 +25,8 @@ data class AppProperties(
     val secure: Boolean = false,
     val createRootUser: Boolean = false,
     val rootEmail: String = "admin@example.com",
-    val rootPassword: String = "strong-password"
+    val rootPassword: String = "strong-password",
+    val groups: List<CreateGroupMultiLangRequest> = emptyList()
 ) {
 
     val slug: String

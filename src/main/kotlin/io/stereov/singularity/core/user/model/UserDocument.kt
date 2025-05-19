@@ -36,7 +36,7 @@ data class UserDocument(
         name: String,
         email: String,
         roles: MutableSet<Role> = mutableSetOf(Role.USER),
-        groups: MutableSet<ObjectId> = mutableSetOf(),
+        groups: MutableSet<String> = mutableSetOf(),
         security: UserSecurityDetails = UserSecurityDetails(),
         devices: MutableList<DeviceInfo> = mutableListOf(),
         avatar: FileMetaData? = null,
@@ -96,6 +96,7 @@ data class UserDocument(
             sensitive.security.twoFactor.enabled,
             sensitive.avatar,
             created.toString(),
+            sensitive.groups
         )
     }
 

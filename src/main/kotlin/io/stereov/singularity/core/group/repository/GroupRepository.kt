@@ -6,4 +6,7 @@ import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface GroupRepository : CoroutineCrudRepository<GroupDocument, ObjectId>
+interface GroupRepository : CoroutineCrudRepository<GroupDocument, ObjectId> {
+
+    suspend fun existsByKey(key: String): Boolean
+}

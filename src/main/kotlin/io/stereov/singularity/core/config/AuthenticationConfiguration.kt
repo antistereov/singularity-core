@@ -170,9 +170,10 @@ class AuthenticationConfiguration {
     @Bean
     @ConditionalOnMissingBean
     fun groupService(
-        groupRepository: GroupRepository
+        groupRepository: GroupRepository,
+        appProperties: AppProperties
     ): GroupService {
-        return GroupService(groupRepository)
+        return GroupService(groupRepository, appProperties)
     }
 
     @Bean
