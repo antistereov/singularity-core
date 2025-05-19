@@ -11,11 +11,9 @@ import io.stereov.singularity.core.global.service.file.exception.model.Unsupport
 import io.stereov.singularity.core.global.service.file.service.FileStorage
 import io.stereov.singularity.core.global.service.hash.HashService
 import io.stereov.singularity.core.global.service.mail.MailService
-import io.stereov.singularity.core.user.dto.ApplicationInfoDto
 import io.stereov.singularity.core.user.dto.UserDto
 import io.stereov.singularity.core.user.dto.request.*
 import io.stereov.singularity.core.user.exception.model.EmailAlreadyExistsException
-import io.stereov.singularity.core.user.exception.model.NoAppInfoFoundException
 import io.stereov.singularity.core.user.model.UserDocument
 import io.stereov.singularity.core.user.service.device.UserDeviceService
 import io.stereov.singularity.core.user.service.twofactor.UserTwoFactorAuthService
@@ -217,22 +215,6 @@ class UserSessionService(
         user.sensitive.avatar = null
 
         return userService.save(user).toDto()
-    }
-
-    /**
-     * Retrieves the application info for the current user.
-     *
-     * @return The [ApplicationInfoDto] of the user's application info.
-     *
-     * @throws NoAppInfoFoundException If no application info is found for the user.
-     */
-    suspend fun getApplicationInfo(): ApplicationInfoDto {
-        logger.debug { "Getting application info" }
-
-        val user = authenticationService.getCurrentUser()
-
-        return user.app?.toDto()
-            ?: throw NoAppInfoFoundException(user.id)
     }
 
     /**

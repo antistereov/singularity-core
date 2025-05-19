@@ -4,7 +4,6 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.core.auth.service.AuthenticationService
 import io.stereov.singularity.core.auth.service.CookieService
-import io.stereov.singularity.core.user.dto.ApplicationInfoDto
 import io.stereov.singularity.core.user.dto.UserDto
 import io.stereov.singularity.core.user.dto.request.*
 import io.stereov.singularity.core.user.dto.response.LoginResponse
@@ -150,18 +149,6 @@ class UserSessionController(
     suspend fun changeUser(@RequestBody payload: ChangeUserRequest): ResponseEntity<UserDto> {
         return ResponseEntity.ok().body(
             userSessionService.changeUser(payload).toDto()
-        )
-    }
-
-    /**
-     * Get the application information.
-     *
-     * @return The application information as an [ApplicationInfoDto].
-     */
-    @GetMapping("/me/app")
-    suspend fun getApplicationInfo(): ResponseEntity<ApplicationInfoDto> {
-        return ResponseEntity.ok().body(
-            userSessionService.getApplicationInfo()
         )
     }
 
