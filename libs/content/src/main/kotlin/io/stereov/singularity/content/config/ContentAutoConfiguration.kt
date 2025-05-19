@@ -1,13 +1,14 @@
 package io.stereov.singularity.content.config
 
 import io.stereov.singularity.content.article.controller.ArticleController
+import io.stereov.singularity.content.article.controller.ArticleManagementController
 import io.stereov.singularity.content.article.repository.ArticleRepository
 import io.stereov.singularity.content.article.service.ArticleManagementService
 import io.stereov.singularity.content.article.service.ArticleService
+import io.stereov.singularity.content.common.content.util.AccessCriteria
 import io.stereov.singularity.content.common.tag.controller.TagController
 import io.stereov.singularity.content.common.tag.repository.TagRepository
 import io.stereov.singularity.content.common.tag.service.TagService
-import io.stereov.singularity.content.common.content.util.AccessCriteria
 import io.stereov.singularity.content.properties.ContentProperties
 import io.stereov.singularity.core.auth.service.AuthenticationService
 import io.stereov.singularity.core.config.AuthenticationConfiguration
@@ -46,6 +47,12 @@ class ContentAutoConfiguration {
     @ConditionalOnMissingBean
     fun articleController(articleService: ArticleService): ArticleController {
         return ArticleController(articleService)
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun articleManagementController(articleManagementService: ArticleManagementService): ArticleManagementController {
+        return ArticleManagementController(articleManagementService)
     }
 
     @Bean
