@@ -64,7 +64,7 @@ class ArticleController(
         val currentUser = authenticationService.getCurrentUserOrNull()
 
         return ResponseEntity.ok(
-            articleService.getArticles(pageable, tags, lang).map { it.toOverviewResponse(lang, currentUser) }
+            articleService.getArticles(pageable, tags).map { it.toOverviewResponse(lang, currentUser) }
         )
     }
 
