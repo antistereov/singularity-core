@@ -10,7 +10,6 @@ import io.stereov.singularity.core.auth.model.AccessType
 import io.stereov.singularity.core.config.Constants
 import io.stereov.singularity.core.global.language.model.Language
 import io.stereov.singularity.test.BaseContentTest
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -41,8 +40,6 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         val foundArticle = articleService.findById(article.id)
         foundArticle.toString()
         foundArticle.toOverviewResponse(Language.EN,null).toString()
-
-        val articles = articleService.findAll().toList().forEach { println(it) }
 
         val res = webTestClient.get()
             .uri(articleBasePath)

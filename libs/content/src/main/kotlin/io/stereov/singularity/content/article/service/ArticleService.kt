@@ -8,9 +8,9 @@ import io.stereov.singularity.content.article.model.Article
 import io.stereov.singularity.content.article.repository.ArticleRepository
 import io.stereov.singularity.content.common.content.service.ContentService
 import io.stereov.singularity.content.common.content.util.toSlug
-import io.stereov.singularity.core.global.language.model.Language
 import io.stereov.singularity.content.common.util.AccessCriteria
 import io.stereov.singularity.core.auth.service.AuthenticationService
+import io.stereov.singularity.core.global.language.model.Language
 import io.stereov.singularity.core.global.util.paginateWithQuery
 import io.stereov.singularity.core.user.model.Role
 import io.stereov.singularity.core.user.model.UserDocument
@@ -71,7 +71,7 @@ class ArticleService(
         return FullArticleResponse.create(article, actualOwner, currentUser, lang)
     }
 
-    suspend fun getArticles(pageable: Pageable, tags: List<String>, lang: Language): Page<Article> {
+    suspend fun getArticles(pageable: Pageable, tags: List<String>): Page<Article> {
         val criteria = if (tags.isEmpty()) {
             accessCriteria.getViewCriteria()
         } else {

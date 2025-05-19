@@ -7,6 +7,6 @@ import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 abstract class ContentManagementService<T: ContentDocument<T>>(
     protected val reactiveMongoTemplate: ReactiveMongoTemplate,
     protected val accessCriteria: AccessCriteria,
-    private val collectionClass: Class<T>
+    protected val collectionClass: Class<T>
 ) {
 }
