@@ -1,13 +1,9 @@
 package io.stereov.singularity.content.common.content.exception.handler
 
-import io.github.oshai.kotlinlogging.KLogger
-import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.content.common.content.exception.ContentException
 import io.stereov.singularity.content.common.content.exception.model.ContentKeyExistsException
 import io.stereov.singularity.core.global.exception.BaseExceptionHandler
-import io.stereov.singularity.core.global.model.ErrorResponse
 import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.server.ServerWebExchange
@@ -15,28 +11,14 @@ import org.springframework.web.server.ServerWebExchange
 @ControllerAdvice
 class ContentExceptionHandler : BaseExceptionHandler<ContentException> {
 
-    private val logger: KLogger
-        get() = KotlinLogging.logger {}
+    override fun getHttpStatus(ex: ContentException) = when (ex) {
+        is ContentKeyExistsException -> HttpStatus.CONFLICT
+        else -> HttpStatus.INTERNAL_SERVER_ERROR
+    }
 
     @ExceptionHandler(ContentException::class)
-    override suspend fun handleException(
+    override fun handleException(
         ex: ContentException,
         exchange: ServerWebExchange
-    ): ResponseEntity<ErrorResponse> {
-        logger.warn { "${ex.javaClass.simpleName} - ${ex.message}" }
-
-        val status = when (ex) {
-            is ContentKeyExistsException -> HttpStatus.CONFLICT
-            else -> HttpStatus.INTERNAL_SERVER_ERROR
-        }
-
-        val errorResponse = ErrorResponse(
-            status = status.value(),
-            error = ex.javaClass.simpleName,
-            message = ex.message,
-            path = exchange.request.uri.path
-        )
-
-        return ResponseEntity(errorResponse, status)
-    }
+    ) = handleExceptionInternal(ex, exchange)
 }

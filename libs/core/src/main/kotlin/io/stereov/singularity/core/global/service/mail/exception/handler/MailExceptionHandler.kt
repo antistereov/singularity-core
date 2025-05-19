@@ -1,13 +1,9 @@
 package io.stereov.singularity.core.global.service.mail.exception.handler
 
-import io.github.oshai.kotlinlogging.KLogger
-import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.core.global.exception.BaseExceptionHandler
-import io.stereov.singularity.core.global.model.ErrorResponse
 import io.stereov.singularity.core.global.service.mail.exception.MailException
 import io.stereov.singularity.core.global.service.mail.exception.model.MailCooldownException
 import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.server.ServerWebExchange
@@ -22,28 +18,14 @@ import org.springframework.web.server.ServerWebExchange
 @ControllerAdvice
 class MailExceptionHandler : BaseExceptionHandler<MailException> {
 
-    private val logger: KLogger
-        get() = KotlinLogging.logger {}
+    override fun getHttpStatus(ex: MailException) = when (ex) {
+        is MailCooldownException -> HttpStatus.TOO_MANY_REQUESTS
+        else -> HttpStatus.INTERNAL_SERVER_ERROR
+    }
 
     @ExceptionHandler(MailException::class)
-    override suspend fun handleException(
+    override fun handleException(
         ex: MailException,
         exchange: ServerWebExchange
-    ): ResponseEntity<ErrorResponse> {
-        logger.warn { "${ex.javaClass.simpleName} - ${ex.message}" }
-
-        val status = when (ex) {
-            is MailCooldownException -> HttpStatus.TOO_MANY_REQUESTS
-            else -> HttpStatus.INTERNAL_SERVER_ERROR
-        }
-
-        val errorResponse = ErrorResponse(
-            status = status.value(),
-            error = ex.javaClass.simpleName,
-            message = ex.message,
-            path = exchange.request.uri.path
-        )
-
-        return ResponseEntity(errorResponse, status)
-    }
+    ) = handleExceptionInternal(ex, exchange)
 }

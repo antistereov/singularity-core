@@ -1,7 +1,5 @@
 package io.stereov.singularity.core.global.service.ratelimit.excpetion.handler
 
-import io.github.oshai.kotlinlogging.KLogger
-import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.core.global.exception.BaseExceptionHandler
 import io.stereov.singularity.core.global.model.ErrorResponse
 import io.stereov.singularity.core.global.service.ratelimit.excpetion.RateLimitException
@@ -28,28 +26,14 @@ import org.springframework.web.server.ServerWebExchange
 @ControllerAdvice
 class RateLimitExceptionHandler : BaseExceptionHandler<RateLimitException> {
 
-    private val logger: KLogger
-        get() = KotlinLogging.logger {}
+    override fun getHttpStatus(ex: RateLimitException) = when (ex) {
+        is TooManyRequestsException -> HttpStatus.TOO_MANY_REQUESTS
+        else -> HttpStatus.INTERNAL_SERVER_ERROR
+    }
 
     @ExceptionHandler(RateLimitException::class)
-    override suspend fun handleException(
+    override fun handleException(
         ex: RateLimitException,
         exchange: ServerWebExchange
-    ): ResponseEntity<ErrorResponse> {
-        logger.warn { "${ex.javaClass.simpleName} - ${ex.message}" }
-
-        val status = when (ex) {
-            is TooManyRequestsException -> HttpStatus.TOO_MANY_REQUESTS
-            else -> HttpStatus.INTERNAL_SERVER_ERROR
-        }
-
-        val errorResponse = ErrorResponse(
-            status = status.value(),
-            error = ex.javaClass.simpleName,
-            message = ex.message,
-            path = exchange.request.uri.path
-        )
-
-        return ResponseEntity(errorResponse, status)
-    }
+    ) = handleExceptionInternal(ex, exchange)
 }
