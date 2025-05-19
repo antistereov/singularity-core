@@ -10,6 +10,8 @@ io.stereov.singularity.core.config.EncryptionConfiguration
 io.stereov.singularity.core.config.JsonConfiguration
 io.stereov.singularity.core.config.JwtConfiguration
 io.stereov.singularity.core.config.MailConfiguration
+io.stereov.singularity.core.config.MongoConfiguration
 io.stereov.singularity.core.config.RedisConfiguration
 io.stereov.singularity.core.config.WebClientConfiguration
+io.stereov.singularity.core.config.WebFluxConfiguration
 io.stereov.singularity.core.config.WebSecurityConfiguration
