@@ -3,7 +3,9 @@ package io.stereov.singularity.test
 import com.warrenstrange.googleauth.GoogleAuthenticator
 import io.mockk.every
 import io.stereov.singularity.core.config.Constants
+import io.stereov.singularity.core.global.language.model.Language
 import io.stereov.singularity.core.group.model.GroupDocument
+import io.stereov.singularity.core.group.model.GroupTranslation
 import io.stereov.singularity.core.group.service.GroupService
 import io.stereov.singularity.core.user.dto.request.*
 import io.stereov.singularity.core.user.dto.response.TwoFactorSetupResponse
@@ -12,7 +14,6 @@ import io.stereov.singularity.core.user.model.UserDocument
 import io.stereov.singularity.core.user.service.UserService
 import io.stereov.singularity.test.config.MockConfig
 import io.stereov.singularity.test.config.MockKeyManager
-import org.bson.types.ObjectId
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -63,7 +64,7 @@ class BaseSpringBootTest {
     )
 
     suspend fun createGroup(key: String = "test-group"): GroupDocument {
-        val group = GroupDocument(key = key, name = key)
+        val group = GroupDocument(key = key, translations = mutableMapOf(Language.EN to GroupTranslation("Test")))
         return groupService.save(group)
     }
 
@@ -74,7 +75,7 @@ class BaseSpringBootTest {
         twoFactorEnabled: Boolean = false,
         name: String = "Name",
         roles: List<Role> = listOf(Role.USER),
-        groups: List<ObjectId> = listOf(),
+        groups: List<String> = listOf(),
     ): TestRegisterResponse {
         val device = DeviceInfoRequest(id = deviceId)
 
