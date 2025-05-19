@@ -10,7 +10,7 @@ import io.stereov.singularity.core.global.service.hash.HashService
 import io.stereov.singularity.core.global.service.random.RandomService
 import io.stereov.singularity.core.global.service.twofactorauth.TwoFactorAuthService
 import io.stereov.singularity.core.properties.TwoFactorAuthProperties
-import io.stereov.singularity.core.user.dto.UserDto
+import io.stereov.singularity.core.user.dto.UserResponse
 import io.stereov.singularity.core.user.dto.request.DisableTwoFactorRequest
 import io.stereov.singularity.core.user.dto.response.TwoFactorSetupResponse
 import io.stereov.singularity.core.global.exception.model.InvalidDocumentException
@@ -84,7 +84,7 @@ class UserTwoFactorAuthService(
      *
      * @return The updated user document.
      */
-    suspend fun validateSetup(token: String, code: Int): UserDto {
+    suspend fun validateSetup(token: String, code: Int): UserResponse {
         val user = authenticationService.getCurrentUser()
         val setupToken = twoFactorAuthTokenService.validateAndExtractSetupToken(token)
 
@@ -103,7 +103,7 @@ class UserTwoFactorAuthService(
         userService.save(user)
         accessTokenCache.invalidateAllTokens(user.id)
 
-        return user.toDto()
+        return user.toResponse()
     }
 
     /**
@@ -182,7 +182,7 @@ class UserTwoFactorAuthService(
      *
      * @return The updated user document.
      */
-    suspend fun disable(exchange: ServerWebExchange, req: DisableTwoFactorRequest): UserDto {
+    suspend fun disable(exchange: ServerWebExchange, req: DisableTwoFactorRequest): UserResponse {
         logger.debug { "Disabling 2FA" }
 
         cookieService.validateStepUpCookie(exchange)
@@ -195,6 +195,6 @@ class UserTwoFactorAuthService(
 
         user.disableTwoFactorAuth()
 
-        return userService.save(user).toDto()
+        return userService.save(user).toResponse()
     }
 }

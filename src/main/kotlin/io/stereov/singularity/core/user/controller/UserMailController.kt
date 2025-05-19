@@ -1,6 +1,6 @@
 package io.stereov.singularity.core.user.controller
 
-import io.stereov.singularity.core.user.dto.UserDto
+import io.stereov.singularity.core.user.dto.UserResponse
 import io.stereov.singularity.core.user.dto.request.ResetPasswordRequest
 import io.stereov.singularity.core.user.dto.request.SendPasswordResetRequest
 import io.stereov.singularity.core.user.dto.response.MailCooldownResponse
@@ -30,7 +30,7 @@ class UserMailController(
      * @return The updated user information.
      */
     @PostMapping("/verify")
-    suspend fun verifyEmail(@RequestParam token: String): ResponseEntity<UserDto> {
+    suspend fun verifyEmail(@RequestParam token: String): ResponseEntity<UserResponse> {
         val authInfo = userMailService.verifyEmail(token)
 
         return ResponseEntity.ok()

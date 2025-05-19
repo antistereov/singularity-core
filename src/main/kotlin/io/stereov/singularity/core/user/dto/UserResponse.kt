@@ -24,7 +24,7 @@ import org.bson.types.ObjectId
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
-data class UserDto(
+data class UserResponse(
     val id: ObjectId,
     val name: String,
     val email: String,

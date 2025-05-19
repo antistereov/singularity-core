@@ -3,7 +3,7 @@ package io.stereov.singularity.core.admin.controller
 import io.stereov.singularity.core.admin.dto.RotationStatusResponse
 import io.stereov.singularity.core.admin.service.AdminService
 import io.stereov.singularity.core.global.model.SuccessResponse
-import io.stereov.singularity.core.user.dto.UserDto
+import io.stereov.singularity.core.user.dto.UserResponse
 import io.stereov.singularity.core.user.service.UserService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -37,9 +37,9 @@ class AdminController(
     }
 
     @GetMapping("/users")
-    suspend fun getAllUsers(): ResponseEntity<List<UserDto>> {
+    suspend fun getAllUsers(): ResponseEntity<List<UserResponse>> {
         return ResponseEntity.ok(
-            userService.findAll().map { user -> user.toDto() }.toList()
+            userService.findAll().map { user -> user.toResponse() }.toList()
         )
     }
 }
