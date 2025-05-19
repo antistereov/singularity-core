@@ -1,13 +1,9 @@
 package io.stereov.singularity.core.global.service.cache.exception.handler
 
-import io.github.oshai.kotlinlogging.KLogger
-import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.core.global.exception.BaseExceptionHandler
-import io.stereov.singularity.core.global.model.ErrorResponse
 import io.stereov.singularity.core.global.service.cache.exception.RedisException
 import io.stereov.singularity.core.global.service.cache.exception.model.RedisKeyNotFoundException
 import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.server.ServerWebExchange
@@ -24,28 +20,14 @@ import org.springframework.web.server.ServerWebExchange
 @ControllerAdvice
 class RedisExceptionHandler : BaseExceptionHandler<RedisException> {
 
-    private val logger: KLogger
-        get() = KotlinLogging.logger {}
+    override fun getHttpStatus(ex: RedisException) = when (ex) {
+        is RedisKeyNotFoundException -> HttpStatus.NOT_FOUND
+        else -> HttpStatus.INTERNAL_SERVER_ERROR
+    }
 
     @ExceptionHandler(RedisException::class)
-    override suspend fun handleException(
+    override fun handleException(
         ex: RedisException,
         exchange: ServerWebExchange
-    ): ResponseEntity<ErrorResponse> {
-        logger.warn { "${ex.javaClass.simpleName} - ${ex.message}" }
-
-        val status = when (ex) {
-            is RedisKeyNotFoundException -> HttpStatus.NOT_FOUND
-            else -> HttpStatus.INTERNAL_SERVER_ERROR
-        }
-
-        val errorResponse = ErrorResponse(
-            status = status.value(),
-            error = ex.javaClass.simpleName,
-            message = ex.message,
-            path = exchange.request.uri.path
-        )
-
-        return ResponseEntity(errorResponse, status)
-    }
+    ) = handleExceptionInternal(ex, exchange)
 }
