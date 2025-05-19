@@ -44,8 +44,8 @@ class ContentAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun articleController(articleService: ArticleService, authenticationService: AuthenticationService): ArticleController {
-        return ArticleController(articleService, authenticationService)
+    fun articleController(articleService: ArticleService): ArticleController {
+        return ArticleController(articleService)
     }
 
     @Bean
