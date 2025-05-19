@@ -9,6 +9,7 @@ import io.stereov.singularity.core.auth.model.CustomAuthenticationToken
 import io.stereov.singularity.core.auth.model.ErrorAuthenticationToken
 import io.stereov.singularity.core.global.service.jwt.exception.TokenException
 import io.stereov.singularity.core.global.service.jwt.exception.model.InvalidTokenException
+import io.stereov.singularity.core.group.model.KnownGroups
 import io.stereov.singularity.core.user.model.Role
 import io.stereov.singularity.core.user.model.UserDocument
 import io.stereov.singularity.core.user.service.UserService
@@ -109,6 +110,16 @@ class AuthenticationService {
         val valid = this.getCurrentUser().sensitive.roles.contains(role)
 
         if (!valid) throw NotAuthorizedException("User does not have sufficient permission: User does not have role $role")
+    }
+
+    suspend fun validateCurrentUserIsEditor() {
+        logger.debug { "Validating that the current user is editor" }
+
+        val user = getCurrentUser()
+
+        if (!user.sensitive.groups.contains(KnownGroups.EDITOR)) {
+            throw NotAuthorizedException("User does not have sufficient permission: User is not an editor")
+        }
     }
 
     /**
