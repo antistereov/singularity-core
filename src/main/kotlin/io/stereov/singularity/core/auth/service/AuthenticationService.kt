@@ -117,7 +117,7 @@ class AuthenticationService {
 
         val user = getCurrentUser()
 
-        if (!user.sensitive.groups.contains(KnownGroups.EDITOR)) {
+        if (!user.sensitive.groups.contains(KnownGroups.EDITOR) && !user.sensitive.roles.contains(Role.ADMIN)) {
             throw NotAuthorizedException("User does not have sufficient permission: User is not an editor")
         }
     }
