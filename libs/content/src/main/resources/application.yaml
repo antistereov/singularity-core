@@ -1,0 +1,9 @@
+baseline:
+  app:
+    groups:
+      - key: editor
+        translations:
+          en:
+            name: Editor
+          de:
+            name: Editor
