@@ -98,7 +98,7 @@ class UserMailController(
     /**
      * Sends a password reset email to the user using the provided email address.
      *
-     * @param email The email address of the user to send the password reset email to.
+     * @param req The email address of the user to send the password reset email to.
      *
      * @return A message indicating the success of the operation.
      */

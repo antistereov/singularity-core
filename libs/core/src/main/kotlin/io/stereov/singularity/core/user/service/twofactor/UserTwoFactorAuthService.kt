@@ -5,7 +5,9 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.core.auth.exception.AuthException
 import io.stereov.singularity.core.auth.service.AuthenticationService
 import io.stereov.singularity.core.auth.service.CookieService
+import io.stereov.singularity.core.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.core.global.service.cache.AccessTokenCache
+import io.stereov.singularity.core.global.service.encryption.service.EncryptionService
 import io.stereov.singularity.core.global.service.hash.HashService
 import io.stereov.singularity.core.global.service.random.RandomService
 import io.stereov.singularity.core.global.service.twofactorauth.TwoFactorAuthService
@@ -13,7 +15,6 @@ import io.stereov.singularity.core.properties.TwoFactorAuthProperties
 import io.stereov.singularity.core.user.dto.UserResponse
 import io.stereov.singularity.core.user.dto.request.DisableTwoFactorRequest
 import io.stereov.singularity.core.user.dto.response.TwoFactorSetupResponse
-import io.stereov.singularity.core.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.core.user.model.UserDocument
 import io.stereov.singularity.core.user.service.UserService
 import io.stereov.singularity.core.user.service.token.TwoFactorAuthTokenService
@@ -138,7 +139,7 @@ class UserTwoFactorAuthService(
         return try {
             cookieService.validateLoginVerificationCookieAndGetUserId(exchange)
             true
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             false
         }
     }
@@ -159,7 +160,7 @@ class UserTwoFactorAuthService(
 
         val userId = try {
             authenticationService.getCurrentUserId()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             cookieService.validateLoginVerificationCookieAndGetUserId(exchange)
         }
 
