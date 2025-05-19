@@ -5,7 +5,6 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.content.common.content.model.ContentDocument
 import io.stereov.singularity.content.common.content.repository.ContentRepository
 import io.stereov.singularity.core.global.exception.model.DocumentNotFoundException
-import org.bson.types.ObjectId
 import java.time.Instant
 
 abstract class ContentService<T: ContentDocument<T>>(
@@ -15,16 +14,6 @@ abstract class ContentService<T: ContentDocument<T>>(
 
     private val logger: KLogger
         get() = KotlinLogging.logger {}
-
-    suspend fun findByIdOrNull(id: ObjectId): T? {
-        logger.debug { "Finding article by ID $id" }
-
-        return repository.findById(id)
-    }
-
-    suspend fun findById(id: ObjectId): T {
-        return findByIdOrNull(id) ?: throw DocumentNotFoundException("No content document with ID $id found")
-    }
 
     suspend fun findByKeyOrNull(key: String): T? {
         logger.debug { "Fining article by key" }

@@ -7,7 +7,7 @@ import io.stereov.singularity.content.article.service.ArticleService
 import io.stereov.singularity.content.common.tag.controller.TagController
 import io.stereov.singularity.content.common.tag.repository.TagRepository
 import io.stereov.singularity.content.common.tag.service.TagService
-import io.stereov.singularity.content.common.util.AccessCriteria
+import io.stereov.singularity.content.common.content.util.AccessCriteria
 import io.stereov.singularity.content.properties.ContentProperties
 import io.stereov.singularity.core.auth.service.AuthenticationService
 import io.stereov.singularity.core.config.AuthenticationConfiguration

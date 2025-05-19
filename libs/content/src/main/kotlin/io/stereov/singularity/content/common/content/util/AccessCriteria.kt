@@ -1,4 +1,4 @@
-package io.stereov.singularity.content.common.util
+package io.stereov.singularity.content.common.content.util
 
 import io.stereov.singularity.content.common.content.model.ContentAccessDetails
 import io.stereov.singularity.content.common.content.model.ContentAccessPermissions
@@ -59,27 +59,4 @@ class AccessCriteria(
             )
         } else isPublic
     }
-
-    suspend fun getEditCriteria(): Criteria {
-        val user = authenticationService.getCurrentUser()
-
-        return Criteria().orOperator(
-            canEditUser(user.id),
-            isAdminUser(user.id),
-            canEditGroup(user),
-            isAdminGroup(user),
-            isOwner(user.id)
-        )
-    }
-
-    suspend fun getDeleteCriteria(): Criteria {
-        val user = authenticationService.getCurrentUser()
-
-        return Criteria().orOperator(
-            isAdminUser(user.id),
-            isAdminGroup(user),
-            isOwner(user.id)
-        )
-    }
-
 }

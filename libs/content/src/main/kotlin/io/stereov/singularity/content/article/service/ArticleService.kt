@@ -11,7 +11,7 @@ import io.stereov.singularity.content.article.repository.ArticleRepository
 import io.stereov.singularity.content.common.content.dto.ContentAccessDetailsResponse
 import io.stereov.singularity.content.common.content.service.ContentService
 import io.stereov.singularity.content.common.tag.service.TagService
-import io.stereov.singularity.content.common.util.AccessCriteria
+import io.stereov.singularity.content.common.content.util.AccessCriteria
 import io.stereov.singularity.core.auth.service.AuthenticationService
 import io.stereov.singularity.core.global.language.model.Language
 import io.stereov.singularity.core.user.model.UserDocument
