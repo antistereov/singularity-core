@@ -88,11 +88,17 @@ baseline:
         translations:
           EN:
             name: Music
+          DE:
+            name: Musik
       - key: arts
         translations:
           EN:
             name: Arts
+          DE:
+            name: Kunst
       - key: coding
         translations:
           EN:
             name: Coding
+          DE:
+            name: Programmieren
