@@ -16,8 +16,9 @@ data class TagDocument(
     @Id private val _id: ObjectId? = null,
     @Indexed(unique = true) var key: String,
     override val translations: MutableMap<Language, TagTranslation> = mutableMapOf(),
-    override val primaryLanguage: Language = Language.EN
 ) : Translatable<TagTranslation> {
+
+    override val primaryLanguage: Language = Language.EN
 
     constructor(req: CreateTagRequest): this(
         _id = null,
