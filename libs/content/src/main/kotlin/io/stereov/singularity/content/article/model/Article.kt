@@ -6,9 +6,9 @@ import io.stereov.singularity.content.article.dto.FullArticleResponse
 import io.stereov.singularity.content.common.content.dto.ContentAccessDetailsResponse
 import io.stereov.singularity.content.common.content.model.ContentAccessDetails
 import io.stereov.singularity.content.common.content.model.ContentDocument
+import io.stereov.singularity.core.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.core.global.language.model.Language
 import io.stereov.singularity.core.global.language.model.Translatable
-import io.stereov.singularity.core.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.core.global.service.file.model.FileMetaData
 import io.stereov.singularity.core.user.model.UserDocument
 import org.bson.types.ObjectId
@@ -31,7 +31,8 @@ data class Article(
     val image: FileMetaData? = null,
     override var trusted: Boolean,
     override val tags: MutableSet<String> = mutableSetOf(),
-    override val translations: MutableMap<Language, ArticleTranslation> = mutableMapOf()
+    override val translations: MutableMap<Language, ArticleTranslation> = mutableMapOf(),
+    override val primaryLanguage: Language
 ) : ContentDocument<Article>(), Translatable<ArticleTranslation> {
 
     override val id: ObjectId
@@ -39,7 +40,7 @@ data class Article(
 
     fun toOverviewResponse(lang: Language, viewer: UserDocument?): ArticleOverviewResponse {
         val access = ContentAccessDetailsResponse.create(access, viewer)
-        val translation = translate(lang)
+        val (lang, translation) = translate(lang)
 
         return ArticleOverviewResponse(
             id = id,
@@ -54,7 +55,8 @@ data class Article(
             tags = tags,
             title = translation.title,
             summary = translation.summary,
-            access = access
+            access = access,
+            lang = lang
         )
     }
 
@@ -77,7 +79,8 @@ data class Article(
                 image = null,
                 trusted = false,
                 access = ContentAccessDetails(ownerId),
-                translations = translations
+                translations = translations,
+                primaryLanguage = req.lang
             )
         }
 
@@ -96,7 +99,8 @@ data class Article(
                 image = dto.image,
                 trusted = dto.trusted,
                 access = ContentAccessDetails(dto.access),
-                translations = translations
+                translations = translations,
+                primaryLanguage = language
             )
         }
     }

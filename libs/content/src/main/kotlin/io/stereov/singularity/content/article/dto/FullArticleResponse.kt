@@ -22,6 +22,7 @@ data class FullArticleResponse(
     var state: ArticleState = ArticleState.DRAFT,
     val colors: ArticleColors,
     val image: FileMetaData?,
+    val lang: Language,
     val title: String,
     val summary: String,
     val content: String,
@@ -34,7 +35,7 @@ data class FullArticleResponse(
 
         fun create(article: Article, owner: UserDocument, viewer: UserDocument?, lang: Language): FullArticleResponse {
             val access = ContentAccessDetailsResponse.create(article.access, viewer)
-            val translation = article.translate(lang)
+            val (lang, translation) = article.translate(lang)
 
             return FullArticleResponse(
                 id = article.id,
@@ -49,6 +50,7 @@ data class FullArticleResponse(
                 image = article.image,
                 trusted = article.trusted,
                 access = access,
+                lang = lang,
                 title = translation.title,
                 summary = translation.summary,
                 content = translation.content,
