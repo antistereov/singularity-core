@@ -122,7 +122,7 @@ class UserTwoFactorAuthController(
      * @return A response indicating the success of the operation.
      */
     @PostMapping("/verify-step-up")
-    suspend fun setStepUp(@RequestParam code: Int, exchange: ServerWebExchange): ResponseEntity<UserResponse> {
+    suspend fun setStepUp(@RequestParam code: Int): ResponseEntity<UserResponse> {
         val user = authenticationService.getCurrentUser()
         val stepUpTokenCookie = cookieService.createStepUpCookie(code)
 
@@ -143,9 +143,9 @@ class UserTwoFactorAuthController(
         val twoFactorRequired = try {
             cookieService.validateStepUpCookie(exchange)
             false
-        } catch (e: TokenException) {
+        } catch (_: TokenException) {
             true
-        } catch (e: TwoFactorAuthDisabledException) {
+        } catch (_: TwoFactorAuthDisabledException) {
             false
         }
 
