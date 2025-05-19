@@ -50,63 +50,6 @@ Check out the matching Angular frontend baseline:
 
 Want to bootstrap a new web backend project? Just add a new app to the `apps/` folder and hook into the existing libraries in `libs/` — all the groundwork is already done.
 
-## Example
-
-This is a simple example of how to set up a simple service that retrieves the current user and
-updates the application info for the user.
-
-```kotlin
-import org.springframework.stereotype.Service
-import io.stereov.singularity.core.user.dto.ApplicationInfoDto
-import io.stereov.singularity.core.user.dto.ApplicationInfoDto
-import io.stereov.singularity.auth.service.AuthenticationService
-import io.stereov.singularity.core.user.model.UserDocument
-import io.stereov.singularity.core.user.service.UserService
-
-/**
- * This is an example of how to set up custom application info for the user.
- * 
- * @param customField A custom application info to set for the user.
- * @param internalField An internal field that is not exposed to through the dto.
- */
-data class CustomApplicationInfo(
-    val customField: String,
-    val internalField: String
-) : ApplicationInfo {
-    
-    override fun toDto() = CustomApplicationDto(customField)
-}
-
-/**
- * This is an example of how to set up a custom application info dto.
- * It is used to expose the custom application info to the client.
- * 
- * @param customField A custom field that is exposed to the client.
- */
-data class CustomApplicationDto(
-    val customField: String
-)
-
-/**
- * A service that is used to set the custom application info for the user.
- */
-@Service
-class CustomService(
-    private val authenticationService: AuthenticationService,
-    private val userService: UserService
-) {
-    suspend fun setCustomApplicationInfo(applicationInfo: CustomApplicationInfo) {
-        // Fetch the current user from the AuthenticationService
-        // If the user is not authenticated, an exception will be thrown and HttpStatus.UNAUTHORIZED will be returned
-        val user: UserDocument = authenticationService.getUserCurrentUser()
- 
-       // Set custom application info for the user
-       user.app = applicationInfo
-       userService.save(user)
-  }
-}
-```
-
 ## Development Setup
 
 ### Prerequisites:

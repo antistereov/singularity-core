@@ -20,7 +20,6 @@ import org.bson.types.ObjectId
  * @property emailVerified Indicates whether the user's email is verified (default is false).
  * @property lastActive The last active time of the user.
  * @property twoFactorAuthEnabled Indicates whether two-factor authentication is enabled for the user.
- * @property app The application information associated with the user (nullable).
  * @property avatar The URL for the user's avatar. Is null if the user did not set a custom avatar.
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
@@ -31,10 +30,8 @@ data class UserDto(
     val email: String,
     val roles: Set<Role> = setOf(Role.USER),
     val emailVerified: Boolean = false,
-    // TODO: these don't belong here - ask for expanded user details instead
     val lastActive: String,
     val twoFactorAuthEnabled: Boolean,
-    val app: ApplicationInfoDto?,
     val avatar: FileMetaData?,
     val created: String,
 )

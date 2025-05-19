@@ -25,16 +25,14 @@ data class UserDocument(
     var password: SecureHash,
     val created: Instant = Instant.now(),
     var lastActive: Instant = Instant.now(),
-    var app: ApplicationInfo? = null,
     override var sensitive: SensitiveUserData,
 ) : SensitiveDocument<SensitiveUserData>() {
 
     constructor(
-        _id: ObjectId? = null,
+        id: ObjectId? = null,
         password: SecureHash,
         created: Instant = Instant.now(),
         lastActive: Instant = Instant.now(),
-        app: ApplicationInfo? = null,
         name: String,
         email: String,
         roles: MutableSet<Role> = mutableSetOf(Role.USER),
@@ -42,7 +40,7 @@ data class UserDocument(
         security: UserSecurityDetails = UserSecurityDetails(),
         devices: MutableList<DeviceInfo> = mutableListOf(),
         avatar: FileMetaData? = null,
-    ): this(_id, password, created, lastActive, app, SensitiveUserData(name, email, roles, groups, security, devices, avatar))
+    ): this(id, password, created, lastActive, SensitiveUserData(name, email, roles, groups, security, devices, avatar))
 
     @get:Transient
     private val logger: KLogger
@@ -66,17 +64,6 @@ data class UserDocument(
     val fileStoragePath: String
         get() = "users/$id"
 
-    /**
-     * Get the application info of the user.
-     *
-     * This method returns the application info associated with the user cast to the given class [T].
-     *
-     * @throws InvalidDocumentException If the application info is not of the expected type.
-     */
-    inline fun <reified T: ApplicationInfo> getApplicationInfo(): T {
-        return app as? T ?: throw InvalidDocumentException("No application info found in UserDocument")
-    }
-
     override fun toEncryptedDocument(
         encryptedSensitiveData: Encrypted<SensitiveUserData>,
         otherValues: List<Any>
@@ -85,7 +72,7 @@ data class UserDocument(
             ?: throw MissingFunctionParameterException("Please provide the hashed email as parameter.")
 
         return EncryptedUserDocument(
-            _id, hashedEmail, password, created, lastActive, app, encryptedSensitiveData
+            _id, hashedEmail, password, created, lastActive, encryptedSensitiveData
         )
     }
 
@@ -107,7 +94,6 @@ data class UserDocument(
             sensitive.security.mail.verified,
             lastActive.toString(),
             sensitive.security.twoFactor.enabled,
-            app?.toDto(),
             sensitive.avatar,
             created.toString(),
         )
