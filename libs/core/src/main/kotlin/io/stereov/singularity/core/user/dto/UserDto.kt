@@ -1,7 +1,6 @@
 package io.stereov.singularity.core.user.dto
 
 import io.stereov.singularity.core.global.service.file.model.FileMetaData
-import io.stereov.singularity.core.user.dto.response.DeviceInfoResponse
 import io.stereov.singularity.core.user.model.Role
 import org.bson.types.ObjectId
 
@@ -19,7 +18,6 @@ import org.bson.types.ObjectId
  * @property email The email address of the user.
  * @property roles The list of roles assigned to the user (default is a list containing the USER role).
  * @property emailVerified Indicates whether the user's email is verified (default is false).
- * @property devices The list of devices associated with the user (default is an empty list).
  * @property lastActive The last active time of the user.
  * @property twoFactorAuthEnabled Indicates whether two-factor authentication is enabled for the user.
  * @property app The application information associated with the user (nullable).
@@ -34,7 +32,6 @@ data class UserDto(
     val roles: Set<Role> = setOf(Role.USER),
     val emailVerified: Boolean = false,
     // TODO: these don't belong here - ask for expanded user details instead
-    val devices: List<DeviceInfoResponse> = listOf(),
     val lastActive: String,
     val twoFactorAuthEnabled: Boolean,
     val app: ApplicationInfoDto?,

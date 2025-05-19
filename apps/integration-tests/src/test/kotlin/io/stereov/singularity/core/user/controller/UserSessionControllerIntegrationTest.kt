@@ -126,7 +126,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val deviceId = "device"
         val newDeviceId = "newDeviceId"
 
-        registerUser(email, password, deviceId)
+        val user = registerUser(email, password, deviceId)
 
         val accessToken = webTestClient.post()
             .uri("/api/user/login")
@@ -150,7 +150,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
 
         requireNotNull(userInfo) { "No UserDetails provided in response" }
 
-        val devices = userInfo.devices
+        val devices = userService.findById(user.info.id).sensitive.devices
 
         assertEquals(2, devices.size)
         assertTrue(devices.any { it.id == deviceId })
@@ -220,9 +220,11 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
 
         requireNotNull(userDetails) { "No UserDetails provided in response" }
 
+        val devices = userService.findById(userDto.id).sensitive.devices
+
         assertEquals(userDto.id, userDetails.id)
-        assertEquals(1, userDetails.devices.size)
-        assertEquals(deviceId, userDetails.devices.first().id)
+        assertEquals(1, devices.size)
+        assertEquals(deviceId, devices.first().id)
 
         assertEquals(1, userService.findAll().count())
     }

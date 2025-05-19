@@ -105,7 +105,6 @@ data class UserDocument(
             sensitive.email,
             sensitive.roles,
             sensitive.security.mail.verified,
-            sensitive.devices.map { it.toResponseDto() },
             lastActive.toString(),
             sensitive.security.twoFactor.enabled,
             app?.toDto(),
