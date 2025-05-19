@@ -1,17 +1,15 @@
 package io.stereov.singularity.content.common.content.model
 
-import org.bson.types.ObjectId
-
 data class ContentAccessPermissions(
-    val admin: MutableSet<ObjectId> = mutableSetOf(),
-    val editor: MutableSet<ObjectId> = mutableSetOf(),
-    val viewer: MutableSet<ObjectId> = mutableSetOf(),
+    val admin: MutableSet<String> = mutableSetOf(),
+    val editor: MutableSet<String> = mutableSetOf(),
+    val viewer: MutableSet<String> = mutableSetOf(),
 ) {
 
     /**
      * Remove all permissions for a given subject.
      */
-    fun remove(subjectId: ObjectId): Boolean {
+    fun remove(subjectId: String): Boolean {
         val removedFromAdmins = this.admin.remove(subjectId)
         val removedFromEditors = this.editor.remove(subjectId)
         val removedFromViewers = this.viewer.remove(subjectId)
@@ -22,7 +20,7 @@ data class ContentAccessPermissions(
     /**
      * Add a permission for a given subject.
      */
-    fun put(subjectId: ObjectId, role: ContentAccessRole) {
+    fun put(subjectId: String, role: ContentAccessRole) {
         remove(subjectId)
 
         when(role) {
@@ -42,7 +40,7 @@ data class ContentAccessPermissions(
         this.viewer.clear()
     }
 
-    fun hasAccess(subjectId: ObjectId, role: ContentAccessRole): Boolean {
+    fun hasAccess(subjectId: String, role: ContentAccessRole): Boolean {
         return when (role) {
             ContentAccessRole.VIEWER -> admin.contains(subjectId) || editor.contains(subjectId) || viewer.contains(subjectId)
             ContentAccessRole.EDITOR -> admin.contains(subjectId) || editor.contains(subjectId)

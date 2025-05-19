@@ -19,7 +19,7 @@ data class ContentAccessDetails(
         response.groups
     )
 
-    fun share(type: ContentAccessSubject, subjectId: ObjectId, role: ContentAccessRole): ContentAccessDetails {
+    fun share(type: ContentAccessSubject, subjectId: String, role: ContentAccessRole): ContentAccessDetails {
         if (visibility == AccessType.PRIVATE) visibility = AccessType.SHARED
 
         when (type) {
@@ -30,7 +30,7 @@ data class ContentAccessDetails(
         return this
     }
 
-    fun remove(type: ContentAccessSubject, subjectId: ObjectId): ContentAccessDetails {
+    fun remove(type: ContentAccessSubject, subjectId: String): ContentAccessDetails {
         when (type) {
             ContentAccessSubject.USER -> users.remove(subjectId)
             ContentAccessSubject.GROUP -> groups.remove(subjectId)
@@ -55,21 +55,21 @@ data class ContentAccessDetails(
         return this
     }
 
-    fun hasAccess(type: ContentAccessSubject, subjectId: ObjectId, role: ContentAccessRole): Boolean {
+    fun hasAccess(type: ContentAccessSubject, subjectId: String, role: ContentAccessRole): Boolean {
         return when (type) {
-            ContentAccessSubject.USER -> users.hasAccess(subjectId, role) || subjectId == ownerId
+            ContentAccessSubject.USER -> users.hasAccess(subjectId, role) || ObjectId(subjectId) == ownerId
             ContentAccessSubject.GROUP -> groups.hasAccess(subjectId, role)
         }
     }
 
     fun hasAccess(user: UserDocument, role: ContentAccessRole): Boolean {
-        val userIsAdmin = hasAccess(ContentAccessSubject.USER, user.id, ContentAccessRole.ADMIN)
+        val userIsAdmin = hasAccess(ContentAccessSubject.USER, user.id.toString(), ContentAccessRole.ADMIN)
         val groupIsAdmin = user.sensitive.groups.any { groupId -> hasAccess(ContentAccessSubject.GROUP, groupId, ContentAccessRole.ADMIN) }
 
-        val userIsEditor = hasAccess(ContentAccessSubject.USER, user.id, ContentAccessRole.EDITOR)
+        val userIsEditor = hasAccess(ContentAccessSubject.USER, user.id.toString(), ContentAccessRole.EDITOR)
         val groupIsEditor = user.sensitive.groups.any { groupId -> hasAccess(ContentAccessSubject.GROUP, groupId, ContentAccessRole.EDITOR) }
 
-        val userIsViewer = hasAccess(ContentAccessSubject.USER, user.id, ContentAccessRole.VIEWER)
+        val userIsViewer = hasAccess(ContentAccessSubject.USER, user.id.toString(), ContentAccessRole.VIEWER)
         val groupIsViewer = user.sensitive.groups.any { groupId -> hasAccess(ContentAccessSubject.GROUP, groupId, ContentAccessRole.VIEWER) }
 
         return when (role) {

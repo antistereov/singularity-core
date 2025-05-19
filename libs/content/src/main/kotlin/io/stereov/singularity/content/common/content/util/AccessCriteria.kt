@@ -35,9 +35,9 @@ class AccessCriteria(
 
     private fun isOwner(userId: ObjectId) = Criteria.where(ownerIdField).`is`(userId)
 
-    private fun canViewUser(userId: ObjectId) = Criteria().andOperator(Criteria.where(canViewUsersField).`in`(userId), isShared)
-    private fun canEditUser(userId: ObjectId) = Criteria().andOperator(Criteria.where(canEditUsersField).`in`(userId), isShared)
-    private fun isAdminUser(userId: ObjectId) = Criteria.where(isAdminUsersField).`in`(userId)
+    private fun canViewUser(userId: ObjectId) = Criteria().andOperator(Criteria.where(canViewUsersField).`in`(userId.toHexString()), isShared)
+    private fun canEditUser(userId: ObjectId) = Criteria().andOperator(Criteria.where(canEditUsersField).`in`(userId.toHexString()), isShared)
+    private fun isAdminUser(userId: ObjectId) = Criteria.where(isAdminUsersField).`in`(userId.toHexString())
 
     private fun canViewGroup(user: UserDocument) = Criteria.where(canViewGroupsField).`in`(user.sensitive.groups)
     private fun canEditGroup(user: UserDocument) = Criteria.where(canEditGroupsField).`in`(user.sensitive.groups)
