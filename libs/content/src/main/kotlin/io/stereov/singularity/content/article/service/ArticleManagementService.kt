@@ -6,6 +6,7 @@ import io.stereov.singularity.content.article.dto.ArticleResponse
 import io.stereov.singularity.content.article.model.Article
 import io.stereov.singularity.content.article.model.ArticleState
 import io.stereov.singularity.content.common.content.service.ContentManagementService
+import io.stereov.singularity.core.global.language.model.Language
 import io.stereov.singularity.content.common.util.AccessCriteria
 import io.stereov.singularity.core.auth.service.AuthenticationService
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -27,7 +28,11 @@ class ArticleManagementService(
 
     private val isPublished = Criteria.where(Article::state.name).`is`(ArticleState.PUBLISHED.toString())
 
-    suspend fun getAccessibleArticles(limit: Long = 10, afterId: String? = null): ArticleResponse {
+    suspend fun getAccessibleArticles(
+        limit: Long = 10,
+        afterId: String? = null,
+        lang: Language
+    ): ArticleResponse {
         logger.debug { "Getting accessible articles limit=$limit${afterId?.let { " after $it" } ?: ""}" }
 
         val currentUser = authenticationService.getCurrentUserOrNull()
@@ -62,6 +67,6 @@ class ArticleManagementService(
             ).awaitFirstOrNull() ?: 0
         } else 0
 
-        return ArticleResponse(articles.map { it.toOverviewResponse(currentUser) }, remainingCount)
+        return ArticleResponse(articles.map { it.toOverviewResponse(lang, currentUser) }, remainingCount)
     }
 }

@@ -2,10 +2,14 @@ package io.stereov.singularity.content.common.tag.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.core.global.language.model.Language
+import io.stereov.singularity.content.common.tag.dto.CreateTagMultiLangRequest
 import io.stereov.singularity.content.common.tag.dto.CreateTagRequest
 import io.stereov.singularity.content.common.tag.dto.UpdateTagRequest
-import io.stereov.singularity.content.common.tag.exception.model.TagNameExistsException
+import io.stereov.singularity.content.common.tag.exception.model.InvalidUpdateTagRequest
+import io.stereov.singularity.content.common.tag.exception.model.TagKeyExistsException
 import io.stereov.singularity.content.common.tag.model.TagDocument
+import io.stereov.singularity.content.common.tag.model.TagTranslation
 import io.stereov.singularity.content.common.tag.repository.TagRepository
 import io.stereov.singularity.content.properties.ContentProperties
 import io.stereov.singularity.core.global.exception.model.DocumentNotFoundException
@@ -13,7 +17,6 @@ import io.stereov.singularity.core.global.util.getFieldContainsCriteria
 import jakarta.annotation.PostConstruct
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.runBlocking
-import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.find
 import org.springframework.data.mongodb.core.query.Query
@@ -34,7 +37,7 @@ class TagService(
             try {
                 runBlocking { create(tagRequest) }
                 logger.info { "Created tag with key \"${tagRequest.key}\""}
-            } catch (_: TagNameExistsException) {
+            } catch (_: TagKeyExistsException) {
                 logger.info { "Skipping creation of tag with key \"${tagRequest.key}\" because it already exists"}
             }
         }
@@ -46,7 +49,15 @@ class TagService(
     suspend fun create(req: CreateTagRequest): TagDocument {
         logger.debug { "Creating tag with key ${req.key}" }
 
-        if (existsByKey(req.key)) throw TagNameExistsException(req.key)
+        if (existsByKey(req.key)) throw TagKeyExistsException(req.key)
+
+        return save(TagDocument(req))
+    }
+
+    suspend fun create(req: CreateTagMultiLangRequest): TagDocument {
+        logger.debug { "Creating tag with key \"${req.key}\"" }
+
+        if (existsByKey(req.key)) throw TagKeyExistsException(req.key)
 
         return save(TagDocument(req))
     }
@@ -57,22 +68,25 @@ class TagService(
         return repository.save(tag)
     }
 
+    suspend fun findByKey(key: String): TagDocument {
+        logger.debug { "Finding tag by key \"$key\"" }
+
+        return repository.findByKey(key)
+            ?: throw DocumentNotFoundException("No tag with key \"$key\" found")
+    }
+
     suspend fun existsByKey(name: String): Boolean {
         logger.debug { "Checking if there is a tag with key \"$name\" already" }
 
         return repository.existsByKey(name)
     }
 
-    suspend fun findById(id: ObjectId): TagDocument {
-        logger.debug { "Fining tag with id \"$id\"" }
+    suspend fun findByNameContains(substring: String, lang: Language): List<TagDocument> {
+        logger.debug { "Finding tags with name containing \"$substring\"" }
 
-        return repository.findById(id) ?: throw DocumentNotFoundException("No tag with id \"$id\" found")
-    }
+        val field = "${TagDocument::translations.name}.$lang.${TagTranslation::name.name}"
 
-    suspend fun findByKeyContains(substring: String): List<TagDocument> {
-        logger.debug { "Finding tags with key containing \"$substring\"" }
-
-        val criteria = getFieldContainsCriteria(TagDocument::key.name, substring)
+        val criteria = getFieldContainsCriteria(field, substring)
 
         return reactiveMongoTemplate.find<TagDocument>(Query.query(criteria))
             .collectList()
@@ -80,22 +94,44 @@ class TagService(
             ?: emptyList()
     }
 
-    suspend fun updateTag(id: String, req: UpdateTagRequest): TagDocument {
-        logger.debug { "Updating tag with id \"$id\"" }
+    suspend fun updateTag(key: String, req: UpdateTagRequest): TagDocument {
+        logger.debug { "Updating tag with key \"$key\"" }
 
-        val tag = findById(ObjectId(id))
+        val tag = findByKey(key)
+        val updatedTranslations = mutableMapOf<Language, TagTranslation>()
 
-        tag.key = req.key ?: tag.key
-        tag.description = req.description ?: tag.description
+        req.translations.forEach { (lang, updateReq) ->
+            val existing = tag.translations[lang]
+
+            if (existing != null) {
+                updatedTranslations.put(
+                    lang,
+                    TagTranslation(
+                        updateReq.name ?: existing.name,
+                        updateReq.description ?: existing.description
+                    )
+                )
+            } else {
+                updatedTranslations.put(
+                    lang,
+                    TagTranslation(
+                        updateReq.name
+                            ?: throw InvalidUpdateTagRequest("Failed to add new translation $lang for tag \"$key\": tag name not specified"),
+                        updateReq.description ?: ""
+                    )
+                )
+            }
+        }
+
+        tag.translations.putAll(updatedTranslations)
 
         return save(tag)
     }
 
-    suspend fun deleteById(id: String): Boolean {
-        logger.debug { "Deleting tag with id \"$id\"" }
+    suspend fun deleteByKey(key: String): Boolean {
+        logger.debug { "Deleting tag with key \"$key\"" }
 
-        repository.deleteById(ObjectId(id))
-        return true
+        return repository.deleteByKey(key)
     }
 
     suspend fun deleteAll() {

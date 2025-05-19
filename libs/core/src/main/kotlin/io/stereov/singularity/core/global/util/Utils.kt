@@ -10,19 +10,20 @@ import org.springframework.data.mongodb.core.query.Query
 
 suspend fun <T> paginateWithQuery(
     reactiveMongoTemplate: ReactiveMongoTemplate,
-    criteria: Criteria,
+    query: Query,
     pageable: Pageable,
-    collectionClass: Class<T>
+    collectionClass: Class<T>,
 ): Page<T> {
-    val query = Query(criteria).with(pageable)
+
+    val totalCount = reactiveMongoTemplate.count(query, collectionClass)
+        .awaitFirstOrNull() ?: 0
+
+    query.with(pageable)
 
     val content = reactiveMongoTemplate.find(query, collectionClass)
         .collectList()
         .awaitFirstOrNull()
         ?: emptyList()
-
-    val totalCount = reactiveMongoTemplate.count(Query(criteria), collectionClass)
-        .awaitFirstOrNull() ?: 0
 
     return PageImpl(content, pageable, totalCount)
 }

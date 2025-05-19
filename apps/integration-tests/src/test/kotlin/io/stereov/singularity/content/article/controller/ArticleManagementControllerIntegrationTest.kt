@@ -8,7 +8,9 @@ import io.stereov.singularity.content.common.content.model.ContentAccessSubject
 import io.stereov.singularity.content.common.tag.dto.CreateTagRequest
 import io.stereov.singularity.core.auth.model.AccessType
 import io.stereov.singularity.core.config.Constants
+import io.stereov.singularity.core.global.language.model.Language
 import io.stereov.singularity.test.BaseContentTest
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -19,7 +21,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
     private val articleBasePath = "$contentBasePath/articles"
 
     data class ArticleOverviewPage(
-        val content: List<ArticleOverviewResponse>,
+        val content: List<ArticleOverviewResponse> = emptyList(),
         val pageNumber: Int,
         val pageSize: Int,
         val numberOfElements: Int,
@@ -38,7 +40,9 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
 
         val foundArticle = articleService.findById(article.id)
         foundArticle.toString()
-        foundArticle.toOverviewResponse(null).toString()
+        foundArticle.toOverviewResponse(Language.EN,null).toString()
+
+        val articles = articleService.findAll().toList().forEach { println(it) }
 
         val res = webTestClient.get()
             .uri(articleBasePath)
@@ -224,7 +228,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
     @Test fun `getArticles correctly filters tags`() = runTest {
         val user = registerUser()
         val article = save(creator = user)
-        val tag = tagService.create(CreateTagRequest("test"))
+        val tag = tagService.create(CreateTagRequest("test", name = "Test"))
 
         article.tags.add(tag.key)
         articleService.save(article)
@@ -247,8 +251,8 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
     @Test fun `getArticles correctly filters when multiple tags`() = runTest {
         val user = registerUser()
         val article = save(creator = user)
-        val tag = tagService.create(CreateTagRequest("test"))
-        val anotherTag = tagService.create(CreateTagRequest("test2"))
+        val tag = tagService.create(CreateTagRequest("test", name = "Test"))
+        val anotherTag = tagService.create(CreateTagRequest("test2", name = "Another Test"))
 
         article.tags.add(tag.key)
         articleService.save(article)

@@ -1,6 +1,14 @@
 package io.stereov.singularity.content.common.tag.dto
 
+import io.stereov.singularity.core.global.language.model.Language
+
 data class UpdateTagRequest(
     val key: String?,
-    val description: String?
-)
+    val translations: Map<Language, TagTranslationUpdateRequest>
+) {
+
+    data class TagTranslationUpdateRequest(
+        val name: String?,
+        val description: String?
+    )
+}

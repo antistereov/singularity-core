@@ -8,6 +8,7 @@ import io.stereov.singularity.content.article.model.Article
 import io.stereov.singularity.content.article.repository.ArticleRepository
 import io.stereov.singularity.content.common.content.service.ContentService
 import io.stereov.singularity.content.common.content.util.toSlug
+import io.stereov.singularity.core.global.language.model.Language
 import io.stereov.singularity.content.common.util.AccessCriteria
 import io.stereov.singularity.core.auth.service.AuthenticationService
 import io.stereov.singularity.core.global.util.paginateWithQuery
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -33,8 +35,9 @@ class ArticleService(
     private val logger: KLogger
         get() = KotlinLogging.logger {}
 
-    suspend fun create(req: CreateArticleRequest): FullArticleResponse {
+    suspend fun create(req: CreateArticleRequest, lang: Language): FullArticleResponse {
         logger.debug { "Creating article with title ${req.title}" }
+
         val user = authenticationService.getCurrentUser()
 
         val baseKey = req.title.toSlug()
@@ -42,10 +45,10 @@ class ArticleService(
             "$baseKey-${UUID.randomUUID().toString().substring(0, 8)}"
         } else baseKey
 
-        val article = Article.create(key = key, ownerId = user.id, title = req.title)
+        val article = Article.create(req, key,user.id)
         val savedArticle = save(article)
 
-        return fullArticledResponseFrom(savedArticle, user)
+        return fullArticledResponseFrom(savedArticle, lang,user)
     }
 
     suspend fun setTrustedState(key: String, trusted: Boolean): Article {
@@ -57,18 +60,18 @@ class ArticleService(
         return save(article)
     }
 
-    suspend fun getFullArticleResponseByKey(key: String): FullArticleResponse {
-        return fullArticledResponseFrom(findByKey(key))
+    suspend fun getFullArticleResponseByKey(key: String, lang: Language): FullArticleResponse {
+        return fullArticledResponseFrom(findByKey(key), lang)
     }
 
-    suspend fun fullArticledResponseFrom(article: Article, owner: UserDocument? = null): FullArticleResponse {
+    suspend fun fullArticledResponseFrom(article: Article, lang: Language, owner: UserDocument? = null): FullArticleResponse {
         val currentUser = authenticationService.getCurrentUserOrNull()
 
         val actualOwner = owner ?: userService.findById(article.access.ownerId)
-        return FullArticleResponse(article, actualOwner, currentUser)
+        return FullArticleResponse.create(article, actualOwner, currentUser, lang)
     }
 
-    suspend fun getArticles(pageable: Pageable, tags: List<String>): Page<Article> {
+    suspend fun getArticles(pageable: Pageable, tags: List<String>, lang: Language): Page<Article> {
         val criteria = if (tags.isEmpty()) {
             accessCriteria.getViewCriteria()
         } else {
@@ -78,6 +81,8 @@ class ArticleService(
             )
         }
 
-        return paginateWithQuery(reactiveMongoTemplate, criteria, pageable, contentClass)
+        val query = Query.query(criteria)
+
+        return paginateWithQuery(reactiveMongoTemplate, query, pageable, contentClass)
     }
 }

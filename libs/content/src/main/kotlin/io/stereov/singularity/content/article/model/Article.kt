@@ -1,12 +1,13 @@
 package io.stereov.singularity.content.article.model
 
 import io.stereov.singularity.content.article.dto.ArticleOverviewResponse
+import io.stereov.singularity.content.article.dto.CreateArticleRequest
 import io.stereov.singularity.content.article.dto.FullArticleResponse
 import io.stereov.singularity.content.common.content.dto.ContentAccessDetailsResponse
 import io.stereov.singularity.content.common.content.model.ContentAccessDetails
-import io.stereov.singularity.content.common.content.model.ContentAccessPermissions
 import io.stereov.singularity.content.common.content.model.ContentDocument
-import io.stereov.singularity.core.auth.model.AccessType
+import io.stereov.singularity.core.global.language.model.Language
+import io.stereov.singularity.core.global.language.model.Translatable
 import io.stereov.singularity.core.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.core.global.service.file.model.FileMetaData
 import io.stereov.singularity.core.user.model.UserDocument
@@ -26,32 +27,44 @@ data class Article(
     val publishedAt: Instant? = null,
     val path: String,
     var state: ArticleState = ArticleState.DRAFT,
-    val title: String,
-    val summary: String = "",
     val colors: ArticleColors = ArticleColors(),
     val image: FileMetaData? = null,
-    val content: String = "",
     override var trusted: Boolean,
-    override val tags: MutableSet<String> = mutableSetOf()
-) : ContentDocument<Article>() {
+    override val tags: MutableSet<String> = mutableSetOf(),
+    override val translations: MutableMap<Language, ArticleTranslation> = mutableMapOf()
+) : ContentDocument<Article>(), Translatable<ArticleTranslation> {
 
     override val id: ObjectId
         get() = _id ?: throw InvalidDocumentException("No id found")
 
-    fun toOverviewResponse(viewer: UserDocument?) = ArticleOverviewResponse(id, key, createdAt, publishedAt, updatedAt, path, state,
-        title, colors, summary, image, ContentAccessDetailsResponse.create(access, viewer), tags)
+    fun toOverviewResponse(lang: Language, viewer: UserDocument?): ArticleOverviewResponse {
+        val access = ContentAccessDetailsResponse.create(access, viewer)
+        val translation = translate(lang)
+
+        return ArticleOverviewResponse(
+            id = id,
+            key = key,
+            createdAt = createdAt,
+            publishedAt = publishedAt,
+            updatedAt = updatedAt,
+            path = path,
+            state = state,
+            colors = colors,
+            image = image,
+            tags = tags,
+            title = translation.title,
+            summary = translation.summary,
+            access = access
+        )
+    }
 
     companion object {
         private val basePath: String
             get() = "/articles"
 
-        fun create(key: String, ownerId: ObjectId, title: String = "", summary: String = "",
-                   colors: ArticleColors = ArticleColors(), image: FileMetaData? = null, content: String = "",
-                   accessType: AccessType = AccessType.PRIVATE, state: ArticleState = ArticleState.DRAFT,
-                   trusted: Boolean = false,
-                   userPermissions: ContentAccessPermissions = ContentAccessPermissions(),
-                   groupPermissions: ContentAccessPermissions = ContentAccessPermissions()
-        ): Article {
+        fun create(req: CreateArticleRequest, key: String, ownerId: ObjectId): Article {
+            val translations = mutableMapOf(req.lang to ArticleTranslation(req.title, req.summary, req.content))
+
             return Article(
                 _id = null,
                 key = key,
@@ -59,18 +72,18 @@ data class Article(
                 publishedAt = null,
                 updatedAt = Instant.now(),
                 path = "$basePath/$key",
-                state = state,
-                title = title,
-                summary = summary,
-                colors = colors,
-                image = image,
-                content = content,
-                trusted = trusted,
-                access = ContentAccessDetails(ownerId, accessType, users = userPermissions, groups = groupPermissions)
+                state = ArticleState.DRAFT,
+                colors = ArticleColors(),
+                image = null,
+                trusted = false,
+                access = ContentAccessDetails(ownerId),
+                translations = translations
             )
         }
 
-        fun create(dto: FullArticleResponse): Article {
+        fun create(dto: FullArticleResponse, language: Language): Article {
+            val translations = mutableMapOf(language to ArticleTranslation(dto.title, dto.summary, dto.content))
+
             return Article(
                 _id = dto.id,
                 key = dto.key,
@@ -79,13 +92,11 @@ data class Article(
                 updatedAt = dto.updatedAt,
                 path = dto.path,
                 state = dto.state,
-                title = dto.title,
-                summary = dto.summary,
                 colors = dto.colors,
                 image = dto.image,
-                content = dto.content,
                 trusted = dto.trusted,
-                access = ContentAccessDetails(dto.access)
+                access = ContentAccessDetails(dto.access),
+                translations = translations
             )
         }
     }

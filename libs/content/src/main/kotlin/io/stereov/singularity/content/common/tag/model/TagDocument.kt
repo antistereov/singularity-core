@@ -1,5 +1,8 @@
 package io.stereov.singularity.content.common.tag.model
 
+import io.stereov.singularity.core.global.language.model.Language
+import io.stereov.singularity.core.global.language.model.Translatable
+import io.stereov.singularity.content.common.tag.dto.CreateTagMultiLangRequest
 import io.stereov.singularity.content.common.tag.dto.CreateTagRequest
 import io.stereov.singularity.content.common.tag.dto.TagResponse
 import io.stereov.singularity.core.global.exception.model.InvalidDocumentException
@@ -12,19 +15,27 @@ import org.springframework.data.mongodb.core.mapping.Document
 data class TagDocument(
     @Id private val _id: ObjectId? = null,
     @Indexed(unique = true) var key: String,
-    var description: String,
-) {
+    override val translations: MutableMap<Language, TagTranslation> = mutableMapOf()
+) : Translatable<TagTranslation> {
 
     constructor(req: CreateTagRequest): this(
         _id = null,
         key = req.key,
-        description = req.description ?: ""
+        translations = mutableMapOf(req.lang to TagTranslation(req.name, req.description ?: ""))
+    )
+
+    constructor(req: CreateTagMultiLangRequest): this (
+        _id = null,
+        key = req.key,
+        translations = req.translations
     )
 
     val id: ObjectId
         get() = _id ?: throw InvalidDocumentException("TagDocument contains no ID")
 
-    fun toResponse(): TagResponse {
-        return TagResponse(key, description)
+
+    fun toResponse(lang: Language): TagResponse {
+        val translation = translate(lang)
+        return TagResponse(key, translation.name, translation.description)
     }
 }

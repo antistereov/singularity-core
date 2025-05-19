@@ -4,6 +4,7 @@ import io.stereov.singularity.content.article.dto.CreateArticleRequest
 import io.stereov.singularity.content.article.dto.FullArticleResponse
 import io.stereov.singularity.content.article.model.Article
 import io.stereov.singularity.content.article.service.ArticleService
+import io.stereov.singularity.core.global.language.model.Language
 import io.stereov.singularity.content.common.tag.service.TagService
 import io.stereov.singularity.core.config.Constants
 import kotlinx.coroutines.runBlocking
@@ -27,7 +28,7 @@ class BaseContentTest : BaseIntegrationTest() {
 
     suspend fun save(creator: TestRegisterResponse? = null, title: String? = null): Article {
         val actualUser = creator ?: registerUser()
-        val req = CreateArticleRequest(title ?: "test")
+        val req = CreateArticleRequest(Language.EN, title ?: "test", "", "")
         val res = webTestClient.post()
             .uri("/api/content/articles/create")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, actualUser.accessToken)
@@ -40,6 +41,6 @@ class BaseContentTest : BaseIntegrationTest() {
 
         requireNotNull(res)
 
-        return Article.create(res)
+        return Article.create(res, Language.EN)
     }
 }

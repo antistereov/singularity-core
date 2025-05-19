@@ -33,6 +33,7 @@ data class UserDto(
     val email: String,
     val roles: Set<Role> = setOf(Role.USER),
     val emailVerified: Boolean = false,
+    // TODO: these don't belong here - ask for expanded user details instead
     val devices: List<DeviceInfoResponse> = listOf(),
     val lastActive: String,
     val twoFactorAuthEnabled: Boolean,

@@ -85,5 +85,14 @@ baseline:
   content:
     tags:
       - key: music
+        translations:
+          EN:
+            name: Music
       - key: arts
+        translations:
+          EN:
+            name: Arts
       - key: coding
+        translations:
+          EN:
+            name: Coding

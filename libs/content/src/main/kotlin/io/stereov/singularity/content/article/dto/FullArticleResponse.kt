@@ -4,6 +4,7 @@ import io.stereov.singularity.content.article.model.Article
 import io.stereov.singularity.content.article.model.ArticleColors
 import io.stereov.singularity.content.article.model.ArticleState
 import io.stereov.singularity.content.common.content.dto.ContentAccessDetailsResponse
+import io.stereov.singularity.core.global.language.model.Language
 import io.stereov.singularity.core.global.service.file.model.FileMetaData
 import io.stereov.singularity.core.user.dto.UserOverviewDto
 import io.stereov.singularity.core.user.model.UserDocument
@@ -19,20 +20,40 @@ data class FullArticleResponse(
     val owner: UserOverviewDto,
     val path: String,
     var state: ArticleState = ArticleState.DRAFT,
-    val title: String,
     val colors: ArticleColors,
-    val summary: String,
     val image: FileMetaData?,
+    val title: String,
+    val summary: String,
     val content: String,
     val trusted: Boolean,
     val access: ContentAccessDetailsResponse,
     val tags: Set<String>
 ) {
 
-    constructor(article: Article, creator: UserDocument, viewer: UserDocument?): this(
-        article.id, article.key, article.createdAt, article.publishedAt, article.updatedAt, creator.toOverviewDto(),
-        article.path, article.state, article.title, article.colors, article.summary, article.image, article.content,
-        article.trusted, ContentAccessDetailsResponse.create(article.access, viewer), article.tags
-    )
+    companion object {
 
+        fun create(article: Article, owner: UserDocument, viewer: UserDocument?, lang: Language): FullArticleResponse {
+            val access = ContentAccessDetailsResponse.create(article.access, viewer)
+            val translation = article.translate(lang)
+
+            return FullArticleResponse(
+                id = article.id,
+                key = article.key,
+                createdAt = article.createdAt,
+                publishedAt = article.publishedAt,
+                updatedAt = article.updatedAt,
+                owner = owner.toOverviewDto(),
+                path = article.path,
+                state = article.state,
+                colors = article.colors,
+                image = article.image,
+                trusted = article.trusted,
+                access = access,
+                title = translation.title,
+                summary = translation.summary,
+                content = translation.content,
+                tags = article.tags
+            )
+        }
+    }
 }
