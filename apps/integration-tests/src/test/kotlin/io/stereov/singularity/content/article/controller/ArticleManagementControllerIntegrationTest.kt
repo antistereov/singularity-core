@@ -8,7 +8,7 @@ import io.stereov.singularity.content.common.content.model.ContentAccessSubject
 import io.stereov.singularity.content.common.tag.dto.CreateTagRequest
 import io.stereov.singularity.core.auth.model.AccessType
 import io.stereov.singularity.core.config.Constants
-import io.stereov.singularity.core.global.language.model.Language
+import io.stereov.singularity.core.group.model.KnownGroups
 import io.stereov.singularity.test.BaseContentTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -36,10 +36,6 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         val article = save()
         article.access.visibility = AccessType.PUBLIC
         articleService.save(article)
-
-        val foundArticle = articleService.findById(article.id)
-        foundArticle.toString()
-        foundArticle.toOverviewResponse(Language.EN,null).toString()
 
         val res = webTestClient.get()
             .uri(articleBasePath)
@@ -85,7 +81,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         assertEquals(0, res.totalElements)
     }
     @Test fun `getArticles works with creator`() = runTest {
-        val user = registerUser()
+        val user = registerUser(groups = listOf(KnownGroups.EDITOR))
         val article = save(creator = user)
         article.access.visibility = AccessType.PRIVATE
 
@@ -223,7 +219,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         assertEquals(article.id, res.content.first().id)
     }
     @Test fun `getArticles correctly filters tags`() = runTest {
-        val user = registerUser()
+        val user = registerUser(groups = listOf(KnownGroups.EDITOR))
         val article = save(creator = user)
         val tag = tagService.create(CreateTagRequest("test", name = "Test"))
 
@@ -246,7 +242,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         assertEquals(article.id, res.content.first().id)
     }
     @Test fun `getArticles correctly filters when multiple tags`() = runTest {
-        val user = registerUser()
+        val user = registerUser(groups = listOf(KnownGroups.EDITOR))
         val article = save(creator = user)
         val tag = tagService.create(CreateTagRequest("test", name = "Test"))
         val anotherTag = tagService.create(CreateTagRequest("test2", name = "Another Test"))
@@ -365,7 +361,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         assertEquals(0, res.articles.size)
     }
     @Test fun `getLatestArticles works with creator`() = runTest {
-        val user = registerUser()
+        val user = registerUser(groups = listOf(KnownGroups.EDITOR))
         val article = save(creator = user)
         article.access.visibility = AccessType.PRIVATE
         article.state = ArticleState.PUBLISHED

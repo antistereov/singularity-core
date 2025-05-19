@@ -3,6 +3,7 @@ package io.stereov.singularity.content.article.dto
 import io.stereov.singularity.content.article.model.ArticleColors
 import io.stereov.singularity.content.article.model.ArticleState
 import io.stereov.singularity.content.common.content.dto.ContentAccessDetailsResponse
+import io.stereov.singularity.content.common.tag.dto.TagResponse
 import io.stereov.singularity.core.global.language.model.Language
 import io.stereov.singularity.core.global.service.file.model.FileMetaData
 import org.bson.types.ObjectId
@@ -22,5 +23,5 @@ data class ArticleOverviewResponse(
     val summary: String,
     val image: FileMetaData?,
     val access: ContentAccessDetailsResponse,
-    val tags: Set<String>
+    val tags: List<TagResponse>
 )

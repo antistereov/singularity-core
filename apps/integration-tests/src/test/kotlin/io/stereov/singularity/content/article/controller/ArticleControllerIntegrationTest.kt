@@ -1,6 +1,7 @@
 package io.stereov.singularity.content.article.controller
 
 import io.stereov.singularity.core.config.Constants
+import io.stereov.singularity.core.group.model.KnownGroups
 import io.stereov.singularity.core.user.model.Role
 import io.stereov.singularity.test.BaseContentTest
 import kotlinx.coroutines.test.runTest
@@ -11,7 +12,7 @@ import org.junit.jupiter.api.Test
 class ArticleControllerIntegrationTest : BaseContentTest() {
 
     @Test fun `setTrusted can only be called by an admin`() = runTest {
-        val user = registerUser()
+        val user = registerUser(groups = listOf(KnownGroups.EDITOR))
         val article = save(creator = user)
 
         webTestClient.put()
@@ -24,7 +25,7 @@ class ArticleControllerIntegrationTest : BaseContentTest() {
     }
 
     @Test fun `setTrusted can works`() = runTest {
-        val user = registerUser(roles = listOf(Role.USER, Role.ADMIN))
+        val user = registerUser(roles = listOf(Role.USER, Role.ADMIN), groups = listOf(KnownGroups.EDITOR))
         val article = save(creator = user)
 
         assertFalse(articleService.findByKey(article.key).trusted)

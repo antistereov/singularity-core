@@ -4,9 +4,10 @@ import io.stereov.singularity.content.article.dto.CreateArticleRequest
 import io.stereov.singularity.content.article.dto.FullArticleResponse
 import io.stereov.singularity.content.article.model.Article
 import io.stereov.singularity.content.article.service.ArticleService
-import io.stereov.singularity.core.global.language.model.Language
 import io.stereov.singularity.content.common.tag.service.TagService
 import io.stereov.singularity.core.config.Constants
+import io.stereov.singularity.core.global.language.model.Language
+import io.stereov.singularity.core.group.model.KnownGroups
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach
 import org.springframework.beans.factory.annotation.Autowired
@@ -27,7 +28,7 @@ class BaseContentTest : BaseIntegrationTest() {
     }
 
     suspend fun save(creator: TestRegisterResponse? = null, title: String? = null): Article {
-        val actualUser = creator ?: registerUser()
+        val actualUser = creator ?: registerUser(groups = listOf(KnownGroups.EDITOR))
         val req = CreateArticleRequest(Language.EN, title ?: "test", "", "")
         val res = webTestClient.post()
             .uri("/api/content/articles/create")

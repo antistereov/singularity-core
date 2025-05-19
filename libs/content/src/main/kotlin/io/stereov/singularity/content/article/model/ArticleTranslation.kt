@@ -1,7 +1,7 @@
 package io.stereov.singularity.content.article.model
 
 data class ArticleTranslation(
-    val title: String,
-    val summary: String,
-    val content: String,
+    var title: String,
+    var summary: String,
+    var content: String,
 )

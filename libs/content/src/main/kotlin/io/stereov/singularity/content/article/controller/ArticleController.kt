@@ -1,7 +1,8 @@
 package io.stereov.singularity.content.article.controller
 
-import io.stereov.singularity.content.article.dto.*
-import io.stereov.singularity.content.article.service.ArticleManagementService
+import io.stereov.singularity.content.article.dto.ArticleOverviewResponse
+import io.stereov.singularity.content.article.dto.ArticleResponse
+import io.stereov.singularity.content.article.dto.FullArticleResponse
 import io.stereov.singularity.content.article.service.ArticleService
 import io.stereov.singularity.core.auth.service.AuthenticationService
 import io.stereov.singularity.core.global.language.model.Language
@@ -9,13 +10,15 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 
 @Controller
 @RequestMapping("/api/content/articles")
 class ArticleController(
-    private val articleService: ArticleService,
-    private val articleManagementService: ArticleManagementService,
+    private val service: ArticleService,
     private val authenticationService: AuthenticationService,
 ) {
 
@@ -25,24 +28,10 @@ class ArticleController(
         @RequestParam lang: Language = Language.EN
     ): ResponseEntity<FullArticleResponse> {
         return ResponseEntity.ok(
-            articleService.getFullArticleResponseByKey(key, lang)
+            service.getFullArticleResponseByKey(key, lang)
         )
     }
 
-    @GetMapping("/{key}/trusted")
-    suspend fun isArticleTrusted(@PathVariable key: String): ResponseEntity<ArticleTrustedResponse> {
-        return ResponseEntity.ok(
-            ArticleTrustedResponse(articleService.findByKey(key).trusted)
-        )
-    }
-
-    @PutMapping("/{key}/trusted")
-    suspend fun setTrustedState(@PathVariable key: String, @RequestParam trusted: Boolean): ResponseEntity<ArticleTrustedResponse> {
-        articleService.setTrustedState(key, trusted)
-        return ResponseEntity.ok(
-            ArticleTrustedResponse(trusted)
-        )
-    }
 
     @GetMapping("/scroll")
     suspend fun getLatestArticles(
@@ -50,7 +39,7 @@ class ArticleController(
         @RequestParam after: String? = null,
         @RequestParam lang: Language = Language.EN
     ): ResponseEntity<ArticleResponse> {
-        return ResponseEntity.ok(articleManagementService.getAccessibleArticles(limit, after, lang))
+        return ResponseEntity.ok(service.getAccessibleArticles(limit, after, lang))
     }
 
     @GetMapping
@@ -61,20 +50,7 @@ class ArticleController(
         @RequestParam lang: Language = Language.EN
     ): ResponseEntity<Page<ArticleOverviewResponse>> {
         val pageable = Pageable.ofSize(size).withPage(page)
-        val currentUser = authenticationService.getCurrentUserOrNull()
 
-        return ResponseEntity.ok(
-            articleService.getArticles(pageable, tags).map { it.toOverviewResponse(lang, currentUser) }
-        )
-    }
-
-    @PostMapping("/create")
-    suspend fun createArticle(
-        @RequestBody req: CreateArticleRequest,
-        @RequestParam lang: Language = Language.EN
-    ): ResponseEntity<FullArticleResponse> {
-        return ResponseEntity.ok(
-            articleService.create(req, lang)
-        )
+        return ResponseEntity.ok(service.getArticles(pageable, tags, lang))
     }
 }

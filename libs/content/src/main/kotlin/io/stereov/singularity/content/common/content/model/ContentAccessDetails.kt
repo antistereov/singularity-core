@@ -1,5 +1,6 @@
 package io.stereov.singularity.content.common.content.model
 
+import io.stereov.singularity.content.common.content.dto.ChangeContentVisibilityRequest
 import io.stereov.singularity.content.common.content.dto.ContentAccessDetailsResponse
 import io.stereov.singularity.core.auth.model.AccessType
 import io.stereov.singularity.core.user.model.UserDocument
@@ -12,12 +13,7 @@ data class ContentAccessDetails(
     val groups: ContentAccessPermissions = ContentAccessPermissions(),
 ) {
 
-    constructor(response: ContentAccessDetailsResponse): this(
-        response.ownerId,
-        response.visibility,
-        response.users,
-        response.groups
-    )
+
 
     fun share(type: ContentAccessSubject, subjectId: String, role: ContentAccessRole): ContentAccessDetails {
         if (visibility == AccessType.PRIVATE) visibility = AccessType.SHARED
@@ -30,25 +26,14 @@ data class ContentAccessDetails(
         return this
     }
 
-    fun remove(type: ContentAccessSubject, subjectId: String): ContentAccessDetails {
-        when (type) {
-            ContentAccessSubject.USER -> users.remove(subjectId)
-            ContentAccessSubject.GROUP -> groups.remove(subjectId)
-        }
-
-        if (users.isEmpty() && groups.isEmpty() && visibility == AccessType.SHARED) visibility = AccessType.PRIVATE
-
-        return this
-    }
-
-    fun publish(): ContentAccessDetails {
-        visibility = AccessType.PUBLIC
-
-        return this
-    }
-
     fun makePrivate(): ContentAccessDetails {
         visibility = AccessType.PRIVATE
+        clear()
+
+        return this
+    }
+
+    fun clear(): ContentAccessDetails {
         users.clear()
         groups.clear()
 
@@ -76,6 +61,59 @@ data class ContentAccessDetails(
             ContentAccessRole.VIEWER ->  userIsAdmin || groupIsAdmin || userIsEditor || groupIsEditor || userIsViewer || groupIsViewer
             ContentAccessRole.EDITOR ->  userIsAdmin || groupIsAdmin || userIsEditor || groupIsEditor
             ContentAccessRole.ADMIN -> userIsAdmin || groupIsAdmin
+        }
+    }
+
+    private fun updateShared(
+        sharedUsers: Map<ObjectId, ContentAccessRole>,
+        sharedGroups: Map<String, ContentAccessRole>
+    ): ContentAccessDetails {
+        users.clear()
+        groups.clear()
+
+        sharedUsers.forEach { (userId, role) -> users.put(userId.toString(), role) }
+        sharedGroups.forEach { (groupKey, role) -> groups.put(groupKey, role) }
+
+        return this
+    }
+
+    fun update(req: ChangeContentVisibilityRequest): ContentAccessDetails {
+        return when (req.visibility) {
+            AccessType.PRIVATE -> makePrivate()
+            AccessType.PUBLIC -> {
+                visibility = AccessType.PUBLIC
+                updateShared(req.sharedUsers, req.sharedGroups)
+
+                return this
+            }
+            AccessType.SHARED -> {
+                visibility = AccessType.SHARED
+                updateShared(req.sharedUsers, req.sharedGroups)
+
+                return this
+            }
+        }
+    }
+
+    companion object {
+
+        fun create(req: ContentAccessDetailsResponse, ownerId: ObjectId): ContentAccessDetails {
+
+            return when (req.visibility) {
+                AccessType.PUBLIC -> {
+                    val access = ContentAccessDetails(ownerId, AccessType.PUBLIC)
+                    access.updateShared(req.users, req.groups)
+
+                    return access
+                }
+                AccessType.SHARED -> {
+                    val access = ContentAccessDetails(ownerId, AccessType.SHARED)
+                    access.updateShared(req.users, req.groups)
+
+                    return access
+                }
+                AccessType.PRIVATE -> ContentAccessDetails(ownerId, AccessType.PRIVATE)
+            }
         }
     }
 }
