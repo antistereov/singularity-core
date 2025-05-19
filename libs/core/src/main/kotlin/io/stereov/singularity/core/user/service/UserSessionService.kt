@@ -11,7 +11,7 @@ import io.stereov.singularity.core.global.service.file.exception.model.Unsupport
 import io.stereov.singularity.core.global.service.file.service.FileStorage
 import io.stereov.singularity.core.global.service.hash.HashService
 import io.stereov.singularity.core.global.service.mail.MailService
-import io.stereov.singularity.core.user.dto.UserDto
+import io.stereov.singularity.core.user.dto.UserResponse
 import io.stereov.singularity.core.user.dto.request.*
 import io.stereov.singularity.core.user.exception.model.EmailAlreadyExistsException
 import io.stereov.singularity.core.user.model.UserDocument
@@ -178,7 +178,7 @@ class UserSessionService(
         return userService.save(user)
     }
 
-    suspend fun setAvatar(file: FilePart): UserDto {
+    suspend fun setAvatar(file: FilePart): UserResponse {
         val user = authenticationService.getCurrentUser()
 
         val currentAvatar = user.sensitive.avatar
@@ -200,10 +200,10 @@ class UserSessionService(
 
         user.sensitive.avatar = fileStorage.upload(user.id, file, "${user.fileStoragePath}/avatar", true)
 
-        return userService.save(user).toDto()
+        return userService.save(user).toResponse()
     }
 
-    suspend fun deleteAvatar(): UserDto {
+    suspend fun deleteAvatar(): UserResponse {
         val user = authenticationService.getCurrentUser()
 
         val currentAvatar = user.sensitive.avatar
@@ -214,7 +214,7 @@ class UserSessionService(
 
         user.sensitive.avatar = null
 
-        return userService.save(user).toDto()
+        return userService.save(user).toResponse()
     }
 
     /**

@@ -9,8 +9,8 @@ import io.stereov.singularity.core.global.service.encryption.model.Encrypted
 import io.stereov.singularity.core.global.service.file.model.FileMetaData
 import io.stereov.singularity.core.global.service.hash.model.SearchableHash
 import io.stereov.singularity.core.global.service.hash.model.SecureHash
-import io.stereov.singularity.core.user.dto.UserDto
 import io.stereov.singularity.core.user.dto.UserOverviewDto
+import io.stereov.singularity.core.user.dto.UserResponse
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Transient
 import java.time.Instant
@@ -77,16 +77,16 @@ data class UserDocument(
     }
 
     /**
-     * Convert this [UserDocument] to a [UserDto].
+     * Convert this [UserDocument] to a [UserResponse].
      *
      * This method is used to create a data transfer object (DTO) for the user.
      *
-     * @return A [UserDto] containing the user information.
+     * @return A [UserResponse] containing the user information.
      */
-    fun toDto(): UserDto {
+    fun toResponse(): UserResponse {
         logger.debug { "Creating UserDto" }
 
-        return UserDto(
+        return UserResponse(
             id,
             sensitive.name,
             sensitive.email,

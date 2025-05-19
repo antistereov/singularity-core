@@ -9,7 +9,7 @@ import io.stereov.singularity.core.global.service.mail.MailCooldownService
 import io.stereov.singularity.core.global.service.mail.MailService
 import io.stereov.singularity.core.global.service.mail.MailTokenService
 import io.stereov.singularity.core.global.service.random.RandomService
-import io.stereov.singularity.core.user.dto.UserDto
+import io.stereov.singularity.core.user.dto.UserResponse
 import io.stereov.singularity.core.user.dto.request.ResetPasswordRequest
 import io.stereov.singularity.core.user.dto.request.SendPasswordResetRequest
 import io.stereov.singularity.core.user.dto.response.MailCooldownResponse
@@ -47,7 +47,7 @@ class UserMailService(
      *
      * @return The updated user information.
      */
-    suspend fun verifyEmail(token: String): UserDto {
+    suspend fun verifyEmail(token: String): UserResponse {
         logger.debug { "Verifying email" }
 
         val verificationToken = mailTokenService.validateAndExtractVerificationToken(token)
@@ -59,7 +59,7 @@ class UserMailService(
         return if (verificationToken.secret == savedSecret) {
             user.sensitive.security.mail.verified = true
             user.sensitive.email = verificationToken.email
-            userService.save(user).toDto()
+            userService.save(user).toResponse()
         } else {
             throw AuthException("Verification token does not match")
         }

@@ -3,7 +3,7 @@ package io.stereov.singularity.core.user.controller
 import io.stereov.singularity.core.config.Constants
 import io.stereov.singularity.core.global.service.mail.MailTokenService
 import io.stereov.singularity.core.global.service.random.RandomService
-import io.stereov.singularity.core.user.dto.UserDto
+import io.stereov.singularity.core.user.dto.UserResponse
 import io.stereov.singularity.core.user.dto.request.*
 import io.stereov.singularity.core.user.dto.response.LoginResponse
 import io.stereov.singularity.test.BaseIntegrationTest
@@ -29,7 +29,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
             .header(HttpHeaders.COOKIE, "${Constants.ACCESS_TOKEN_COOKIE}=${user.accessToken}")
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserDto::class.java)
+            .expectBody(UserResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -73,19 +73,19 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         assertTrue(refreshToken.isNotBlank())
         assertEquals(user.info.id, account.id)
 
-        val userDto = webTestClient.get()
+        val userResponse = webTestClient.get()
             .uri("/api/user/me")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserDto::class.java)
+            .expectBody(UserResponse::class.java)
             .returnResult()
             .responseBody
 
-        requireNotNull(userDto)
+        requireNotNull(userResponse)
 
-        assertEquals(user.info.id, userDto.id)
-        assertEquals(user.info.sensitive.email, userDto.email)
+        assertEquals(user.info.id, userResponse.id)
+        assertEquals(user.info.sensitive.email, userResponse.email)
 
         assertEquals(deviceId, user.info.sensitive.devices.firstOrNull()?.id)
         assertEquals(1, user.info.sensitive.devices.size)
@@ -144,7 +144,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
             .cookie(Constants.ACCESS_TOKEN_COOKIE, accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserDto::class.java)
+            .expectBody(UserResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -193,7 +193,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
             .bodyValue(RegisterUserRequest(email = email, password = password, name = "Name", device = deviceInfo))
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserDto::class.java)
+            .expectBody(UserResponse::class.java)
             .returnResult()
 
         val accessToken = response.responseCookies[Constants.ACCESS_TOKEN_COOKIE]
@@ -214,7 +214,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
             .cookie(Constants.ACCESS_TOKEN_COOKIE, accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserDto::class.java)
+            .expectBody(UserResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -269,7 +269,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
             .bodyValue(ChangeEmailRequest(newEmail, password))
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserDto::class.java)
+            .expectBody(UserResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -279,7 +279,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
             .uri("/api/user/mail/verify?token=$token")
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserDto::class.java)
+            .expectBody(UserResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -300,7 +300,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
             .bodyValue(ChangeEmailRequest(newEmail, password))
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserDto::class.java)
+            .expectBody(UserResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -310,7 +310,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
             .uri("/api/user/mail/verify?token=$token")
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserDto::class.java)
+            .expectBody(UserResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -331,7 +331,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
             .bodyValue(ChangeEmailRequest(newEmail, password))
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserDto::class.java)
+            .expectBody(UserResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -481,7 +481,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
             .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserDto::class.java)
+            .expectBody(UserResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -505,7 +505,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
             .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserDto::class.java)
+            .expectBody(UserResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -637,7 +637,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
             .bodyValue(ChangeUserRequest(newName))
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserDto::class.java)
+            .expectBody(UserResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -681,7 +681,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserDto::class.java)
+            .expectBody(UserResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -756,7 +756,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
             .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.first().id))
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserDto::class.java)
+            .expectBody(UserResponse::class.java)
             .returnResult()
 
         val account = response.responseBody

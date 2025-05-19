@@ -4,7 +4,7 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.core.auth.service.AuthenticationService
 import io.stereov.singularity.core.auth.service.CookieService
-import io.stereov.singularity.core.user.dto.UserDto
+import io.stereov.singularity.core.user.dto.UserResponse
 import io.stereov.singularity.core.user.dto.request.*
 import io.stereov.singularity.core.user.dto.response.LoginResponse
 import io.stereov.singularity.core.user.service.UserSessionService
@@ -44,19 +44,19 @@ class UserSessionController(
     /**
      * Get the current user's information.
      *
-     * @return The current user's information as a [UserDto].
+     * @return The current user's information as a [UserResponse].
      */
     @GetMapping("/me")
-    suspend fun getUser(): ResponseEntity<UserDto> {
+    suspend fun getUser(): ResponseEntity<UserResponse> {
         val user = authenticationService.getCurrentUser()
 
-        return ResponseEntity.ok(user.toDto())
+        return ResponseEntity.ok(user.toResponse())
     }
 
     /**
      * Get the current user's information with application info.
      *
-     * @return The current user's information with application info as a [UserDto].
+     * @return The current user's information with application info as a [UserResponse].
      */
     @PostMapping("/login")
     suspend fun login(
@@ -71,7 +71,7 @@ class UserSessionController(
             val twoFactorCookie = cookieService.createLoginVerificationCookie(user.id)
             return ResponseEntity.ok()
                 .header("Set-Cookie", twoFactorCookie.toString())
-                .body(LoginResponse(true, user.toDto()))
+                .body(LoginResponse(true, user.toResponse()))
         }
 
         val accessTokenCookie = cookieService.createAccessTokenCookie(user.id, payload.device.id)
@@ -80,7 +80,7 @@ class UserSessionController(
         return ResponseEntity.ok()
             .header("Set-Cookie", accessTokenCookie.toString())
             .header("Set-Cookie", refreshTokenCookie.toString())
-            .body(LoginResponse(false, user.toDto()))
+            .body(LoginResponse(false, user.toResponse()))
     }
 
     /**
@@ -88,14 +88,14 @@ class UserSessionController(
      *
      * @param exchange The server web exchange.
      * @param payload The registration request payload.
-     * @return The registered user's information as a [UserDto].
+     * @return The registered user's information as a [UserResponse].
      */
     @PostMapping("/register")
     suspend fun register(
         exchange: ServerWebExchange,
         @RequestBody @Valid payload: RegisterUserRequest,
         @RequestParam("send-email") sendEmail: Boolean = true,
-    ): ResponseEntity<UserDto> {
+    ): ResponseEntity<UserResponse> {
         logger.info { "Executing register" }
 
         val user = userSessionService.registerAndGetUser(payload, sendEmail)
@@ -106,7 +106,7 @@ class UserSessionController(
         return ResponseEntity.ok()
             .header("Set-Cookie", accessTokenCookie.toString())
             .header("Set-Cookie", refreshTokenCookie.toString())
-            .body(user.toDto())
+            .body(user.toResponse())
     }
 
     /**
@@ -115,12 +115,12 @@ class UserSessionController(
      * @param payload The two-factor authentication request payload.
      * @param exchange The server web exchange.
      *
-     * @return The user's information as a [UserDto].
+     * @return The user's information as a [UserResponse].
      */
     @PutMapping("/me/email")
-    suspend fun changeEmail(@RequestBody payload: ChangeEmailRequest, exchange: ServerWebExchange): ResponseEntity<UserDto> {
+    suspend fun changeEmail(@RequestBody payload: ChangeEmailRequest, exchange: ServerWebExchange): ResponseEntity<UserResponse> {
         return ResponseEntity.ok().body(
-            userSessionService.changeEmail(payload, exchange).toDto()
+            userSessionService.changeEmail(payload, exchange).toResponse()
         )
     }
 
@@ -130,12 +130,12 @@ class UserSessionController(
      * @param payload The change password request payload.
      * @param exchange The server web exchange.
      *
-     * @return The user's information as a [UserDto].
+     * @return The user's information as a [UserResponse].
      */
     @PutMapping("/me/password")
-    suspend fun changePassword(@RequestBody payload: ChangePasswordRequest, exchange: ServerWebExchange): ResponseEntity<UserDto> {
+    suspend fun changePassword(@RequestBody payload: ChangePasswordRequest, exchange: ServerWebExchange): ResponseEntity<UserResponse> {
         return ResponseEntity.ok().body(
-            userSessionService.changePassword(payload, exchange).toDto()
+            userSessionService.changePassword(payload, exchange).toResponse()
         )
     }
 
@@ -143,24 +143,24 @@ class UserSessionController(
      * Change the user's information.
      *
      * @param payload The change user request payload.
-     * @return The user's information as a [UserDto].
+     * @return The user's information as a [UserResponse].
      */
     @PutMapping("/me")
-    suspend fun changeUser(@RequestBody payload: ChangeUserRequest): ResponseEntity<UserDto> {
+    suspend fun changeUser(@RequestBody payload: ChangeUserRequest): ResponseEntity<UserResponse> {
         return ResponseEntity.ok().body(
-            userSessionService.changeUser(payload).toDto()
+            userSessionService.changeUser(payload).toResponse()
         )
     }
 
     @PutMapping("/me/avatar")
-    suspend fun setAvatar(@RequestPart file: FilePart): ResponseEntity<UserDto> {
+    suspend fun setAvatar(@RequestPart file: FilePart): ResponseEntity<UserResponse> {
         return ResponseEntity.ok().body(
             userSessionService.setAvatar(file)
         )
     }
 
     @DeleteMapping("/me/avatar")
-    suspend fun deleteAvatar(): ResponseEntity<UserDto> {
+    suspend fun deleteAvatar(): ResponseEntity<UserResponse> {
         return ResponseEntity.ok().body(
             userSessionService.deleteAvatar()
         )
@@ -170,7 +170,7 @@ class UserSessionController(
      * Set up two-factor authentication for the user.
      *
      * @param deviceInfo The device info request payload.
-     * @return The user's information as a [UserDto].
+     * @return The user's information as a [UserResponse].
      */
     @PostMapping("/logout")
     suspend fun logout(@RequestBody deviceInfo: DeviceInfoRequest): ResponseEntity<Map<String, String>> {
@@ -216,13 +216,13 @@ class UserSessionController(
      *
      * @param exchange The server web exchange.
      * @param deviceInfoDto The device information request payload.
-     * @return The user's information as a [UserDto].
+     * @return The user's information as a [UserResponse].
      */
     @PostMapping("/refresh")
     suspend fun refreshToken(
         exchange: ServerWebExchange,
         @RequestBody deviceInfoDto: DeviceInfoRequest
-    ): ResponseEntity<UserDto> {
+    ): ResponseEntity<UserResponse> {
         logger.debug { "Refreshing token" }
 
         val userDto = cookieService.validateRefreshTokenAndGetUserDto(exchange, deviceInfoDto.id)

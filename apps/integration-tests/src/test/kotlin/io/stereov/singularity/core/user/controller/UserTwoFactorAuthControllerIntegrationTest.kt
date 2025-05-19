@@ -2,7 +2,7 @@ package io.stereov.singularity.core.user.controller
 
 import io.stereov.singularity.core.config.Constants
 import io.stereov.singularity.core.global.service.random.RandomService
-import io.stereov.singularity.core.user.dto.UserDto
+import io.stereov.singularity.core.user.dto.UserResponse
 import io.stereov.singularity.core.user.dto.request.*
 import io.stereov.singularity.core.user.dto.response.LoginResponse
 import io.stereov.singularity.core.user.dto.response.TwoFactorSetupResponse
@@ -54,7 +54,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
             .bodyValue(TwoFactorVerifySetupRequest(response.token, code))
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserDto::class.java)
+            .expectBody(UserResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -93,7 +93,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
             .bodyValue(DeviceInfoRequest(deviceId))
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserDto::class.java)
+            .expectBody(UserResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -169,7 +169,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
             .bodyValue(TwoFactorVerifySetupRequest(response.token, code))
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserDto::class.java)
+            .expectBody(UserResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -195,7 +195,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
             .bodyValue(TwoFactorVerifySetupRequest(token, code))
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserDto::class.java)
+            .expectBody(UserResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -318,7 +318,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
             .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.first().id))
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserDto::class.java)
+            .expectBody(UserResponse::class.java)
             .returnResult()
 
         val body = res.responseBody
@@ -352,7 +352,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
             .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.first().id))
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserDto::class.java)
+            .expectBody(UserResponse::class.java)
             .returnResult()
 
         val body = res.responseBody
@@ -429,7 +429,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
             .cookie(Constants.LOGIN_VERIFICATION_TOKEN_COOKIE, user.twoFactorToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserDto::class.java)
+            .expectBody(UserResponse::class.java)
             .returnResult()
 
         val body = res.responseBody
@@ -535,7 +535,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserDto::class.java)
+            .expectBody(UserResponse::class.java)
             .returnResult()
 
         val token = res.responseCookies[Constants.STEP_UP_TOKEN_COOKIE]?.first()?.value
@@ -724,7 +724,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserDto::class.java)
+            .expectBody(UserResponse::class.java)
             .returnResult()
 
         val body = res.responseBody

@@ -1,6 +1,6 @@
 package io.stereov.singularity.core.user.dto.response
 
-import io.stereov.singularity.core.user.dto.UserDto
+import io.stereov.singularity.core.user.dto.UserResponse
 
 /**
  * # LoginResponse
@@ -16,5 +16,5 @@ import io.stereov.singularity.core.user.dto.UserDto
  */
 data class LoginResponse(
     val twoFactorRequired: Boolean,
-    val user: UserDto,
+    val user: UserResponse,
 )

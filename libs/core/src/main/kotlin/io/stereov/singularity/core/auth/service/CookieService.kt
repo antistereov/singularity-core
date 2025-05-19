@@ -11,7 +11,7 @@ import io.stereov.singularity.core.global.service.random.RandomService
 import io.stereov.singularity.core.global.service.twofactorauth.TwoFactorAuthService
 import io.stereov.singularity.core.properties.AppProperties
 import io.stereov.singularity.core.properties.JwtProperties
-import io.stereov.singularity.core.user.dto.UserDto
+import io.stereov.singularity.core.user.dto.UserResponse
 import io.stereov.singularity.core.user.dto.request.DeviceInfoRequest
 import io.stereov.singularity.core.user.dto.request.TwoFactorStartSetupRequest
 import io.stereov.singularity.core.user.model.DeviceInfo
@@ -181,7 +181,7 @@ class CookieService(
      *
      * @return The user information.
      */
-    suspend fun validateRefreshTokenAndGetUserDto(exchange: ServerWebExchange, deviceId: String): UserDto {
+    suspend fun validateRefreshTokenAndGetUserDto(exchange: ServerWebExchange, deviceId: String): UserResponse {
         logger.debug { "Validating refresh token and getting user" }
 
         val refreshTokenCookie = exchange.request.cookies[Constants.REFRESH_TOKEN_COOKIE]?.firstOrNull()?.value
@@ -192,7 +192,7 @@ class CookieService(
         val user = userService.findById(refreshToken.userId)
 
         if (user.sensitive.devices.any { it.id == refreshToken.deviceId && it.refreshTokenId == refreshToken.tokenId }) {
-            return user.toDto()
+            return user.toResponse()
         } else {
             throw InvalidTokenException("Invalid refresh token")
         }
