@@ -14,8 +14,9 @@ data class GroupDocument(
     @Id private val _id: ObjectId? = null,
     @Indexed(unique = true) val key: String,
     override val translations: MutableMap<Language, GroupTranslation>,
-    override val primaryLanguage: Language = Language.EN
 ) : Translatable<GroupTranslation> {
+
+    override val primaryLanguage: Language = Language.EN
 
     constructor(req: CreateGroupMultiLangRequest): this(
         key = req.key,
