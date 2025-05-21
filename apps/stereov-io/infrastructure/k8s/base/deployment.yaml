@@ -50,7 +50,7 @@ metadata:
   name: stereov-io-singularity-ingress
   namespace: stereov-io
   annotations:
-    cert-manager.io/cluster-issuer: acme-issuer
+    cert-manager.io/cluster-issuer: cloudflare-clusterissuer
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
 spec:
   ingressClassName: nginx
@@ -111,3 +111,16 @@ data:
   PASSWORD_RESET_PATH: /auth/password-reset
   LOG_LEVEL: DEBUG
   LOG_PATH: logs
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: stereov-io-singularity-cert
+  namespace: stereov-io
+spec:
+  secretName: stereov-io-singularity-cert
+  issuerRef:
+    name: cloudflare-clusterissuer
+    kind: ClusterIssuer
+  dnsNames:
+    - stereov.io
