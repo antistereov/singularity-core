@@ -1,8 +1,10 @@
 package io.stereov.singularity.content.article.dto
 
+import io.stereov.singularity.content.article.model.ArticleColors
 import io.stereov.singularity.core.global.language.model.Language
 
-data class ChangeArticleTitleRequest(
+data class ChangeArticleHeaderRequest(
     val lang: Language,
     val title: String,
+    val colors: ArticleColors,
 )

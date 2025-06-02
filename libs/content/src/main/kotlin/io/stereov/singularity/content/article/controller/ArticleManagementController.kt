@@ -6,6 +6,7 @@ import io.stereov.singularity.content.common.content.dto.ChangeContentTagsReques
 import io.stereov.singularity.content.common.content.dto.ChangeContentVisibilityRequest
 import io.stereov.singularity.core.global.language.model.Language
 import org.springframework.http.ResponseEntity
+import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 
@@ -33,13 +34,13 @@ class ArticleManagementController(
         )
     }
 
-    @PutMapping("/{key}/title")
-    suspend fun changeTitle(
+    @PutMapping("/{key}/header")
+    suspend fun changeHeader(
         @PathVariable key: String,
-        @RequestBody req: ChangeArticleTitleRequest,
+        @RequestBody req: ChangeArticleHeaderRequest,
         @RequestParam lang: Language = Language.EN
     ): ResponseEntity<FullArticleResponse> {
-        return ResponseEntity.ok(service.changeTitle(key, req, lang))
+        return ResponseEntity.ok(service.changeHeader(key, req, lang))
     }
 
     @PutMapping("/{key}/summary")
@@ -60,22 +61,15 @@ class ArticleManagementController(
         return ResponseEntity.ok(service.changeContent(key, req, lang))
     }
 
-    @PutMapping("/{key}/colors")
-    suspend fun changeColors(
-        @PathVariable key: String,
-        @RequestBody req: ChangeArticleColorsRequest,
-        @RequestParam lang: Language = Language.EN
-    ): ResponseEntity<FullArticleResponse> {
-        return ResponseEntity.ok(service.changeColors(key, req, lang))
-    }
-
-    @PutMapping("/{key}/image")
+    @PutMapping("/{key}/avatar")
     suspend fun changeImage(
         @PathVariable key: String,
-        @RequestBody req: ChangeArticleImageRequest,
+        @RequestPart file: FilePart,
         @RequestParam lang: Language = Language.EN
     ): ResponseEntity<FullArticleResponse> {
-        return ResponseEntity.ok(service.changeImage(key, req, lang))
+        return ResponseEntity.ok().body(
+            service.changeImage(key, file, lang)
+        )
     }
 
     @PutMapping("/{key}/state")

@@ -11,7 +11,11 @@ import io.stereov.singularity.content.common.content.util.toSlug
 import io.stereov.singularity.core.auth.service.AuthenticationService
 import io.stereov.singularity.core.global.language.exception.model.TranslationForLangMissingException
 import io.stereov.singularity.core.global.language.model.Language
+import io.stereov.singularity.core.global.service.file.exception.model.UnsupportedMediaTypeException
+import io.stereov.singularity.core.global.service.file.service.FileStorage
 import io.stereov.singularity.core.user.model.Role
+import org.springframework.http.MediaType
+import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -19,6 +23,7 @@ import java.util.*
 class ArticleManagementService(
     private val articleService: ArticleService,
     private val authenticationService: AuthenticationService,
+    private val fileStorage: FileStorage
 ) : ContentManagementService<Article>(articleService, authenticationService) {
 
     private val logger: KLogger
@@ -47,17 +52,18 @@ class ArticleManagementService(
         return articleService.save(article)
     }
 
-    suspend fun changeTitle(key: String, req: ChangeArticleTitleRequest, lang: Language): FullArticleResponse {
-        logger.debug { "Changing title of article with key \"$key\"" }
+    suspend fun changeHeader(key: String, req: ChangeArticleHeaderRequest, lang: Language): FullArticleResponse {
+        logger.debug { "Changing header of article with key \"$key\"" }
 
         val article = validatePermissionsAndGetByKey(key)
 
         val translation = article.translations[req.lang]
             ?: throw TranslationForLangMissingException(lang)
+        val uniqueKey = getUniqueKey(req.title.toSlug())
+        article.key = uniqueKey
+        article.path = "${Article.basePath}/$uniqueKey"
         translation.title = req.title
-        val key = getUniqueKey(req.title.toSlug())
-        article.key = key
-        article.path = "${Article.basePath}/$key"
+        article.colors = req.colors
 
         val updatedArticle = articleService.save(article)
 
@@ -93,22 +99,32 @@ class ArticleManagementService(
         return articleService.fullArticledResponseFrom(updatedArticle, lang)
     }
 
-    suspend fun changeColors(key: String, req: ChangeArticleColorsRequest, lang: Language): FullArticleResponse {
-        logger.debug { "Changing colors of article with key \"$key\"" }
-
-        val article = validatePermissionsAndGetByKey(key)
-        article.colors = req.colors
-
-        val updatedArticle = articleService.save(article)
-
-        return articleService.fullArticledResponseFrom(updatedArticle, lang)
-    }
-
-    suspend fun changeImage(key: String, req: ChangeArticleImageRequest, lang: Language): FullArticleResponse {
+    suspend fun changeImage(key: String, file: FilePart, lang: Language): FullArticleResponse {
         logger.debug { "Changing image of article with key \"$key\"" }
 
         val article = validatePermissionsAndGetByKey(key)
-        article.image = req.image
+        val userId = authenticationService.getCurrentUserId()
+
+        val currentImage = article.image
+
+        if (currentImage != null) {
+            fileStorage.removeFileIfExists(currentImage.key)
+        }
+
+        val allowedMediaTypes = listOf(MediaType.IMAGE_JPEG, MediaType.IMAGE_GIF, MediaType.IMAGE_PNG)
+
+        val contentType = file.headers().contentType
+            ?: throw UnsupportedMediaTypeException("Media type is not set")
+
+        if (contentType !in allowedMediaTypes) {
+            throw UnsupportedMediaTypeException("Unsupported file type: $contentType")
+        }
+
+        val imageKey = Article.basePath.replace("/", "") + "/" + article.key
+
+        val image = fileStorage.upload(userId, file, imageKey, true)
+
+        article.image = image
 
         val updatedArticle = articleService.save(article)
 
