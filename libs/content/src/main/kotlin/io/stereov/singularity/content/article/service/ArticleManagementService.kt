@@ -14,6 +14,7 @@ import io.stereov.singularity.core.global.language.model.Language
 import io.stereov.singularity.core.global.service.file.exception.model.UnsupportedMediaTypeException
 import io.stereov.singularity.core.global.service.file.service.FileStorage
 import io.stereov.singularity.core.user.model.Role
+import org.bson.types.ObjectId
 import org.springframework.http.MediaType
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
@@ -59,7 +60,7 @@ class ArticleManagementService(
 
         val translation = article.translations[req.lang]
             ?: throw TranslationForLangMissingException(lang)
-        val uniqueKey = getUniqueKey(req.title.toSlug())
+        val uniqueKey = getUniqueKey(req.title.toSlug(), article.id)
         article.key = uniqueKey
         article.path = "${Article.basePath}/$uniqueKey"
         translation.title = req.title
@@ -158,8 +159,10 @@ class ArticleManagementService(
         return articleService.fullArticledResponseFrom(article, lang)
     }
 
-    private suspend fun getUniqueKey(baseKey: String): String {
-        return if (articleService.existsByKey(baseKey)) {
+    private suspend fun getUniqueKey(baseKey: String, id: ObjectId? = null): String {
+        val existingArticle = articleService.findByKeyOrNull(baseKey) ?: return baseKey
+
+        return if (id != existingArticle.id) {
             "$baseKey-${UUID.randomUUID().toString().substring(0, 8)}"
         } else baseKey
     }
