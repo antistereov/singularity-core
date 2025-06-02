@@ -61,7 +61,7 @@ class ArticleManagementController(
         return ResponseEntity.ok(service.changeContent(key, req, lang))
     }
 
-    @PutMapping("/{key}/avatar")
+    @PutMapping("/{key}/image")
     suspend fun changeImage(
         @PathVariable key: String,
         @RequestPart file: FilePart,
