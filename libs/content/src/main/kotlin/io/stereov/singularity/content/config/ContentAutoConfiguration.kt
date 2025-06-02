@@ -12,6 +12,7 @@ import io.stereov.singularity.content.common.tag.service.TagService
 import io.stereov.singularity.content.properties.ContentProperties
 import io.stereov.singularity.core.auth.service.AuthenticationService
 import io.stereov.singularity.core.config.AuthenticationConfiguration
+import io.stereov.singularity.core.global.service.file.service.FileStorage
 import io.stereov.singularity.core.user.service.UserService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
@@ -70,8 +71,8 @@ class ContentAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun articleManagementService(articleService: ArticleService, authenticationService: AuthenticationService): ArticleManagementService {
-        return ArticleManagementService(articleService, authenticationService)
+    fun articleManagementService(articleService: ArticleService, authenticationService: AuthenticationService, fileStorage: FileStorage): ArticleManagementService {
+        return ArticleManagementService(articleService, authenticationService, fileStorage)
     }
 
     @Bean
