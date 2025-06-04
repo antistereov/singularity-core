@@ -22,6 +22,7 @@ import io.stereov.singularity.core.global.service.mail.MailService
 import io.stereov.singularity.core.global.service.ratelimit.RateLimitService
 import io.stereov.singularity.core.global.service.secrets.service.EncryptionSecretService
 import io.stereov.singularity.core.global.service.twofactorauth.TwoFactorAuthService
+import io.stereov.singularity.core.global.service.twofactorauth.exception.handler.TwoFactorAuthExceptionHandler
 import io.stereov.singularity.core.group.repository.GroupRepository
 import io.stereov.singularity.core.group.service.GroupService
 import io.stereov.singularity.core.properties.*
@@ -301,4 +302,8 @@ class AuthenticationConfiguration {
     fun tokenExceptionHandler(): TokenExceptionHandler {
         return TokenExceptionHandler()
     }
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun twoFactorAuthExceptionHandler() = TwoFactorAuthExceptionHandler()
 }

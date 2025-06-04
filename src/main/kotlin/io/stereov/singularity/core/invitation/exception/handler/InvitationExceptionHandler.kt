@@ -12,7 +12,7 @@ import org.springframework.web.server.ServerWebExchange
 class InvitationExceptionHandler : BaseExceptionHandler<InvitationException> {
 
     override fun getHttpStatus(ex: InvitationException) = when (ex) {
-        is InvalidInvitationException -> HttpStatus.UNAUTHORIZED
+        is InvalidInvitationException -> HttpStatus.FORBIDDEN
         else -> HttpStatus.INTERNAL_SERVER_ERROR
     }
 

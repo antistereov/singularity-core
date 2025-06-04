@@ -3,6 +3,7 @@ package io.stereov.singularity.core.invitation.exception.model
 import io.stereov.singularity.core.invitation.exception.InvitationException
 
 
-class InvalidInvitationException(cause: Throwable? = null) : InvitationException(
-    msg = "The invitation is either invalid or expired", cause
-)
+class InvalidInvitationException(
+    msg: String = "The invitation is either invalid or expired",
+    cause: Throwable? = null
+) : InvitationException(msg, cause)

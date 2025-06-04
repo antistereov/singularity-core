@@ -91,13 +91,11 @@ class InvitationService(
         val id = try {
             invitationTokenService.validateInvitationTokenAndGetId(token)
         } catch (e: Exception) {
-            throw InvalidInvitationException(e)
+            throw InvalidInvitationException(cause = e)
         }
 
         val invitation = findByIdOrNull(id)
             ?: throw InvalidInvitationException()
-
-        deleteById(id)
 
         return invitation
     }
