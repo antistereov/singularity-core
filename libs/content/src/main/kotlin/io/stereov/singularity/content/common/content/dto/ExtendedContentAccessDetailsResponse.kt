@@ -10,19 +10,13 @@ import org.bson.types.ObjectId
 data class ExtendedContentAccessDetailsResponse(
     val ownerId: ObjectId,
     var visibility: AccessType = AccessType.PRIVATE,
-    val users: Map<ObjectId, ContentAccessRole>,
+    val users: List<UserContentAccessDetails>,
     val groups: Map<String, ContentAccessRole>,
     val invitations: List<InvitationResponse>
 ) {
 
     companion object {
-        fun create(contentAccessDetails: ContentAccessDetails, invitations: List<InvitationDocument>): ExtendedContentAccessDetailsResponse {
-
-            val users = mutableMapOf<ObjectId, ContentAccessRole>()
-            contentAccessDetails.users.viewer.forEach { user -> users.put(ObjectId(user), ContentAccessRole.VIEWER) }
-            contentAccessDetails.users.editor.forEach { user -> users.put(ObjectId(user), ContentAccessRole.EDITOR) }
-            contentAccessDetails.users.admin.forEach { user -> users.put(ObjectId(user), ContentAccessRole.ADMIN) }
-
+        fun create(contentAccessDetails: ContentAccessDetails, invitations: List<InvitationDocument>, users: List<UserContentAccessDetails>): ExtendedContentAccessDetailsResponse {
             val groups = mutableMapOf<String, ContentAccessRole>()
             contentAccessDetails.groups.viewer.forEach { group -> groups.put(group, ContentAccessRole.VIEWER) }
             contentAccessDetails.groups.editor.forEach { group -> groups.put(group, ContentAccessRole.EDITOR) }

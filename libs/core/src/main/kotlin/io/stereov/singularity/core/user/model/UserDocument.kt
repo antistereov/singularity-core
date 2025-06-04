@@ -9,7 +9,7 @@ import io.stereov.singularity.core.global.service.encryption.model.Encrypted
 import io.stereov.singularity.core.global.service.file.model.FileMetaData
 import io.stereov.singularity.core.global.service.hash.model.SearchableHash
 import io.stereov.singularity.core.global.service.hash.model.SecureHash
-import io.stereov.singularity.core.user.dto.UserOverviewDto
+import io.stereov.singularity.core.user.dto.UserOverviewResponse
 import io.stereov.singularity.core.user.dto.UserResponse
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Transient
@@ -100,7 +100,7 @@ data class UserDocument(
         )
     }
 
-    fun toOverviewDto() = UserOverviewDto(id, sensitive.name, sensitive.avatar)
+    fun toOverview() = UserOverviewResponse(id, sensitive.name, sensitive.email, sensitive.avatar)
 
     /**
      * Set up two-factor authentication for the user.

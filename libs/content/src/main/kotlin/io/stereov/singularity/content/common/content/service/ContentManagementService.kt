@@ -2,16 +2,17 @@ package io.stereov.singularity.content.common.content.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.stereov.singularity.content.common.content.dto.*
-import io.stereov.singularity.content.common.content.exception.model.InvalidInvitationException
 import io.stereov.singularity.content.common.content.model.ContentAccessRole
 import io.stereov.singularity.content.common.content.model.ContentAccessSubject
 import io.stereov.singularity.content.common.content.model.ContentDocument
 import io.stereov.singularity.core.auth.exception.model.NotAuthorizedException
 import io.stereov.singularity.core.auth.service.AuthenticationService
 import io.stereov.singularity.core.global.language.model.Language
+import io.stereov.singularity.core.invitation.exception.model.InvalidInvitationException
 import io.stereov.singularity.core.invitation.model.InvitationDocument
 import io.stereov.singularity.core.invitation.service.InvitationService
 import io.stereov.singularity.core.user.service.UserService
+import org.bson.types.ObjectId
 
 interface ContentManagementService<T: ContentDocument<T>> {
 
@@ -73,8 +74,14 @@ interface ContentManagementService<T: ContentDocument<T>> {
 
         val key = invitation.sensitive.claims["key"] as? String
             ?: throw InvalidInvitationException("No key claim found in invitation")
-        val role = invitation.sensitive.claims["role"] as? ContentAccessRole
+        val roleString = invitation.sensitive.claims["role"] as? String
             ?: throw InvalidInvitationException("No role claim found in invitation")
+        val role = try {
+            ContentAccessRole.fromString(roleString)
+        } catch (e: Exception) {
+            throw InvalidInvitationException(" Role claim found in invitation is invalid: $roleString")
+        }
+
         val email = invitation.sensitive.email
 
         val user = userService.findByEmailOrNull(email)
@@ -131,11 +138,42 @@ interface ContentManagementService<T: ContentDocument<T>> {
                 invitations.add(foundInvite)
             }
         }
-
         content.access.invitations.removeIf { invitations.none { invite -> invite.id == it } }
+
+        val users = mutableListOf<UserContentAccessDetails>()
+
+        content.access.users.admin.forEach { id ->
+            val foundUser = userService.findByIdOrNull(ObjectId(id))
+
+            if (foundUser != null) {
+                users.add(UserContentAccessDetails(foundUser.toOverview(), ContentAccessRole.ADMIN))
+            } else {
+                content.access.users.admin.remove(id)
+            }
+        }
+
+        content.access.users.editor.forEach { id ->
+            val foundUser = userService.findByIdOrNull(ObjectId(id))
+
+            if (foundUser != null) {
+                users.add(UserContentAccessDetails(foundUser.toOverview(), ContentAccessRole.EDITOR))
+            } else {
+                content.access.users.editor.remove(id)
+            }
+        }
+
+        content.access.users.viewer.forEach { id ->
+            val foundUser = userService.findByIdOrNull(ObjectId(id))
+
+            if (foundUser != null) {
+                users.add(UserContentAccessDetails(foundUser.toOverview(), ContentAccessRole.VIEWER))
+            } else {
+                content.access.users.viewer.remove(id)
+            }
+        }
 
         val updatedContent = contentService.save(content)
 
-        return ExtendedContentAccessDetailsResponse.create(updatedContent.access, invitations)
+        return ExtendedContentAccessDetailsResponse.create(updatedContent.access, invitations, users)
     }
 }

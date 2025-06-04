@@ -6,6 +6,7 @@ import io.stereov.singularity.content.article.queries.ArticleQueries
 import io.stereov.singularity.content.article.repository.ArticleRepository
 import io.stereov.singularity.content.article.service.ArticleManagementService
 import io.stereov.singularity.content.article.service.ArticleService
+import io.stereov.singularity.content.common.content.exception.handler.ContentExceptionHandler
 import io.stereov.singularity.content.common.content.util.AccessCriteria
 import io.stereov.singularity.content.common.tag.controller.TagController
 import io.stereov.singularity.content.common.tag.repository.TagRepository
@@ -106,4 +107,8 @@ class ContentAutoConfiguration {
     fun articleQueries(reactiveMongoTemplate: ReactiveMongoTemplate, converter: MappingMongoConverter, accessCriteria: AccessCriteria): ArticleQueries {
         return ArticleQueries(reactiveMongoTemplate, converter, accessCriteria)
     }
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun contentExceptionHandler() = ContentExceptionHandler()
 }

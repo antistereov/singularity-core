@@ -6,7 +6,7 @@ import io.stereov.singularity.content.common.content.dto.ContentAccessDetailsRes
 import io.stereov.singularity.content.common.tag.dto.TagResponse
 import io.stereov.singularity.core.global.language.model.Language
 import io.stereov.singularity.core.global.service.file.model.FileMetaData
-import io.stereov.singularity.core.user.dto.UserOverviewDto
+import io.stereov.singularity.core.user.dto.UserOverviewResponse
 import org.bson.types.ObjectId
 import java.time.Instant
 
@@ -16,7 +16,7 @@ data class FullArticleResponse(
     val createdAt: Instant,
     val publishedAt: Instant?,
     val updatedAt: Instant,
-    val owner: UserOverviewDto,
+    val owner: UserOverviewResponse,
     val path: String,
     var state: ArticleState = ArticleState.DRAFT,
     val colors: ArticleColors,
