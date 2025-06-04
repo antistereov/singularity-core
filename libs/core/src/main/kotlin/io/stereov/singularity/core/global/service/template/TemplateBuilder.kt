@@ -16,7 +16,7 @@ class TemplateBuilder private constructor(private val template: String) {
         logger.debug { "Translating template to $lang" }
 
         val bundle = ResourceBundle.getBundle(translationResource, lang.toLocale())
-        val regex = Regex("""\{\{\s*translate\.([a-zA-Z0-9_.-]+)\s*\|\s*translate\s*}}""")
+        val regex = Regex("""\{\{\s*([a-zA-Z0-9_.-]+)\s*\|\s*translate\s*}}""")
 
         val translatedTemplate = regex.replace(template) { matchResult ->
             val key = matchResult.groupValues[1]

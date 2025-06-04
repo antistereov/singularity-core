@@ -45,7 +45,7 @@ interface ContentManagementService<T: ContentDocument<T>> {
     suspend fun inviteUser(
         key: String,
         req: InviteUserToContentRequest,
-        inviteTo: String,
+        invitedTo: String,
         lang: Language,
     ): ExtendedContentAccessDetailsResponse {
         logger.debug { "Inviting user with email \"${req.email}\" to content with key \"$key\" as ${req.role}" }
@@ -55,7 +55,7 @@ interface ContentManagementService<T: ContentDocument<T>> {
         val invitation = invitationService.invite(
             email = req.email,
             inviterName = user.sensitive.name,
-            inviteTo = inviteTo,
+            invitedTo = invitedTo,
             acceptPath = acceptPath,
             claims = mapOf("key" to key, "role" to req.role),
             lang = lang

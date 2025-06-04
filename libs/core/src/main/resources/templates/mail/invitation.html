@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <title>{{ invitation.subject | translate }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
-    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
 </head>
 <body style="
     font-family: 'Inter', Arial, sans-serif;
@@ -21,10 +21,10 @@
         box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
 
         width: 100%;">
-        <div style="display: flex; gap: 0.5rem; align-items: center">
+        <a style="display: flex; gap: 0.5rem; align-items: center; text-decoration: none" href="{{ app_url }}">
             <img src="{{ icon_url }}" alt="icon" style="height: 2rem; width: 2rem;"/>
-            <span style="font-size: 2.25rem; font-weight: 300">{{ app_name }}</span>
-        </div>
+            <span style="font-size: 2.25rem; font-weight: 300; color: black; text-decoration: none">{{ app_name }}</span>
+        </a>
     </div>
     <div style="margin: 1rem">
         <div style="
@@ -40,19 +40,16 @@
         >
             <div style="
             font-size: 1.25rem;
-            font-weight: 500;
             margin-bottom: 1.5rem;"
             >
-                <span>{{ invitation.header | translate }}</span>
+                <span><strong>{{ invitation.header | translate }}</strong></span>
             </div>
             <div style="
             margin-bottom: 1rem;"
             >
-                <span>{{ invitation.description.1 | translate }}</span>
-
-                <span>{{ invitation.description.2 | translate }}</span>
-
-                <span>{{ invitation.description.3 | translate }}</span>
+                <p>{{ invitation.description.1 | translate }}</p>
+                <p>{{ invitation.description.2 | translate }}</p>
+                <p>{{ invitation.description.3 | translate }}</p>
             </div>
             <a style="
             box-sizing: border-box;
@@ -67,18 +64,15 @@
             background-color: #6366f1;
             color: white;
             text-decoration: none;
-            margin-bottom: 1rem;
             text-align: center;"
                href="{{ accept_url }}?token={{ accept_token }}"
             >
-                {{ invitation.accept | translate }}
+                <strong>{{ invitation.accept | translate }}</strong>
             </a>
             <div>
-                <span>{{ invitation.description.4 | translate }}</span>
-
-                <span>{{ invitation.description.5 | translate }}</span>
-
-                <span>{{ invitation.description.6 | translate }}</span>
+                <p>{{ invitation.description.4 | translate }}</p>
+                <p>{{ invitation.description.5 | translate }}</p>
+                <p>{{ invitation.description.6 | translate }}</p>
             </div>
         </div>
     </div>

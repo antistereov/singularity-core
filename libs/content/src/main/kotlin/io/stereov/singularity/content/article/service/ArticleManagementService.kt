@@ -70,9 +70,9 @@ class ArticleManagementService(
         val action = translateService.translate(TranslateKey("invitation.action"), "i18n/content/article", lang)
         val articleRef = "<a href=\"${uiProperties.baseUrl}/${article.path.removePrefix("/")}\" style=\"color: black;\">${article.translate(lang).second.title}</a>"
 
-        val inviteTo = "$inviteToRole $action $articleRef"
+        val invitedTo = "$inviteToRole $action $articleRef"
 
-        return inviteUser(key, req, inviteTo, lang)
+        return inviteUser(key, req, invitedTo, lang)
     }
 
     suspend fun acceptInvitationAndGetFullArticle(req: AcceptInvitationToContentRequest, lang: Language): FullArticleResponse {
