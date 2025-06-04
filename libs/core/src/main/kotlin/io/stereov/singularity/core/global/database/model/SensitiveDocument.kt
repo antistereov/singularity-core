@@ -2,8 +2,8 @@ package io.stereov.singularity.core.global.database.model
 
 import io.stereov.singularity.core.global.service.encryption.model.Encrypted
 
-abstract class SensitiveDocument<S> {
+interface SensitiveDocument<S> {
 
-    abstract val sensitive: S
-    abstract fun toEncryptedDocument(encryptedSensitiveData: Encrypted<S>, otherValues: List<Any>): EncryptedSensitiveDocument<S>
+    val sensitive: S
+    fun toEncryptedDocument(encryptedSensitiveData: Encrypted<S>, otherValues: List<Any>): EncryptedSensitiveDocument<S>
 }

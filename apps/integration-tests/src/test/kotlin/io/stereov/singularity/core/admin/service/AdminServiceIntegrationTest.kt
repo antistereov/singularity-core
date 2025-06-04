@@ -1,8 +1,8 @@
 package io.stereov.singularity.core.admin.service
 
 import io.stereov.singularity.core.properties.secrets.KeyManagerImplementation
-import io.stereov.singularity.test.BaseSpringBootTest
 import io.stereov.singularity.core.user.model.Role
+import io.stereov.singularity.test.BaseSpringBootTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -28,6 +28,7 @@ class AdminServiceIntegrationTest : BaseSpringBootTest() {
         @DynamicPropertySource
         @JvmStatic
         fun properties(registry: DynamicPropertyRegistry) {
+            registry.add("baseline.app.support-email") { "support@example.com" }
             registry.add("baseline.app.create-root-user") { "true" }
             registry.add("baseline.app.root-email") { "root@email.com" }
             registry.add("baseline.app.root-password") { "root-password" }

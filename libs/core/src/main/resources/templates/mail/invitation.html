@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{{ invitation.subject | translate }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+    </style>
+</head>
+<body style="
+    font-family: 'Inter', Arial, sans-serif;
+    font-size: 16px;
+    margin: 0"
+>
+    <div style="
+        box-sizing: border-box;
+        top: 0;
+        left: 0;
+        padding: 0.75rem;
+        box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+
+        width: 100%;">
+        <div style="display: flex; gap: 0.5rem; align-items: center">
+            <img src="{{ icon_url }}" alt="icon" style="height: 2rem; width: 2rem;"/>
+            <span style="font-size: 2.25rem; font-weight: 300">{{ app_name }}</span>
+        </div>
+    </div>
+    <div style="margin: 1rem">
+        <div style="
+            box-sizing: border-box;
+            margin-top: 2rem;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 1.5rem 1rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            width: 100%;
+            max-width: 30rem;"
+        >
+            <div style="
+            font-size: 1.25rem;
+            font-weight: 500;
+            margin-bottom: 1.5rem;"
+            >
+                <span>{{ invitation.header | translate }}</span>
+            </div>
+            <div style="
+            margin-bottom: 1rem;"
+            >
+                <span>{{ invitation.description.1 | translate }}</span>
+
+                <span>{{ invitation.description.2 | translate }}</span>
+
+                <span>{{ invitation.description.3 | translate }}</span>
+            </div>
+            <a style="
+            box-sizing: border-box;
+            display: inline-block;
+            width: 100%;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            font-weight: 500;
+            border: 0;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            background-color: #6366f1;
+            color: white;
+            text-decoration: none;
+            margin-bottom: 1rem;
+            text-align: center;"
+               href="{{ accept_url }}?token={{ accept_token }}"
+            >
+                {{ invitation.accept | translate }}
+            </a>
+            <div>
+                <span>{{ invitation.description.4 | translate }}</span>
+
+                <span>{{ invitation.description.5 | translate }}</span>
+
+                <span>{{ invitation.description.6 | translate }}</span>
+            </div>
+        </div>
+    </div>
+
+
+    <div style="
+        position: absolute;
+        box-sizing: border-box;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        padding: 1rem;
+        background-color: #f4f4f5;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.75rem;
+        color: #52525b;"
+    >
+        <div>
+            <a href="{{ contact_url }}" style="color: #52525b;">{{ contact | translate }}</a>
+            <span> | </span>
+            <a href="{{ legal_notice_url }}" style="color: #52525b;">{{ legal_notice | translate }}</a>
+            <span> | </span>
+            <a href="{{ privacy_policy_url }}" style="color: #52525b;">{{ privacy_policy | translate }}</a>
+        </div>
+
+    </div>
+</body>
+</html>

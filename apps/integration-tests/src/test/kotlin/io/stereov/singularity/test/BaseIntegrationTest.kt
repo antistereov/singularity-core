@@ -76,6 +76,7 @@ class BaseIntegrationTest : BaseSpringBootTest() {
         @DynamicPropertySource
         @JvmStatic
         fun properties(registry: DynamicPropertyRegistry) {
+            registry.add("baseline.app.support-email") { "support@example.com" }
             registry.add("baseline.app.create-root-user") { "false" }
             registry.add("baseline.secrets.key-manager") { KeyManagerImplementation.Mock }
             registry.add("baseline.file.storage.s3.domain") { "amazon.com" }

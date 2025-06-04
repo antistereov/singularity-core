@@ -26,6 +26,7 @@ baseline:
   app:
     name: ${APP_NAME}
     base-url: ${BACKEND_BASE_URL}
+    support-mail: ${SUPPORT_EMAIL}
     secure: ${SECURE:false}
     create-root-user: ${CREATE_ROOT_USER}
     root-email: ${ROOT_EMAIL}

@@ -2,8 +2,7 @@ package io.stereov.singularity.content.article.controller
 
 import io.stereov.singularity.content.article.dto.*
 import io.stereov.singularity.content.article.service.ArticleManagementService
-import io.stereov.singularity.content.common.content.dto.ChangeContentTagsRequest
-import io.stereov.singularity.content.common.content.dto.ChangeContentVisibilityRequest
+import io.stereov.singularity.content.common.content.dto.*
 import io.stereov.singularity.core.global.language.model.Language
 import org.springframework.http.ResponseEntity
 import org.springframework.http.codec.multipart.FilePart
@@ -97,5 +96,29 @@ class ArticleManagementController(
         @RequestParam lang: Language = Language.EN
     ): ResponseEntity<FullArticleResponse> {
         return ResponseEntity.ok(service.changeVisibility(key, req, lang))
+    }
+
+    @PostMapping("/{key}/invite")
+    suspend fun inviteUser(
+        @PathVariable key: String,
+        @RequestBody req: InviteUserToContentRequest,
+        @RequestParam lang: Language = Language.EN
+    ): ResponseEntity<ExtendedContentAccessDetailsResponse> {
+        return ResponseEntity.ok(service.inviteUser(key, req, lang))
+    }
+
+    @PostMapping("/invite/accept")
+    suspend fun acceptInvitation(
+        @RequestBody req: AcceptInvitationToContentRequest,
+        @RequestParam lang: Language = Language.EN
+    ): ResponseEntity<FullArticleResponse> {
+        return ResponseEntity.ok(service.acceptInvitationAndGetFullArticle(req, lang))
+    }
+
+    @GetMapping("/{key}/access")
+    suspend fun getExtendedAccessDetails(
+        @PathVariable key: String
+    ): ResponseEntity<ExtendedContentAccessDetailsResponse> {
+        return ResponseEntity.ok(service.extendedContentAccessDetails(key))
     }
 }

@@ -21,7 +21,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 @ConfigurationProperties(prefix = "baseline.app")
 data class AppProperties(
     val name: String = "Spring Boot Application",
-    val baseUrl: String = "http://localhost:8000",
+    val baseUrl: String,
+    val supportMail: String = "support@example.com",
     val secure: Boolean = false,
     val createRootUser: Boolean = false,
     val rootEmail: String = "admin@example.com",

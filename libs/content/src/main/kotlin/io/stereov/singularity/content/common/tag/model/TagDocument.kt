@@ -16,10 +16,8 @@ data class TagDocument(
     @Id private val _id: ObjectId? = null,
     @Indexed(unique = true) var key: String,
     override val translations: MutableMap<Language, TagTranslation> = mutableMapOf(),
-) : Translatable<TagTranslation> {
-
     override val primaryLanguage: Language = Language.EN
-
+) : Translatable<TagTranslation> {
     constructor(req: CreateTagRequest): this(
         _id = null,
         key = req.key,
@@ -39,5 +37,9 @@ data class TagDocument(
     fun toResponse(lang: Language): TagResponse {
         val (lang, translation) = translate(lang)
         return TagResponse(key, lang, translation.name, translation.description)
+    }
+
+    companion object {
+        val COLLECTION_NAME = "tags"
     }
 }
