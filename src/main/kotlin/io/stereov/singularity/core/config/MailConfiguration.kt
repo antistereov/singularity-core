@@ -8,6 +8,15 @@ import io.stereov.singularity.core.global.service.mail.MailCooldownService
 import io.stereov.singularity.core.global.service.mail.MailService
 import io.stereov.singularity.core.global.service.mail.MailTokenService
 import io.stereov.singularity.core.global.service.mail.exception.handler.MailExceptionHandler
+import io.stereov.singularity.core.global.service.secrets.service.EncryptionSecretService
+import io.stereov.singularity.core.global.service.template.TemplateUtil
+import io.stereov.singularity.core.global.service.translate.service.TranslateService
+import io.stereov.singularity.core.invitation.controller.InvitationController
+import io.stereov.singularity.core.invitation.exception.handler.InvitationExceptionHandler
+import io.stereov.singularity.core.invitation.repository.InvitationRepository
+import io.stereov.singularity.core.invitation.service.InvitationService
+import io.stereov.singularity.core.invitation.service.InvitationTokenService
+import io.stereov.singularity.core.properties.AppProperties
 import io.stereov.singularity.core.properties.MailProperties
 import io.stereov.singularity.core.properties.UiProperties
 import io.stereov.singularity.core.user.controller.UserMailController
@@ -21,6 +30,8 @@ import org.springframework.boot.autoconfigure.mongo.MongoReactiveAutoConfigurati
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate
+import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRepositories
 import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.JavaMailSenderImpl
@@ -60,6 +71,7 @@ import org.springframework.mail.javamail.JavaMailSenderImpl
     ]
 )
 @EnableConfigurationProperties(MailProperties::class)
+@EnableReactiveMongoRepositories(basePackageClasses = [InvitationRepository::class])
 class MailConfiguration {
 
     @Bean
@@ -125,6 +137,35 @@ class MailConfiguration {
         return UserMailService(userService, authenticationService, mailCooldownService, mailService, mailTokenService, hashService)
     }
 
+    @Bean
+    @ConditionalOnMissingBean
+    fun invitationService(
+        repository: InvitationRepository,
+        encryptionService: EncryptionService,
+        encryptionSecretService: EncryptionSecretService,
+        reactiveMongoTemplate: ReactiveMongoTemplate,
+        invitationTokenService: InvitationTokenService,
+        templateUtil: TemplateUtil,
+        mailService: MailService,
+        translateService: TranslateService,
+        userService: UserService,
+        uiProperties: UiProperties,
+    ): InvitationService {
+        return InvitationService(repository, encryptionService, encryptionSecretService, reactiveMongoTemplate, invitationTokenService, templateUtil, mailService, translateService, userService, uiProperties)
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun invitationTokenService(jwtService: JwtService) = InvitationTokenService(jwtService)
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun templateUtil(appProperties: AppProperties, uiProperties: UiProperties) = TemplateUtil(appProperties, uiProperties)
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun translateService() = TranslateService()
+
     // Controller
 
     @Bean
@@ -135,6 +176,10 @@ class MailConfiguration {
         return UserMailController(userMailService)
     }
 
+    @Bean
+    @ConditionalOnMissingBean
+    fun invitationController(invitationService: InvitationService) = InvitationController(invitationService)
+
     // ExceptionHandler
 
     @Bean
@@ -142,4 +187,8 @@ class MailConfiguration {
     fun mailExceptionHandler(): MailExceptionHandler {
         return MailExceptionHandler()
     }
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun invitationExceptionHandler() = InvitationExceptionHandler()
 }

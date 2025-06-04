@@ -11,6 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSender
+import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.stereotype.Service
 
 /**
@@ -28,13 +29,32 @@ class MailService(
     private val mailProperties: MailProperties,
     private val uiProperties: UiProperties,
     private val mailCooldownService: MailCooldownService,
-    private val mailTokenService: MailTokenService,
+    private val mailTokenService: MailTokenService
 ) {
 
     private val logger: KLogger
         get() = KotlinLogging.logger {}
 
     private val sendMailScope = CoroutineScope(Dispatchers.Default)
+
+    suspend fun sendEmail(
+        to: String,
+        subject: String,
+        text: String,
+        html: Boolean
+    ) {
+        logger.debug { "Sending email with subject \"$subject\" to \"$to\"" }
+
+        val message = mailSender.createMimeMessage()
+
+        val helper = MimeMessageHelper(message, true, "UTF-8")
+        helper.setFrom(mailProperties.email)
+        helper.setTo(to)
+        helper.setSubject(subject)
+        helper.setText(text, html)
+
+        sendMailScope.launch { mailSender.send(message) }
+    }
 
     /**
      * Sends a verification email to the user.

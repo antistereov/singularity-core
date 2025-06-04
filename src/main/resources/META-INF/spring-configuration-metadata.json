@@ -70,6 +70,12 @@
       "description": "Base URL for the application. This is used to generate links in emails and other notifications."
     },
     {
+      "name": "baseline.app.support-mail",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.core.properties.AppProperties",
+      "description": "The email address that is used for support requests."
+    },
+    {
       "name": "baseline.app.name",
       "type": "java.lang.String",
       "sourceType": "io.stereov.singularity.core.properties.AppProperties",
@@ -403,6 +409,36 @@
       "sourceType": "io.stereov.singularity.core.properties.UiProperties",
       "defaultValue": "http://localhost:4200",
       "description": "Base URL for the UI application. This is used to generate links in emails and other notifications."
+    },
+    {
+      "name": "baseline.ui.icon-path",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.core.properties.AppProperties",
+      "defaultValue": "/icon.svg"
+    },
+    {
+      "name": "baseline.ui.accept-invitation-path",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.core.properties.AppProperties",
+      "defaultValue": "/invitation/accept"
+    },
+    {
+      "name": "baseline.ui.contact-path",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.core.properties.AppProperties",
+      "defaultValue": "/contact"
+    },
+    {
+      "name": "baseline.ui.legal-notice-path",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.core.properties.AppProperties",
+      "defaultValue": "/legal-notice"
+    },
+    {
+      "name": "baseline.ui.privacy-policy-path",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.core.properties.AppProperties",
+      "defaultValue": "/privacy-policy"
     }
   ],
   "hints": []

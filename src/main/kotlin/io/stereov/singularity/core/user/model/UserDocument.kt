@@ -26,7 +26,7 @@ data class UserDocument(
     val created: Instant = Instant.now(),
     var lastActive: Instant = Instant.now(),
     override var sensitive: SensitiveUserData,
-) : SensitiveDocument<SensitiveUserData>() {
+) : SensitiveDocument<SensitiveUserData> {
 
     constructor(
         id: ObjectId? = null,

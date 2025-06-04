@@ -18,4 +18,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 @ConfigurationProperties(prefix = "baseline.ui")
 data class UiProperties(
     val baseUrl: String = "http://localhost:4200",
+    val iconPath: String = "/icon.svg",
+    val acceptInvitationPath: String = "/invitation/accept",
+    val contactPath: String = "/contact",
+    val legalNoticePath: String = "/legal-notice",
+    val privacyPolicyPath: String = "/privacy-policy"
 )
