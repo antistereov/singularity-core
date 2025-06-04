@@ -53,7 +53,7 @@ class InvitationService(
     suspend fun invite(
         email: String,
         inviterName: String,
-        inviteTo: String,
+        invitedTo: String,
         acceptPath: String,
         claims: Map<String, Any>,
         issuedAt: Instant = Instant.now(),
@@ -68,7 +68,7 @@ class InvitationService(
 
         val placeholders = mapOf(
             "inviter_name" to inviterName,
-            "invite_to" to inviteTo,
+            "invited_to" to invitedTo,
             "expiration_days" to (expiresInSeconds / 60 / 60 / 24).toInt(),
             "accept_url" to uiProperties.baseUrl.removeSuffix("/") + "/" + acceptPath.removePrefix("/"),
             "accept_token" to token
