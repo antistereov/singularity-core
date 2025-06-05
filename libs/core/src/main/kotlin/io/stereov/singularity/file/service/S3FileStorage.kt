@@ -4,9 +4,9 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.model.AccessType
 import io.stereov.singularity.file.model.FileMetaData
-import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.file.properties.S3Properties
 import io.stereov.singularity.file.util.DataBufferPublisher
+import io.stereov.singularity.global.properties.AppProperties
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.reactive.awaitSingle
 import org.bson.types.ObjectId
@@ -26,7 +26,7 @@ import java.time.Duration
 import java.util.*
 
 @Service
-@ConditionalOnProperty(prefix = "baseline.file.storage", value = ["type"], havingValue = "s3", matchIfMissing = false)
+@ConditionalOnProperty(prefix = "singularity.file.storage", value = ["type"], havingValue = "s3", matchIfMissing = false)
 class S3FileStorage(
     private val s3Properties: S3Properties,
     private val s3Client: S3AsyncClient,

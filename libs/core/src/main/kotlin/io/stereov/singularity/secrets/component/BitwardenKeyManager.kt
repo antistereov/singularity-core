@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component
 import java.util.*
 
 @Component
-@ConditionalOnProperty(prefix = "baseline.secrets", value = ["key-manager"], havingValue = "bitwarden", matchIfMissing = false)
+@ConditionalOnProperty(prefix = "singularity.secrets", value = ["key-manager"], havingValue = "bitwarden", matchIfMissing = false)
 class BitwardenKeyManager(
     private val bitwardenClient: BitwardenClient,
     private val properties: BitwardenKeyManagerProperties,

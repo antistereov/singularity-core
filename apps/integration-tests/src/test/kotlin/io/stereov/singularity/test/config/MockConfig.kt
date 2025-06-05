@@ -2,6 +2,7 @@ package io.stereov.singularity.test.config
 
 import com.warrenstrange.googleauth.GoogleAuthenticator
 import io.mockk.mockk
+import io.stereov.singularity.file.service.FileStorage
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 
@@ -12,4 +13,7 @@ class MockConfig {
 
     @Bean
     fun keyManager(): MockKeyManager = MockKeyManager()
+
+    @Bean
+    fun fileStorage(): FileStorage = mockk(relaxed = true)
 }
