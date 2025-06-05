@@ -1,4 +1,4 @@
-package io.stereov.singularity.global.database.exception
+package io.stereov.singularity.database.exception
 
 import io.stereov.singularity.global.exception.BaseWebException
 

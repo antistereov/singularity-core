@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.encryption.model.Encrypted
-import io.stereov.singularity.global.database.model.EncryptedSensitiveDocument
-import io.stereov.singularity.global.database.model.SensitiveDocument
+import io.stereov.singularity.database.model.EncryptedSensitiveDocument
+import io.stereov.singularity.database.model.SensitiveDocument
 import io.stereov.singularity.secrets.component.KeyManager
 import io.stereov.singularity.secrets.service.EncryptionSecretService
 import kotlinx.coroutines.Dispatchers

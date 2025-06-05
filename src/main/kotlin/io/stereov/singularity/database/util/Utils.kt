@@ -1,7 +1,7 @@
-package io.stereov.singularity.global.database.util
+package io.stereov.singularity.database.util
 
-import io.stereov.singularity.global.database.exception.model.UnexpectedContentTypeException
-import io.stereov.singularity.global.database.model.PagedResult
+import io.stereov.singularity.database.exception.model.UnexpectedContentTypeException
+import io.stereov.singularity.database.model.PagedResult
 import io.stereov.singularity.global.language.model.Language
 import io.stereov.singularity.global.language.model.Translatable
 import org.bson.Document

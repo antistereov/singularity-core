@@ -1,15 +1,12 @@
 package io.stereov.singularity.invitation.service
 
-import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.global.database.service.SensitiveCrudService
-import io.stereov.singularity.global.language.model.Language
+import io.stereov.singularity.database.service.SensitiveCrudService
 import io.stereov.singularity.encryption.service.EncryptionService
+import io.stereov.singularity.global.language.model.Language
 import io.stereov.singularity.global.service.mail.MailService
-import io.stereov.singularity.secrets.service.EncryptionSecretService
 import io.stereov.singularity.global.service.template.TemplateBuilder
 import io.stereov.singularity.global.service.template.TemplateUtil
-import io.stereov.singularity.global.service.translate.model.TranslateKey
 import io.stereov.singularity.global.service.translate.service.TranslateService
 import io.stereov.singularity.invitation.exception.model.InvalidInvitationException
 import io.stereov.singularity.invitation.model.EncryptedInvitationDocument
@@ -17,6 +14,7 @@ import io.stereov.singularity.invitation.model.InvitationDocument
 import io.stereov.singularity.invitation.model.SensitiveInvitationData
 import io.stereov.singularity.invitation.repository.InvitationRepository
 import io.stereov.singularity.properties.UiProperties
+import io.stereov.singularity.secrets.service.EncryptionSecretService
 import io.stereov.singularity.user.service.UserService
 import kotlinx.coroutines.reactive.awaitLast
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
@@ -28,9 +26,9 @@ import java.time.Instant
 
 @Service
 class InvitationService(
-    repository: InvitationRepository,
-    encryptionService: EncryptionService,
-    encryptionSecretService: EncryptionSecretService,
+    override val repository: InvitationRepository,
+    override val encryptionService: EncryptionService,
+    override val encryptionSecretService: EncryptionSecretService,
     private val reactiveMongoTemplate: ReactiveMongoTemplate,
     private val invitationTokenService: InvitationTokenService,
     private val templateUtil: TemplateUtil,
@@ -38,17 +36,10 @@ class InvitationService(
     private val translateService: TranslateService,
     private val userService: UserService,
     private val uiProperties: UiProperties,
-) : SensitiveCrudService<SensitiveInvitationData, InvitationDocument, EncryptedInvitationDocument>(
-    repository,
-    encryptionSecretService,
-    encryptionService
-) {
+) : SensitiveCrudService<SensitiveInvitationData, InvitationDocument, EncryptedInvitationDocument> {
 
-    override val clazz: Class<SensitiveInvitationData>
-        get() = SensitiveInvitationData::class.java
-
-    private val logger: KLogger
-        get() = KotlinLogging.logger {}
+    override val clazz = SensitiveInvitationData::class.java
+    override val logger = KotlinLogging.logger {}
 
     suspend fun invite(
         email: String,

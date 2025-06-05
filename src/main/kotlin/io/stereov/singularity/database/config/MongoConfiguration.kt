@@ -1,4 +1,4 @@
-package io.stereov.singularity.config
+package io.stereov.singularity.database.config
 
 import io.stereov.singularity.global.language.util.LanguageToStringConverter
 import io.stereov.singularity.global.language.util.StringToLanguageConverter

@@ -2,7 +2,7 @@ package io.stereov.singularity.user.model
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.global.database.model.SensitiveDocument
+import io.stereov.singularity.database.model.SensitiveDocument
 import io.stereov.singularity.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.global.exception.model.MissingFunctionParameterException
 import io.stereov.singularity.encryption.model.Encrypted
