@@ -15,16 +15,17 @@ import io.stereov.singularity.core.global.service.cache.RedisService
 import io.stereov.singularity.core.global.service.encryption.service.EncryptionService
 import io.stereov.singularity.core.global.service.file.service.FileStorage
 import io.stereov.singularity.core.global.service.geolocation.GeoLocationService
-import io.stereov.singularity.core.global.service.hash.HashService
 import io.stereov.singularity.core.global.service.jwt.JwtService
 import io.stereov.singularity.core.global.service.jwt.exception.handler.TokenExceptionHandler
 import io.stereov.singularity.core.global.service.mail.MailService
 import io.stereov.singularity.core.global.service.ratelimit.RateLimitService
 import io.stereov.singularity.core.global.service.secrets.service.EncryptionSecretService
+import io.stereov.singularity.core.global.service.secrets.service.HashSecretService
 import io.stereov.singularity.core.global.service.twofactorauth.TwoFactorAuthService
 import io.stereov.singularity.core.global.service.twofactorauth.exception.handler.TwoFactorAuthExceptionHandler
 import io.stereov.singularity.core.group.repository.GroupRepository
 import io.stereov.singularity.core.group.service.GroupService
+import io.stereov.singularity.core.hash.HashService
 import io.stereov.singularity.core.properties.*
 import io.stereov.singularity.core.user.controller.UserDeviceController
 import io.stereov.singularity.core.user.controller.UserSessionController
@@ -153,8 +154,8 @@ class AuthenticationConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun hashService(): HashService {
-        return HashService()
+    fun hashService(hashSecretService: HashSecretService): HashService {
+        return HashService(hashSecretService)
     }
 
     @Bean

@@ -7,7 +7,7 @@ import io.stereov.singularity.core.auth.exception.model.InvalidCredentialsExcept
 import io.stereov.singularity.core.auth.service.AuthenticationService
 import io.stereov.singularity.core.config.Constants
 import io.stereov.singularity.core.global.exception.model.InvalidDocumentException
-import io.stereov.singularity.core.global.service.hash.HashService
+import io.stereov.singularity.core.hash.HashService
 import io.stereov.singularity.core.global.service.jwt.JwtService
 import io.stereov.singularity.core.global.service.jwt.exception.model.InvalidTokenException
 import io.stereov.singularity.core.global.service.twofactorauth.TwoFactorAuthService

@@ -6,7 +6,7 @@ import io.stereov.singularity.core.global.database.service.SensitiveCrudService
 import io.stereov.singularity.core.global.service.encryption.service.EncryptionService
 import io.stereov.singularity.core.global.service.file.exception.model.NoSuchFileException
 import io.stereov.singularity.core.global.service.file.model.FileMetaData
-import io.stereov.singularity.core.global.service.hash.HashService
+import io.stereov.singularity.core.hash.HashService
 import io.stereov.singularity.core.global.service.secrets.service.EncryptionSecretService
 import io.stereov.singularity.core.user.exception.model.UserDoesNotExistException
 import io.stereov.singularity.core.user.model.EncryptedUserDocument
@@ -43,7 +43,7 @@ class UserService(
 
         if (otherValues.getOrNull(0) == true || otherValues.getOrNull(0) == null) document.updateLastActive()
 
-        val hashedEmail = hashService.hashSha256(document.sensitive.email)
+        val hashedEmail = hashService.hashSearchableHmacSha256(document.sensitive.email)
         return this.encryptionService.encrypt(document, listOf(hashedEmail)) as EncryptedUserDocument
     }
 
@@ -76,7 +76,7 @@ class UserService(
     suspend fun findByEmail(email: String): UserDocument {
         logger.debug { "Fetching user with email $email" }
 
-        val hashedEmail = hashService.hashSha256(email)
+        val hashedEmail = hashService.hashSearchableHmacSha256(email)
         val encrypted =  this.userRepository.findByEmail(hashedEmail)
             ?: throw UserDoesNotExistException("No user account found with email $email")
 
@@ -93,7 +93,7 @@ class UserService(
     suspend fun findByEmailOrNull(email: String): UserDocument? {
         logger.debug { "Fetching user with email $email" }
 
-        val hashedEmail = hashService.hashSha256(email)
+        val hashedEmail = hashService.hashSearchableHmacSha256(email)
         return this.userRepository.findByEmail(hashedEmail)
             ?.let { this. decrypt(it) }
     }
@@ -108,7 +108,7 @@ class UserService(
     suspend fun existsByEmail(email: String): Boolean {
         logger.debug { "Checking if email $email already exists" }
 
-        val hashedEmail = hashService.hashSha256(email)
+        val hashedEmail = hashService.hashSearchableHmacSha256(email)
         return this.userRepository.existsByEmail(hashedEmail)
     }
 

@@ -9,8 +9,8 @@ import io.stereov.singularity.core.auth.service.CookieService
 import io.stereov.singularity.core.global.service.cache.AccessTokenCache
 import io.stereov.singularity.core.global.service.file.exception.model.UnsupportedMediaTypeException
 import io.stereov.singularity.core.global.service.file.service.FileStorage
-import io.stereov.singularity.core.global.service.hash.HashService
 import io.stereov.singularity.core.global.service.mail.MailService
+import io.stereov.singularity.core.hash.HashService
 import io.stereov.singularity.core.user.dto.UserResponse
 import io.stereov.singularity.core.user.dto.request.*
 import io.stereov.singularity.core.user.exception.model.EmailAlreadyExistsException

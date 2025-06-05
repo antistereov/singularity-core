@@ -25,4 +25,5 @@ object Constants {
 
     const val ENCRYPTION_SECRET = "encryption-secret"
     const val JWT_SECRET = "jwt-secret"
+    const val HASH_SECRET = "hash-secret"
 }
