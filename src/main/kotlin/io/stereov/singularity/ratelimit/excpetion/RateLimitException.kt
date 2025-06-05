@@ -1,4 +1,4 @@
-package io.stereov.singularity.global.service.ratelimit.excpetion
+package io.stereov.singularity.ratelimit.excpetion
 
 import io.stereov.singularity.global.exception.BaseWebException
 

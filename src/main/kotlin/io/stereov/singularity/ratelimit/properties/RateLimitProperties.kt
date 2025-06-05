@@ -1,4 +1,4 @@
-package io.stereov.singularity.properties
+package io.stereov.singularity.ratelimit.properties
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 
@@ -18,7 +18,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
-@ConfigurationProperties(prefix = "baseline.security.rate-limit")
+@ConfigurationProperties(prefix = "singularity.security.rate-limit")
 data class RateLimitProperties(
     val ipLimit: Long = 200,
     val ipTimeWindow: Long = 1,

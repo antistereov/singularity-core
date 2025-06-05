@@ -1,4 +1,4 @@
-package io.stereov.singularity.filter
+package io.stereov.singularity.auth.filter
 
 import io.stereov.singularity.auth.exception.AuthException
 import io.stereov.singularity.auth.model.CustomAuthenticationToken
@@ -21,7 +21,7 @@ import reactor.core.publisher.Mono
 /**
  * # Filter for handling cookie-based authentication.
  *
- * This filter intercepts incoming requests and checks for the presence of an authentication token in the cookies.
+ * This ratelimit intercepts incoming requests and checks for the presence of an authentication token in the cookies.
  * If a valid token is found, it retrieves the associated user and sets the security context.
  * If the token is invalid or the user is not found, it sets the response status to UNAUTHORIZED.
  *

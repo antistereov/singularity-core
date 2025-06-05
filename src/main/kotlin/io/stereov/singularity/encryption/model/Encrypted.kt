@@ -1,4 +1,4 @@
-package io.stereov.singularity.global.service.encryption.model
+package io.stereov.singularity.encryption.model
 
 import java.util.*
 

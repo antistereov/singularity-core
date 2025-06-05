@@ -7,8 +7,8 @@
     },
     {
       "name": "baseline.auth",
-      "type": "io.stereov.singularity.properties.AuthProperties",
-      "sourceType": "io.stereov.singularity.properties.AuthProperties"
+      "type": "io.stereov.singularity.auth.properties.AuthProperties",
+      "sourceType": "io.stereov.singularity.auth.properties.AuthProperties"
     },
     {
       "name": "baseline.file.storage",
@@ -42,13 +42,13 @@
     },
     {
       "name": "baseline.security.login-attempt-limit",
-      "type": "io.stereov.singularity.properties.LoginAttemptLimitProperties",
-      "sourceType": "io.stereov.singularity.properties.LoginAttemptLimitProperties"
+      "type": "io.stereov.singularity.ratelimit.properties.LoginAttemptLimitProperties",
+      "sourceType": "io.stereov.singularity.ratelimit.properties.LoginAttemptLimitProperties"
     },
     {
       "name": "baseline.security.rate-limit",
-      "type": "io.stereov.singularity.properties.RateLimitProperties",
-      "sourceType": "io.stereov.singularity.properties.RateLimitProperties"
+      "type": "io.stereov.singularity.ratelimit.properties.RateLimitProperties",
+      "sourceType": "io.stereov.singularity.ratelimit.properties.RateLimitProperties"
     },
     {
       "name": "baseline.security.two-factor",
@@ -111,19 +111,19 @@
     {
       "name": "baseline.auth.admin-paths",
       "type": "java.util.List<java.lang.String>",
-      "sourceType": "io.stereov.singularity.properties.AuthProperties",
+      "sourceType": "io.stereov.singularity.auth.properties.AuthProperties",
       "description": "Paths that require admin authentication. This is a comma-separated list of paths."
     },
     {
       "name": "baseline.auth.public-paths",
       "type": "java.util.List<java.lang.String>",
-      "sourceType": "io.stereov.singularity.properties.AuthProperties",
+      "sourceType": "io.stereov.singularity.auth.properties.AuthProperties",
       "description": "Paths that do not require authentication. This is a comma-separated list of paths."
     },
     {
       "name": "baseline.auth.user-paths",
       "type": "java.util.List<java.lang.String>",
-      "sourceType": "io.stereov.singularity.properties.AuthProperties",
+      "sourceType": "io.stereov.singularity.auth.properties.AuthProperties",
       "description": "Paths that require user authentication. This is a comma-separated list of paths."
     },
     {
@@ -350,42 +350,42 @@
     {
       "name": "baseline.security.rate-limit.ip-limit",
       "type": "java.lang.Long",
-      "sourceType": "io.stereov.singularity.properties.RateLimitProperties",
+      "sourceType": "io.stereov.singularity.ratelimit.properties.RateLimitProperties",
       "defaultValue": 200,
       "description": "Maximum number of requests from a single IP address in the time window."
     },
     {
       "name": "baseline.security.rate-limit.ip-time-window",
       "type": "java.lang.Long",
-      "sourceType": "io.stereov.singularity.properties.RateLimitProperties",
+      "sourceType": "io.stereov.singularity.ratelimit.properties.RateLimitProperties",
       "defaultValue": 1,
       "description": "Time window in minutes for the IP limit."
     },
     {
       "name": "baseline.security.rate-limit.user-limit",
       "type": "java.lang.Long",
-      "sourceType": "io.stereov.singularity.properties.RateLimitProperties",
+      "sourceType": "io.stereov.singularity.ratelimit.properties.RateLimitProperties",
       "defaultValue": 200,
       "description": "Maximum number of requests per user in the time window."
     },
     {
       "name": "baseline.security.rate-limit.user-time-window",
       "type": "java.lang.Long",
-      "sourceType": "io.stereov.singularity.properties.RateLimitProperties",
+      "sourceType": "io.stereov.singularity.ratelimit.properties.RateLimitProperties",
       "defaultValue": 1,
       "description": "Time window in minutes for the user limit."
     },
     {
       "name": "baseline.security.login-attempt-limit.ip-limit",
       "type": "java.lang.Long",
-      "sourceType": "io.stereov.singularity.properties.LoginAttemptLimitProperties",
+      "sourceType": "io.stereov.singularity.ratelimit.properties.LoginAttemptLimitProperties",
       "defaultValue": 10,
       "description": "Maximum number of login attempts from a single IP address before being blocked."
     },
     {
       "name": "baseline.security.login-attempt-limit.ip-time-window",
       "type": "java.lang.Long",
-      "sourceType": "io.stereov.singularity.properties.LoginAttemptLimitProperties",
+      "sourceType": "io.stereov.singularity.ratelimit.properties.LoginAttemptLimitProperties",
       "defaultValue": 5,
       "description": "Time window in minutes for the IP limit."
     },

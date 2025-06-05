@@ -1,12 +1,12 @@
-package io.stereov.singularity.global.service.ratelimit
+package io.stereov.singularity.ratelimit.service
 
 import io.github.bucket4j.Bucket
 import io.github.bucket4j.BucketConfiguration
 import io.github.bucket4j.redis.lettuce.cas.LettuceBasedProxyManager
 import io.stereov.singularity.auth.service.AuthenticationService
-import io.stereov.singularity.global.service.ratelimit.excpetion.model.TooManyRequestsException
-import io.stereov.singularity.properties.LoginAttemptLimitProperties
-import io.stereov.singularity.properties.RateLimitProperties
+import io.stereov.singularity.ratelimit.excpetion.model.TooManyRequestsException
+import io.stereov.singularity.ratelimit.properties.LoginAttemptLimitProperties
+import io.stereov.singularity.ratelimit.properties.RateLimitProperties
 import kotlinx.coroutines.reactor.mono
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono

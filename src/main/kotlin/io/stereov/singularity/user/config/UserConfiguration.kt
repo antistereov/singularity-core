@@ -3,10 +3,10 @@ package io.stereov.singularity.user.config
 import io.stereov.singularity.auth.service.AuthenticationService
 import io.stereov.singularity.auth.service.CookieService
 import io.stereov.singularity.config.ApplicationConfiguration
-import io.stereov.singularity.config.AuthenticationConfiguration
+import io.stereov.singularity.auth.config.AuthenticationConfiguration
 import io.stereov.singularity.config.MailConfiguration
 import io.stereov.singularity.global.service.cache.AccessTokenCache
-import io.stereov.singularity.global.service.encryption.service.EncryptionService
+import io.stereov.singularity.encryption.service.EncryptionService
 import io.stereov.singularity.global.service.file.service.FileStorage
 import io.stereov.singularity.global.service.jwt.JwtService
 import io.stereov.singularity.global.service.mail.MailCooldownService

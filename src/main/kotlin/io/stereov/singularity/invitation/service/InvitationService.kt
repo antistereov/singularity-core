@@ -4,7 +4,7 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.global.database.service.SensitiveCrudService
 import io.stereov.singularity.global.language.model.Language
-import io.stereov.singularity.global.service.encryption.service.EncryptionService
+import io.stereov.singularity.encryption.service.EncryptionService
 import io.stereov.singularity.global.service.mail.MailService
 import io.stereov.singularity.secrets.service.EncryptionSecretService
 import io.stereov.singularity.global.service.template.TemplateBuilder

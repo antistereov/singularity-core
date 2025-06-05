@@ -1,7 +1,7 @@
-package io.stereov.singularity.filter
+package io.stereov.singularity.ratelimit.filter
 
-import io.stereov.singularity.global.service.ratelimit.RateLimitService
-import io.stereov.singularity.global.service.ratelimit.excpetion.model.TooManyRequestsException
+import io.stereov.singularity.ratelimit.excpetion.model.TooManyRequestsException
+import io.stereov.singularity.ratelimit.service.RateLimitService
 import org.springframework.http.HttpStatus
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilter
@@ -11,14 +11,14 @@ import reactor.core.publisher.Mono
 /**
  * # Filter for rate limiting incoming requests.
  *
- * This filter limits the number of requests from a single IP address and user account
+ * This ratelimit limits the number of requests from a single IP address and user account
  * within a specified time period.
  *
  * It uses the Bucket4j library to manage the rate limiting.
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
-class RateLimitingFilter(
+class RateLimitFilter(
     private val rateLimitService: RateLimitService
 ) : WebFilter {
 
@@ -27,8 +27,8 @@ class RateLimitingFilter(
      * It checks for IP-based, user-based, and login-specific rate limits to prevent abuse.
      *
      * @param exchange the current server web exchange containing the HTTP request and response
-     * @param chain the web filter chain allowing further processing of the request
-     * @return a Mono<Void> indicating the completion of the filter processing or an error if rate limits are exceeded
+     * @param chain the web ratelimit chain allowing further processing of the request
+     * @return a Mono<Void> indicating the completion of the ratelimit processing or an error if rate limits are exceeded
      */
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
         return Mono.defer {

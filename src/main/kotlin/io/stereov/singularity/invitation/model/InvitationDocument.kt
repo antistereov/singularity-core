@@ -3,7 +3,7 @@ package io.stereov.singularity.invitation.model
 import io.stereov.singularity.global.database.model.EncryptedSensitiveDocument
 import io.stereov.singularity.global.database.model.SensitiveDocument
 import io.stereov.singularity.global.exception.model.InvalidDocumentException
-import io.stereov.singularity.global.service.encryption.model.Encrypted
+import io.stereov.singularity.encryption.model.Encrypted
 import io.stereov.singularity.invitation.dto.InvitationResponse
 import org.bson.types.ObjectId
 import java.beans.Transient

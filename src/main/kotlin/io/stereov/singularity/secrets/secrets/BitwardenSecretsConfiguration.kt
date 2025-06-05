@@ -1,4 +1,4 @@
-package io.stereov.singularity.config.secrets
+package io.stereov.singularity.secrets.secrets
 
 import com.bitwarden.sdk.BitwardenClient
 import com.bitwarden.sdk.BitwardenSettings

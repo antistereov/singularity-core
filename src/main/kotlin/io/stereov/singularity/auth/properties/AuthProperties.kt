@@ -1,4 +1,4 @@
-package io.stereov.singularity.properties
+package io.stereov.singularity.auth.properties
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 
@@ -17,7 +17,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
-@ConfigurationProperties(prefix = "baseline.auth")
+@ConfigurationProperties(prefix = "singularity.auth")
 data class AuthProperties(
     val publicPaths: List<String> = emptyList(),
     val userPaths: List<String> = emptyList(),

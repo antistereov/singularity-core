@@ -5,10 +5,10 @@ import com.nimbusds.jose.jwk.OctetSequenceKey
 import com.nimbusds.jose.jwk.source.JWKSource
 import com.nimbusds.jose.proc.SecurityContext
 import com.nimbusds.jwt.SignedJWT
-import io.stereov.singularity.config.secrets.SecretsConfiguration
 import io.stereov.singularity.global.service.jwt.JwtService
 import io.stereov.singularity.global.service.jwt.exception.model.InvalidTokenException
 import io.stereov.singularity.secrets.component.KeyManager
+import io.stereov.singularity.secrets.secrets.SecretsConfiguration
 import io.stereov.singularity.secrets.service.JwtSecretService
 import kotlinx.coroutines.reactor.mono
 import kotlinx.coroutines.runBlocking

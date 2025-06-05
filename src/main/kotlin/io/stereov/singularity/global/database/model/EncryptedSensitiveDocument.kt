@@ -1,6 +1,6 @@
 package io.stereov.singularity.global.database.model
 
-import io.stereov.singularity.global.service.encryption.model.Encrypted
+import io.stereov.singularity.encryption.model.Encrypted
 import org.bson.types.ObjectId
 
 interface EncryptedSensitiveDocument<T> {

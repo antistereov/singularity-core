@@ -1,10 +1,11 @@
 package io.stereov.singularity.config
 
-import io.stereov.singularity.filter.CookieAuthenticationFilter
-import io.stereov.singularity.filter.LoggingFilter
-import io.stereov.singularity.filter.RateLimitingFilter
-import io.stereov.singularity.global.service.ratelimit.RateLimitService
-import io.stereov.singularity.properties.AuthProperties
+import io.stereov.singularity.auth.config.AuthenticationConfiguration
+import io.stereov.singularity.auth.filter.CookieAuthenticationFilter
+import io.stereov.singularity.auth.properties.AuthProperties
+import io.stereov.singularity.global.filter.LoggingFilter
+import io.stereov.singularity.ratelimit.filter.RateLimitFilter
+import io.stereov.singularity.ratelimit.service.RateLimitService
 import io.stereov.singularity.properties.UiProperties
 import io.stereov.singularity.user.model.Role
 import io.stereov.singularity.user.service.UserService
@@ -71,12 +72,6 @@ class WebSecurityConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun authenticationEntryPoint(): ServerAuthenticationEntryPoint {
-        return HttpStatusServerEntryPoint(HttpStatus.UNAUTHORIZED)
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
     fun filterChain(
         http: ServerHttpSecurity,
         authProperties: AuthProperties,
@@ -106,11 +101,17 @@ class WebSecurityConfiguration {
                 it.pathMatchers("/admin/**").hasRole(Role.ADMIN.name)
                 it.anyExchange().permitAll()
             }
-            .addFilterBefore(RateLimitingFilter(rateLimitService), SecurityWebFiltersOrder.FIRST)
+            .addFilterBefore(RateLimitFilter(rateLimitService), SecurityWebFiltersOrder.FIRST)
             .addFilterBefore(LoggingFilter(), SecurityWebFiltersOrder.AUTHENTICATION)
             .addFilterBefore(CookieAuthenticationFilter(userTokenService, userService), SecurityWebFiltersOrder.AUTHENTICATION)
             .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())
             .build()
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun authenticationEntryPoint(): ServerAuthenticationEntryPoint {
+        return HttpStatusServerEntryPoint(HttpStatus.UNAUTHORIZED)
     }
 
     @Bean

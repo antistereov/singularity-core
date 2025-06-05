@@ -1,9 +1,9 @@
-package io.stereov.singularity.global.service.ratelimit.excpetion.handler
+package io.stereov.singularity.ratelimit.excpetion.handler
 
+import io.stereov.singularity.ratelimit.excpetion.RateLimitException
+import io.stereov.singularity.ratelimit.excpetion.model.TooManyRequestsException
 import io.stereov.singularity.global.exception.BaseExceptionHandler
 import io.stereov.singularity.global.model.ErrorResponse
-import io.stereov.singularity.global.service.ratelimit.excpetion.RateLimitException
-import io.stereov.singularity.global.service.ratelimit.excpetion.model.TooManyRequestsException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice

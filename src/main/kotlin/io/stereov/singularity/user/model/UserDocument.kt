@@ -5,7 +5,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.global.database.model.SensitiveDocument
 import io.stereov.singularity.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.global.exception.model.MissingFunctionParameterException
-import io.stereov.singularity.global.service.encryption.model.Encrypted
+import io.stereov.singularity.encryption.model.Encrypted
 import io.stereov.singularity.global.service.file.model.FileMetaData
 import io.stereov.singularity.hash.model.SearchableHash
 import io.stereov.singularity.hash.model.SecureHash

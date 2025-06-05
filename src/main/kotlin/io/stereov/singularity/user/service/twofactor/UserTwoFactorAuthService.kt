@@ -7,7 +7,7 @@ import io.stereov.singularity.auth.service.AuthenticationService
 import io.stereov.singularity.auth.service.CookieService
 import io.stereov.singularity.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.global.service.cache.AccessTokenCache
-import io.stereov.singularity.global.service.encryption.service.EncryptionService
+import io.stereov.singularity.encryption.service.EncryptionService
 import io.stereov.singularity.hash.HashService
 import io.stereov.singularity.global.service.random.RandomService
 import io.stereov.singularity.global.service.twofactorauth.TwoFactorAuthService

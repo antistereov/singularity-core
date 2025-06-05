@@ -1,10 +1,10 @@
-package io.stereov.singularity.config.secrets
+package io.stereov.singularity.secrets.secrets
 
 import io.stereov.singularity.config.ApplicationConfiguration
 import io.stereov.singularity.properties.AppProperties
-import io.stereov.singularity.secrets.properties.KeyManagerProperties
 import io.stereov.singularity.secrets.component.KeyManager
 import io.stereov.singularity.secrets.component.SecretCache
+import io.stereov.singularity.secrets.properties.KeyManagerProperties
 import io.stereov.singularity.secrets.service.EncryptionSecretService
 import io.stereov.singularity.secrets.service.HashSecretService
 import io.stereov.singularity.secrets.service.JwtSecretService

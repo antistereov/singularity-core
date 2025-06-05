@@ -1,21 +1,19 @@
-package io.stereov.singularity.config
+package io.stereov.singularity.auth.config
 
 import com.warrenstrange.googleauth.GoogleAuthenticator
-import io.github.bucket4j.redis.lettuce.cas.LettuceBasedProxyManager
 import io.lettuce.core.ExperimentalLettuceCoroutinesApi
 import io.lettuce.core.api.coroutines.RedisCoroutinesCommands
-import io.stereov.singularity.admin.controller.AdminController
-import io.stereov.singularity.admin.service.AdminService
 import io.stereov.singularity.auth.exception.handler.AuthExceptionHandler
+import io.stereov.singularity.auth.properties.AuthProperties
 import io.stereov.singularity.auth.service.AuthenticationService
 import io.stereov.singularity.auth.service.CookieService
+import io.stereov.singularity.config.ApplicationConfiguration
 import io.stereov.singularity.config.storage.S3Configuration
 import io.stereov.singularity.global.service.cache.AccessTokenCache
 import io.stereov.singularity.global.service.cache.RedisService
 import io.stereov.singularity.global.service.geolocation.GeoLocationService
 import io.stereov.singularity.global.service.jwt.JwtService
 import io.stereov.singularity.global.service.jwt.exception.handler.TokenExceptionHandler
-import io.stereov.singularity.global.service.ratelimit.RateLimitService
 import io.stereov.singularity.global.service.twofactorauth.TwoFactorAuthService
 import io.stereov.singularity.global.service.twofactorauth.exception.handler.TwoFactorAuthExceptionHandler
 import io.stereov.singularity.group.repository.GroupRepository
@@ -23,64 +21,18 @@ import io.stereov.singularity.group.service.GroupService
 import io.stereov.singularity.hash.HashService
 import io.stereov.singularity.properties.AppProperties
 import io.stereov.singularity.properties.JwtProperties
-import io.stereov.singularity.properties.LoginAttemptLimitProperties
-import io.stereov.singularity.properties.RateLimitProperties
 import io.stereov.singularity.secrets.service.HashSecretService
-import io.stereov.singularity.user.controller.UserDeviceController
-import io.stereov.singularity.user.controller.UserSessionController
-import io.stereov.singularity.user.controller.UserTwoFactorAuthController
 import io.stereov.singularity.user.service.UserService
-import io.stereov.singularity.user.service.UserSessionService
 import io.stereov.singularity.user.service.device.UserDeviceService
 import io.stereov.singularity.user.service.token.TwoFactorAuthTokenService
 import io.stereov.singularity.user.service.token.UserTokenService
-import io.stereov.singularity.user.service.twofactor.UserTwoFactorAuthService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
-import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
-import org.springframework.boot.autoconfigure.data.web.SpringDataWebAutoConfiguration
-import org.springframework.boot.autoconfigure.mongo.MongoReactiveAutoConfiguration
-import org.springframework.context.ApplicationContext
+import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRepositories
 import org.springframework.web.reactive.function.client.WebClient
 
-/**
- * # Authentication configuration class.
- *
- * This class is responsible for configuring the authentication-related services
- * and components in the application.
- *
- * It runs after the [MongoReactiveAutoConfiguration], [SpringDataWebAutoConfiguration],
- * [RedisAutoConfiguration], and [ApplicationConfiguration] classes to ensure that
- * the necessary configurations are applied in the correct order.
- *
- * This class enables the following services:
- * - [AuthenticationService]
- * - [GeoLocationService]
- * - [HashService]
- * - [RedisService]
- * - [TwoFactorAuthService]
- * - [TwoFactorAuthTokenService]
- * - [UserService]
- * - [UserSessionService]
- * - [CookieService]
- * - [UserDeviceService]
- * - [UserTokenService]
- * - [UserTwoFactorAuthService]
- *
- * It enabled the following controllers:
- * - [UserSessionController]
- * - [UserTwoFactorAuthController]
- * - [UserDeviceController]
- *
- * It enables the following beans:
- * - [GoogleAuthenticator]
- * - [AccessTokenCache]
- *
- * @author <a href="https://github.com/antistereov">antistereov</a>
- */
 @Configuration
 @AutoConfiguration(
     after = [
@@ -88,10 +40,8 @@ import org.springframework.web.reactive.function.client.WebClient
         S3Configuration::class,
     ]
 )
-@EnableReactiveMongoRepositories(
-    basePackageClasses = [GroupRepository::class]
-)
 @OptIn(ExperimentalLettuceCoroutinesApi::class)
+@EnableConfigurationProperties(AuthProperties::class)
 class AuthenticationConfiguration {
 
     @Bean
@@ -107,12 +57,6 @@ class AuthenticationConfiguration {
     }
 
     // Services
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun adminService(context: ApplicationContext, userService: UserService, hashService: HashService, appProperties: AppProperties): AdminService {
-        return AdminService(context, userService, appProperties, hashService)
-    }
 
     @Bean
     @ConditionalOnMissingBean
@@ -158,17 +102,6 @@ class AuthenticationConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun rateLimitService(
-        authenticationService: AuthenticationService,
-        proxyManager: LettuceBasedProxyManager<String>,
-        rateLimitProperties: RateLimitProperties,
-        loginAttemptLimitProperties: LoginAttemptLimitProperties,
-    ): RateLimitService {
-        return RateLimitService(authenticationService, proxyManager, rateLimitProperties, loginAttemptLimitProperties)
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
     fun groupService(
         groupRepository: GroupRepository,
         appProperties: AppProperties
@@ -195,14 +128,6 @@ class AuthenticationConfiguration {
     @ConditionalOnMissingBean
     fun twoFactorAuthTokenService(jwtService: JwtService, jwtProperties: JwtProperties, authenticationService: AuthenticationService, twoFactorAuthService: TwoFactorAuthService, hashService: HashService): TwoFactorAuthTokenService {
         return TwoFactorAuthTokenService(jwtService, jwtProperties, authenticationService, twoFactorAuthService, hashService)
-    }
-
-    // Controller
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun adminController(adminService: AdminService, userService: UserService): AdminController {
-        return AdminController(adminService, userService)
     }
 
     // Exception Handler

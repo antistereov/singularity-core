@@ -2,8 +2,8 @@ package io.stereov.singularity.global.service.mail
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.global.service.encryption.model.Encrypted
-import io.stereov.singularity.global.service.encryption.service.EncryptionService
+import io.stereov.singularity.encryption.model.Encrypted
+import io.stereov.singularity.encryption.service.EncryptionService
 import io.stereov.singularity.global.service.jwt.JwtService
 import io.stereov.singularity.global.service.jwt.exception.model.InvalidTokenException
 import io.stereov.singularity.global.service.jwt.exception.model.TokenExpiredException

@@ -1,6 +1,6 @@
-package io.stereov.singularity.global.service.ratelimit.excpetion.model
+package io.stereov.singularity.ratelimit.excpetion.model
 
-import io.stereov.singularity.global.service.ratelimit.excpetion.RateLimitException
+import io.stereov.singularity.ratelimit.excpetion.RateLimitException
 
 /**
  * Exception thrown when a client exceeds the allowed number of requests.

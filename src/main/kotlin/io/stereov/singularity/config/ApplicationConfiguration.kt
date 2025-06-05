@@ -1,6 +1,12 @@
 package io.stereov.singularity.config
 
-import io.stereov.singularity.properties.*
+import io.stereov.singularity.auth.properties.AuthProperties
+import io.stereov.singularity.ratelimit.properties.LoginAttemptLimitProperties
+import io.stereov.singularity.ratelimit.properties.RateLimitProperties
+import io.stereov.singularity.properties.AppProperties
+import io.stereov.singularity.properties.JwtProperties
+import io.stereov.singularity.properties.TwoFactorAuthProperties
+import io.stereov.singularity.properties.UiProperties
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
 import org.springframework.boot.autoconfigure.data.web.SpringDataWebAutoConfiguration
@@ -42,8 +48,6 @@ import org.springframework.scheduling.annotation.EnableScheduling
     AppProperties::class,
     AuthProperties::class,
     JwtProperties::class,
-    LoginAttemptLimitProperties::class,
-    RateLimitProperties::class,
     TwoFactorAuthProperties::class,
     UiProperties::class,
 )

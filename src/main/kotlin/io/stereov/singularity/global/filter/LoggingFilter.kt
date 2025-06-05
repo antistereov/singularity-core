@@ -1,4 +1,4 @@
-package io.stereov.singularity.filter
+package io.stereov.singularity.global.filter
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -11,7 +11,7 @@ import reactor.core.publisher.Mono
 /**
  * # Filter for logging incoming requests and outgoing responses.
  *
- * This filter logs the details of incoming requests and outgoing responses,
+ * This ratelimit logs the details of incoming requests and outgoing responses,
  * including the HTTP method, path, and status code.
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>

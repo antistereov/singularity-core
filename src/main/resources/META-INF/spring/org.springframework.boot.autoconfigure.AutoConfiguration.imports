@@ -1,12 +1,11 @@
-io.stereov.singularity.config.secrets.SecretsConfiguration
-io.stereov.singularity.config.secrets.BitwardenSecretsConfiguration
+io.stereov.singularity.secrets.secrets.SecretsConfiguration
+io.stereov.singularity.secrets.secrets.BitwardenSecretsConfiguration
 
 io.stereov.singularity.config.storage.StorageConfiguration
 io.stereov.singularity.config.storage.S3Configuration
 
 io.stereov.singularity.config.ApplicationConfiguration
-io.stereov.singularity.config.AuthenticationConfiguration
-io.stereov.singularity.config.EncryptionConfiguration
+io.stereov.singularity.encryption.config.EncryptionConfiguration
 io.stereov.singularity.config.JsonConfiguration
 io.stereov.singularity.config.JwtConfiguration
 io.stereov.singularity.config.MailConfiguration
@@ -16,4 +15,7 @@ io.stereov.singularity.config.WebClientConfiguration
 io.stereov.singularity.config.WebFluxConfiguration
 io.stereov.singularity.config.WebSecurityConfiguration
 
+io.stereov.singularity.auth.config.AuthenticationConfiguration
+io.stereov.singularity.admin.config.AdminConfiguration
+io.stereov.singularity.ratelimit.config.RateLimitConfiguration
 io.stereov.singularity.user.config.UserConfiguration
