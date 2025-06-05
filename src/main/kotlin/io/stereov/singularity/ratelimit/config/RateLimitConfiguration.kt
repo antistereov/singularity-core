@@ -42,6 +42,8 @@ class RateLimitConfiguration {
 
     // Exception Handler
 
+    @Bean
+    @ConditionalOnMissingBean
     fun rateLimitExceptionHandler() = RateLimitExceptionHandler()
 
 
