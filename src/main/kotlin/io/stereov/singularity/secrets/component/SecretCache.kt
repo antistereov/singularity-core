@@ -58,7 +58,7 @@ class SecretCache(keyManagerProperties: KeyManagerProperties) {
         cache.entries.removeIf { it.value.expirationTime.isBefore(now) }
     }
 
-    @Scheduled(fixedRateString = "\${baseline.secrets.cache-expiration:900}")
+    @Scheduled(fixedRateString = "\${singularity.secrets.cache-expiration:900000}")
     fun scheduledCleanup() {
         logger.debug { "Starting scheduled cleanup of secret cache" }
         cleanupExpiredEntries()

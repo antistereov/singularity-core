@@ -1,22 +1,21 @@
 package io.stereov.singularity.user.config
 
+import io.stereov.singularity.auth.config.AuthenticationConfiguration
 import io.stereov.singularity.auth.service.AuthenticationService
 import io.stereov.singularity.auth.service.CookieService
-import io.stereov.singularity.config.ApplicationConfiguration
-import io.stereov.singularity.auth.config.AuthenticationConfiguration
-import io.stereov.singularity.config.MailConfiguration
-import io.stereov.singularity.global.service.cache.AccessTokenCache
+import io.stereov.singularity.cache.service.AccessTokenCache
 import io.stereov.singularity.encryption.service.EncryptionService
-import io.stereov.singularity.global.service.file.service.FileStorage
-import io.stereov.singularity.global.service.jwt.JwtService
-import io.stereov.singularity.global.service.mail.MailCooldownService
-import io.stereov.singularity.global.service.mail.MailService
-import io.stereov.singularity.global.service.mail.MailTokenService
-import io.stereov.singularity.global.service.twofactorauth.TwoFactorAuthService
-import io.stereov.singularity.hash.HashService
-import io.stereov.singularity.properties.JwtProperties
-import io.stereov.singularity.properties.TwoFactorAuthProperties
+import io.stereov.singularity.global.config.ApplicationConfiguration
+import io.stereov.singularity.hash.service.HashService
+import io.stereov.singularity.jwt.properties.JwtProperties
+import io.stereov.singularity.jwt.service.JwtService
+import io.stereov.singularity.mail.config.MailConfiguration
+import io.stereov.singularity.mail.service.MailCooldownService
+import io.stereov.singularity.mail.service.MailService
+import io.stereov.singularity.mail.service.MailTokenService
 import io.stereov.singularity.secrets.service.EncryptionSecretService
+import io.stereov.singularity.twofactorauth.properties.TwoFactorAuthProperties
+import io.stereov.singularity.twofactorauth.service.TwoFactorAuthService
 import io.stereov.singularity.user.controller.UserDeviceController
 import io.stereov.singularity.user.controller.UserSessionController
 import io.stereov.singularity.user.controller.UserTwoFactorAuthController
@@ -117,7 +116,7 @@ class UserConfiguration {
         deviceService: UserDeviceService,
         accessTokenCache: AccessTokenCache,
         cookieService: CookieService,
-        fileStorage: FileStorage,
+        fileStorage: io.stereov.singularity.file.service.FileStorage,
         mailService: MailService,
     ): UserSessionService {
         return UserSessionService(

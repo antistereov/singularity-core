@@ -4,13 +4,13 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.exception.AuthException
 import io.stereov.singularity.auth.exception.model.TwoFactorAuthDisabledException
-import io.stereov.singularity.config.Constants
-import io.stereov.singularity.global.service.geolocation.GeoLocationService
-import io.stereov.singularity.global.service.jwt.exception.model.InvalidTokenException
-import io.stereov.singularity.global.service.random.RandomService
-import io.stereov.singularity.global.service.twofactorauth.TwoFactorAuthService
-import io.stereov.singularity.properties.AppProperties
-import io.stereov.singularity.properties.JwtProperties
+import io.stereov.singularity.global.util.Constants
+import io.stereov.singularity.geolocation.service.GeoLocationService
+import io.stereov.singularity.jwt.exception.model.InvalidTokenException
+import io.stereov.singularity.global.util.Random
+import io.stereov.singularity.twofactorauth.service.TwoFactorAuthService
+import io.stereov.singularity.global.properties.AppProperties
+import io.stereov.singularity.jwt.properties.JwtProperties
 import io.stereov.singularity.user.dto.UserResponse
 import io.stereov.singularity.user.dto.request.DeviceInfoRequest
 import io.stereov.singularity.user.dto.request.TwoFactorStartSetupRequest
@@ -89,7 +89,7 @@ class CookieService(
     ): ResponseCookie {
         logger.info { "Creating refresh token cookie" }
 
-        val refreshTokenId = RandomService.generateCode(20)
+        val refreshTokenId = Random.generateCode(20)
         val refreshToken = userTokenService.createRefreshToken(userId, deviceInfoDto.id, refreshTokenId)
 
         val ipAddress = exchange.request.remoteAddress?.address?.hostAddress

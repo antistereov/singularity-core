@@ -1,443 +1,443 @@
 {
   "groups": [
     {
-      "name": "baseline.app",
-      "type": "io.stereov.singularity.properties.AppProperties",
-      "sourceType": "io.stereov.singularity.properties.AppProperties"
+      "name": "singularity.app",
+      "type": "io.stereov.singularity.global.properties.AppProperties",
+      "sourceType": "io.stereov.singularity.global.properties.AppProperties"
     },
     {
-      "name": "baseline.auth",
+      "name": "singularity.auth",
       "type": "io.stereov.singularity.auth.properties.AuthProperties",
       "sourceType": "io.stereov.singularity.auth.properties.AuthProperties"
     },
     {
-      "name": "baseline.file.storage",
-      "type": "io.stereov.singularity.properties.storage.StorageProperties",
-      "sourceType": "io.stereov.singularity.properties.storage.StorageProperties"
+      "name": "singularity.file.storage",
+      "type": "io.stereov.singularity.file.properties.StorageProperties",
+      "sourceType": "io.stereov.singularity.file.properties.StorageProperties"
     },
     {
-      "name": "baseline.file.storage.s3",
-      "type": "io.stereov.singularity.properties.storage.S3Properties",
-      "sourceType": "io.stereov.singularity.properties.storage.S3Properties"
+      "name": "singularity.file.storage.s3",
+      "type": "io.stereov.singularity.file.properties.S3Properties",
+      "sourceType": "io.stereov.singularity.file.properties.S3Properties"
     },
     {
-      "name": "baseline.mail",
-      "type": "io.stereov.singularity.properties.MailProperties",
-      "sourceType": "io.stereov.singularity.properties.MailProperties"
+      "name": "singularity.mail",
+      "type": "io.stereov.singularity.mail.properties.MailProperties",
+      "sourceType": "io.stereov.singularity.mail.properties.MailProperties"
     },
     {
-      "name": "baseline.secrets",
+      "name": "singularity.secrets",
       "type": "io.stereov.singularity.secrets.properties.KeyManagerProperties",
       "sourceType": "io.stereov.singularity.secrets.properties.KeyManagerProperties"
     },
     {
-      "name": "baseline.secrets.bitwarden",
+      "name": "singularity.secrets.bitwarden",
       "type": "io.stereov.singularity.secrets.properties.BitwardenKeyManagerProperties",
       "sourceType": "io.stereov.singularity.secrets.properties.BitwardenKeyManagerProperties"
     },
     {
-      "name": "baseline.security.jwt",
-      "type": "io.stereov.singularity.properties.JwtProperties",
-      "sourceType": "io.stereov.singularity.properties.JwtProperties"
+      "name": "singularity.security.jwt",
+      "type": "io.stereov.singularity.jwt.properties.JwtProperties",
+      "sourceType": "io.stereov.singularity.jwt.properties.JwtProperties"
     },
     {
-      "name": "baseline.security.login-attempt-limit",
+      "name": "singularity.security.login-attempt-limit",
       "type": "io.stereov.singularity.ratelimit.properties.LoginAttemptLimitProperties",
       "sourceType": "io.stereov.singularity.ratelimit.properties.LoginAttemptLimitProperties"
     },
     {
-      "name": "baseline.security.rate-limit",
+      "name": "singularity.security.rate-limit",
       "type": "io.stereov.singularity.ratelimit.properties.RateLimitProperties",
       "sourceType": "io.stereov.singularity.ratelimit.properties.RateLimitProperties"
     },
     {
-      "name": "baseline.security.two-factor",
-      "type": "io.stereov.singularity.properties.TwoFactorAuthProperties",
-      "sourceType": "io.stereov.singularity.properties.TwoFactorAuthProperties"
+      "name": "singularity.security.two-factor",
+      "type": "io.stereov.singularity.twofactorauth.properties.TwoFactorAuthProperties",
+      "sourceType": "io.stereov.singularity.twofactorauth.properties.TwoFactorAuthProperties"
     },
     {
-      "name": "baseline.ui",
-      "type": "io.stereov.singularity.properties.UiProperties",
-      "sourceType": "io.stereov.singularity.properties.UiProperties"
+      "name": "singularity.ui",
+      "type": "io.stereov.singularity.global.properties.UiProperties",
+      "sourceType": "io.stereov.singularity.global.properties.UiProperties"
     }
   ],
   "properties": [
     {
-      "name": "baseline.app.base-url",
+      "name": "singularity.app.base-url",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.properties.AppProperties",
+      "sourceType": "io.stereov.singularity.global.properties.AppProperties",
       "defaultValue": "http://localhost:8000",
       "description": "Base URL for the application. This is used to generate links in emails and other notifications."
     },
     {
-      "name": "baseline.app.support-mail",
+      "name": "singularity.app.support-mail",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.properties.AppProperties",
+      "sourceType": "io.stereov.singularity.global.properties.AppProperties",
       "description": "The email address that is used for support requests."
     },
     {
-      "name": "baseline.app.name",
+      "name": "singularity.app.name",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.properties.AppProperties",
+      "sourceType": "io.stereov.singularity.global.properties.AppProperties",
       "defaultValue": "Spring Application",
       "description": "The name of the application. This is used in various places, including the UI and emails."
     },
     {
-      "name": "baseline.app.create-root-user",
+      "name": "singularity.app.create-root-user",
       "type": "java.lang.Boolean",
-      "sourceType": "io.stereov.singularity.properties.AppProperties",
+      "sourceType": "io.stereov.singularity.global.properties.AppProperties",
       "defaultValue": "False",
       "description": "Should the application create a root user at application start?"
     },
     {
-      "name": "baseline.app.root-email",
+      "name": "singularity.app.root-email",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.properties.AppProperties",
+      "sourceType": "io.stereov.singularity.global.properties.AppProperties",
       "description": "The email associated to the root user."
     },
     {
-      "name": "baseline.app.root-password",
+      "name": "singularity.app.root-password",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.properties.AppProperties",
+      "sourceType": "io.stereov.singularity.global.properties.AppProperties",
       "description": "The password associated to the root user."
     },
     {
-      "name": "baseline.app.secure",
+      "name": "singularity.app.secure",
       "type": "java.lang.Boolean",
-      "sourceType": "io.stereov.singularity.properties.AppProperties",
+      "sourceType": "io.stereov.singularity.global.properties.AppProperties",
       "defaultValue": false,
       "description": "Enable HTTPS and secure cookies for the application. Default is false."
     },
     {
-      "name": "baseline.auth.admin-paths",
+      "name": "singularity.auth.admin-paths",
       "type": "java.util.List<java.lang.String>",
       "sourceType": "io.stereov.singularity.auth.properties.AuthProperties",
       "description": "Paths that require admin authentication. This is a comma-separated list of paths."
     },
     {
-      "name": "baseline.auth.public-paths",
+      "name": "singularity.auth.public-paths",
       "type": "java.util.List<java.lang.String>",
       "sourceType": "io.stereov.singularity.auth.properties.AuthProperties",
       "description": "Paths that do not require authentication. This is a comma-separated list of paths."
     },
     {
-      "name": "baseline.auth.user-paths",
+      "name": "singularity.auth.user-paths",
       "type": "java.util.List<java.lang.String>",
       "sourceType": "io.stereov.singularity.auth.properties.AuthProperties",
       "description": "Paths that require user authentication. This is a comma-separated list of paths."
     },
     {
-      "name": "baseline.file.storage.type",
-      "type": "io.stereov.singularity.properties.storage.StorageType",
-      "sourceType": "io.stereov.singularity.properties.storage.S3Properties",
+      "name": "singularity.file.storage.type",
+      "type": "io.stereov.singularity.file.properties.StorageType",
+      "sourceType": "io.stereov.singularity.file.properties.S3Properties",
       "description": "The type of storage you prefer.",
       "defaultValue": "s3"
     },
     {
-      "name": "baseline.file.storage.s3.domain",
+      "name": "singularity.file.storage.s3.domain",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.properties.storage.S3Properties",
+      "sourceType": "io.stereov.singularity.file.properties.S3Properties",
       "description": "The URI of your S3"
     },
     {
-      "name": "baseline.file.storage.s3.scheme",
+      "name": "singularity.file.storage.s3.scheme",
       "type": "io.stereov.singularity.global.model.HttpScheme",
       "sourceType": "io.stereov.singularity.global.model.HttpScheme",
       "description": "The scheme of your S3 URL. Can be http or https.",
       "defaultValue": "https"
     },
     {
-      "name": "baseline.file.storage.s3.bucket",
+      "name": "singularity.file.storage.s3.bucket",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.properties.storage.S3Properties",
+      "sourceType": "io.stereov.singularity.file.properties.S3Properties",
       "description": "The bucket in your S3 storage.",
       "defaultValue": "app"
     },
     {
-      "name": "baseline.file.storage.s3.region",
+      "name": "singularity.file.storage.s3.region",
       "type": "software.amazon.awssdk.regions.Region",
       "sourceType": "software.amazon.awssdk.regions.Region",
       "description": "The region of your S3 storage.",
       "defaultValue": "eu-central-1"
     },
     {
-      "name": "baseline.file.storage.s3.access-key",
+      "name": "singularity.file.storage.s3.access-key",
       "type": "java.util.List<java.lang.String>",
-      "sourceType": "io.stereov.singularity.properties.storage.S3Properties",
+      "sourceType": "io.stereov.singularity.file.properties.S3Properties",
       "description": "Your S3 access key."
     },
     {
-      "name": "baseline.file.storage.s3.secret-key",
+      "name": "singularity.file.storage.s3.secret-key",
       "type": "java.util.List<java.lang.String>",
-      "sourceType": "io.stereov.singularity.properties.storage.S3Properties",
+      "sourceType": "io.stereov.singularity.file.properties.S3Properties",
       "description": "Your S3 secret key."
     },
     {
-      "name": "baseline.file.storage.s3.signature-duration",
+      "name": "singularity.file.storage.s3.signature-duration",
       "type": "java.util.List<java.lang.Long>",
-      "sourceType": "io.stereov.singularity.properties.storage.S3Properties",
+      "sourceType": "io.stereov.singularity.file.properties.S3Properties",
       "description": "How many minutes should presigned URLs be valid? Default is 5 min.",
       "defaultValue": 5
     },
     {
-      "name": "baseline.mail.debug",
+      "name": "singularity.mail.debug",
       "type": "java.lang.Boolean",
-      "sourceType": "io.stereov.singularity.properties.MailProperties",
+      "sourceType": "io.stereov.singularity.mail.properties.MailProperties",
       "defaultValue": false,
       "description": "Enable debug mode for email sending. This will log the email content to the console."
     },
     {
-      "name": "baseline.mail.email",
+      "name": "singularity.mail.email",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.properties.MailProperties",
+      "sourceType": "io.stereov.singularity.mail.properties.MailProperties",
       "description": "The email address used to send emails. This is the 'from' address."
     },
     {
-      "name": "baseline.mail.host",
+      "name": "singularity.mail.host",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.properties.MailProperties",
+      "sourceType": "io.stereov.singularity.mail.properties.MailProperties",
       "defaultValue": "smtp.example.com"
     },
     {
-      "name": "baseline.mail.password",
+      "name": "singularity.mail.password",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.properties.MailProperties",
+      "sourceType": "io.stereov.singularity.mail.properties.MailProperties",
       "description": "The password for the email account used to send emails."
     },
     {
-      "name": "baseline.mail.password-reset-expiration",
+      "name": "singularity.mail.password-reset-expiration",
       "type": "java.lang.Long",
-      "sourceType": "io.stereov.singularity.properties.MailProperties",
+      "sourceType": "io.stereov.singularity.mail.properties.MailProperties",
       "defaultValue": 900,
       "description": "Expiration time for the password reset token in seconds. Default is 15 minutes."
     },
     {
-      "name": "baseline.mail.password-reset-send-cooldown",
+      "name": "singularity.mail.password-reset-send-cooldown",
       "type": "java.lang.Long",
-      "sourceType": "io.stereov.singularity.properties.MailProperties",
+      "sourceType": "io.stereov.singularity.mail.properties.MailProperties",
       "defaultValue": 60,
       "description": "Cooldown period in seconds for sending password reset emails."
     },
     {
-      "name": "baseline.mail.port",
+      "name": "singularity.mail.port",
       "type": "java.lang.Integer",
-      "sourceType": "io.stereov.singularity.properties.MailProperties",
+      "sourceType": "io.stereov.singularity.mail.properties.MailProperties",
       "defaultValue": 587,
       "description": "The port used for sending emails. Default is 587."
     },
     {
-      "name": "baseline.mail.smtp-auth",
+      "name": "singularity.mail.smtp-auth",
       "type": "java.lang.Boolean",
-      "sourceType": "io.stereov.singularity.properties.MailProperties",
+      "sourceType": "io.stereov.singularity.mail.properties.MailProperties",
       "defaultValue": true,
       "description": "Enable SMTP authentication for sending emails."
     },
     {
-      "name": "baseline.mail.smtp-starttls",
+      "name": "singularity.mail.smtp-starttls",
       "type": "java.lang.Boolean",
-      "sourceType": "io.stereov.singularity.properties.MailProperties",
+      "sourceType": "io.stereov.singularity.mail.properties.MailProperties",
       "defaultValue": true,
       "description": "Enable STARTTLS for secure email transmission."
     },
     {
-      "name": "baseline.mail.transport-protocol",
+      "name": "singularity.mail.transport-protocol",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.properties.MailProperties",
+      "sourceType": "io.stereov.singularity.mail.properties.MailProperties",
       "defaultValue": "smtp",
       "description": "The transport protocol used for sending emails. Default is 'smtp'."
     },
     {
-      "name": "baseline.mail.ui-password-reset-path",
+      "name": "singularity.mail.ui-password-reset-path",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.properties.MailProperties",
+      "sourceType": "io.stereov.singularity.mail.properties.MailProperties",
       "defaultValue": "/auth/reset-password",
       "description": "The path to the password reset page in the UI application."
     },
     {
-      "name": "baseline.mail.ui-verification-path",
+      "name": "singularity.mail.ui-verification-path",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.properties.MailProperties",
+      "sourceType": "io.stereov.singularity.mail.properties.MailProperties",
       "defaultValue": "/auth/verify-email",
       "description": "The path to the verification page in the UI application."
     },
     {
-      "name": "baseline.mail.username",
+      "name": "singularity.mail.username",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.properties.MailProperties",
+      "sourceType": "io.stereov.singularity.mail.properties.MailProperties",
       "description": "The username for the email account used to send emails."
     },
     {
-      "name": "baseline.mail.verification-expiration",
+      "name": "singularity.mail.verification-expiration",
       "type": "java.lang.Long",
-      "sourceType": "io.stereov.singularity.properties.MailProperties",
+      "sourceType": "io.stereov.singularity.mail.properties.MailProperties",
       "defaultValue": 900,
       "description": "Expiration time for the verification token in seconds. Default is 15 minutes."
     },
     {
-      "name": "baseline.mail.verification-send-cooldown",
+      "name": "singularity.mail.verification-send-cooldown",
       "type": "java.lang.Long",
-      "sourceType": "io.stereov.singularity.properties.MailProperties",
+      "sourceType": "io.stereov.singularity.mail.properties.MailProperties",
       "defaultValue": 60,
       "description": "Cooldown period in seconds for sending verification emails."
     },
     {
-      "name": "baseline.secrets.key-manager",
+      "name": "singularity.secrets.key-manager",
       "type": "io.stereov.singularity.secrets.properties.KeyManagerImplementation",
       "sourceType": "io.stereov.singularity.secrets.properties.KeyManagerProperties",
       "defaultValue": "bitwarden",
       "description": "The key manager you want to use. Default value is bitwarden."
     },
     {
-      "name": "baseline.secrets.key-rotation-cron",
+      "name": "singularity.secrets.key-rotation-cron",
       "type": "java.lang.String",
       "sourceType": "io.stereov.singularity.secrets.properties.KeyManagerProperties",
       "defaultValue": "0 0 4 1 1,4,7,10 *",
       "description": "The cron expression for key rotation. The default value is the 1st day of January, April, July, and October at 4:00:00 AM."
     },
     {
-      "name": "baseline.secrets.cache-expiration",
+      "name": "singularity.secrets.cache-expiration",
       "type": "java.lang.Long",
       "sourceType": "io.stereov.singularity.secrets.properties.KeyManagerProperties",
       "defaultValue": 900000,
       "description": "The duration it takes for cached secrets to expire in milliseconds. Default is 900 000ms which is equal to 15min."
     },
     {
-      "name": "baseline.secrets.bitwarden.api-url",
+      "name": "singularity.secrets.bitwarden.api-url",
       "type": "java.lang.String",
       "sourceType": "io.stereov.singularity.secrets.properties.BitwardenKeyManagerProperties",
       "defaultValue": "https://api.bitwarden.com",
       "description": "The API URL for Bitwarden."
     },
     {
-      "name": "baseline.secrets.bitwarden.identity-url",
+      "name": "singularity.secrets.bitwarden.identity-url",
       "type": "java.lang.String",
       "sourceType": "io.stereov.singularity.secrets.properties.BitwardenKeyManagerProperties",
       "defaultValue": "https://identity.bitwarden.com",
       "description": "The identity URL for Bitwarden."
     },
     {
-      "name": "baseline.secrets.bitwarden.access-token",
+      "name": "singularity.secrets.bitwarden.access-token",
       "type": "java.lang.String",
       "sourceType": "io.stereov.singularity.secrets.properties.BitwardenKeyManagerProperties",
       "description": "Your access token for Bitwarden."
     },
     {
-      "name": "baseline.secrets.bitwarden.organization-id",
+      "name": "singularity.secrets.bitwarden.organization-id",
       "type": "java.util.UUID",
       "sourceType": "io.stereov.singularity.secrets.properties.BitwardenKeyManagerProperties",
       "description": "Your organization ID within Bitwarden."
     },
     {
-      "name": "baseline.secrets.bitwarden.project-id",
+      "name": "singularity.secrets.bitwarden.project-id",
       "type": "java.util.UUID",
       "sourceType": "io.stereov.singularity.secrets.properties.BitwardenKeyManagerProperties",
       "description": "Your project ID within Bitwarden."
     },
     {
-      "name": "baseline.secrets.bitwarden.state-file",
+      "name": "singularity.secrets.bitwarden.state-file",
       "type": "java.lang.String",
       "sourceType": "io.stereov.singularity.secrets.properties.BitwardenKeyManagerProperties",
       "description": "The path to your state file",
       "defaultValue": "~/.bitwarden/application/state"
     },
     {
-      "name": "baseline.security.jwt.expires-in",
+      "name": "singularity.security.jwt.expires-in",
       "type": "java.lang.Long",
-      "sourceType": "io.stereov.singularity.properties.JwtProperties",
+      "sourceType": "io.stereov.singularity.jwt.properties.JwtProperties",
       "defaultValue": 900,
       "description": "Expiration time for the JWT token in seconds. Default is 15 minutes."
     },
     {
-      "name": "baseline.security.rate-limit.ip-limit",
+      "name": "singularity.security.rate-limit.ip-limit",
       "type": "java.lang.Long",
       "sourceType": "io.stereov.singularity.ratelimit.properties.RateLimitProperties",
       "defaultValue": 200,
       "description": "Maximum number of requests from a single IP address in the time window."
     },
     {
-      "name": "baseline.security.rate-limit.ip-time-window",
+      "name": "singularity.security.rate-limit.ip-time-window",
       "type": "java.lang.Long",
       "sourceType": "io.stereov.singularity.ratelimit.properties.RateLimitProperties",
       "defaultValue": 1,
       "description": "Time window in minutes for the IP limit."
     },
     {
-      "name": "baseline.security.rate-limit.user-limit",
+      "name": "singularity.security.rate-limit.user-limit",
       "type": "java.lang.Long",
       "sourceType": "io.stereov.singularity.ratelimit.properties.RateLimitProperties",
       "defaultValue": 200,
       "description": "Maximum number of requests per user in the time window."
     },
     {
-      "name": "baseline.security.rate-limit.user-time-window",
+      "name": "singularity.security.rate-limit.user-time-window",
       "type": "java.lang.Long",
       "sourceType": "io.stereov.singularity.ratelimit.properties.RateLimitProperties",
       "defaultValue": 1,
       "description": "Time window in minutes for the user limit."
     },
     {
-      "name": "baseline.security.login-attempt-limit.ip-limit",
+      "name": "singularity.security.login-attempt-limit.ip-limit",
       "type": "java.lang.Long",
       "sourceType": "io.stereov.singularity.ratelimit.properties.LoginAttemptLimitProperties",
       "defaultValue": 10,
       "description": "Maximum number of login attempts from a single IP address before being blocked."
     },
     {
-      "name": "baseline.security.login-attempt-limit.ip-time-window",
+      "name": "singularity.security.login-attempt-limit.ip-time-window",
       "type": "java.lang.Long",
       "sourceType": "io.stereov.singularity.ratelimit.properties.LoginAttemptLimitProperties",
       "defaultValue": 5,
       "description": "Time window in minutes for the IP limit."
     },
     {
-      "name": "baseline.security.two-factor.recovery-code-length",
+      "name": "singularity.security.two-factor.recovery-code-length",
       "type": "java.lang.Integer",
-      "sourceType": "io.stereov.singularity.properties.TwoFactorAuthProperties",
+      "sourceType": "io.stereov.singularity.twofactorauth.properties.TwoFactorAuthProperties",
       "defaultValue": 10,
       "description": "Length of the recovery code. Default is 10 characters."
     },
     {
-      "name": "baseline.security.two-factor.recovery-code-count",
+      "name": "singularity.security.two-factor.recovery-code-count",
       "type": "java.lang.Integer",
-      "sourceType": "io.stereov.singularity.properties.TwoFactorAuthProperties",
+      "sourceType": "io.stereov.singularity.twofactorauth.properties.TwoFactorAuthProperties",
       "defaultValue": 6,
       "description": "Count of recovery codes to generate. Default is 6."
     },
     {
-      "name": "baseline.ui.base-url",
+      "name": "singularity.ui.base-url",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.properties.UiProperties",
+      "sourceType": "io.stereov.singularity.global.properties.UiProperties",
       "defaultValue": "http://localhost:4200",
       "description": "Base URL for the UI application. This is used to generate links in emails and other notifications."
     },
     {
-      "name": "baseline.ui.icon-path",
+      "name": "singularity.ui.icon-path",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.properties.AppProperties",
+      "sourceType": "io.stereov.singularity.global.properties.AppProperties",
       "defaultValue": "/icon.svg"
     },
     {
-      "name": "baseline.ui.accept-invitation-path",
+      "name": "singularity.ui.accept-invitation-path",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.properties.AppProperties",
+      "sourceType": "io.stereov.singularity.global.properties.AppProperties",
       "defaultValue": "/invitation/accept"
     },
     {
-      "name": "baseline.ui.contact-path",
+      "name": "singularity.ui.contact-path",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.properties.AppProperties",
+      "sourceType": "io.stereov.singularity.global.properties.AppProperties",
       "defaultValue": "/contact"
     },
     {
-      "name": "baseline.ui.legal-notice-path",
+      "name": "singularity.ui.legal-notice-path",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.properties.AppProperties",
+      "sourceType": "io.stereov.singularity.global.properties.AppProperties",
       "defaultValue": "/legal-notice"
     },
     {
-      "name": "baseline.ui.privacy-policy-path",
+      "name": "singularity.ui.privacy-policy-path",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.properties.AppProperties",
+      "sourceType": "io.stereov.singularity.global.properties.AppProperties",
       "defaultValue": "/privacy-policy"
     }
   ],

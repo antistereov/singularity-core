@@ -2,10 +2,10 @@ package io.stereov.singularity.admin.config
 
 import io.stereov.singularity.admin.controller.AdminController
 import io.stereov.singularity.admin.service.AdminService
-import io.stereov.singularity.config.ApplicationConfiguration
-import io.stereov.singularity.group.repository.GroupRepository
-import io.stereov.singularity.hash.HashService
-import io.stereov.singularity.properties.AppProperties
+import io.stereov.singularity.global.config.ApplicationConfiguration
+import io.stereov.singularity.global.properties.AppProperties
+import io.stereov.singularity.hash.config.HashConfiguration
+import io.stereov.singularity.hash.service.HashService
 import io.stereov.singularity.user.config.UserConfiguration
 import io.stereov.singularity.user.service.UserService
 import org.springframework.boot.autoconfigure.AutoConfiguration
@@ -13,17 +13,14 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRepositories
 
 @Configuration
 @AutoConfiguration(
     after = [
         ApplicationConfiguration::class,
         UserConfiguration::class,
+        HashConfiguration::class,
     ]
-)
-@EnableReactiveMongoRepositories(
-    basePackageClasses = [GroupRepository::class]
 )
 class AdminConfiguration {
 

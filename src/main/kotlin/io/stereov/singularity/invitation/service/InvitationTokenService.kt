@@ -2,7 +2,7 @@ package io.stereov.singularity.invitation.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.global.service.jwt.JwtService
+import io.stereov.singularity.jwt.service.JwtService
 import io.stereov.singularity.invitation.model.InvitationDocument
 import org.bson.types.ObjectId
 import org.springframework.security.oauth2.jwt.JwtClaimsSet

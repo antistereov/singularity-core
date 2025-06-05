@@ -6,13 +6,15 @@ import io.stereov.singularity.auth.exception.AuthException
 import io.stereov.singularity.auth.exception.model.InvalidCredentialsException
 import io.stereov.singularity.auth.service.AuthenticationService
 import io.stereov.singularity.auth.service.CookieService
-import io.stereov.singularity.global.service.cache.AccessTokenCache
-import io.stereov.singularity.global.service.file.exception.model.UnsupportedMediaTypeException
-import io.stereov.singularity.global.service.file.service.FileStorage
-import io.stereov.singularity.global.service.mail.MailService
-import io.stereov.singularity.hash.HashService
+import io.stereov.singularity.cache.service.AccessTokenCache
+import io.stereov.singularity.file.exception.model.UnsupportedMediaTypeException
+import io.stereov.singularity.hash.service.HashService
+import io.stereov.singularity.mail.service.MailService
 import io.stereov.singularity.user.dto.UserResponse
-import io.stereov.singularity.user.dto.request.*
+import io.stereov.singularity.user.dto.request.ChangeEmailRequest
+import io.stereov.singularity.user.dto.request.ChangePasswordRequest
+import io.stereov.singularity.user.dto.request.LoginRequest
+import io.stereov.singularity.user.dto.request.RegisterUserRequest
 import io.stereov.singularity.user.exception.model.EmailAlreadyExistsException
 import io.stereov.singularity.user.model.UserDocument
 import io.stereov.singularity.user.service.device.UserDeviceService
@@ -43,7 +45,7 @@ class UserSessionService(
     private val deviceService: UserDeviceService,
     private val accessTokenCache: AccessTokenCache,
     private val cookieService: CookieService,
-    private val fileStorage: FileStorage,
+    private val fileStorage: io.stereov.singularity.file.service.FileStorage,
     private val mailService: MailService,
 ) {
 

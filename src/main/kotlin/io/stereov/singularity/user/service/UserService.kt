@@ -3,9 +3,9 @@ package io.stereov.singularity.user.service
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.database.service.SensitiveCrudService
 import io.stereov.singularity.encryption.service.EncryptionService
-import io.stereov.singularity.global.service.file.exception.model.NoSuchFileException
-import io.stereov.singularity.global.service.file.model.FileMetaData
-import io.stereov.singularity.hash.HashService
+import io.stereov.singularity.file.model.FileMetaData
+import io.stereov.singularity.file.exception.model.NoSuchFileException
+import io.stereov.singularity.hash.service.HashService
 import io.stereov.singularity.secrets.service.EncryptionSecretService
 import io.stereov.singularity.user.exception.model.UserDoesNotExistException
 import io.stereov.singularity.user.model.EncryptedUserDocument

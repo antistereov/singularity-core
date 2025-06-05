@@ -7,7 +7,7 @@ import io.stereov.singularity.group.dto.CreateGroupMultiLangRequest
 import io.stereov.singularity.group.exception.model.GroupKeyExistsException
 import io.stereov.singularity.group.model.GroupDocument
 import io.stereov.singularity.group.repository.GroupRepository
-import io.stereov.singularity.properties.AppProperties
+import io.stereov.singularity.global.properties.AppProperties
 import jakarta.annotation.PostConstruct
 import kotlinx.coroutines.runBlocking
 import org.bson.types.ObjectId

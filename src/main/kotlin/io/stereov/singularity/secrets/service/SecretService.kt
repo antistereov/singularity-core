@@ -1,8 +1,7 @@
 package io.stereov.singularity.secrets.service
 
 import io.github.oshai.kotlinlogging.KLogger
-import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.properties.AppProperties
+import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.secrets.component.KeyManager
 import io.stereov.singularity.secrets.model.Secret
 import java.time.Instant
@@ -16,7 +15,7 @@ abstract class SecretService(
     appProperties: AppProperties
 ) {
 
-    protected val logger: KLogger = KotlinLogging.logger {}
+    abstract val logger: KLogger
     private val actualKey = "${appProperties.slug}-$key"
     private var currentSecret: Secret? = null
 

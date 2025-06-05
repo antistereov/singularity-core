@@ -3,18 +3,19 @@ package io.stereov.singularity.invitation.service
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.database.service.SensitiveCrudService
 import io.stereov.singularity.encryption.service.EncryptionService
-import io.stereov.singularity.global.language.model.Language
-import io.stereov.singularity.global.service.mail.MailService
-import io.stereov.singularity.global.service.template.TemplateBuilder
-import io.stereov.singularity.global.service.template.TemplateUtil
-import io.stereov.singularity.global.service.translate.service.TranslateService
+import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.invitation.exception.model.InvalidInvitationException
 import io.stereov.singularity.invitation.model.EncryptedInvitationDocument
 import io.stereov.singularity.invitation.model.InvitationDocument
 import io.stereov.singularity.invitation.model.SensitiveInvitationData
 import io.stereov.singularity.invitation.repository.InvitationRepository
-import io.stereov.singularity.properties.UiProperties
+import io.stereov.singularity.mail.service.MailService
 import io.stereov.singularity.secrets.service.EncryptionSecretService
+import io.stereov.singularity.template.service.TemplateService
+import io.stereov.singularity.template.util.TemplateBuilder
+import io.stereov.singularity.translate.model.Language
+import io.stereov.singularity.translate.model.TranslateKey
+import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.user.service.UserService
 import kotlinx.coroutines.reactive.awaitLast
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
@@ -31,7 +32,7 @@ class InvitationService(
     override val encryptionSecretService: EncryptionSecretService,
     private val reactiveMongoTemplate: ReactiveMongoTemplate,
     private val invitationTokenService: InvitationTokenService,
-    private val templateUtil: TemplateUtil,
+    private val templateService: TemplateService,
     private val mailService: MailService,
     private val translateService: TranslateService,
     private val userService: UserService,
@@ -55,7 +56,7 @@ class InvitationService(
 
         val invitation = save(email, claims, issuedAt, expiresInSeconds)
         val token = invitationTokenService.createInvitationToken(invitation)
-        val subject = translateService.translate(io.stereov.singularity.global.service.translate.model.TranslateKey("invitation.subject"), "i18n/core/mail", lang)
+        val subject = translateService.translate(TranslateKey("invitation.subject"), "i18n/core/mail", lang)
 
         val placeholders = mapOf(
             "inviter_name" to inviterName,
@@ -67,7 +68,7 @@ class InvitationService(
         val template = TemplateBuilder
             .fromResource("templates/mail/invitation.html")
             .translate("i18n/core/mail", lang)
-            .replacePlaceholders(templateUtil.getPlaceholders(placeholders))
+            .replacePlaceholders(templateService.getPlaceholders(placeholders))
             .build()
 
         // TODO: Register user when invited

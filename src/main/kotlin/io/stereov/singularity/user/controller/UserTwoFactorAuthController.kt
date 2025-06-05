@@ -4,7 +4,7 @@ import io.stereov.singularity.auth.exception.model.TwoFactorAuthDisabledExceptio
 import io.stereov.singularity.auth.service.AuthenticationService
 import io.stereov.singularity.auth.service.CookieService
 import io.stereov.singularity.global.model.SuccessResponse
-import io.stereov.singularity.global.service.jwt.exception.TokenException
+import io.stereov.singularity.jwt.exception.TokenException
 import io.stereov.singularity.user.dto.UserResponse
 import io.stereov.singularity.user.dto.request.DeviceInfoRequest
 import io.stereov.singularity.user.dto.request.DisableTwoFactorRequest

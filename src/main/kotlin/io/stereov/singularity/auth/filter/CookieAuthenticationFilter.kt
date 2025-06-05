@@ -3,10 +3,10 @@ package io.stereov.singularity.auth.filter
 import io.stereov.singularity.auth.exception.AuthException
 import io.stereov.singularity.auth.model.CustomAuthenticationToken
 import io.stereov.singularity.auth.model.ErrorAuthenticationToken
-import io.stereov.singularity.config.Constants
+import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.global.exception.model.DocumentNotFoundException
-import io.stereov.singularity.global.service.jwt.exception.TokenException
-import io.stereov.singularity.global.service.jwt.exception.model.InvalidTokenException
+import io.stereov.singularity.jwt.exception.TokenException
+import io.stereov.singularity.jwt.exception.model.InvalidTokenException
 import io.stereov.singularity.user.service.UserService
 import io.stereov.singularity.user.service.token.UserTokenService
 import kotlinx.coroutines.reactive.awaitFirstOrNull

@@ -4,9 +4,9 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.admin.dto.RotationStatusResponse
 import io.stereov.singularity.database.service.SensitiveCrudService
-import io.stereov.singularity.hash.HashService
+import io.stereov.singularity.global.properties.AppProperties
+import io.stereov.singularity.hash.service.HashService
 import io.stereov.singularity.secrets.service.SecretService
-import io.stereov.singularity.properties.AppProperties
 import io.stereov.singularity.user.model.Role
 import io.stereov.singularity.user.model.UserDocument
 import io.stereov.singularity.user.service.UserService
@@ -63,7 +63,7 @@ class AdminService(
     }
 
 
-    @Scheduled(cron = "\${baseline.secrets.key-rotation-cron}")
+    @Scheduled(cron = "\${singularity.secrets.key-rotation-cron}")
     suspend fun rotateKeys() {
         this.logger.info { "Rotating keys" }
 

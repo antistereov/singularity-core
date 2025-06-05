@@ -1,7 +1,7 @@
 package io.stereov.singularity.user.model
 
 import io.stereov.singularity.hash.model.SecureHash
-import io.stereov.singularity.global.service.random.RandomService
+import io.stereov.singularity.global.util.Random
 
 /**
  * # UserSecurityDetails
@@ -44,7 +44,7 @@ data class UserSecurityDetails(
      */
     data class MailVerificationDetails(
         var verified: Boolean = false,
-        var verificationSecret: String = RandomService.generateCode(20),
-        var passwordResetSecret: String = RandomService.generateCode(20),
+        var verificationSecret: String = Random.generateCode(20),
+        var passwordResetSecret: String = Random.generateCode(20),
     )
 }
