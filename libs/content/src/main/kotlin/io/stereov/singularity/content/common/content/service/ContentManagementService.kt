@@ -5,7 +5,6 @@ import io.stereov.singularity.content.common.content.dto.*
 import io.stereov.singularity.content.common.content.model.ContentAccessRole
 import io.stereov.singularity.content.common.content.model.ContentAccessSubject
 import io.stereov.singularity.content.common.content.model.ContentDocument
-import io.stereov.singularity.core.auth.exception.model.NotAuthorizedException
 import io.stereov.singularity.core.auth.service.AuthenticationService
 import io.stereov.singularity.core.global.language.model.Language
 import io.stereov.singularity.core.invitation.exception.model.InvalidInvitationException
@@ -27,7 +26,7 @@ interface ContentManagementService<T: ContentDocument<T>> {
     suspend fun changeVisibility(key: String, req: ChangeContentVisibilityRequest): T {
         logger.debug { "Changing visibility of key \"$key\"" }
 
-        val content = validatePermissionsAndGetByKey(key, ContentAccessRole.ADMIN)
+        val content = contentService.findAuthorizedByKey(key, ContentAccessRole.ADMIN)
 
         content.access.update(req)
 
@@ -37,7 +36,7 @@ interface ContentManagementService<T: ContentDocument<T>> {
     suspend fun changeTags(key: String, req: ChangeContentTagsRequest): T {
         logger.debug { "Changing tags of key \"$key\"" }
 
-        val content = validatePermissionsAndGetByKey(key, ContentAccessRole.EDITOR)
+        val content = contentService.findAuthorizedByKey(key, ContentAccessRole.EDITOR)
         content.tags = req.tags
 
         return contentService.save(content)
@@ -52,7 +51,7 @@ interface ContentManagementService<T: ContentDocument<T>> {
         logger.debug { "Inviting user with email \"${req.email}\" to content with key \"$key\" as ${req.role}" }
 
         val user = authenticationService.getCurrentUser()
-        val content = validatePermissionsAndGetByKey(key, ContentAccessRole.ADMIN)
+        val content = contentService.findAuthorizedByKey(key, ContentAccessRole.ADMIN)
         val invitation = invitationService.invite(
             email = req.email,
             inviterName = user.sensitive.name,
@@ -98,24 +97,9 @@ interface ContentManagementService<T: ContentDocument<T>> {
     suspend fun delete(key: String) {
         logger.debug { "Deleting content with key \"$key\"" }
 
-        val content = validatePermissionsAndGetByKey(key, ContentAccessRole.ADMIN)
+        val content = contentService.findAuthorizedByKey(key, ContentAccessRole.ADMIN)
 
         contentService.deleteById(content.id)
-    }
-
-    suspend fun validateCurrentUserIsEditor() {
-        authenticationService.validateCurrentUserIsEditor()
-    }
-
-    suspend fun validatePermissionsAndGetByKey(key: String, role: ContentAccessRole): T {
-        validateCurrentUserIsEditor()
-
-        val content = contentService.findByKey(key)
-        val user = authenticationService.getCurrentUser()
-
-        if (!content.hasAccess(user, role)) throw NotAuthorizedException("User does not have sufficient permission to perform this action. Required role: $role")
-
-        return content
     }
 
     suspend fun extendedContentAccessDetails(key: String): ExtendedContentAccessDetailsResponse {

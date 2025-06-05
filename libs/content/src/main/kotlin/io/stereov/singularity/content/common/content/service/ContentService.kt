@@ -1,29 +1,39 @@
 package io.stereov.singularity.content.common.content.service
 
 import io.github.oshai.kotlinlogging.KLogger
-import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.content.common.content.model.ContentAccessRole
 import io.stereov.singularity.content.common.content.model.ContentDocument
 import io.stereov.singularity.content.common.content.repository.ContentRepository
+import io.stereov.singularity.core.auth.exception.model.NotAuthorizedException
+import io.stereov.singularity.core.auth.model.AccessType
+import io.stereov.singularity.core.auth.service.AuthenticationService
 import io.stereov.singularity.core.global.exception.model.DocumentNotFoundException
+import io.stereov.singularity.core.group.model.KnownGroups
 import org.bson.types.ObjectId
 import java.time.Instant
 
-abstract class ContentService<T: ContentDocument<T>>(
-    private val repository: ContentRepository<T>,
-    protected val contentClass: Class<T>
-) {
+interface ContentService<T: ContentDocument<T>>  {
 
-    private val logger: KLogger
-        get() = KotlinLogging.logger {}
+    val repository: ContentRepository<T>
+    val contentClass: Class<T>
+    val authenticationService: AuthenticationService
+
+    val logger: KLogger
 
     suspend fun findByKeyOrNull(key: String): T? {
-        logger.debug { "Fining article by key" }
+        logger.debug { "Fining ${contentClass.simpleName} by key" }
 
         return repository.findByKey(key)
     }
 
     suspend fun findByKey(key: String): T {
-        return findByKeyOrNull(key) ?: throw DocumentNotFoundException("No content document with key $key found")
+        logger.debug { "Finding ${contentClass.simpleName} by key \"$key\"" }
+
+        val content = findByKeyOrNull(key) ?: throw DocumentNotFoundException("No content document with key $key found")
+
+        if (content.access.visibility == AccessType.PUBLIC) return content
+
+        return requireAuthorization(content, ContentAccessRole.VIEWER)
     }
 
     suspend fun save(content: T): T {
@@ -47,8 +57,45 @@ abstract class ContentService<T: ContentDocument<T>>(
     }
 
     suspend fun deleteAll() {
-        logger.debug { "Deleting all content" }
+        logger.debug { "Deleting all ${contentClass.simpleName}s" }
 
         repository.deleteAll()
+    }
+
+    /**
+     * Validate that the current user belongs to the Editor group.
+     *
+     * @throws NotAuthorizedException if the user does not have sufficient permissions.
+     */
+    suspend fun requireEditorGroupMembership() {
+        logger.debug { "Validate that user belongs to Editor group" }
+
+        authenticationService.requireGroupMembership(KnownGroups.EDITOR)
+    }
+
+    suspend fun requireAuthorization(content: T, role: ContentAccessRole): T {
+        logger.debug { "Validating that user has role \"$role\" in ${contentClass.simpleName} with key \"${content.key}\"" }
+
+        val user = authenticationService.getCurrentUser()
+
+        if (!content.hasAccess(user, role)) throw NotAuthorizedException("User does not have sufficient permission to perform this action. Required role: $role")
+
+        return content
+    }
+
+    /**
+     * Validates if the current user has sufficient permission.
+     *
+     * @param key The key of the content.
+     * @param role The [ContentAccessRole] required to perform the action, e.g. VIEWER to view or EDIT to edit the article.
+     *
+     * @throws NotAuthorizedException if the user does not have sufficient permissions.
+     */
+    suspend fun findAuthorizedByKey(key: String, role: ContentAccessRole): T {
+        logger.debug { "Finding ${contentClass.simpleName} by key \"$key\" and validating permission: $role" }
+
+        val content = findByKey(key)
+
+        return requireAuthorization(content, role)
     }
 }

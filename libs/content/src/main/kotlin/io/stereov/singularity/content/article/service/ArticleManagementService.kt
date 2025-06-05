@@ -41,7 +41,7 @@ class ArticleManagementService(
     suspend fun create(req: CreateArticleRequest, lang: Language): FullArticleResponse {
         logger.debug { "Creating article with title ${req.title}" }
 
-        validateCurrentUserIsEditor()
+        contentService.requireEditorGroupMembership()
         val user = authenticationService.getCurrentUser()
 
         val key = getUniqueKey(req.title.toSlug())
@@ -53,9 +53,10 @@ class ArticleManagementService(
     }
 
     suspend fun setTrustedState(key: String, trusted: Boolean): Article {
-        authenticationService.validateAuthorization(Role.ADMIN)
+        logger.debug { "Setting trusted state" }
+        authenticationService.requireRole(Role.ADMIN)
 
-        val article = validatePermissionsAndGetByKey(key, ContentAccessRole.EDITOR)
+        val article = contentService.findAuthorizedByKey(key, ContentAccessRole.EDITOR)
 
         article.trusted = trusted
         return contentService.save(article)
@@ -64,7 +65,7 @@ class ArticleManagementService(
     suspend fun inviteUser(key: String, req: InviteUserToContentRequest, lang: Language): ExtendedContentAccessDetailsResponse {
         logger.debug { "Inviting user with email \"${req.email}\" to role ${req.role} on article with key \"$key\"" }
 
-        val article = validatePermissionsAndGetByKey(key, ContentAccessRole.EDITOR)
+        val article = contentService.findAuthorizedByKey(key, ContentAccessRole.EDITOR)
 
         val inviteToRole = translateService.translate(TranslateKey("invitation.role.${req.role.toString().lowercase()}"), "i18n/content/article", lang)
         val action = translateService.translate(TranslateKey("invitation.action"), "i18n/content/article", lang)
@@ -86,7 +87,7 @@ class ArticleManagementService(
     suspend fun changeHeader(key: String, req: ChangeArticleHeaderRequest, lang: Language): FullArticleResponse {
         logger.debug { "Changing header of article with key \"$key\"" }
 
-        val article = validatePermissionsAndGetByKey(key, ContentAccessRole.EDITOR)
+        val article = contentService.findAuthorizedByKey(key, ContentAccessRole.EDITOR)
 
         val translation = article.translations[req.lang]
             ?: throw TranslationForLangMissingException(lang)
@@ -104,7 +105,7 @@ class ArticleManagementService(
     suspend fun changeSummary(key: String, req: ChangeArticleSummaryRequest, lang: Language): FullArticleResponse {
         logger.debug { "Changing summary of article with key \"$key\"" }
 
-        val article = validatePermissionsAndGetByKey(key, ContentAccessRole.EDITOR)
+        val article = contentService.findAuthorizedByKey(key, ContentAccessRole.EDITOR)
 
         val translation = article.translations[req.lang]
             ?: throw TranslationForLangMissingException(lang)
@@ -118,7 +119,7 @@ class ArticleManagementService(
     suspend fun changeContent(key: String, req: ChangeArticleContentRequest, lang: Language): FullArticleResponse {
         logger.debug { "Changing content of article with key \"$key\"" }
 
-        val article = validatePermissionsAndGetByKey(key, ContentAccessRole.EDITOR)
+        val article = contentService.findAuthorizedByKey(key, ContentAccessRole.EDITOR)
 
         val translation = article.translations[req.lang]
             ?: throw TranslationForLangMissingException(lang)
@@ -133,7 +134,7 @@ class ArticleManagementService(
     suspend fun changeImage(key: String, file: FilePart, lang: Language): FullArticleResponse {
         logger.debug { "Changing image of article with key \"$key\"" }
 
-        val article = validatePermissionsAndGetByKey(key, ContentAccessRole.EDITOR)
+        val article = contentService.findAuthorizedByKey(key, ContentAccessRole.EDITOR)
         val userId = authenticationService.getCurrentUserId()
 
         val currentImage = article.image
@@ -165,7 +166,7 @@ class ArticleManagementService(
     suspend fun changeState(key: String, req: ChangeArticleStateRequest, lang: Language): FullArticleResponse {
         logger.debug { "Changing satte of article with key \"$key\"" }
 
-        val article = validatePermissionsAndGetByKey(key, ContentAccessRole.EDITOR)
+        val article = contentService.findAuthorizedByKey(key, ContentAccessRole.EDITOR)
         article.state = req.state
 
         val updatedArticle = contentService.save(article)

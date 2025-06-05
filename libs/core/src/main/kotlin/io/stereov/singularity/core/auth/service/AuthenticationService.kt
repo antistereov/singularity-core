@@ -9,7 +9,6 @@ import io.stereov.singularity.core.auth.model.CustomAuthenticationToken
 import io.stereov.singularity.core.auth.model.ErrorAuthenticationToken
 import io.stereov.singularity.core.global.service.jwt.exception.TokenException
 import io.stereov.singularity.core.global.service.jwt.exception.model.InvalidTokenException
-import io.stereov.singularity.core.group.model.KnownGroups
 import io.stereov.singularity.core.user.model.Role
 import io.stereov.singularity.core.user.model.UserDocument
 import io.stereov.singularity.core.user.service.UserService
@@ -104,7 +103,7 @@ class AuthenticationService {
      *
      * @throws NotAuthorizedException If the user does not have the required role.
      */
-    suspend fun validateAuthorization(role: Role) {
+    suspend fun requireRole(role: Role) {
         logger.debug { "Validating authorization" }
 
         val valid = this.getCurrentUser().sensitive.roles.contains(role)
@@ -112,13 +111,13 @@ class AuthenticationService {
         if (!valid) throw NotAuthorizedException("User does not have sufficient permission: User does not have role $role")
     }
 
-    suspend fun validateCurrentUserIsEditor() {
-        logger.debug { "Validating that the current user is editor" }
+    suspend fun requireGroupMembership(groupKey: String) {
+        logger.debug { "Validating that the current user is part of the group \"$groupKey\"" }
 
         val user = getCurrentUser()
 
-        if (!user.sensitive.groups.contains(KnownGroups.EDITOR) && !user.sensitive.roles.contains(Role.ADMIN)) {
-            throw NotAuthorizedException("User does not have sufficient permission: User is not an editor")
+        if (!user.sensitive.groups.contains(groupKey) && !user.sensitive.roles.contains(Role.ADMIN)) {
+            throw NotAuthorizedException("User does not have sufficient permission: User does not belong to group \"$groupKey\"")
         }
     }
 

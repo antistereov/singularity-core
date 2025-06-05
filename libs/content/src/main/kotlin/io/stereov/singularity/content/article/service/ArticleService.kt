@@ -10,8 +10,8 @@ import io.stereov.singularity.content.article.model.ArticleState
 import io.stereov.singularity.content.article.repository.ArticleRepository
 import io.stereov.singularity.content.common.content.dto.ContentAccessDetailsResponse
 import io.stereov.singularity.content.common.content.service.ContentService
-import io.stereov.singularity.content.common.tag.service.TagService
 import io.stereov.singularity.content.common.content.util.AccessCriteria
+import io.stereov.singularity.content.common.tag.service.TagService
 import io.stereov.singularity.core.auth.service.AuthenticationService
 import io.stereov.singularity.core.global.language.model.Language
 import io.stereov.singularity.core.user.model.UserDocument
@@ -28,16 +28,16 @@ import org.springframework.stereotype.Service
 
 @Service
 class ArticleService(
-    repository: ArticleRepository,
+    override val repository: ArticleRepository,
     private val userService: UserService,
-    private val authenticationService: AuthenticationService,
+    override val authenticationService: AuthenticationService,
     private val tagService: TagService,
     private val reactiveMongoTemplate: ReactiveMongoTemplate,
     private val accessCriteria: AccessCriteria,
-) : ContentService<Article>(repository, Article::class.java) {
+) : ContentService<Article> {
 
-    private val logger: KLogger
-        get() = KotlinLogging.logger {}
+    override val logger: KLogger = KotlinLogging.logger {}
+    override val contentClass: Class<Article> = Article::class.java
 
     private val isPublished = Criteria.where(Article::state.name).`is`(ArticleState.PUBLISHED.toString())
 
@@ -54,9 +54,9 @@ class ArticleService(
 
         val actualOwner = owner ?: userService.findById(article.access.ownerId)
         val access = ContentAccessDetailsResponse.create(article.access, currentUser)
-        val (lang, translation) = article.translate(lang)
+        val (articleLang, translation) = article.translate(lang)
 
-        val tags = article.tags.map { key -> tagService.findByKey(key).toResponse(lang) }
+        val tags = article.tags.map { key -> tagService.findByKey(key).toResponse(articleLang) }
 
         return FullArticleResponse(
             id = article.id,
@@ -71,7 +71,7 @@ class ArticleService(
             image = article.image,
             trusted = article.trusted,
             access = access,
-            lang = lang,
+            lang = articleLang,
             title = translation.title,
             summary = translation.summary,
             content = translation.content,
