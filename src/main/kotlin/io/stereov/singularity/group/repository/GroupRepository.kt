@@ -9,4 +9,6 @@ import org.springframework.stereotype.Repository
 interface GroupRepository : CoroutineCrudRepository<GroupDocument, ObjectId> {
 
     suspend fun existsByKey(key: String): Boolean
+
+    suspend fun findByKey(key: String): GroupDocument?
 }

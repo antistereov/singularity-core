@@ -3,11 +3,11 @@ package io.stereov.singularity.group.service
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.global.exception.model.DocumentNotFoundException
+import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.group.dto.CreateGroupMultiLangRequest
 import io.stereov.singularity.group.exception.model.GroupKeyExistsException
 import io.stereov.singularity.group.model.GroupDocument
 import io.stereov.singularity.group.repository.GroupRepository
-import io.stereov.singularity.global.properties.AppProperties
 import jakarta.annotation.PostConstruct
 import kotlinx.coroutines.runBlocking
 import org.bson.types.ObjectId
@@ -54,6 +54,18 @@ class GroupService(
         logger.debug { "Fining group by ID: $id" }
 
         return repository.findById(id)
+    }
+
+    suspend fun findByKey(key: String): GroupDocument {
+        logger.debug { "Finding group by key \"$key\"" }
+
+        return findByKeyOrNull(key) ?: throw DocumentNotFoundException("No group with key \"$key\" found")
+    }
+
+    suspend fun findByKeyOrNull(key: String): GroupDocument? {
+        logger.debug { "Finding group by key \"$key\"" }
+
+        return repository.findByKey(key)
     }
 
     suspend fun existsByKey(key: String): Boolean {
