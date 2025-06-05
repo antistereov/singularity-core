@@ -39,13 +39,6 @@ interface ContentService<T: ContentDocument<T>>  {
 
         return repository.save(content)
     }
-
-    suspend fun existsByKey(key: String): Boolean {
-        logger.debug { "Checking if ${contentClass.simpleName} with key $key exists"}
-
-        return repository.existsByKey(key)
-    }
-
     suspend fun deleteById(id: ObjectId) {
         logger.debug { "Deleting ${contentClass.simpleName} with id \"$id\"" }
 
