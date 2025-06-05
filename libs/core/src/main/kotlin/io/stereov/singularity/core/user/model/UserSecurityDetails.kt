@@ -1,6 +1,6 @@
 package io.stereov.singularity.core.user.model
 
-import io.stereov.singularity.core.global.service.hash.model.SecureHash
+import io.stereov.singularity.core.hash.model.SecureHash
 import io.stereov.singularity.core.global.service.random.RandomService
 
 /**

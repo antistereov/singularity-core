@@ -4,7 +4,7 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.core.auth.exception.AuthException
 import io.stereov.singularity.core.auth.service.AuthenticationService
-import io.stereov.singularity.core.global.service.hash.HashService
+import io.stereov.singularity.core.hash.HashService
 import io.stereov.singularity.core.global.service.mail.MailCooldownService
 import io.stereov.singularity.core.global.service.mail.MailService
 import io.stereov.singularity.core.global.service.mail.MailTokenService

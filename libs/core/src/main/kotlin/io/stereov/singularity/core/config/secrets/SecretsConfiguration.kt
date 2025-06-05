@@ -4,6 +4,7 @@ import io.stereov.singularity.core.config.ApplicationConfiguration
 import io.stereov.singularity.core.global.service.secrets.component.KeyManager
 import io.stereov.singularity.core.global.service.secrets.component.SecretCache
 import io.stereov.singularity.core.global.service.secrets.service.EncryptionSecretService
+import io.stereov.singularity.core.global.service.secrets.service.HashSecretService
 import io.stereov.singularity.core.global.service.secrets.service.JwtSecretService
 import io.stereov.singularity.core.properties.AppProperties
 import io.stereov.singularity.core.properties.secrets.KeyManagerProperties
@@ -33,6 +34,10 @@ class SecretsConfiguration {
     fun encryptionSecretService(keyManager: KeyManager, appProperties: AppProperties): EncryptionSecretService {
         return EncryptionSecretService(keyManager, appProperties)
     }
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun hashSecretService(keyManager: KeyManager, appProperties: AppProperties) = HashSecretService(keyManager, appProperties)
 
     @Bean
     @ConditionalOnMissingBean

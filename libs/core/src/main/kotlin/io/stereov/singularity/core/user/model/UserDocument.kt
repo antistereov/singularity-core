@@ -7,8 +7,8 @@ import io.stereov.singularity.core.global.exception.model.InvalidDocumentExcepti
 import io.stereov.singularity.core.global.exception.model.MissingFunctionParameterException
 import io.stereov.singularity.core.global.service.encryption.model.Encrypted
 import io.stereov.singularity.core.global.service.file.model.FileMetaData
-import io.stereov.singularity.core.global.service.hash.model.SearchableHash
-import io.stereov.singularity.core.global.service.hash.model.SecureHash
+import io.stereov.singularity.core.hash.model.SearchableHash
+import io.stereov.singularity.core.hash.model.SecureHash
 import io.stereov.singularity.core.user.dto.UserOverviewResponse
 import io.stereov.singularity.core.user.dto.UserResponse
 import org.bson.types.ObjectId

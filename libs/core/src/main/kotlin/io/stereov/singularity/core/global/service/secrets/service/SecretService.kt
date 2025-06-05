@@ -16,11 +16,8 @@ abstract class SecretService(
     appProperties: AppProperties
 ) {
 
-    protected val logger: KLogger
-        get() = KotlinLogging.logger {}
-
+    protected val logger: KLogger = KotlinLogging.logger {}
     private val actualKey = "${appProperties.slug}-$key"
-
     private var currentSecret: Secret? = null
 
     suspend fun getCurrentSecret(): Secret {

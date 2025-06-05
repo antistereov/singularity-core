@@ -1,11 +1,13 @@
-package io.stereov.singularity.core.global.service.hash
+package io.stereov.singularity.core.hash
 
-import io.stereov.singularity.core.global.service.hash.model.SearchableHash
-import io.stereov.singularity.core.global.service.hash.model.SecureHash
+import io.stereov.singularity.core.global.service.secrets.service.HashSecretService
+import io.stereov.singularity.core.hash.model.SearchableHash
+import io.stereov.singularity.core.hash.model.SecureHash
 import org.springframework.security.crypto.bcrypt.BCrypt
 import org.springframework.stereotype.Service
-import java.security.MessageDigest
 import java.util.*
+import javax.crypto.Mac
+import javax.crypto.spec.SecretKeySpec
 
 /**
  * # HashService
@@ -17,7 +19,9 @@ import java.util.*
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
 @Service
-class HashService {
+class HashService(
+    private val hashSecretService: HashSecretService
+) {
 
     /**
      * Checks if the provided input matches the given hash using BCrypt.
@@ -42,9 +46,19 @@ class HashService {
         return SecureHash(BCrypt.hashpw(input, BCrypt.gensalt(10)))
     }
 
-    fun hashSha256(input: String): SearchableHash {
-        val digest = MessageDigest.getInstance("SHA-256")
-        val hash = digest.digest(input.toByteArray())
-        return SearchableHash(Base64.getUrlEncoder().withoutPadding().encodeToString(hash))
+    suspend fun hashSearchableHmacSha256(input: String): SearchableHash {
+        val normalized = input.trim().lowercase()
+
+        val secret = hashSecretService.getCurrentSecret()
+        val secretKeyBytes = Base64.getDecoder().decode(secret.value)
+
+        val keySpec = SecretKeySpec(secretKeyBytes, "HmacSHA256")
+        val mac = Mac.getInstance("HmacSHA256")
+        mac.init(keySpec)
+
+        val hmac = mac.doFinal(normalized.toByteArray(Charsets.UTF_8))
+        val encoded = Base64.getUrlEncoder().withoutPadding().encodeToString(hmac)
+
+        return SearchableHash(encoded)
     }
 }
