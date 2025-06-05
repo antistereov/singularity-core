@@ -30,6 +30,7 @@ class RateLimitIpFilterTest : BaseSpringBootTest() {
 
         @DynamicPropertySource
         @JvmStatic
+        @Suppress("UNUSED")
         fun properties(registry: DynamicPropertyRegistry) {
             registry.add("baseline.app.support-email") { "support@example.com" }
             registry.add("baseline.app.create-root-user") { "false" }

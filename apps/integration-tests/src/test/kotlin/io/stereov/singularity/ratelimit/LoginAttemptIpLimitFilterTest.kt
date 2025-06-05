@@ -1,6 +1,6 @@
 package io.stereov.singularity.ratelimit
 
-import io.stereov.singularity.properties.LoginAttemptLimitProperties
+import io.stereov.singularity.ratelimit.properties.LoginAttemptLimitProperties
 import io.stereov.singularity.secrets.properties.KeyManagerImplementation
 import io.stereov.singularity.test.BaseSpringBootTest
 import io.stereov.singularity.user.dto.request.DeviceInfoRequest

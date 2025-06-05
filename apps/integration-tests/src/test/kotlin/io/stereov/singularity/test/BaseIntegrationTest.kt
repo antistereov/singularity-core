@@ -5,11 +5,11 @@ import io.mockk.every
 import io.mockk.just
 import io.stereov.singularity.cache.service.AccessTokenCache
 import io.stereov.singularity.hash.service.HashService
-import io.stereov.singularity.twofactorauth.service.TwoFactorAuthService
 import io.stereov.singularity.secrets.properties.KeyManagerImplementation
+import io.stereov.singularity.test.config.MockMailSenderConfig
+import io.stereov.singularity.twofactorauth.service.TwoFactorAuthService
 import io.stereov.singularity.user.service.token.TwoFactorAuthTokenService
 import io.stereov.singularity.user.service.token.UserTokenService
-import io.stereov.singularity.test.config.MockMailSenderConfig
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -75,6 +75,7 @@ class BaseIntegrationTest : BaseSpringBootTest() {
 
         @DynamicPropertySource
         @JvmStatic
+        @Suppress("UNUSED")
         fun properties(registry: DynamicPropertyRegistry) {
             registry.add("baseline.app.support-email") { "support@example.com" }
             registry.add("baseline.app.create-root-user") { "false" }

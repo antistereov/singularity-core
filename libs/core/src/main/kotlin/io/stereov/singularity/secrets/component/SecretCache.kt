@@ -45,14 +45,6 @@ class SecretCache(keyManagerProperties: KeyManagerProperties) {
         return cache.entries.firstOrNull { it.value.secret.key == key }?.value?.secret
     }
 
-    fun remove(id: UUID) {
-        cache.remove(id)
-    }
-
-    fun clear() {
-        cache.clear()
-    }
-
     fun cleanupExpiredEntries() {
         val now = Instant.now()
         cache.entries.removeIf { it.value.expirationTime.isBefore(now) }

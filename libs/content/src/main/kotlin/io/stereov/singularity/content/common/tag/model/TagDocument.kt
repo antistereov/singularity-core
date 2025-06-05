@@ -35,11 +35,7 @@ data class TagDocument(
 
 
     fun toResponse(lang: Language): TagResponse {
-        val (lang, translation) = translate(lang)
-        return TagResponse(key, lang, translation.name, translation.description)
-    }
-
-    companion object {
-        val COLLECTION_NAME = "tags"
+        val (translatedLang, translation) = translate(lang)
+        return TagResponse(key, translatedLang, translation.name, translation.description)
     }
 }

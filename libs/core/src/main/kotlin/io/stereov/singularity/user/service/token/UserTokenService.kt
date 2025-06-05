@@ -2,12 +2,12 @@ package io.stereov.singularity.user.service.token
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.cache.service.AccessTokenCache
-import io.stereov.singularity.jwt.service.JwtService
-import io.stereov.singularity.jwt.exception.model.InvalidTokenException
+import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.global.util.Random
+import io.stereov.singularity.jwt.exception.model.InvalidTokenException
 import io.stereov.singularity.jwt.properties.JwtProperties
+import io.stereov.singularity.jwt.service.JwtService
 import io.stereov.singularity.user.service.token.model.AccessToken
 import io.stereov.singularity.user.service.token.model.RefreshToken
 import org.bson.types.ObjectId
@@ -71,7 +71,7 @@ class UserTokenService(
      *
      * @throws InvalidTokenException If the token is invalid or does not contain the required claims.
      */
-    suspend fun validateAndExtractAccessToken(token: String): io.stereov.singularity.user.service.token.model.AccessToken {
+    suspend fun validateAndExtractAccessToken(token: String): AccessToken {
         logger.debug { "Validating access token" }
 
         val jwt = jwtService.decodeJwt(token, true)
@@ -91,7 +91,7 @@ class UserTokenService(
             throw InvalidTokenException("Access token is not valid")
         }
 
-        return io.stereov.singularity.user.service.token.model.AccessToken(userId, deviceId, tokenId)
+        return AccessToken(userId, deviceId, tokenId)
     }
 
     /**

@@ -3,7 +3,6 @@ package io.stereov.singularity.mail.config
 import io.stereov.singularity.auth.service.AuthenticationService
 import io.stereov.singularity.encryption.service.EncryptionService
 import io.stereov.singularity.global.config.ApplicationConfiguration
-import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.hash.service.HashService
 import io.stereov.singularity.jwt.service.JwtService
@@ -12,7 +11,6 @@ import io.stereov.singularity.mail.properties.MailProperties
 import io.stereov.singularity.mail.service.MailCooldownService
 import io.stereov.singularity.mail.service.MailService
 import io.stereov.singularity.mail.service.MailTokenService
-import io.stereov.singularity.template.service.TemplateService
 import io.stereov.singularity.user.controller.UserMailController
 import io.stereov.singularity.user.service.UserService
 import io.stereov.singularity.user.service.mail.UserMailService

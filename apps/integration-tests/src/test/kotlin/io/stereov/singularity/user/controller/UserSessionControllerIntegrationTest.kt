@@ -1,12 +1,12 @@
 package io.stereov.singularity.user.controller
 
 import io.stereov.singularity.global.util.Constants
-import io.stereov.singularity.mail.service.MailTokenService
 import io.stereov.singularity.global.util.Random
+import io.stereov.singularity.mail.service.MailTokenService
+import io.stereov.singularity.test.BaseIntegrationTest
 import io.stereov.singularity.user.dto.UserResponse
 import io.stereov.singularity.user.dto.request.*
 import io.stereov.singularity.user.dto.response.LoginResponse
-import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*
@@ -634,7 +634,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val res = webTestClient.put()
             .uri("/api/user/me")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, accessToken)
-            .bodyValue(io.stereov.singularity.user.dto.request.ChangeUserRequest(newName))
+            .bodyValue(ChangeUserRequest(newName))
             .exchange()
             .expectStatus().isOk
             .expectBody(UserResponse::class.java)
@@ -652,7 +652,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
 
         webTestClient.put()
             .uri("/api/user/me")
-            .bodyValue(io.stereov.singularity.user.dto.request.ChangeUserRequest(newName))
+            .bodyValue(ChangeUserRequest(newName))
             .exchange()
             .expectStatus().isUnauthorized
     }
