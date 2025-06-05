@@ -1,12 +1,12 @@
 package io.stereov.singularity.content.common.content.service
 
 import io.github.oshai.kotlinlogging.KLogger
-import io.stereov.singularity.content.common.content.model.ContentAccessRole
-import io.stereov.singularity.content.common.content.model.ContentDocument
-import io.stereov.singularity.content.common.content.repository.ContentRepository
 import io.stereov.singularity.auth.exception.model.NotAuthorizedException
 import io.stereov.singularity.auth.model.AccessType
 import io.stereov.singularity.auth.service.AuthenticationService
+import io.stereov.singularity.content.common.content.model.ContentAccessRole
+import io.stereov.singularity.content.common.content.model.ContentDocument
+import io.stereov.singularity.content.common.content.repository.ContentRepository
 import io.stereov.singularity.global.exception.model.DocumentNotFoundException
 import io.stereov.singularity.group.model.KnownGroups
 import org.bson.types.ObjectId
@@ -29,11 +29,7 @@ interface ContentService<T: ContentDocument<T>>  {
     suspend fun findByKey(key: String): T {
         logger.debug { "Finding ${contentClass.simpleName} by key \"$key\"" }
 
-        val content = findByKeyOrNull(key) ?: throw DocumentNotFoundException("No content document with key $key found")
-
-        if (content.access.visibility == AccessType.PUBLIC) return content
-
-        return requireAuthorization(content, ContentAccessRole.VIEWER)
+        return findByKeyOrNull(key) ?: throw DocumentNotFoundException("No content document with key $key found")
     }
 
     suspend fun save(content: T): T {
@@ -95,6 +91,8 @@ interface ContentService<T: ContentDocument<T>>  {
         logger.debug { "Finding ${contentClass.simpleName} by key \"$key\" and validating permission: $role" }
 
         val content = findByKey(key)
+
+        if (role == ContentAccessRole.VIEWER && content.access.visibility == AccessType.PUBLIC) return content
 
         return requireAuthorization(content, role)
     }

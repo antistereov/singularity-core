@@ -2,6 +2,7 @@ package io.stereov.singularity.content.article.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.auth.service.AuthenticationService
 import io.stereov.singularity.content.article.dto.ArticleOverviewResponse
 import io.stereov.singularity.content.article.dto.ArticleResponse
 import io.stereov.singularity.content.article.dto.FullArticleResponse
@@ -9,10 +10,10 @@ import io.stereov.singularity.content.article.model.Article
 import io.stereov.singularity.content.article.model.ArticleState
 import io.stereov.singularity.content.article.repository.ArticleRepository
 import io.stereov.singularity.content.common.content.dto.ContentAccessDetailsResponse
+import io.stereov.singularity.content.common.content.model.ContentAccessRole
 import io.stereov.singularity.content.common.content.service.ContentService
 import io.stereov.singularity.content.common.content.util.AccessCriteria
 import io.stereov.singularity.content.common.tag.service.TagService
-import io.stereov.singularity.auth.service.AuthenticationService
 import io.stereov.singularity.translate.model.Language
 import io.stereov.singularity.user.model.UserDocument
 import io.stereov.singularity.user.service.UserService
@@ -42,7 +43,7 @@ class ArticleService(
     private val isPublished = Criteria.where(Article::state.name).`is`(ArticleState.PUBLISHED.toString())
 
     suspend fun getFullArticleResponseByKey(key: String, lang: Language): FullArticleResponse {
-        return fullArticledResponseFrom(findByKey(key), lang)
+        return fullArticledResponseFrom(findAuthorizedByKey(key, ContentAccessRole.VIEWER), lang)
     }
 
     suspend fun articleOverviewFrom(article: Article, lang: Language): ArticleOverviewResponse {
