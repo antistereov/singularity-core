@@ -1,7 +1,7 @@
-package io.stereov.singularity.global.database.exception.handler
+package io.stereov.singularity.database.exception.handler
 
-import io.stereov.singularity.global.database.exception.DatabaseException
-import io.stereov.singularity.global.database.exception.model.UnexpectedContentTypeException
+import io.stereov.singularity.database.exception.DatabaseException
+import io.stereov.singularity.database.exception.model.UnexpectedContentTypeException
 import io.stereov.singularity.global.exception.BaseExceptionHandler
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ControllerAdvice

@@ -1,8 +1,7 @@
 package io.stereov.singularity.user.service
 
-import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.global.database.service.SensitiveCrudService
+import io.stereov.singularity.database.service.SensitiveCrudService
 import io.stereov.singularity.encryption.service.EncryptionService
 import io.stereov.singularity.global.service.file.exception.model.NoSuchFileException
 import io.stereov.singularity.global.service.file.model.FileMetaData
@@ -28,15 +27,13 @@ import org.springframework.stereotype.Service
  */
 @Service
 class UserService(
-    private val userRepository: UserRepository,
-    private val encryptionService: EncryptionService,
+    override val repository: UserRepository,
+    override val encryptionService: EncryptionService,
     private val hashService: HashService,
-    private val encryptionSecretService: EncryptionSecretService,
-) : SensitiveCrudService<SensitiveUserData, UserDocument, EncryptedUserDocument>(userRepository, encryptionSecretService, encryptionService) {
+    override val encryptionSecretService: EncryptionSecretService,
+) : SensitiveCrudService<SensitiveUserData, UserDocument, EncryptedUserDocument> {
 
-    private val logger: KLogger
-        get() = KotlinLogging.logger {}
-
+    override val logger = KotlinLogging.logger {}
     override val clazz = SensitiveUserData::class.java
 
     override suspend fun encrypt(document: UserDocument, otherValues: List<Any>): EncryptedUserDocument {
@@ -50,7 +47,7 @@ class UserService(
     override suspend fun rotateKey() {
         logger.debug { "Rotating encryption secrets for users" }
 
-        this.userRepository.findAll()
+        this.repository.findAll()
             .map {
                 if (it.sensitive.secretId == encryptionSecretService.getCurrentSecret().id) {
                     logger.debug { "Skipping rotation of user document ${it._id}: Encryption secret did not change" }
@@ -58,7 +55,7 @@ class UserService(
                 }
 
                 this.logger.debug { "Rotating key of user document ${it._id}" }
-                this.userRepository.save(this.encrypt(this.decrypt(it), listOf(false)))
+                this.repository.save(this.encrypt(this.decrypt(it), listOf(false)))
             }
             .onCompletion { logger.debug { "Key successfully rotated" } }
             .collect {}
@@ -77,7 +74,7 @@ class UserService(
         logger.debug { "Fetching user with email $email" }
 
         val hashedEmail = hashService.hashSearchableHmacSha256(email)
-        val encrypted =  this.userRepository.findByEmail(hashedEmail)
+        val encrypted =  this.repository.findByEmail(hashedEmail)
             ?: throw UserDoesNotExistException("No user account found with email $email")
 
         return this.decrypt(encrypted)
@@ -94,7 +91,7 @@ class UserService(
         logger.debug { "Fetching user with email $email" }
 
         val hashedEmail = hashService.hashSearchableHmacSha256(email)
-        return this.userRepository.findByEmail(hashedEmail)
+        return this.repository.findByEmail(hashedEmail)
             ?.let { this. decrypt(it) }
     }
 
@@ -109,7 +106,7 @@ class UserService(
         logger.debug { "Checking if email $email already exists" }
 
         val hashedEmail = hashService.hashSearchableHmacSha256(email)
-        return this.userRepository.existsByEmail(hashedEmail)
+        return this.repository.existsByEmail(hashedEmail)
     }
 
     suspend fun getAvatar(userId: ObjectId): FileMetaData {

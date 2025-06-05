@@ -3,8 +3,8 @@ package io.stereov.singularity.content.article.queries
 import io.stereov.singularity.content.article.dto.ArticleOverviewResponse
 import io.stereov.singularity.content.article.model.Article
 import io.stereov.singularity.content.common.content.util.AccessCriteria
-import io.stereov.singularity.global.database.model.PagedResult
-import io.stereov.singularity.global.database.util.pageFromPagedResult
+import io.stereov.singularity.database.model.PagedResult
+import io.stereov.singularity.database.util.pageFromPagedResult
 import io.stereov.singularity.global.language.model.Language
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.bson.BsonNull
@@ -178,7 +178,8 @@ class ArticleQueries(
                 )
 
 
-            val aggregation = TypedAggregation<PagedResult>.newAggregation(PagedResult::class.java,
+            val aggregation = TypedAggregation<PagedResult>.newAggregation(
+                PagedResult::class.java,
                 Aggregation.match(combinedCriteria),
 
                 Aggregation.facet(

@@ -3,7 +3,7 @@ package io.stereov.singularity.admin.service
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.admin.dto.RotationStatusResponse
-import io.stereov.singularity.global.database.service.SensitiveCrudService
+import io.stereov.singularity.database.service.SensitiveCrudService
 import io.stereov.singularity.hash.HashService
 import io.stereov.singularity.secrets.service.SecretService
 import io.stereov.singularity.properties.AppProperties

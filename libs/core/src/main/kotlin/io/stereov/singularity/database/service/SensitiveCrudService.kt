@@ -1,37 +1,34 @@
-package io.stereov.singularity.global.database.service
+package io.stereov.singularity.database.service
 
 import io.github.oshai.kotlinlogging.KLogger
-import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.global.database.model.EncryptedSensitiveDocument
-import io.stereov.singularity.global.database.model.SensitiveDocument
-import io.stereov.singularity.global.database.repository.SensitiveCrudRepository
-import io.stereov.singularity.global.exception.model.DocumentNotFoundException
+import io.stereov.singularity.database.model.EncryptedSensitiveDocument
+import io.stereov.singularity.database.model.SensitiveDocument
+import io.stereov.singularity.database.repository.SensitiveCrudRepository
 import io.stereov.singularity.encryption.service.EncryptionService
+import io.stereov.singularity.global.exception.model.DocumentNotFoundException
 import io.stereov.singularity.secrets.service.EncryptionSecretService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import org.bson.types.ObjectId
 
-abstract class SensitiveCrudService<S, D: SensitiveDocument<S>, E: EncryptedSensitiveDocument<S>>(
-    private val repository: SensitiveCrudRepository<E>,
-    private val encryptionSecretService: EncryptionSecretService,
-    private val encryptionService: EncryptionService
-) {
-    abstract val clazz: Class<S>
+interface SensitiveCrudService<S, D: SensitiveDocument<S>, E: EncryptedSensitiveDocument<S>> {
+    val repository: SensitiveCrudRepository<E>
+    val encryptionSecretService: EncryptionSecretService
+    val encryptionService: EncryptionService
+    val clazz: Class<S>
+    val logger: KLogger
+
 
     @Suppress("UNCHECKED_CAST")
-    open suspend fun encrypt(document: D, otherValues: List<Any> = emptyList()): E {
+    suspend fun encrypt(document: D, otherValues: List<Any> = emptyList()): E {
         return this.encryptionService.encrypt(document) as E
     }
 
     @Suppress("UNCHECKED_CAST")
-    open suspend fun decrypt(encrypted: E, otherValues: List<Any> = emptyList()): D {
+    suspend fun decrypt(encrypted: E, otherValues: List<Any> = emptyList()): D {
         return encryptionService.decrypt(encrypted, otherValues, clazz) as D
     }
-
-    private val logger: KLogger
-        get() = KotlinLogging.logger {}
 
     suspend fun findById(id: ObjectId): D {
         logger.debug { "Finding document by ID: $id" }
@@ -94,7 +91,7 @@ abstract class SensitiveCrudService<S, D: SensitiveDocument<S>, E: EncryptedSens
         }
     }
 
-    open suspend fun rotateKey() {
+    suspend fun rotateKey() {
         logger.debug { "Rotating encryption secret" }
 
         this.repository.findAll()

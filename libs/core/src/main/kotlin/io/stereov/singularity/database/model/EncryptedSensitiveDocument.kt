@@ -1,4 +1,4 @@
-package io.stereov.singularity.global.database.model
+package io.stereov.singularity.database.model
 
 import io.stereov.singularity.encryption.model.Encrypted
 import org.bson.types.ObjectId

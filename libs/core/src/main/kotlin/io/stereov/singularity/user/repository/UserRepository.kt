@@ -1,6 +1,6 @@
 package io.stereov.singularity.user.repository
 
-import io.stereov.singularity.global.database.repository.SensitiveCrudRepository
+import io.stereov.singularity.database.repository.SensitiveCrudRepository
 import io.stereov.singularity.hash.model.SearchableHash
 import io.stereov.singularity.user.model.EncryptedUserDocument
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
