@@ -1,10 +1,10 @@
-package io.stereov.singularity.core.global.service.secrets.component
+package io.stereov.singularity.core.secrets.component
 
 import com.bitwarden.sdk.BitwardenClient
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.core.global.service.secrets.model.Secret
-import io.stereov.singularity.core.properties.secrets.BitwardenKeyManagerProperties
+import io.stereov.singularity.core.secrets.model.Secret
+import io.stereov.singularity.core.secrets.properties.BitwardenKeyManagerProperties
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty

@@ -1,7 +1,7 @@
-package io.stereov.singularity.core.global.service.secrets.service
+package io.stereov.singularity.core.secrets.service
 
 import io.stereov.singularity.core.config.Constants
-import io.stereov.singularity.core.global.service.secrets.component.KeyManager
+import io.stereov.singularity.core.secrets.component.KeyManager
 import io.stereov.singularity.core.properties.AppProperties
 import org.springframework.stereotype.Service
 

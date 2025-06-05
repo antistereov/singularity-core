@@ -1,9 +1,9 @@
-package io.stereov.singularity.core.global.service.secrets.service
+package io.stereov.singularity.core.secrets.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.core.global.service.secrets.component.KeyManager
-import io.stereov.singularity.core.global.service.secrets.model.Secret
+import io.stereov.singularity.core.secrets.component.KeyManager
+import io.stereov.singularity.core.secrets.model.Secret
 import io.stereov.singularity.core.properties.AppProperties
 import java.time.Instant
 import java.util.*

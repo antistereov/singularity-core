@@ -1,10 +1,10 @@
-package io.stereov.singularity.core.global.service.secrets.component
+package io.stereov.singularity.core.secrets.component
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.core.global.service.secrets.model.CachedSecret
-import io.stereov.singularity.core.global.service.secrets.model.Secret
-import io.stereov.singularity.core.properties.secrets.KeyManagerProperties
+import io.stereov.singularity.core.secrets.model.CachedSecret
+import io.stereov.singularity.core.secrets.model.Secret
+import io.stereov.singularity.core.secrets.properties.KeyManagerProperties
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.time.Instant

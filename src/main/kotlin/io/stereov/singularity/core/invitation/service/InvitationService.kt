@@ -6,7 +6,7 @@ import io.stereov.singularity.core.global.database.service.SensitiveCrudService
 import io.stereov.singularity.core.global.language.model.Language
 import io.stereov.singularity.core.global.service.encryption.service.EncryptionService
 import io.stereov.singularity.core.global.service.mail.MailService
-import io.stereov.singularity.core.global.service.secrets.service.EncryptionSecretService
+import io.stereov.singularity.core.secrets.service.EncryptionSecretService
 import io.stereov.singularity.core.global.service.template.TemplateBuilder
 import io.stereov.singularity.core.global.service.template.TemplateUtil
 import io.stereov.singularity.core.global.service.translate.model.TranslateKey

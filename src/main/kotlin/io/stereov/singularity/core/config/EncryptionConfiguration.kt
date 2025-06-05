@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.stereov.singularity.core.config.secrets.BitwardenSecretsConfiguration
 import io.stereov.singularity.core.config.secrets.SecretsConfiguration
 import io.stereov.singularity.core.global.service.encryption.service.EncryptionService
-import io.stereov.singularity.core.global.service.secrets.component.KeyManager
-import io.stereov.singularity.core.global.service.secrets.service.EncryptionSecretService
+import io.stereov.singularity.core.secrets.component.KeyManager
+import io.stereov.singularity.core.secrets.service.EncryptionSecretService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration

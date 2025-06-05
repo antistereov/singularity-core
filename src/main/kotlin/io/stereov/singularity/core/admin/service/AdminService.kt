@@ -5,7 +5,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.core.admin.dto.RotationStatusResponse
 import io.stereov.singularity.core.global.database.service.SensitiveCrudService
 import io.stereov.singularity.core.hash.HashService
-import io.stereov.singularity.core.global.service.secrets.service.SecretService
+import io.stereov.singularity.core.secrets.service.SecretService
 import io.stereov.singularity.core.properties.AppProperties
 import io.stereov.singularity.core.user.model.Role
 import io.stereov.singularity.core.user.model.UserDocument

@@ -12,25 +12,23 @@ import io.stereov.singularity.core.auth.service.CookieService
 import io.stereov.singularity.core.config.storage.S3Configuration
 import io.stereov.singularity.core.global.service.cache.AccessTokenCache
 import io.stereov.singularity.core.global.service.cache.RedisService
-import io.stereov.singularity.core.global.service.encryption.service.EncryptionService
-import io.stereov.singularity.core.global.service.file.service.FileStorage
 import io.stereov.singularity.core.global.service.geolocation.GeoLocationService
 import io.stereov.singularity.core.global.service.jwt.JwtService
 import io.stereov.singularity.core.global.service.jwt.exception.handler.TokenExceptionHandler
-import io.stereov.singularity.core.global.service.mail.MailService
 import io.stereov.singularity.core.global.service.ratelimit.RateLimitService
-import io.stereov.singularity.core.global.service.secrets.service.EncryptionSecretService
-import io.stereov.singularity.core.global.service.secrets.service.HashSecretService
 import io.stereov.singularity.core.global.service.twofactorauth.TwoFactorAuthService
 import io.stereov.singularity.core.global.service.twofactorauth.exception.handler.TwoFactorAuthExceptionHandler
 import io.stereov.singularity.core.group.repository.GroupRepository
 import io.stereov.singularity.core.group.service.GroupService
 import io.stereov.singularity.core.hash.HashService
-import io.stereov.singularity.core.properties.*
+import io.stereov.singularity.core.properties.AppProperties
+import io.stereov.singularity.core.properties.JwtProperties
+import io.stereov.singularity.core.properties.LoginAttemptLimitProperties
+import io.stereov.singularity.core.properties.RateLimitProperties
+import io.stereov.singularity.core.secrets.service.HashSecretService
 import io.stereov.singularity.core.user.controller.UserDeviceController
 import io.stereov.singularity.core.user.controller.UserSessionController
 import io.stereov.singularity.core.user.controller.UserTwoFactorAuthController
-import io.stereov.singularity.core.user.repository.UserRepository
 import io.stereov.singularity.core.user.service.UserService
 import io.stereov.singularity.core.user.service.UserSessionService
 import io.stereov.singularity.core.user.service.device.UserDeviceService
@@ -91,7 +89,7 @@ import org.springframework.web.reactive.function.client.WebClient
     ]
 )
 @EnableReactiveMongoRepositories(
-    basePackageClasses = [UserRepository::class, GroupRepository::class]
+    basePackageClasses = [GroupRepository::class]
 )
 @OptIn(ExperimentalLettuceCoroutinesApi::class)
 class AuthenticationConfiguration {
@@ -199,95 +197,12 @@ class AuthenticationConfiguration {
         return TwoFactorAuthTokenService(jwtService, jwtProperties, authenticationService, twoFactorAuthService, hashService)
     }
 
-    @Bean
-    @ConditionalOnMissingBean
-    fun userTokenService(
-        jwtService: JwtService,
-        accessTokenCache: AccessTokenCache,
-        jwtProperties: JwtProperties,
-    ): UserTokenService {
-        return UserTokenService(jwtService, accessTokenCache, jwtProperties)
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun userTwoFactorAuthService(
-        userService: UserService,
-        twoFactorAuthService: TwoFactorAuthService,
-        authenticationService: AuthenticationService,
-        twoFactorAuthProperties: TwoFactorAuthProperties,
-        hashService: HashService,
-        cookieService: CookieService,
-        twoFactorAuthTokenService: TwoFactorAuthTokenService,
-        accessTokenCache: AccessTokenCache,
-    ): UserTwoFactorAuthService {
-        return UserTwoFactorAuthService(userService, twoFactorAuthService, authenticationService, twoFactorAuthProperties, hashService, cookieService, twoFactorAuthTokenService, accessTokenCache)
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun userService(userRepository: UserRepository, encryptionTransformer: EncryptionService, hashService: HashService, encryptionSecretService: EncryptionSecretService): UserService {
-        return UserService(userRepository, encryptionTransformer, hashService, encryptionSecretService)
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun userSessionService(
-        userService: UserService,
-        hashService: HashService,
-        authenticationService: AuthenticationService,
-        deviceService: UserDeviceService,
-        accessTokenCache: AccessTokenCache,
-        cookieService: CookieService,
-        fileStorage: FileStorage,
-        mailService: MailService,
-    ): UserSessionService {
-        return UserSessionService(
-            userService,
-            hashService,
-            authenticationService,
-            deviceService,
-            accessTokenCache,
-            cookieService,
-            fileStorage,
-            mailService,
-        )
-    }
-
     // Controller
 
     @Bean
     @ConditionalOnMissingBean
     fun adminController(adminService: AdminService, userService: UserService): AdminController {
         return AdminController(adminService, userService)
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun userTwoFactorAuthController(
-        userTwoFactorAuthService: UserTwoFactorAuthService,
-        cookieService: CookieService,
-        authenticationService: AuthenticationService
-    ): UserTwoFactorAuthController {
-        return UserTwoFactorAuthController(userTwoFactorAuthService, cookieService, authenticationService)
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun userDeviceController(
-        userDeviceService: UserDeviceService
-    ): UserDeviceController {
-        return UserDeviceController(userDeviceService)
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun userSessionController(
-        authenticationService: AuthenticationService,
-        userSessionService: UserSessionService,
-        cookieService: CookieService,
-    ): UserSessionController {
-        return UserSessionController(authenticationService, userSessionService, cookieService)
     }
 
     // Exception Handler
