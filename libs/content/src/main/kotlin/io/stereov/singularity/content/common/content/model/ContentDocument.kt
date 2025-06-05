@@ -1,7 +1,7 @@
 package io.stereov.singularity.content.common.content.model
 
-import io.stereov.singularity.core.invitation.model.InvitationDocument
-import io.stereov.singularity.core.user.model.UserDocument
+import io.stereov.singularity.invitation.model.InvitationDocument
+import io.stereov.singularity.user.model.UserDocument
 import org.bson.types.ObjectId
 import java.time.Instant
 

@@ -4,7 +4,7 @@ import io.stereov.singularity.content.article.dto.ArticleOverviewResponse
 import io.stereov.singularity.content.article.dto.ArticleResponse
 import io.stereov.singularity.content.article.dto.FullArticleResponse
 import io.stereov.singularity.content.article.service.ArticleService
-import io.stereov.singularity.core.global.language.model.Language
+import io.stereov.singularity.global.language.model.Language
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.http.ResponseEntity

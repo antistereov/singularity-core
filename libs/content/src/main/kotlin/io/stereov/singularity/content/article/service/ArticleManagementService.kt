@@ -7,17 +7,17 @@ import io.stereov.singularity.content.common.content.dto.*
 import io.stereov.singularity.content.common.content.model.ContentAccessRole
 import io.stereov.singularity.content.common.content.service.ContentManagementService
 import io.stereov.singularity.content.common.content.util.toSlug
-import io.stereov.singularity.core.auth.service.AuthenticationService
-import io.stereov.singularity.core.global.language.exception.model.TranslationForLangMissingException
-import io.stereov.singularity.core.global.language.model.Language
-import io.stereov.singularity.core.global.service.file.exception.model.UnsupportedMediaTypeException
-import io.stereov.singularity.core.global.service.file.service.FileStorage
-import io.stereov.singularity.core.global.service.translate.model.TranslateKey
-import io.stereov.singularity.core.global.service.translate.service.TranslateService
-import io.stereov.singularity.core.invitation.service.InvitationService
-import io.stereov.singularity.core.properties.UiProperties
-import io.stereov.singularity.core.user.model.Role
-import io.stereov.singularity.core.user.service.UserService
+import io.stereov.singularity.auth.service.AuthenticationService
+import io.stereov.singularity.global.language.exception.model.TranslationForLangMissingException
+import io.stereov.singularity.global.language.model.Language
+import io.stereov.singularity.global.service.file.exception.model.UnsupportedMediaTypeException
+import io.stereov.singularity.global.service.file.service.FileStorage
+import io.stereov.singularity.global.service.translate.model.TranslateKey
+import io.stereov.singularity.global.service.translate.service.TranslateService
+import io.stereov.singularity.invitation.service.InvitationService
+import io.stereov.singularity.properties.UiProperties
+import io.stereov.singularity.user.model.Role
+import io.stereov.singularity.user.service.UserService
 import org.bson.types.ObjectId
 import org.springframework.http.MediaType
 import org.springframework.http.codec.multipart.FilePart
@@ -67,8 +67,11 @@ class ArticleManagementService(
 
         val article = contentService.findAuthorizedByKey(key, ContentAccessRole.EDITOR)
 
-        val inviteToRole = translateService.translate(TranslateKey("invitation.role.${req.role.toString().lowercase()}"), "i18n/content/article", lang)
-        val action = translateService.translate(TranslateKey("invitation.action"), "i18n/content/article", lang)
+        val inviteToRole = translateService.translate(
+            io.stereov.singularity.global.service.translate.model.TranslateKey(
+                "invitation.role.${req.role.toString().lowercase()}"
+            ), "i18n/content/article", lang)
+        val action = translateService.translate(io.stereov.singularity.global.service.translate.model.TranslateKey("invitation.action"), "i18n/content/article", lang)
         val articleRef = "<a href=\"${uiProperties.baseUrl}/${article.path.removePrefix("/")}\" style=\"color: black;\">${article.translate(lang).second.title}</a>"
 
         val invitedTo = "$inviteToRole $action $articleRef"
@@ -90,7 +93,7 @@ class ArticleManagementService(
         val article = contentService.findAuthorizedByKey(key, ContentAccessRole.EDITOR)
 
         val translation = article.translations[req.lang]
-            ?: throw TranslationForLangMissingException(lang)
+            ?: throw io.stereov.singularity.global.language.exception.model.TranslationForLangMissingException(lang)
         val uniqueKey = getUniqueKey(req.title.toSlug(), article.id)
         article.key = uniqueKey
         article.path = "${Article.basePath}/$uniqueKey"
@@ -108,7 +111,7 @@ class ArticleManagementService(
         val article = contentService.findAuthorizedByKey(key, ContentAccessRole.EDITOR)
 
         val translation = article.translations[req.lang]
-            ?: throw TranslationForLangMissingException(lang)
+            ?: throw io.stereov.singularity.global.language.exception.model.TranslationForLangMissingException(lang)
         translation.summary = req.summary
 
         val updatedArticle = contentService.save(article)
@@ -122,7 +125,7 @@ class ArticleManagementService(
         val article = contentService.findAuthorizedByKey(key, ContentAccessRole.EDITOR)
 
         val translation = article.translations[req.lang]
-            ?: throw TranslationForLangMissingException(lang)
+            ?: throw io.stereov.singularity.global.language.exception.model.TranslationForLangMissingException(lang)
 
         translation.content = req.content
 

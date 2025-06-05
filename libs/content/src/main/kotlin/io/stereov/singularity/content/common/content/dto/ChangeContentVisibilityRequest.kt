@@ -1,7 +1,7 @@
 package io.stereov.singularity.content.common.content.dto
 
 import io.stereov.singularity.content.common.content.model.ContentAccessRole
-import io.stereov.singularity.core.auth.model.AccessType
+import io.stereov.singularity.auth.model.AccessType
 import org.bson.types.ObjectId
 
 data class ChangeContentVisibilityRequest(

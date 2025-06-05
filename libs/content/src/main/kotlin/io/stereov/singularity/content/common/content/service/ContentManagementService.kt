@@ -5,12 +5,12 @@ import io.stereov.singularity.content.common.content.dto.*
 import io.stereov.singularity.content.common.content.model.ContentAccessRole
 import io.stereov.singularity.content.common.content.model.ContentAccessSubject
 import io.stereov.singularity.content.common.content.model.ContentDocument
-import io.stereov.singularity.core.auth.service.AuthenticationService
-import io.stereov.singularity.core.global.language.model.Language
-import io.stereov.singularity.core.invitation.exception.model.InvalidInvitationException
-import io.stereov.singularity.core.invitation.model.InvitationDocument
-import io.stereov.singularity.core.invitation.service.InvitationService
-import io.stereov.singularity.core.user.service.UserService
+import io.stereov.singularity.auth.service.AuthenticationService
+import io.stereov.singularity.global.language.model.Language
+import io.stereov.singularity.invitation.exception.model.InvalidInvitationException
+import io.stereov.singularity.invitation.model.InvitationDocument
+import io.stereov.singularity.invitation.service.InvitationService
+import io.stereov.singularity.user.service.UserService
 import org.bson.types.ObjectId
 
 interface ContentManagementService<T: ContentDocument<T>> {

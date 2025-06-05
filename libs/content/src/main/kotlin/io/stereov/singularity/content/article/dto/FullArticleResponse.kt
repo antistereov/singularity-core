@@ -4,9 +4,9 @@ import io.stereov.singularity.content.article.model.ArticleColors
 import io.stereov.singularity.content.article.model.ArticleState
 import io.stereov.singularity.content.common.content.dto.ContentAccessDetailsResponse
 import io.stereov.singularity.content.common.tag.dto.TagResponse
-import io.stereov.singularity.core.global.language.model.Language
-import io.stereov.singularity.core.global.service.file.model.FileMetaData
-import io.stereov.singularity.core.user.dto.UserOverviewResponse
+import io.stereov.singularity.global.language.model.Language
+import io.stereov.singularity.global.service.file.model.FileMetaData
+import io.stereov.singularity.user.dto.UserOverviewResponse
 import org.bson.types.ObjectId
 import java.time.Instant
 

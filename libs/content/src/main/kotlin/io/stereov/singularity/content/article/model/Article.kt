@@ -4,10 +4,10 @@ import io.stereov.singularity.content.article.dto.CreateArticleRequest
 import io.stereov.singularity.content.article.dto.FullArticleResponse
 import io.stereov.singularity.content.common.content.model.ContentAccessDetails
 import io.stereov.singularity.content.common.content.model.ContentDocument
-import io.stereov.singularity.core.global.exception.model.InvalidDocumentException
-import io.stereov.singularity.core.global.language.model.Language
-import io.stereov.singularity.core.global.language.model.Translatable
-import io.stereov.singularity.core.global.service.file.model.FileMetaData
+import io.stereov.singularity.global.exception.model.InvalidDocumentException
+import io.stereov.singularity.global.language.model.Language
+import io.stereov.singularity.global.language.model.Translatable
+import io.stereov.singularity.global.service.file.model.FileMetaData
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.index.Indexed

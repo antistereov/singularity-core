@@ -6,9 +6,9 @@ import io.stereov.singularity.content.article.model.ArticleState
 import io.stereov.singularity.content.common.content.model.ContentAccessRole
 import io.stereov.singularity.content.common.content.model.ContentAccessSubject
 import io.stereov.singularity.content.common.tag.dto.CreateTagRequest
-import io.stereov.singularity.core.auth.model.AccessType
-import io.stereov.singularity.core.config.Constants
-import io.stereov.singularity.core.group.model.KnownGroups
+import io.stereov.singularity.auth.model.AccessType
+import io.stereov.singularity.config.Constants
+import io.stereov.singularity.group.model.KnownGroups
 import io.stereov.singularity.test.BaseContentTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals

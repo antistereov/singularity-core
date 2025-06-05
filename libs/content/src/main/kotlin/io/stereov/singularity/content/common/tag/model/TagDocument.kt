@@ -3,9 +3,9 @@ package io.stereov.singularity.content.common.tag.model
 import io.stereov.singularity.content.common.tag.dto.CreateTagMultiLangRequest
 import io.stereov.singularity.content.common.tag.dto.CreateTagRequest
 import io.stereov.singularity.content.common.tag.dto.TagResponse
-import io.stereov.singularity.core.global.exception.model.InvalidDocumentException
-import io.stereov.singularity.core.global.language.model.Language
-import io.stereov.singularity.core.global.language.model.Translatable
+import io.stereov.singularity.global.exception.model.InvalidDocumentException
+import io.stereov.singularity.global.language.model.Language
+import io.stereov.singularity.global.language.model.Translatable
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.index.Indexed

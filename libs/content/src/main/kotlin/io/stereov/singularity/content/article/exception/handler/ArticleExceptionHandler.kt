@@ -2,7 +2,7 @@ package io.stereov.singularity.content.article.exception.handler
 
 import io.stereov.singularity.content.article.exception.ArticleException
 import io.stereov.singularity.content.article.exception.model.InvalidArticleRequestException
-import io.stereov.singularity.core.global.exception.BaseExceptionHandler
+import io.stereov.singularity.global.exception.BaseExceptionHandler
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler

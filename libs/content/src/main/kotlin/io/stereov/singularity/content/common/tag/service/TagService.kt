@@ -2,7 +2,7 @@ package io.stereov.singularity.content.common.tag.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.core.global.language.model.Language
+import io.stereov.singularity.global.language.model.Language
 import io.stereov.singularity.content.common.tag.dto.CreateTagMultiLangRequest
 import io.stereov.singularity.content.common.tag.dto.CreateTagRequest
 import io.stereov.singularity.content.common.tag.dto.UpdateTagRequest
@@ -12,8 +12,8 @@ import io.stereov.singularity.content.common.tag.model.TagDocument
 import io.stereov.singularity.content.common.tag.model.TagTranslation
 import io.stereov.singularity.content.common.tag.repository.TagRepository
 import io.stereov.singularity.content.properties.ContentProperties
-import io.stereov.singularity.core.global.exception.model.DocumentNotFoundException
-import io.stereov.singularity.core.global.util.getFieldContainsCriteria
+import io.stereov.singularity.global.exception.model.DocumentNotFoundException
+import io.stereov.singularity.global.util.getFieldContainsCriteria
 import jakarta.annotation.PostConstruct
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.runBlocking

@@ -2,9 +2,9 @@ package io.stereov.singularity.content.common.content.dto
 
 import io.stereov.singularity.content.common.content.model.ContentAccessDetails
 import io.stereov.singularity.content.common.content.model.ContentAccessRole
-import io.stereov.singularity.core.auth.model.AccessType
-import io.stereov.singularity.core.invitation.dto.InvitationResponse
-import io.stereov.singularity.core.invitation.model.InvitationDocument
+import io.stereov.singularity.auth.model.AccessType
+import io.stereov.singularity.invitation.dto.InvitationResponse
+import io.stereov.singularity.invitation.model.InvitationDocument
 import org.bson.types.ObjectId
 
 data class ExtendedContentAccessDetailsResponse(

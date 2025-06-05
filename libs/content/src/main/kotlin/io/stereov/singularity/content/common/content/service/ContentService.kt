@@ -4,11 +4,11 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.stereov.singularity.content.common.content.model.ContentAccessRole
 import io.stereov.singularity.content.common.content.model.ContentDocument
 import io.stereov.singularity.content.common.content.repository.ContentRepository
-import io.stereov.singularity.core.auth.exception.model.NotAuthorizedException
-import io.stereov.singularity.core.auth.model.AccessType
-import io.stereov.singularity.core.auth.service.AuthenticationService
-import io.stereov.singularity.core.global.exception.model.DocumentNotFoundException
-import io.stereov.singularity.core.group.model.KnownGroups
+import io.stereov.singularity.auth.exception.model.NotAuthorizedException
+import io.stereov.singularity.auth.model.AccessType
+import io.stereov.singularity.auth.service.AuthenticationService
+import io.stereov.singularity.global.exception.model.DocumentNotFoundException
+import io.stereov.singularity.group.model.KnownGroups
 import org.bson.types.ObjectId
 import java.time.Instant
 

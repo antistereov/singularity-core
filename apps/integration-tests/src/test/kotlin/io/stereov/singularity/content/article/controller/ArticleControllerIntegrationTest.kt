@@ -1,8 +1,8 @@
 package io.stereov.singularity.content.article.controller
 
-import io.stereov.singularity.core.config.Constants
-import io.stereov.singularity.core.group.model.KnownGroups
-import io.stereov.singularity.core.user.model.Role
+import io.stereov.singularity.config.Constants
+import io.stereov.singularity.group.model.KnownGroups
+import io.stereov.singularity.user.model.Role
 import io.stereov.singularity.test.BaseContentTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertFalse

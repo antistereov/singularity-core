@@ -12,10 +12,10 @@ import io.stereov.singularity.content.common.content.dto.ContentAccessDetailsRes
 import io.stereov.singularity.content.common.content.service.ContentService
 import io.stereov.singularity.content.common.content.util.AccessCriteria
 import io.stereov.singularity.content.common.tag.service.TagService
-import io.stereov.singularity.core.auth.service.AuthenticationService
-import io.stereov.singularity.core.global.language.model.Language
-import io.stereov.singularity.core.user.model.UserDocument
-import io.stereov.singularity.core.user.service.UserService
+import io.stereov.singularity.auth.service.AuthenticationService
+import io.stereov.singularity.global.language.model.Language
+import io.stereov.singularity.user.model.UserDocument
+import io.stereov.singularity.user.service.UserService
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl

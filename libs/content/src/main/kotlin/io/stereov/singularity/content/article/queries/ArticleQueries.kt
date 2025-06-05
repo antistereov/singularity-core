@@ -3,9 +3,9 @@ package io.stereov.singularity.content.article.queries
 import io.stereov.singularity.content.article.dto.ArticleOverviewResponse
 import io.stereov.singularity.content.article.model.Article
 import io.stereov.singularity.content.common.content.util.AccessCriteria
-import io.stereov.singularity.core.global.database.model.PagedResult
-import io.stereov.singularity.core.global.database.util.pageFromPagedResult
-import io.stereov.singularity.core.global.language.model.Language
+import io.stereov.singularity.global.database.model.PagedResult
+import io.stereov.singularity.global.database.util.pageFromPagedResult
+import io.stereov.singularity.global.language.model.Language
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.bson.BsonNull
 import org.bson.Document

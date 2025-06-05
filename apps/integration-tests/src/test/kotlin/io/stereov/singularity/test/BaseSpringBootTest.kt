@@ -2,16 +2,16 @@ package io.stereov.singularity.test
 
 import com.warrenstrange.googleauth.GoogleAuthenticator
 import io.mockk.every
-import io.stereov.singularity.core.config.Constants
-import io.stereov.singularity.core.global.language.model.Language
-import io.stereov.singularity.core.group.model.GroupDocument
-import io.stereov.singularity.core.group.model.GroupTranslation
-import io.stereov.singularity.core.group.service.GroupService
-import io.stereov.singularity.core.user.dto.request.*
-import io.stereov.singularity.core.user.dto.response.TwoFactorSetupResponse
-import io.stereov.singularity.core.user.model.Role
-import io.stereov.singularity.core.user.model.UserDocument
-import io.stereov.singularity.core.user.service.UserService
+import io.stereov.singularity.config.Constants
+import io.stereov.singularity.global.language.model.Language
+import io.stereov.singularity.group.model.GroupDocument
+import io.stereov.singularity.group.model.GroupTranslation
+import io.stereov.singularity.group.service.GroupService
+import io.stereov.singularity.user.dto.request.*
+import io.stereov.singularity.user.dto.response.TwoFactorSetupResponse
+import io.stereov.singularity.user.model.Role
+import io.stereov.singularity.user.model.UserDocument
+import io.stereov.singularity.user.service.UserService
 import io.stereov.singularity.test.config.MockConfig
 import io.stereov.singularity.test.config.MockKeyManager
 import org.junit.jupiter.api.BeforeEach
