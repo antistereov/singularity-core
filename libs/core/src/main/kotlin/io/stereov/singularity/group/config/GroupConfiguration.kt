@@ -2,6 +2,7 @@ package io.stereov.singularity.group.config
 
 import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.global.properties.AppProperties
+import io.stereov.singularity.group.controller.GroupController
 import io.stereov.singularity.group.exception.handler.GroupExceptionHandler
 import io.stereov.singularity.group.repository.GroupRepository
 import io.stereov.singularity.group.service.GroupService
@@ -18,6 +19,8 @@ import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRep
 @EnableReactiveMongoRepositories(basePackageClasses = [GroupRepository::class])
 class GroupConfiguration {
 
+    // Service
+
     @Bean
     @ConditionalOnMissingBean
     fun groupService(
@@ -26,6 +29,12 @@ class GroupConfiguration {
     ): GroupService {
         return GroupService(groupRepository, appProperties)
     }
+
+    // Controller
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun groupController(service: GroupService) = GroupController(service)
 
     // Exception Handler
 

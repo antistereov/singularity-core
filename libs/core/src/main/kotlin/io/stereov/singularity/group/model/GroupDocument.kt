@@ -1,9 +1,10 @@
 package io.stereov.singularity.group.model
 
 import io.stereov.singularity.global.exception.model.InvalidDocumentException
+import io.stereov.singularity.group.dto.CreateGroupMultiLangRequest
+import io.stereov.singularity.group.dto.GroupResponse
 import io.stereov.singularity.translate.model.Language
 import io.stereov.singularity.translate.model.Translatable
-import io.stereov.singularity.group.dto.CreateGroupMultiLangRequest
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.index.Indexed
@@ -25,4 +26,15 @@ data class GroupDocument(
 
     val id: ObjectId
         get() = _id ?: throw InvalidDocumentException("GroupDocument does not contain ID")
+
+    fun toResponse(lang: Language): GroupResponse {
+        val (translatedLang, content) = translate(lang)
+
+        return GroupResponse(
+            key = key,
+            lang = translatedLang,
+            name = content.name,
+            description = content.description
+        )
+    }
 }
