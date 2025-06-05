@@ -51,5 +51,11 @@ class TemplateBuilder private constructor(private val template: String) {
             val resource = ClassPathResource(templateResource)
             return@withContext TemplateBuilder(resource.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() })
         }
+
+        fun fromString(template: String): TemplateBuilder {
+            logger.debug { "Creating template from String" }
+
+            return TemplateBuilder(template)
+        }
     }
 }

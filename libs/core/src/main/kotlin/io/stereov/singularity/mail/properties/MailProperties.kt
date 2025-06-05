@@ -17,6 +17,4 @@ data class MailProperties(
     val verificationSendCooldown: Long = 60,
     val passwordResetExpiration: Long = 900,
     val passwordResetSendCooldown: Long = 60,
-    val uiVerificationPath: String = "/auth/verify-email",
-    val uiPasswordResetPath: String = "/auth/reset-password",
 )

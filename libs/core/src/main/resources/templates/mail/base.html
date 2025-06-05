@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{{ subject }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+</head>
+<body style="
+    font-family: 'Inter', Arial, sans-serif;
+    font-size: 16px;
+    margin: 0"
+>
+    <div style="
+        box-sizing: border-box;
+        top: 0;
+        left: 0;
+        padding: 0.75rem;
+        box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+
+        width: 100%;">
+        <a style="display: flex; gap: 0.5rem; align-items: center; text-decoration: none" href="{{ app_url }}">
+            <img src="{{ icon_url }}" alt="icon" style="height: 2rem; width: 2rem;"/>
+            <span style="font-size: 2.25rem; font-weight: 300; color: black; text-decoration: none">{{ app_name }}</span>
+        </a>
+    </div>
+    <div style="margin: 1rem">
+        <div style="
+            box-sizing: border-box;
+            margin-top: 2rem;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 1.5rem 1rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            width: 100%;
+            max-width: 30rem;"
+        >
+            <div style="
+                font-size: 1.25rem;
+                margin-bottom: 1.5rem;"
+            >
+                <span><strong>{{ subject }}</strong></span>
+            </div>
+            <div>
+                {{ content }}
+            </div>
+            <div>
+                <p>{{ questions | translate }}</p>
+                <p>{{ footer | translate }}</p>
+            </div>
+        </div>
+    </div>
+
+
+    <div style="
+        margin-top: 4rem;
+        box-sizing: border-box;
+        width: 100%;
+        padding: 1rem;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.75rem;
+        color: #52525b;"
+    >
+        <div>
+            <a href="{{ contact_url }}" style="color: #52525b;">{{ contact | translate }}</a>
+            <span> | </span>
+            <a href="{{ legal_notice_url }}" style="color: #52525b;">{{ legal_notice | translate }}</a>
+            <span> | </span>
+            <a href="{{ privacy_policy_url }}" style="color: #52525b;">{{ privacy_policy | translate }}</a>
+        </div>
+
+    </div>
+</body>
+</html>

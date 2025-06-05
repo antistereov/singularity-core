@@ -72,7 +72,7 @@ class InvitationService(
             .build()
 
         // TODO: Register user when invited
-        if (userService.existsByEmail(email)) mailService.sendEmail(email, subject, template, true)
+        if (userService.existsByEmail(email)) mailService.sendEmail(email, subject, template)
 
         return invitation
     }

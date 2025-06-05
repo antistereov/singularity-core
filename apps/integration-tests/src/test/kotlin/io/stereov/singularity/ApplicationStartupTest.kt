@@ -1,7 +1,7 @@
 package io.stereov.singularity
 
 import io.stereov.singularity.mail.service.MailService
-import io.stereov.singularity.mail.service.MailTokenService
+import io.stereov.singularity.user.service.mail.MailTokenService
 import io.stereov.singularity.mail.properties.MailProperties
 import io.stereov.singularity.user.controller.UserMailController
 import io.stereov.singularity.user.service.mail.UserMailService

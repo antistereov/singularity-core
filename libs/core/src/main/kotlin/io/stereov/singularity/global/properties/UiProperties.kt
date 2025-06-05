@@ -18,9 +18,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 @ConfigurationProperties(prefix = "singularity.ui")
 data class UiProperties(
     val baseUrl: String = "http://localhost:4200",
-    val iconPath: String = "/icon.svg",
-    val acceptInvitationPath: String = "/invitation/accept",
+    val iconUrl: String = "http://localhost:4200/icon.svg",
+    val primaryColor: String = "#6366f1",
     val contactPath: String = "/contact",
     val legalNoticePath: String = "/legal-notice",
-    val privacyPolicyPath: String = "/privacy-policy"
+    val privacyPolicyPath: String = "/privacy-policy",
+    val emailVerificationPath: String = "/auth/verify-email",
+    val passwordResetPath: String = "/auth/reset-password",
 )

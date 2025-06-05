@@ -247,20 +247,6 @@
       "description": "The transport protocol used for sending emails. Default is 'smtp'."
     },
     {
-      "name": "singularity.mail.ui-password-reset-path",
-      "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.mail.properties.MailProperties",
-      "defaultValue": "/auth/reset-password",
-      "description": "The path to the password reset page in the UI application."
-    },
-    {
-      "name": "singularity.mail.ui-verification-path",
-      "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.mail.properties.MailProperties",
-      "defaultValue": "/auth/verify-email",
-      "description": "The path to the verification page in the UI application."
-    },
-    {
       "name": "singularity.mail.username",
       "type": "java.lang.String",
       "sourceType": "io.stereov.singularity.mail.properties.MailProperties",
@@ -411,16 +397,16 @@
       "description": "Base URL for the UI application. This is used to generate links in emails and other notifications."
     },
     {
-      "name": "singularity.ui.icon-path",
+      "name": "singularity.ui.icon-url",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.global.properties.AppProperties",
-      "defaultValue": "/icon.svg"
+      "sourceType": "io.stereov.singularity.global.properties.AppProperties"
     },
     {
-      "name": "singularity.ui.accept-invitation-path",
+      "name": "singularity.ui.primary-color",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.global.properties.AppProperties",
-      "defaultValue": "/invitation/accept"
+      "sourceType": "io.stereov.singularity.global.properties.UiProperties",
+      "defaultValue": "#6366f1",
+      "description": "The primary UI color used in mail templates"
     },
     {
       "name": "singularity.ui.contact-path",
@@ -439,6 +425,20 @@
       "type": "java.lang.String",
       "sourceType": "io.stereov.singularity.global.properties.AppProperties",
       "defaultValue": "/privacy-policy"
+    },
+    {
+      "name": "singularity.ui.password-reset-path",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.mail.properties.MailProperties",
+      "defaultValue": "/auth/reset-password",
+      "description": "The path to the password reset page in the UI application."
+    },
+    {
+      "name": "singularity.ui.email-verification-path",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.mail.properties.MailProperties",
+      "defaultValue": "/auth/verify-email",
+      "description": "The path to the verification page in the UI application."
     }
   ],
   "hints": []

@@ -2,7 +2,7 @@ package io.stereov.singularity.user.controller
 
 import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.global.util.Random
-import io.stereov.singularity.mail.service.MailTokenService
+import io.stereov.singularity.user.service.mail.MailTokenService
 import io.stereov.singularity.test.BaseIntegrationTest
 import io.stereov.singularity.user.dto.UserResponse
 import io.stereov.singularity.user.dto.request.*

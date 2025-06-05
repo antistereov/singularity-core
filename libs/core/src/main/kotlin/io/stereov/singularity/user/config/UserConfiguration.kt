@@ -6,14 +6,15 @@ import io.stereov.singularity.auth.service.CookieService
 import io.stereov.singularity.cache.service.AccessTokenCache
 import io.stereov.singularity.encryption.service.EncryptionService
 import io.stereov.singularity.global.config.ApplicationConfiguration
+import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.hash.service.HashService
 import io.stereov.singularity.jwt.properties.JwtProperties
 import io.stereov.singularity.jwt.service.JwtService
 import io.stereov.singularity.mail.config.MailConfiguration
-import io.stereov.singularity.mail.service.MailCooldownService
+import io.stereov.singularity.mail.properties.MailProperties
 import io.stereov.singularity.mail.service.MailService
-import io.stereov.singularity.mail.service.MailTokenService
 import io.stereov.singularity.secrets.service.EncryptionSecretService
+import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.twofactorauth.properties.TwoFactorAuthProperties
 import io.stereov.singularity.twofactorauth.service.TwoFactorAuthService
 import io.stereov.singularity.user.controller.UserDeviceController
@@ -23,6 +24,9 @@ import io.stereov.singularity.user.repository.UserRepository
 import io.stereov.singularity.user.service.UserService
 import io.stereov.singularity.user.service.UserSessionService
 import io.stereov.singularity.user.service.device.UserDeviceService
+import io.stereov.singularity.user.service.mail.MailCooldownService
+import io.stereov.singularity.user.service.mail.MailTokenService
+import io.stereov.singularity.user.service.mail.UserMailSender
 import io.stereov.singularity.user.service.mail.UserMailService
 import io.stereov.singularity.user.service.token.TwoFactorAuthTokenService
 import io.stereov.singularity.user.service.token.UserTokenService
@@ -32,6 +36,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRepositories
+import org.springframework.data.redis.core.ReactiveRedisTemplate
 
 @Configuration
 @AutoConfiguration(
@@ -57,14 +62,43 @@ class UserConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    fun mailCooldownService(
+        redisTemplate: ReactiveRedisTemplate<String, String>,
+        mailProperties: MailProperties
+    ): MailCooldownService {
+        return MailCooldownService(redisTemplate, mailProperties)
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun mailTokenService(
+        mailProperties: MailProperties,
+        jwtService: JwtService,
+        encryptionService: EncryptionService
+    ): MailTokenService {
+        return MailTokenService(mailProperties, jwtService, encryptionService)
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     fun userMailService(
         userService: UserService,
         authenticationService: AuthenticationService,
         mailCooldownService: MailCooldownService,
-        mailService: MailService,
+        mailService: UserMailSender,
         mailTokenService: MailTokenService,
         hashService: HashService
     ) = UserMailService(userService, authenticationService, mailCooldownService, mailService, mailTokenService, hashService)
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun userMailSender(
+        mailCooldownService: MailCooldownService,
+        mailTokenService: MailTokenService,
+        uiProperties: UiProperties,
+        translateService: TranslateService,
+        mailService: MailService
+    ) = UserMailSender(mailCooldownService, mailTokenService, uiProperties, translateService, mailService)
 
     @Bean
     @ConditionalOnMissingBean
@@ -117,7 +151,7 @@ class UserConfiguration {
         accessTokenCache: AccessTokenCache,
         cookieService: CookieService,
         fileStorage: io.stereov.singularity.file.service.FileStorage,
-        mailService: MailService,
+        mailService: UserMailSender,
     ): UserSessionService {
         return UserSessionService(
             userService,

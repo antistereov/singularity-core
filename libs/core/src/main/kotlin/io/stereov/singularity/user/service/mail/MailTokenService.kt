@@ -1,4 +1,4 @@
-package io.stereov.singularity.mail.service
+package io.stereov.singularity.user.service.mail
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging

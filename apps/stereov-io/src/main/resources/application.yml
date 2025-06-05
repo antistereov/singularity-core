@@ -65,8 +65,6 @@ singularity:
     verification-send-cooldown: ${MAIL_VERIFICATION_SEND_COOLDOWN:60}
     password-reset-expiration: 900
     password-reset-send-cooldown: 60
-    ui-verification-path: ${EMAIL_VERIFICATION_PATH:/auth/verify-email}
-    ui-password-reset-path: ${PASSWORD_RESET_PATH:/auth/reset-password}
   security:
     jwt:
       expires-in: 900
@@ -83,6 +81,13 @@ singularity:
       recovery-code-count: 6
   ui:
     base-url: ${UI_BASE_URL}
+    icon-url: ${ICON_URL}
+    primary-color: ${UI_PRIMARY_COLOR:#6366f1}
+    contact-path: ${CONTACT_PATH:/contact}
+    legal-notice-path: ${LEGAL_NOTICE_PATH:/legal-notice}
+    privacy-policy-path: ${PRIVACY_POLICY_PATH:/privacy-policy}
+    email-verification-path: ${EMAIL_VERIFICATION_PATH:/auth/verify-email}
+    password-reset-path: ${PASSWORD_RESET_PATH:/auth/reset-password}
   content:
     tags:
       - key: music

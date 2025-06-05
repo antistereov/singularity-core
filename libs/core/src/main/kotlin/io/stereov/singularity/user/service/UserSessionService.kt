@@ -9,7 +9,7 @@ import io.stereov.singularity.auth.service.CookieService
 import io.stereov.singularity.cache.service.AccessTokenCache
 import io.stereov.singularity.file.exception.model.UnsupportedMediaTypeException
 import io.stereov.singularity.hash.service.HashService
-import io.stereov.singularity.mail.service.MailService
+import io.stereov.singularity.translate.model.Language
 import io.stereov.singularity.user.dto.UserResponse
 import io.stereov.singularity.user.dto.request.ChangeEmailRequest
 import io.stereov.singularity.user.dto.request.ChangePasswordRequest
@@ -18,6 +18,7 @@ import io.stereov.singularity.user.dto.request.RegisterUserRequest
 import io.stereov.singularity.user.exception.model.EmailAlreadyExistsException
 import io.stereov.singularity.user.model.UserDocument
 import io.stereov.singularity.user.service.device.UserDeviceService
+import io.stereov.singularity.user.service.mail.UserMailSender
 import io.stereov.singularity.user.service.twofactor.UserTwoFactorAuthService
 import org.springframework.http.MediaType
 import org.springframework.http.codec.multipart.FilePart
@@ -46,7 +47,7 @@ class UserSessionService(
     private val accessTokenCache: AccessTokenCache,
     private val cookieService: CookieService,
     private val fileStorage: io.stereov.singularity.file.service.FileStorage,
-    private val mailService: MailService,
+    private val mailService: UserMailSender,
 ) {
 
     private val logger: KLogger
@@ -85,7 +86,7 @@ class UserSessionService(
      * @throws EmailAlreadyExistsException If the email already exists in the system.
      * @throws AuthException If the user document does not contain an ID.
      */
-    suspend fun registerAndGetUser(payload: RegisterUserRequest, sendEmail: Boolean): UserDocument {
+    suspend fun registerAndGetUser(payload: RegisterUserRequest, sendEmail: Boolean, lang: Language): UserDocument {
         logger.debug { "Registering user ${payload.email}" }
 
         if (userService.existsByEmail(payload.email)) {
@@ -100,7 +101,7 @@ class UserSessionService(
 
         val savedUserDocument = userService.save(userDocument)
 
-        if (sendEmail) mailService.sendVerificationEmail(savedUserDocument)
+        if (sendEmail) mailService.sendVerificationEmail(savedUserDocument, lang)
 
         return savedUserDocument
     }
@@ -115,7 +116,7 @@ class UserSessionService(
      *
      * @throws InvalidCredentialsException If the password is invalid.
      */
-    suspend fun changeEmail(payload: ChangeEmailRequest, exchange: ServerWebExchange): UserDocument {
+    suspend fun changeEmail(payload: ChangeEmailRequest, exchange: ServerWebExchange, lang: Language): UserDocument {
         logger.debug { "Changing email" }
 
         val user = authenticationService.getCurrentUser()
@@ -132,7 +133,7 @@ class UserSessionService(
             cookieService.validateStepUpCookie(exchange)
         }
 
-        mailService.sendVerificationEmail(user, payload.newEmail)
+        mailService.sendVerificationEmail(user, lang, payload.newEmail)
 
         return userService.save(user)
     }
