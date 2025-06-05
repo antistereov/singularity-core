@@ -2,18 +2,18 @@ package io.stereov.singularity.user.controller
 
 import io.mockk.verify
 import io.stereov.singularity.global.util.Constants
-import io.stereov.singularity.user.service.mail.MailTokenService
 import io.stereov.singularity.secrets.service.EncryptionSecretService
+import io.stereov.singularity.test.BaseIntegrationTest
 import io.stereov.singularity.user.dto.request.DeviceInfoRequest
 import io.stereov.singularity.user.dto.request.LoginRequest
 import io.stereov.singularity.user.dto.request.ResetPasswordRequest
 import io.stereov.singularity.user.dto.request.SendPasswordResetRequest
-import io.stereov.singularity.test.BaseIntegrationTest
+import io.stereov.singularity.user.service.mail.MailTokenService
+import jakarta.mail.internet.MimeMessage
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.mail.SimpleMailMessage
 import java.time.Instant
 
 class UserMailControllerIntegrationTest : BaseIntegrationTest() {
@@ -79,7 +79,7 @@ class UserMailControllerIntegrationTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isOk
 
-        verify { mailSender.send(any<SimpleMailMessage>()) }
+        verify { mailSender.send(any<MimeMessage>()) }
     }
 
     @Test fun `verifyCooldown works`() = runTest {
@@ -206,7 +206,7 @@ class UserMailControllerIntegrationTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isOk
 
-        verify { mailSender.send(any<SimpleMailMessage>()) }
+        verify { mailSender.send(any<MimeMessage>()) }
     }
     @Test fun `sendPasswordReset requires email`() = runTest {
         val user = registerUser()
