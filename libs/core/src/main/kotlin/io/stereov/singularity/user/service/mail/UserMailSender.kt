@@ -5,6 +5,7 @@ import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.mail.exception.model.MailCooldownException
 import io.stereov.singularity.mail.service.MailService
 import io.stereov.singularity.mail.util.MailConstants
+import io.stereov.singularity.template.service.TemplateService
 import io.stereov.singularity.template.util.TemplateBuilder
 import io.stereov.singularity.translate.model.Language
 import io.stereov.singularity.translate.model.TranslateKey
@@ -18,7 +19,8 @@ class UserMailSender(
     private val mailTokenService: MailTokenService,
     private val uiProperties: UiProperties,
     private val translateService: TranslateService,
-    private val mailService: MailService
+    private val mailService: MailService,
+    private val templateService: TemplateService
 )  {
 
     private val logger = KotlinLogging.logger {}
@@ -60,13 +62,13 @@ class UserMailSender(
         val subject = translateService.translate(TranslateKey("$slug.subject"), MailConstants.RESOURCE_BUNDLE, lang)
         val content = TemplateBuilder.fromResource(templatePath)
             .translate(MailConstants.RESOURCE_BUNDLE, lang)
-            .replacePlaceholders(mapOf(
+            .replacePlaceholders(templateService.getPlaceholders(mapOf(
                 "name" to user.sensitive.name,
                 "verification_url" to verificationUrl
-            ))
+            )))
             .build()
 
-        mailService.sendEmail(email, subject, content)
+        mailService.sendEmail(email, subject, content, lang)
         mailCooldownService.startVerificationCooldown(userId)
     }
 
@@ -98,13 +100,13 @@ class UserMailSender(
         val subject = translateService.translate(TranslateKey("$slug.subject"), MailConstants.RESOURCE_BUNDLE, lang)
         val content = TemplateBuilder.fromResource(templatePath)
             .translate(MailConstants.RESOURCE_BUNDLE, lang)
-            .replacePlaceholders(mapOf(
+            .replacePlaceholders(templateService.getPlaceholders(mapOf(
                 "name" to user.sensitive.name,
                 "reset_url" to passwordResetUrl
-            ))
+            )))
             .build()
 
-        mailService.sendEmail(user.sensitive.email, subject, content)
+        mailService.sendEmail(user.sensitive.email, subject, content, lang)
         mailCooldownService.startPasswordResetCooldown(userId)
     }
 

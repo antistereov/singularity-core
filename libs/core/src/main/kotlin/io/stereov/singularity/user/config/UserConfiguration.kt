@@ -14,6 +14,7 @@ import io.stereov.singularity.mail.config.MailConfiguration
 import io.stereov.singularity.mail.properties.MailProperties
 import io.stereov.singularity.mail.service.MailService
 import io.stereov.singularity.secrets.service.EncryptionSecretService
+import io.stereov.singularity.template.service.TemplateService
 import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.twofactorauth.properties.TwoFactorAuthProperties
 import io.stereov.singularity.twofactorauth.service.TwoFactorAuthService
@@ -97,8 +98,9 @@ class UserConfiguration {
         mailTokenService: MailTokenService,
         uiProperties: UiProperties,
         translateService: TranslateService,
-        mailService: MailService
-    ) = UserMailSender(mailCooldownService, mailTokenService, uiProperties, translateService, mailService)
+        mailService: MailService,
+        templateService: TemplateService
+    ) = UserMailSender(mailCooldownService, mailTokenService, uiProperties, translateService, mailService, templateService)
 
     @Bean
     @ConditionalOnMissingBean

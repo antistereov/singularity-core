@@ -4,6 +4,8 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.mail.properties.MailProperties
+import io.stereov.singularity.template.service.TemplateService
+import io.stereov.singularity.translate.model.Language
 import io.stereov.singularity.user.service.mail.MailCooldownService
 import io.stereov.singularity.user.service.mail.MailTokenService
 import kotlinx.coroutines.CoroutineScope
@@ -29,7 +31,7 @@ class MailService(
     private val uiProperties: UiProperties,
     private val mailCooldownService: MailCooldownService,
     private val mailTokenService: MailTokenService,
-    private val mailTemplateService: MailTemplateService
+    private val mailTemplateService: MailTemplateService,
 ) {
 
     private val logger: KLogger = KotlinLogging.logger {}
@@ -40,11 +42,12 @@ class MailService(
         to: String,
         subject: String,
         content: String,
+        lang: Language
     ) {
         logger.debug { "Sending email with subject \"$subject\" to \"$to\"" }
 
         val message = mailSender.createMimeMessage()
-        val template = mailTemplateService.createTemplate(subject, content)
+        val template = mailTemplateService.createTemplate(subject, content, lang)
 
         val helper = MimeMessageHelper(message, true, "UTF-8")
         helper.setFrom(mailProperties.email)

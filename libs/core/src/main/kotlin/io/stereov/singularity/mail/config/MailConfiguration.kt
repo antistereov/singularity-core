@@ -8,6 +8,7 @@ import io.stereov.singularity.mail.exception.handler.MailExceptionHandler
 import io.stereov.singularity.mail.properties.MailProperties
 import io.stereov.singularity.mail.service.MailService
 import io.stereov.singularity.mail.service.MailTemplateService
+import io.stereov.singularity.template.service.TemplateService
 import io.stereov.singularity.user.controller.UserMailController
 import io.stereov.singularity.user.service.UserService
 import io.stereov.singularity.user.service.mail.MailCooldownService
@@ -79,7 +80,7 @@ class MailConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun mainTemplateService() = MailTemplateService()
+    fun mainTemplateService(templateService: TemplateService) = MailTemplateService(templateService)
 
     // Controller
 
