@@ -13,7 +13,7 @@ import io.stereov.singularity.content.common.tag.repository.TagRepository
 import io.stereov.singularity.content.common.tag.service.TagService
 import io.stereov.singularity.content.properties.ContentProperties
 import io.stereov.singularity.auth.service.AuthenticationService
-import io.stereov.singularity.config.AuthenticationConfiguration
+import io.stereov.singularity.auth.config.AuthenticationConfiguration
 import io.stereov.singularity.config.MailConfiguration
 import io.stereov.singularity.global.service.file.service.FileStorage
 import io.stereov.singularity.global.service.translate.service.TranslateService

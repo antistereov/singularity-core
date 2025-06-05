@@ -1,7 +1,7 @@
 package io.stereov.singularity.user.model
 
 import io.stereov.singularity.global.database.model.EncryptedSensitiveDocument
-import io.stereov.singularity.global.service.encryption.model.Encrypted
+import io.stereov.singularity.encryption.model.Encrypted
 import io.stereov.singularity.hash.model.SearchableHash
 import io.stereov.singularity.hash.model.SecureHash
 import org.bson.types.ObjectId

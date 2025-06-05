@@ -2,7 +2,7 @@ package io.stereov.singularity.invitation.model
 
 import io.stereov.singularity.global.database.model.EncryptedSensitiveDocument
 import io.stereov.singularity.global.database.model.SensitiveDocument
-import io.stereov.singularity.global.service.encryption.model.Encrypted
+import io.stereov.singularity.encryption.model.Encrypted
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant

@@ -1,7 +1,7 @@
 package io.stereov.singularity.config
 
 import io.stereov.singularity.auth.service.AuthenticationService
-import io.stereov.singularity.global.service.encryption.service.EncryptionService
+import io.stereov.singularity.encryption.service.EncryptionService
 import io.stereov.singularity.hash.HashService
 import io.stereov.singularity.global.service.jwt.JwtService
 import io.stereov.singularity.global.service.mail.MailCooldownService

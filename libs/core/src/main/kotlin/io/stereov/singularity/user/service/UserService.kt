@@ -3,7 +3,7 @@ package io.stereov.singularity.user.service
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.global.database.service.SensitiveCrudService
-import io.stereov.singularity.global.service.encryption.service.EncryptionService
+import io.stereov.singularity.encryption.service.EncryptionService
 import io.stereov.singularity.global.service.file.exception.model.NoSuchFileException
 import io.stereov.singularity.global.service.file.model.FileMetaData
 import io.stereov.singularity.hash.HashService
