@@ -1,7 +1,7 @@
 <div style="margin-bottom: 1rem;">
-    <p>{{ invitation.description.1 | translate }}</p>
-    <p>{{ invitation.description.2 | translate }}</p>
-    <p>{{ invitation.description.3 | translate }}</p>
+    <p>{{ email_verification.description.1 | translate }}</p>
+    <p>{{ email_verification.description.2 | translate }}</p>
+    <p>{{ email_verification.description.3 | translate }}</p>
 </div>
 <a style="
     box-sizing: border-box;
@@ -17,10 +17,10 @@
     color: white;
     text-decoration: none;
     text-align: center;"
-    href="{{ accept_url }}?token={{ accept_token }}"
+    href="{{ verification_url }}"
 >
-    <strong>{{ invitation.accept | translate }}</strong>
+    <strong>{{ email_verification.verify | translate }}</strong>
 </a>
 <div>
-    <p>{{ invitation.description.4 | translate }}</p>
+    <p>{{ email_verification.description.4 | translate }}</p>
 </div>

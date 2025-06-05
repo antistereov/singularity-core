@@ -1,9 +1,9 @@
 package io.stereov.singularity.user.controller
 
+import io.stereov.singularity.translate.model.Language
 import io.stereov.singularity.user.dto.UserResponse
 import io.stereov.singularity.user.dto.request.ResetPasswordRequest
 import io.stereov.singularity.user.dto.request.SendPasswordResetRequest
-import io.stereov.singularity.user.dto.response.MailCooldownResponse
 import io.stereov.singularity.user.service.mail.UserMailService
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
@@ -55,9 +55,11 @@ class UserMailController(
      * @return A message indicating the success of the operation.
      */
     @PostMapping("/verify/send")
-    suspend fun sendVerificationEmail(): ResponseEntity<Map<String, String>> {
+    suspend fun sendVerificationEmail(
+        @RequestParam lang: Language = Language.EN
+    ): ResponseEntity<Map<String, String>> {
 
-        userMailService.sendEmailVerificationToken()
+        userMailService.sendEmailVerificationToken(lang)
 
         return ResponseEntity.ok().body(
             mapOf("message" to "Successfully send verification email")
@@ -103,8 +105,11 @@ class UserMailController(
      * @return A message indicating the success of the operation.
      */
     @PostMapping("/reset-password/send")
-    suspend fun sendPasswordResetEmail(@RequestBody req: SendPasswordResetRequest): ResponseEntity<Map<String, String>> {
-        userMailService.sendPasswordReset(req)
+    suspend fun sendPasswordResetEmail(
+        @RequestBody req: SendPasswordResetRequest,
+        @RequestParam lang: Language = Language.EN
+    ): ResponseEntity<Map<String, String>> {
+        userMailService.sendPasswordReset(req, lang)
 
         return ResponseEntity.ok().body(
             mapOf("message" to "Successfully send password reset email")

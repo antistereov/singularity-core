@@ -1,14 +1,11 @@
 package io.stereov.singularity.user.service.mail
 
-import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.exception.AuthException
 import io.stereov.singularity.auth.service.AuthenticationService
-import io.stereov.singularity.hash.service.HashService
-import io.stereov.singularity.mail.service.MailCooldownService
-import io.stereov.singularity.mail.service.MailService
-import io.stereov.singularity.mail.service.MailTokenService
 import io.stereov.singularity.global.util.Random
+import io.stereov.singularity.hash.service.HashService
+import io.stereov.singularity.translate.model.Language
 import io.stereov.singularity.user.dto.UserResponse
 import io.stereov.singularity.user.dto.request.ResetPasswordRequest
 import io.stereov.singularity.user.dto.request.SendPasswordResetRequest
@@ -29,13 +26,12 @@ class UserMailService(
     private val userService: UserService,
     private val authenticationService: AuthenticationService,
     private val mailCooldownService: MailCooldownService,
-    private val mailService: MailService,
+    private val mailSender: UserMailSender,
     private val mailTokenService: MailTokenService,
     private val hashService: HashService,
 ) {
 
-    private val logger: KLogger
-        get() = KotlinLogging.logger {}
+    private val logger = KotlinLogging.logger {}
 
     /**
      * Verifies the email address of the user.
@@ -85,11 +81,11 @@ class UserMailService(
      *
      * This method generates a verification token and sends it to the user's email address.
      */
-    suspend fun sendEmailVerificationToken() {
+    suspend fun sendEmailVerificationToken(lang: Language) {
         logger.debug { "Sending email verification token" }
 
         val user = authenticationService.getCurrentUser()
-        return mailService.sendVerificationEmail(user)
+        return mailSender.sendVerificationEmail(user, lang)
     }
 
     /**
@@ -99,12 +95,12 @@ class UserMailService(
      *
      * @param req The email address of the user to send the password-reset email to.
      */
-    suspend fun sendPasswordReset(req: SendPasswordResetRequest) {
+    suspend fun sendPasswordReset(req: SendPasswordResetRequest, lang: Language) {
         logger.debug { "Sending password reset email" }
 
         try {
             val user = userService.findByEmail(req.email)
-            return mailService.sendPasswordResetEmail(user)
+            return mailSender.sendPasswordResetEmail(user, lang)
         } catch (_: UserDoesNotExistException) {
             return
         }

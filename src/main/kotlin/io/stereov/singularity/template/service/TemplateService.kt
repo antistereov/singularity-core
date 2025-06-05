@@ -13,11 +13,12 @@ class TemplateService(
     private val placeholders = mapOf(
         "app_url" to uiProperties.baseUrl.trim(),
         "app_name" to appProperties.name.trim(),
-        "icon_url" to uiProperties.baseUrl.removeSuffix("/").trim() + "/" + uiProperties.iconPath.removePrefix("/").trim(),
+        "icon_url" to uiProperties.iconUrl.trim(),
         "contact_url" to uiProperties.baseUrl.removeSuffix("/").trim() + "/" + uiProperties.contactPath.removePrefix("/").trim(),
         "legal_notice_url" to uiProperties.baseUrl.removeSuffix("/").trim() + "/" + uiProperties.legalNoticePath.removePrefix("/").trim(),
         "privacy_policy_url" to uiProperties.baseUrl.removeSuffix("/").trim() + "/" + uiProperties.privacyPolicyPath.removePrefix("/").trim(),
-        "support_mail" to appProperties.supportMail.trim()
+        "support_mail" to appProperties.supportMail.trim(),
+        "primary_color" to uiProperties.primaryColor.trim(),
     )
 
     fun getPlaceholders(additional: Map<String, Any>): Map<String, Any> {

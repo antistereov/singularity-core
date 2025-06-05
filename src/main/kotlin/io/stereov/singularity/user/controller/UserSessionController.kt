@@ -4,6 +4,7 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.service.AuthenticationService
 import io.stereov.singularity.auth.service.CookieService
+import io.stereov.singularity.translate.model.Language
 import io.stereov.singularity.user.dto.UserResponse
 import io.stereov.singularity.user.dto.request.*
 import io.stereov.singularity.user.dto.response.LoginResponse
@@ -95,10 +96,11 @@ class UserSessionController(
         exchange: ServerWebExchange,
         @RequestBody @Valid payload: RegisterUserRequest,
         @RequestParam("send-email") sendEmail: Boolean = true,
+        @RequestParam lang: Language = Language.EN
     ): ResponseEntity<UserResponse> {
         logger.info { "Executing register" }
 
-        val user = userSessionService.registerAndGetUser(payload, sendEmail)
+        val user = userSessionService.registerAndGetUser(payload, sendEmail, lang)
 
         val accessTokenCookie = cookieService.createAccessTokenCookie(user.id, payload.device.id)
         val refreshTokenCookie = cookieService.createRefreshTokenCookie(user.id, payload.device, exchange)
@@ -118,9 +120,13 @@ class UserSessionController(
      * @return The user's information as a [UserResponse].
      */
     @PutMapping("/me/email")
-    suspend fun changeEmail(@RequestBody payload: ChangeEmailRequest, exchange: ServerWebExchange): ResponseEntity<UserResponse> {
+    suspend fun changeEmail(
+        @RequestBody payload: ChangeEmailRequest,
+        @RequestParam lang: Language = Language.EN,
+        exchange: ServerWebExchange
+    ): ResponseEntity<UserResponse> {
         return ResponseEntity.ok().body(
-            userSessionService.changeEmail(payload, exchange).toResponse()
+            userSessionService.changeEmail(payload, exchange, lang).toResponse()
         )
     }
 
@@ -146,7 +152,7 @@ class UserSessionController(
      * @return The user's information as a [UserResponse].
      */
     @PutMapping("/me")
-    suspend fun changeUser(@RequestBody payload: io.stereov.singularity.user.dto.request.ChangeUserRequest): ResponseEntity<UserResponse> {
+    suspend fun changeUser(@RequestBody payload: ChangeUserRequest): ResponseEntity<UserResponse> {
         return ResponseEntity.ok().body(
             userSessionService.changeUser(payload).toResponse()
         )
