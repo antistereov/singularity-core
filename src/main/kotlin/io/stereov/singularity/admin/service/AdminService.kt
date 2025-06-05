@@ -63,7 +63,7 @@ class AdminService(
     }
 
 
-    @Scheduled(cron = "\${singularity.secrets.key-rotation-cron}")
+    @Scheduled(cron = "\${singularity.secrets.key-rotation-cron:0 0 4 1 1,4,7,10 *}")
     suspend fun rotateKeys() {
         this.logger.info { "Rotating keys" }
 
