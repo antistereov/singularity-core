@@ -2,7 +2,7 @@ package io.stereov.singularity.content.common.tag.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.global.language.model.Language
+import io.stereov.singularity.translate.model.Language
 import io.stereov.singularity.content.common.tag.dto.CreateTagMultiLangRequest
 import io.stereov.singularity.content.common.tag.dto.CreateTagRequest
 import io.stereov.singularity.content.common.tag.dto.UpdateTagRequest

@@ -7,7 +7,7 @@ import io.stereov.singularity.content.common.content.model.ContentAccessRole
 import io.stereov.singularity.content.common.content.model.ContentAccessSubject
 import io.stereov.singularity.content.common.tag.dto.CreateTagRequest
 import io.stereov.singularity.auth.model.AccessType
-import io.stereov.singularity.config.Constants
+import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.group.model.KnownGroups
 import io.stereov.singularity.test.BaseContentTest
 import kotlinx.coroutines.test.runTest

@@ -1,6 +1,6 @@
 package io.stereov.singularity.ratelimit
 
-import io.stereov.singularity.config.Constants
+import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.ratelimit.properties.RateLimitProperties
 import io.stereov.singularity.secrets.properties.KeyManagerImplementation
 import io.stereov.singularity.test.BaseSpringBootTest

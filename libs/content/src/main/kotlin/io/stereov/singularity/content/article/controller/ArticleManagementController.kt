@@ -3,7 +3,7 @@ package io.stereov.singularity.content.article.controller
 import io.stereov.singularity.content.article.dto.*
 import io.stereov.singularity.content.article.service.ArticleManagementService
 import io.stereov.singularity.content.common.content.dto.*
-import io.stereov.singularity.global.language.model.Language
+import io.stereov.singularity.translate.model.Language
 import org.springframework.http.ResponseEntity
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Controller

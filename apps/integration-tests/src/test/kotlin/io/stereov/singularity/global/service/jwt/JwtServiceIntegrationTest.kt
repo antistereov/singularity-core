@@ -5,9 +5,9 @@ import com.nimbusds.jose.JWSHeader
 import com.nimbusds.jose.crypto.MACSigner
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
-import io.stereov.singularity.global.service.jwt.JwtService
-import io.stereov.singularity.global.service.jwt.exception.model.InvalidTokenException
-import io.stereov.singularity.global.service.jwt.exception.model.TokenExpiredException
+import io.stereov.singularity.jwt.service.JwtService
+import io.stereov.singularity.jwt.exception.model.InvalidTokenException
+import io.stereov.singularity.jwt.exception.model.TokenExpiredException
 import io.stereov.singularity.secrets.model.Secret
 import io.stereov.singularity.secrets.service.JwtSecretService
 import io.stereov.singularity.test.BaseIntegrationTest

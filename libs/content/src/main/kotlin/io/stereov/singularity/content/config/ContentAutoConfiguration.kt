@@ -14,11 +14,10 @@ import io.stereov.singularity.content.common.tag.service.TagService
 import io.stereov.singularity.content.properties.ContentProperties
 import io.stereov.singularity.auth.service.AuthenticationService
 import io.stereov.singularity.auth.config.AuthenticationConfiguration
-import io.stereov.singularity.config.MailConfiguration
-import io.stereov.singularity.global.service.file.service.FileStorage
-import io.stereov.singularity.global.service.translate.service.TranslateService
+import io.stereov.singularity.mail.config.MailConfiguration
+import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.invitation.service.InvitationService
-import io.stereov.singularity.properties.UiProperties
+import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.user.service.UserService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
@@ -86,7 +85,7 @@ class ContentAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun articleManagementService(articleService: ArticleService, authenticationService: AuthenticationService, invitationService: InvitationService, fileStorage: FileStorage, translateService: TranslateService, uiProperties: UiProperties, userService: UserService): ArticleManagementService {
+    fun articleManagementService(articleService: ArticleService, authenticationService: AuthenticationService, invitationService: InvitationService, fileStorage: io.stereov.singularity.file.service.FileStorage, translateService: TranslateService, uiProperties: UiProperties, userService: UserService): ArticleManagementService {
         return ArticleManagementService(articleService, authenticationService, invitationService, fileStorage, translateService, uiProperties, userService)
     }
 

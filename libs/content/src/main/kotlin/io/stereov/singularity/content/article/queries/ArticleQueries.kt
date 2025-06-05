@@ -5,7 +5,7 @@ import io.stereov.singularity.content.article.model.Article
 import io.stereov.singularity.content.common.content.util.AccessCriteria
 import io.stereov.singularity.database.model.PagedResult
 import io.stereov.singularity.database.util.pageFromPagedResult
-import io.stereov.singularity.global.language.model.Language
+import io.stereov.singularity.translate.model.Language
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.bson.BsonNull
 import org.bson.Document

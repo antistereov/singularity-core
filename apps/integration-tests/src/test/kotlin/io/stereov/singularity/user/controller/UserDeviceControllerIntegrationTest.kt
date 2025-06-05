@@ -1,6 +1,6 @@
 package io.stereov.singularity.user.controller
 
-import io.stereov.singularity.config.Constants
+import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.user.dto.response.DeviceInfoResponse
 import io.stereov.singularity.user.model.DeviceInfo
 import io.stereov.singularity.test.BaseIntegrationTest

@@ -1,8 +1,8 @@
 package io.stereov.singularity.group.model
 
 import io.stereov.singularity.global.exception.model.InvalidDocumentException
-import io.stereov.singularity.global.language.model.Language
-import io.stereov.singularity.global.language.model.Translatable
+import io.stereov.singularity.translate.model.Language
+import io.stereov.singularity.translate.model.Translatable
 import io.stereov.singularity.group.dto.CreateGroupMultiLangRequest
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id

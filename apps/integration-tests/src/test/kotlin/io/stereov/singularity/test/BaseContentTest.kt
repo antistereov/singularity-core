@@ -5,8 +5,8 @@ import io.stereov.singularity.content.article.dto.FullArticleResponse
 import io.stereov.singularity.content.article.model.Article
 import io.stereov.singularity.content.article.service.ArticleService
 import io.stereov.singularity.content.common.tag.service.TagService
-import io.stereov.singularity.config.Constants
-import io.stereov.singularity.global.language.model.Language
+import io.stereov.singularity.global.util.Constants
+import io.stereov.singularity.translate.model.Language
 import io.stereov.singularity.group.model.KnownGroups
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach

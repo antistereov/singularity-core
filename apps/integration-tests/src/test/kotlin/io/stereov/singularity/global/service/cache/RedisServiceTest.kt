@@ -1,7 +1,7 @@
 package io.stereov.singularity.global.service.cache
 
-import io.stereov.singularity.global.service.cache.RedisService
-import io.stereov.singularity.global.service.cache.exception.model.RedisKeyNotFoundException
+import io.stereov.singularity.cache.service.RedisService
+import io.stereov.singularity.cache.exception.model.RedisKeyNotFoundException
 import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest

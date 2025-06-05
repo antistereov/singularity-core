@@ -6,7 +6,7 @@ import io.stereov.singularity.content.common.content.model.ContentAccessRole
 import io.stereov.singularity.content.common.content.model.ContentAccessSubject
 import io.stereov.singularity.content.common.content.model.ContentDocument
 import io.stereov.singularity.auth.service.AuthenticationService
-import io.stereov.singularity.global.language.model.Language
+import io.stereov.singularity.translate.model.Language
 import io.stereov.singularity.invitation.exception.model.InvalidInvitationException
 import io.stereov.singularity.invitation.model.InvitationDocument
 import io.stereov.singularity.invitation.service.InvitationService

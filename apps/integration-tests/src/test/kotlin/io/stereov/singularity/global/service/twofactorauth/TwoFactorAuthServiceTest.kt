@@ -1,7 +1,7 @@
 package io.stereov.singularity.global.service.twofactorauth
 
 import com.warrenstrange.googleauth.GoogleAuthenticator
-import io.stereov.singularity.global.service.twofactorauth.TwoFactorAuthService
+import io.stereov.singularity.twofactorauth.service.TwoFactorAuthService
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

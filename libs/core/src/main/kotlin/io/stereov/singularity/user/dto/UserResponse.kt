@@ -1,6 +1,6 @@
 package io.stereov.singularity.user.dto
 
-import io.stereov.singularity.global.service.file.model.FileMetaData
+import io.stereov.singularity.file.model.FileMetaData
 import io.stereov.singularity.user.model.Role
 import org.bson.types.ObjectId
 

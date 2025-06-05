@@ -4,15 +4,14 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.exception.AuthException
 import io.stereov.singularity.auth.service.AuthenticationService
-import io.stereov.singularity.hash.HashService
-import io.stereov.singularity.global.service.mail.MailCooldownService
-import io.stereov.singularity.global.service.mail.MailService
-import io.stereov.singularity.global.service.mail.MailTokenService
-import io.stereov.singularity.global.service.random.RandomService
+import io.stereov.singularity.hash.service.HashService
+import io.stereov.singularity.mail.service.MailCooldownService
+import io.stereov.singularity.mail.service.MailService
+import io.stereov.singularity.mail.service.MailTokenService
+import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.user.dto.UserResponse
 import io.stereov.singularity.user.dto.request.ResetPasswordRequest
 import io.stereov.singularity.user.dto.request.SendPasswordResetRequest
-import io.stereov.singularity.user.dto.response.MailCooldownResponse
 import io.stereov.singularity.user.exception.model.UserDoesNotExistException
 import io.stereov.singularity.user.service.UserService
 import org.springframework.stereotype.Service
@@ -125,7 +124,7 @@ class UserMailService(
             throw AuthException("Password request secret does not match")
         }
 
-        user.sensitive.security.mail.passwordResetSecret = RandomService.generateCode(20)
+        user.sensitive.security.mail.passwordResetSecret = Random.generateCode(20)
         user.password = hashService.hashBcrypt(req.newPassword)
         userService.save(user)
     }

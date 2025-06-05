@@ -2,12 +2,12 @@ package io.stereov.singularity.user.service.token
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.config.Constants
-import io.stereov.singularity.global.service.cache.AccessTokenCache
-import io.stereov.singularity.global.service.jwt.JwtService
-import io.stereov.singularity.global.service.jwt.exception.model.InvalidTokenException
-import io.stereov.singularity.global.service.random.RandomService
-import io.stereov.singularity.properties.JwtProperties
+import io.stereov.singularity.global.util.Constants
+import io.stereov.singularity.cache.service.AccessTokenCache
+import io.stereov.singularity.jwt.service.JwtService
+import io.stereov.singularity.jwt.exception.model.InvalidTokenException
+import io.stereov.singularity.global.util.Random
+import io.stereov.singularity.jwt.properties.JwtProperties
 import io.stereov.singularity.user.service.token.model.AccessToken
 import io.stereov.singularity.user.service.token.model.RefreshToken
 import org.bson.types.ObjectId
@@ -47,7 +47,7 @@ class UserTokenService(
     suspend fun createAccessToken(userId: ObjectId, deviceId: String, issuedAt: Instant = Instant.now()): String {
         logger.debug { "Creating access token for user $userId and device $deviceId" }
 
-        val tokenId = RandomService.generateCode(20)
+        val tokenId = Random.generateCode(20)
 
         accessTokenCache.addTokenId(userId, tokenId)
 

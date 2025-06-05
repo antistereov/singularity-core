@@ -1,7 +1,7 @@
 package io.stereov.singularity.database.config
 
-import io.stereov.singularity.global.language.util.LanguageToStringConverter
-import io.stereov.singularity.global.language.util.StringToLanguageConverter
+import io.stereov.singularity.translate.util.LanguageToStringConverter
+import io.stereov.singularity.translate.util.StringToLanguageConverter
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions

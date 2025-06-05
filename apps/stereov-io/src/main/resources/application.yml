@@ -22,7 +22,7 @@ logging:
   level:
     io.stereov: ${LOG_LEVEL:DEBUG}
 
-baseline:
+singularity:
   app:
     name: ${APP_NAME}
     base-url: ${BACKEND_BASE_URL}

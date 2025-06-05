@@ -2,8 +2,8 @@ package io.stereov.singularity.test
 
 import com.warrenstrange.googleauth.GoogleAuthenticator
 import io.mockk.every
-import io.stereov.singularity.config.Constants
-import io.stereov.singularity.global.language.model.Language
+import io.stereov.singularity.global.util.Constants
+import io.stereov.singularity.translate.model.Language
 import io.stereov.singularity.group.model.GroupDocument
 import io.stereov.singularity.group.model.GroupTranslation
 import io.stereov.singularity.group.service.GroupService

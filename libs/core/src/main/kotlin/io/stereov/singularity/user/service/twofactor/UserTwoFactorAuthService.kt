@@ -6,12 +6,12 @@ import io.stereov.singularity.auth.exception.AuthException
 import io.stereov.singularity.auth.service.AuthenticationService
 import io.stereov.singularity.auth.service.CookieService
 import io.stereov.singularity.global.exception.model.InvalidDocumentException
-import io.stereov.singularity.global.service.cache.AccessTokenCache
+import io.stereov.singularity.cache.service.AccessTokenCache
 import io.stereov.singularity.encryption.service.EncryptionService
-import io.stereov.singularity.hash.HashService
-import io.stereov.singularity.global.service.random.RandomService
-import io.stereov.singularity.global.service.twofactorauth.TwoFactorAuthService
-import io.stereov.singularity.properties.TwoFactorAuthProperties
+import io.stereov.singularity.hash.service.HashService
+import io.stereov.singularity.global.util.Random
+import io.stereov.singularity.twofactorauth.service.TwoFactorAuthService
+import io.stereov.singularity.twofactorauth.properties.TwoFactorAuthProperties
 import io.stereov.singularity.user.dto.UserResponse
 import io.stereov.singularity.user.dto.request.DisableTwoFactorRequest
 import io.stereov.singularity.user.dto.response.TwoFactorSetupResponse
@@ -66,7 +66,7 @@ class UserTwoFactorAuthService(
         val secret = twoFactorAuthService.generateSecretKey()
         val otpAuthUrl = twoFactorAuthService.getOtpAuthUrl(user.sensitive.email, secret)
         val recoveryCodes = List(twoFactorAuthProperties.recoveryCodeCount) {
-            RandomService.generateCode(twoFactorAuthProperties.recoveryCodeLength)
+            Random.generateCode(twoFactorAuthProperties.recoveryCodeLength)
         }
 
         val setupToken = twoFactorAuthTokenService.createSetupToken(user.id, secret, recoveryCodes)

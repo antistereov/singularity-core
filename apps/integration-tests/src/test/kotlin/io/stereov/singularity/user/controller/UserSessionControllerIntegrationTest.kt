@@ -1,8 +1,8 @@
 package io.stereov.singularity.user.controller
 
-import io.stereov.singularity.config.Constants
-import io.stereov.singularity.global.service.mail.MailTokenService
-import io.stereov.singularity.global.service.random.RandomService
+import io.stereov.singularity.global.util.Constants
+import io.stereov.singularity.mail.service.MailTokenService
+import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.user.dto.UserResponse
 import io.stereov.singularity.user.dto.request.*
 import io.stereov.singularity.user.dto.response.LoginResponse
@@ -715,7 +715,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
     }
     @Test fun `refresh requires associated token to account`() = runTest {
         val user = registerUser()
-        val refreshToken = userTokenService.createRefreshToken(user.info.id, user.info.sensitive.devices.first().id, RandomService.generateCode(20))
+        val refreshToken = userTokenService.createRefreshToken(user.info.id, user.info.sensitive.devices.first().id, Random.generateCode(20))
         webTestClient.post()
             .uri("/api/user/refresh")
             .cookie(Constants.REFRESH_TOKEN_COOKIE, refreshToken)
