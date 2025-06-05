@@ -3,7 +3,7 @@ package io.stereov.singularity.core.user.controller
 import io.mockk.verify
 import io.stereov.singularity.core.config.Constants
 import io.stereov.singularity.core.global.service.mail.MailTokenService
-import io.stereov.singularity.core.global.service.secrets.service.EncryptionSecretService
+import io.stereov.singularity.core.secrets.service.EncryptionSecretService
 import io.stereov.singularity.core.user.dto.request.DeviceInfoRequest
 import io.stereov.singularity.core.user.dto.request.LoginRequest
 import io.stereov.singularity.core.user.dto.request.ResetPasswordRequest

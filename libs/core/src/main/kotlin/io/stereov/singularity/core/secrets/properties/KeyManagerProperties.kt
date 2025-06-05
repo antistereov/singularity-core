@@ -1,4 +1,4 @@
-package io.stereov.singularity.core.properties.secrets
+package io.stereov.singularity.core.secrets.properties
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 

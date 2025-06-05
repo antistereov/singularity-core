@@ -15,3 +15,5 @@ io.stereov.singularity.core.config.RedisConfiguration
 io.stereov.singularity.core.config.WebClientConfiguration
 io.stereov.singularity.core.config.WebFluxConfiguration
 io.stereov.singularity.core.config.WebSecurityConfiguration
+
+io.stereov.singularity.core.user.config.UserConfiguration

@@ -8,7 +8,7 @@ import io.stereov.singularity.core.global.service.mail.MailCooldownService
 import io.stereov.singularity.core.global.service.mail.MailService
 import io.stereov.singularity.core.global.service.mail.MailTokenService
 import io.stereov.singularity.core.global.service.mail.exception.handler.MailExceptionHandler
-import io.stereov.singularity.core.global.service.secrets.service.EncryptionSecretService
+import io.stereov.singularity.core.secrets.service.EncryptionSecretService
 import io.stereov.singularity.core.global.service.template.TemplateUtil
 import io.stereov.singularity.core.global.service.translate.service.TranslateService
 import io.stereov.singularity.core.invitation.controller.InvitationController

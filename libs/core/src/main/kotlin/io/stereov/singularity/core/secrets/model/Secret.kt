@@ -1,4 +1,4 @@
-package io.stereov.singularity.core.global.service.secrets.model
+package io.stereov.singularity.core.secrets.model
 
 import java.time.Instant
 import java.util.*

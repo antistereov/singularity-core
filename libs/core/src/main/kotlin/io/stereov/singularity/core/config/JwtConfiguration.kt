@@ -8,8 +8,8 @@ import com.nimbusds.jwt.SignedJWT
 import io.stereov.singularity.core.config.secrets.SecretsConfiguration
 import io.stereov.singularity.core.global.service.jwt.JwtService
 import io.stereov.singularity.core.global.service.jwt.exception.model.InvalidTokenException
-import io.stereov.singularity.core.global.service.secrets.component.KeyManager
-import io.stereov.singularity.core.global.service.secrets.service.JwtSecretService
+import io.stereov.singularity.core.secrets.component.KeyManager
+import io.stereov.singularity.core.secrets.service.JwtSecretService
 import kotlinx.coroutines.reactor.mono
 import kotlinx.coroutines.runBlocking
 import org.springframework.boot.autoconfigure.AutoConfiguration

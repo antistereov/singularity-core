@@ -1,7 +1,7 @@
 package io.stereov.singularity.core.filter
 
 import io.stereov.singularity.core.properties.LoginAttemptLimitProperties
-import io.stereov.singularity.core.properties.secrets.KeyManagerImplementation
+import io.stereov.singularity.core.secrets.properties.KeyManagerImplementation
 import io.stereov.singularity.test.BaseSpringBootTest
 import io.stereov.singularity.core.user.dto.request.DeviceInfoRequest
 import io.stereov.singularity.core.user.dto.request.LoginRequest

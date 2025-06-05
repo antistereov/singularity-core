@@ -1,6 +1,6 @@
 package io.stereov.singularity.core.hash
 
-import io.stereov.singularity.core.global.service.secrets.service.HashSecretService
+import io.stereov.singularity.core.secrets.service.HashSecretService
 import io.stereov.singularity.core.hash.model.SearchableHash
 import io.stereov.singularity.core.hash.model.SecureHash
 import org.springframework.security.crypto.bcrypt.BCrypt

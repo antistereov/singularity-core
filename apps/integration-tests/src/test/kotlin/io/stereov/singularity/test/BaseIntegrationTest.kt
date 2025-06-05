@@ -6,7 +6,7 @@ import io.mockk.just
 import io.stereov.singularity.core.global.service.cache.AccessTokenCache
 import io.stereov.singularity.core.hash.HashService
 import io.stereov.singularity.core.global.service.twofactorauth.TwoFactorAuthService
-import io.stereov.singularity.core.properties.secrets.KeyManagerImplementation
+import io.stereov.singularity.core.secrets.properties.KeyManagerImplementation
 import io.stereov.singularity.core.user.service.token.TwoFactorAuthTokenService
 import io.stereov.singularity.core.user.service.token.UserTokenService
 import io.stereov.singularity.test.config.MockMailSenderConfig
