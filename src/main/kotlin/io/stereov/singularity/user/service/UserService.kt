@@ -44,7 +44,7 @@ class UserService(
         return this.encryptionService.encrypt(document, listOf(hashedEmail)) as EncryptedUserDocument
     }
 
-    override suspend fun rotateKey() {
+    override suspend fun rotateSecret() {
         logger.debug { "Rotating encryption secrets for users" }
 
         this.repository.findAll()

@@ -12,7 +12,8 @@ abstract class SecretService(
     private val keyManager: KeyManager,
     key: String,
     private val algorithm: String,
-    appProperties: AppProperties
+    appProperties: AppProperties,
+    private val fixSecret: Boolean = false,
 ) {
 
     abstract val logger: KLogger
@@ -53,6 +54,12 @@ abstract class SecretService(
         this.keyManager.createOrUpdateKey(this.actualKey, newSecret.id.toString(), newNote)
 
         return newSecret
+    }
+
+    suspend fun rotateSecret(): Secret {
+        if (fixSecret) return getCurrentSecret()
+
+        return updateSecret()
     }
 
     fun generateKey(keySize: Int = 256, algorithm: String = this.algorithm): String {
