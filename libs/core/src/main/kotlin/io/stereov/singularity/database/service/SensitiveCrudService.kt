@@ -6,7 +6,7 @@ import io.stereov.singularity.database.model.SensitiveDocument
 import io.stereov.singularity.database.repository.SensitiveCrudRepository
 import io.stereov.singularity.encryption.service.EncryptionService
 import io.stereov.singularity.global.exception.model.DocumentNotFoundException
-import io.stereov.singularity.secrets.service.EncryptionSecretService
+import io.stereov.singularity.encryption.service.EncryptionSecretService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion

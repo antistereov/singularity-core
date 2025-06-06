@@ -1,7 +1,7 @@
 package io.stereov.singularity.auth
 
 import io.stereov.singularity.global.util.Constants
-import io.stereov.singularity.secrets.service.JwtSecretService
+import io.stereov.singularity.jwt.service.JwtSecretService
 import io.stereov.singularity.user.dto.request.DeviceInfoRequest
 import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.reactive.awaitFirst

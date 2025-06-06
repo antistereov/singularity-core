@@ -9,7 +9,7 @@ import io.stereov.singularity.jwt.service.JwtService
 import io.stereov.singularity.jwt.exception.model.InvalidTokenException
 import io.stereov.singularity.jwt.exception.model.TokenExpiredException
 import io.stereov.singularity.secrets.model.Secret
-import io.stereov.singularity.secrets.service.JwtSecretService
+import io.stereov.singularity.jwt.service.JwtSecretService
 import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals

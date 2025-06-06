@@ -12,7 +12,7 @@ import io.stereov.singularity.invitation.service.InvitationTokenService
 import io.stereov.singularity.jwt.service.JwtService
 import io.stereov.singularity.mail.config.MailConfiguration
 import io.stereov.singularity.mail.service.MailService
-import io.stereov.singularity.secrets.service.EncryptionSecretService
+import io.stereov.singularity.encryption.service.EncryptionSecretService
 import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.user.service.UserService
 import org.springframework.boot.autoconfigure.AutoConfiguration

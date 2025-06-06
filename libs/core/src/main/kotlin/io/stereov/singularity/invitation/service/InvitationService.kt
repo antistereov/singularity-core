@@ -10,7 +10,7 @@ import io.stereov.singularity.invitation.model.InvitationDocument
 import io.stereov.singularity.invitation.model.SensitiveInvitationData
 import io.stereov.singularity.invitation.repository.InvitationRepository
 import io.stereov.singularity.mail.service.MailService
-import io.stereov.singularity.secrets.service.EncryptionSecretService
+import io.stereov.singularity.encryption.service.EncryptionSecretService
 import io.stereov.singularity.template.service.TemplateService
 import io.stereov.singularity.template.util.TemplateBuilder
 import io.stereov.singularity.translate.model.Language

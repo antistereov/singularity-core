@@ -6,7 +6,7 @@ import io.stereov.singularity.encryption.service.EncryptionService
 import io.stereov.singularity.file.model.FileMetaData
 import io.stereov.singularity.file.exception.model.NoSuchFileException
 import io.stereov.singularity.hash.service.HashService
-import io.stereov.singularity.secrets.service.EncryptionSecretService
+import io.stereov.singularity.encryption.service.EncryptionSecretService
 import io.stereov.singularity.user.exception.model.UserDoesNotExistException
 import io.stereov.singularity.user.model.EncryptedUserDocument
 import io.stereov.singularity.user.model.SensitiveUserData
