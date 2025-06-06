@@ -13,7 +13,7 @@ import io.stereov.singularity.jwt.service.JwtService
 import io.stereov.singularity.mail.config.MailConfiguration
 import io.stereov.singularity.mail.properties.MailProperties
 import io.stereov.singularity.mail.service.MailService
-import io.stereov.singularity.secrets.service.EncryptionSecretService
+import io.stereov.singularity.encryption.service.EncryptionSecretService
 import io.stereov.singularity.template.service.TemplateService
 import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.twofactorauth.properties.TwoFactorAuthProperties

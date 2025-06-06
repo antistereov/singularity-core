@@ -6,13 +6,14 @@ import com.nimbusds.jose.jwk.source.JWKSource
 import com.nimbusds.jose.proc.SecurityContext
 import com.nimbusds.jwt.SignedJWT
 import io.stereov.singularity.global.config.ApplicationConfiguration
+import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.jwt.exception.handler.TokenExceptionHandler
 import io.stereov.singularity.jwt.exception.model.InvalidTokenException
 import io.stereov.singularity.jwt.properties.JwtProperties
+import io.stereov.singularity.jwt.service.JwtSecretService
 import io.stereov.singularity.jwt.service.JwtService
 import io.stereov.singularity.secrets.component.KeyManager
 import io.stereov.singularity.secrets.config.SecretsConfiguration
-import io.stereov.singularity.secrets.service.JwtSecretService
 import kotlinx.coroutines.reactor.mono
 import kotlinx.coroutines.runBlocking
 import org.springframework.boot.autoconfigure.AutoConfiguration
@@ -38,6 +39,12 @@ import javax.crypto.spec.SecretKeySpec
 )
 @EnableConfigurationProperties(JwtProperties::class)
 class JwtConfiguration {
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun jwtSecretService(keyManager: KeyManager, appProperties: AppProperties): JwtSecretService {
+        return JwtSecretService(keyManager, appProperties)
+    }
 
     @Bean
     @ConditionalOnMissingBean

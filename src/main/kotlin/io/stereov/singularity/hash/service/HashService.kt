@@ -2,7 +2,7 @@ package io.stereov.singularity.hash.service
 
 import io.stereov.singularity.hash.model.SearchableHash
 import io.stereov.singularity.hash.model.SecureHash
-import io.stereov.singularity.secrets.service.HashSecretService
+import io.stereov.singularity.hash.service.HashSecretService
 import org.springframework.security.crypto.bcrypt.BCrypt
 import org.springframework.stereotype.Service
 import java.util.*
@@ -20,7 +20,7 @@ import javax.crypto.spec.SecretKeySpec
  */
 @Service
 class HashService(
-    private val hashSecretService: HashSecretService
+    private val hashSecretService: HashSecretService,
 ) {
 
     /**
@@ -59,6 +59,6 @@ class HashService(
         val hmac = mac.doFinal(normalized.toByteArray(Charsets.UTF_8))
         val encoded = Base64.getUrlEncoder().withoutPadding().encodeToString(hmac)
 
-        return SearchableHash(encoded)
+        return SearchableHash(encoded, secret.id)
     }
 }
