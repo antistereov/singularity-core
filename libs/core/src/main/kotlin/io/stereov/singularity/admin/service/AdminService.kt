@@ -75,16 +75,16 @@ class AdminService(
         this.rotationOngoing.set(true)
 
         this.keyRotationScope.launch {
-            logger.info { "Rotating JWT secret" }
+            logger.info { "Rotating secrets" }
             context.getBeansOfType(SecretService::class.java).forEach { (name, service) ->
                 logger.info { "Rotating keys for secrets defined in $name}" }
-                service.updateSecret()
+                service.rotateSecret()
             }
 
             logger.info { "Rotating encryption secrets" }
             context.getBeansOfType(SensitiveCrudService::class.java).forEach { (name, service) ->
                 logger.info { "Rotating keys for documents defined in $name" }
-                service.rotateKey()
+                service.rotateSecret()
             }
 
             rotationOngoing.set(false)

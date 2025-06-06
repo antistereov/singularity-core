@@ -22,7 +22,7 @@ class EncryptionServiceTest : BaseIntegrationTest() {
         val decryptedUser = userService.decrypt(encryptedUser)
 
         encryptionSecretService.updateSecret()
-        userService.rotateKey()
+        userService.rotateSecret()
 
         val rotatedEncryptedUser = userService.findEncryptedById(user.info.id)
         val newSecret = rotatedEncryptedUser.sensitive.secretId

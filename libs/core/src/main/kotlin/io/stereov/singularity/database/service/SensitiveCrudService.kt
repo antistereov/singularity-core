@@ -4,9 +4,9 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.stereov.singularity.database.model.EncryptedSensitiveDocument
 import io.stereov.singularity.database.model.SensitiveDocument
 import io.stereov.singularity.database.repository.SensitiveCrudRepository
+import io.stereov.singularity.encryption.service.EncryptionSecretService
 import io.stereov.singularity.encryption.service.EncryptionService
 import io.stereov.singularity.global.exception.model.DocumentNotFoundException
-import io.stereov.singularity.encryption.service.EncryptionSecretService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
@@ -91,7 +91,7 @@ interface SensitiveCrudService<S, D: SensitiveDocument<S>, E: EncryptedSensitive
         }
     }
 
-    suspend fun rotateKey() {
+    suspend fun rotateSecret() {
         logger.debug { "Rotating encryption secret" }
 
         this.repository.findAll()
