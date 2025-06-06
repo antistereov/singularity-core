@@ -4,7 +4,6 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.jwt.exception.model.InvalidTokenException
 import io.stereov.singularity.jwt.exception.model.TokenExpiredException
-import io.stereov.singularity.jwt.service.JwtSecretService
 import kotlinx.coroutines.reactive.awaitFirst
 import org.springframework.security.oauth2.jwt.*
 import org.springframework.stereotype.Service
