@@ -1,13 +1,15 @@
 package io.stereov.singularity.group.service
 
-import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.auth.service.AuthenticationService
 import io.stereov.singularity.global.exception.model.DocumentNotFoundException
 import io.stereov.singularity.global.properties.AppProperties
-import io.stereov.singularity.group.dto.CreateGroupMultiLangRequest
+import io.stereov.singularity.group.dto.CreateGroupRequest
+import io.stereov.singularity.group.dto.UpdateGroupRequest
 import io.stereov.singularity.group.exception.model.GroupKeyExistsException
 import io.stereov.singularity.group.model.GroupDocument
 import io.stereov.singularity.group.repository.GroupRepository
+import io.stereov.singularity.user.model.Role
 import jakarta.annotation.PostConstruct
 import kotlinx.coroutines.runBlocking
 import org.bson.types.ObjectId
@@ -16,7 +18,8 @@ import org.springframework.stereotype.Service
 @Service
 class GroupService(
     private val repository: GroupRepository,
-    private val appProperties: AppProperties
+    private val appProperties: AppProperties,
+    private val authenticationService: AuthenticationService
 ) {
 
     @PostConstruct
@@ -25,7 +28,7 @@ class GroupService(
 
         appProperties.groups.forEach { groupRequest ->
             try {
-                runBlocking { create(groupRequest) }
+                runBlocking { createNotAuthorized(groupRequest) }
                 logger.info { "Created group with key \"${groupRequest.key}\""}
             } catch (_: GroupKeyExistsException) {
                 logger.info { "Skipping creation of group with key \"${groupRequest.key}\" because it already exists"}
@@ -33,11 +36,17 @@ class GroupService(
         }
     }
 
-    private val logger: KLogger
-        get() = KotlinLogging.logger {}
+    private val logger = KotlinLogging.logger {}
 
-    suspend fun create(req: CreateGroupMultiLangRequest): GroupDocument {
+    suspend fun create(req: CreateGroupRequest): GroupDocument {
+        authenticationService.requireRole(Role.ADMIN)
+
+        return createNotAuthorized(req)
+    }
+
+    private suspend fun createNotAuthorized(req: CreateGroupRequest): GroupDocument {
         logger.debug { "Creating group with key \"${req.key}\"" }
+
 
         if (existsByKey(req.key)) throw GroupKeyExistsException(req.key)
 
@@ -76,5 +85,26 @@ class GroupService(
 
     suspend fun findById(id: ObjectId): GroupDocument {
         return findByIdOrNull(id) ?: throw DocumentNotFoundException("No group with ID $id found")
+    }
+
+    suspend fun update(key: String, req: UpdateGroupRequest): GroupDocument {
+        logger.debug { "Updating group with key \"$key\"" }
+
+        authenticationService.requireRole(Role.ADMIN)
+
+        val group = findByKeyOrNull(key)
+            ?: throw DocumentNotFoundException("No group with key \"$key\" found")
+
+        group.translations.putAll(req.translations)
+
+        return save(group)
+    }
+
+    suspend fun deleteByKey(key: String) {
+        logger.debug { "Deleting group with key \"$key\"" }
+
+        authenticationService.requireRole(Role.ADMIN)
+
+        return repository.deleteByKey(key)
     }
 }
