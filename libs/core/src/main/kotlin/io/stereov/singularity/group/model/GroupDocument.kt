@@ -1,7 +1,7 @@
 package io.stereov.singularity.group.model
 
 import io.stereov.singularity.global.exception.model.InvalidDocumentException
-import io.stereov.singularity.group.dto.CreateGroupMultiLangRequest
+import io.stereov.singularity.group.dto.CreateGroupRequest
 import io.stereov.singularity.group.dto.GroupResponse
 import io.stereov.singularity.translate.model.Language
 import io.stereov.singularity.translate.model.Translatable
@@ -19,7 +19,7 @@ data class GroupDocument(
 ) : Translatable<GroupTranslation> {
 
 
-    constructor(req: CreateGroupMultiLangRequest): this(
+    constructor(req: CreateGroupRequest): this(
         key = req.key,
         translations = req.translations
     )

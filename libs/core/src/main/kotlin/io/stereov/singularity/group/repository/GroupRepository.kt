@@ -11,4 +11,6 @@ interface GroupRepository : CoroutineCrudRepository<GroupDocument, ObjectId> {
     suspend fun existsByKey(key: String): Boolean
 
     suspend fun findByKey(key: String): GroupDocument?
+
+    suspend fun deleteByKey(key: String)
 }
