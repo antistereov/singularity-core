@@ -2,25 +2,33 @@ package io.stereov.singularity.group.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.service.AuthenticationService
+import io.stereov.singularity.database.service.TranslatableCrudService
 import io.stereov.singularity.global.exception.model.DocumentNotFoundException
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.group.dto.CreateGroupRequest
 import io.stereov.singularity.group.dto.UpdateGroupRequest
 import io.stereov.singularity.group.exception.model.GroupKeyExistsException
 import io.stereov.singularity.group.model.GroupDocument
+import io.stereov.singularity.group.model.GroupTranslation
 import io.stereov.singularity.group.repository.GroupRepository
 import io.stereov.singularity.user.model.Role
 import jakarta.annotation.PostConstruct
 import kotlinx.coroutines.runBlocking
 import org.bson.types.ObjectId
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.stereotype.Service
 
 @Service
 class GroupService(
     private val repository: GroupRepository,
     private val appProperties: AppProperties,
-    private val authenticationService: AuthenticationService
-) {
+    private val authenticationService: AuthenticationService,
+    override val reactiveMongoTemplate: ReactiveMongoTemplate
+) : TranslatableCrudService<GroupTranslation, GroupDocument> {
+
+    override val logger = KotlinLogging.logger {}
+    override val collectionClass = GroupDocument::class.java
+    override val contentClass = GroupTranslation::class.java
 
     @PostConstruct
     fun initializeGroups() = runBlocking {
@@ -36,7 +44,6 @@ class GroupService(
         }
     }
 
-    private val logger = KotlinLogging.logger {}
 
     suspend fun create(req: CreateGroupRequest): GroupDocument {
         authenticationService.requireRole(Role.ADMIN)
@@ -87,13 +94,13 @@ class GroupService(
         return findByIdOrNull(id) ?: throw DocumentNotFoundException("No group with ID $id found")
     }
 
-    suspend fun update(key: String, req: UpdateGroupRequest): GroupDocument {
-        logger.debug { "Updating group with key \"$key\"" }
+    suspend fun update(req: UpdateGroupRequest): GroupDocument {
+        logger.debug { "Updating group with key \"${req.key}\"" }
 
         authenticationService.requireRole(Role.ADMIN)
 
-        val group = findByKeyOrNull(key)
-            ?: throw DocumentNotFoundException("No group with key \"$key\" found")
+        val group = findByKeyOrNull(req.key)
+            ?: throw DocumentNotFoundException("No group with key \"${req.key}\" found")
 
         group.translations.putAll(req.translations)
 
