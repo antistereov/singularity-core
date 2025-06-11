@@ -2,7 +2,7 @@ package io.stereov.singularity.user.service.token
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.cache.service.AccessTokenCache
+import io.stereov.singularity.user.cache.AccessTokenCache
 import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.jwt.exception.model.InvalidTokenException

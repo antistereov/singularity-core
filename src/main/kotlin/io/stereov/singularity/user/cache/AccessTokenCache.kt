@@ -1,4 +1,4 @@
-package io.stereov.singularity.cache.service
+package io.stereov.singularity.user.cache
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging

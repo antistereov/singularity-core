@@ -6,7 +6,7 @@ import io.stereov.singularity.auth.exception.AuthException
 import io.stereov.singularity.auth.exception.model.InvalidCredentialsException
 import io.stereov.singularity.auth.service.AuthenticationService
 import io.stereov.singularity.auth.service.CookieService
-import io.stereov.singularity.cache.service.AccessTokenCache
+import io.stereov.singularity.user.cache.AccessTokenCache
 import io.stereov.singularity.file.exception.model.UnsupportedMediaTypeException
 import io.stereov.singularity.hash.service.HashService
 import io.stereov.singularity.translate.model.Language
