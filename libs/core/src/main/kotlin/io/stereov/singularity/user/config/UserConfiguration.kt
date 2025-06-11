@@ -1,9 +1,11 @@
 package io.stereov.singularity.user.config
 
+import io.lettuce.core.ExperimentalLettuceCoroutinesApi
+import io.lettuce.core.api.coroutines.RedisCoroutinesCommands
 import io.stereov.singularity.auth.config.AuthenticationConfiguration
 import io.stereov.singularity.auth.service.AuthenticationService
 import io.stereov.singularity.auth.service.CookieService
-import io.stereov.singularity.cache.service.AccessTokenCache
+import io.stereov.singularity.encryption.service.EncryptionSecretService
 import io.stereov.singularity.encryption.service.EncryptionService
 import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.global.properties.UiProperties
@@ -13,11 +15,11 @@ import io.stereov.singularity.jwt.service.JwtService
 import io.stereov.singularity.mail.config.MailConfiguration
 import io.stereov.singularity.mail.properties.MailProperties
 import io.stereov.singularity.mail.service.MailService
-import io.stereov.singularity.encryption.service.EncryptionSecretService
 import io.stereov.singularity.template.service.TemplateService
 import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.twofactorauth.properties.TwoFactorAuthProperties
 import io.stereov.singularity.twofactorauth.service.TwoFactorAuthService
+import io.stereov.singularity.user.cache.AccessTokenCache
 import io.stereov.singularity.user.controller.UserDeviceController
 import io.stereov.singularity.user.controller.UserSessionController
 import io.stereov.singularity.user.controller.UserTwoFactorAuthController
@@ -50,7 +52,17 @@ import org.springframework.data.redis.core.ReactiveRedisTemplate
 @EnableReactiveMongoRepositories(basePackageClasses = [UserRepository::class])
 class UserConfiguration {
 
+    // Cache
 
+    @Bean
+    @ConditionalOnMissingBean
+    @OptIn(ExperimentalLettuceCoroutinesApi::class)
+    fun accessTokenCache(
+        commands: RedisCoroutinesCommands<String, ByteArray>,
+        jwtProperties: JwtProperties,
+    ): AccessTokenCache {
+        return AccessTokenCache(commands, jwtProperties)
+    }
 
     // Service
 
