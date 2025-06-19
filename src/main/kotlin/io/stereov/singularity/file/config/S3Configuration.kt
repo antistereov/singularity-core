@@ -38,6 +38,7 @@ class S3Configuration {
                 ClientOverrideConfiguration.builder()
                     .build()
             )
+            .serviceConfiguration { it.pathStyleAccessEnabled(s3Properties.pathStyleAccessEnabled) }
             .build()
     }
 

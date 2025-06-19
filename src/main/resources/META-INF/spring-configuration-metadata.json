@@ -180,6 +180,13 @@
       "defaultValue": 5
     },
     {
+      "name": "singularity.file.storage.s3.path-style-access-enabled",
+      "type": "java.util.List<java.lang.Boolean>",
+      "sourceType": "io.stereov.singularity.file.properties.S3Properties",
+      "description": "Should the bucket be added as subdomain or inside the path. If enabled bucket.domain.com will become domain.com/bucket",
+      "defaultValue": false
+    },
+    {
       "name": "singularity.mail.debug",
       "type": "java.lang.Boolean",
       "sourceType": "io.stereov.singularity.mail.properties.MailProperties",
