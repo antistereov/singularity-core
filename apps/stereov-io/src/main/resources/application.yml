@@ -40,7 +40,7 @@ singularity:
         access-key: ${S3_ACCESS_KEY}
         secret-key: ${S3_SECRET_KEY}
         scheme: ${S3_SCHEME}
-        path-style-access-enabled: ${PATH_STYLE_ACCESS_ENABLED}
+        path-style-access-enabled: ${S3_PATH_STYLE_ACCESS_ENABLED}
   secrets:
     key-manager: bitwarden
     key-rotation-cron: 0 0 4 1 1,4,7,10 *
