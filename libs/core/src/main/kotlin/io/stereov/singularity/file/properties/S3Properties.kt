@@ -14,5 +14,6 @@ data class S3Properties(
     val region: Region = Region.EU_CENTRAL_1,
     val accessKey: String,
     val secretKey: String,
-    val signatureDuration: Long = 5
+    val signatureDuration: Long = 5,
+    val pathStyleAccessEnabled: Boolean = false,
 )
