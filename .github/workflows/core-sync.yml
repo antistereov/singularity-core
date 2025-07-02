@@ -31,7 +31,7 @@ jobs:
 
       - name: Add mirror remote and push branch
         run: |
-          git remote add mirror https://x-access-token:${{ secrets.MIRROR_TOKEN }}@github.com/antistereov/singularity-core.git
+          git remote add mirror https://antistereov:${{ secrets.MIRROR_TOKEN }}@github.com/antistereov/singularity-core.git
           git push -f mirror sync-core:main
 
       - name: Push tags if matching
