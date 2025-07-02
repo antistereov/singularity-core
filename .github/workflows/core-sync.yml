@@ -23,10 +23,15 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
       - name: Git config
         run: |
-          git config user.name "antistereov"
-          git config user.email "andre.antimonov@stereov.io"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions@github.com"
 
       - name: Split subtree
         run: |
@@ -34,7 +39,7 @@ jobs:
 
       - name: Add mirror remote and push branch
         run: |
-          git remote add mirror https://antistereov:$MIRROR_TOKEN@github.com/antistereov/singularity-core.git
+          git remote add mirror git@github.com:antistereov/singularity-core.git
           git push -f mirror sync-core:main
 
       - name: Push tags if matching
