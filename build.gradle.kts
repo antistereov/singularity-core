@@ -143,7 +143,7 @@ publishing {
             pom {
                 name = "baseline"
                 description = "Spring Boot Web Baseline"
-                url = "https://github.com/antistereov/singularity"
+                url = "https://github.com/antistereov/singularity-core"
                 inceptionYear = "2025"
                 licenses {
                     license {
@@ -161,9 +161,9 @@ publishing {
                 }
 
                 scm {
-                    url = "https://github.com/antistereov/singularity"
-                    connection = "scm:git:git://github.com/antistereov/singularity.git"
-                    developerConnection = "scm:git:ssh://github.com/antistereov/singularity.git"
+                    url = "https://github.com/antistereov/singularity-core"
+                    connection = "scm:git:git://github.com/antistereov/singularity-core.git"
+                    developerConnection = "scm:git:ssh://github.com/antistereov/singularity-core.git"
                 }
             }
         }
@@ -182,7 +182,7 @@ jreleaser {
     release {
         github {
             repoOwner.set("antistereov")
-            name.set("singularity")
+            name.set("singularity-core")
             overwrite.set(true)
             skipTag.set(false)
             sign.set(true)
@@ -218,7 +218,7 @@ jreleaser {
         authors.set(listOf("André Antimonov"))
         license.set("GPL")
         links {
-            homepage = "https://github.com/antistereov/singularity"
+            homepage = "https://github.com/antistereov/singularity-core"
         }
         inceptionYear = "2025"
     }
