@@ -1,0 +1,42 @@
+name: Core - Sync to mirror repo
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'libs/core/**'
+      - '.github/workflows/core-sync.yml'
+    tags:
+      - 'core@*'
+
+jobs:
+  sync-core:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout full repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Git config
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions@github.com"
+
+      - name: Split subtree
+        run: |
+          git subtree split --prefix=libs/core -b sync-core
+
+      - name: Add mirror remote and push branch
+        run: |
+          git remote add mirror https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/antistereov/singularity-core.git
+          git push -f mirror sync-core:main
+
+      - name: Push tags if matching
+        run: |
+          TAGS=$(git tag -l 'core@*' || true)
+          for TAG in $TAGS; do
+            git push mirror $TAG || echo "Failed to push tag $TAG"
+          done
