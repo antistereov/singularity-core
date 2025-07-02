@@ -18,7 +18,7 @@ kotlin {
 }
 
 group = "io.stereov.singularity"
-version = "1.6.5-SNAPSHOT"
+version = "1.7.0"
 
 repositories {
     mavenCentral()
