@@ -207,7 +207,7 @@ jreleaser {
                 }
 
                 append {
-                    target.set(File("$rootDir/CHANGELOG.md"))
+                    target.set(File("$rootDir/libs/core/CHANGELOG.md"))
                     enabled.set(true)
                 }
             }
