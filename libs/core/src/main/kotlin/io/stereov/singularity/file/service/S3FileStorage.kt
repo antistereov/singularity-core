@@ -119,6 +119,9 @@ class S3FileStorage(
     }
 
     override suspend fun getPublicUrl(key: String): String {
+        if (s3Properties.pathStyleAccessEnabled) {
+            return  "${s3Properties.scheme}${s3Properties.domain}/${s3Properties.bucket}/$key"
+        }
         return  "${s3Properties.scheme}${s3Properties.bucket}.${s3Properties.domain}/$key"
     }
 
