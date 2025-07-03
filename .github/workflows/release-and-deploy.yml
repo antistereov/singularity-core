@@ -75,28 +75,11 @@ jobs:
             exit 1
           fi
 
-      - uses: stefanzweifel/git-auto-commit-action@v6
+      - name: Commit and Push Version update
+        uses: stefanzweifel/git-auto-commit-action@v6
         with:
           commit_message: "ci: bump version to ${{ env.release_version }}"
           tagging_message: "v${{ env.release_version }}"
-
-      #############################################################
-      # Generating Changelog
-      #############################################################
-
-      - name: Generate Changelog
-        run: |
-          ./gradlew publish
-          
-          echo "Generating changelog for core"
-          ./gradlew :libs:core:jreleaserChangelog
-          
-          echo "Generating changelog for content"
-          ./gradlew :libs:content:jreleaserChangelog
-
-      - uses: stefanzweifel/git-auto-commit-action@v6
-        with:
-          commit_message: "ci: update changelog"
 
       #############################################################
       # Publishing
@@ -104,11 +87,12 @@ jobs:
 
       - name: Release and Deploy
         run: |
-          echo "Releasing core"
-          ./gradlew :libs:core:jreleaserFullRelease
-          
-          echo "Releasing content"
-          ./gradlew :libs:content:jreleaserFullRelease
+          ./gradlew jreleaserFullRelease
+
+      - name: Commit and Push Changelog update
+        uses: stefanzweifel/git-auto-commit-action@v6
+        with:
+          commit_message: "ci: bump version to ${{ env.release_version }}"
 
       #############################################################
       # Update Snapshot Version
