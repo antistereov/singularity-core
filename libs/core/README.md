@@ -1,6 +1,6 @@
 # **Singularity Core**
 
-[![Maven Central](https://img.shields.io/maven-central/v/io.stereov.singularity.svg)](https://central.sonatype.com/artifact/io.stereov.singularity)
+[![Maven Central](https://img.shields.io/maven-central/v/io.stereov.singularity/core.svg)](https://central.sonatype.com/artifact/io.stereov.singularity/core)
 
 A production-ready Spring Web baseline with JWT authentication, 2FA, MongoDB, Redis, rate limiting & async processing. 🚀
 Save time, ensure consistency, and focus on features — whether you're building an API, microservice, or full-stack app.
