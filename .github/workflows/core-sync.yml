@@ -1,12 +1,12 @@
-name: content - Sync to mirror repo
+name: Core - Sync to mirror repo
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'libs/content/**'
-      - '.github/workflows/content/sync.yml'
+      - 'libs/core/**'
+      - '.github/workflows/core-sync.yml'
     tags:
       - 'v*'
 
@@ -14,7 +14,7 @@ env:
   MIRROR_TOKEN: ${{ secrets.MIRROR_TOKEN }}
 
 jobs:
-  sync-content:
+  sync-core:
     runs-on: ubuntu-latest
 
     steps:
@@ -35,12 +35,12 @@ jobs:
 
       - name: Split subtree
         run: |
-          git subtree split --prefix=libs/content -b sync-content
+          git subtree split --prefix=libs/core -b sync-core
 
       - name: Add mirror remote and push branch
         run: |
-          git remote add mirror git@github.com:antistereov/singularity-content.git
-          git push -f mirror sync-content:main
+          git remote add mirror git@github.com:antistereov/singularity-core.git
+          git push -f mirror sync-core:main
 
       - name: Push tags if matching
         run: |
