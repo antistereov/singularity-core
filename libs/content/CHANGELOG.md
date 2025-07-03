@@ -2,6 +2,18 @@
 
 ## Changelog
 
+## 🛠  Build
+- [ed3b6f9](https://github.com/antistereov/singularity-content/commits/ed3b6f9) fix build setup for repository - remove root build.gradle.kts
+
+
+## Contributors
+We'd like to thank the following people for their contributions:
+antistereov
+
+## [v1.7.0]
+
+## Changelog
+
 ## 🚀 Features
 - [fd3df82](https://github.com/antistereov/singularity-content/commits/fd3df82) **core**: rename env variable name for path access style in s3
 - [fb0c312](https://github.com/antistereov/singularity-content/commits/fb0c312) **core**: update s3 properties to allow path-style-access

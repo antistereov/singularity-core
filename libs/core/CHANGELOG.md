@@ -1,3 +1,15 @@
+## [v1.7.0]
+
+## Changelog
+
+## 🛠  Build
+- [ed3b6f9](https://github.com/antistereov/singularity-core/commits/ed3b6f9) fix build setup for repository - remove root build.gradle.kts
+
+
+## Contributors
+We'd like to thank the following people for their contributions:
+antistereov
+
 ## [v1.6.2]
 
 ## Changelog
