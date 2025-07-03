@@ -88,7 +88,12 @@ jobs:
         run: |
           ./gradlew clean
           ./gradlew publish
-          ./gradlew jreleaserChangelog
+          
+          echo "Generating changelog for core"
+          ./gradlew :libs:core:jreleaserChangelog
+          
+          echo "Generating changelog for content"
+          ./gradlew :libs:content:jreleaserChangelog
 
       - uses: stefanzweifel/git-auto-commit-action@v6
         with:
@@ -98,13 +103,13 @@ jobs:
       # Publishing
       #############################################################
 
-      - name: Publish
-        run: |
-          ./gradlew publish
-
       - name: Release and Deploy
         run: |
-          ./gradlew jreleaserFullRelease
+          echo "Releasing core"
+          ./gradlew :libs:core:jreleaserFullRelease
+          
+          echo "Releasing content"
+          ./gradlew :libs:content:jreleaserFullRelease
 
       #############################################################
       # Update Snapshot Version
