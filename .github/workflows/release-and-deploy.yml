@@ -86,7 +86,6 @@ jobs:
 
       - name: Generate Changelog
         run: |
-          ./gradlew clean
           ./gradlew publish
           
           echo "Generating changelog for core"
