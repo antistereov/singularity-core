@@ -5,10 +5,10 @@ on:
     branches:
       - main
     paths:
-      - 'libs/core/**'
-      - '.github/workflows/core-sync.yml'
+      - '../../../libs/core'
+      - 'sync.yml'
     tags:
-      - 'core@*'
+      - 'v*'
 
 env:
   MIRROR_TOKEN: ${{ secrets.MIRROR_TOKEN }}
@@ -44,7 +44,7 @@ jobs:
 
       - name: Push tags if matching
         run: |
-          TAGS=$(git tag -l 'core@*' || true)
+          TAGS=$(git tag -l || true)
           for TAG in $TAGS; do
             git push mirror $TAG || echo "Failed to push tag $TAG"
           done
