@@ -1,35 +1,8 @@
-plugins {
-    kotlin("jvm") version "2.0.21"
-    kotlin("plugin.spring") version "2.0.21"
-    kotlin("plugin.serialization") version "2.0.21"
-    id("org.springframework.boot") version "3.4.1"
-    id("io.spring.dependency-management") version "1.1.4"
-    id("maven-publish")
-}
-
-group = "io.stereov.singularity"
-version = "0.0.1-SNAPSHOT"
-
 val accessToken = properties["maven.accessToken"] as String?
-
-repositories {
-    mavenCentral()
-
-    maven {
-        url = uri("https://maven.pkg.github.com/bitwarden/sdk-sm")
-        credentials {
-            username = properties["gpr.user"] as String?
-                ?: System.getenv("GPR_USER")
-            password = properties["gpr.key"] as String?
-                ?: System.getenv("GPR_KEY")
-        }
-    }
-}
 
 val kotlinxVersion = "1.10.1"
 val springBootVersion = "3.4.1"
 val testContainersVersion = "1.19.0"
-val log4jVersion = "2.24.3"
 
 dependencies {
     // Web Starter

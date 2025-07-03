@@ -1,4 +1,3 @@
-
 import org.jreleaser.model.Active
 import org.jreleaser.model.Signing
 import org.springframework.boot.gradle.tasks.bundling.BootJar
@@ -10,15 +9,28 @@ plugins {
     id("io.spring.dependency-management") version "1.1.4"
     id("maven-publish")
     id("java-library")
-    id("org.jreleaser") version "1.17.0"
+    id("org.jreleaser") version "1.19.0"
 }
+
+group = properties["group"] as String
+version = properties["version"] as String
 
 kotlin {
     jvmToolchain(21)
 }
 
-group = "io.stereov.singularity"
-version = "1.7.1-SNAPSHOT"
+tasks.withType<Test> {
+    useJUnitPlatform()
+}
+
+tasks.getByName<BootJar>("bootJar") {
+    enabled = false
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
 
 repositories {
     mavenCentral()
@@ -38,22 +50,6 @@ val kotlinVersion = "2.0.21"
 val kotlinxVersion = "1.10.1"
 val springBootVersion = "3.4.4"
 val bucket4jVersion = "8.14.0"
-
-val mavenCentralUsername: String? = properties["mavencentral.username"] as String?
-    ?: System.getenv("MAVENCENTRAL_USERNAME")
-val mavenCentralPassword: String? = properties["mavencentral.password"] as String?
-    ?: System.getenv("MAVENCENTRAL_PASSWORD")
-val gpgPassphrase: String? = properties["gpg.passphrase"] as String?
-    ?: System.getenv("GPG_PASSPHRASE")
-val gpgUseFileCondition: String? = properties["gpg.use-file"] as String?
-    ?: "false"
-val gpgUseFile: Boolean = gpgUseFileCondition.toBoolean()
-val gpgSecretKey: String? = properties["gpg.private-key"] as String?
-    ?: System.getenv("GPG_PRIVATE_KEY")
-val gpgPublicKey: String? = properties["gpg.public-key"] as String?
-    ?: System.getenv("GPG_PUBLIC_KEY")
-val gitHubToken: String? = properties["github.token"] as String?
-    ?: System.getenv("GITHUB_TOKEN")
 
 dependencies {
     // Spring Boot Starters
@@ -119,21 +115,21 @@ configurations.all {
     exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat")
 }
 
-java {
-    withJavadocJar()
-    withSourcesJar()
-}
-
-tasks.getByName<BootJar>("bootJar") {
-    enabled = false
-}
-
-tasks.register("changelog") {
-    group = "release"
-    description = "Runs clean, publish, and jReleaserChangelog tasks in sequence."
-
-    dependsOn("clean", "publish", "jreleaserChangelog")
-}
+val mavenCentralUsername: String? = properties["mavencentral.username"] as String?
+    ?: System.getenv("MAVENCENTRAL_USERNAME")
+val mavenCentralPassword: String? = properties["mavencentral.password"] as String?
+    ?: System.getenv("MAVENCENTRAL_PASSWORD")
+val gpgPassphrase: String? = properties["gpg.passphrase"] as String?
+    ?: System.getenv("GPG_PASSPHRASE")
+val gpgUseFileCondition: String? = properties["gpg.use-file"] as String?
+    ?: "false"
+val gpgUseFile: Boolean = gpgUseFileCondition.toBoolean()
+val gpgSecretKey: String? = properties["gpg.private-key"] as String?
+    ?: System.getenv("GPG_PRIVATE_KEY")
+val gpgPublicKey: String? = properties["gpg.public-key"] as String?
+    ?: System.getenv("GPG_PUBLIC_KEY")
+val gitHubToken: String? = properties["github.token"] as String?
+    ?: System.getenv("GITHUB_TOKEN")
 
 publishing {
     publications {
@@ -141,8 +137,8 @@ publishing {
             from(components["java"])
 
             pom {
-                name = "baseline"
-                description = "Spring Boot Web Baseline"
+                name = "singularity-core"
+                description = "Spring Boot Web Starter - Core"
                 url = "https://github.com/antistereov/singularity-core"
                 inceptionYear = "2025"
                 licenses {
@@ -156,7 +152,7 @@ publishing {
                         id = "antistereov"
                         name = "André Antimonov"
                         email = "andre.antimonov@stereov.io"
-                        url = "https://stereov.io"
+                        url = "https://github.com/antistereov"
                     }
                 }
 
@@ -252,12 +248,5 @@ jreleaser {
                 }
             }
         }
-    }
-}
-
-tasks.register("checkVersion") {
-    doLast {
-        val projectVersion = project.version.toString()
-        println(projectVersion)
     }
 }
