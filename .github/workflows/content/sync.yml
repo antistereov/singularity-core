@@ -5,8 +5,8 @@ on:
     branches:
       - main
     paths:
-      - '../../../libs/content'
-      - 'sync.yml'
+      - 'libs/content/**'
+      - '.github/workflows/content/sync.yml'
     tags:
       - 'v*'
 
