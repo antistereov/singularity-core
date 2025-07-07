@@ -1,4 +1,4 @@
-package io.stereov.singularity.secrets.model
+package io.stereov.singularity.secrets.core.model
 
 import java.time.Instant
 

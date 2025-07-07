@@ -12,8 +12,8 @@ import io.stereov.singularity.jwt.exception.model.InvalidTokenException
 import io.stereov.singularity.jwt.properties.JwtProperties
 import io.stereov.singularity.jwt.service.JwtSecretService
 import io.stereov.singularity.jwt.service.JwtService
-import io.stereov.singularity.secrets.component.KeyManager
-import io.stereov.singularity.secrets.config.SecretsConfiguration
+import io.stereov.singularity.secrets.core.component.KeyManager
+import io.stereov.singularity.secrets.core.config.SecretsConfiguration
 import kotlinx.coroutines.reactor.mono
 import kotlinx.coroutines.runBlocking
 import org.springframework.boot.autoconfigure.AutoConfiguration

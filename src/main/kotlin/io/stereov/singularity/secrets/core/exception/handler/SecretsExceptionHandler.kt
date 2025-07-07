@@ -1,9 +1,9 @@
-package io.stereov.singularity.secrets.exception.handler
+package io.stereov.singularity.secrets.core.exception.handler
 
 import io.stereov.singularity.global.exception.BaseExceptionHandler
-import io.stereov.singularity.secrets.exception.SecretsException
-import io.stereov.singularity.secrets.exception.model.NoCurrentEncryptionKeyException
-import io.stereov.singularity.secrets.exception.model.SecretKeyNotFoundException
+import io.stereov.singularity.secrets.core.exception.SecretsException
+import io.stereov.singularity.secrets.core.exception.model.NoCurrentEncryptionKeyException
+import io.stereov.singularity.secrets.core.exception.model.SecretKeyNotFoundException
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler

@@ -1,4 +1,4 @@
-package io.stereov.singularity.secrets.exception
+package io.stereov.singularity.secrets.core.exception
 
 import io.stereov.singularity.global.exception.BaseWebException
 

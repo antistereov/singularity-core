@@ -6,7 +6,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.encryption.model.Encrypted
 import io.stereov.singularity.database.model.EncryptedSensitiveDocument
 import io.stereov.singularity.database.model.SensitiveDocument
-import io.stereov.singularity.secrets.component.KeyManager
+import io.stereov.singularity.secrets.core.component.KeyManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.springframework.stereotype.Service
