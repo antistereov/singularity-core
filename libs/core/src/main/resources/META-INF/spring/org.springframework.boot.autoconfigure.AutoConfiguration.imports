@@ -33,8 +33,9 @@ io.stereov.singularity.mail.config.MailConfiguration
 
 io.stereov.singularity.ratelimit.config.RateLimitConfiguration
 
-io.stereov.singularity.secrets.config.SecretsConfiguration
-io.stereov.singularity.secrets.config.BitwardenSecretsConfiguration
+io.stereov.singularity.secrets.core.config.SecretsConfiguration
+io.stereov.singularity.secrets.bitwarden.config.BitwardenSecretsConfiguration
+io.stereov.singularity.secrets.hashicorp.config.HashiCorpVaultConfiguration
 
 io.stereov.singularity.template.config.TemplateConfiguration
 

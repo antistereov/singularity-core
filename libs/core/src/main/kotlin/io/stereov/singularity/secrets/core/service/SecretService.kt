@@ -1,9 +1,9 @@
-package io.stereov.singularity.secrets.service
+package io.stereov.singularity.secrets.core.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.stereov.singularity.global.properties.AppProperties
-import io.stereov.singularity.secrets.component.KeyManager
-import io.stereov.singularity.secrets.model.Secret
+import io.stereov.singularity.secrets.core.component.KeyManager
+import io.stereov.singularity.secrets.core.model.Secret
 import java.time.Instant
 import java.util.*
 import javax.crypto.KeyGenerator
@@ -30,10 +30,10 @@ abstract class SecretService(
     private suspend fun loadCurrentSecret(): Secret {
         this.logger.debug { "Loading current secret from key manager" }
 
-        val currentSecret = this.keyManager.getSecretByKey(actualKey)
+        val currentSecret = this.keyManager.get(actualKey)
 
         val secret = currentSecret?.let {
-            this.keyManager.getSecretById(UUID.fromString(currentSecret.value))
+            this.keyManager.get(currentSecret.value)
         } ?: this.updateSecret()
 
         this.currentSecret = secret
@@ -48,10 +48,10 @@ abstract class SecretService(
         val newValue = this.generateKey(algorithm = algorithm)
         val newNote = "Generated on ${Instant.now()}"
 
-        val newSecret = this.keyManager.create(newKey, newValue, newNote)
+        val newSecret = this.keyManager.put(newKey, newValue, newNote)
         this.currentSecret = newSecret
 
-        this.keyManager.createOrUpdateKey(this.actualKey, newSecret.id.toString(), newNote)
+        this.keyManager.put(this.actualKey, newSecret.key, newNote)
 
         return newSecret
     }

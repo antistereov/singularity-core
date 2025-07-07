@@ -5,7 +5,7 @@ import io.mockk.every
 import io.mockk.just
 import io.stereov.singularity.user.cache.AccessTokenCache
 import io.stereov.singularity.hash.service.HashService
-import io.stereov.singularity.secrets.properties.KeyManagerImplementation
+import io.stereov.singularity.secrets.core.properties.KeyManagerImplementation
 import io.stereov.singularity.test.config.MockMailSenderConfig
 import io.stereov.singularity.twofactorauth.service.TwoFactorAuthService
 import io.stereov.singularity.user.service.token.TwoFactorAuthTokenService

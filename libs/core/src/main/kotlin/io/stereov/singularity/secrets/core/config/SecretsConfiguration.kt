@@ -1,8 +1,8 @@
-package io.stereov.singularity.secrets.config
+package io.stereov.singularity.secrets.core.config
 
 import io.stereov.singularity.global.config.ApplicationConfiguration
-import io.stereov.singularity.secrets.component.SecretCache
-import io.stereov.singularity.secrets.properties.KeyManagerProperties
+import io.stereov.singularity.secrets.core.component.SecretCache
+import io.stereov.singularity.secrets.core.properties.KeyManagerProperties
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties

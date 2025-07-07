@@ -1,11 +1,11 @@
-package io.stereov.singularity.secrets.config
+package io.stereov.singularity.secrets.bitwarden.config
 
 import com.bitwarden.sdk.BitwardenClient
 import com.bitwarden.sdk.BitwardenSettings
 import io.stereov.singularity.global.config.ApplicationConfiguration
-import io.stereov.singularity.secrets.component.BitwardenKeyManager
-import io.stereov.singularity.secrets.component.SecretCache
-import io.stereov.singularity.secrets.properties.BitwardenKeyManagerProperties
+import io.stereov.singularity.secrets.bitwarden.component.BitwardenKeyManager
+import io.stereov.singularity.secrets.bitwarden.properties.BitwardenKeyManagerProperties
+import io.stereov.singularity.secrets.core.component.SecretCache
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty

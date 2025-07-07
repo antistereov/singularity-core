@@ -1,4 +1,4 @@
-package io.stereov.singularity.secrets.properties
+package io.stereov.singularity.secrets.bitwarden.properties
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 import java.util.*

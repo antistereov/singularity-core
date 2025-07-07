@@ -1,5 +1,5 @@
-package io.stereov.singularity.secrets.exception.model
+package io.stereov.singularity.secrets.core.exception.model
 
-import io.stereov.singularity.secrets.exception.SecretsException
+import io.stereov.singularity.secrets.core.exception.SecretsException
 
 class SecretKeyNotFoundException(keyId: String) : SecretsException(msg = "Encryption cannot be started: secret key $keyId is not set")

@@ -1,6 +1,6 @@
 package io.stereov.singularity.admin.service
 
-import io.stereov.singularity.secrets.properties.KeyManagerImplementation
+import io.stereov.singularity.secrets.core.properties.KeyManagerImplementation
 import io.stereov.singularity.test.BaseSpringBootTest
 import io.stereov.singularity.user.model.Role
 import kotlinx.coroutines.test.runTest

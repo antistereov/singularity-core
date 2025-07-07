@@ -106,6 +106,7 @@ dependencies {
 
     // Secrets
     implementation("com.bitwarden:sdk-secrets:1.0.1")
+    implementation("org.springframework.vault:spring-vault-core:3.2.0")
 }
 
 configurations.all {

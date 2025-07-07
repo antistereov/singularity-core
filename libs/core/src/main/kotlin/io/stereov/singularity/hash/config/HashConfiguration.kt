@@ -3,7 +3,7 @@ package io.stereov.singularity.hash.config
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.hash.service.HashSecretService
 import io.stereov.singularity.hash.service.HashService
-import io.stereov.singularity.secrets.component.KeyManager
+import io.stereov.singularity.secrets.core.component.KeyManager
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean
