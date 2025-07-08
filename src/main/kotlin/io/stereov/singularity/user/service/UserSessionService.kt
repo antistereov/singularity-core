@@ -7,7 +7,8 @@ import io.stereov.singularity.auth.exception.model.InvalidCredentialsException
 import io.stereov.singularity.auth.service.AuthenticationService
 import io.stereov.singularity.auth.service.CookieService
 import io.stereov.singularity.user.cache.AccessTokenCache
-import io.stereov.singularity.file.exception.model.UnsupportedMediaTypeException
+import io.stereov.singularity.file.core.exception.model.UnsupportedMediaTypeException
+import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.hash.service.HashService
 import io.stereov.singularity.translate.model.Language
 import io.stereov.singularity.user.dto.UserResponse
@@ -46,7 +47,7 @@ class UserSessionService(
     private val deviceService: UserDeviceService,
     private val accessTokenCache: AccessTokenCache,
     private val cookieService: CookieService,
-    private val fileStorage: io.stereov.singularity.file.service.FileStorage,
+    private val fileStorage: FileStorage,
     private val mailService: UserMailSender,
 ) {
 

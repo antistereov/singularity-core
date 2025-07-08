@@ -12,13 +12,13 @@
     },
     {
       "name": "singularity.file.storage",
-      "type": "io.stereov.singularity.file.properties.StorageProperties",
-      "sourceType": "io.stereov.singularity.file.properties.StorageProperties"
+      "type": "io.stereov.singularity.file.core.properties.StorageProperties",
+      "sourceType": "io.stereov.singularity.file.core.properties.StorageProperties"
     },
     {
       "name": "singularity.file.storage.s3",
-      "type": "io.stereov.singularity.file.properties.S3Properties",
-      "sourceType": "io.stereov.singularity.file.properties.S3Properties"
+      "type": "io.stereov.singularity.file.s3.properties.S3Properties",
+      "sourceType": "io.stereov.singularity.file.s3.properties.S3Properties"
     },
     {
       "name": "singularity.mail",
@@ -133,15 +133,15 @@
     },
     {
       "name": "singularity.file.storage.type",
-      "type": "io.stereov.singularity.file.properties.StorageType",
-      "sourceType": "io.stereov.singularity.file.properties.S3Properties",
+      "type": "io.stereov.singularity.file.core.properties.StorageType",
+      "sourceType": "io.stereov.singularity.file.s3.properties.S3Properties",
       "description": "The type of storage you prefer.",
       "defaultValue": "s3"
     },
     {
       "name": "singularity.file.storage.s3.domain",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.file.properties.S3Properties",
+      "sourceType": "io.stereov.singularity.file.s3.properties.S3Properties",
       "description": "The URI of your S3"
     },
     {
@@ -154,7 +154,7 @@
     {
       "name": "singularity.file.storage.s3.bucket",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.file.properties.S3Properties",
+      "sourceType": "io.stereov.singularity.file.s3.properties.S3Properties",
       "description": "The bucket in your S3 storage.",
       "defaultValue": "app"
     },
@@ -168,26 +168,26 @@
     {
       "name": "singularity.file.storage.s3.access-key",
       "type": "java.util.List<java.lang.String>",
-      "sourceType": "io.stereov.singularity.file.properties.S3Properties",
+      "sourceType": "io.stereov.singularity.file.s3.properties.S3Properties",
       "description": "Your S3 access key."
     },
     {
       "name": "singularity.file.storage.s3.secret-key",
       "type": "java.util.List<java.lang.String>",
-      "sourceType": "io.stereov.singularity.file.properties.S3Properties",
+      "sourceType": "io.stereov.singularity.file.s3.properties.S3Properties",
       "description": "Your S3 secret key."
     },
     {
       "name": "singularity.file.storage.s3.signature-duration",
       "type": "java.util.List<java.lang.Long>",
-      "sourceType": "io.stereov.singularity.file.properties.S3Properties",
+      "sourceType": "io.stereov.singularity.file.s3.properties.S3Properties",
       "description": "How many minutes should presigned URLs be valid? Default is 5 min.",
       "defaultValue": 5
     },
     {
       "name": "singularity.file.storage.s3.path-style-access-enabled",
       "type": "java.util.List<java.lang.Boolean>",
-      "sourceType": "io.stereov.singularity.file.properties.S3Properties",
+      "sourceType": "io.stereov.singularity.file.s3.properties.S3Properties",
       "description": "Should the bucket be added as subdomain or inside the path. If enabled bucket.domain.com will become domain.com/bucket",
       "defaultValue": false
     },

@@ -1,6 +1,6 @@
-package io.stereov.singularity.file.util
+package io.stereov.singularity.file.core.util
 
-import io.stereov.singularity.file.model.FileResource
+import io.stereov.singularity.file.core.model.FileResource
 import org.springframework.core.io.UrlResource
 import org.springframework.http.MediaType
 import java.io.File

@@ -6,7 +6,7 @@ import io.stereov.singularity.database.model.SensitiveDocument
 import io.stereov.singularity.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.global.exception.model.MissingFunctionParameterException
 import io.stereov.singularity.encryption.model.Encrypted
-import io.stereov.singularity.file.model.FileMetaData
+import io.stereov.singularity.file.core.model.FileMetaData
 import io.stereov.singularity.hash.model.SearchableHash
 import io.stereov.singularity.hash.model.SecureHash
 import io.stereov.singularity.user.dto.UserOverviewResponse

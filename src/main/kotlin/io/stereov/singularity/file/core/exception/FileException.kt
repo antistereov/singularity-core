@@ -1,6 +1,6 @@
-package io.stereov.singularity.file.exception
+package io.stereov.singularity.file.core.exception
 
-import io.stereov.singularity.file.util.toResource
+import io.stereov.singularity.file.core.util.toResource
 import io.stereov.singularity.global.exception.BaseWebException
 import java.io.File
 

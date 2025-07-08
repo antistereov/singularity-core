@@ -1,9 +1,10 @@
-package io.stereov.singularity.file.exception.handler
+package io.stereov.singularity.file.core.exception.handler
 
-import io.stereov.singularity.file.exception.model.DeleteFailedException
-import io.stereov.singularity.file.exception.model.FileSecurityException
-import io.stereov.singularity.file.exception.model.UnsupportedMediaTypeException
-import io.stereov.singularity.file.exception.model.NoSuchFileException
+import io.stereov.singularity.file.core.exception.FileException
+import io.stereov.singularity.file.core.exception.model.DeleteFailedException
+import io.stereov.singularity.file.core.exception.model.FileSecurityException
+import io.stereov.singularity.file.core.exception.model.UnsupportedMediaTypeException
+import io.stereov.singularity.file.core.exception.model.NoSuchFileException
 import io.stereov.singularity.global.exception.BaseExceptionHandler
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ControllerAdvice
@@ -11,9 +12,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.server.ServerWebExchange
 
 @ControllerAdvice
-class FileExceptionHandler : BaseExceptionHandler<io.stereov.singularity.file.exception.FileException> {
+class FileExceptionHandler : BaseExceptionHandler<FileException> {
 
-    override fun getHttpStatus(ex: io.stereov.singularity.file.exception.FileException) = when (ex) {
+    override fun getHttpStatus(ex: FileException) = when (ex) {
         is DeleteFailedException -> HttpStatus.INTERNAL_SERVER_ERROR
         is NoSuchFileException -> HttpStatus.NOT_FOUND
         is FileSecurityException -> HttpStatus.FORBIDDEN
@@ -21,9 +22,9 @@ class FileExceptionHandler : BaseExceptionHandler<io.stereov.singularity.file.ex
         else -> HttpStatus.INTERNAL_SERVER_ERROR
     }
 
-    @ExceptionHandler(io.stereov.singularity.file.exception.FileException::class)
+    @ExceptionHandler(FileException::class)
     override fun handleException(
-        ex: io.stereov.singularity.file.exception.FileException,
+        ex: FileException,
         exchange: ServerWebExchange
     ) = handleExceptionInternal(ex, exchange)
 }

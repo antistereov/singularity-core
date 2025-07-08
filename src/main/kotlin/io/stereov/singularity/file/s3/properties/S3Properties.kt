@@ -1,4 +1,4 @@
-package io.stereov.singularity.file.properties
+package io.stereov.singularity.file.s3.properties
 
 import io.stereov.singularity.global.model.HttpScheme
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty

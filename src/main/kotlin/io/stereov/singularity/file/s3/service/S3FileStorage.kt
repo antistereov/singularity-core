@@ -1,11 +1,12 @@
-package io.stereov.singularity.file.service
+package io.stereov.singularity.file.s3.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.model.AccessType
-import io.stereov.singularity.file.model.FileMetaData
-import io.stereov.singularity.file.properties.S3Properties
-import io.stereov.singularity.file.util.DataBufferPublisher
+import io.stereov.singularity.file.core.model.FileMetaData
+import io.stereov.singularity.file.core.service.FileStorage
+import io.stereov.singularity.file.s3.properties.S3Properties
+import io.stereov.singularity.file.core.util.DataBufferPublisher
 import io.stereov.singularity.global.properties.AppProperties
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.reactive.awaitSingle

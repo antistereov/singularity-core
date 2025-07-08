@@ -1,4 +1,4 @@
-package io.stereov.singularity.file.model
+package io.stereov.singularity.file.core.model
 
 import org.springframework.core.io.Resource
 
