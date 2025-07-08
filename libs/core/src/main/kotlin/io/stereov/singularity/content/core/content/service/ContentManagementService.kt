@@ -1,15 +1,15 @@
 package io.stereov.singularity.content.common.content.service
 
 import io.github.oshai.kotlinlogging.KLogger
+import io.stereov.singularity.auth.service.AuthenticationService
 import io.stereov.singularity.content.common.content.dto.*
 import io.stereov.singularity.content.common.content.model.ContentAccessRole
 import io.stereov.singularity.content.common.content.model.ContentAccessSubject
 import io.stereov.singularity.content.common.content.model.ContentDocument
-import io.stereov.singularity.auth.service.AuthenticationService
-import io.stereov.singularity.translate.model.Language
 import io.stereov.singularity.invitation.exception.model.InvalidInvitationException
 import io.stereov.singularity.invitation.model.InvitationDocument
 import io.stereov.singularity.invitation.service.InvitationService
+import io.stereov.singularity.translate.model.Language
 import io.stereov.singularity.user.service.UserService
 import org.bson.types.ObjectId
 
@@ -77,7 +77,7 @@ interface ContentManagementService<T: ContentDocument<T>> {
             ?: throw InvalidInvitationException("No role claim found in invitation")
         val role = try {
             ContentAccessRole.fromString(roleString)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             throw InvalidInvitationException(" Role claim found in invitation is invalid: $roleString")
         }
 
