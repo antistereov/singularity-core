@@ -18,7 +18,7 @@ data class FileDocument(
     override val createdAt: Instant = Instant.now(),
     override var updatedAt: Instant = Instant.now(),
     override var access: ContentAccessDetails,
-    val contentType: MediaType,
+    private val _contentType: String,
     val publicUrl: String?,
     val size: Long,
     override val trusted: Boolean = false,
@@ -27,6 +27,9 @@ data class FileDocument(
 
     override val id: ObjectId
         get() = _id ?: throw InvalidDocumentException("No ID found")
+
+    val contentType: MediaType
+        get() = MediaType.valueOf(_contentType)
 
     constructor(
         id: ObjectId? = null,
@@ -46,7 +49,7 @@ data class FileDocument(
         createdAt = createdAt,
         updatedAt = updatedAt,
         access = ContentAccessDetails(ownerId = ownerId, visibility = accessType),
-        contentType = contentType,
+        _contentType = contentType.toString(),
         publicUrl = publicUrl,
         size = size,
         trusted = trusted,
