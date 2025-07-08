@@ -2,7 +2,7 @@ package io.stereov.singularity.ratelimit
 
 import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.ratelimit.properties.RateLimitProperties
-import io.stereov.singularity.secrets.core.properties.KeyManagerImplementation
+import io.stereov.singularity.secrets.core.properties.SecretStoreImplementation
 import io.stereov.singularity.test.BaseSpringBootTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -35,7 +35,7 @@ class UserRateLimitFilterTest : BaseSpringBootTest() {
         fun properties(registry: DynamicPropertyRegistry) {
             registry.add("singularity.app.support-email") { "support@example.com" }
             registry.add("singularity.app.create-root-user") { "false" }
-            registry.add("singularity.secrets.key-manager") { KeyManagerImplementation.Mock }
+            registry.add("singularity.secrets.store") { SecretStoreImplementation.Mock }
             registry.add("singularity.secrets.bitwarden.api-url") { "https//api.bitwarden.com" }
             registry.add("singularity.secrets.bitwarden.identity-url") { "https//identity.bitwarden.com" }
             registry.add("singularity.secrets.bitwarden.organization-id") { UUID.randomUUID() }

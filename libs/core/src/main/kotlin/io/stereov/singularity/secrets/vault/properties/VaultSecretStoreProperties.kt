@@ -1,9 +1,9 @@
-package io.stereov.singularity.secrets.hashicorp.properties
+package io.stereov.singularity.secrets.vault.properties
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties("singularity.secrets.hashicorp")
-data class HashiCorpKeyManagerProperties(
+data class VaultSecretStoreProperties(
     val host: String = "http://localhost",
     val port: Int = 8200,
     val token: String,

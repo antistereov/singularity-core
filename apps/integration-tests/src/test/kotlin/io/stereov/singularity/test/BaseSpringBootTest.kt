@@ -13,7 +13,7 @@ import io.stereov.singularity.user.model.Role
 import io.stereov.singularity.user.model.UserDocument
 import io.stereov.singularity.user.service.UserService
 import io.stereov.singularity.test.config.MockConfig
-import io.stereov.singularity.test.config.MockKeyManager
+import io.stereov.singularity.test.config.MockSecretStore
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -23,7 +23,7 @@ import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.returnResult
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Import(MockConfig::class, MockKeyManager::class)
+@Import(MockConfig::class, MockSecretStore::class)
 class BaseSpringBootTest {
 
 

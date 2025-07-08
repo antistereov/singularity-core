@@ -12,7 +12,7 @@ import io.stereov.singularity.jwt.exception.model.InvalidTokenException
 import io.stereov.singularity.jwt.properties.JwtProperties
 import io.stereov.singularity.jwt.service.JwtSecretService
 import io.stereov.singularity.jwt.service.JwtService
-import io.stereov.singularity.secrets.core.component.KeyManager
+import io.stereov.singularity.secrets.core.component.SecretStore
 import io.stereov.singularity.secrets.core.config.SecretsConfiguration
 import kotlinx.coroutines.reactor.mono
 import kotlinx.coroutines.runBlocking
@@ -42,13 +42,13 @@ class JwtConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun jwtSecretService(keyManager: KeyManager, appProperties: AppProperties): JwtSecretService {
-        return JwtSecretService(keyManager, appProperties)
+    fun jwtSecretService(secretStore: SecretStore, appProperties: AppProperties): JwtSecretService {
+        return JwtSecretService(secretStore, appProperties)
     }
 
     @Bean
     @ConditionalOnMissingBean
-    fun reactiveJwtDecoder(keyManager: KeyManager): ReactiveJwtDecoder {
+    fun reactiveJwtDecoder(secretStore: SecretStore): ReactiveJwtDecoder {
         return ReactiveJwtDecoder { token ->
             mono {
                 val jwt = try {
@@ -59,7 +59,7 @@ class JwtConfiguration {
                 val keyId = jwt.header.keyID
 
                 if (keyId.isNullOrEmpty()) throw InvalidTokenException("No key for JWT secret found in header")
-                val secret = keyManager.get(keyId) ?: throw InvalidTokenException("No JWT secret found for key that was found in header.")
+                val secret = secretStore.get(keyId) ?: throw InvalidTokenException("No JWT secret found for key that was found in header.")
 
                 if (!verifyJwtSignature(jwt, secret.value)) throw InvalidTokenException("Signature is invalid.")
 

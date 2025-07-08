@@ -5,7 +5,7 @@ import io.mockk.every
 import io.mockk.just
 import io.stereov.singularity.user.cache.AccessTokenCache
 import io.stereov.singularity.hash.service.HashService
-import io.stereov.singularity.secrets.core.properties.KeyManagerImplementation
+import io.stereov.singularity.secrets.core.properties.SecretStoreImplementation
 import io.stereov.singularity.test.config.MockMailSenderConfig
 import io.stereov.singularity.twofactorauth.service.TwoFactorAuthService
 import io.stereov.singularity.user.service.token.TwoFactorAuthTokenService
@@ -79,7 +79,7 @@ class BaseIntegrationTest : BaseSpringBootTest() {
         fun properties(registry: DynamicPropertyRegistry) {
             registry.add("singularity.app.support-email") { "support@example.com" }
             registry.add("singularity.app.create-root-user") { "false" }
-            registry.add("singularity.secrets.key-manager") { KeyManagerImplementation.Mock }
+            registry.add("singularity.secrets.store") { SecretStoreImplementation.Mock }
             registry.add("singularity.file.storage.s3.domain") { "amazon.com" }
             registry.add("singularity.file.storage.s3.access-key") { "amazon.com" }
             registry.add("singularity.file.storage.s3.secret-key") { "amazon.com" }

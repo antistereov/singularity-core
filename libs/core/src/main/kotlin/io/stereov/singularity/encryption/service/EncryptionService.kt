@@ -6,11 +6,10 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.encryption.model.Encrypted
 import io.stereov.singularity.database.model.EncryptedSensitiveDocument
 import io.stereov.singularity.database.model.SensitiveDocument
-import io.stereov.singularity.secrets.core.component.KeyManager
+import io.stereov.singularity.secrets.core.component.SecretStore
 import io.stereov.singularity.secrets.core.exception.model.SecretKeyNotFoundException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import java.util.*
 import javax.crypto.Cipher
@@ -19,7 +18,7 @@ import javax.crypto.spec.SecretKeySpec
 @Service
 class EncryptionService(
     private val encryptionSecretService: EncryptionSecretService,
-    private val keyManager: KeyManager,
+    private val secretStore: SecretStore,
     private val objectMapper: ObjectMapper
 ) {
 
@@ -73,7 +72,7 @@ class EncryptionService(
        this. logger.debug { "Decrypting..." }
 
         val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
-        val secret = this.keyManager.get(encrypted.secretKey) ?: throw SecretKeyNotFoundException(encrypted.secretKey)
+        val secret = this.secretStore.get(encrypted.secretKey) ?: throw SecretKeyNotFoundException(encrypted.secretKey)
 
         cipher.init(Cipher.DECRYPT_MODE, getKeyFromBase64(secret.value))
 

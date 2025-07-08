@@ -4,7 +4,7 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.secrets.core.model.CachedSecret
 import io.stereov.singularity.secrets.core.model.Secret
-import io.stereov.singularity.secrets.core.properties.KeyManagerProperties
+import io.stereov.singularity.secrets.core.properties.SecretStoreProperties
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.time.Instant
@@ -14,15 +14,15 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * A cache for secrets loaded from a key manager.
  * It can be used to improve performance when working with a key manager.
- * The secrets will expire and be deleted automatically. It is configured in the [KeyManagerProperties].
+ * The secrets will expire and be deleted automatically. It is configured in the [SecretStoreProperties].
  */
 @Component
-class SecretCache(keyManagerProperties: KeyManagerProperties) {
+class SecretCache(secretStoreProperties: SecretStoreProperties) {
 
     private val logger: KLogger
         get() = KotlinLogging.logger {}
 
-    private val expirationDurationSeconds = keyManagerProperties.cacheExpiration
+    private val expirationDurationSeconds = secretStoreProperties.cacheExpiration
     private val cache = ConcurrentHashMap<UUID, CachedSecret>()
 
     fun put(secret: Secret) {

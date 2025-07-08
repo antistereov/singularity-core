@@ -1,13 +1,13 @@
 package io.stereov.singularity.test.config
 
-import io.stereov.singularity.secrets.core.component.KeyManager
+import io.stereov.singularity.secrets.core.component.SecretStore
 import io.stereov.singularity.secrets.core.model.Secret
 import org.springframework.stereotype.Component
 import java.time.Instant
 import java.util.*
 
 @Component
-class MockKeyManager : KeyManager {
+class MockSecretStore : SecretStore {
     private val secrets: MutableList<Secret> = mutableListOf()
 
     override suspend fun getOrNull(key: String): Secret? {

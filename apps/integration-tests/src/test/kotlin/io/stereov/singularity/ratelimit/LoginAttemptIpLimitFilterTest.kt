@@ -1,7 +1,7 @@
 package io.stereov.singularity.ratelimit
 
 import io.stereov.singularity.ratelimit.properties.LoginAttemptLimitProperties
-import io.stereov.singularity.secrets.core.properties.KeyManagerImplementation
+import io.stereov.singularity.secrets.core.properties.SecretStoreImplementation
 import io.stereov.singularity.test.BaseSpringBootTest
 import io.stereov.singularity.user.dto.request.DeviceInfoRequest
 import io.stereov.singularity.user.dto.request.LoginRequest
@@ -36,7 +36,7 @@ class LoginAttemptIpLimitFilterTest : BaseSpringBootTest() {
         fun properties(registry: DynamicPropertyRegistry) {
             registry.add("singularity.app.support-email") { "support@example.com" }
             registry.add("singularity.app.create-root-user") { "false" }
-            registry.add("singularity.secrets.key-manager") { KeyManagerImplementation.Mock }
+            registry.add("singularity.secrets.store") { SecretStoreImplementation.Mock }
             registry.add("singularity.secrets.bitwarden.api-url") { "https//api.bitwarden.com" }
             registry.add("singularity.secrets.bitwarden.identity-url") { "https//identity.bitwarden.com" }
             registry.add("singularity.secrets.bitwarden.organization-id") { UUID.randomUUID() }

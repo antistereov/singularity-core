@@ -42,7 +42,7 @@ singularity:
         scheme: ${S3_SCHEME}
         path-style-access-enabled: ${S3_PATH_STYLE_ACCESS_ENABLED}
   secrets:
-    key-manager: bitwarden
+    store: bitwarden
     key-rotation-cron: 0 0 4 1 1,4,7,10 *
     cache-expiration: 900000
     bitwarden:

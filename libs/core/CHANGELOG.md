@@ -270,7 +270,7 @@ antistereov
 ## 🚀 Features
 - [e42130e](https://github.com/antistereov/web-kotlin-spring-baseline/commits/e42130e) enable key rotation for jwt
 - [d2f8475](https://github.com/antistereov/web-kotlin-spring-baseline/commits/d2f8475) create abstract classes to simplify handling encryption
-- [9ec8ac9](https://github.com/antistereov/web-kotlin-spring-baseline/commits/9ec8ac9) **key-manager**: implement a KeyManager interface to enable future implementations of key rotation
+- [9ec8ac9](https://github.com/antistereov/web-kotlin-spring-baseline/commits/9ec8ac9) **store**: implement a KeyManager interface to enable future implementations of key rotation
 - [4c423ad](https://github.com/antistereov/web-kotlin-spring-baseline/commits/4c423ad) various improvements
 - [8c7307f](https://github.com/antistereov/web-kotlin-spring-baseline/commits/8c7307f) implement S3 compatibility
 

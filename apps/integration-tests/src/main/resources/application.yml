@@ -41,7 +41,7 @@ baseline:
         secret-key: ${S3_SECRET_KEY}
         scheme: ${S3_SCHEME}
   secrets:
-    key-manager: bitwarden
+    store: bitwarden
     key-rotation-cron: 0 0 4 1 1,4,7,10 *
     cache-expiration: 900000
     bitwarden:

@@ -1,6 +1,6 @@
 package io.stereov.singularity.admin.service
 
-import io.stereov.singularity.secrets.core.properties.KeyManagerImplementation
+import io.stereov.singularity.secrets.core.properties.SecretStoreImplementation
 import io.stereov.singularity.test.BaseSpringBootTest
 import io.stereov.singularity.user.model.Role
 import kotlinx.coroutines.test.runTest
@@ -33,7 +33,7 @@ class AdminServiceIntegrationTest : BaseSpringBootTest() {
             registry.add("singularity.app.create-root-user") { "true" }
             registry.add("singularity.app.root-email") { "root@email.com" }
             registry.add("singularity.app.root-password") { "root-password" }
-            registry.add("singularity.secrets.key-manager") { KeyManagerImplementation.Mock }
+            registry.add("singularity.secrets.store") { SecretStoreImplementation.Mock }
             registry.add("singularity.file.storage.s3.domain") { "amazon.com" }
             registry.add("singularity.file.storage.s3.access-key") { "amazon.com" }
             registry.add("singularity.file.storage.s3.secret-key") { "amazon.com" }

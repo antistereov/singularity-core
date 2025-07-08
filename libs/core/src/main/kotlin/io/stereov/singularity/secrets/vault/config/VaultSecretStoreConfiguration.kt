@@ -1,7 +1,7 @@
-package io.stereov.singularity.secrets.hashicorp.config
+package io.stereov.singularity.secrets.vault.config
 
 import io.stereov.singularity.global.config.ApplicationConfiguration
-import io.stereov.singularity.secrets.hashicorp.properties.HashiCorpKeyManagerProperties
+import io.stereov.singularity.secrets.vault.properties.VaultSecretStoreProperties
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -17,10 +17,10 @@ import org.springframework.vault.config.AbstractReactiveVaultConfiguration
         ApplicationConfiguration::class,
     ]
 )
-@EnableConfigurationProperties(HashiCorpKeyManagerProperties::class)
-@ConditionalOnProperty(prefix = "singularity.secrets", value = ["key-manager"], havingValue = "hashicorp", matchIfMissing = false)
-class HashiCorpVaultConfiguration(
-    private val properties: HashiCorpKeyManagerProperties
+@EnableConfigurationProperties(VaultSecretStoreProperties::class)
+@ConditionalOnProperty(prefix = "singularity.secrets", value = ["store"], havingValue = "hashicorp", matchIfMissing = false)
+class VaultSecretStoreConfiguration(
+    private val properties: VaultSecretStoreProperties
 ) : AbstractReactiveVaultConfiguration()  {
 
 

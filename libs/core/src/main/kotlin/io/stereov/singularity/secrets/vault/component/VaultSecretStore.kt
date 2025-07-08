@@ -1,10 +1,10 @@
-package io.stereov.singularity.secrets.hashicorp.component
+package io.stereov.singularity.secrets.vault.component
 
 import io.stereov.singularity.global.properties.AppProperties
-import io.stereov.singularity.secrets.core.component.KeyManager
-import io.stereov.singularity.secrets.core.exception.model.KeyManagerException
+import io.stereov.singularity.secrets.core.component.SecretStore
+import io.stereov.singularity.secrets.core.exception.model.SecretStoreException
 import io.stereov.singularity.secrets.core.model.Secret
-import io.stereov.singularity.secrets.hashicorp.properties.HashiCorpKeyManagerProperties
+import io.stereov.singularity.secrets.vault.properties.VaultSecretStoreProperties
 import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
@@ -13,12 +13,12 @@ import java.time.Instant
 import java.util.*
 
 @Component
-@ConditionalOnProperty(prefix = "singularity.secrets", value = ["key-manager"], havingValue = "hashicorp", matchIfMissing = false)
-class HashiCorpKeyManager(
-    private val properties: HashiCorpKeyManagerProperties,
+@ConditionalOnProperty(prefix = "singularity.secrets", value = ["store"], havingValue = "hashicorp", matchIfMissing = false)
+class VaultSecretStore(
+    private val properties: VaultSecretStoreProperties,
     private val appProperties: AppProperties,
     private val vaultOperations: ReactiveVaultOperations
-) : KeyManager {
+) : SecretStore {
 
     private val apiPath: String
         get() = "/v1/${properties.engine}/data/${appProperties.slug}"
@@ -54,11 +54,11 @@ class HashiCorpKeyManager(
 
     private fun Map<String, Any?>.toSecret(key: String): Secret {
         val id = (this[idField] as? UUID)
-            ?: throw KeyManagerException("Cannot read secret with key \"$key\": $idField is not of type UUID")
+            ?: throw SecretStoreException("Cannot read secret with key \"$key\": $idField is not of type UUID")
         val value = this[valueField] as? String
-            ?: throw KeyManagerException("Cannot read secret with key \"$key\": $valueField is not of type String")
+            ?: throw SecretStoreException("Cannot read secret with key \"$key\": $valueField is not of type String")
         val createdAt = this[createdAtField] as? Instant
-            ?: throw KeyManagerException("Cannot read secret with key \"$key\": $createdAtField is not of type Instant")
+            ?: throw SecretStoreException("Cannot read secret with key \"$key\": $createdAtField is not of type Instant")
 
         return Secret(id, key, value, createdAt)
     }
