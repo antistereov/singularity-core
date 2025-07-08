@@ -5,11 +5,11 @@ import com.nimbusds.jose.JWSHeader
 import com.nimbusds.jose.crypto.MACSigner
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
-import io.stereov.singularity.jwt.service.JwtService
 import io.stereov.singularity.jwt.exception.model.InvalidTokenException
 import io.stereov.singularity.jwt.exception.model.TokenExpiredException
-import io.stereov.singularity.secrets.core.model.Secret
 import io.stereov.singularity.jwt.service.JwtSecretService
+import io.stereov.singularity.jwt.service.JwtService
+import io.stereov.singularity.secrets.core.model.Secret
 import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -41,7 +41,7 @@ class JwtServiceIntegrationTest : BaseIntegrationTest() {
 
         val signedJWT = SignedJWT(
             JWSHeader.Builder(JWSAlgorithm.HS256)
-                .keyID(secret.id.toString())
+                .keyID(secret.key)
                 .build(),
             actualClaims
         )
@@ -144,7 +144,7 @@ class JwtServiceIntegrationTest : BaseIntegrationTest() {
             .build()
 
         val signedJWT = SignedJWT(
-            JWSHeader.Builder(JWSAlgorithm.HS256).keyID(jwtSecretService.getCurrentSecret().id.toString()).build(),
+            JWSHeader.Builder(JWSAlgorithm.HS256).keyID(jwtSecretService.getCurrentSecret().key).build(),
             claims
         )
         signedJWT.sign(MACSigner(jwtSecretService.getCurrentSecret().value.toByteArray()))
