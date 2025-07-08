@@ -69,7 +69,7 @@ class BitwardenSecretStore(
         withContext(Dispatchers.IO) {
             logger.debug { "Creating or updating key $key" }
 
-            get(key) ?: return@withContext create(key, value, note)
+            getOrNull(key) ?: return@withContext create(key, value, note)
 
             val updatedSecret = update(key, value, note)
             cache.put(updatedSecret)

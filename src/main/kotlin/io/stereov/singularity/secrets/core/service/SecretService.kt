@@ -30,7 +30,7 @@ abstract class SecretService(
     private suspend fun loadCurrentSecret(): Secret {
         this.logger.debug { "Loading current secret from key manager" }
 
-        val currentSecret = this.secretStore.get(actualKey)
+        val currentSecret = this.secretStore.getOrNull(actualKey)
 
         val secret = currentSecret?.let {
             this.secretStore.get(currentSecret.value)

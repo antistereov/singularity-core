@@ -13,7 +13,7 @@ import java.time.Instant
 import java.util.*
 
 @Component
-@ConditionalOnProperty(prefix = "singularity.secrets", value = ["store"], havingValue = "hashicorp", matchIfMissing = false)
+@ConditionalOnProperty(prefix = "singularity.secrets", value = ["store"], havingValue = "vault", matchIfMissing = false)
 class VaultSecretStore(
     private val properties: VaultSecretStoreProperties,
     private val appProperties: AppProperties,

@@ -36,9 +36,9 @@
       "sourceType": "io.stereov.singularity.secrets.bitwarden.properties.BitwardenSecretStoreProperties"
     },
     {
-      "name": "singularity.secrets.hashicorp",
-      "type": "io.stereov.singularity.secrets.bitwarden.properties.HashiCorpKeyManagerProperties",
-      "sourceType": "io.stereov.singularity.secrets.bitwarden.properties.HashiCorpKeyManagerProperties"
+      "name": "singularity.secrets.vault",
+      "type": "io.stereov.singularity.secrets.bitwarden.properties.VaultKeyManagerProperties",
+      "sourceType": "io.stereov.singularity.secrets.bitwarden.properties.VaultKeyManagerProperties"
     },
     {
       "name": "singularity.security.jwt",
@@ -339,24 +339,31 @@
       "defaultValue": "~/.bitwarden/application/state"
     },
     {
-      "name": "singularity.secrets.hashicorp.host",
+      "name": "singularity.secrets.vault.host",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.secrets.bitwarden.properties.HashiCorpKeyManagerProperties",
-      "description": "The host of your HashiCorp vault instance",
+      "sourceType": "io.stereov.singularity.secrets.bitwarden.properties.VaultKeyManagerProperties",
+      "description": "The host of your Vault vault instance",
       "defaultValue": "localhost"
     },
     {
-      "name": "singularity.secrets.hashicorp.port",
+      "name": "singularity.secrets.vault.port",
       "type": "java.lang.Integer",
-      "sourceType": "io.stereov.singularity.secrets.bitwarden.properties.HashiCorpKeyManagerProperties",
-      "description": "The port of your HashiCorp vault instance",
+      "sourceType": "io.stereov.singularity.secrets.bitwarden.properties.VaultKeyManagerProperties",
+      "description": "The port of your Vault vault instance",
       "defaultValue": "8200"
     },
     {
-      "name": "singularity.secrets.hashicorp.token",
+      "name": "singularity.secrets.vault.token",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.secrets.bitwarden.properties.HashiCorpKeyManagerProperties",
-      "description": "The token to access your HashiCorp vault instance"
+      "sourceType": "io.stereov.singularity.secrets.bitwarden.properties.VaultKeyManagerProperties",
+      "description": "The token to access your Vault vault instance"
+    },
+    {
+      "name": "singularity.secrets.vault.engine",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.secrets.bitwarden.properties.VaultKeyManagerProperties",
+      "description": "The engine that stores all secrets. Default is apps.",
+      "defaultValue": "apps"
     },
     {
       "name": "singularity.security.jwt.expires-in",
