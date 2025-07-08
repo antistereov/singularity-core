@@ -29,6 +29,12 @@ Need a built-in content management backend? Check out the [content library](http
 - 💾 MongoDB for persistence, Redis for caching and session storage.
 - 🗂️ S3-based object storage abstraction with local fallback.
 
+### **Content Management**
+- 🧩 Abstract base for content types with **built-in access control** (users, groups, roles).
+- 🌍 **Multi-language support** out of the box — store and serve content in multiple locales.
+- 🏷️ Configurable tagging system for flexible content organization.
+- 📝 Prebuilt `Article` class for instant publishing workflows.
+
 ### **Performance**
 - ⚙️ Kotlin Coroutines for async flows.
 - 🚦 Configurable rate limiting (IP & user-based).

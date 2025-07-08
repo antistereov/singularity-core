@@ -16,6 +16,11 @@
       "sourceType": "io.stereov.singularity.file.core.properties.StorageProperties"
     },
     {
+      "name": "singularity.file.storage.local",
+      "type": "io.stereov.singularity.file.local.properties.LocalFileStorageProperties",
+      "sourceType": "io.stereov.singularity.file.local.properties.LocalFileStorageProperties"
+    },
+    {
       "name": "singularity.file.storage.s3",
       "type": "io.stereov.singularity.file.s3.properties.S3Properties",
       "sourceType": "io.stereov.singularity.file.s3.properties.S3Properties"
@@ -135,8 +140,22 @@
       "name": "singularity.file.storage.type",
       "type": "io.stereov.singularity.file.core.properties.StorageType",
       "sourceType": "io.stereov.singularity.file.s3.properties.S3Properties",
-      "description": "The type of storage you prefer.",
-      "defaultValue": "s3"
+      "description": "The type of storage you prefer. Default is local.",
+      "defaultValue": "local"
+    },
+    {
+      "name": "singularity.file.storage.local.private-path",
+      "type": "io.stereov.singularity.file.local.properties.LocalFileStorageProperties",
+      "sourceType": "io.stereov.singularity.file.local.properties.LocalFileStorageProperties",
+      "description": "The directory where your private files will be stored.",
+      "defaultValue": "./private"
+    },
+    {
+      "name": "singularity.file.storage.local.public-path",
+      "type": "io.stereov.singularity.file.local.properties.LocalFileStorageProperties",
+      "sourceType": "io.stereov.singularity.file.local.properties.LocalFileStorageProperties",
+      "description": "The directory where your public files will be stored.",
+      "defaultValue": "./public"
     },
     {
       "name": "singularity.file.storage.s3.domain",

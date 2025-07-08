@@ -1,6 +1,6 @@
 package io.stereov.singularity.user.dto
 
-import io.stereov.singularity.file.core.model.FileMetaData
+import io.stereov.singularity.content.file.model.FileDocument
 import io.stereov.singularity.user.model.Role
 import org.bson.types.ObjectId
 
@@ -32,7 +32,7 @@ data class UserResponse(
     val emailVerified: Boolean = false,
     val lastActive: String,
     val twoFactorAuthEnabled: Boolean,
-    val avatar: FileMetaData?,
+    val avatar: FileDocument?,
     val created: String,
     val groups: Set<String>,
 )
