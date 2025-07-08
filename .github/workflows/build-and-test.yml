@@ -65,7 +65,6 @@ jobs:
           docker build \
           --build-arg GPR_USER=$GPR_USER \
           --build-arg GPR_KEY=$GPR_KEY \
-          --platform linux/arm64 \
           -t ghcr.io/antistereov/stereov-io-singularity:latest \
           -f apps/stereov-io/Dockerfile \
           .
