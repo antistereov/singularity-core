@@ -6,7 +6,6 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.secrets.bitwarden.properties.BitwardenSecretStoreProperties
 import io.stereov.singularity.secrets.core.component.SecretCache
 import io.stereov.singularity.secrets.core.component.SecretStore
-import io.stereov.singularity.secrets.core.exception.model.SecretKeyNotFoundException
 import io.stereov.singularity.secrets.core.model.Secret
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

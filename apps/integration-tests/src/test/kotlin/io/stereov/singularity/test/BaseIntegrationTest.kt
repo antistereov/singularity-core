@@ -3,7 +3,6 @@ package io.stereov.singularity.test
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
-import io.stereov.singularity.user.cache.AccessTokenCache
 import io.stereov.singularity.hash.service.HashService
 import io.stereov.singularity.secrets.core.properties.SecretStoreImplementation
 import io.stereov.singularity.test.config.MockMailSenderConfig
