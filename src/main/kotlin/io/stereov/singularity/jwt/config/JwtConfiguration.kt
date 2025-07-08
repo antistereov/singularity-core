@@ -59,7 +59,7 @@ class JwtConfiguration {
                 val keyId = jwt.header.keyID
 
                 if (keyId.isNullOrEmpty()) throw InvalidTokenException("No key for JWT secret found in header")
-                val secret = keyManager.getSecretById(UUID.fromString(keyId))
+                val secret = keyManager.get(keyId) ?: throw InvalidTokenException("No JWT secret found for key that was found in header.")
 
                 if (!verifyJwtSignature(jwt, secret.value)) throw InvalidTokenException("Signature is invalid.")
 

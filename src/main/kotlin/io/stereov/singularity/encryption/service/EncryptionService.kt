@@ -7,8 +7,10 @@ import io.stereov.singularity.encryption.model.Encrypted
 import io.stereov.singularity.database.model.EncryptedSensitiveDocument
 import io.stereov.singularity.database.model.SensitiveDocument
 import io.stereov.singularity.secrets.core.component.KeyManager
+import io.stereov.singularity.secrets.core.exception.model.SecretKeyNotFoundException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import java.util.*
 import javax.crypto.Cipher
@@ -64,14 +66,14 @@ class EncryptionService(
 
         val encryptedString = Base64.getUrlEncoder().encodeToString(encrypted)
 
-        return Encrypted(secret.id, encryptedString)
+        return Encrypted(secret.key, encryptedString)
     }
 
     suspend fun <T> decrypt(encrypted: Encrypted<T>): String {
        this. logger.debug { "Decrypting..." }
 
         val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
-        val secret = this.keyManager.getSecretById(encrypted.secretId)
+        val secret = this.keyManager.get(encrypted.secretKey) ?: throw SecretKeyNotFoundException(encrypted.secretKey)
 
         cipher.init(Cipher.DECRYPT_MODE, getKeyFromBase64(secret.value))
 

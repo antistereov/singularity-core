@@ -25,7 +25,7 @@ class HashiCorpKeyManager(
 
     private fun getSecretPath(key: String): String = "$apiPath/$key"
 
-    override suspend fun get(key: String): Secret? {
+    override suspend fun getOrNull(key: String): Secret? {
         val secretPath = getSecretPath(key)
 
         val data = vaultOperations.read(secretPath).awaitSingle().data

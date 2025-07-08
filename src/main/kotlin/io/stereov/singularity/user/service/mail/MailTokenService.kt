@@ -4,9 +4,9 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.encryption.model.Encrypted
 import io.stereov.singularity.encryption.service.EncryptionService
-import io.stereov.singularity.jwt.service.JwtService
 import io.stereov.singularity.jwt.exception.model.InvalidTokenException
 import io.stereov.singularity.jwt.exception.model.TokenExpiredException
+import io.stereov.singularity.jwt.service.JwtService
 import io.stereov.singularity.mail.model.EmailVerificationToken
 import io.stereov.singularity.mail.model.PasswordResetToken
 import io.stereov.singularity.mail.properties.MailProperties
@@ -14,7 +14,6 @@ import org.bson.types.ObjectId
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
 import org.springframework.stereotype.Service
 import java.time.Instant
-import java.util.*
 
 /**
  * # Service for managing email tokens.
@@ -105,7 +104,7 @@ class MailTokenService(
             .expiresAt(issuedAt.plusSeconds(mailProperties.passwordResetExpiration))
             .subject(userId.toHexString())
             .claim("secret", encryptedSecret.ciphertext)
-            .claim("encryption-key-id", encryptedSecret.secretId)
+            .claim("encryption-key-id", encryptedSecret.secretKey)
             .build()
         
         return jwtService.encodeJwt(claims)
@@ -134,7 +133,7 @@ class MailTokenService(
         val kid = jwt.claims["encryption-key-id"] as? String
             ?: throw InvalidTokenException("No key ID found in claims")
 
-        val secret = encryptionService.decrypt(Encrypted<String>(UUID.fromString(kid), encryptedSecret))
+        val secret = encryptionService.decrypt(Encrypted<String>(kid, encryptedSecret))
 
         return PasswordResetToken(userId, secret)
     }
