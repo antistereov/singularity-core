@@ -170,7 +170,7 @@ singularity:
         path-style-access-enabled: ${S3_PATH_STYLE_ACCESS_ENABLED}
   secrets:
     # Key manager type for secrets (e.g., bitwarden).
-    key-manager: bitwarden
+    store: bitwarden
     # Cron expression for key rotation.
     key-rotation-cron: 0 0 4 1 1,4,7,10 *
     # Cache expiration for secrets in milliseconds.

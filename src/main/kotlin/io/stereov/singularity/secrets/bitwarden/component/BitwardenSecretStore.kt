@@ -3,9 +3,9 @@ package io.stereov.singularity.secrets.bitwarden.component
 import com.bitwarden.sdk.BitwardenClient
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.secrets.bitwarden.properties.BitwardenKeyManagerProperties
-import io.stereov.singularity.secrets.core.component.KeyManager
+import io.stereov.singularity.secrets.bitwarden.properties.BitwardenSecretStoreProperties
 import io.stereov.singularity.secrets.core.component.SecretCache
+import io.stereov.singularity.secrets.core.component.SecretStore
 import io.stereov.singularity.secrets.core.exception.model.SecretKeyNotFoundException
 import io.stereov.singularity.secrets.core.model.Secret
 import kotlinx.coroutines.Dispatchers
@@ -15,12 +15,12 @@ import org.springframework.stereotype.Component
 import java.util.*
 
 @Component
-@ConditionalOnProperty(prefix = "singularity.secrets", value = ["key-manager"], havingValue = "bitwarden", matchIfMissing = false)
-class BitwardenKeyManager(
+@ConditionalOnProperty(prefix = "singularity.secrets", value = ["store"], havingValue = "bitwarden", matchIfMissing = false)
+class BitwardenSecretStore(
     private val bitwardenClient: BitwardenClient,
-    private val properties: BitwardenKeyManagerProperties,
+    private val properties: BitwardenSecretStoreProperties,
     private val cache: SecretCache
-) : KeyManager {
+) : SecretStore {
 
     private val logger: KLogger
         get() = KotlinLogging.logger {}

@@ -27,13 +27,13 @@
     },
     {
       "name": "singularity.secrets",
-      "type": "io.stereov.singularity.secrets.core.properties.KeyManagerProperties",
-      "sourceType": "io.stereov.singularity.secrets.core.properties.KeyManagerProperties"
+      "type": "io.stereov.singularity.secrets.core.properties.SecretStoreProperties",
+      "sourceType": "io.stereov.singularity.secrets.core.properties.SecretStoreProperties"
     },
     {
       "name": "singularity.secrets.bitwarden",
-      "type": "io.stereov.singularity.secrets.bitwarden.properties.BitwardenKeyManagerProperties",
-      "sourceType": "io.stereov.singularity.secrets.bitwarden.properties.BitwardenKeyManagerProperties"
+      "type": "io.stereov.singularity.secrets.bitwarden.properties.BitwardenSecretStoreProperties",
+      "sourceType": "io.stereov.singularity.secrets.bitwarden.properties.BitwardenSecretStoreProperties"
     },
     {
       "name": "singularity.secrets.hashicorp",
@@ -279,62 +279,62 @@
       "description": "Cooldown period in seconds for sending verification emails."
     },
     {
-      "name": "singularity.secrets.key-manager",
-      "type": "io.stereov.singularity.secrets.core.properties.KeyManagerImplementation",
-      "sourceType": "io.stereov.singularity.secrets.core.properties.KeyManagerProperties",
+      "name": "singularity.secrets.store",
+      "type": "io.stereov.singularity.secrets.core.properties.SecretStoreImplementation",
+      "sourceType": "io.stereov.singularity.secrets.core.properties.SecretStoreProperties",
       "defaultValue": "bitwarden",
-      "description": "The key manager you want to use. Default value is bitwarden."
+      "description": "The secret store you want to use. Default value is bitwarden."
     },
     {
       "name": "singularity.secrets.key-rotation-cron",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.secrets.core.properties.KeyManagerProperties",
+      "sourceType": "io.stereov.singularity.secrets.core.properties.SecretStoreProperties",
       "defaultValue": "0 0 4 1 1,4,7,10 *",
       "description": "The cron expression for key rotation. The default value is the 1st day of January, April, July, and October at 4:00:00 AM."
     },
     {
       "name": "singularity.secrets.cache-expiration",
       "type": "java.lang.Long",
-      "sourceType": "io.stereov.singularity.secrets.core.properties.KeyManagerProperties",
+      "sourceType": "io.stereov.singularity.secrets.core.properties.SecretStoreProperties",
       "defaultValue": 900000,
       "description": "The duration it takes for cached secrets to expire in milliseconds. Default is 900 000ms which is equal to 15min."
     },
     {
       "name": "singularity.secrets.bitwarden.api-url",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.secrets.bitwarden.properties.BitwardenKeyManagerProperties",
+      "sourceType": "io.stereov.singularity.secrets.bitwarden.properties.BitwardenSecretStoreProperties",
       "defaultValue": "https://api.bitwarden.com",
       "description": "The API URL for Bitwarden."
     },
     {
       "name": "singularity.secrets.bitwarden.identity-url",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.secrets.bitwarden.properties.BitwardenKeyManagerProperties",
+      "sourceType": "io.stereov.singularity.secrets.bitwarden.properties.BitwardenSecretStoreProperties",
       "defaultValue": "https://identity.bitwarden.com",
       "description": "The identity URL for Bitwarden."
     },
     {
       "name": "singularity.secrets.bitwarden.access-token",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.secrets.bitwarden.properties.BitwardenKeyManagerProperties",
+      "sourceType": "io.stereov.singularity.secrets.bitwarden.properties.BitwardenSecretStoreProperties",
       "description": "Your access token for Bitwarden."
     },
     {
       "name": "singularity.secrets.bitwarden.organization-id",
       "type": "java.util.UUID",
-      "sourceType": "io.stereov.singularity.secrets.bitwarden.properties.BitwardenKeyManagerProperties",
+      "sourceType": "io.stereov.singularity.secrets.bitwarden.properties.BitwardenSecretStoreProperties",
       "description": "Your organization ID within Bitwarden."
     },
     {
       "name": "singularity.secrets.bitwarden.project-id",
       "type": "java.util.UUID",
-      "sourceType": "io.stereov.singularity.secrets.bitwarden.properties.BitwardenKeyManagerProperties",
+      "sourceType": "io.stereov.singularity.secrets.bitwarden.properties.BitwardenSecretStoreProperties",
       "description": "Your project ID within Bitwarden."
     },
     {
       "name": "singularity.secrets.bitwarden.state-file",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.secrets.bitwarden.properties.BitwardenKeyManagerProperties",
+      "sourceType": "io.stereov.singularity.secrets.bitwarden.properties.BitwardenSecretStoreProperties",
       "description": "The path to your state file",
       "defaultValue": "~/.bitwarden/application/state"
     },

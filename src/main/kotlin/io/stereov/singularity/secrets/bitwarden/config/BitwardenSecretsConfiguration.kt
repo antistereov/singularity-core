@@ -3,8 +3,8 @@ package io.stereov.singularity.secrets.bitwarden.config
 import com.bitwarden.sdk.BitwardenClient
 import com.bitwarden.sdk.BitwardenSettings
 import io.stereov.singularity.global.config.ApplicationConfiguration
-import io.stereov.singularity.secrets.bitwarden.component.BitwardenKeyManager
-import io.stereov.singularity.secrets.bitwarden.properties.BitwardenKeyManagerProperties
+import io.stereov.singularity.secrets.bitwarden.component.BitwardenSecretStore
+import io.stereov.singularity.secrets.bitwarden.properties.BitwardenSecretStoreProperties
 import io.stereov.singularity.secrets.core.component.SecretCache
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
@@ -19,20 +19,20 @@ import org.springframework.context.annotation.Configuration
         ApplicationConfiguration::class,
     ]
 )
-@EnableConfigurationProperties(BitwardenKeyManagerProperties::class)
-@ConditionalOnProperty(prefix = "singularity.secrets", value = ["key-manager"], havingValue = "bitwarden", matchIfMissing = false)
+@EnableConfigurationProperties(BitwardenSecretStoreProperties::class)
+@ConditionalOnProperty(prefix = "singularity.secrets", value = ["store"], havingValue = "bitwarden", matchIfMissing = false)
 class BitwardenSecretsConfiguration {
 
 
     @Bean
     @ConditionalOnMissingBean
-    fun bitwardenKeyManager(client: BitwardenClient, properties: BitwardenKeyManagerProperties, secretCache: SecretCache): BitwardenKeyManager {
-        return BitwardenKeyManager(client, properties, secretCache)
+    fun bitwardenKeyManager(client: BitwardenClient, properties: BitwardenSecretStoreProperties, secretCache: SecretCache): BitwardenSecretStore {
+        return BitwardenSecretStore(client, properties, secretCache)
     }
 
     @Bean
     @ConditionalOnMissingBean
-    fun bitwardenClient(properties: BitwardenKeyManagerProperties): BitwardenClient {
+    fun bitwardenClient(properties: BitwardenSecretStoreProperties): BitwardenClient {
         val bitwardenSettings = BitwardenSettings(properties.apiUrl, properties.identityUrl)
         val bitwardenClient = BitwardenClient(bitwardenSettings)
 
