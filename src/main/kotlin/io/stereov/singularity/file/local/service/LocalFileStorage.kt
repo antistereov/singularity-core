@@ -19,7 +19,7 @@ import java.nio.file.Paths
 
 @Service
 @ConditionalOnProperty(prefix = "singularity.file.storage", value = ["type"], havingValue = "local", matchIfMissing = true)
-class LocalFileStorageService(
+class LocalFileStorage(
     private val properties: LocalFileStorageProperties,
     override val appProperties: AppProperties,
     override val metadataService: FileMetadataService,
@@ -49,6 +49,7 @@ class LocalFileStorageService(
 
         val filePath = getBaseDir(public).resolve(key)
 
+        Files.createDirectories(filePath.parent)
         filePart.transferTo(filePath).awaitSingle()
 
         val size = Files.size(filePath)

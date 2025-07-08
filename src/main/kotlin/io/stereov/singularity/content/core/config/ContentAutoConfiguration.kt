@@ -14,6 +14,8 @@ import io.stereov.singularity.content.common.tag.controller.TagController
 import io.stereov.singularity.content.common.tag.repository.TagRepository
 import io.stereov.singularity.content.common.tag.service.TagService
 import io.stereov.singularity.content.core.properties.ContentProperties
+import io.stereov.singularity.content.file.repository.FileRepository
+import io.stereov.singularity.content.file.service.FileMetadataService
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.invitation.service.InvitationService
@@ -43,13 +45,19 @@ import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRep
     ]
 )
 @EnableConfigurationProperties(ContentProperties::class)
-@EnableReactiveMongoRepositories(basePackageClasses = [ArticleRepository::class, TagRepository::class])
+@EnableReactiveMongoRepositories(basePackageClasses = [ArticleRepository::class, TagRepository::class, FileRepository::class])
 class ContentAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
     fun accessCriteria(authenticationService: AuthenticationService): AccessCriteria {
         return AccessCriteria(authenticationService)
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun fileMetaDataService(repository: FileRepository, authenticationService: AuthenticationService): FileMetadataService {
+        return FileMetadataService(repository, authenticationService)
     }
 
     @Bean

@@ -1,0 +1,25 @@
+services:
+  dev_mongo:
+    image: mongodb/mongodb-community-server:latest
+    container_name: dev_mongo
+    ports:
+      - "27017:27017"
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: singularity
+      MONGO_INITDB_ROOT_PASSWORD: singularity
+    volumes:
+      - dev_mongo_data:/data/db
+      - ./config/mongo:/etc/mongo
+    command: ["--config", "/etc/mongo/mongod.conf"]
+  dev_redis:
+    image: redis:latest
+    container_name: dev_redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    volumes:
+      - ./config/redis/redis.conf:/usr/local/etc/redis/redis.conf
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+volumes:
+  dev_mongo_data:
