@@ -96,7 +96,7 @@ interface SensitiveCrudService<S, D: SensitiveDocument<S>, E: EncryptedSensitive
 
         this.repository.findAll()
             .map {
-                if (it.sensitive.secretId == encryptionSecretService.getCurrentSecret().id) {
+                if (it.sensitive.secretKey == encryptionSecretService.getCurrentSecret().key) {
                     logger.debug { "Skipping rotation of document ${it._id}: Encryption secret did not change" }
                     return@map it
                 }

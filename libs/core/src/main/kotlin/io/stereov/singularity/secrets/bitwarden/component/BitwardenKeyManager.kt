@@ -39,7 +39,7 @@ class BitwardenKeyManager(
         return@withContext secret
     }
 
-    override suspend fun get(key: String): Secret? = withContext(Dispatchers.IO) {
+    override suspend fun getOrNull(key: String): Secret? = withContext(Dispatchers.IO) {
         logger.debug { "Getting secret by key $key" }
 
         val loadedSecret = cache.getByKey(key)

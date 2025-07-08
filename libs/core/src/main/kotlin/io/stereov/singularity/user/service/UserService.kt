@@ -2,11 +2,11 @@ package io.stereov.singularity.user.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.database.service.SensitiveCrudService
-import io.stereov.singularity.encryption.service.EncryptionService
-import io.stereov.singularity.file.model.FileMetaData
-import io.stereov.singularity.file.exception.model.NoSuchFileException
-import io.stereov.singularity.hash.service.HashService
 import io.stereov.singularity.encryption.service.EncryptionSecretService
+import io.stereov.singularity.encryption.service.EncryptionService
+import io.stereov.singularity.file.exception.model.NoSuchFileException
+import io.stereov.singularity.file.model.FileMetaData
+import io.stereov.singularity.hash.service.HashService
 import io.stereov.singularity.user.exception.model.UserDoesNotExistException
 import io.stereov.singularity.user.model.EncryptedUserDocument
 import io.stereov.singularity.user.model.SensitiveUserData
@@ -49,7 +49,7 @@ class UserService(
 
         this.repository.findAll()
             .map {
-                if (it.sensitive.secretId == encryptionSecretService.getCurrentSecret().id) {
+                if (it.sensitive.secretKey == encryptionSecretService.getCurrentSecret().key) {
                     logger.debug { "Skipping rotation of user document ${it._id}: Encryption secret did not change" }
                     return@map it
                 }
