@@ -22,7 +22,7 @@ logging:
   level:
     io.stereov: ${LOG_LEVEL:DEBUG}
 
-baseline:
+singularity:
   app:
     name: ${APP_NAME}
     base-url: ${BACKEND_BASE_URL}
@@ -65,8 +65,6 @@ baseline:
     verification-send-cooldown: ${MAIL_VERIFICATION_SEND_COOLDOWN:60}
     password-reset-expiration: 900
     password-reset-send-cooldown: 60
-    ui-verification-path: ${EMAIL_VERIFICATION_PATH:/auth/verify-email}
-    ui-password-reset-path: ${PASSWORD_RESET_PATH:/auth/reset-password}
   security:
     jwt:
       expires-in: 900
