@@ -4,6 +4,7 @@ import io.stereov.singularity.auth.exception.handler.AuthExceptionHandler
 import io.stereov.singularity.auth.properties.AuthProperties
 import io.stereov.singularity.auth.service.AuthenticationService
 import io.stereov.singularity.auth.service.CookieService
+import io.stereov.singularity.file.s3.config.S3Configuration
 import io.stereov.singularity.geolocation.service.GeoLocationService
 import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.global.properties.AppProperties
@@ -22,7 +23,7 @@ import org.springframework.context.annotation.Configuration
 @AutoConfiguration(
     after = [
         ApplicationConfiguration::class,
-        io.stereov.singularity.file.config.S3Configuration::class,
+        S3Configuration::class,
     ]
 )
 @EnableConfigurationProperties(AuthProperties::class)

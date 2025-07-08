@@ -1,4 +1,4 @@
-package io.stereov.singularity.file.model
+package io.stereov.singularity.file.core.model
 
 import io.stereov.singularity.auth.model.AccessType
 import java.time.Instant

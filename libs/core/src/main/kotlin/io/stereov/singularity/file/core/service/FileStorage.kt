@@ -1,6 +1,6 @@
-package io.stereov.singularity.file.service
+package io.stereov.singularity.file.core.service
 
-import io.stereov.singularity.file.model.FileMetaData
+import io.stereov.singularity.file.core.model.FileMetaData
 import org.bson.types.ObjectId
 import org.springframework.http.codec.multipart.FilePart
 

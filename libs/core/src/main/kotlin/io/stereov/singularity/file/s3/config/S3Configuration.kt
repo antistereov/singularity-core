@@ -1,6 +1,8 @@
-package io.stereov.singularity.file.config
+package io.stereov.singularity.file.s3.config
 
-import io.stereov.singularity.file.properties.S3Properties
+import io.stereov.singularity.file.core.config.StorageConfiguration
+import io.stereov.singularity.file.s3.properties.S3Properties
+import io.stereov.singularity.file.s3.service.S3FileStorage
 import io.stereov.singularity.global.properties.AppProperties
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
@@ -56,8 +58,8 @@ class S3Configuration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun fileStorage(s3Properties: S3Properties, s3AsyncClient: S3AsyncClient, s3Presigner: S3Presigner, appProperties: AppProperties): io.stereov.singularity.file.service.S3FileStorage {
-        return io.stereov.singularity.file.service.S3FileStorage(
+    fun fileStorage(s3Properties: S3Properties, s3AsyncClient: S3AsyncClient, s3Presigner: S3Presigner, appProperties: AppProperties): S3FileStorage {
+        return S3FileStorage(
             s3Properties,
             s3AsyncClient,
             s3Presigner,

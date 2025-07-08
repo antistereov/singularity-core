@@ -1,6 +1,6 @@
 package io.stereov.singularity.user.model
 
-import io.stereov.singularity.file.model.FileMetaData
+import io.stereov.singularity.file.core.model.FileMetaData
 
 
 data class SensitiveUserData(

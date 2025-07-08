@@ -1,6 +1,6 @@
 package io.stereov.singularity.user.controller
 
-import io.stereov.singularity.file.model.FileMetaData
+import io.stereov.singularity.file.core.model.FileMetaData
 import io.stereov.singularity.user.service.UserService
 import org.bson.types.ObjectId
 import org.springframework.http.ResponseEntity

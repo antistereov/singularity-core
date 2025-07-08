@@ -1,4 +1,4 @@
-package io.stereov.singularity.file.util
+package io.stereov.singularity.file.core.util
 
 import org.springframework.core.io.buffer.DataBuffer
 import reactor.core.publisher.Flux

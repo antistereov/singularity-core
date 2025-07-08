@@ -7,6 +7,7 @@ import io.stereov.singularity.auth.service.AuthenticationService
 import io.stereov.singularity.auth.service.CookieService
 import io.stereov.singularity.encryption.service.EncryptionSecretService
 import io.stereov.singularity.encryption.service.EncryptionService
+import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.hash.service.HashService
@@ -164,7 +165,7 @@ class UserConfiguration {
         deviceService: UserDeviceService,
         accessTokenCache: AccessTokenCache,
         cookieService: CookieService,
-        fileStorage: io.stereov.singularity.file.service.FileStorage,
+        fileStorage: FileStorage,
         mailService: UserMailSender,
     ): UserSessionService {
         return UserSessionService(

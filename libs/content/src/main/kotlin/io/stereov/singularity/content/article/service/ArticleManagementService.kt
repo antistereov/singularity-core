@@ -8,7 +8,8 @@ import io.stereov.singularity.content.common.content.dto.*
 import io.stereov.singularity.content.common.content.model.ContentAccessRole
 import io.stereov.singularity.content.common.content.service.ContentManagementService
 import io.stereov.singularity.content.common.content.util.toSlug
-import io.stereov.singularity.file.exception.model.UnsupportedMediaTypeException
+import io.stereov.singularity.file.core.exception.model.UnsupportedMediaTypeException
+import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.invitation.service.InvitationService
 import io.stereov.singularity.translate.exception.model.TranslationForLangMissingException
@@ -28,7 +29,7 @@ class ArticleManagementService(
     override val contentService: ArticleService,
     override val authenticationService: AuthenticationService,
     override val invitationService: InvitationService,
-    private val fileStorage: io.stereov.singularity.file.service.FileStorage,
+    private val fileStorage: FileStorage,
     private val translateService: TranslateService,
     private val uiProperties: UiProperties,
     override val userService: UserService,

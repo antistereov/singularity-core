@@ -4,7 +4,7 @@ import io.stereov.singularity.content.article.model.ArticleColors
 import io.stereov.singularity.content.article.model.ArticleState
 import io.stereov.singularity.content.common.content.dto.ContentAccessDetailsResponse
 import io.stereov.singularity.content.common.tag.dto.TagResponse
-import io.stereov.singularity.file.model.FileMetaData
+import io.stereov.singularity.file.core.model.FileMetaData
 import io.stereov.singularity.translate.model.Language
 import io.stereov.singularity.user.dto.UserOverviewResponse
 import org.bson.types.ObjectId
