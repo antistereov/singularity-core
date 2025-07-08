@@ -11,6 +11,8 @@ io.stereov.singularity.database.config.MongoConfiguration
 io.stereov.singularity.encryption.config.EncryptionConfiguration
 
 io.stereov.singularity.file.core.config.StorageConfiguration
+io.stereov.singularity.file.local.config.FileSystemResourceConfiguration
+io.stereov.singularity.file.local.config.LocalFileStorageConfiguration
 io.stereov.singularity.file.s3.config.S3Configuration
 
 io.stereov.singularity.geolocation.config.GeoLocationConfiguration

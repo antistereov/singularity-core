@@ -188,7 +188,7 @@ class UserSessionService(
         val currentAvatar = user.sensitive.avatar
 
         if (currentAvatar != null) {
-            fileStorage.removeFileIfExists(currentAvatar.key)
+            fileStorage.remove(currentAvatar.key)
         }
 
         val allowedMediaTypes = listOf(MediaType.IMAGE_JPEG, MediaType.IMAGE_GIF, MediaType.IMAGE_PNG)
@@ -213,7 +213,7 @@ class UserSessionService(
         val currentAvatar = user.sensitive.avatar
 
         if (currentAvatar != null) {
-            fileStorage.removeFileIfExists(currentAvatar.key)
+            fileStorage.remove(currentAvatar.key)
         }
 
         user.sensitive.avatar = null

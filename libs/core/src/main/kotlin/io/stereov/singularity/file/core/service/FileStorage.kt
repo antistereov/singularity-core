@@ -1,15 +1,76 @@
 package io.stereov.singularity.file.core.service
 
-import io.stereov.singularity.file.core.model.FileMetaData
+import io.github.oshai.kotlinlogging.KLogger
+import io.stereov.singularity.auth.model.AccessType
+import io.stereov.singularity.content.file.model.FileDocument
+import io.stereov.singularity.content.file.service.FileMetadataService
+import io.stereov.singularity.global.properties.AppProperties
 import org.bson.types.ObjectId
+import org.springframework.http.MediaType
 import org.springframework.http.codec.multipart.FilePart
+import java.util.*
 
-interface FileStorage {
+abstract class FileStorage {
 
-    suspend fun upload(userId: ObjectId, filePart: FilePart, key: String, public: Boolean): FileMetaData
-    suspend fun fileExists(key: String): Boolean
-    suspend fun removeFile(key: String)
-    suspend fun removeFileIfExists(key: String): Boolean
-    suspend fun getPublicUrl(key: String): String
-    suspend fun getPresignedUrl(key: String): String
+    abstract val metadataService: FileMetadataService
+    abstract val appProperties: AppProperties
+    abstract val logger: KLogger
+
+    suspend fun upload(userId: ObjectId, filePart: FilePart, key: String, public: Boolean): FileDocument {
+        val extension = filePart.filename().substringAfterLast(".", "")
+
+        val actualKey = if (extension.isBlank()) {
+            "${appProperties.slug}/$key-${UUID.randomUUID()}"
+        } else {
+            "${appProperties.slug}/$key-${UUID.randomUUID()}.$extension"
+        }
+
+        val contentType = filePart.headers().contentType ?: MediaType.APPLICATION_OCTET_STREAM
+
+        val document = doUpload(userId, filePart, actualKey, public, contentType)
+        return metadataService.save(document)
+    }
+    suspend fun exists(key: String): Boolean {
+        logger.debug { "Checking existence of file with key \"$key\"" }
+
+        val existsInDb = metadataService.existsByKey(key)
+        val existsAsFile = doExists(key)
+        val exists = existsInDb && existsAsFile
+
+        if (!existsInDb && existsAsFile) {
+            logger.warn { "No metadata for file with key \"$key\" found in database but file exists. It will be removed now to maintain consistency." }
+            remove(key)
+            return false
+        }
+
+        if (!existsAsFile && existsInDb) {
+            logger.warn { "No file found with key \"$key\" but metadata found in database. The metadata will be removed from the database to maintain consistency."}
+            remove(key)
+            return false
+        }
+
+        return exists
+    }
+    suspend fun remove(key: String) {
+        logger.debug { "Removing file with key \"$key\"" }
+
+        metadataService.deleteByKey(key)
+        doRemove(key)
+    }
+    suspend fun getUrl(key: String): String {
+        logger.debug { "Getting URL for file with key \"$key\"" }
+
+        val metadata = metadataService.findByKey(key)
+
+        return when (metadata.access.visibility) {
+            AccessType.PUBLIC -> getPublicUrl(key)
+            else -> getPrivateUrl(key)
+        }
+    }
+
+    protected abstract suspend fun doUpload(userId: ObjectId, filePart: FilePart, key: String, public: Boolean, contentType: MediaType): FileDocument
+    protected abstract suspend fun doExists(key: String): Boolean
+    protected abstract suspend fun doRemove(key: String)
+    protected abstract suspend fun getPublicUrl(key: String): String
+    protected abstract suspend fun getPrivateUrl(key: String): String
 }

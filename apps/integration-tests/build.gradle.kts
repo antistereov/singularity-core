@@ -35,7 +35,6 @@ dependencies {
     // You should use:
     // implementation("io.stereov.web:baseline:<version>")
     api(project(":libs:core"))
-    api(project(":libs:content"))
 
     // Tests
     testImplementation("org.springframework.boot:spring-boot-starter-test") {

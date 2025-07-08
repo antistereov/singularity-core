@@ -3,10 +3,10 @@ package io.stereov.singularity.user.model
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.database.model.SensitiveDocument
+import io.stereov.singularity.encryption.model.Encrypted
+import io.stereov.singularity.content.file.model.FileDocument
 import io.stereov.singularity.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.global.exception.model.MissingFunctionParameterException
-import io.stereov.singularity.encryption.model.Encrypted
-import io.stereov.singularity.file.core.model.FileMetaData
 import io.stereov.singularity.hash.model.SearchableHash
 import io.stereov.singularity.hash.model.SecureHash
 import io.stereov.singularity.user.dto.UserOverviewResponse
@@ -39,7 +39,7 @@ data class UserDocument(
         groups: MutableSet<String> = mutableSetOf(),
         security: UserSecurityDetails = UserSecurityDetails(),
         devices: MutableList<DeviceInfo> = mutableListOf(),
-        avatar: FileMetaData? = null,
+        avatar: FileDocument? = null,
     ): this(id, password, created, lastActive, SensitiveUserData(name, email, roles, groups, security, devices, avatar))
 
     @get:Transient
