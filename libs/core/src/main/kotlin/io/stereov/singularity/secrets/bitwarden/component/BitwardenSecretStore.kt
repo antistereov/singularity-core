@@ -78,7 +78,7 @@ class BitwardenSecretStore(
 
     suspend fun update(key: String, value: String, note: String): Secret =
         withContext(Dispatchers.IO) {
-            val id = get(key)
+            val id: UUID? = get(key).id
 
             val res = bitwardenClient.secrets()
                 .update(properties.organizationId, id, key, value, note, arrayOf(properties.projectId))
