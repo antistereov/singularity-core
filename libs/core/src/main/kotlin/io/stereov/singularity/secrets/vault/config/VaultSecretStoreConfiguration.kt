@@ -18,7 +18,7 @@ import org.springframework.vault.config.AbstractReactiveVaultConfiguration
     ]
 )
 @EnableConfigurationProperties(VaultSecretStoreProperties::class)
-@ConditionalOnProperty(prefix = "singularity.secrets", value = ["store"], havingValue = "hashicorp", matchIfMissing = false)
+@ConditionalOnProperty(prefix = "singularity.secrets", value = ["store"], havingValue = "vault", matchIfMissing = false)
 class VaultSecretStoreConfiguration(
     private val properties: VaultSecretStoreProperties
 ) : AbstractReactiveVaultConfiguration()  {

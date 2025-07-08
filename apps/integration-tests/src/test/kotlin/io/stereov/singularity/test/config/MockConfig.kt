@@ -12,8 +12,5 @@ class MockConfig {
     fun googleAuthenticator(): GoogleAuthenticator = mockk(relaxed = true)
 
     @Bean
-    fun keyManager(): MockSecretStore = MockSecretStore()
-
-    @Bean
     fun fileStorage(): FileStorage = mockk(relaxed = true)
 }

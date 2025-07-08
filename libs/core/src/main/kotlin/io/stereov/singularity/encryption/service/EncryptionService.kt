@@ -72,7 +72,7 @@ class EncryptionService(
        this. logger.debug { "Decrypting..." }
 
         val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
-        val secret = this.secretStore.get(encrypted.secretKey) ?: throw SecretKeyNotFoundException(encrypted.secretKey)
+        val secret = this.secretStore.get(encrypted.secretKey)
 
         cipher.init(Cipher.DECRYPT_MODE, getKeyFromBase64(secret.value))
 

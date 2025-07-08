@@ -79,7 +79,7 @@ class BaseIntegrationTest : BaseSpringBootTest() {
         fun properties(registry: DynamicPropertyRegistry) {
             registry.add("singularity.app.support-email") { "support@example.com" }
             registry.add("singularity.app.create-root-user") { "false" }
-            registry.add("singularity.secrets.store") { SecretStoreImplementation.Mock }
+            registry.add("singularity.secrets.store") { SecretStoreImplementation.MOCK }
             registry.add("singularity.file.storage.s3.domain") { "amazon.com" }
             registry.add("singularity.file.storage.s3.access-key") { "amazon.com" }
             registry.add("singularity.file.storage.s3.secret-key") { "amazon.com" }

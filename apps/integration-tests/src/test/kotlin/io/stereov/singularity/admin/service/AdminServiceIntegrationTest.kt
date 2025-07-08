@@ -33,7 +33,7 @@ class AdminServiceIntegrationTest : BaseSpringBootTest() {
             registry.add("singularity.app.create-root-user") { "true" }
             registry.add("singularity.app.root-email") { "root@email.com" }
             registry.add("singularity.app.root-password") { "root-password" }
-            registry.add("singularity.secrets.store") { SecretStoreImplementation.Mock }
+            registry.add("singularity.secrets.store") { SecretStoreImplementation.MOCK }
             registry.add("singularity.file.storage.s3.domain") { "amazon.com" }
             registry.add("singularity.file.storage.s3.access-key") { "amazon.com" }
             registry.add("singularity.file.storage.s3.secret-key") { "amazon.com" }

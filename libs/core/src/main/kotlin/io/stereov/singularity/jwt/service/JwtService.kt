@@ -75,7 +75,7 @@ class JwtService(
 
         val jwsHeader = JwsHeader
             .with { "HS256" }
-            .keyId(currentJwt.id.toString())
+            .keyId(currentJwt.key)
             .build()
 
         return this.encodeJwt(JwtEncoderParameters.from(jwsHeader, claims))
