@@ -44,9 +44,6 @@ class BaseIntegrationTest : BaseSpringBootTest() {
     lateinit var hashService: HashService
 
     @Autowired
-    lateinit var accessTokenCache: AccessTokenCache
-
-    @Autowired
     lateinit var applicationContext: ApplicationContext
 
     @Autowired

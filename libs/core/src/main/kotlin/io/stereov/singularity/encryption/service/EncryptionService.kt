@@ -7,7 +7,6 @@ import io.stereov.singularity.encryption.model.Encrypted
 import io.stereov.singularity.database.model.EncryptedSensitiveDocument
 import io.stereov.singularity.database.model.SensitiveDocument
 import io.stereov.singularity.secrets.core.component.SecretStore
-import io.stereov.singularity.secrets.core.exception.model.SecretKeyNotFoundException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.springframework.stereotype.Service
