@@ -6,6 +6,7 @@ import io.stereov.singularity.content.common.content.model.ContentDocument
 import io.stereov.singularity.global.exception.model.InvalidDocumentException
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
+import org.springframework.data.annotation.Transient
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.http.MediaType
@@ -25,9 +26,11 @@ data class FileDocument(
     override var tags: MutableSet<String> = mutableSetOf()
 ) : ContentDocument<FileDocument> {
 
+    @get:Transient
     override val id: ObjectId
         get() = _id ?: throw InvalidDocumentException("No ID found")
 
+    @get:Transient
     val contentType: MediaType
         get() = MediaType.valueOf(_contentType)
 
