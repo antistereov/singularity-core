@@ -2,18 +2,20 @@ package io.stereov.singularity.user.controller
 
 import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.global.util.Random
-import io.stereov.singularity.user.service.mail.MailTokenService
 import io.stereov.singularity.test.BaseIntegrationTest
 import io.stereov.singularity.user.dto.UserResponse
 import io.stereov.singularity.user.dto.request.*
 import io.stereov.singularity.user.dto.response.LoginResponse
+import io.stereov.singularity.user.service.mail.MailTokenService
 import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.http.client.MultipartBodyBuilder
 import java.time.Instant
 
 class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
@@ -665,6 +667,25 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
             .cookie(Constants.ACCESS_TOKEN_COOKIE, accessToken)
             .exchange()
             .expectStatus().isBadRequest
+    }
+
+    @Test fun `setAvatar works`() = runTest {
+        val user = registerUser()
+        val accessToken = user.accessToken
+
+        val res = webTestClient.put()
+            .uri("/api/user/me/avatar")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, accessToken)
+            .bodyValue(
+                MultipartBodyBuilder().apply {
+                    part("file", ClassPathResource("files/test-image.jpg"))
+                }.build()
+            )
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(UserResponse::class.java)
+            .returnResult()
+            .responseBody
     }
 
     @Test fun `checkAuthentication requires authentication`() = runTest {
