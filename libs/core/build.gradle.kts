@@ -48,7 +48,7 @@ repositories {
 
 val kotlinVersion = "2.0.21"
 val kotlinxVersion = "1.10.1"
-val springBootVersion = "3.4.4"
+val springBootVersion = "3.5.3"
 val bucket4jVersion = "8.14.0"
 
 dependencies {
