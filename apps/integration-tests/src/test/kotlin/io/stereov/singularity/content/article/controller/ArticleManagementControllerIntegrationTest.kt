@@ -5,7 +5,7 @@ import io.stereov.singularity.content.article.dto.ArticleResponse
 import io.stereov.singularity.content.article.model.ArticleState
 import io.stereov.singularity.content.common.content.model.ContentAccessRole
 import io.stereov.singularity.content.common.content.model.ContentAccessSubject
-import io.stereov.singularity.content.common.tag.dto.CreateTagRequest
+import io.stereov.singularity.content.core.tag.dto.CreateTagRequest
 import io.stereov.singularity.auth.model.AccessType
 import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.group.model.KnownGroups

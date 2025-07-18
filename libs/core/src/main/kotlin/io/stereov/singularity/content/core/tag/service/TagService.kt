@@ -1,16 +1,16 @@
-package io.stereov.singularity.content.common.tag.service
+package io.stereov.singularity.content.core.tag.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.translate.model.Language
-import io.stereov.singularity.content.common.tag.dto.CreateTagMultiLangRequest
-import io.stereov.singularity.content.common.tag.dto.CreateTagRequest
-import io.stereov.singularity.content.common.tag.dto.UpdateTagRequest
-import io.stereov.singularity.content.common.tag.exception.model.InvalidUpdateTagRequest
-import io.stereov.singularity.content.common.tag.exception.model.TagKeyExistsException
-import io.stereov.singularity.content.common.tag.model.TagDocument
-import io.stereov.singularity.content.common.tag.model.TagTranslation
-import io.stereov.singularity.content.common.tag.repository.TagRepository
+import io.stereov.singularity.content.core.tag.dto.CreateTagMultiLangRequest
+import io.stereov.singularity.content.core.tag.dto.CreateTagRequest
+import io.stereov.singularity.content.core.tag.dto.UpdateTagRequest
+import io.stereov.singularity.content.core.tag.exception.model.InvalidUpdateTagRequest
+import io.stereov.singularity.content.core.tag.exception.model.TagKeyExistsException
+import io.stereov.singularity.content.core.tag.model.TagDocument
+import io.stereov.singularity.content.core.tag.model.TagTranslation
+import io.stereov.singularity.content.core.tag.repository.TagRepository
 import io.stereov.singularity.content.core.properties.ContentProperties
 import io.stereov.singularity.global.exception.model.DocumentNotFoundException
 import io.stereov.singularity.global.util.getFieldContainsCriteria

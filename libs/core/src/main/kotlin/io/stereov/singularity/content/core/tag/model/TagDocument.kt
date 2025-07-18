@@ -1,8 +1,8 @@
-package io.stereov.singularity.content.common.tag.model
+package io.stereov.singularity.content.core.tag.model
 
-import io.stereov.singularity.content.common.tag.dto.CreateTagMultiLangRequest
-import io.stereov.singularity.content.common.tag.dto.CreateTagRequest
-import io.stereov.singularity.content.common.tag.dto.TagResponse
+import io.stereov.singularity.content.core.tag.dto.CreateTagMultiLangRequest
+import io.stereov.singularity.content.core.tag.dto.CreateTagRequest
+import io.stereov.singularity.content.core.tag.dto.TagResponse
 import io.stereov.singularity.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.translate.model.Language
 import io.stereov.singularity.translate.model.Translatable

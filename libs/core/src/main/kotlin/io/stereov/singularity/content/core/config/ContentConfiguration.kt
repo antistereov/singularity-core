@@ -10,10 +10,10 @@ import io.stereov.singularity.content.article.service.ArticleManagementService
 import io.stereov.singularity.content.article.service.ArticleService
 import io.stereov.singularity.content.common.content.exception.handler.ContentExceptionHandler
 import io.stereov.singularity.content.common.content.util.AccessCriteria
-import io.stereov.singularity.content.common.tag.controller.TagController
-import io.stereov.singularity.content.common.tag.repository.TagRepository
-import io.stereov.singularity.content.common.tag.service.TagService
 import io.stereov.singularity.content.core.properties.ContentProperties
+import io.stereov.singularity.content.core.tag.controller.TagController
+import io.stereov.singularity.content.core.tag.repository.TagRepository
+import io.stereov.singularity.content.core.tag.service.TagService
 import io.stereov.singularity.content.file.repository.FileRepository
 import io.stereov.singularity.content.file.service.FileMetadataService
 import io.stereov.singularity.file.core.service.FileStorage
@@ -46,7 +46,7 @@ import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRep
 )
 @EnableConfigurationProperties(ContentProperties::class)
 @EnableReactiveMongoRepositories(basePackageClasses = [ArticleRepository::class, TagRepository::class, FileRepository::class])
-class ContentAutoConfiguration {
+class ContentConfiguration {
 
     @Bean
     @ConditionalOnMissingBean

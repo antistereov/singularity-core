@@ -1,10 +1,10 @@
-package io.stereov.singularity.content.common.tag.controller
+package io.stereov.singularity.content.core.tag.controller
 
-import io.stereov.singularity.content.common.tag.dto.CreateTagRequest
-import io.stereov.singularity.content.common.tag.dto.KeyContainsResponse
-import io.stereov.singularity.content.common.tag.dto.TagResponse
-import io.stereov.singularity.content.common.tag.dto.UpdateTagRequest
-import io.stereov.singularity.content.common.tag.service.TagService
+import io.stereov.singularity.content.core.tag.dto.CreateTagRequest
+import io.stereov.singularity.content.core.tag.dto.KeyContainsResponse
+import io.stereov.singularity.content.core.tag.dto.TagResponse
+import io.stereov.singularity.content.core.tag.dto.UpdateTagRequest
+import io.stereov.singularity.content.core.tag.service.TagService
 import io.stereov.singularity.translate.model.Language
 import io.stereov.singularity.global.model.SuccessResponse
 import org.springframework.http.ResponseEntity
