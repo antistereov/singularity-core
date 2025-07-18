@@ -7,7 +7,7 @@ import io.stereov.singularity.content.file.service.FileMetadataService
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.file.local.properties.LocalFileStorageProperties
 import io.stereov.singularity.global.properties.AppProperties
-import kotlinx.coroutines.reactor.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.bson.types.ObjectId
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.http.MediaType
@@ -50,7 +50,7 @@ class LocalFileStorage(
         val filePath = getBaseDir(public).resolve(key)
 
         Files.createDirectories(filePath.parent)
-        filePart.transferTo(filePath).awaitSingle()
+        filePart.transferTo(filePath).awaitSingleOrNull()
 
         val size = Files.size(filePath)
 
