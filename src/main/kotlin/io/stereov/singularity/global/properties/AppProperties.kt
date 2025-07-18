@@ -1,5 +1,6 @@
 package io.stereov.singularity.global.properties
 
+import com.github.slugify.Slugify
 import io.stereov.singularity.group.dto.CreateGroupRequest
 import org.springframework.boot.context.properties.ConfigurationProperties
 
@@ -16,8 +17,5 @@ data class AppProperties(
 ) {
 
     val slug: String
-        get() = name
-            .trim()
-            .lowercase()
-            .replace(Regex("\\s+"), "-")
+        get() = Slugify.builder().build().slugify(name)
 }
