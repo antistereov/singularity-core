@@ -10,6 +10,7 @@ import io.stereov.singularity.global.properties.AppProperties
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.bson.types.ObjectId
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+import org.springframework.context.annotation.Primary
 import org.springframework.http.MediaType
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
@@ -18,6 +19,7 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 @Service
+@Primary
 @ConditionalOnProperty(prefix = "singularity.file.storage", value = ["type"], havingValue = "local", matchIfMissing = true)
 class LocalFileStorage(
     private val properties: LocalFileStorageProperties,
