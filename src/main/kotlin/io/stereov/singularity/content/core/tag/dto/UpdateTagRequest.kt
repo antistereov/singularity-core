@@ -1,4 +1,4 @@
-package io.stereov.singularity.content.common.tag.dto
+package io.stereov.singularity.content.core.tag.dto
 
 import io.stereov.singularity.translate.model.Language
 

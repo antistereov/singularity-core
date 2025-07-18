@@ -5,7 +5,7 @@ io.stereov.singularity.auth.config.AuthenticationConfiguration
 io.stereov.singularity.cache.config.CacheConfiguration
 io.stereov.singularity.cache.config.RedisConfiguration
 
-io.stereov.singularity.content.core.config.ContentAutoConfiguration
+io.stereov.singularity.content.core.config.ContentConfiguration
 
 io.stereov.singularity.database.config.DatabaseConfiguration
 io.stereov.singularity.database.config.MongoConfiguration

@@ -1,7 +1,7 @@
-package io.stereov.singularity.content.common.tag.exception.handler
+package io.stereov.singularity.content.core.tag.exception.handler
 
-import io.stereov.singularity.content.common.tag.exception.TagException
-import io.stereov.singularity.content.common.tag.exception.model.TagKeyExistsException
+import io.stereov.singularity.content.core.tag.exception.TagException
+import io.stereov.singularity.content.core.tag.exception.model.TagKeyExistsException
 import io.stereov.singularity.global.exception.BaseExceptionHandler
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ControllerAdvice

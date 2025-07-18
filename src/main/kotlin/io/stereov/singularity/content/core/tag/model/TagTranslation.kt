@@ -1,4 +1,4 @@
-package io.stereov.singularity.content.common.tag.model
+package io.stereov.singularity.content.core.tag.model
 
 data class TagTranslation(
     var name: String,

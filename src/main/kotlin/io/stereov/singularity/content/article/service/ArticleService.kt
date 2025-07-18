@@ -13,7 +13,7 @@ import io.stereov.singularity.content.common.content.dto.ContentAccessDetailsRes
 import io.stereov.singularity.content.common.content.model.ContentAccessRole
 import io.stereov.singularity.content.common.content.service.ContentService
 import io.stereov.singularity.content.common.content.util.AccessCriteria
-import io.stereov.singularity.content.common.tag.service.TagService
+import io.stereov.singularity.content.core.tag.service.TagService
 import io.stereov.singularity.translate.model.Language
 import io.stereov.singularity.user.model.UserDocument
 import io.stereov.singularity.user.service.UserService

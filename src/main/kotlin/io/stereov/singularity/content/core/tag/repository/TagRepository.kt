@@ -1,6 +1,6 @@
-package io.stereov.singularity.content.common.tag.repository
+package io.stereov.singularity.content.core.tag.repository
 
-import io.stereov.singularity.content.common.tag.model.TagDocument
+import io.stereov.singularity.content.core.tag.model.TagDocument
 import org.bson.types.ObjectId
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import org.springframework.stereotype.Repository

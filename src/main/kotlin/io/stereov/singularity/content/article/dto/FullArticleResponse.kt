@@ -3,7 +3,7 @@ package io.stereov.singularity.content.article.dto
 import io.stereov.singularity.content.article.model.ArticleColors
 import io.stereov.singularity.content.article.model.ArticleState
 import io.stereov.singularity.content.common.content.dto.ContentAccessDetailsResponse
-import io.stereov.singularity.content.common.tag.dto.TagResponse
+import io.stereov.singularity.content.core.tag.dto.TagResponse
 import io.stereov.singularity.content.file.model.FileDocument
 import io.stereov.singularity.translate.model.Language
 import io.stereov.singularity.user.dto.UserOverviewResponse
