@@ -3,17 +3,16 @@ package io.stereov.singularity.test
 import com.warrenstrange.googleauth.GoogleAuthenticator
 import io.mockk.every
 import io.stereov.singularity.global.util.Constants
-import io.stereov.singularity.translate.model.Language
 import io.stereov.singularity.group.model.GroupDocument
 import io.stereov.singularity.group.model.GroupTranslation
 import io.stereov.singularity.group.service.GroupService
+import io.stereov.singularity.test.config.MockConfig
+import io.stereov.singularity.translate.model.Language
 import io.stereov.singularity.user.dto.request.*
 import io.stereov.singularity.user.dto.response.TwoFactorSetupResponse
 import io.stereov.singularity.user.model.Role
 import io.stereov.singularity.user.model.UserDocument
 import io.stereov.singularity.user.service.UserService
-import io.stereov.singularity.test.config.MockConfig
-import io.stereov.singularity.test.config.MockSecretStore
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -23,7 +22,7 @@ import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.returnResult
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Import(MockConfig::class, MockSecretStore::class)
+@Import(MockConfig::class)
 class BaseSpringBootTest {
 
 
