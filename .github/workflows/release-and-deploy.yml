@@ -15,8 +15,6 @@ env:
   GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
   GPG_PUBLIC_KEY: ${{ secrets.GPG_PUBLIC_KEY }}
   GITHUB_TOKEN: ${{ secrets.TOKEN }}
-  GPR_KEY: ${{ secrets.GPR_KEY }}
-  GPR_USER: ${{ secrets.GPR_USER }}
   MIRROR_TOKEN: ${{ secrets.MIRROR_TOKEN }}
 
 jobs:
