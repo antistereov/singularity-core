@@ -14,7 +14,6 @@ import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.MongoDBContainer
 import org.testcontainers.utility.DockerImageName
-import java.util.*
 
 class UserRateLimitFilterTest : BaseSpringBootTest() {
 
