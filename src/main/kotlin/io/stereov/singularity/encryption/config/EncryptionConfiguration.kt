@@ -5,7 +5,6 @@ import io.stereov.singularity.encryption.service.EncryptionSecretService
 import io.stereov.singularity.encryption.service.EncryptionService
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.secrets.core.component.SecretStore
-import io.stereov.singularity.secrets.bitwarden.config.BitwardenSecretsConfiguration
 import io.stereov.singularity.secrets.core.config.SecretsConfiguration
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
@@ -16,7 +15,6 @@ import org.springframework.context.annotation.Configuration
 @AutoConfiguration(
     after = [
         SecretsConfiguration::class,
-        BitwardenSecretsConfiguration::class,
     ]
 )
 class EncryptionConfiguration {
