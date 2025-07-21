@@ -15,7 +15,6 @@ import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.MongoDBContainer
 import org.testcontainers.utility.DockerImageName
-import java.util.*
 
 class LoginAttemptIpLimitFilterTest : BaseSpringBootTest() {
 
@@ -37,12 +36,6 @@ class LoginAttemptIpLimitFilterTest : BaseSpringBootTest() {
             registry.add("singularity.app.support-email") { "support@example.com" }
             registry.add("singularity.app.create-root-user") { "false" }
             registry.add("singularity.secrets.store") { SecretStoreImplementation.LOCAL }
-            registry.add("singularity.secrets.bitwarden.api-url") { "https//api.bitwarden.com" }
-            registry.add("singularity.secrets.bitwarden.identity-url") { "https//identity.bitwarden.com" }
-            registry.add("singularity.secrets.bitwarden.organization-id") { UUID.randomUUID() }
-            registry.add("singularity.secrets.bitwarden.project-id") { UUID.randomUUID() }
-            registry.add("singularity.secrets.bitwarden.access-token") { "asghaosg" }
-            registry.add("singularity.secrets.bitwarden.state-file") { "asghaosg" }
             registry.add("singularity.file.storage.s3.domain") { "amazon.com" }
             registry.add("singularity.file.storage.s3.access-key") { "amazon.com" }
             registry.add("singularity.file.storage.s3.secret-key") { "amazon.com" }

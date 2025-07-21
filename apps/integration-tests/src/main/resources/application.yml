@@ -46,13 +46,6 @@ singularity:
       secret-directory: ./.data/test/secrets
     key-rotation-cron: 0 0 4 1 1,4,7,10 *
     cache-expiration: 900000
-    bitwarden:
-      access-token: ${BITWARDEN_ACCESS_TOKEN}
-      api-url: ${BITWARDEN_API_URL}
-      identity-url: ${BITWARDEN_IDENTITY_URL}
-      project-id: ${BITWARDEN_PROJECT_ID}
-      organization-id: ${BITWARDEN_ORGANIZATION_ID}
-      state-file: ${BITWARDEN_STATE_FILE}
   mail:
     host: ${MAIL_HOST}
     port: ${MAIL_PORT}

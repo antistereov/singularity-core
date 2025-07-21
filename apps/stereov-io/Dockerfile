@@ -1,6 +1,7 @@
 FROM gradle:8.5-jdk21 AS build
 
 ENV APP_NAME=stereov-io
+ENV SUPPORT_EMAIL=contact@stereov.io
 ENV BACKEND_BASE_URL=http://localhost:8000
 ENV BACKEND_PORT=8000
 ENV SECURE=true
@@ -26,12 +27,8 @@ ENV S3_SECRET_KEY=secret-key
 ENV S3_DOMAIN=domain
 ENV S3_SCHEME=https
 ENV S3_BUCKET=bucket
-ENV BITWARDEN_API_URL=https://api.bitwarden.eu
-ENV BITWARDEN_IDENTITY_URL=https://identity.bitwarden.eu
-ENV BITWARDEN_ACCESS_TOKEN=access-token
-ENV BITWARDEN_ORGANIZATION_ID=organization-id
-ENV BITWARDEN_PROJECT_ID=project-id
-ENV BITWARDEN_STATE_FILE=~/.bitwarden/secrets-manager/demo-application/state
+ENV SECRET_STORE_TYPE=local
+ENV SECRET_STORE_DIRECTORY=./.data/secrets
 ENV ENABLE_EMAIL_VERIFICATION=true
 ENV MAIL_HOST=mail.host.de
 ENV MAIL_PORT=587
