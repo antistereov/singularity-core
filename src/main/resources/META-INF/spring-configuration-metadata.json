@@ -41,6 +41,11 @@
       "sourceType": "io.stereov.singularity.secrets.bitwarden.properties.BitwardenSecretStoreProperties"
     },
     {
+      "name": "singularity.secrets.local",
+      "type": "io.stereov.singularity.secrets.local.properties.LocalSecretStoreProperties",
+      "sourceType": "io.stereov.singularity.secrets.local.properties.LocalSecretStoreProperties"
+    },
+    {
       "name": "singularity.secrets.vault",
       "type": "io.stereov.singularity.secrets.bitwarden.properties.VaultKeyManagerProperties",
       "sourceType": "io.stereov.singularity.secrets.bitwarden.properties.VaultKeyManagerProperties"
@@ -358,29 +363,36 @@
       "defaultValue": "~/.bitwarden/application/state"
     },
     {
+      "name": "singularity.secrets.local.secret-directory",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.secrets.local.properties.LocalSecretStoreProperties",
+      "description": "The directory your secret db will be stored in",
+      "defaultValue": ".data/secrets"
+    },
+    {
       "name": "singularity.secrets.vault.host",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.secrets.bitwarden.properties.VaultKeyManagerProperties",
+      "sourceType": "io.stereov.singularity.secrets.vault.properties.VaultKeyManagerProperties",
       "description": "The host of your Vault vault instance",
       "defaultValue": "localhost"
     },
     {
       "name": "singularity.secrets.vault.port",
       "type": "java.lang.Integer",
-      "sourceType": "io.stereov.singularity.secrets.bitwarden.properties.VaultKeyManagerProperties",
+      "sourceType": "io.stereov.singularity.secrets.vault.properties.VaultKeyManagerProperties",
       "description": "The port of your Vault vault instance",
       "defaultValue": "8200"
     },
     {
       "name": "singularity.secrets.vault.token",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.secrets.bitwarden.properties.VaultKeyManagerProperties",
+      "sourceType": "io.stereov.singularity.secrets.vault.properties.VaultKeyManagerProperties",
       "description": "The token to access your Vault vault instance"
     },
     {
       "name": "singularity.secrets.vault.engine",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.secrets.bitwarden.properties.VaultKeyManagerProperties",
+      "sourceType": "io.stereov.singularity.secrets.vault.properties.VaultKeyManagerProperties",
       "description": "The engine that stores all secrets. Default is apps.",
       "defaultValue": "apps"
     },

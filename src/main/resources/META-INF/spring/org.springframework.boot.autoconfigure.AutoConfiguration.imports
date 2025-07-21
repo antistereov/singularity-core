@@ -40,6 +40,7 @@ io.stereov.singularity.ratelimit.config.RateLimitConfiguration
 io.stereov.singularity.secrets.core.config.SecretsConfiguration
 io.stereov.singularity.secrets.bitwarden.config.BitwardenSecretsConfiguration
 io.stereov.singularity.secrets.vault.config.VaultSecretStoreConfiguration
+io.stereov.singularity.secrets.local.config.LocalSecretStoreConfiguration
 
 io.stereov.singularity.template.config.TemplateConfiguration
 
