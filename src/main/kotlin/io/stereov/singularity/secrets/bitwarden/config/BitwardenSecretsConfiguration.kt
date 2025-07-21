@@ -6,6 +6,7 @@ import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.secrets.bitwarden.component.BitwardenSecretStore
 import io.stereov.singularity.secrets.bitwarden.properties.BitwardenSecretStoreProperties
 import io.stereov.singularity.secrets.core.component.SecretCache
+import io.stereov.singularity.secrets.core.component.SecretStore
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -26,7 +27,7 @@ class BitwardenSecretsConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun bitwardenKeyManager(client: BitwardenClient, properties: BitwardenSecretStoreProperties, secretCache: SecretCache): BitwardenSecretStore {
+    fun bitwardenSecretStore(client: BitwardenClient, properties: BitwardenSecretStoreProperties, secretCache: SecretCache): SecretStore {
         return BitwardenSecretStore(client, properties, secretCache)
     }
 
