@@ -33,6 +33,6 @@ class LocalSecretStore(
             createdAt = existingSecret?.createdAt ?: Instant.now()
         )
 
-        return repository.save(newSecret).toSecret()
+        return repository.put(newSecret).toSecret()
     }
 }
