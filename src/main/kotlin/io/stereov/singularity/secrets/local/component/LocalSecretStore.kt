@@ -1,0 +1,38 @@
+package io.stereov.singularity.secrets.local.component
+
+import io.stereov.singularity.secrets.core.component.SecretStore
+import io.stereov.singularity.secrets.core.model.Secret
+import io.stereov.singularity.secrets.local.data.LocalSecretEntity
+import io.stereov.singularity.secrets.local.repository.LocalSecretRepository
+import org.springframework.context.annotation.Primary
+import org.springframework.stereotype.Component
+import java.time.Instant
+import java.util.*
+
+@Component
+@Primary
+class LocalSecretStore(
+    private val repository: LocalSecretRepository
+) : SecretStore {
+
+    override suspend fun getOrNull(key: String): Secret? {
+        return repository.findByKey(key)?.toSecret()
+    }
+
+    override suspend fun put(
+        key: String,
+        value: String,
+        note: String,
+    ): Secret {
+        val existingSecret = repository.findByKey(key)
+        val uuid = existingSecret?.id ?: UUID.randomUUID()
+        val newSecret = LocalSecretEntity(
+            id = uuid.toString(),
+            key = key,
+            value = value,
+            createdAt = existingSecret?.createdAt ?: Instant.now()
+        )
+
+        return repository.save(newSecret).toSecret()
+    }
+}
