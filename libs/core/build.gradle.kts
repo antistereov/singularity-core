@@ -92,6 +92,10 @@ dependencies {
     api("org.springframework.boot:spring-boot-starter-data-redis-reactive")
     api("io.lettuce:lettuce-core:6.5.2.RELEASE")
 
+    // R2DBC and H2
+    api("org.springframework.boot:spring-boot-starter-data-r2dbc")
+    api("io.r2dbc:r2dbc-h2")
+
     // Rate Limiting
     api("com.bucket4j:bucket4j_jdk17-core:$bucket4jVersion")
     api("com.bucket4j:bucket4j_jdk17-redis-common:$bucket4jVersion")
