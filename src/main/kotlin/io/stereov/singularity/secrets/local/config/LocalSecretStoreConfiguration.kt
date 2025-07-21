@@ -21,6 +21,7 @@ import org.springframework.r2dbc.core.DatabaseClient
 import java.nio.file.Files
 import java.nio.file.Paths
 import kotlin.io.path.Path
+import kotlin.io.path.absolute
 
 @Configuration
 @AutoConfiguration(
@@ -45,7 +46,7 @@ class LocalSecretStoreConfiguration(
 
         return H2ConnectionFactory(
             H2ConnectionConfiguration.builder()
-                .file(filePath.toString())
+                .file(filePath.absolute().toString())
                 .username("sa")
                 .build()
         )
