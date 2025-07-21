@@ -1,5 +1,5 @@
 package io.stereov.singularity.secrets.core.properties
 
 enum class SecretStoreImplementation {
-    BITWARDEN, MOCK, VAULT
+    BITWARDEN, MOCK, VAULT, LOCAL
 }
