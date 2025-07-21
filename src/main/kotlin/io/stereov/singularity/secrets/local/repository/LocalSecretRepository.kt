@@ -26,10 +26,10 @@ class LocalSecretRepository(
         secretsTemplate.databaseClient.sql(
             """
                 CREATE TABLE IF NOT EXISTS secrets (
-                    key VARCHAR(255) PRIMARY KEY,
-                    value VARCHAR(255) NOT NULL,
-                    id VARCHAR(255) NOT NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    secret_key VARCHAR(255) PRIMARY KEY,
+                    secret_value VARCHAR(255) NOT NULL,
+                    secret_id VARCHAR(255) NOT NULL,
+                    secret_created_at TIMESTAMP NOT NULL
                 )
             """.trimIndent()
         ).then().block()

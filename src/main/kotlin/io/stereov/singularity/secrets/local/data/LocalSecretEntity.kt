@@ -9,10 +9,18 @@ import java.util.*
 
 @Table("secrets")
 data class LocalSecretEntity(
-    @Id val key: String,
+    @Id
+    @Column("secret_key")
+    val key: String,
+
+    @Column("secret_id")
     val id: String,
+
+    @Column("secret_value")
     val value: String,
-    @Column("created_at") val createdAt: Instant = Instant.now()
+
+    @Column("secret_created_at")
+    val createdAt: Instant = Instant.now()
 ) {
 
     fun toSecret(): Secret {
