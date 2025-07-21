@@ -45,9 +45,11 @@ singularity:
         scheme: ${S3_SCHEME}
         path-style-access-enabled: ${S3_PATH_STYLE_ACCESS_ENABLED}
   secrets:
-    store: bitwarden
+    store: ${SECRET_STORE_TYPE}
     key-rotation-cron: 0 0 4 1 1,4,7,10 *
     cache-expiration: 900000
+    local:
+      secret-directory: ${SECRET_STORE_DIRECTORY}
     bitwarden:
       access-token: ${BITWARDEN_ACCESS_TOKEN}
       api-url: ${BITWARDEN_API_URL}
