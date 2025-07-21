@@ -34,16 +34,6 @@ java {
 
 repositories {
     mavenCentral()
-
-    maven {
-        url = uri("https://maven.pkg.github.com/bitwarden/sdk-sm")
-        credentials {
-            username = properties["gpr.user"] as String?
-                ?: System.getenv("GPR_USER")
-            password = properties["gpr.key"] as String?
-                ?: System.getenv("GPR_KEY")
-        }
-    }
 }
 
 val kotlinVersion = "2.0.21"
@@ -109,7 +99,6 @@ dependencies {
     api("org.springframework.boot:spring-boot-starter-mail")
 
     // Secrets
-    implementation("com.bitwarden:sdk-secrets:1.0.1")
     implementation("org.springframework.vault:spring-vault-core:3.2.0")
 
     // Slugs

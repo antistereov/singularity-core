@@ -7,15 +7,6 @@ plugins {
 
 repositories {
     mavenCentral()
-    maven {
-        url = uri("https://maven.pkg.github.com/bitwarden/sdk-sm")
-        credentials {
-            username = properties["gpr.user"] as String?
-                ?: System.getenv("GPR_USER")
-            password = properties["gpr.key"] as String?
-                ?: System.getenv("GPR_KEY")
-        }
-    }
 }
 
 group = properties["group"] as String
