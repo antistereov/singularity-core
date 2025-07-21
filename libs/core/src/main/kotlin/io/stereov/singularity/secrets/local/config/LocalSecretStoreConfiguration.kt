@@ -30,7 +30,7 @@ import kotlin.io.path.Path
 )
 @EnableConfigurationProperties(LocalSecretStoreProperties::class)
 @ConditionalOnProperty(prefix = "singularity.secrets", value = ["store"], havingValue = "local", matchIfMissing = true)
-class SqliteSecretStoreConfiguration(
+class LocalSecretStoreConfiguration(
     private val properties: LocalSecretStoreProperties
 ) {
 
