@@ -75,7 +75,7 @@ class BaseIntegrationTest : BaseSpringBootTest() {
         fun properties(registry: DynamicPropertyRegistry) {
             registry.add("singularity.app.support-email") { "support@example.com" }
             registry.add("singularity.app.create-root-user") { "false" }
-            registry.add("singularity.secrets.store") { SecretStoreImplementation.MOCK }
+            registry.add("singularity.secrets.store") { SecretStoreImplementation.LOCAL }
             registry.add("singularity.file.storage.type") { "local" }
             registry.add("singularity.file.storage.local.public-path") { ".data/test/files/public" }
             registry.add("singularity.file.storage.local.private-path") { ".data/test/files/private" }
