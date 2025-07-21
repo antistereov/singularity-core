@@ -59,7 +59,13 @@ class LocalSecretStoreConfiguration(
 
     @Bean
     @ConditionalOnMissingBean
-    fun localSecretStore(repository: LocalSecretRepository, properties: LocalSecretStoreProperties): SecretStore {
+    fun localSecretRepository(template: R2dbcEntityTemplate): LocalSecretRepository {
+        return LocalSecretRepository(template)
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun localSecretStore(repository: LocalSecretRepository): SecretStore {
         return LocalSecretStore(repository)
     }
 
