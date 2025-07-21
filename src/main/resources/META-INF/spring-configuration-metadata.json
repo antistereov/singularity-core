@@ -366,7 +366,7 @@
       "name": "singularity.secrets.local.secret-directory",
       "type": "java.lang.String",
       "sourceType": "io.stereov.singularity.secrets.local.properties.LocalSecretStoreProperties",
-      "description": "The directory your secret db will be stored in",
+      "description": "The directory your secret db will be stored in.",
       "defaultValue": ".data/secrets"
     },
     {
