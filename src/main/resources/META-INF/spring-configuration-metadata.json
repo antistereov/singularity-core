@@ -306,7 +306,7 @@
       "name": "singularity.secrets.store",
       "type": "io.stereov.singularity.secrets.core.properties.SecretStoreImplementation",
       "sourceType": "io.stereov.singularity.secrets.core.properties.SecretStoreProperties",
-      "defaultValue": "bitwarden",
+      "defaultValue": "local",
       "description": "The secret store you want to use. Default value is bitwarden."
     },
     {
