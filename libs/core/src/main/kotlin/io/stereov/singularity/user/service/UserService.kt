@@ -5,7 +5,7 @@ import io.stereov.singularity.database.service.SensitiveCrudService
 import io.stereov.singularity.encryption.service.EncryptionSecretService
 import io.stereov.singularity.encryption.service.EncryptionService
 import io.stereov.singularity.file.core.exception.model.NoSuchFileException
-import io.stereov.singularity.content.file.model.FileDocument
+import io.stereov.singularity.content.file.model.FileMetadataDocument
 import io.stereov.singularity.hash.service.HashService
 import io.stereov.singularity.user.exception.model.UserDoesNotExistException
 import io.stereov.singularity.user.model.EncryptedUserDocument
@@ -109,7 +109,7 @@ class UserService(
         return this.repository.existsByEmail(hashedEmail)
     }
 
-    suspend fun getAvatar(userId: ObjectId): FileDocument {
+    suspend fun getAvatar(userId: ObjectId): FileMetadataDocument {
         logger.debug { "Finding avatar for user $userId" }
 
         val user = findById(userId)

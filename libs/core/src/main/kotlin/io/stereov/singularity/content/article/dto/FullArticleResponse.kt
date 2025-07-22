@@ -4,7 +4,7 @@ import io.stereov.singularity.content.article.model.ArticleColors
 import io.stereov.singularity.content.article.model.ArticleState
 import io.stereov.singularity.content.common.content.dto.ContentAccessDetailsResponse
 import io.stereov.singularity.content.core.tag.dto.TagResponse
-import io.stereov.singularity.content.file.model.FileDocument
+import io.stereov.singularity.content.file.model.FileMetadataDocument
 import io.stereov.singularity.translate.model.Language
 import io.stereov.singularity.user.dto.UserOverviewResponse
 import org.bson.types.ObjectId
@@ -20,7 +20,7 @@ data class FullArticleResponse(
     val path: String,
     var state: ArticleState = ArticleState.DRAFT,
     val colors: ArticleColors,
-    val image: FileDocument?,
+    val image: FileMetadataDocument?,
     val lang: Language,
     val title: String,
     val summary: String,

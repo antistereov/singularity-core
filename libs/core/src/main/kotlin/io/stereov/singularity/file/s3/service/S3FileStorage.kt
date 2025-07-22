@@ -2,7 +2,7 @@ package io.stereov.singularity.file.s3.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.model.AccessType
-import io.stereov.singularity.content.file.model.FileDocument
+import io.stereov.singularity.content.file.model.FileMetadataDocument
 import io.stereov.singularity.content.file.service.FileMetadataService
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.file.core.util.DataBufferPublisher
@@ -45,9 +45,9 @@ class S3FileStorage(
      * @param key The key to the file will get in the storage.
      * @param public Whether the file should be publicly accessible.
      *
-     * @return [FileDocument] The metadata of the resulting upload.
+     * @return [FileMetadataDocument] The metadata of the resulting upload.
      */
-    override suspend fun doUpload(userId: ObjectId, filePart: FilePart, key: String, public: Boolean, contentType: MediaType): FileDocument {
+    override suspend fun doUpload(userId: ObjectId, filePart: FilePart, key: String, public: Boolean, contentType: MediaType): FileMetadataDocument {
         logger.debug { "Uploading file: \"${filePart.filename()}\" as $contentType" }
 
         val publisher = DataBufferPublisher(filePart.content()).toFlux()
@@ -69,7 +69,7 @@ class S3FileStorage(
 
         s3Client.putObject(putRequest, requestBody).await()
 
-        return FileDocument(
+        return FileMetadataDocument(
             ownerId = userId,
             key = key,
             contentType = contentType,
