@@ -470,6 +470,27 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
             .expectStatus().isEqualTo(HttpStatus.CONFLICT)
     }
 
+    @Test fun `sendVerificationEmail throws disabled exception`() = runTest {
+        val user = registerUser()
+
+        webTestClient.post()
+            .uri("/api/user/mail/verify/send")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .exchange()
+            .expectStatus()
+            .isEqualTo(HttpStatus.SERVICE_UNAVAILABLE)
+    }
+    @Test fun `sendPasswordReset throws disabled exception`() = runTest {
+        val user = registerUser()
+
+        webTestClient.post()
+            .uri("/api/user/mail/reset-password/send")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .exchange()
+            .expectStatus()
+            .isEqualTo(HttpStatus.SERVICE_UNAVAILABLE)
+    }
+
     @Test fun `changePassword works with 2fa`() = runTest {
         val email = "old@email.com"
         val oldPassword = "password"
