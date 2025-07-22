@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service
 
 @Service
 @ConditionalOnProperty(prefix = "singularity.app", value = ["enable-mail"], havingValue = "false", matchIfMissing = true)
-class MailDisabledService() : MailService {
+class FailingMailService() : MailService {
 
     override val logger = KotlinLogging.logger {}
 

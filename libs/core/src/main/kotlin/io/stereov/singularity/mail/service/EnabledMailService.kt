@@ -24,7 +24,7 @@ import org.springframework.stereotype.Service
  */
 @Service
 @ConditionalOnProperty(prefix = "singularity.app", value = ["enable-mail"], havingValue = "true", matchIfMissing = false)
-class MailServiceImpl(
+class EnabledMailService(
     private val mailSender: JavaMailSender,
     private val mailProperties: MailProperties,
     private val mailTemplateService: MailTemplateService,

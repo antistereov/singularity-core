@@ -485,6 +485,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/user/mail/reset-password/send")
+            .bodyValue(SendPasswordResetRequest(user.info.sensitive.email))
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectStatus()
