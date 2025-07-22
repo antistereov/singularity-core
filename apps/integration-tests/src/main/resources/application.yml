@@ -31,6 +31,7 @@ singularity:
     create-root-user: false
     root-email: ${ROOT_EMAIL}
     root-password: ${ROOT_PASSWORD}
+    enable-mail: false
   file:
     storage:
       type: local
@@ -43,20 +44,6 @@ singularity:
       secret-directory: ./.data/test/secrets
     key-rotation-cron: 0 0 4 1 1,4,7,10 *
     cache-expiration: 900000
-  mail:
-    host: host.com
-    port: 587
-    email: mail@host.com
-    username: mail@host.com
-    password: mailpassword
-    transport-protocol: smtp
-    smtp-auth: true
-    smtp-starttls: true
-    debug: false
-    verification-expiration: 900
-    verification-send-cooldown: 60
-    password-reset-expiration: 900
-    password-reset-send-cooldown: 60
   security:
     jwt:
       expires-in: 900

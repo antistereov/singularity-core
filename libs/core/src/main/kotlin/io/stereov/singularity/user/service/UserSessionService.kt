@@ -8,6 +8,7 @@ import io.stereov.singularity.auth.service.AuthenticationService
 import io.stereov.singularity.auth.service.CookieService
 import io.stereov.singularity.file.core.exception.model.UnsupportedMediaTypeException
 import io.stereov.singularity.file.core.service.FileStorage
+import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.hash.service.HashService
 import io.stereov.singularity.translate.model.Language
 import io.stereov.singularity.user.cache.AccessTokenCache
@@ -49,6 +50,7 @@ class UserSessionService(
     private val cookieService: CookieService,
     private val fileStorage: FileStorage,
     private val mailService: UserMailSender,
+    private val appProperties: AppProperties,
 ) {
 
     private val logger: KLogger
@@ -100,9 +102,14 @@ class UserSessionService(
             name = payload.name,
         )
 
+        /**
+         * Mark email as verified if mail is disabled
+         */
+        if (!appProperties.enableMail) userDocument.sensitive.security.mail.verified = true
+
         val savedUserDocument = userService.save(userDocument)
 
-        if (sendEmail) mailService.sendVerificationEmail(savedUserDocument, lang)
+        if (sendEmail && appProperties.enableMail) mailService.sendVerificationEmail(savedUserDocument, lang)
 
         return savedUserDocument
     }
@@ -134,7 +141,12 @@ class UserSessionService(
             cookieService.validateStepUpCookie(exchange)
         }
 
-        mailService.sendVerificationEmail(user, lang, payload.newEmail)
+        if (appProperties.enableMail) {
+            mailService.sendVerificationEmail(user, lang, payload.newEmail)
+        } else {
+            user.sensitive.email = payload.newEmail
+            user.sensitive.security.mail.verified = true
+        }
 
         return userService.save(user)
     }

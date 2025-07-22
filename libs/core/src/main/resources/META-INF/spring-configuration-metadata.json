@@ -119,6 +119,13 @@
       "description": "Enable HTTPS and secure cookies for the application. Default is false."
     },
     {
+      "name": "singularity.app.enable-mail",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.stereov.singularity.global.properties.AppProperties",
+      "defaultValue": false,
+      "description": "Enable mails for email verification, password resets, ..."
+    },
+    {
       "name": "singularity.auth.admin-paths",
       "type": "java.util.List<java.lang.String>",
       "sourceType": "io.stereov.singularity.auth.properties.AuthProperties",

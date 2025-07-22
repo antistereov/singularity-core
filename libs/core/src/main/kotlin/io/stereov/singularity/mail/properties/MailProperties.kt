@@ -4,11 +4,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "singularity.mail")
 data class MailProperties(
-    val host: String,
+    val host: String = "host.com",
     val port: Int = 0,
-    val email: String,
-    val username: String,
-    val password: String,
+    val email: String = "email@host.com",
+    val username: String = "email@host.com",
+    val password: String = "password",
     val transportProtocol: String = "smtp",
     val smtpAuth: Boolean = true,
     val smtpStarttls: Boolean = true,

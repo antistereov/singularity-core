@@ -31,6 +31,7 @@ singularity:
     create-root-user: ${CREATE_ROOT_USER}
     root-email: ${ROOT_EMAIL}
     root-password: ${ROOT_PASSWORD}
+    enable-mail: true
   file:
     storage:
       type: ${STORAGE_TYPE}

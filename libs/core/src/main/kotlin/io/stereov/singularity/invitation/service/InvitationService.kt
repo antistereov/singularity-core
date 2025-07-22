@@ -2,6 +2,7 @@ package io.stereov.singularity.invitation.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.database.service.SensitiveCrudService
+import io.stereov.singularity.encryption.service.EncryptionSecretService
 import io.stereov.singularity.encryption.service.EncryptionService
 import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.invitation.exception.model.InvalidInvitationException
@@ -10,7 +11,6 @@ import io.stereov.singularity.invitation.model.InvitationDocument
 import io.stereov.singularity.invitation.model.SensitiveInvitationData
 import io.stereov.singularity.invitation.repository.InvitationRepository
 import io.stereov.singularity.mail.service.MailService
-import io.stereov.singularity.encryption.service.EncryptionSecretService
 import io.stereov.singularity.template.service.TemplateService
 import io.stereov.singularity.template.util.TemplateBuilder
 import io.stereov.singularity.translate.model.Language

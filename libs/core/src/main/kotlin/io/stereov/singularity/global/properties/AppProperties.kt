@@ -13,7 +13,8 @@ data class AppProperties(
     val createRootUser: Boolean = false,
     val rootEmail: String = "admin@example.com",
     val rootPassword: String = "strong-password",
-    val groups: List<CreateGroupRequest> = emptyList()
+    val groups: List<CreateGroupRequest> = emptyList(),
+    val enableMail: Boolean = false,
 ) {
 
     val slug: String

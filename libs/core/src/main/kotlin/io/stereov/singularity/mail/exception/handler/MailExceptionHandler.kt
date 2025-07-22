@@ -3,6 +3,7 @@ package io.stereov.singularity.mail.exception.handler
 import io.stereov.singularity.global.exception.BaseExceptionHandler
 import io.stereov.singularity.mail.exception.MailException
 import io.stereov.singularity.mail.exception.model.MailCooldownException
+import io.stereov.singularity.mail.exception.model.MailDisabledException
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -20,6 +21,7 @@ class MailExceptionHandler : BaseExceptionHandler<MailException> {
 
     override fun getHttpStatus(ex: MailException) = when (ex) {
         is MailCooldownException -> HttpStatus.TOO_MANY_REQUESTS
+        is MailDisabledException -> HttpStatus.SERVICE_UNAVAILABLE
         else -> HttpStatus.INTERNAL_SERVER_ERROR
     }
 

@@ -9,6 +9,7 @@ import io.stereov.singularity.encryption.service.EncryptionSecretService
 import io.stereov.singularity.encryption.service.EncryptionService
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.global.config.ApplicationConfiguration
+import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.hash.service.HashService
 import io.stereov.singularity.jwt.properties.JwtProperties
@@ -22,6 +23,7 @@ import io.stereov.singularity.twofactorauth.properties.TwoFactorAuthProperties
 import io.stereov.singularity.twofactorauth.service.TwoFactorAuthService
 import io.stereov.singularity.user.cache.AccessTokenCache
 import io.stereov.singularity.user.controller.UserDeviceController
+import io.stereov.singularity.user.controller.UserMailController
 import io.stereov.singularity.user.controller.UserSessionController
 import io.stereov.singularity.user.controller.UserTwoFactorAuthController
 import io.stereov.singularity.user.repository.UserRepository
@@ -167,6 +169,7 @@ class UserConfiguration {
         cookieService: CookieService,
         fileStorage: FileStorage,
         mailService: UserMailSender,
+        appProperties: AppProperties
     ): UserSessionService {
         return UserSessionService(
             userService,
@@ -177,6 +180,7 @@ class UserConfiguration {
             cookieService,
             fileStorage,
             mailService,
+            appProperties
         )
     }
 
@@ -198,6 +202,14 @@ class UserConfiguration {
         userDeviceService: UserDeviceService
     ): UserDeviceController {
         return UserDeviceController(userDeviceService)
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun userMailController(
+        userMailService: UserMailService
+    ): UserMailController {
+        return UserMailController(userMailService)
     }
 
     @Bean
