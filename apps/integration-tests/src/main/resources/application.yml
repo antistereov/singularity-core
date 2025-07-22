@@ -1,5 +1,5 @@
 server:
-  port: ${BACKEND_PORT}
+  port: 8000
 
 spring:
   data:
@@ -8,38 +8,35 @@ spring:
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
-      password: ${REDIS_PASSWORD}
-      database: ${REDIS_DATABASE:0}
-      timeout: ${REDIS_TIMEOUT:5000ms}
+      password: ""
+      database: 0
+      timeout: 5000ms
       ssl:
-        enabled: ${REDIS_SSL_ENABLED:false}
+        enabled: false
   devtools:
     restart:
-      enabled: ${DEV_MODE:false}
+      enabled: false
       additional-paths: src/main
 
 logging:
   level:
-    io.stereov: ${LOG_LEVEL:DEBUG}
+    io.stereov: DEBUG
 
 singularity:
   app:
-    name: ${APP_NAME}
-    base-url: ${BACKEND_BASE_URL}
-    support-mail: ${SUPPORT_EMAIL}
-    secure: ${SECURE:false}
-    create-root-user: ${CREATE_ROOT_USER}
+    name: TestApplication
+    base-url: http://localhost:8000
+    support-mail: support@example.com
+    secure: false
+    create-root-user: false
     root-email: ${ROOT_EMAIL}
     root-password: ${ROOT_PASSWORD}
   file:
     storage:
-      type: s3
-      s3:
-        domain: ${S3_DOMAIN}
-        bucket: ${S3_BUCKET}
-        access-key: ${S3_ACCESS_KEY}
-        secret-key: ${S3_SECRET_KEY}
-        scheme: ${S3_SCHEME}
+      type: local
+      local:
+        public-path: .data/test/files/public
+        private-path: .data/test/files/private
   secrets:
     store: local
     local:
@@ -47,32 +44,32 @@ singularity:
     key-rotation-cron: 0 0 4 1 1,4,7,10 *
     cache-expiration: 900000
   mail:
-    host: ${MAIL_HOST}
-    port: ${MAIL_PORT}
-    email: ${MAIL_EMAIL}
-    username: ${MAIL_USERNAME}
-    password: ${MAIL_PASSWORD}
-    transport-protocol: ${MAIL_TRANSPORT_PROTOCOL:smtp}
-    smtp-auth: ${MAIL_SMTP_AUTH:true}
-    smtp-starttls: ${MAIL_SMTP_STARTTLS:true}
-    debug: ${MAIL_DEBUG:false}
-    verification-expiration: ${MAIL_VERIFICATION_EXPIRATION:900}
-    verification-send-cooldown: ${MAIL_VERIFICATION_SEND_COOLDOWN:60}
+    host: host.com
+    port: 587
+    email: mail@host.com
+    username: mail@host.com
+    password: mailpassword
+    transport-protocol: smtp
+    smtp-auth: true
+    smtp-starttls: true
+    debug: false
+    verification-expiration: 900
+    verification-send-cooldown: 60
     password-reset-expiration: 900
     password-reset-send-cooldown: 60
   security:
     jwt:
       expires-in: 900
     rate-limit:
-      ip-limit: 2000
+      ip-limit: 10000
       ip-time-window: 1
-      user-limit: 2000
+      user-limit: 10000
       user-time-window: 1
     login-attempt-limit:
-      ip-limit: 1000
+      ip-limit: 10000
       ip-time-window: 1
     two-factor:
       recovery-code-length: 10
       recovery-code-count: 6
   ui:
-    base-url: ${UI_BASE_URL}
+    base-url: http://localhost:4200
