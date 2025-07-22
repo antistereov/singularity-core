@@ -3,10 +3,14 @@ name: Release and Deploy
 on:
   workflow_dispatch:
     inputs:
-      release_version_input:
-        description: 'The release version to use (e.g., 1.2.3). Do NOT include "v".'
+      version_type:
+        description: 'Type of version bump'
         required: true
-        type: string
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
 
 env:
   MAVENCENTRAL_USERNAME: ${{ secrets.MAVENCENTRAL_USERNAME }}
@@ -57,11 +61,41 @@ jobs:
       # Update Version
       #############################################################
 
-      - name: Determine Version to Use
+      - name: Determine current version and calculate next release version
+        id: determine_version
         run: |
-          RELEASE_VERSION="${{ github.event.inputs.release_version_input }}"
-          echo "Using manually provided version: $RELEASE_VERSION"
-          echo "release_version=${RELEASE_VERSION}" >> "$GITHUB_ENV"
+          # Read current version from gradle.properties
+          CURRENT_VERSION=$(grep '^version=' gradle.properties | cut -d'=' -f2)
+          echo "Current version: $CURRENT_VERSION"
+      
+          IFS='.' read -r MAJOR MINOR PATCH <<< "${CURRENT_VERSION//-SNAPSHOT/}"
+      
+          VERSION_TYPE="${{ github.event.inputs.version_type }}"
+      
+          case "$VERSION_TYPE" in
+            major)
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+              ;;
+            minor)
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              ;;
+            patch)
+              PATCH=$((PATCH + 1))
+              ;;
+            *)
+              echo "Unknown version type: $VERSION_TYPE"
+              exit 1
+              ;;
+          esac
+      
+          NEXT_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          echo "Calculated release version: $NEXT_VERSION"
+      
+          echo "release_version=$NEXT_VERSION" >> "$GITHUB_ENV"
+          echo "release_version=$NEXT_VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Update Version in gradle.properties
         run: |
@@ -96,27 +130,22 @@ jobs:
       # Update Snapshot Version
       #############################################################
 
-      - name: Calculate next snapshot version
-        id: calculate_snapshot
+      - name: Create next snapshot version
+        id: create_snapshot
         run: |
           CURRENT_VERSION="${{ env.release_version }}"
           echo "Current release version: $CURRENT_VERSION"
           
-          # Split version into parts (e.g., 1.0.0 -> 1, 0, 0)
-          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+          SNAPSHOT_VERSION="${{ env.release_version }}-SNAPSHOT"
           
-          # Increment minor version
-          NEXT_MINOR=$((MINOR + 1))
-          NEXT_SNAPSHOT_VERSION="${MAJOR}.${NEXT_MINOR}.0-SNAPSHOT" # Reset patch to 0 for next minor
-          
-          echo "Calculated next snapshot version: $NEXT_SNAPSHOT_VERSION"
-          echo "next_snapshot_version=$NEXT_SNAPSHOT_VERSION" >> "$GITHUB_ENV"
+          echo "Next snapshot: $SNAPSHOT_VERSION"
+          echo "snapshot_version=$SNAPSHOT_VERSION" >> "$GITHUB_ENV"
 
       - name: Update version in gradle.properties to snapshot
         run: |
           if [ -f gradle.properties ]; then
-            sed -i "s/^version=.*$/version=${{ env.next_snapshot_version }}/" gradle.properties
-            echo "Updated gradle.properties with snapshot version: ${{ env.next_snapshot_version }}"
+            sed -i "s/^version=.*$/version=${{ env.snapshot_version }}/" gradle.properties
+            echo "Updated gradle.properties with snapshot version: ${{ env.snapshot_version }}"
           else
             echo "Error: gradle.properties not found in the root directory."
             exit 1
@@ -125,4 +154,4 @@ jobs:
       - name: Commit and Push Snapshot Version Update
         uses: stefanzweifel/git-auto-commit-action@v6
         with:
-          commit_message: 'ci: bump version to ${{ env.next_snapshot_version }} for next development cycle'
+          commit_message: 'ci: bump version to ${{ env.snapshot_version }} for next development cycle'
