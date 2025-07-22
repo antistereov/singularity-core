@@ -38,6 +38,7 @@ jobs:
           report_paths: '**/build/test-results/test/TEST-*.xml'
           require_tests: true
           include_passed: false
+
   stereov-io:
     name: Build stereov-io
     needs: build_and_test
@@ -64,4 +65,6 @@ jobs:
           .
 
       - name: Push image
-        run: docker push ghcr.io/antistereov/stereov-io-singularity:latest
+        if: github.event_name == 'push'
+        run: |
+          docker push ghcr.io/antistereov/stereov-io-singularity:latest
