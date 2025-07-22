@@ -2,8 +2,8 @@ package io.stereov.singularity.file.core.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.stereov.singularity.auth.model.AccessType
-import io.stereov.singularity.content.file.model.FileMetadataDocument
-import io.stereov.singularity.content.file.service.FileMetadataService
+import io.stereov.singularity.file.core.model.FileMetadataDocument
+import io.stereov.singularity.file.core.service.FileMetadataService
 import io.stereov.singularity.global.properties.AppProperties
 import org.bson.types.ObjectId
 import org.springframework.http.MediaType

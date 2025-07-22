@@ -4,7 +4,7 @@ import io.stereov.singularity.content.article.dto.CreateArticleRequest
 import io.stereov.singularity.content.article.dto.FullArticleResponse
 import io.stereov.singularity.content.common.content.model.ContentAccessDetails
 import io.stereov.singularity.content.common.content.model.ContentDocument
-import io.stereov.singularity.content.file.model.FileMetadataDocument
+import io.stereov.singularity.file.core.model.FileMetadataDocument
 import io.stereov.singularity.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.translate.model.Language
 import io.stereov.singularity.translate.model.Translatable

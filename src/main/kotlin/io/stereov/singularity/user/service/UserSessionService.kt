@@ -6,11 +6,11 @@ import io.stereov.singularity.auth.exception.AuthException
 import io.stereov.singularity.auth.exception.model.InvalidCredentialsException
 import io.stereov.singularity.auth.service.AuthenticationService
 import io.stereov.singularity.auth.service.CookieService
-import io.stereov.singularity.user.cache.AccessTokenCache
 import io.stereov.singularity.file.core.exception.model.UnsupportedMediaTypeException
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.hash.service.HashService
 import io.stereov.singularity.translate.model.Language
+import io.stereov.singularity.user.cache.AccessTokenCache
 import io.stereov.singularity.user.dto.UserResponse
 import io.stereov.singularity.user.dto.request.ChangeEmailRequest
 import io.stereov.singularity.user.dto.request.ChangePasswordRequest
@@ -202,7 +202,9 @@ class UserSessionService(
 
         userService.save(user)
 
-        user.sensitive.avatar = fileStorage.upload(user.id, file, "${user.fileStoragePath}/avatar", true)
+        user.sensitive.avatar = fileStorage
+            .upload(user.id, file, "${user.fileStoragePath}/avatar", true)
+            .toResponse()
 
         return userService.save(user).toResponse()
     }

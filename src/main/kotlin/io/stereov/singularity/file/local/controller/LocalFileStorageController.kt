@@ -1,7 +1,7 @@
 package io.stereov.singularity.file.local.controller
 
 import io.stereov.singularity.content.common.content.model.ContentAccessRole
-import io.stereov.singularity.content.file.service.FileMetadataService
+import io.stereov.singularity.file.core.service.FileMetadataService
 import io.stereov.singularity.file.local.properties.LocalFileStorageProperties
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.core.io.buffer.DataBuffer

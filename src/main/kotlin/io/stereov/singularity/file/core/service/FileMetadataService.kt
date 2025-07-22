@@ -1,10 +1,10 @@
-package io.stereov.singularity.content.file.service
+package io.stereov.singularity.file.core.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.service.AuthenticationService
 import io.stereov.singularity.content.common.content.service.ContentService
-import io.stereov.singularity.content.file.model.FileMetadataDocument
-import io.stereov.singularity.content.file.repository.FileRepository
+import io.stereov.singularity.file.core.repository.FileRepository
+import io.stereov.singularity.file.core.model.FileMetadataDocument
 import org.springframework.stereotype.Service
 
 @Service

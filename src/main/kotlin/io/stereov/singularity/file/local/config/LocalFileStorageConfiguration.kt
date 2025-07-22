@@ -1,6 +1,6 @@
 package io.stereov.singularity.file.local.config
 
-import io.stereov.singularity.content.file.service.FileMetadataService
+import io.stereov.singularity.file.core.service.FileMetadataService
 import io.stereov.singularity.file.core.config.StorageConfiguration
 import io.stereov.singularity.file.local.properties.LocalFileStorageProperties
 import io.stereov.singularity.file.local.service.LocalFileStorage
