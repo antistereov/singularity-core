@@ -13,7 +13,7 @@ import org.springframework.http.MediaType
 import java.time.Instant
 
 @Document(collection = "files")
-data class FileDocument(
+data class FileMetadataDocument(
     @Id private val _id: ObjectId? = null,
     @Indexed(unique = true) override val key: String,
     override val createdAt: Instant = Instant.now(),
@@ -24,7 +24,7 @@ data class FileDocument(
     val size: Long,
     override val trusted: Boolean = false,
     override var tags: MutableSet<String> = mutableSetOf()
-) : ContentDocument<FileDocument> {
+) : ContentDocument<FileMetadataDocument> {
 
     @get:Transient
     override val id: ObjectId

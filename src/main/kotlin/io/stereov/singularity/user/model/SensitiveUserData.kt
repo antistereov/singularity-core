@@ -1,6 +1,6 @@
 package io.stereov.singularity.user.model
 
-import io.stereov.singularity.content.file.model.FileDocument
+import io.stereov.singularity.content.file.model.FileMetadataDocument
 
 
 data class SensitiveUserData(
@@ -10,5 +10,5 @@ data class SensitiveUserData(
     val groups: MutableSet<String> = mutableSetOf(),
     val security: UserSecurityDetails = UserSecurityDetails(),
     val devices: MutableList<DeviceInfo> = mutableListOf(),
-    var avatar: FileDocument? = null,
+    var avatar: FileMetadataDocument? = null,
 )

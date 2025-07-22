@@ -2,7 +2,7 @@ package io.stereov.singularity.file.core.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.stereov.singularity.auth.model.AccessType
-import io.stereov.singularity.content.file.model.FileDocument
+import io.stereov.singularity.content.file.model.FileMetadataDocument
 import io.stereov.singularity.content.file.service.FileMetadataService
 import io.stereov.singularity.global.properties.AppProperties
 import org.bson.types.ObjectId
@@ -16,7 +16,7 @@ abstract class FileStorage {
     abstract val appProperties: AppProperties
     abstract val logger: KLogger
 
-    suspend fun upload(userId: ObjectId, filePart: FilePart, key: String, public: Boolean): FileDocument {
+    suspend fun upload(userId: ObjectId, filePart: FilePart, key: String, public: Boolean): FileMetadataDocument {
         val extension = filePart.filename().substringAfterLast(".", "")
 
         val actualKey = if (extension.isBlank()) {
@@ -68,7 +68,7 @@ abstract class FileStorage {
         }
     }
 
-    protected abstract suspend fun doUpload(userId: ObjectId, filePart: FilePart, key: String, public: Boolean, contentType: MediaType): FileDocument
+    protected abstract suspend fun doUpload(userId: ObjectId, filePart: FilePart, key: String, public: Boolean, contentType: MediaType): FileMetadataDocument
     protected abstract suspend fun doExists(key: String): Boolean
     protected abstract suspend fun doRemove(key: String)
     protected abstract suspend fun getPublicUrl(key: String): String

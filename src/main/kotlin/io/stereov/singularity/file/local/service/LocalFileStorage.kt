@@ -2,7 +2,7 @@ package io.stereov.singularity.file.local.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.model.AccessType
-import io.stereov.singularity.content.file.model.FileDocument
+import io.stereov.singularity.content.file.model.FileMetadataDocument
 import io.stereov.singularity.content.file.service.FileMetadataService
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.file.local.properties.LocalFileStorageProperties
@@ -46,7 +46,7 @@ class LocalFileStorage(
         key: String,
         public: Boolean,
         contentType: MediaType
-    ): FileDocument {
+    ): FileMetadataDocument {
         logger.debug { "Uploading file of content type $contentType to path \"$key\"" }
 
         val filePath = getBaseDir(public).resolve(key)
@@ -56,7 +56,7 @@ class LocalFileStorage(
 
         val size = Files.size(filePath)
 
-        return FileDocument(
+        return FileMetadataDocument(
             ownerId = userId,
             key = key,
             contentType = contentType,
