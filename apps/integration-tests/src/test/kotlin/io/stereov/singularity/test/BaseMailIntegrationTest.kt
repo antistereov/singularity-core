@@ -3,16 +3,11 @@ package io.stereov.singularity.test
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
-import io.stereov.singularity.hash.service.HashService
 import io.stereov.singularity.test.config.MockMailSenderConfig
-import io.stereov.singularity.twofactorauth.service.TwoFactorAuthService
-import io.stereov.singularity.user.service.token.TwoFactorAuthTokenService
-import io.stereov.singularity.user.service.token.UserTokenService
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Import
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSender
@@ -26,23 +21,6 @@ import org.testcontainers.utility.DockerImageName
 @Testcontainers
 @Import(MockMailSenderConfig::class)
 class BaseMailIntegrationTest : BaseSpringBootTest() {
-
-    final val basePath = "/api"
-
-    @Autowired
-    lateinit var userTokenService: UserTokenService
-
-    @Autowired
-    lateinit var twoFactorAuthService: TwoFactorAuthService
-
-    @Autowired
-    lateinit var twoFactorAuthTokenService: TwoFactorAuthTokenService
-
-    @Autowired
-    lateinit var hashService: HashService
-
-    @Autowired
-    lateinit var applicationContext: ApplicationContext
 
     @Autowired
     lateinit var mailSender: JavaMailSender
