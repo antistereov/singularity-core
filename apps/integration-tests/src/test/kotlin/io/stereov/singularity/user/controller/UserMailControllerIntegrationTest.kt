@@ -1,13 +1,11 @@
 package io.stereov.singularity.user.controller
 
 import io.mockk.verify
-import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.encryption.service.EncryptionSecretService
-import io.stereov.singularity.test.BaseIntegrationTest
-import io.stereov.singularity.user.dto.request.DeviceInfoRequest
-import io.stereov.singularity.user.dto.request.LoginRequest
-import io.stereov.singularity.user.dto.request.ResetPasswordRequest
-import io.stereov.singularity.user.dto.request.SendPasswordResetRequest
+import io.stereov.singularity.global.util.Constants
+import io.stereov.singularity.test.BaseMailIntegrationTest
+import io.stereov.singularity.user.dto.UserResponse
+import io.stereov.singularity.user.dto.request.*
 import io.stereov.singularity.user.service.mail.MailTokenService
 import jakarta.mail.internet.MimeMessage
 import kotlinx.coroutines.test.runTest
@@ -16,7 +14,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.Instant
 
-class UserMailControllerIntegrationTest : BaseIntegrationTest() {
+class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
 
     @Autowired
     private lateinit var encryptionSecretService: EncryptionSecretService
@@ -125,6 +123,28 @@ class UserMailControllerIntegrationTest : BaseIntegrationTest() {
             .uri("/api/user/mail/verify/cooldown")
             .exchange()
             .expectStatus().isUnauthorized
+    }
+
+    @Test fun `changeEmail does nothing without validation`() = runTest {
+        val oldEmail = "old@email.com"
+        val newEmail = "new@email.com"
+        val password = "password"
+        val user = registerUser(oldEmail, password)
+
+        val res = webTestClient.put()
+            .uri("/api/user/me/email")
+            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .bodyValue(ChangeEmailRequest(newEmail, password))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(UserResponse::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+        assertEquals(oldEmail, res.email)
+        val foundUser = userService.findByEmail(oldEmail)
+        assertEquals(user.info.id, foundUser.id)
     }
 
     @Test fun `resetPassword works`() = runTest {

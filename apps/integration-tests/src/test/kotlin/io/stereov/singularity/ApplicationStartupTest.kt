@@ -1,11 +1,11 @@
 package io.stereov.singularity
 
-import io.stereov.singularity.mail.service.MailServiceImpl
-import io.stereov.singularity.user.service.mail.MailTokenService
 import io.stereov.singularity.mail.properties.MailProperties
-import io.stereov.singularity.user.controller.UserMailController
-import io.stereov.singularity.user.service.mail.UserMailService
+import io.stereov.singularity.mail.service.MailService
 import io.stereov.singularity.test.BaseIntegrationTest
+import io.stereov.singularity.user.controller.UserMailController
+import io.stereov.singularity.user.service.mail.MailTokenService
+import io.stereov.singularity.user.service.mail.UserMailService
 import org.junit.jupiter.api.Test
 
 class ApplicationStartupTest : BaseIntegrationTest() {
@@ -24,7 +24,7 @@ class ApplicationStartupTest : BaseIntegrationTest() {
     @Test
     fun `context loads`() {
         applicationContext.getBean(MailProperties::class.java)
-        applicationContext.getBean(MailServiceImpl::class.java)
+        applicationContext.getBean(MailService::class.java)
         applicationContext.getBean(MailTokenService::class.java)
         applicationContext.getBean(UserMailService::class.java)
         applicationContext.getBean(UserMailController::class.java)

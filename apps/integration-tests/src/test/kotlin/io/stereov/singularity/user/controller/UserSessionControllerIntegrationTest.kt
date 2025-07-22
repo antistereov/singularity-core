@@ -321,7 +321,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         assertEquals(newEmail, res.email)
         userService.findByEmail(newEmail)
     }
-    @Test fun `changeEmail does nothing without validation`() = runTest {
+    @Test fun `changeEmail changes email`() = runTest {
         val oldEmail = "old@email.com"
         val newEmail = "new@email.com"
         val password = "password"
@@ -338,8 +338,8 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
             .responseBody
 
         requireNotNull(res)
-        assertEquals(oldEmail, res.email)
-        val foundUser = userService.findByEmail(oldEmail)
+        assertEquals(newEmail, res.email)
+        val foundUser = userService.findByEmail(newEmail)
         assertEquals(user.info.id, foundUser.id)
     }
     @Test fun `changeEmail requires authentication`() = runTest {
