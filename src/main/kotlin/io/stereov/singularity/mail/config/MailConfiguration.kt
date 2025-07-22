@@ -4,9 +4,9 @@ import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.mail.exception.handler.MailExceptionHandler
 import io.stereov.singularity.mail.properties.MailProperties
-import io.stereov.singularity.mail.service.MailDisabledService
+import io.stereov.singularity.mail.service.EnabledMailService
+import io.stereov.singularity.mail.service.FailingMailService
 import io.stereov.singularity.mail.service.MailService
-import io.stereov.singularity.mail.service.MailServiceImpl
 import io.stereov.singularity.mail.service.MailTemplateService
 import io.stereov.singularity.template.service.TemplateService
 import org.springframework.boot.autoconfigure.AutoConfiguration
@@ -57,15 +57,15 @@ class MailConfiguration(
         mailTemplateService: MailTemplateService
     ): MailService {
         return if (appProperties.enableMail) {
-            MailServiceImpl(mailSender, mailProperties, mailTemplateService)
+            EnabledMailService(mailSender, mailProperties, mailTemplateService)
         } else {
-            MailDisabledService()
+            FailingMailService()
         }
     }
 
     @Bean
     @ConditionalOnMissingBean
-    fun mainTemplateService(templateService: TemplateService) = MailTemplateService(templateService)
+    fun mailTemplateService(templateService: TemplateService) = MailTemplateService(templateService)
 
     // ExceptionHandler
 
