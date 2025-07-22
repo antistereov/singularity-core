@@ -1,6 +1,6 @@
 package io.stereov.singularity.user.controller
 
-import io.stereov.singularity.content.file.model.FileMetadataDocument
+import io.stereov.singularity.file.core.dto.FileMetadataResponse
 import io.stereov.singularity.user.service.UserService
 import org.bson.types.ObjectId
 import org.springframework.http.ResponseEntity
@@ -18,7 +18,7 @@ class UserController(
     @GetMapping("/{id}/avatar")
     suspend fun getAvatar(
         @PathVariable id: String
-    ): ResponseEntity<FileMetadataDocument> {
+    ): ResponseEntity<FileMetadataResponse> {
         return ResponseEntity.ok().body(userService.getAvatar(ObjectId(id)))
     }
 }

@@ -14,8 +14,8 @@ import io.stereov.singularity.content.core.properties.ContentProperties
 import io.stereov.singularity.content.core.tag.controller.TagController
 import io.stereov.singularity.content.core.tag.repository.TagRepository
 import io.stereov.singularity.content.core.tag.service.TagService
-import io.stereov.singularity.content.file.repository.FileRepository
-import io.stereov.singularity.content.file.service.FileMetadataService
+import io.stereov.singularity.file.core.repository.FileRepository
+import io.stereov.singularity.file.core.service.FileMetadataService
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.invitation.service.InvitationService

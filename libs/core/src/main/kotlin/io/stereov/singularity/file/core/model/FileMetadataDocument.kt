@@ -1,8 +1,9 @@
-package io.stereov.singularity.content.file.model
+package io.stereov.singularity.file.core.model
 
 import io.stereov.singularity.auth.model.AccessType
 import io.stereov.singularity.content.common.content.model.ContentAccessDetails
 import io.stereov.singularity.content.common.content.model.ContentDocument
+import io.stereov.singularity.file.core.dto.FileMetadataResponse
 import io.stereov.singularity.global.exception.model.InvalidDocumentException
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
@@ -58,4 +59,19 @@ data class FileMetadataDocument(
         trusted = trusted,
         tags = tags
     )
+
+    fun toResponse(): FileMetadataResponse {
+        return FileMetadataResponse(
+            id = id,
+            key = key,
+            createdAt = createdAt,
+            updatedAt = updatedAt,
+            access = access,
+            contentType = _contentType,
+            publicUrl = publicUrl,
+            size = size,
+            trusted = trusted,
+            tags = tags
+        )
+    }
 }

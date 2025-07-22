@@ -4,7 +4,7 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.database.model.SensitiveDocument
 import io.stereov.singularity.encryption.model.Encrypted
-import io.stereov.singularity.content.file.model.FileMetadataDocument
+import io.stereov.singularity.file.core.dto.FileMetadataResponse
 import io.stereov.singularity.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.global.exception.model.MissingFunctionParameterException
 import io.stereov.singularity.hash.model.SearchableHash
@@ -39,7 +39,7 @@ data class UserDocument(
         groups: MutableSet<String> = mutableSetOf(),
         security: UserSecurityDetails = UserSecurityDetails(),
         devices: MutableList<DeviceInfo> = mutableListOf(),
-        avatar: FileMetadataDocument? = null,
+        avatar: FileMetadataResponse? = null,
     ): this(id, password, created, lastActive, SensitiveUserData(name, email, roles, groups, security, devices, avatar))
 
     @get:Transient

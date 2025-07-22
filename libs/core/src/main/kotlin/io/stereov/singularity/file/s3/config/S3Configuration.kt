@@ -1,6 +1,6 @@
 package io.stereov.singularity.file.s3.config
 
-import io.stereov.singularity.content.file.service.FileMetadataService
+import io.stereov.singularity.file.core.service.FileMetadataService
 import io.stereov.singularity.file.core.config.StorageConfiguration
 import io.stereov.singularity.file.s3.properties.S3Properties
 import io.stereov.singularity.file.s3.service.S3FileStorage

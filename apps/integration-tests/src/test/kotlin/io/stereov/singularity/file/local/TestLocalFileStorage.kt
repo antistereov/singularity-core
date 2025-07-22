@@ -1,6 +1,6 @@
 package io.stereov.singularity.file.local
 
-import io.stereov.singularity.content.file.service.FileMetadataService
+import io.stereov.singularity.file.core.service.FileMetadataService
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.file.local.properties.LocalFileStorageProperties
 import io.stereov.singularity.file.local.util.MockFilePart
