@@ -1,6 +1,8 @@
 package io.stereov.singularity.file.local.controller
 
+import io.stereov.singularity.auth.model.AccessType
 import io.stereov.singularity.content.common.content.model.ContentAccessRole
+import io.stereov.singularity.file.core.exception.model.FileNotFoundException
 import io.stereov.singularity.file.core.service.FileMetadataService
 import io.stereov.singularity.file.local.properties.LocalFileStorageProperties
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -18,6 +20,8 @@ import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Flux
 import java.nio.file.Files
 import java.nio.file.Paths
+import kotlin.io.path.absolute
+import kotlin.io.path.exists
 
 @Controller
 @RequestMapping("/api/assets")
@@ -32,20 +36,35 @@ class LocalFileStorageController(
         exchange: ServerWebExchange
     ): ResponseEntity<Flux<DataBuffer>> {
         val fullRequestPath = exchange.request.uri.path
-        val basePath = "/api/assets"
+        val basePath = "/api/assets/"
         val key = fullRequestPath.removePrefix(basePath)
 
         if (key.isBlank()) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing file key")
         }
 
-        val metadata = metadataService.findByKey(key)
-        metadataService.requireAuthorization(metadata, ContentAccessRole.VIEWER)
+        val baseFileDir = Paths.get(properties.fileDirectory).toAbsolutePath().normalize()
+        val filePath = Paths.get(properties.fileDirectory).resolve(key).normalize().absolute()
 
-        val filePath = Paths.get(properties.fileDirectory).resolve(key).normalize()
+        val metadata = metadataService.findByKeyOrNull(key)
 
-        if (!filePath.startsWith(basePath)) {
-            throw ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid path access")
+        if (metadata == null) {
+            filePath.toFile().delete()
+            throw FileNotFoundException(filePath.toFile())
+        }
+
+        if (!filePath.exists()) {
+            metadataService.deleteByKey(key)
+            throw FileNotFoundException(filePath.toFile())
+        }
+
+        if (!filePath.startsWith(baseFileDir)) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid path access: trying to access file $filePath outside of specified directory ${properties.fileDirectory}")
+        }
+
+
+        if (metadata.access.visibility != AccessType.PUBLIC) {
+            metadataService.requireAuthorization(metadata, ContentAccessRole.VIEWER)
         }
 
         return ResponseEntity.ok()
