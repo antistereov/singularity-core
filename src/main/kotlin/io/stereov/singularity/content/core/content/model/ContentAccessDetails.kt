@@ -1,8 +1,8 @@
 package io.stereov.singularity.content.common.content.model
 
+import io.stereov.singularity.auth.model.AccessType
 import io.stereov.singularity.content.common.content.dto.ChangeContentVisibilityRequest
 import io.stereov.singularity.content.common.content.dto.ContentAccessDetailsResponse
-import io.stereov.singularity.auth.model.AccessType
 import io.stereov.singularity.user.model.Role
 import io.stereov.singularity.user.model.UserDocument
 import org.bson.types.ObjectId
@@ -59,8 +59,10 @@ data class ContentAccessDetails(
         val userIsViewer = hasAccess(ContentAccessSubject.USER, user.id.toString(), ContentAccessRole.VIEWER)
         val groupIsViewer = user.sensitive.groups.any { groupId -> hasAccess(ContentAccessSubject.GROUP, groupId, ContentAccessRole.VIEWER) }
 
+        val isPublic = visibility == AccessType.PUBLIC
+
         return when (role) {
-            ContentAccessRole.VIEWER -> isAdmin || userIsAdmin || groupIsAdmin || userIsEditor || groupIsEditor || userIsViewer || groupIsViewer
+            ContentAccessRole.VIEWER -> isAdmin || userIsAdmin || groupIsAdmin || userIsEditor || groupIsEditor || userIsViewer || groupIsViewer || isPublic
             ContentAccessRole.EDITOR ->  isAdmin || userIsAdmin || groupIsAdmin || userIsEditor || groupIsEditor
             ContentAccessRole.ADMIN -> isAdmin || userIsAdmin || groupIsAdmin
         }
