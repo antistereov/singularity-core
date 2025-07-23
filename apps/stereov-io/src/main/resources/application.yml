@@ -36,7 +36,7 @@ singularity:
     storage:
       type: ${STORAGE_TYPE}
       local:
-        file-directory: ${FILE_DIRECTORY}
+        file-directory: ${FILE_STORAGE_DIRECTORY}
       s3:
         domain: ${S3_DOMAIN}
         bucket: ${S3_BUCKET}
