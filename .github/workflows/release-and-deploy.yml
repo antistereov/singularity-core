@@ -117,8 +117,9 @@ jobs:
       # Publishing
       #############################################################
 
-      - name: Release and Deploy
+      - name: Full Release with JReleaser
         run: |
+          ./gradlew publish
           ./gradlew jreleaserFullRelease
 
       - name: Commit and Push Changelog update
