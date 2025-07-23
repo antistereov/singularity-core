@@ -1,18 +1,23 @@
 package io.stereov.singularity.file.local
 
+import io.stereov.singularity.file.core.model.FileMetadataDocument
 import io.stereov.singularity.file.core.service.FileMetadataService
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.file.local.properties.LocalFileStorageProperties
 import io.stereov.singularity.file.local.util.MockFilePart
+import io.stereov.singularity.global.exception.model.DocumentNotFoundException
+import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ClassPathResource
+import org.springframework.http.MediaType
 import java.io.File
 import java.time.temporal.ChronoUnit
 
@@ -32,24 +37,133 @@ class TestLocalFileStorage : BaseIntegrationTest() {
         metadataService.deleteAll()
     }
 
+    suspend fun runFileTest(public: Boolean = true, method: suspend (file: File, metadata: FileMetadataDocument, user: TestRegisterResponse) -> Unit) = runTest {
+        val user = registerUser()
+        val file = ClassPathResource("files/test-image.jpg").file
+        val filePart = MockFilePart(file)
+        val key = file.name
+
+        val metadata = storage.upload(user.info.id, filePart, key, public)
+
+        val uploadedFile = File(properties.fileDirectory, metadata.key)
+        method(uploadedFile, metadata, user)
+
+        uploadedFile.delete()
+    }
+
     @Test
     fun `should upload public file`() = runTest {
-        val user = registerUser()
-        val filePart = MockFilePart(ClassPathResource("files/test-image.jpg"))
-        val key = "test-image"
+        runFileTest { file, metadata, _ ->
+            val file = File(properties.fileDirectory, metadata.key)
 
-        val metadata = storage.upload(user.info.id, filePart, key, true)
-        val file = File(properties.publicPath, metadata.key)
+            assertTrue(file.exists())
+            val savedMetadata = metadataService.findByKey(metadata.key)
 
-        assertTrue(file.exists())
-        val savedMetadata = metadataService.findByKey(metadata.key)
+            val metadataWithMillis = metadata.copy(
+                createdAt = metadata.createdAt.truncatedTo(ChronoUnit.MILLIS),
+                updatedAt = metadata.updatedAt.truncatedTo(ChronoUnit.MILLIS)
+            )
+            assertEquals(metadataWithMillis, savedMetadata)
+        }
+    }
 
-        val metadataWithMillis = metadata.copy(
-            createdAt = metadata.createdAt.truncatedTo(ChronoUnit.MILLIS),
-            updatedAt = metadata.updatedAt.truncatedTo(ChronoUnit.MILLIS)
-        )
-        assertEquals(metadataWithMillis, savedMetadata)
+    @Test fun `should serve public file`() = runTest {
+        runFileTest { file, metadata, _ ->
 
-        file.delete()
+            webTestClient.get()
+                .uri("/api/assets/${metadata.key}")
+                .exchange()
+                .expectStatus().isOk
+                .expectHeader().contentType(MediaType.IMAGE_JPEG)
+                .expectHeader().contentLength(file.length())
+                .expectBody()
+                .consumeWith {
+                    assertThat(it.responseBody).isEqualTo(file.readBytes())
+                }
+
+        }
+    }
+    @Test fun `should serve private file`() = runTest {
+        runFileTest(false) { file, metadata, user ->
+
+            webTestClient.get()
+                .uri("/api/assets/${metadata.key}")
+                .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+                .exchange()
+                .expectStatus().isOk
+                .expectHeader().contentType(MediaType.IMAGE_JPEG)
+                .expectHeader().contentLength(file.length())
+                .expectBody()
+                .consumeWith {
+                    assertThat(it.responseBody).isEqualTo(file.readBytes())
+                }
+
+        }
+    }
+    @Test fun `should not serve private file publicly`() = runTest {
+        runFileTest(false) { file, metadata, user ->
+
+            webTestClient.get()
+                .uri("/api/assets/${metadata.key}")
+                .exchange()
+                .expectStatus().isUnauthorized
+        }
+    }
+    @Test fun `should not serve private file to non-owner`() = runTest {
+        val anotherUser = registerUser(email = "another@email.com")
+
+        runFileTest(false) { file, metadata, user ->
+
+            webTestClient.get()
+                .uri("/api/assets/${metadata.key}")
+                .cookie(Constants.ACCESS_TOKEN_COOKIE, anotherUser.accessToken)
+                .exchange()
+                .expectStatus().isForbidden
+        }
+    }
+
+    @Test fun `requires key`() = runTest {
+        webTestClient.get()
+            .uri("/api/assets/")
+            .exchange()
+            .expectStatus().isBadRequest
+    }
+    @Test fun `should prohibit path injection attacks`() = runTest {
+        webTestClient.get()
+            .uri("/api/assets/hehe/../../test.jpg")
+            .exchange()
+            .expectStatus().isBadRequest
+    }
+    @Test fun `returns not found when no file found`() = runTest {
+        webTestClient.get()
+            .uri("/api/assets/test.jpg")
+            .exchange()
+            .expectStatus().isNotFound
+    }
+    @Test fun `returns not found when no database entry is removed but file exists`() = runTest {
+        runFileTest { file, metadata, user ->
+            metadataService.deleteByKey(metadata.key)
+
+            webTestClient.get()
+                .uri("/api/assets/${metadata.key}")
+                .exchange()
+                .expectStatus().isNotFound
+
+            // also deletes file for consistency
+            assertFalse { file.exists() }
+        }
+    }
+    @Test fun `returns not found when no file is deleted but db entry exists`() = runTest {
+        runFileTest { file, metadata, user ->
+            file.delete()
+
+            webTestClient.get()
+                .uri("/api/assets/${metadata.key}")
+                .exchange()
+                .expectStatus().isNotFound
+
+            // also deletes database entry for consistency
+            assertThrows<DocumentNotFoundException> { metadataService.findByKey(metadata.key) }
+        }
     }
 }
