@@ -36,8 +36,7 @@ singularity:
     storage:
       type: ${STORAGE_TYPE}
       local:
-        private-path: ${PRIVATE_STORAGE_PATH}
-        public-path: ${PUBLIC_STORAGE_PATH}
+        file-directory: ${FILE_DIRECTORY}
       s3:
         domain: ${S3_DOMAIN}
         bucket: ${S3_BUCKET}

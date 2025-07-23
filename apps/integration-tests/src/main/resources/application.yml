@@ -36,8 +36,7 @@ singularity:
     storage:
       type: local
       local:
-        public-path: .data/test/files/public
-        private-path: .data/test/files/private
+        file-directory: .data/test/files
   secrets:
     store: local
     local:

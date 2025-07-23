@@ -151,7 +151,7 @@
       "defaultValue": "local"
     },
     {
-      "name": "singularity.file.storage.local.private-path",
+      "name": "singularity.file.storage.local.file-directory",
       "type": "io.stereov.singularity.file.local.properties.LocalFileStorageProperties",
       "sourceType": "io.stereov.singularity.file.local.properties.LocalFileStorageProperties",
       "description": "The directory where your private files will be stored.",
