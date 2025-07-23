@@ -20,7 +20,7 @@ import java.nio.file.Files
 import java.nio.file.Paths
 
 @Controller
-@RequestMapping("/api/assets/private")
+@RequestMapping("/api/assets")
 @ConditionalOnProperty(prefix = "singularity.file.storage", value = ["type"], havingValue = "local", matchIfMissing = true)
 class LocalFileStorageController(
     private val metadataService: FileMetadataService,
@@ -28,11 +28,11 @@ class LocalFileStorageController(
 ) {
 
     @GetMapping("/**")
-    suspend fun servePrivateFile(
+    suspend fun serveFile(
         exchange: ServerWebExchange
     ): ResponseEntity<Flux<DataBuffer>> {
         val fullRequestPath = exchange.request.uri.path
-        val basePath = "/api/assets/private"
+        val basePath = "/api/assets"
         val key = fullRequestPath.removePrefix(basePath)
 
         if (key.isBlank()) {
@@ -42,7 +42,7 @@ class LocalFileStorageController(
         val metadata = metadataService.findByKey(key)
         metadataService.requireAuthorization(metadata, ContentAccessRole.VIEWER)
 
-        val filePath = Paths.get(properties.privatePath).resolve(key).normalize()
+        val filePath = Paths.get(properties.fileDirectory).resolve(key).normalize()
 
         if (!filePath.startsWith(basePath)) {
             throw ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid path access")
