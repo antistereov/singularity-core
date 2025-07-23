@@ -5,7 +5,7 @@ import io.stereov.singularity.database.service.SensitiveCrudService
 import io.stereov.singularity.encryption.service.EncryptionSecretService
 import io.stereov.singularity.encryption.service.EncryptionService
 import io.stereov.singularity.file.core.dto.FileMetadataResponse
-import io.stereov.singularity.file.core.exception.model.NoSuchFileException
+import io.stereov.singularity.file.core.exception.model.FileNotFoundException
 import io.stereov.singularity.hash.service.HashService
 import io.stereov.singularity.user.exception.model.UserDoesNotExistException
 import io.stereov.singularity.user.model.EncryptedUserDocument
@@ -113,6 +113,6 @@ class UserService(
         logger.debug { "Finding avatar for user $userId" }
 
         val user = findById(userId)
-        return user.sensitive.avatar ?: throw NoSuchFileException("No avatar set for user")
+        return user.sensitive.avatar ?: throw FileNotFoundException(file = null, "No avatar set for user")
     }
 }
