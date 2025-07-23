@@ -1,3 +1,16 @@
+## [v1.8.0]
+
+## Changelog
+
+## 🛠  Build
+- [5146f79](https://github.com/antistereov/singularity-core/commits/5146f79) bump version to 1.8.0
+- [1122c27](https://github.com/antistereov/singularity-core/commits/1122c27) fix release and deploy script
+
+
+## Contributors
+We'd like to thank the following people for their contributions:
+antistereov
+
 ## [v1.7.0]
 
 ## Changelog
