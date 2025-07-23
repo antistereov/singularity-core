@@ -30,14 +30,12 @@ class LocalFileStorage(
     val apiPath = "/api/assets/"
     override val logger = KotlinLogging.logger {}
 
-    private fun getBaseDir(public: Boolean): Path {
-        val baseDir = if (public) properties.publicPath else properties.privatePath
-        return Files.createDirectories(Paths.get(baseDir))
-    }
+    private val baseDir: Path
+        get() = Files.createDirectories(Paths.get(properties.fileDirectory))
+
 
     private suspend fun getFilePath(key: String): Path {
-        val isPublic = metadataService.findByKey(key).access.visibility == AccessType.PUBLIC
-        return getBaseDir(isPublic).resolve(key)
+        return baseDir.resolve(key)
     }
 
     override suspend fun doUpload(
@@ -49,7 +47,7 @@ class LocalFileStorage(
     ): FileMetadataDocument {
         logger.debug { "Uploading file of content type $contentType to path \"$key\"" }
 
-        val filePath = getBaseDir(public).resolve(key)
+        val filePath = baseDir.resolve(key)
 
         Files.createDirectories(filePath.parent)
         filePart.transferTo(filePath).awaitSingleOrNull()
@@ -60,7 +58,7 @@ class LocalFileStorage(
             ownerId = userId,
             key = key,
             contentType = contentType,
-            accessType = if (public) AccessType.PUBLIC else AccessType.SHARED,
+            accessType = if (public) AccessType.PUBLIC else AccessType.PRIVATE,
             publicUrl = if (public) getPublicUrl(key) else null,
             size = size
         )
