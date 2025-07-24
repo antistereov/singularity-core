@@ -18,11 +18,12 @@ abstract class FileStorage {
 
     suspend fun upload(userId: ObjectId, filePart: FilePart, key: String, public: Boolean): FileMetadataDocument {
         val extension = filePart.filename().substringAfterLast(".", "")
+        val filename = key.substringBeforeLast(".", key)
 
         val actualKey = if (extension.isBlank()) {
-            "${appProperties.slug}/$key-${UUID.randomUUID()}"
+            "${appProperties.slug}/$filename-${UUID.randomUUID()}"
         } else {
-            "${appProperties.slug}/$key-${UUID.randomUUID()}.$extension"
+            "${appProperties.slug}/$filename-${UUID.randomUUID()}.$extension"
         }
 
         val contentType = filePart.headers().contentType ?: MediaType.APPLICATION_OCTET_STREAM
