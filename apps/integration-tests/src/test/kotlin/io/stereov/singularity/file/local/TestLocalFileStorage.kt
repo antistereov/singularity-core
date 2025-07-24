@@ -40,11 +40,11 @@ class TestLocalFileStorage : BaseIntegrationTest() {
         metadataService.deleteAll()
     }
 
-    suspend fun runFileTest(public: Boolean = true, method: suspend (file: File, metadata: FileMetadataDocument, user: TestRegisterResponse) -> Unit) = runTest {
+    suspend fun runFileTest(public: Boolean = true, key: String = "test-image.jpg", method: suspend (file: File, metadata: FileMetadataDocument, user: TestRegisterResponse) -> Unit) = runTest {
         val user = registerUser()
         val file = ClassPathResource("files/test-image.jpg").file
         val filePart = MockFilePart(file)
-        val key = file.name
+        val key = key
 
         val metadata = storage.upload(user.info.id, filePart, key, public)
 
@@ -180,6 +180,26 @@ class TestLocalFileStorage : BaseIntegrationTest() {
 
     @Test fun `creates response with correct url`() = runTest {
         runFileTest { file, metadata, user ->
+            val response = storage.metadataResponseByKey(metadata.key)
+
+            val relativeUri = URI(response.url).path
+
+            assertThat(response.url).isEqualTo("http://localhost:8000/api/assets/${metadata.key}")
+
+            webTestClient.get()
+                .uri(relativeUri)
+                .exchange()
+                .expectStatus().isOk
+                .expectHeader().contentType(MediaType.IMAGE_JPEG)
+                .expectHeader().contentLength(file.length())
+                .expectBody()
+                .consumeWith {
+                    assertThat(it.responseBody).isEqualTo(file.readBytes())
+                }
+        }
+    }
+    @Test fun `creates response with correct url when in subdirectory`() = runTest {
+        runFileTest(key = "sub/dir/test-image.jpg") { file, metadata, user ->
             val response = storage.metadataResponseByKey(metadata.key)
 
             val relativeUri = URI(response.url).path
