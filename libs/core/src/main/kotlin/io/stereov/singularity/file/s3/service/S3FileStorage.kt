@@ -62,7 +62,7 @@ class S3FileStorage(
             .key(key)
             .contentLength(size)
             .contentType(contentType.toString())
-            .acl(if (public) ObjectCannedACL.PUBLIC_READ else ObjectCannedACL.PRIVATE)
+            .acl(ObjectCannedACL.PRIVATE)
             .build()
 
         val requestBody = AsyncRequestBody.fromPublisher(publisher)
@@ -74,7 +74,6 @@ class S3FileStorage(
             key = key,
             contentType = contentType,
             accessType = if (public) AccessType.PUBLIC else AccessType.SHARED,
-            publicUrl = if (public) getPublicUrl(key) else null,
             size = size
         )
     }
@@ -98,14 +97,7 @@ class S3FileStorage(
         }.await()
     }
 
-    override suspend fun getPublicUrl(key: String): String {
-        if (s3Properties.pathStyleAccessEnabled) {
-            return  "${s3Properties.scheme}${s3Properties.domain}/${s3Properties.bucket}/$key"
-        }
-        return  "${s3Properties.scheme}${s3Properties.bucket}.${s3Properties.domain}/$key"
-    }
-
-    override suspend fun getPrivateUrl(key: String): String {
+    override suspend fun doGetUrl(key: String): String {
         val getObjectRequest = GetObjectRequest.builder()
             .bucket(s3Properties.bucket)
             .key(key)

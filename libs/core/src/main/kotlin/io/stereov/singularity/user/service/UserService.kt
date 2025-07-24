@@ -6,7 +6,10 @@ import io.stereov.singularity.encryption.service.EncryptionSecretService
 import io.stereov.singularity.encryption.service.EncryptionService
 import io.stereov.singularity.file.core.dto.FileMetadataResponse
 import io.stereov.singularity.file.core.exception.model.FileNotFoundException
+import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.hash.service.HashService
+import io.stereov.singularity.user.dto.UserOverviewResponse
+import io.stereov.singularity.user.dto.UserResponse
 import io.stereov.singularity.user.exception.model.UserDoesNotExistException
 import io.stereov.singularity.user.model.EncryptedUserDocument
 import io.stereov.singularity.user.model.SensitiveUserData
@@ -31,6 +34,7 @@ class UserService(
     override val encryptionService: EncryptionService,
     private val hashService: HashService,
     override val encryptionSecretService: EncryptionSecretService,
+    private val fileStorage: FileStorage,
 ) : SensitiveCrudService<SensitiveUserData, UserDocument, EncryptedUserDocument> {
 
     override val logger = KotlinLogging.logger {}
@@ -113,6 +117,49 @@ class UserService(
         logger.debug { "Finding avatar for user $userId" }
 
         val user = findById(userId)
-        return user.sensitive.avatar ?: throw FileNotFoundException(file = null, "No avatar set for user")
+        return user.sensitive.avatarFileKey?.let { fileStorage.metadataResponseByKey(it) }
+            ?: throw FileNotFoundException(file = null, "No avatar set for user")
     }
+
+    /**
+     * Convert this [UserDocument] to a [UserResponse].
+     *
+     * This method is used to create a data transfer object (DTO) for the user.
+     *
+     * @return A [UserResponse] containing the user information.
+     */
+    suspend fun createResponse(user: UserDocument): UserResponse {
+        logger.debug { "Creating UserResponse for user with ID \"${user.id}\"" }
+
+        val avatarKey = user.sensitive.avatarFileKey
+        val avatarMetadata = avatarKey?.let { fileStorage.metadataResponseByKeyOrNull(it) }
+
+        return UserResponse(
+            user.id,
+            user.sensitive.name,
+            user.sensitive.email,
+            user.sensitive.roles,
+            user.sensitive.security.mail.verified,
+            user.lastActive.toString(),
+            user.sensitive.security.twoFactor.enabled,
+            avatarMetadata,
+            user.created.toString(),
+            user.sensitive.groups
+        )
+    }
+
+    suspend fun createOverview(user: UserDocument): UserOverviewResponse {
+        logger.debug { "Creating UserOverviewResponse for user with ID \"${user.id}\"" }
+
+        val avatarKey = user.sensitive.avatarFileKey
+        val avatarMetadata = avatarKey?.let { fileStorage.metadataResponseByKeyOrNull(it) }
+
+        return UserOverviewResponse(
+            user.id,
+            user.sensitive.name,
+            user.sensitive.email,
+            avatarMetadata
+        )
+    }
+
 }

@@ -12,6 +12,7 @@ import io.stereov.singularity.user.dto.request.TwoFactorStartSetupRequest
 import io.stereov.singularity.user.dto.request.TwoFactorVerifySetupRequest
 import io.stereov.singularity.user.dto.response.TwoFactorSetupResponse
 import io.stereov.singularity.user.dto.response.TwoFactorStatusResponse
+import io.stereov.singularity.user.service.UserService
 import io.stereov.singularity.user.service.twofactor.UserTwoFactorAuthService
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
@@ -33,6 +34,7 @@ class UserTwoFactorAuthController(
     private val twoFactorService: UserTwoFactorAuthService,
     private val cookieService: CookieService,
     private val authenticationService: AuthenticationService,
+    private val userService: UserService
 ) {
 
     @PostMapping("/start-setup")
@@ -78,7 +80,7 @@ class UserTwoFactorAuthController(
             .header("Set-Cookie", accessTokenCookie.toString())
             .header("Set-Cookie", refreshTokenCookie.toString())
             .header("Set-Cookie", stepUpTokenCookie.toString())
-            .body(user.toResponse())
+            .body(userService.createResponse(user))
     }
 
     @PostMapping("/verify-login")
@@ -97,7 +99,7 @@ class UserTwoFactorAuthController(
             .header("Set-Cookie", clearTwoFactorCookie.toString())
             .header("Set-Cookie", accessTokenCookie.toString())
             .header("Set-Cookie", refreshTokenCookie.toString())
-            .body(user.toResponse())
+            .body(userService.createResponse(user))
     }
 
     @GetMapping("/login-status")
@@ -128,7 +130,7 @@ class UserTwoFactorAuthController(
 
         return ResponseEntity.ok()
             .header("Set-Cookie", stepUpTokenCookie.toString())
-            .body(user.toResponse())
+            .body(userService.createResponse(user))
     }
 
     /**

@@ -154,8 +154,14 @@ class UserConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun userService(userRepository: UserRepository, encryptionTransformer: EncryptionService, hashService: HashService, encryptionSecretService: EncryptionSecretService): UserService {
-        return UserService(userRepository, encryptionTransformer, hashService, encryptionSecretService)
+    fun userService(userRepository: UserRepository, encryptionTransformer: EncryptionService, hashService: HashService, encryptionSecretService: EncryptionSecretService, fileStorage: FileStorage): UserService {
+        return UserService(
+            userRepository,
+            encryptionTransformer,
+            hashService,
+            encryptionSecretService,
+            fileStorage
+        )
     }
 
     @Bean
@@ -191,9 +197,10 @@ class UserConfiguration {
     fun userTwoFactorAuthController(
         userTwoFactorAuthService: UserTwoFactorAuthService,
         cookieService: CookieService,
-        authenticationService: AuthenticationService
+        authenticationService: AuthenticationService,
+        userService: UserService
     ): UserTwoFactorAuthController {
-        return UserTwoFactorAuthController(userTwoFactorAuthService, cookieService, authenticationService)
+        return UserTwoFactorAuthController(userTwoFactorAuthService, cookieService, authenticationService, userService)
     }
 
     @Bean
@@ -218,8 +225,9 @@ class UserConfiguration {
         authenticationService: AuthenticationService,
         userSessionService: UserSessionService,
         cookieService: CookieService,
+        userService: UserService
     ): UserSessionController {
-        return UserSessionController(authenticationService, userSessionService, cookieService)
+        return UserSessionController(authenticationService, userSessionService, cookieService, userService)
     }
 
     // Exception Handler

@@ -1,7 +1,5 @@
 package io.stereov.singularity.user.model
 
-import io.stereov.singularity.file.core.dto.FileMetadataResponse
-
 
 data class SensitiveUserData(
     var name: String,
@@ -10,5 +8,5 @@ data class SensitiveUserData(
     val groups: MutableSet<String> = mutableSetOf(),
     val security: UserSecurityDetails = UserSecurityDetails(),
     val devices: MutableList<DeviceInfo> = mutableListOf(),
-    var avatar: FileMetadataResponse? = null,
+    var avatarFileKey: String? = null,
 )

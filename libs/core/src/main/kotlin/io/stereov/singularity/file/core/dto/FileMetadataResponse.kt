@@ -12,7 +12,7 @@ data class FileMetadataResponse(
     override var updatedAt: Instant = Instant.now(),
     override var access: ContentAccessDetails,
     val contentType: String,
-    val publicUrl: String?,
+    val url: String,
     val size: Long,
     override val trusted: Boolean = false,
     override var tags: MutableSet<String> = mutableSetOf()

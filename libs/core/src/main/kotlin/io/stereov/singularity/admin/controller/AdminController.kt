@@ -39,7 +39,7 @@ class AdminController(
     @GetMapping("/users")
     suspend fun getAllUsers(): ResponseEntity<List<UserResponse>> {
         return ResponseEntity.ok(
-            userService.findAll().map { user -> user.toResponse() }.toList()
+            userService.findAll().map { user -> userService.createResponse(user) }.toList()
         )
     }
 }

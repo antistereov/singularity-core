@@ -6,7 +6,7 @@ import io.stereov.singularity.content.article.dto.*
 import io.stereov.singularity.content.article.model.Article
 import io.stereov.singularity.content.common.content.dto.*
 import io.stereov.singularity.content.common.content.model.ContentAccessRole
-import io.stereov.singularity.content.common.content.service.ContentManagementService
+import io.stereov.singularity.content.core.content.service.ContentManagementService
 import io.stereov.singularity.content.common.content.util.toSlug
 import io.stereov.singularity.file.core.exception.model.UnsupportedMediaTypeException
 import io.stereov.singularity.file.core.service.FileStorage

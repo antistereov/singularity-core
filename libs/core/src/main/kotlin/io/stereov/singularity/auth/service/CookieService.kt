@@ -4,13 +4,13 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.exception.AuthException
 import io.stereov.singularity.auth.exception.model.TwoFactorAuthDisabledException
-import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.geolocation.service.GeoLocationService
-import io.stereov.singularity.jwt.exception.model.InvalidTokenException
-import io.stereov.singularity.global.util.Random
-import io.stereov.singularity.twofactorauth.service.TwoFactorAuthService
 import io.stereov.singularity.global.properties.AppProperties
+import io.stereov.singularity.global.util.Constants
+import io.stereov.singularity.global.util.Random
+import io.stereov.singularity.jwt.exception.model.InvalidTokenException
 import io.stereov.singularity.jwt.properties.JwtProperties
+import io.stereov.singularity.twofactorauth.service.TwoFactorAuthService
 import io.stereov.singularity.user.dto.UserResponse
 import io.stereov.singularity.user.dto.request.DeviceInfoRequest
 import io.stereov.singularity.user.dto.request.TwoFactorStartSetupRequest
@@ -192,7 +192,7 @@ class CookieService(
         val user = userService.findById(refreshToken.userId)
 
         if (user.sensitive.devices.any { it.id == refreshToken.deviceId && it.refreshTokenId == refreshToken.tokenId }) {
-            return user.toResponse()
+            return userService.createResponse(user)
         } else {
             throw InvalidTokenException("Invalid refresh token")
         }

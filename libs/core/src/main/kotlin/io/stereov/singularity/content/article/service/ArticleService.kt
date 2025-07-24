@@ -65,7 +65,7 @@ class ArticleService(
             createdAt = article.createdAt,
             publishedAt = article.publishedAt,
             updatedAt = article.updatedAt,
-            owner = actualOwner.toOverview(),
+            owner = userService.createOverview(actualOwner),
             path = article.path,
             state = article.state,
             colors = article.colors,

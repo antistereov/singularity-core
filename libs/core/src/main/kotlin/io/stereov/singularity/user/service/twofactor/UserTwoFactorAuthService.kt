@@ -5,13 +5,13 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.exception.AuthException
 import io.stereov.singularity.auth.service.AuthenticationService
 import io.stereov.singularity.auth.service.CookieService
-import io.stereov.singularity.global.exception.model.InvalidDocumentException
-import io.stereov.singularity.user.cache.AccessTokenCache
 import io.stereov.singularity.encryption.service.EncryptionService
-import io.stereov.singularity.hash.service.HashService
+import io.stereov.singularity.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.global.util.Random
-import io.stereov.singularity.twofactorauth.service.TwoFactorAuthService
+import io.stereov.singularity.hash.service.HashService
 import io.stereov.singularity.twofactorauth.properties.TwoFactorAuthProperties
+import io.stereov.singularity.twofactorauth.service.TwoFactorAuthService
+import io.stereov.singularity.user.cache.AccessTokenCache
 import io.stereov.singularity.user.dto.UserResponse
 import io.stereov.singularity.user.dto.request.DisableTwoFactorRequest
 import io.stereov.singularity.user.dto.response.TwoFactorSetupResponse
@@ -104,7 +104,7 @@ class UserTwoFactorAuthService(
         userService.save(user)
         accessTokenCache.invalidateAllTokens(user.id)
 
-        return user.toResponse()
+        return userService.createResponse(user)
     }
 
     /**
@@ -196,6 +196,8 @@ class UserTwoFactorAuthService(
 
         user.disableTwoFactorAuth()
 
-        return userService.save(user).toResponse()
+        val savedUser = userService.save(user)
+
+        return userService.createResponse(savedUser)
     }
 }
