@@ -50,6 +50,10 @@ singularity:
     cache-expiration: 900000
     local:
       secret-directory: ${SECRET_STORE_DIRECTORY}
+    vault:
+      host: ${VAULT_HOST}
+      port: ${VAULT_PORT}
+      token: ${VAULT_TOKEN}
   mail:
     host: ${MAIL_HOST}
     port: ${MAIL_PORT}
