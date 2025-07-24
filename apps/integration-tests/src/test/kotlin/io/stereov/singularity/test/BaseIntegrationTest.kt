@@ -8,7 +8,6 @@ import io.stereov.singularity.user.service.token.UserTokenService
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
@@ -34,9 +33,6 @@ class BaseIntegrationTest : BaseSpringBootTest() {
 
     @Autowired
     lateinit var hashService: HashService
-
-    @Autowired
-    lateinit var applicationContext: ApplicationContext
 
     @AfterEach
     fun clearDatabase() = runBlocking {
