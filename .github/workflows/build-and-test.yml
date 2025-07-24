@@ -57,25 +57,22 @@ jobs:
           username: antistereov
           password: ${{ secrets.GPR_KEY }}
 
-      - name: Build and push image
-        if: github.event_name == 'push'
-        run: |
-          docker buildx build \
-          --no-cache \
-          --pull \
-          --platform linux/amd64,linux/arm64 \
-          -t ghcr.io/antistereov/stereov-io-singularity:latest \
-          -f apps/stereov-io/Dockerfile \
-          . \
-          --push
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Build image
         if: github.event_name == 'pull_request'
-        run: |
-          docker buildx build \
-          --no-cache \
-          --pull \
-          --platform linux/amd64,linux/arm64 \
-          -t ghcr.io/antistereov/stereov-io-singularity:latest \
-          -f apps/stereov-io/Dockerfile \
-          .
+        uses: docker/build-push-action@v6
+        with:
+          platforms: linux/amd64, linux/arm64
+          push: false
+          tags: ghcr.io/antistereov/stereov-io-singularity:latest
+
+
+      - name: Build and push image
+        if: github.event_name == 'push'
+        uses: docker/build-push-action@v6
+        with:
+          platforms: linux/amd64, linux/arm64
+          push: true
+          tags: ghcr.io/antistereov/stereov-io-singularity:latest
