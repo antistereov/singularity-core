@@ -84,6 +84,6 @@ class LocalFileStorage(
     }
 
     override suspend fun doGetUrl(key: String): String {
-        return Path.of(appProperties.baseUrl).resolve(apiPath).resolve(key).toString()
+        return "${appProperties.baseUrl}${apiPath}${key}"
     }
 }
