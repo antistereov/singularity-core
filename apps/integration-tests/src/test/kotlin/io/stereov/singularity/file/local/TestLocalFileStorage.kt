@@ -3,6 +3,7 @@ package io.stereov.singularity.file.local
 import io.stereov.singularity.file.core.model.FileMetadataDocument
 import io.stereov.singularity.file.core.service.FileMetadataService
 import io.stereov.singularity.file.core.service.FileStorage
+import io.stereov.singularity.file.local.controller.LocalFileStorageController
 import io.stereov.singularity.file.local.properties.LocalFileStorageProperties
 import io.stereov.singularity.file.local.service.LocalFileStorage
 import io.stereov.singularity.file.util.MockFilePart
@@ -56,6 +57,7 @@ class TestLocalFileStorage : BaseIntegrationTest() {
 
     @Test fun `should initialize beans correctly`() {
         applicationContext.getBean<LocalFileStorageProperties>()
+        applicationContext.getBean<LocalFileStorageController>()
 
         val fileStorage = applicationContext.getBean<FileStorage>()
 
