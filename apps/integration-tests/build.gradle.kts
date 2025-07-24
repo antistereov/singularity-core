@@ -17,7 +17,7 @@ kotlin {
 }
 
 val kotlinxVersion = "1.10.1"
-val testContainersVersion = "1.19.0"
+val testContainersVersion = "1.21.3"
 
 dependencies {
     // Web Starter
@@ -37,6 +37,7 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers:$testContainersVersion")
     testImplementation("org.testcontainers:junit-jupiter:$testContainersVersion")
     testImplementation("org.testcontainers:mongodb:$testContainersVersion")
+    testImplementation("org.testcontainers:vault:$testContainersVersion")
 }
 
 configurations.all {
