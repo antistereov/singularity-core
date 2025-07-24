@@ -1,7 +1,7 @@
 package io.stereov.singularity.file.s3.config
 
-import io.stereov.singularity.file.core.service.FileMetadataService
 import io.stereov.singularity.file.core.config.StorageConfiguration
+import io.stereov.singularity.file.core.service.FileMetadataService
 import io.stereov.singularity.file.s3.properties.S3Properties
 import io.stereov.singularity.file.s3.service.S3FileStorage
 import io.stereov.singularity.global.properties.AppProperties
@@ -14,6 +14,7 @@ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
 import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration
 import software.amazon.awssdk.services.s3.S3AsyncClient
+import software.amazon.awssdk.services.s3.S3Configuration
 import software.amazon.awssdk.services.s3.presigner.S3Presigner
 import java.net.URI
 
@@ -49,11 +50,14 @@ class S3Configuration {
     @ConditionalOnMissingBean
     fun s3Presigner(s3Properties: S3Properties): S3Presigner {
         return S3Presigner.builder()
-            .endpointOverride(URI.create(s3Properties.domain))
+            .endpointOverride(URI.create("${s3Properties.scheme}${s3Properties.domain}"))
             .region(s3Properties.region)
             .credentialsProvider(StaticCredentialsProvider.create(
                 AwsBasicCredentials.create(s3Properties.accessKey, s3Properties.secretKey)
             ))
+            .serviceConfiguration(
+                S3Configuration.builder().pathStyleAccessEnabled(s3Properties.pathStyleAccessEnabled).build()
+            )
             .build()
     }
 
