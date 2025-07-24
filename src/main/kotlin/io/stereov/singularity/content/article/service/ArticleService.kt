@@ -14,6 +14,7 @@ import io.stereov.singularity.content.common.content.model.ContentAccessRole
 import io.stereov.singularity.content.common.content.service.ContentService
 import io.stereov.singularity.content.common.content.util.AccessCriteria
 import io.stereov.singularity.content.core.tag.service.TagService
+import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.translate.model.Language
 import io.stereov.singularity.user.model.UserDocument
 import io.stereov.singularity.user.service.UserService
@@ -35,6 +36,7 @@ class ArticleService(
     private val tagService: TagService,
     private val reactiveMongoTemplate: ReactiveMongoTemplate,
     private val accessCriteria: AccessCriteria,
+    private val fileStorage: FileStorage,
 ) : ContentService<Article> {
 
     override val logger: KLogger = KotlinLogging.logger {}
@@ -59,6 +61,8 @@ class ArticleService(
 
         val tags = article.tags.map { key -> tagService.findByKey(key).toResponse(articleLang) }
 
+        val image = article.imageKey?.let { fileStorage.metadataResponseByKey(it) }
+
         return FullArticleResponse(
             id = article.id,
             key = article.key,
@@ -69,7 +73,7 @@ class ArticleService(
             path = article.path,
             state = article.state,
             colors = article.colors,
-            image = article.image,
+            image = image,
             trusted = article.trusted,
             access = access,
             lang = articleLang,
