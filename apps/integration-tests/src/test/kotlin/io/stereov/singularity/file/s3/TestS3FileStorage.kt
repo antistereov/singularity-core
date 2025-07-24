@@ -1,0 +1,143 @@
+package io.stereov.singularity.file.s3
+
+import io.minio.MakeBucketArgs
+import io.minio.MinioClient
+import io.stereov.singularity.file.core.model.FileMetadataDocument
+import io.stereov.singularity.file.core.properties.StorageType
+import io.stereov.singularity.file.core.service.FileMetadataService
+import io.stereov.singularity.file.core.service.FileStorage
+import io.stereov.singularity.file.s3.properties.S3Properties
+import io.stereov.singularity.file.s3.service.S3FileStorage
+import io.stereov.singularity.file.util.MockFilePart
+import io.stereov.singularity.test.BaseSpringBootTest
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.getBean
+import org.springframework.core.io.ClassPathResource
+import org.springframework.http.MediaType
+import org.springframework.test.context.DynamicPropertyRegistry
+import org.springframework.test.context.DynamicPropertySource
+import org.testcontainers.containers.GenericContainer
+import org.testcontainers.containers.MinIOContainer
+import org.testcontainers.containers.MongoDBContainer
+import org.testcontainers.utility.DockerImageName
+import java.io.File
+import java.net.URI
+import java.time.temporal.ChronoUnit
+
+class TestS3FileStorage : BaseSpringBootTest() {
+
+    @Autowired
+    private lateinit var storage: FileStorage
+
+    @Autowired
+    private lateinit var metadataService: FileMetadataService
+
+    @BeforeEach
+    fun delete() = runBlocking {
+        userService.deleteAll()
+        metadataService.deleteAll()
+    }
+
+    @Test fun `should initialize beans correctly`() {
+        applicationContext.getBean<S3Properties>()
+
+        val fileStorage = applicationContext.getBean<FileStorage>()
+
+        assertThat(fileStorage).isOfAnyClassIn(S3FileStorage::class.java)
+    }
+
+    suspend fun runFileTest(public: Boolean = true, method: suspend (file: File, metadata: FileMetadataDocument, user: TestRegisterResponse) -> Unit) = runTest {
+        val user = registerUser()
+        val file = ClassPathResource("files/test-image.jpg").file
+        val filePart = MockFilePart(file)
+        val key = file.name
+
+        val metadata = storage.upload(user.info.id, filePart, key, public)
+
+        method(file, metadata, user)
+
+        storage.remove(metadata.key)
+    }
+
+    @Test fun `should upload public file`() = runTest {
+        runFileTest { file, metadata, _ ->
+            val savedMetadata = metadataService.findByKey(metadata.key)
+
+            val metadataWithMillis = metadata.copy(
+                createdAt = metadata.createdAt.truncatedTo(ChronoUnit.MILLIS),
+                updatedAt = metadata.updatedAt.truncatedTo(ChronoUnit.MILLIS)
+            )
+            assertEquals(metadataWithMillis, savedMetadata)
+        }
+    }
+    @Test fun `creates response with correct url`() = runTest {
+        runFileTest { file, metadata, user ->
+            val response = storage.metadataResponseByKey(metadata.key)
+
+            webTestClient.get()
+                .uri(response.url)
+                .exchange()
+                .expectStatus().isOk
+                .expectHeader().contentType(MediaType.IMAGE_JPEG)
+                .expectHeader().contentLength(file.length())
+                .expectBody()
+                .consumeWith {
+                    assertThat(it.responseBody).isEqualTo(file.readBytes())
+                }
+        }
+    }
+
+    companion object {
+        val mongoDBContainer = MongoDBContainer("mongo:latest").apply {
+            start()
+        }
+
+        private val redisContainer = GenericContainer(DockerImageName.parse("redis:latest"))
+            .withExposedPorts(6379)
+            .apply {
+                start()
+            }
+
+        val minioContainer = MinIOContainer("minio/minio:latest")
+            .apply {
+                start()
+            }
+
+        @BeforeAll
+        @JvmStatic
+        fun initializeBucket() = runBlocking {
+            val minioClient: MinioClient = MinioClient
+                .builder()
+                .endpoint(minioContainer.s3URL)
+                .credentials(minioContainer.userName, minioContainer.password)
+                .build()
+
+            minioClient.makeBucket(MakeBucketArgs.builder().bucket("app").build())
+        }
+
+
+        @DynamicPropertySource
+        @JvmStatic
+        @Suppress("UNUSED")
+        fun properties(registry: DynamicPropertyRegistry) {
+            val uri = URI(minioContainer.s3URL)
+
+            registry.add("spring.data.mongodb.uri") { "${mongoDBContainer.connectionString}/test" }
+            registry.add("spring.data.redis.host") { redisContainer.host }
+            registry.add("spring.data.redis.port") { redisContainer.getMappedPort(6379) }
+            registry.add("singularity.security.rate-limit.user-limit") { 10000 }
+            registry.add("singularity.file.storage.type") { StorageType.S3 }
+            registry.add("singularity.file.storage.s3.domain") { "${uri.host}:${uri.port}" }
+            registry.add("singularity.file.storage.s3.access-key") { minioContainer.userName }
+            registry.add("singularity.file.storage.s3.secret-key") { minioContainer.password }
+            registry.add("singularity.file.storage.s3.path-style-access-enabled") { true }
+        }
+    }
+}

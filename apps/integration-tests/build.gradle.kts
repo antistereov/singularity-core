@@ -37,7 +37,10 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers:$testContainersVersion")
     testImplementation("org.testcontainers:junit-jupiter:$testContainersVersion")
     testImplementation("org.testcontainers:mongodb:$testContainersVersion")
-    testImplementation("org.testcontainers:vault:$testContainersVersion")
+    testImplementation("org.testcontainers:vault:${testContainersVersion}")
+
+    testImplementation("org.testcontainers:minio:${testContainersVersion}")
+    testImplementation("io.minio:minio:8.5.17")
 }
 
 configurations.all {
