@@ -1,5 +1,6 @@
 package io.stereov.singularity.file.s3.service
 
+import com.nimbusds.jose.util.StandardCharset
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.model.AccessType
 import io.stereov.singularity.file.core.model.FileMetadataDocument
@@ -23,6 +24,7 @@ import software.amazon.awssdk.services.s3.model.ObjectCannedACL
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import software.amazon.awssdk.services.s3.presigner.S3Presigner
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest
+import java.net.URLDecoder
 import java.time.Duration
 
 @Service
@@ -109,6 +111,6 @@ class S3FileStorage(
             .build()
 
         val presigned = s3Presigner.presignGetObject(presignRequest)
-        return presigned.url().toString()
+        return URLDecoder.decode(presigned.url().toString(), StandardCharset.UTF_8)
     }
 }
