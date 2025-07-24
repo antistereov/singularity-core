@@ -1,7 +1,8 @@
 package io.stereov.singularity.file.local.config
 
-import io.stereov.singularity.file.core.service.FileMetadataService
 import io.stereov.singularity.file.core.config.StorageConfiguration
+import io.stereov.singularity.file.core.service.FileMetadataService
+import io.stereov.singularity.file.local.controller.LocalFileStorageController
 import io.stereov.singularity.file.local.properties.LocalFileStorageProperties
 import io.stereov.singularity.file.local.service.LocalFileStorage
 import io.stereov.singularity.global.properties.AppProperties
@@ -31,4 +32,10 @@ class LocalFileStorageConfiguration {
             metadataService
         )
     }
+
+    @Bean
+    fun localFileStorageController(
+        metadataService: FileMetadataService,
+        properties: LocalFileStorageProperties
+    ) = LocalFileStorageController(metadataService, properties)
 }
