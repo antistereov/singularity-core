@@ -36,7 +36,10 @@ class VaultSecretStoreConfiguration(
     }
 
     override fun vaultEndpoint(): VaultEndpoint {
-        return VaultEndpoint.create(properties.host, properties.port)
+        val endpoint = VaultEndpoint.create(properties.host, properties.port)
+        endpoint.scheme = properties.scheme
+
+        return endpoint
     }
 
     override fun clientAuthentication(): ClientAuthentication {

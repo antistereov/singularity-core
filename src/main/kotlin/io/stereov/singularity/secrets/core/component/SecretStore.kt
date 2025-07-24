@@ -9,5 +9,5 @@ interface SecretStore {
     suspend fun get(key: String): Secret {
         return getOrNull(key) ?: throw SecretKeyNotFoundException(key)
     }
-    suspend fun put(key: String, value: String, note: String): Secret
+    suspend fun put(key: String, value: String, note: String = ""): Secret
 }
