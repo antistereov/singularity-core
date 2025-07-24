@@ -1,4 +1,4 @@
-package io.stereov.singularity.file.local.util
+package io.stereov.singularity.file.util
 
 import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.core.io.buffer.DataBufferUtils

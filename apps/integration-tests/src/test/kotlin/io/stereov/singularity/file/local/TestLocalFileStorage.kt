@@ -4,7 +4,7 @@ import io.stereov.singularity.file.core.model.FileMetadataDocument
 import io.stereov.singularity.file.core.service.FileMetadataService
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.file.local.properties.LocalFileStorageProperties
-import io.stereov.singularity.file.local.util.MockFilePart
+import io.stereov.singularity.file.util.MockFilePart
 import io.stereov.singularity.global.exception.model.DocumentNotFoundException
 import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.test.BaseIntegrationTest
