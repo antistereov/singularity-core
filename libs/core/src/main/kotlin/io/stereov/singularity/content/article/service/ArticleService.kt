@@ -61,7 +61,7 @@ class ArticleService(
 
         val tags = article.tags.map { key -> tagService.findByKey(key).toResponse(articleLang) }
 
-        val image = article.imageKey?.let { fileStorage.metadataResponseByKey(it) }
+        val image = article.imageKey?.let { fileStorage.metadataResponseByKeyOrNull(it) }
 
         return FullArticleResponse(
             id = article.id,
