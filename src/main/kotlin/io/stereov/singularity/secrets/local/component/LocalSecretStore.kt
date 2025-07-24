@@ -4,6 +4,7 @@ import io.stereov.singularity.secrets.core.component.SecretStore
 import io.stereov.singularity.secrets.core.model.Secret
 import io.stereov.singularity.secrets.local.data.LocalSecretEntity
 import io.stereov.singularity.secrets.local.repository.LocalSecretRepository
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Component
 import java.time.Instant
@@ -11,6 +12,7 @@ import java.util.*
 
 @Component
 @Primary
+@ConditionalOnProperty(prefix = "singularity.secrets", value = ["store"], havingValue = "local", matchIfMissing = true)
 class LocalSecretStore(
     private val repository: LocalSecretRepository
 ) : SecretStore {

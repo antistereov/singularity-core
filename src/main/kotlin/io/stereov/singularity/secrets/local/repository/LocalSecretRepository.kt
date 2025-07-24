@@ -5,6 +5,7 @@ import io.stereov.singularity.secrets.local.data.LocalSecretEntity
 import jakarta.annotation.PostConstruct
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingleOrNull
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.data.r2dbc.core.select
 import org.springframework.data.relational.core.query.Criteria
@@ -12,6 +13,7 @@ import org.springframework.data.relational.core.query.Query
 import org.springframework.stereotype.Service
 
 @Service
+@ConditionalOnProperty(prefix = "singularity.secrets", value = ["store"], havingValue = "local", matchIfMissing = true)
 class LocalSecretRepository(
     private val secretsTemplate: R2dbcEntityTemplate
 ) {
