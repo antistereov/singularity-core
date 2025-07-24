@@ -81,6 +81,7 @@ class ContentConfiguration {
         tagService: TagService,
         reactiveMongoTemplate: ReactiveMongoTemplate,
         accessCriteria: AccessCriteria,
+        fileStorage: FileStorage
     ): ArticleService {
         return ArticleService(
             articleRepository,
@@ -89,6 +90,7 @@ class ContentConfiguration {
             tagService,
             reactiveMongoTemplate,
             accessCriteria,
+            fileStorage,
         )
     }
 

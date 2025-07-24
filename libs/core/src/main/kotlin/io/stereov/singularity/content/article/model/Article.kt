@@ -4,7 +4,6 @@ import io.stereov.singularity.content.article.dto.CreateArticleRequest
 import io.stereov.singularity.content.article.dto.FullArticleResponse
 import io.stereov.singularity.content.common.content.model.ContentAccessDetails
 import io.stereov.singularity.content.common.content.model.ContentDocument
-import io.stereov.singularity.file.core.model.FileMetadataDocument
 import io.stereov.singularity.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.translate.model.Language
 import io.stereov.singularity.translate.model.Translatable
@@ -25,7 +24,7 @@ data class Article(
     var path: String,
     var state: ArticleState = ArticleState.DRAFT,
     var colors: ArticleColors = ArticleColors(),
-    var image: FileMetadataDocument? = null,
+    var imageKey: String? = null,
     override var trusted: Boolean,
     override var tags: MutableSet<String> = mutableSetOf(),
     override val translations: MutableMap<Language, ArticleTranslation> = mutableMapOf(),
@@ -51,7 +50,7 @@ data class Article(
                 path = "$basePath/$key",
                 state = ArticleState.DRAFT,
                 colors = ArticleColors(),
-                image = null,
+                imageKey = null,
                 trusted = false,
                 access = ContentAccessDetails(ownerId),
                 translations = translations,
@@ -71,7 +70,7 @@ data class Article(
                 path = dto.path,
                 state = dto.state,
                 colors = dto.colors,
-                image = dto.image,
+                imageKey = dto.image?.key,
                 trusted = dto.trusted,
                 access = ContentAccessDetails.create(dto.access, dto.owner.id),
                 translations = translations,

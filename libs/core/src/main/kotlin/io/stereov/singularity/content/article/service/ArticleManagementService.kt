@@ -6,8 +6,8 @@ import io.stereov.singularity.content.article.dto.*
 import io.stereov.singularity.content.article.model.Article
 import io.stereov.singularity.content.common.content.dto.*
 import io.stereov.singularity.content.common.content.model.ContentAccessRole
-import io.stereov.singularity.content.core.content.service.ContentManagementService
 import io.stereov.singularity.content.common.content.util.toSlug
+import io.stereov.singularity.content.core.content.service.ContentManagementService
 import io.stereov.singularity.file.core.exception.model.UnsupportedMediaTypeException
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.global.properties.UiProperties
@@ -140,10 +140,10 @@ class ArticleManagementService(
         val article = contentService.findAuthorizedByKey(key, ContentAccessRole.EDITOR)
         val userId = authenticationService.getCurrentUserId()
 
-        val currentImage = article.image
+        val currentImage = article.imageKey
 
         if (currentImage != null) {
-            fileStorage.remove(currentImage.key)
+            fileStorage.remove(currentImage)
         }
 
         val allowedMediaTypes = listOf(MediaType.IMAGE_JPEG, MediaType.IMAGE_GIF, MediaType.IMAGE_PNG)
@@ -159,7 +159,7 @@ class ArticleManagementService(
 
         val image = fileStorage.upload(userId, file, imageKey, true)
 
-        article.image = image
+        article.imageKey = image.key
 
         val updatedArticle = contentService.save(article)
 
