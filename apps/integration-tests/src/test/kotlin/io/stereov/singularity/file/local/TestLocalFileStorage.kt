@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.MediaType
 import java.io.File
+import java.net.URI
 import java.time.temporal.ChronoUnit
 
 class TestLocalFileStorage : BaseIntegrationTest() {
@@ -164,6 +165,27 @@ class TestLocalFileStorage : BaseIntegrationTest() {
 
             // also deletes database entry for consistency
             assertThrows<DocumentNotFoundException> { metadataService.findByKey(metadata.key) }
+        }
+    }
+
+    @Test fun `creates response with correct url`() = runTest {
+        runFileTest { file, metadata, user ->
+            val response = storage.metadataResponseByKey(metadata.key)
+
+            val relativeUri = URI(response.url).path
+
+            assertThat(response.url).isEqualTo("http://localhost:8000/api/assets/${metadata.key}")
+
+            webTestClient.get()
+                .uri(relativeUri)
+                .exchange()
+                .expectStatus().isOk
+                .expectHeader().contentType(MediaType.IMAGE_JPEG)
+                .expectHeader().contentLength(file.length())
+                .expectBody()
+                .consumeWith {
+                    assertThat(it.responseBody).isEqualTo(file.readBytes())
+                }
         }
     }
 }
