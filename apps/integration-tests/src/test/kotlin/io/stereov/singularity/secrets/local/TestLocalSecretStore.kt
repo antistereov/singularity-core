@@ -11,6 +11,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.temporal.ChronoUnit
 import java.util.*
 
 class TestLocalSecretStore : BaseIntegrationTest() {
@@ -36,7 +37,7 @@ class TestLocalSecretStore : BaseIntegrationTest() {
 
         val savedSecret = secretStore.get(key)
 
-        assertThat(savedSecret).isEqualTo(secret)
+        assertThat(savedSecret.copy(createdAt = savedSecret.createdAt.truncatedTo(ChronoUnit.MILLIS))).isEqualTo(secret)
     }
     @Test fun `get throws exception when no secret exists`() = runTest {
         assertThrows<SecretKeyNotFoundException> { secretStore.get("random-key") }

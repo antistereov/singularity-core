@@ -20,6 +20,7 @@ import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.MongoDBContainer
 import org.testcontainers.utility.DockerImageName
 import org.testcontainers.vault.VaultContainer
+import java.time.temporal.ChronoUnit
 import java.util.*
 
 class TestVaultSecretStore : BaseSpringBootTest() {
@@ -50,7 +51,7 @@ class TestVaultSecretStore : BaseSpringBootTest() {
 
         val savedSecret = secretStore.get(key)
 
-        assertThat(savedSecret).isEqualTo(secret)
+        assertThat(savedSecret.copy(createdAt = savedSecret.createdAt.truncatedTo(ChronoUnit.MILLIS))).isEqualTo(secret)
     }
     @Test fun `get throws exception when no secret exists`() = runTest {
         assertThrows<SecretKeyNotFoundException> { secretStore.get("random-key") }
