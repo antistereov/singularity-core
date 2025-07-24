@@ -4,6 +4,7 @@ import io.stereov.singularity.file.core.model.FileMetadataDocument
 import io.stereov.singularity.file.core.service.FileMetadataService
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.file.local.properties.LocalFileStorageProperties
+import io.stereov.singularity.file.local.service.LocalFileStorage
 import io.stereov.singularity.file.util.MockFilePart
 import io.stereov.singularity.global.exception.model.DocumentNotFoundException
 import io.stereov.singularity.global.util.Constants
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.getBean
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.MediaType
 import java.io.File
@@ -50,6 +52,14 @@ class TestLocalFileStorage : BaseIntegrationTest() {
         method(uploadedFile, metadata, user)
 
         uploadedFile.delete()
+    }
+
+    @Test fun `should initialize beans correctly`() {
+        applicationContext.getBean<LocalFileStorageProperties>()
+
+        val fileStorage = applicationContext.getBean<FileStorage>()
+
+        assertThat(fileStorage).isOfAnyClassIn(LocalFileStorage::class.java)
     }
 
     @Test
