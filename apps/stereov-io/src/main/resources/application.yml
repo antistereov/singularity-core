@@ -54,6 +54,7 @@ singularity:
       host: ${VAULT_HOST}
       port: ${VAULT_PORT}
       token: ${VAULT_TOKEN}
+      scheme: ${VAULT_SCHEME}
   mail:
     host: ${MAIL_HOST}
     port: ${MAIL_PORT}

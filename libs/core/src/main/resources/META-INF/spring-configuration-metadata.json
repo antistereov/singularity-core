@@ -333,6 +333,13 @@
       "defaultValue": ".data/secrets"
     },
     {
+      "name": "singularity.secrets.vault.scheme",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.secrets.vault.properties.VaultKeyManagerProperties",
+      "description": "The scheme of your Vault vault instance. Can be http or https.",
+      "defaultValue": "http"
+    },
+    {
       "name": "singularity.secrets.vault.host",
       "type": "java.lang.String",
       "sourceType": "io.stereov.singularity.secrets.vault.properties.VaultKeyManagerProperties",

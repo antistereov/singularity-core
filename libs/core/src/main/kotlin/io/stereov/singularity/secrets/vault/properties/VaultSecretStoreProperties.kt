@@ -6,7 +6,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 @ConfigurationProperties("singularity.secrets.vault")
 @ConditionalOnProperty(prefix = "singularity.secrets", value = ["store"], havingValue = "vault", matchIfMissing = false)
 data class VaultSecretStoreProperties(
-    val host: String = "http://localhost",
+    val scheme: String = "http",
+    val host: String = "localhost",
     val port: Int = 8200,
     val token: String,
     val engine: String = "apps"
