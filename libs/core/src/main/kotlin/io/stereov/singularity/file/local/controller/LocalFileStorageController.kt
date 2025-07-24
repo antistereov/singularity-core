@@ -1,5 +1,6 @@
 package io.stereov.singularity.file.local.controller
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.model.AccessType
 import io.stereov.singularity.content.common.content.model.ContentAccessRole
 import io.stereov.singularity.file.core.exception.model.FileNotFoundException
@@ -31,6 +32,8 @@ class LocalFileStorageController(
     private val properties: LocalFileStorageProperties,
 ) {
 
+    private val logger = KotlinLogging.logger {}
+
     @GetMapping("/**")
     suspend fun serveFile(
         exchange: ServerWebExchange
@@ -38,6 +41,8 @@ class LocalFileStorageController(
         val fullRequestPath = exchange.request.uri.path
         val basePath = "/api/assets/"
         val key = fullRequestPath.removePrefix(basePath)
+
+        logger.debug { "Accessing asset $key" }
 
         if (key.isBlank()) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing file key")
