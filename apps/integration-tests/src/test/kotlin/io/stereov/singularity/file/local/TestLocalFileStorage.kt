@@ -198,4 +198,25 @@ class TestLocalFileStorage : BaseIntegrationTest() {
                 }
         }
     }
+
+    @Test fun `remove works`() = runTest {
+        runFileTest { file, metadata, user ->
+            storage.remove(metadata.key)
+
+            assertFalse(metadataService.existsByKey(metadata.key))
+            assertFalse(storage.exists(metadata.key))
+
+            assertFalse(file.exists())
+        }
+    }
+    @Test fun `remove does nothing when key not existing`() = runTest {
+        storage.remove("just-a-key")
+    }
+    @Test fun `exists works`() = runTest {
+        assertFalse(storage.exists("just-a-key"))
+
+        runFileTest { file, metadata, user ->
+            assertTrue(storage.exists(metadata.key))
+        }
+    }
 }

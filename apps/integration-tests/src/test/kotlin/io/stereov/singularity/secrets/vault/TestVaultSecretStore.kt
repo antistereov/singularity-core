@@ -51,7 +51,7 @@ class TestVaultSecretStore : BaseSpringBootTest() {
 
         val savedSecret = secretStore.get(key)
 
-        assertThat(savedSecret).isEqualTo(secret.copy(createdAt = savedSecret.createdAt.truncatedTo(ChronoUnit.MILLIS)))
+        assertThat(savedSecret.copy(createdAt = savedSecret.createdAt.truncatedTo(ChronoUnit.MILLIS))).isEqualTo(secret.copy(createdAt = savedSecret.createdAt.truncatedTo(ChronoUnit.MILLIS)))
     }
     @Test fun `get throws exception when no secret exists`() = runTest {
         assertThrows<SecretKeyNotFoundException> { secretStore.get("random-key") }

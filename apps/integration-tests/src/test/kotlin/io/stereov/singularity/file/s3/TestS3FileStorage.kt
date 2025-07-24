@@ -13,7 +13,7 @@ import io.stereov.singularity.test.BaseSpringBootTest
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -45,14 +45,6 @@ class TestS3FileStorage : BaseSpringBootTest() {
         metadataService.deleteAll()
     }
 
-    @Test fun `should initialize beans correctly`() {
-        applicationContext.getBean<S3Properties>()
-
-        val fileStorage = applicationContext.getBean<FileStorage>()
-
-        assertThat(fileStorage).isOfAnyClassIn(S3FileStorage::class.java)
-    }
-
     suspend fun runFileTest(public: Boolean = true, method: suspend (file: File, metadata: FileMetadataDocument, user: TestRegisterResponse) -> Unit) = runTest {
         val user = registerUser()
         val file = ClassPathResource("files/test-image.jpg").file
@@ -64,6 +56,14 @@ class TestS3FileStorage : BaseSpringBootTest() {
         method(file, metadata, user)
 
         storage.remove(metadata.key)
+    }
+
+    @Test fun `should initialize beans correctly`() {
+        applicationContext.getBean<S3Properties>()
+
+        val fileStorage = applicationContext.getBean<FileStorage>()
+
+        assertThat(fileStorage).isOfAnyClassIn(S3FileStorage::class.java)
     }
 
     @Test fun `should upload public file`() = runTest {
@@ -91,6 +91,25 @@ class TestS3FileStorage : BaseSpringBootTest() {
                 .consumeWith {
                     assertThat(it.responseBody).isEqualTo(file.readBytes())
                 }
+        }
+    }
+
+    @Test fun `remove works`() = runTest {
+        runFileTest { file, metadata, user ->
+            storage.remove(metadata.key)
+
+            assertFalse(metadataService.existsByKey(metadata.key))
+            assertFalse(storage.exists(metadata.key))
+        }
+    }
+    @Test fun `remove does nothing when key not existing`() = runTest {
+        storage.remove("just-a-key")
+    }
+    @Test fun `exists works`() = runTest {
+        assertFalse(storage.exists("just-a-key"))
+
+        runFileTest { file, metadata, user ->
+            assertTrue(storage.exists(metadata.key))
         }
     }
 
