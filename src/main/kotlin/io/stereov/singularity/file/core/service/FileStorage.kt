@@ -1,7 +1,8 @@
 package io.stereov.singularity.file.core.service
 
 import io.github.oshai.kotlinlogging.KLogger
-import io.stereov.singularity.auth.model.AccessType
+import io.stereov.singularity.file.core.dto.FileMetadataResponse
+import io.stereov.singularity.file.core.exception.model.FileNotFoundException
 import io.stereov.singularity.file.core.model.FileMetadataDocument
 import io.stereov.singularity.global.properties.AppProperties
 import org.bson.types.ObjectId
@@ -56,20 +57,37 @@ abstract class FileStorage {
         metadataService.deleteByKey(key)
         doRemove(key)
     }
-    suspend fun getUrl(key: String): String {
-        logger.debug { "Getting URL for file with key \"$key\"" }
 
-        val metadata = metadataService.findByKey(key)
+    suspend fun metadataResponseByKeyOrNull(key: String): FileMetadataResponse? {
+        logger.debug { "Creating metadata response for file with key \"$key\"" }
 
-        return when (metadata.access.visibility) {
-            AccessType.PUBLIC -> getPublicUrl(key)
-            else -> getPrivateUrl(key)
-        }
+        val metadata = metadataService.findByKeyOrNull(key) ?: return null
+
+        return metadata.toResponse()
     }
+
+    suspend fun metadataResponseByKey(key: String): FileMetadataResponse {
+        return metadataResponseByKeyOrNull(key) ?: throw FileNotFoundException(file = null, msg = "File with key \"$key not found")
+    }
+
+    private suspend fun FileMetadataDocument.toResponse(): FileMetadataResponse {
+        return FileMetadataResponse(
+            id = this.id,
+            key = this.key,
+            createdAt = this.createdAt,
+            updatedAt = this.updatedAt,
+            access = this.access,
+            contentType = this.contentType.toString(),
+            url = doGetUrl(this.key),
+            size = this.size,
+            trusted = this.trusted,
+            tags = this.tags
+        )
+    }
+
 
     protected abstract suspend fun doUpload(userId: ObjectId, filePart: FilePart, key: String, public: Boolean, contentType: MediaType): FileMetadataDocument
     protected abstract suspend fun doExists(key: String): Boolean
     protected abstract suspend fun doRemove(key: String)
-    protected abstract suspend fun getPublicUrl(key: String): String
-    protected abstract suspend fun getPrivateUrl(key: String): String
+    protected abstract suspend fun doGetUrl(key: String): String
 }

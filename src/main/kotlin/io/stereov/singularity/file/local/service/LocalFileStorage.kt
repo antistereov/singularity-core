@@ -59,7 +59,6 @@ class LocalFileStorage(
             key = key,
             contentType = contentType,
             accessType = if (public) AccessType.PUBLIC else AccessType.PRIVATE,
-            publicUrl = if (public) getPublicUrl(key) else null,
             size = size
         )
     }
@@ -84,11 +83,7 @@ class LocalFileStorage(
         }
     }
 
-    override suspend fun getPublicUrl(key: String): String {
-        return "${appProperties.baseUrl}/${apiPath}/public/$key"
-    }
-
-    override suspend fun getPrivateUrl(key: String): String {
-        return "${appProperties.baseUrl}/${apiPath}/private/$key"
+    override suspend fun doGetUrl(key: String): String {
+        return Path.of(appProperties.baseUrl).resolve(apiPath).resolve(key).toString()
     }
 }

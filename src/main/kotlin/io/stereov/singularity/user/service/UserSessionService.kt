@@ -197,10 +197,10 @@ class UserSessionService(
     suspend fun setAvatar(file: FilePart): UserResponse {
         val user = authenticationService.getCurrentUser()
 
-        val currentAvatar = user.sensitive.avatar
+        val currentAvatar = user.sensitive.avatarFileKey
 
         if (currentAvatar != null) {
-            fileStorage.remove(currentAvatar.key)
+            fileStorage.remove(currentAvatar)
         }
 
         val allowedMediaTypes = listOf(MediaType.IMAGE_JPEG, MediaType.IMAGE_GIF, MediaType.IMAGE_PNG)
@@ -214,25 +214,28 @@ class UserSessionService(
 
         userService.save(user)
 
-        user.sensitive.avatar = fileStorage
+        user.sensitive.avatarFileKey = fileStorage
             .upload(user.id, file, "${user.fileStoragePath}/avatar", true)
-            .toResponse()
+            .key
 
-        return userService.save(user).toResponse()
+        val savedUser = userService.save(user)
+        return userService.createResponse(savedUser)
     }
 
     suspend fun deleteAvatar(): UserResponse {
         val user = authenticationService.getCurrentUser()
 
-        val currentAvatar = user.sensitive.avatar
+        val currentAvatar = user.sensitive.avatarFileKey
 
         if (currentAvatar != null) {
-            fileStorage.remove(currentAvatar.key)
+            fileStorage.remove(currentAvatar)
         }
 
-        user.sensitive.avatar = null
+        user.sensitive.avatarFileKey = null
 
-        return userService.save(user).toResponse()
+        val savedUser = userService.save(user)
+
+        return userService.createResponse(savedUser)
     }
 
     /**

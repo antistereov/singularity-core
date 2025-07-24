@@ -3,7 +3,6 @@ package io.stereov.singularity.file.core.model
 import io.stereov.singularity.auth.model.AccessType
 import io.stereov.singularity.content.common.content.model.ContentAccessDetails
 import io.stereov.singularity.content.common.content.model.ContentDocument
-import io.stereov.singularity.file.core.dto.FileMetadataResponse
 import io.stereov.singularity.global.exception.model.InvalidDocumentException
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
@@ -21,7 +20,6 @@ data class FileMetadataDocument(
     override var updatedAt: Instant = Instant.now(),
     override var access: ContentAccessDetails,
     private val _contentType: String,
-    val publicUrl: String?,
     val size: Long,
     override val trusted: Boolean = false,
     override var tags: MutableSet<String> = mutableSetOf()
@@ -43,7 +41,6 @@ data class FileMetadataDocument(
         ownerId: ObjectId,
         contentType: MediaType,
         accessType: AccessType,
-        publicUrl: String?,
         size: Long,
         trusted: Boolean = false,
         tags: MutableSet<String> = mutableSetOf()
@@ -54,24 +51,8 @@ data class FileMetadataDocument(
         updatedAt = updatedAt,
         access = ContentAccessDetails(ownerId = ownerId, visibility = accessType),
         _contentType = contentType.toString(),
-        publicUrl = publicUrl,
         size = size,
         trusted = trusted,
         tags = tags
     )
-
-    fun toResponse(): FileMetadataResponse {
-        return FileMetadataResponse(
-            id = id,
-            key = key,
-            createdAt = createdAt,
-            updatedAt = updatedAt,
-            access = access,
-            contentType = _contentType,
-            publicUrl = publicUrl,
-            size = size,
-            trusted = trusted,
-            tags = tags
-        )
-    }
 }

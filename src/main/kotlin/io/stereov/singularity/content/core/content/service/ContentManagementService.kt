@@ -1,4 +1,4 @@
-package io.stereov.singularity.content.common.content.service
+package io.stereov.singularity.content.core.content.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.stereov.singularity.auth.service.AuthenticationService
@@ -6,6 +6,7 @@ import io.stereov.singularity.content.common.content.dto.*
 import io.stereov.singularity.content.common.content.model.ContentAccessRole
 import io.stereov.singularity.content.common.content.model.ContentAccessSubject
 import io.stereov.singularity.content.common.content.model.ContentDocument
+import io.stereov.singularity.content.common.content.service.ContentService
 import io.stereov.singularity.invitation.exception.model.InvalidInvitationException
 import io.stereov.singularity.invitation.model.InvitationDocument
 import io.stereov.singularity.invitation.service.InvitationService
@@ -130,7 +131,7 @@ interface ContentManagementService<T: ContentDocument<T>> {
             val foundUser = userService.findByIdOrNull(ObjectId(id))
 
             if (foundUser != null) {
-                users.add(UserContentAccessDetails(foundUser.toOverview(), ContentAccessRole.ADMIN))
+                users.add(UserContentAccessDetails(userService.createOverview(foundUser), ContentAccessRole.ADMIN))
             } else {
                 content.access.users.admin.remove(id)
             }
@@ -140,7 +141,7 @@ interface ContentManagementService<T: ContentDocument<T>> {
             val foundUser = userService.findByIdOrNull(ObjectId(id))
 
             if (foundUser != null) {
-                users.add(UserContentAccessDetails(foundUser.toOverview(), ContentAccessRole.EDITOR))
+                users.add(UserContentAccessDetails(userService.createOverview(foundUser), ContentAccessRole.EDITOR))
             } else {
                 content.access.users.editor.remove(id)
             }
@@ -150,7 +151,7 @@ interface ContentManagementService<T: ContentDocument<T>> {
             val foundUser = userService.findByIdOrNull(ObjectId(id))
 
             if (foundUser != null) {
-                users.add(UserContentAccessDetails(foundUser.toOverview(), ContentAccessRole.VIEWER))
+                users.add(UserContentAccessDetails(userService.createOverview(foundUser), ContentAccessRole.VIEWER))
             } else {
                 content.access.users.viewer.remove(id)
             }

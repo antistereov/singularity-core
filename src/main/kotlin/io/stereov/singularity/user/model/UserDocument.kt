@@ -4,13 +4,10 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.database.model.SensitiveDocument
 import io.stereov.singularity.encryption.model.Encrypted
-import io.stereov.singularity.file.core.dto.FileMetadataResponse
 import io.stereov.singularity.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.global.exception.model.MissingFunctionParameterException
 import io.stereov.singularity.hash.model.SearchableHash
 import io.stereov.singularity.hash.model.SecureHash
-import io.stereov.singularity.user.dto.UserOverviewResponse
-import io.stereov.singularity.user.dto.UserResponse
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Transient
 import java.time.Instant
@@ -39,8 +36,8 @@ data class UserDocument(
         groups: MutableSet<String> = mutableSetOf(),
         security: UserSecurityDetails = UserSecurityDetails(),
         devices: MutableList<DeviceInfo> = mutableListOf(),
-        avatar: FileMetadataResponse? = null,
-    ): this(id, password, created, lastActive, SensitiveUserData(name, email, roles, groups, security, devices, avatar))
+        avatarFileKey: String? = null,
+    ): this(id, password, created, lastActive, SensitiveUserData(name, email, roles, groups, security, devices, avatarFileKey))
 
     @get:Transient
     private val logger: KLogger
@@ -75,32 +72,6 @@ data class UserDocument(
             _id, hashedEmail, password, created, lastActive, encryptedSensitiveData
         )
     }
-
-    /**
-     * Convert this [UserDocument] to a [UserResponse].
-     *
-     * This method is used to create a data transfer object (DTO) for the user.
-     *
-     * @return A [UserResponse] containing the user information.
-     */
-    fun toResponse(): UserResponse {
-        logger.debug { "Creating UserDto" }
-
-        return UserResponse(
-            id,
-            sensitive.name,
-            sensitive.email,
-            sensitive.roles,
-            sensitive.security.mail.verified,
-            lastActive.toString(),
-            sensitive.security.twoFactor.enabled,
-            sensitive.avatar,
-            created.toString(),
-            sensitive.groups
-        )
-    }
-
-    fun toOverview() = UserOverviewResponse(id, sensitive.name, sensitive.email, sensitive.avatar)
 
     /**
      * Set up two-factor authentication for the user.

@@ -8,6 +8,7 @@ import io.stereov.singularity.translate.model.Language
 import io.stereov.singularity.user.dto.UserResponse
 import io.stereov.singularity.user.dto.request.*
 import io.stereov.singularity.user.dto.response.LoginResponse
+import io.stereov.singularity.user.service.UserService
 import io.stereov.singularity.user.service.UserSessionService
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
@@ -37,6 +38,7 @@ class UserSessionController(
     private val authenticationService: AuthenticationService,
     private val userSessionService: UserSessionService,
     private val cookieService: CookieService,
+    private val userService: UserService
 ) {
 
     private val logger: KLogger
@@ -51,7 +53,7 @@ class UserSessionController(
     suspend fun getUser(): ResponseEntity<UserResponse> {
         val user = authenticationService.getCurrentUser()
 
-        return ResponseEntity.ok(user.toResponse())
+        return ResponseEntity.ok(userService.createResponse(user))
     }
 
     /**
@@ -72,7 +74,7 @@ class UserSessionController(
             val twoFactorCookie = cookieService.createLoginVerificationCookie(user.id)
             return ResponseEntity.ok()
                 .header("Set-Cookie", twoFactorCookie.toString())
-                .body(LoginResponse(true, user.toResponse()))
+                .body(LoginResponse(true, userService.createResponse(user)))
         }
 
         val accessTokenCookie = cookieService.createAccessTokenCookie(user.id, payload.device.id)
@@ -81,7 +83,7 @@ class UserSessionController(
         return ResponseEntity.ok()
             .header("Set-Cookie", accessTokenCookie.toString())
             .header("Set-Cookie", refreshTokenCookie.toString())
-            .body(LoginResponse(false, user.toResponse()))
+            .body(LoginResponse(false, userService.createResponse(user)))
     }
 
     /**
@@ -108,7 +110,7 @@ class UserSessionController(
         return ResponseEntity.ok()
             .header("Set-Cookie", accessTokenCookie.toString())
             .header("Set-Cookie", refreshTokenCookie.toString())
-            .body(user.toResponse())
+            .body(userService.createResponse(user))
     }
 
     /**
@@ -125,8 +127,9 @@ class UserSessionController(
         @RequestParam lang: Language = Language.EN,
         exchange: ServerWebExchange
     ): ResponseEntity<UserResponse> {
+        val user = userSessionService.changeEmail(payload, exchange, lang)
         return ResponseEntity.ok().body(
-            userSessionService.changeEmail(payload, exchange, lang).toResponse()
+            userService.createResponse(user)
         )
     }
 
@@ -140,8 +143,10 @@ class UserSessionController(
      */
     @PutMapping("/me/password")
     suspend fun changePassword(@RequestBody payload: ChangePasswordRequest, exchange: ServerWebExchange): ResponseEntity<UserResponse> {
+        val user = userSessionService.changePassword(payload, exchange)
+        
         return ResponseEntity.ok().body(
-            userSessionService.changePassword(payload, exchange).toResponse()
+            userService.createResponse(user)
         )
     }
 
@@ -153,8 +158,10 @@ class UserSessionController(
      */
     @PutMapping("/me")
     suspend fun changeUser(@RequestBody payload: ChangeUserRequest): ResponseEntity<UserResponse> {
+        val user = userSessionService.changeUser(payload)
+        
         return ResponseEntity.ok().body(
-            userSessionService.changeUser(payload).toResponse()
+            userService.createResponse(user)
         )
     }
 

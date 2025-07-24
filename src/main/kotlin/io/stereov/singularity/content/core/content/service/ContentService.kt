@@ -20,16 +20,24 @@ interface ContentService<T: ContentDocument<T>>  {
 
     val logger: KLogger
 
+    suspend fun findByIdOrNull(id: ObjectId): T? {
+        logger.debug { "Finding ${contentClass.simpleName} by ID \"$id\"" }
+
+        return repository.findById(id)
+    }
+
+    suspend fun findById(id: ObjectId): T {
+        return findByIdOrNull(id) ?: throw DocumentNotFoundException("No ${contentClass.simpleName} with ID \"$id\" found")
+    }
+
     suspend fun findByKeyOrNull(key: String): T? {
-        logger.debug { "Fining ${contentClass.simpleName} by key" }
+        logger.debug { "Fining ${contentClass.simpleName} by key \"$key\"" }
 
         return repository.findByKey(key)
     }
 
     suspend fun findByKey(key: String): T {
-        logger.debug { "Finding ${contentClass.simpleName} by key \"$key\"" }
-
-        return findByKeyOrNull(key) ?: throw DocumentNotFoundException("No content document with key $key found")
+        return findByKeyOrNull(key) ?: throw DocumentNotFoundException("No ${contentClass.simpleName} with key \"$key\" found")
     }
 
     suspend fun save(content: T): T {

@@ -54,7 +54,9 @@ class UserMailService(
         return if (verificationToken.secret == savedSecret) {
             user.sensitive.security.mail.verified = true
             user.sensitive.email = verificationToken.email
-            userService.save(user).toResponse()
+            val savedUser = userService.save(user)
+
+            userService.createResponse(savedUser)
         } else {
             throw AuthException("Verification token does not match")
         }
