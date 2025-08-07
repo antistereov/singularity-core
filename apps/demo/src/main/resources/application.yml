@@ -61,4 +61,4 @@ singularity:
       recovery-code-length: 10
       recovery-code-count: 6
   ui:
-    base-url: ${UI_BASE_URL:http://localhost:63342}
+    base-url: ${UI_BASE_URL:http://localhost:3000}

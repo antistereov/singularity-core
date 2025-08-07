@@ -696,7 +696,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val user = registerUser()
         val accessToken = user.accessToken
 
-        val res = webTestClient.put()
+        webTestClient.put()
             .uri("/api/user/me/avatar")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, accessToken)
             .bodyValue(
