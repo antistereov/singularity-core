@@ -2,15 +2,18 @@ package io.stereov.singularity.user.controller
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.auth.properties.AuthProperties
 import io.stereov.singularity.auth.service.AuthenticationService
 import io.stereov.singularity.auth.service.CookieService
 import io.stereov.singularity.translate.model.Language
 import io.stereov.singularity.user.dto.UserResponse
 import io.stereov.singularity.user.dto.request.*
 import io.stereov.singularity.user.dto.response.LoginResponse
+import io.stereov.singularity.user.dto.response.RegisterResponse
 import io.stereov.singularity.user.service.UserService
 import io.stereov.singularity.user.service.UserSessionService
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
@@ -41,7 +44,8 @@ class UserSessionController(
     private val authenticationService: AuthenticationService,
     private val userSessionService: UserSessionService,
     private val cookieService: CookieService,
-    private val userService: UserService
+    private val userService: UserService,
+    private val authProperties: AuthProperties
 ) {
 
     private val logger: KLogger
@@ -55,8 +59,8 @@ class UserSessionController(
     @GetMapping("/me")
     @Operation(
         summary = "Get currently logged in user",
-        tags = ["User Info"]
     )
+    @SecurityRequirement(name = "bearerAuth")
     suspend fun getUser(): ResponseEntity<UserResponse> {
         val user = authenticationService.getCurrentUser()
 
@@ -87,10 +91,16 @@ class UserSessionController(
         val accessTokenCookie = cookieService.createAccessTokenCookie(user.id, payload.device.id)
         val refreshTokenCookie = cookieService.createRefreshTokenCookie(user.id, payload.device, exchange)
 
+        val res = LoginResponse(
+            false,
+            userService.createResponse(user),
+            if (authProperties.allowHeaderAuthentication) accessTokenCookie.value else null
+        )
+
         return ResponseEntity.ok()
             .header("Set-Cookie", accessTokenCookie.toString())
             .header("Set-Cookie", refreshTokenCookie.toString())
-            .body(LoginResponse(false, userService.createResponse(user)))
+            .body(res)
     }
 
     /**
@@ -106,7 +116,7 @@ class UserSessionController(
         @RequestBody @Valid payload: RegisterUserRequest,
         @RequestParam("send-email") sendEmail: Boolean = true,
         @RequestParam lang: Language = Language.EN
-    ): ResponseEntity<UserResponse> {
+    ): ResponseEntity<RegisterResponse> {
         logger.info { "Executing register" }
 
         val user = userSessionService.registerAndGetUser(payload, sendEmail, lang)
@@ -114,10 +124,15 @@ class UserSessionController(
         val accessTokenCookie = cookieService.createAccessTokenCookie(user.id, payload.device.id)
         val refreshTokenCookie = cookieService.createRefreshTokenCookie(user.id, payload.device, exchange)
 
+        val res = RegisterResponse(
+            userService.createResponse(user),
+            if (authProperties.allowHeaderAuthentication) accessTokenCookie.value else null
+        )
+
         return ResponseEntity.ok()
             .header("Set-Cookie", accessTokenCookie.toString())
             .header("Set-Cookie", refreshTokenCookie.toString())
-            .body(userService.createResponse(user))
+            .body(res)
     }
 
     /**
