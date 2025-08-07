@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
 /**
  * # UserDeviceController class.
@@ -20,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
-@Controller
+@RestController
 @RequestMapping("/api/user/devices")
 class UserDeviceController(
     private val deviceService: UserDeviceService

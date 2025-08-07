@@ -10,6 +10,8 @@ import io.stereov.singularity.user.dto.request.*
 import io.stereov.singularity.user.dto.response.LoginResponse
 import io.stereov.singularity.user.service.UserService
 import io.stereov.singularity.user.service.UserSessionService
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.http.codec.multipart.FilePart
@@ -34,6 +36,7 @@ import org.springframework.web.server.ServerWebExchange
  */
 @RestController
 @RequestMapping("/api/user")
+@Tag(name = "User Session", description = "Operations related to login and session management")
 class UserSessionController(
     private val authenticationService: AuthenticationService,
     private val userSessionService: UserSessionService,
@@ -50,6 +53,10 @@ class UserSessionController(
      * @return The current user's information as a [UserResponse].
      */
     @GetMapping("/me")
+    @Operation(
+        summary = "Get currently logged in user",
+        tags = ["User Info"]
+    )
     suspend fun getUser(): ResponseEntity<UserResponse> {
         val user = authenticationService.getCurrentUser()
 

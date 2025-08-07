@@ -6,7 +6,6 @@ import io.stereov.singularity.user.dto.request.ResetPasswordRequest
 import io.stereov.singularity.user.dto.request.SendPasswordResetRequest
 import io.stereov.singularity.user.service.mail.UserMailService
 import org.springframework.http.ResponseEntity
-import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 
 /**
@@ -16,7 +15,7 @@ import org.springframework.web.bind.annotation.*
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
-@Controller
+@RestController
 @RequestMapping("/api/user/mail")
 class UserMailController(
     private val userMailService: UserMailService,

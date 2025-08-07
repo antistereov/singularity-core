@@ -8,10 +8,9 @@ import io.stereov.singularity.group.service.GroupService
 import io.stereov.singularity.translate.model.Language
 import org.springframework.data.domain.Page
 import org.springframework.http.ResponseEntity
-import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 
-@Controller
+@RestController
 @RequestMapping("api/groups")
 class GroupController(
     private val service: GroupService

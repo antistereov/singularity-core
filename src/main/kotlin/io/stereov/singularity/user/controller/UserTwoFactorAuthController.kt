@@ -15,7 +15,6 @@ import io.stereov.singularity.user.dto.response.TwoFactorStatusResponse
 import io.stereov.singularity.user.service.UserService
 import io.stereov.singularity.user.service.twofactor.UserTwoFactorAuthService
 import org.springframework.http.ResponseEntity
-import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ServerWebExchange
 
@@ -28,7 +27,7 @@ import org.springframework.web.server.ServerWebExchange
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
-@Controller
+@RestController
 @RequestMapping("/api/user/2fa")
 class UserTwoFactorAuthController(
     private val twoFactorService: UserTwoFactorAuthService,

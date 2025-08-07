@@ -6,10 +6,9 @@ import io.stereov.singularity.content.common.content.dto.*
 import io.stereov.singularity.translate.model.Language
 import org.springframework.http.ResponseEntity
 import org.springframework.http.codec.multipart.FilePart
-import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 
-@Controller
+@RestController
 @RequestMapping("/api/content/articles")
 class ArticleManagementController(
     private val service: ArticleManagementService
