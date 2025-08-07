@@ -144,6 +144,20 @@
       "description": "Paths that require user authentication. This is a comma-separated list of paths."
     },
     {
+      "name": "singularity.auth.allow-header-authentication",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.stereov.singularity.auth.properties.AuthProperties",
+      "description": "Allow authentication using a bearer token placed in the header along Http-only Cookies. Turned off by default for security reasons.",
+      "default": false
+    },
+    {
+      "name": "singularity.auth.prefer-header-authentication",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.stereov.singularity.auth.properties.AuthProperties",
+      "description": "If header authentication is allowed, this property controls the precedence: if true, the Authorization header is preferred over Http-only cookies.",
+      "default": false
+    },
+    {
       "name": "singularity.file.storage.type",
       "type": "io.stereov.singularity.file.core.properties.StorageType",
       "sourceType": "io.stereov.singularity.file.s3.properties.S3Properties",
