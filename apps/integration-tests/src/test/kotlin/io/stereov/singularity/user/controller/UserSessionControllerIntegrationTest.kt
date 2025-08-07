@@ -6,6 +6,7 @@ import io.stereov.singularity.test.BaseIntegrationTest
 import io.stereov.singularity.user.dto.UserResponse
 import io.stereov.singularity.user.dto.request.*
 import io.stereov.singularity.user.dto.response.LoginResponse
+import io.stereov.singularity.user.dto.response.RegisterResponse
 import io.stereov.singularity.user.service.mail.MailTokenService
 import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.test.runTest
@@ -195,14 +196,14 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
             .bodyValue(RegisterUserRequest(email = email, password = password, name = "Name", device = deviceInfo))
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserResponse::class.java)
+            .expectBody(RegisterResponse::class.java)
             .returnResult()
 
         val accessToken = response.responseCookies[Constants.ACCESS_TOKEN_COOKIE]
             ?.firstOrNull()?.value
         val refreshToken = response.responseCookies[Constants.REFRESH_TOKEN_COOKIE]
             ?.firstOrNull()?.value
-        val userDto = response.responseBody
+        val userDto = response.responseBody!!.user
 
         requireNotNull(accessToken) { "No access token provided in response" }
         requireNotNull(refreshToken) { "No refresh token provided in response" }
