@@ -1,0 +1,41 @@
+services:
+  singularity-demo:
+    container_name: singularity-demo
+    restart: unless-stopped
+    depends_on:
+      - singularity-demo-mongo
+      - singularity-demo-redis
+    build:
+      context: ../
+      dockerfile: apps/demo/Dockerfile
+    networks:
+      default_network:
+
+  singularity-demo-mongo:
+    image: mongodb/mongodb-community-server:latest
+    container_name: singularity-demo-mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: singularity
+      MONGO_INITDB_ROOT_PASSWORD: singularity
+    networks:
+      default_network:
+
+  singularity-demo-redis:
+    image: redis:latest
+    container_name: singularity-demo-redis
+    restart: unless-stopped
+    command: [ "redis-server", "--requirepass", "singularity" ]
+    networks:
+      default_network:
+
+  docusaurus:
+    container_name: docusaurus
+    restart: unless-stopped
+    build: .
+    networks:
+      default_network:
+
+networks:
+  default_network:
+    external: true

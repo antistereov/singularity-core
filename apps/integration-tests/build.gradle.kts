@@ -3,8 +3,6 @@ plugins {
     kotlin("plugin.spring") version "2.0.21"
     id("org.springframework.boot") version "3.4.1"
     id("io.spring.dependency-management") version "1.1.4"
-
-    id("org.springdoc.openapi-gradle-plugin") version "1.9.0"
 }
 
 repositories {
@@ -52,14 +50,4 @@ configurations.all {
 
 tasks.test {
     useJUnitPlatform()
-}
-
-tasks.named("forkedSpringBootRun") {
-    dependsOn("assemble")
-}
-
-openApi {
-    apiDocsUrl.set("http://localhost:8000/api/openapi")
-    outputDir.set(file("$rootDir/docs/static/openapi"))
-    outputFileName.set("openapi.yaml")
 }

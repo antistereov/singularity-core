@@ -1,0 +1,61 @@
+server:
+  port: 8000
+
+spring:
+  data:
+    mongodb:
+      uri: mongodb://singularity:singularity@singularity-demo-mongo:27017/test-application?authSource=admin&tls=false
+    redis:
+      host: singularity-demo-redis
+      port: 6379
+      password: singularity
+      database: 0
+      timeout: 5000ms
+      ssl:
+        enabled: false
+  devtools:
+    restart:
+      enabled: false
+      additional-paths: src/main
+
+logging:
+  level:
+    io.stereov: DEBUG
+
+singularity:
+  app:
+    name: TestApplication
+    base-url: http://localhost:8000
+    support-mail: support@example.com
+    secure: false
+    create-root-user: false
+    root-email: ${ROOT_EMAIL}
+    root-password: ${ROOT_PASSWORD}
+    enable-mail: false
+  file:
+    storage:
+      type: local
+      local:
+        file-directory: .data/test/files
+  secrets:
+    store: local
+    local:
+      secret-directory: ./.data/test/secrets
+    key-rotation-cron: 0 0 4 1 1,4,7,10 *
+    cache-expiration: 900000
+  security:
+    jwt:
+      expires-in: 900
+    rate-limit:
+      ip-limit: 10000
+      ip-time-window: 1
+      user-limit: 10000
+      user-time-window: 1
+    login-attempt-limit:
+      ip-limit: 10000
+      ip-time-window: 1
+    two-factor:
+      recovery-code-length: 10
+      recovery-code-count: 6
+  ui:
+    base-url: http://localhost:4200
