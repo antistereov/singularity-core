@@ -5,8 +5,6 @@ import io.stereov.singularity.test.config.MockMailSenderConfig
 import io.stereov.singularity.twofactorauth.service.TwoFactorAuthService
 import io.stereov.singularity.user.service.token.TwoFactorAuthTokenService
 import io.stereov.singularity.user.service.token.UserTokenService
-import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.AfterEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.DynamicPropertyRegistry
@@ -33,11 +31,6 @@ class BaseIntegrationTest : BaseSpringBootTest() {
 
     @Autowired
     lateinit var hashService: HashService
-
-    @AfterEach
-    fun clearDatabase() = runBlocking {
-        userService.deleteAll()
-    }
 
     companion object {
         val mongoDBContainer = MongoDBContainer("mongo:latest").apply {

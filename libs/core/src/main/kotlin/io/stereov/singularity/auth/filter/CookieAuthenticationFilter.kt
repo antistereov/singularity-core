@@ -3,14 +3,16 @@ package io.stereov.singularity.auth.filter
 import io.stereov.singularity.auth.exception.AuthException
 import io.stereov.singularity.auth.model.CustomAuthenticationToken
 import io.stereov.singularity.auth.model.ErrorAuthenticationToken
-import io.stereov.singularity.global.util.Constants
+import io.stereov.singularity.auth.properties.AuthProperties
 import io.stereov.singularity.global.exception.model.DocumentNotFoundException
+import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.jwt.exception.TokenException
 import io.stereov.singularity.jwt.exception.model.InvalidTokenException
 import io.stereov.singularity.user.service.UserService
 import io.stereov.singularity.user.service.token.UserTokenService
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.mono
+import org.apache.http.HttpHeaders
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.security.core.context.SecurityContextImpl
 import org.springframework.web.server.ServerWebExchange
@@ -30,6 +32,7 @@ import reactor.core.publisher.Mono
 class CookieAuthenticationFilter(
     private val userTokenService: UserTokenService,
     private val userService: UserService,
+    private val authProperties: AuthProperties
 ) : WebFilter {
 
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain) = mono {
@@ -67,7 +70,19 @@ class CookieAuthenticationFilter(
     }
 
     private fun extractTokenFromRequest(exchange: ServerWebExchange): String? {
-        return exchange.request.cookies[Constants.ACCESS_TOKEN_COOKIE]?.firstOrNull()?.value
+        val cookieToken = exchange.request.cookies[Constants.ACCESS_TOKEN_COOKIE]?.firstOrNull()?.value
+
+        if (!authProperties.allowHeaderAuthentication) return cookieToken
+
+        val headerToken = exchange.request.headers.getFirst(HttpHeaders.AUTHORIZATION)
+            ?.takeIf { it.startsWith("Bearer ") }
+            ?.removePrefix("Bearer ")
+
+        return if (authProperties.preferHeaderAuthentication) {
+            headerToken ?: cookieToken
+        } else {
+            cookieToken ?: headerToken
+        }
     }
 
     private suspend fun setSecurityContext(chain: WebFilterChain, exchange: ServerWebExchange, exception: Exception): Void? {

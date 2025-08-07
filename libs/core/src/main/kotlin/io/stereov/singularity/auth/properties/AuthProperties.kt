@@ -7,4 +7,6 @@ data class AuthProperties(
     val publicPaths: List<String> = emptyList(),
     val userPaths: List<String> = emptyList(),
     val adminPaths: List<String> = emptyList(),
+    val allowHeaderAuthentication: Boolean = false,
+    val preferHeaderAuthentication: Boolean = false
 )

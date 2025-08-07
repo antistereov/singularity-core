@@ -13,6 +13,8 @@ import io.stereov.singularity.user.dto.response.TwoFactorSetupResponse
 import io.stereov.singularity.user.model.Role
 import io.stereov.singularity.user.model.UserDocument
 import io.stereov.singularity.user.service.UserService
+import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -29,7 +31,6 @@ class BaseSpringBootTest {
     @Autowired
     lateinit var applicationContext: ApplicationContext
 
-
     @Autowired
     private lateinit var groupService: GroupService
 
@@ -41,6 +42,11 @@ class BaseSpringBootTest {
 
     @Autowired
     lateinit var gAuth: GoogleAuthenticator
+
+    @AfterEach
+    fun clearDatabase() = runBlocking {
+        userService.deleteAll()
+    }
 
     @BeforeEach
     fun setupMocks() {

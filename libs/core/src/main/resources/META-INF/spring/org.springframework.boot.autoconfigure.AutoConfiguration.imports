@@ -20,6 +20,7 @@ io.stereov.singularity.geolocation.config.GeoLocationConfiguration
 
 io.stereov.singularity.global.config.ApplicationConfiguration
 io.stereov.singularity.global.config.JsonConfiguration
+io.stereov.singularity.global.config.OpenApiConfiguration
 io.stereov.singularity.global.config.WebClientConfiguration
 io.stereov.singularity.global.config.WebFluxConfiguration
 io.stereov.singularity.global.config.WebSecurityConfiguration

@@ -4,8 +4,6 @@ import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.stereov.singularity.test.config.MockMailSenderConfig
-import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
@@ -28,11 +26,6 @@ class BaseMailIntegrationTest : BaseSpringBootTest() {
     @BeforeEach
     fun init() {
         every { mailSender.send(any<SimpleMailMessage>()) } just Runs
-    }
-
-    @AfterEach
-    fun clearDatabase() = runBlocking {
-        userService.deleteAll()
     }
 
     companion object {

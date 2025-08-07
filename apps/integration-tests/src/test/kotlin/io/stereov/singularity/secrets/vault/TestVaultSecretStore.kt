@@ -7,10 +7,8 @@ import io.stereov.singularity.secrets.core.properties.SecretStoreImplementation
 import io.stereov.singularity.secrets.vault.component.VaultSecretStore
 import io.stereov.singularity.secrets.vault.properties.VaultSecretStoreProperties
 import io.stereov.singularity.test.BaseSpringBootTest
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
@@ -24,11 +22,6 @@ import java.time.temporal.ChronoUnit
 import java.util.*
 
 class TestVaultSecretStore : BaseSpringBootTest() {
-
-    @AfterEach
-    fun clearDatabase() = runBlocking {
-        userService.deleteAll()
-    }
 
     @Autowired
     private lateinit var secretStore: VaultSecretStore
