@@ -17,4 +17,5 @@ import io.stereov.singularity.user.dto.UserResponse
 data class LoginResponse(
     val twoFactorRequired: Boolean,
     val user: UserResponse,
+    val token: String? = null,
 )

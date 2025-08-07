@@ -8,6 +8,7 @@ services:
     environment:
       MONGO_DB_HOST: singularity-demo-mongo
       REDIS_HOST: singularity-demo-redis
+      UI_BASE_URL: https://singularity.stereov.io
     build:
       context: ../
       dockerfile: apps/demo/Dockerfile

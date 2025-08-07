@@ -23,6 +23,9 @@ logging:
     io.stereov: DEBUG
 
 singularity:
+  auth:
+    allow-header-authentication: true
+    prefer-header-authentication: true
   app:
     name: TestApplication
     base-url: http://localhost:8000
@@ -58,4 +61,4 @@ singularity:
       recovery-code-length: 10
       recovery-code-count: 6
   ui:
-    base-url: http://localhost:4200
+    base-url: ${UI_BASE_URL:http://localhost:63342}

@@ -3,6 +3,7 @@ package io.stereov.singularity.user.config
 import io.lettuce.core.ExperimentalLettuceCoroutinesApi
 import io.lettuce.core.api.coroutines.RedisCoroutinesCommands
 import io.stereov.singularity.auth.config.AuthenticationConfiguration
+import io.stereov.singularity.auth.properties.AuthProperties
 import io.stereov.singularity.auth.service.AuthenticationService
 import io.stereov.singularity.auth.service.CookieService
 import io.stereov.singularity.encryption.service.EncryptionSecretService
@@ -200,7 +201,12 @@ class UserConfiguration {
         authenticationService: AuthenticationService,
         userService: UserService
     ): UserTwoFactorAuthController {
-        return UserTwoFactorAuthController(userTwoFactorAuthService, cookieService, authenticationService, userService)
+        return UserTwoFactorAuthController(
+            userTwoFactorAuthService,
+            cookieService,
+            authenticationService,
+            userService
+        )
     }
 
     @Bean
@@ -225,9 +231,16 @@ class UserConfiguration {
         authenticationService: AuthenticationService,
         userSessionService: UserSessionService,
         cookieService: CookieService,
-        userService: UserService
+        userService: UserService,
+        authProperties: AuthProperties
     ): UserSessionController {
-        return UserSessionController(authenticationService, userSessionService, cookieService, userService)
+        return UserSessionController(
+            authenticationService,
+            userSessionService,
+            cookieService,
+            userService,
+            authProperties
+        )
     }
 
     // Exception Handler
