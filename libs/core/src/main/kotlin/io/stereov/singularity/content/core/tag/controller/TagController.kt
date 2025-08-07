@@ -5,13 +5,12 @@ import io.stereov.singularity.content.core.tag.dto.KeyContainsResponse
 import io.stereov.singularity.content.core.tag.dto.TagResponse
 import io.stereov.singularity.content.core.tag.dto.UpdateTagRequest
 import io.stereov.singularity.content.core.tag.service.TagService
-import io.stereov.singularity.translate.model.Language
 import io.stereov.singularity.global.model.SuccessResponse
+import io.stereov.singularity.translate.model.Language
 import org.springframework.http.ResponseEntity
-import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 
-@Controller
+@RestController
 @RequestMapping("/api/content/tags")
 class TagController(
     private val service: TagService

@@ -1,0 +1,3580 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "OpenAPI definition",
+    "version": "v0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000",
+      "description": "Generated server url"
+    }
+  ],
+  "tags": [
+    {
+      "name": "User Session",
+      "description": "Operations related to login and session management"
+    }
+  ],
+  "paths": {
+    "/api/user/me": {
+      "get": {
+        "tags": [
+          "User Info",
+          "User Session"
+        ],
+        "summary": "Get currently logged in user",
+        "operationId": "getUser",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "User Session"
+        ],
+        "operationId": "changeUser",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeUserRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "User Session"
+        ],
+        "operationId": "delete",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/me/password": {
+      "put": {
+        "tags": [
+          "User Session"
+        ],
+        "operationId": "changePassword",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/me/email": {
+      "put": {
+        "tags": [
+          "User Session"
+        ],
+        "operationId": "changeEmail",
+        "parameters": [
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "de",
+                "en"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeEmailRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/me/avatar": {
+      "put": {
+        "tags": [
+          "User Session"
+        ],
+        "operationId": "setAvatar",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "User Session"
+        ],
+        "operationId": "deleteAvatar",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups": {
+      "get": {
+        "tags": [
+          "group-controller"
+        ],
+        "operationId": "findGroups",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "de",
+                "en"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageGroupResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "group-controller"
+        ],
+        "operationId": "updateGroup",
+        "parameters": [
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "de",
+                "en"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateGroupRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "group-controller"
+        ],
+        "operationId": "create",
+        "parameters": [
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "de",
+                "en"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGroupRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/tags/{key}": {
+      "get": {
+        "tags": [
+          "tag-controller"
+        ],
+        "operationId": "findByKey",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "de",
+                "en"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TagResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "tag-controller"
+        ],
+        "operationId": "updateTag",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "de",
+                "en"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTagRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TagResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "tag-controller"
+        ],
+        "operationId": "deleteTag",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/articles/{key}/visibility": {
+      "put": {
+        "tags": [
+          "article-management-controller"
+        ],
+        "operationId": "changeVisibility",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "de",
+                "en"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeContentVisibilityRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullArticleResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/articles/{key}/trusted": {
+      "put": {
+        "tags": [
+          "article-management-controller"
+        ],
+        "operationId": "setTrustedState",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "trusted",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArticleTrustedResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/articles/{key}/tags": {
+      "put": {
+        "tags": [
+          "article-management-controller"
+        ],
+        "operationId": "changeTags",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "de",
+                "en"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeContentTagsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullArticleResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/articles/{key}/summary": {
+      "put": {
+        "tags": [
+          "article-management-controller"
+        ],
+        "operationId": "changeSummary",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "de",
+                "en"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeArticleSummaryRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullArticleResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/articles/{key}/state": {
+      "put": {
+        "tags": [
+          "article-management-controller"
+        ],
+        "operationId": "changeState",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "de",
+                "en"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeArticleStateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullArticleResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/articles/{key}/image": {
+      "put": {
+        "tags": [
+          "article-management-controller"
+        ],
+        "operationId": "changeImage",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "de",
+                "en"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullArticleResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/articles/{key}/header": {
+      "put": {
+        "tags": [
+          "article-management-controller"
+        ],
+        "operationId": "changeHeader",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "de",
+                "en"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeArticleHeaderRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullArticleResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/articles/{key}/content": {
+      "put": {
+        "tags": [
+          "article-management-controller"
+        ],
+        "operationId": "changeContent",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "de",
+                "en"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeArticleContentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullArticleResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/register": {
+      "post": {
+        "tags": [
+          "User Session"
+        ],
+        "operationId": "register",
+        "parameters": [
+          {
+            "name": "send-email",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "de",
+                "en"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterUserRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/refresh": {
+      "post": {
+        "tags": [
+          "User Session"
+        ],
+        "operationId": "refreshToken",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceInfoRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/mail/verify": {
+      "post": {
+        "tags": [
+          "user-mail-controller"
+        ],
+        "operationId": "verifyEmail",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/mail/verify/send": {
+      "post": {
+        "tags": [
+          "user-mail-controller"
+        ],
+        "operationId": "sendVerificationEmail",
+        "parameters": [
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "de",
+                "en"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/mail/reset-password": {
+      "post": {
+        "tags": [
+          "user-mail-controller"
+        ],
+        "operationId": "resetPassword",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/mail/reset-password/send": {
+      "post": {
+        "tags": [
+          "user-mail-controller"
+        ],
+        "operationId": "sendPasswordResetEmail",
+        "parameters": [
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "de",
+                "en"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendPasswordResetRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/logout": {
+      "post": {
+        "tags": [
+          "User Session"
+        ],
+        "operationId": "logout",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceInfoRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/logout-all": {
+      "post": {
+        "tags": [
+          "User Session"
+        ],
+        "operationId": "logoutFromAllDevices",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/login": {
+      "post": {
+        "tags": [
+          "User Session"
+        ],
+        "operationId": "login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/2fa/verify-step-up": {
+      "post": {
+        "tags": [
+          "user-two-factor-auth-controller"
+        ],
+        "operationId": "setStepUp",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/2fa/verify-login": {
+      "post": {
+        "tags": [
+          "user-two-factor-auth-controller"
+        ],
+        "operationId": "verifyTwoFactorAuth",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceInfoRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/2fa/start-setup": {
+      "post": {
+        "tags": [
+          "user-two-factor-auth-controller"
+        ],
+        "operationId": "startTwoFactorAuthSetup",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TwoFactorStartSetupRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/2fa/setup": {
+      "get": {
+        "tags": [
+          "user-two-factor-auth-controller"
+        ],
+        "operationId": "setupTwoFactorAuth",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwoFactorSetupResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "user-two-factor-auth-controller"
+        ],
+        "operationId": "validateTwoFactorSetup",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TwoFactorVerifySetupRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/2fa/recovery": {
+      "post": {
+        "tags": [
+          "user-two-factor-auth-controller"
+        ],
+        "operationId": "recoverUser",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceInfoRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/2fa/disable": {
+      "post": {
+        "tags": [
+          "user-two-factor-auth-controller"
+        ],
+        "operationId": "disableTwoFactorAuth",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DisableTwoFactorRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/tags": {
+      "get": {
+        "tags": [
+          "tag-controller"
+        ],
+        "operationId": "findByKeyContains",
+        "parameters": [
+          {
+            "name": "substring",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "de",
+                "en"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyContainsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "tag-controller"
+        ],
+        "operationId": "create_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTagRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TagResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/articles/{key}/invite": {
+      "post": {
+        "tags": [
+          "article-management-controller"
+        ],
+        "operationId": "inviteUser",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "de",
+                "en"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InviteUserToContentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExtendedContentAccessDetailsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/articles/invite/accept": {
+      "post": {
+        "tags": [
+          "article-management-controller"
+        ],
+        "operationId": "acceptInvitation",
+        "parameters": [
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "de",
+                "en"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptInvitationToContentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullArticleResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/articles/create": {
+      "post": {
+        "tags": [
+          "article-management-controller"
+        ],
+        "operationId": "createArticle",
+        "parameters": [
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "de",
+                "en"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateArticleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullArticleResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/rotate-keys": {
+      "post": {
+        "tags": [
+          "admin-controller"
+        ],
+        "operationId": "rotateKeys",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/{id}/avatar": {
+      "get": {
+        "tags": [
+          "user-controller"
+        ],
+        "operationId": "getAvatar",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileMetadataResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/mail/verify/cooldown": {
+      "get": {
+        "tags": [
+          "user-mail-controller"
+        ],
+        "operationId": "getRemainingEmailVerificationCooldown",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MailCooldownResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/mail/reset-password/cooldown": {
+      "get": {
+        "tags": [
+          "user-mail-controller"
+        ],
+        "operationId": "getRemainingPasswordResetCooldown",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MailCooldownResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/devices": {
+      "get": {
+        "tags": [
+          "user-device-controller"
+        ],
+        "operationId": "getDevices",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DeviceInfoResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "user-device-controller"
+        ],
+        "operationId": "clearDevices",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/2fa/step-up-status": {
+      "get": {
+        "tags": [
+          "user-two-factor-auth-controller"
+        ],
+        "operationId": "getStepUpStatus",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwoFactorStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/2fa/login-status": {
+      "get": {
+        "tags": [
+          "user-two-factor-auth-controller"
+        ],
+        "operationId": "getTwoFactorAuthStatus",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwoFactorStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups/{key}": {
+      "get": {
+        "tags": [
+          "group-controller"
+        ],
+        "operationId": "findByKey_1",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "de",
+                "en"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "group-controller"
+        ],
+        "operationId": "deleteGroup",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/articles": {
+      "get": {
+        "tags": [
+          "article-controller"
+        ],
+        "operationId": "getArticles",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "tags",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "de",
+                "en"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageArticleOverviewResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/articles/{key}": {
+      "get": {
+        "tags": [
+          "article-controller"
+        ],
+        "operationId": "getArticleByKey",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "de",
+                "en"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullArticleResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/articles/{key}/access": {
+      "get": {
+        "tags": [
+          "article-management-controller"
+        ],
+        "operationId": "getExtendedAccessDetails",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExtendedContentAccessDetailsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/articles/scroll": {
+      "get": {
+        "tags": [
+          "article-controller"
+        ],
+        "operationId": "getLatestArticles",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "de",
+                "en"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArticleResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/assets/**": {
+      "get": {
+        "tags": [
+          "local-file-storage-controller"
+        ],
+        "operationId": "serveFile",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DataBuffer"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/users": {
+      "get": {
+        "tags": [
+          "admin-controller"
+        ],
+        "operationId": "getAllUsers",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/rotate-keys/status": {
+      "get": {
+        "tags": [
+          "admin-controller"
+        ],
+        "operationId": "rotationOngoing",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RotationStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/devices/{deviceId}": {
+      "delete": {
+        "tags": [
+          "user-device-controller"
+        ],
+        "operationId": "removeDevice",
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DeviceInfoResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/invite/{id}": {
+      "delete": {
+        "tags": [
+          "invitation-controller"
+        ],
+        "operationId": "deleteInvitation",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ObjectId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ChangeUserRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "ContentAccessDetails": {
+        "type": "object",
+        "properties": {
+          "ownerId": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "PRIVATE",
+              "PUBLIC",
+              "SHARED"
+            ]
+          },
+          "users": {
+            "$ref": "#/components/schemas/ContentAccessPermissions"
+          },
+          "groups": {
+            "$ref": "#/components/schemas/ContentAccessPermissions"
+          },
+          "invitations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ObjectId"
+            },
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "groups",
+          "invitations",
+          "ownerId",
+          "users",
+          "visibility"
+        ]
+      },
+      "ContentAccessPermissions": {
+        "type": "object",
+        "properties": {
+          "admin": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          },
+          "editor": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          },
+          "viewer": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          },
+          "isEmpty": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "admin",
+          "editor",
+          "isEmpty",
+          "viewer"
+        ]
+      },
+      "FileMetadataResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "key": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "access": {
+            "$ref": "#/components/schemas/ContentAccessDetails"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "trusted": {
+            "type": "boolean"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "access",
+          "contentType",
+          "createdAt",
+          "id",
+          "key",
+          "size",
+          "tags",
+          "trusted",
+          "updatedAt",
+          "url"
+        ]
+      },
+      "ObjectId": {
+        "type": "object",
+        "properties": {
+          "timestamp": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "UserResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "USER",
+                "ADMIN",
+                "GUEST"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "emailVerified": {
+            "type": "boolean"
+          },
+          "lastActive": {
+            "type": "string"
+          },
+          "twoFactorAuthEnabled": {
+            "type": "boolean"
+          },
+          "avatar": {
+            "$ref": "#/components/schemas/FileMetadataResponse"
+          },
+          "created": {
+            "type": "string"
+          },
+          "groups": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "created",
+          "email",
+          "emailVerified",
+          "groups",
+          "id",
+          "lastActive",
+          "name",
+          "roles",
+          "twoFactorAuthEnabled"
+        ]
+      },
+      "ChangePasswordRequest": {
+        "type": "object",
+        "properties": {
+          "oldPassword": {
+            "type": "string"
+          },
+          "newPassword": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "newPassword",
+          "oldPassword"
+        ]
+      },
+      "ChangeEmailRequest": {
+        "type": "object",
+        "properties": {
+          "newEmail": {
+            "type": "string",
+            "minLength": 1
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "newEmail",
+          "password"
+        ]
+      },
+      "GroupTranslation": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "description",
+          "name"
+        ]
+      },
+      "UpdateGroupRequest": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "translations": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/GroupTranslation"
+            }
+          }
+        },
+        "required": [
+          "key",
+          "translations"
+        ]
+      },
+      "GroupResponse": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "lang": {
+            "type": "string",
+            "enum": [
+              "de",
+              "en"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "description",
+          "key",
+          "lang",
+          "name"
+        ]
+      },
+      "TagTranslationUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateTagRequest": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "translations": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/TagTranslationUpdateRequest"
+            }
+          }
+        },
+        "required": [
+          "translations"
+        ]
+      },
+      "TagResponse": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "lang": {
+            "type": "string",
+            "enum": [
+              "de",
+              "en"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "description",
+          "key",
+          "lang",
+          "name"
+        ]
+      },
+      "ChangeContentVisibilityRequest": {
+        "type": "object",
+        "properties": {
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "PRIVATE",
+              "PUBLIC",
+              "SHARED"
+            ]
+          },
+          "sharedUsers": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "enum": [
+                "VIEWER",
+                "EDITOR",
+                "ADMIN"
+              ]
+            }
+          },
+          "sharedGroups": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "enum": [
+                "VIEWER",
+                "EDITOR",
+                "ADMIN"
+              ]
+            }
+          }
+        },
+        "required": [
+          "sharedGroups",
+          "sharedUsers",
+          "visibility"
+        ]
+      },
+      "ArticleColors": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "background": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "background",
+          "text"
+        ]
+      },
+      "ContentAccessDetailsResponse": {
+        "type": "object",
+        "properties": {
+          "ownerId": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "PRIVATE",
+              "PUBLIC",
+              "SHARED"
+            ]
+          },
+          "canEdit": {
+            "type": "boolean"
+          },
+          "canDelete": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "canDelete",
+          "canEdit",
+          "ownerId",
+          "visibility"
+        ]
+      },
+      "FullArticleResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "key": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "publishedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/UserOverviewResponse"
+          },
+          "path": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "PUBLISHED",
+              "DRAFT",
+              "ARCHIVED"
+            ]
+          },
+          "colors": {
+            "$ref": "#/components/schemas/ArticleColors"
+          },
+          "image": {
+            "$ref": "#/components/schemas/FileMetadataResponse"
+          },
+          "lang": {
+            "type": "string",
+            "enum": [
+              "de",
+              "en"
+            ]
+          },
+          "title": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "trusted": {
+            "type": "boolean"
+          },
+          "access": {
+            "$ref": "#/components/schemas/ContentAccessDetailsResponse"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TagResponse"
+            }
+          }
+        },
+        "required": [
+          "access",
+          "colors",
+          "content",
+          "createdAt",
+          "id",
+          "key",
+          "lang",
+          "owner",
+          "path",
+          "state",
+          "summary",
+          "tags",
+          "title",
+          "trusted",
+          "updatedAt"
+        ]
+      },
+      "UserOverviewResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "avatar": {
+            "$ref": "#/components/schemas/FileMetadataResponse"
+          }
+        },
+        "required": [
+          "email",
+          "id",
+          "name"
+        ]
+      },
+      "ArticleTrustedResponse": {
+        "type": "object",
+        "properties": {
+          "trusted": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "trusted"
+        ]
+      },
+      "ChangeContentTagsRequest": {
+        "type": "object",
+        "properties": {
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "tags"
+        ]
+      },
+      "ChangeArticleSummaryRequest": {
+        "type": "object",
+        "properties": {
+          "lang": {
+            "type": "string",
+            "enum": [
+              "de",
+              "en"
+            ]
+          },
+          "summary": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "lang",
+          "summary"
+        ]
+      },
+      "ChangeArticleStateRequest": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "string",
+            "enum": [
+              "PUBLISHED",
+              "DRAFT",
+              "ARCHIVED"
+            ]
+          }
+        },
+        "required": [
+          "state"
+        ]
+      },
+      "ChangeArticleHeaderRequest": {
+        "type": "object",
+        "properties": {
+          "lang": {
+            "type": "string",
+            "enum": [
+              "de",
+              "en"
+            ]
+          },
+          "title": {
+            "type": "string"
+          },
+          "colors": {
+            "$ref": "#/components/schemas/ArticleColors"
+          }
+        },
+        "required": [
+          "colors",
+          "lang",
+          "title"
+        ]
+      },
+      "ChangeArticleContentRequest": {
+        "type": "object",
+        "properties": {
+          "lang": {
+            "type": "string",
+            "enum": [
+              "de",
+              "en"
+            ]
+          },
+          "content": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "content",
+          "lang"
+        ]
+      },
+      "DeviceInfoRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "browser": {
+            "type": "string"
+          },
+          "os": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "RegisterUserRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "minLength": 1
+          },
+          "password": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "device": {
+            "$ref": "#/components/schemas/DeviceInfoRequest"
+          }
+        },
+        "required": [
+          "device",
+          "email",
+          "name",
+          "password"
+        ]
+      },
+      "ResetPasswordRequest": {
+        "type": "object",
+        "properties": {
+          "newPassword": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "newPassword"
+        ]
+      },
+      "SendPasswordResetRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "LoginRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "device": {
+            "$ref": "#/components/schemas/DeviceInfoRequest"
+          }
+        },
+        "required": [
+          "device",
+          "email",
+          "password"
+        ]
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "twoFactorRequired": {
+            "type": "boolean"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserResponse"
+          }
+        },
+        "required": [
+          "twoFactorRequired",
+          "user"
+        ]
+      },
+      "TwoFactorStartSetupRequest": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "password"
+        ]
+      },
+      "SuccessResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "success"
+        ]
+      },
+      "TwoFactorVerifySetupRequest": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          },
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "required": [
+          "code",
+          "token"
+        ]
+      },
+      "DisableTwoFactorRequest": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "password"
+        ]
+      },
+      "CreateGroupRequest": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "translations": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/GroupTranslation"
+            }
+          }
+        },
+        "required": [
+          "key",
+          "translations"
+        ]
+      },
+      "CreateTagRequest": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "lang": {
+            "type": "string",
+            "enum": [
+              "de",
+              "en"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "lang",
+          "name"
+        ]
+      },
+      "InviteUserToContentRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "VIEWER",
+              "EDITOR",
+              "ADMIN"
+            ]
+          }
+        },
+        "required": [
+          "email",
+          "role"
+        ]
+      },
+      "ExtendedContentAccessDetailsResponse": {
+        "type": "object",
+        "properties": {
+          "ownerId": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "PRIVATE",
+              "PUBLIC",
+              "SHARED"
+            ]
+          },
+          "users": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserContentAccessDetails"
+            }
+          },
+          "groups": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "enum": [
+                "VIEWER",
+                "EDITOR",
+                "ADMIN"
+              ]
+            }
+          },
+          "invitations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InvitationResponse"
+            }
+          }
+        },
+        "required": [
+          "groups",
+          "invitations",
+          "ownerId",
+          "users",
+          "visibility"
+        ]
+      },
+      "InvitationResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "issuedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "email": {
+            "type": "string"
+          },
+          "claims": {
+            "type": "object",
+            "additionalProperties": {}
+          }
+        },
+        "required": [
+          "claims",
+          "email",
+          "expiresAt",
+          "id",
+          "issuedAt"
+        ]
+      },
+      "UserContentAccessDetails": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/UserOverviewResponse"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "VIEWER",
+              "EDITOR",
+              "ADMIN"
+            ]
+          }
+        },
+        "required": [
+          "role",
+          "user"
+        ]
+      },
+      "AcceptInvitationToContentRequest": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "token"
+        ]
+      },
+      "CreateArticleRequest": {
+        "type": "object",
+        "properties": {
+          "lang": {
+            "type": "string",
+            "enum": [
+              "de",
+              "en"
+            ]
+          },
+          "title": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "content",
+          "lang",
+          "summary",
+          "title"
+        ]
+      },
+      "MailCooldownResponse": {
+        "type": "object",
+        "properties": {
+          "remaining": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "remaining"
+        ]
+      },
+      "DeviceInfoResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "browser": {
+            "type": "string"
+          },
+          "os": {
+            "type": "string"
+          },
+          "ipAddress": {
+            "type": "string"
+          },
+          "location": {
+            "$ref": "#/components/schemas/LocationInfo"
+          },
+          "lastActive": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "lastActive"
+        ]
+      },
+      "LocationInfo": {
+        "type": "object",
+        "properties": {
+          "latitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "cityName": {
+            "type": "string"
+          },
+          "regionName": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "cityName",
+          "countryCode",
+          "latitude",
+          "longitude",
+          "regionName"
+        ]
+      },
+      "TwoFactorStatusResponse": {
+        "type": "object",
+        "properties": {
+          "twoFactorRequired": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "twoFactorRequired"
+        ]
+      },
+      "TwoFactorSetupResponse": {
+        "type": "object",
+        "properties": {
+          "secret": {
+            "type": "string"
+          },
+          "optAuthUrl": {
+            "type": "string"
+          },
+          "recoveryCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "token": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "optAuthUrl",
+          "recoveryCodes",
+          "secret",
+          "token"
+        ]
+      },
+      "PageGroupResponse": {
+        "type": "object",
+        "properties": {
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageable": {
+            "$ref": "#/components/schemas/PageableObject"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GroupResponse"
+            }
+          },
+          "number": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/SortObject"
+          },
+          "numberOfElements": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "empty": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PageableObject": {
+        "type": "object",
+        "properties": {
+          "paged": {
+            "type": "boolean"
+          },
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/SortObject"
+          },
+          "unpaged": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SortObject": {
+        "type": "object",
+        "properties": {
+          "empty": {
+            "type": "boolean"
+          },
+          "sorted": {
+            "type": "boolean"
+          },
+          "unsorted": {
+            "type": "boolean"
+          }
+        }
+      },
+      "KeyContainsResponse": {
+        "type": "object",
+        "properties": {
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TagResponse"
+            }
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "required": [
+          "size",
+          "tags"
+        ]
+      },
+      "ArticleOverviewResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "key": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "publishedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "path": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "PUBLISHED",
+              "DRAFT",
+              "ARCHIVED"
+            ]
+          },
+          "title": {
+            "type": "string"
+          },
+          "colors": {
+            "$ref": "#/components/schemas/ArticleColors"
+          },
+          "lang": {
+            "type": "string",
+            "enum": [
+              "de",
+              "en"
+            ]
+          },
+          "summary": {
+            "type": "string"
+          },
+          "image": {
+            "$ref": "#/components/schemas/FileMetadataResponse"
+          },
+          "access": {
+            "$ref": "#/components/schemas/ContentAccessDetailsResponse"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TagResponse"
+            }
+          }
+        },
+        "required": [
+          "access",
+          "colors",
+          "createdAt",
+          "id",
+          "key",
+          "lang",
+          "path",
+          "state",
+          "summary",
+          "tags",
+          "title",
+          "updatedAt"
+        ]
+      },
+      "PageArticleOverviewResponse": {
+        "type": "object",
+        "properties": {
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageable": {
+            "$ref": "#/components/schemas/PageableObject"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ArticleOverviewResponse"
+            }
+          },
+          "number": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/SortObject"
+          },
+          "numberOfElements": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "empty": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ArticleResponse": {
+        "type": "object",
+        "properties": {
+          "articles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ArticleOverviewResponse"
+            }
+          },
+          "remainingCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "articles",
+          "remainingCount"
+        ]
+      },
+      "DataBuffer": {},
+      "RotationStatusResponse": {
+        "type": "object",
+        "properties": {
+          "isOngoing": {
+            "type": "boolean"
+          },
+          "lastRotation": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "isOngoing"
+        ]
+      }
+    }
+  }
+}

@@ -7,3 +7,9 @@ management:
     web:
       exposure:
         include: health
+springdoc:
+  api-docs:
+    enabled: true
+    path: "/api/openapi"
+  swagger-ui:
+    enabled: false

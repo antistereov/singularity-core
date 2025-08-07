@@ -69,6 +69,11 @@ const config: Config = {
           label: 'Tutorial',
         },
         {
+          position: 'left',
+          label: 'API',
+          to: '/api'
+        },
+        {
           href: 'https://github.com/antistereov/singularity-core',
           label: 'GitHub',
           position: 'right',
@@ -113,7 +118,7 @@ const config: Config = {
             },
             {
               label: 'GitHub',
-              href: 'https://github.com/facebook/docusaurus',
+              href: 'https://github.com/antistereov',
             }
           ],
         },
