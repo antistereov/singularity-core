@@ -9,6 +9,7 @@ on:
       - '.github/workflows/core-sync.yml'
       - '.github/workflows/deploy-docs.yml'
       - '.github/workflows/release-and-deploy.yml'
+      - 'README.md'
   pull_request:
     branches:
       - main
