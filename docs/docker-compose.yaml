@@ -5,6 +5,9 @@ services:
     depends_on:
       - singularity-demo-mongo
       - singularity-demo-redis
+    environment:
+      MONGO_DB_HOST: singularity-demo-mongo
+      REDIS_HOST: singularity-demo-redis
     build:
       context: ../
       dockerfile: apps/demo/Dockerfile
