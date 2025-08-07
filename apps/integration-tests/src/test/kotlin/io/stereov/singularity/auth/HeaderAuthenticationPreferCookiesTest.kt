@@ -66,8 +66,6 @@ class HeaderAuthenticationPreferCookiesTest : BaseSpringBootTest() {
             .expectStatus().isOk
     }
     @Test fun `should prefer cookie token and fall back to header token with invalid token`() = runTest {
-        val user = registerUser()
-
         webTestClient.get()
             .uri("/api/user/me")
             .header(HttpHeaders.AUTHORIZATION, "Bearer invalid")

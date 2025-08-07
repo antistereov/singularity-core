@@ -48,7 +48,7 @@ class CookieAuthenticationFilter(
 
             val user = try {
                 userService.findById(accessToken.userId)
-            } catch (e: DocumentNotFoundException) {
+            } catch (_: DocumentNotFoundException) {
                 val authException = AuthException("Invalid access token: user does not exist")
                 return@mono setSecurityContext(chain, exchange, authException)
             }
