@@ -74,7 +74,7 @@ const config: Config = {
         {
           position: 'left',
           label: 'API',
-          to: '/redoc'
+          to: '/swagger'
         },
         {
           href: 'https://github.com/antistereov/singularity-core',
