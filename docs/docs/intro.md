@@ -1,47 +1,45 @@
 ---
 sidebar_position: 1
+title: Intro
 ---
 
-# Intro
+# Singularity
 
-Let's discover **Docusaurus in less than 5 minutes**.
+Welcome to your production-ready Spring starter with built-in authentication with 2FA and email verification, content management,
+database connection, file storage, caching, rate limiting & async processing.
+🚀
 
-## Getting Started
+Save time, ensure consistency, and focus on features — whether you're building an API, microservice, or full-stack app.
 
-Get started by **creating a new site**.
 
-Or **try Docusaurus immediately** with **[docusaurus.new](https://docusaurus.new)**.
+## ⚡ Why Use This?
 
-### What you'll need
+- ✔ **Batteries Included:** authentication with 2FA and email verification, content management, file storage, and key rotation already set up.
+- ✔ **Code Reuse Made Easy:** Shared libraries mean no more copying boilerplate between projects.
+- ✔ **Production-Ready by Default:** All components are built with real-world usage and scalability in mind.
+- ✔ **Fast Start, Every Time:** Create a new backend app in minutes using the existing architecture and libs.
+- ✔ **Open & Extensible:** Contributions welcome! Let’s refine this into a toolkit others can benefit from too.
 
-- [Node.js](https://nodejs.org/en/download/) version 18.0 or above:
-  - When installing Node.js, you are recommended to check all checkboxes related to dependencies.
+## 🔐 Features at a Glance
 
-## Generate a new site
+#### **Authentication & User Management**
+- 🔒 JWT auth with refresh tokens, 2FA, secure HTTP-only cookies.
+- 📧 Email verification with expiration and resend control.
+- 🧑‍💻 Role-based user access with custom exceptions for better error handling.
 
-Generate a new Docusaurus site using the **classic template**.
+#### **Data & Caching**
+- 💾 MongoDB for persistence, Redis for caching and session storage.
+- 🗂️ S3-based object storage abstraction with local fallback.
 
-The classic template will automatically be added to your project after you run the command:
+#### **Content Management**
+- 🧩 Abstract base for content types with **built-in access control** (users, groups, roles).
+- 🌍 **Multi-language support** out-of-the-box — store and serve content in multiple locales.
+- 🏷️ Configurable tagging system for flexible content organization.
+- 📝 Prebuilt `Article` class for instant publishing workflows.
 
-```bash
-npm init docusaurus@latest my-website classic
-```
+#### **Security & Key Management**
+- 🔑 Secret manager integration with **automated key rotation** for your secrets.
 
-You can type this command into Command Prompt, Powershell, Terminal, or any other integrated terminal of your code editor.
-
-The command also installs all necessary dependencies you need to run Docusaurus.
-
-## Start your site
-
-Run the development server:
-
-```bash
-cd my-website
-npm run start
-```
-
-The `cd` command changes the directory you're working with. In order to work with your newly created Docusaurus site, you'll need to navigate the terminal there.
-
-The `npm run start` command builds your website locally and serves it through a development server, ready for you to view at http://localhost:3000/.
-
-Open `docs/intro.md` (this page) and edit some lines: the site **reloads automatically** and displays your changes.
+#### **Performance**
+- ⚙️ Kotlin Coroutines for async flows.
+- 🚦 Configurable IP and user-based rate limiting.
