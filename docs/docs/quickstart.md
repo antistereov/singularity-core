@@ -10,6 +10,8 @@ Use your favorite IDE or build tool to create a new Java or Kotlin project with 
 
 ## 2. Add Singularity to your dependencies
 
+[![Maven Central](https://img.shields.io/maven-central/v/io.stereov.singularity/core.svg?logo=apachemaven)](https://central.sonatype.com/artifact/io.stereov.singularity/core)
+
 Add the dependency to your `build.gradle.kts`, `build.gradle` or `pom.xml` if using Maven:
 
 **For Gradle with Kotlin DSL:**
