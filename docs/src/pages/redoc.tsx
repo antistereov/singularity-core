@@ -1,20 +1,21 @@
-import SwaggerUI from "swagger-ui-react"
-import "swagger-ui-react/swagger-ui.css"
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import Layout from "@theme/Layout";
-
+import {RedocStandalone} from "redoc";
 
 export default function ApiPage() {
     const {siteConfig} = useDocusaurusContext();
+    const specUrl = siteConfig.customFields.openApiUrl as string;
     return (
         <Layout
             title={`Hello from ${siteConfig.title}`}
             description="Description will go into a meta tag in <head />">
             <main>
-                <SwaggerUI
-                    url="/openapi/openapi.yaml"
-                    docExpansion="list"
-                    defaultModelsExpandDepth={-1}
+                <RedocStandalone
+                    specUrl={specUrl}
+                    options={{
+                        nativeScrollbars: true,
+                        theme: { colors: { primary: { main: '#6366f1' } } }
+                    }}
                 />
             </main>
         </Layout>
