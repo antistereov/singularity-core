@@ -129,33 +129,33 @@
       "name": "singularity.auth.admin-paths",
       "type": "java.util.List<java.lang.String>",
       "sourceType": "io.stereov.singularity.auth.properties.AuthProperties",
-      "description": "Paths that require admin authentication. This is a comma-separated list of paths."
+      "description": "Paths that require users to be authenticated and to have the ADMIN role."
     },
     {
       "name": "singularity.auth.public-paths",
       "type": "java.util.List<java.lang.String>",
       "sourceType": "io.stereov.singularity.auth.properties.AuthProperties",
-      "description": "Paths that do not require authentication. This is a comma-separated list of paths."
+      "description": "Paths that do not require authentication."
     },
     {
       "name": "singularity.auth.user-paths",
       "type": "java.util.List<java.lang.String>",
       "sourceType": "io.stereov.singularity.auth.properties.AuthProperties",
-      "description": "Paths that require user authentication. This is a comma-separated list of paths."
+      "description": "Paths that require users to be authenticated and to have the USER role."
     },
     {
       "name": "singularity.auth.allow-header-authentication",
       "type": "java.lang.Boolean",
       "sourceType": "io.stereov.singularity.auth.properties.AuthProperties",
-      "description": "Allow authentication using a bearer token placed in the header along Http-only Cookies. Turned off by default for security reasons.",
-      "default": false
+      "description": "Allow authentication using a bearer token placed in the header along HTTP-only Cookies. Allowed by default.",
+      "default": true
     },
     {
       "name": "singularity.auth.prefer-header-authentication",
       "type": "java.lang.Boolean",
       "sourceType": "io.stereov.singularity.auth.properties.AuthProperties",
-      "description": "If header authentication is allowed, this property controls the precedence: if true, the Authorization header is preferred over Http-only cookies.",
-      "default": false
+      "description": "If header authentication is allowed, this property controls the precedence: if true, the Authorization header is preferred over HTTP-only cookies.",
+      "default": true
     },
     {
       "name": "singularity.file.storage.type",
