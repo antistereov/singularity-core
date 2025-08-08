@@ -36,6 +36,10 @@ const config: Config = {
     locales: ['en'],
   },
 
+  customFields: {
+    openApiUrl: 'https://singularity.stereov.io/api/openapi.yaml'
+  },
+
   presets: [
     [
       '@docusaurus/preset-classic',
@@ -70,7 +74,7 @@ const config: Config = {
         {
           position: 'left',
           label: 'API',
-          to: '/swagger'
+          to: '/redoc'
         },
         {
           href: 'https://github.com/antistereov/singularity-core',
