@@ -102,11 +102,6 @@ class UserSessionService(
             name = payload.name,
         )
 
-        /**
-         * Mark email as verified if mail is disabled
-         */
-        if (!appProperties.enableMail) userDocument.sensitive.security.mail.verified = true
-
         val savedUserDocument = userService.save(userDocument)
 
         if (sendEmail && appProperties.enableMail) mailService.sendVerificationEmail(savedUserDocument, lang)
