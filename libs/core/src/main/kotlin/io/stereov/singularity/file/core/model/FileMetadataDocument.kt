@@ -1,8 +1,8 @@
 package io.stereov.singularity.file.core.model
 
-import io.stereov.singularity.auth.model.AccessType
-import io.stereov.singularity.content.common.content.model.ContentAccessDetails
-import io.stereov.singularity.content.common.content.model.ContentDocument
+import io.stereov.singularity.auth.core.model.AccessType
+import io.stereov.singularity.content.core.model.ContentAccessDetails
+import io.stereov.singularity.content.core.model.ContentDocument
 import io.stereov.singularity.global.exception.model.InvalidDocumentException
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id

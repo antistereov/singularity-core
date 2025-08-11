@@ -1,10 +1,10 @@
 package io.stereov.singularity.user.twofactor.config
 
-import io.stereov.singularity.auth.service.AuthenticationService
-import io.stereov.singularity.auth.service.CookieService
+import io.stereov.singularity.auth.core.service.AuthenticationService
+import io.stereov.singularity.auth.core.service.CookieService
 import io.stereov.singularity.database.hash.service.HashService
-import io.stereov.singularity.twofactorauth.properties.TwoFactorAuthProperties
-import io.stereov.singularity.twofactorauth.service.TwoFactorAuthService
+import io.stereov.singularity.auth.twofactor.properties.TwoFactorAuthProperties
+import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthService
 import io.stereov.singularity.user.core.config.UserConfiguration
 import io.stereov.singularity.user.core.service.UserService
 import io.stereov.singularity.user.token.cache.AccessTokenCache

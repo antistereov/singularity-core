@@ -3,9 +3,9 @@ package io.stereov.singularity.test
 import com.warrenstrange.googleauth.GoogleAuthenticator
 import io.mockk.every
 import io.stereov.singularity.global.util.Constants
-import io.stereov.singularity.group.model.GroupDocument
-import io.stereov.singularity.group.model.GroupTranslation
-import io.stereov.singularity.group.service.GroupService
+import io.stereov.singularity.user.group.model.GroupDocument
+import io.stereov.singularity.user.group.model.GroupTranslation
+import io.stereov.singularity.user.group.service.GroupService
 import io.stereov.singularity.test.config.MockConfig
 import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.user.twofactor.dto.response.TwoFactorSetupResponse

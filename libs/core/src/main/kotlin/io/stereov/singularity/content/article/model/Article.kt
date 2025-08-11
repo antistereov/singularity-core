@@ -2,8 +2,8 @@ package io.stereov.singularity.content.article.model
 
 import io.stereov.singularity.content.article.dto.CreateArticleRequest
 import io.stereov.singularity.content.article.dto.FullArticleResponse
-import io.stereov.singularity.content.common.content.model.ContentAccessDetails
-import io.stereov.singularity.content.common.content.model.ContentDocument
+import io.stereov.singularity.content.core.model.ContentAccessDetails
+import io.stereov.singularity.content.core.model.ContentDocument
 import io.stereov.singularity.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.content.translate.model.Translatable

@@ -4,9 +4,9 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.global.util.Random
-import io.stereov.singularity.jwt.exception.model.InvalidTokenException
-import io.stereov.singularity.jwt.properties.JwtProperties
-import io.stereov.singularity.jwt.service.JwtService
+import io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException
+import io.stereov.singularity.auth.jwt.properties.JwtProperties
+import io.stereov.singularity.auth.jwt.service.JwtService
 import io.stereov.singularity.user.token.cache.AccessTokenCache
 import io.stereov.singularity.user.token.model.AccessToken
 import io.stereov.singularity.user.token.model.RefreshToken

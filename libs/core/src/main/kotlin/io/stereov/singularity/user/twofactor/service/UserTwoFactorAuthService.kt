@@ -2,13 +2,13 @@ package io.stereov.singularity.user.twofactor.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.auth.exception.AuthException
-import io.stereov.singularity.auth.service.AuthenticationService
-import io.stereov.singularity.auth.service.CookieService
+import io.stereov.singularity.auth.core.exception.AuthException
+import io.stereov.singularity.auth.core.service.AuthenticationService
+import io.stereov.singularity.auth.core.service.CookieService
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.global.util.Random
-import io.stereov.singularity.twofactorauth.properties.TwoFactorAuthProperties
-import io.stereov.singularity.twofactorauth.service.TwoFactorAuthService
+import io.stereov.singularity.auth.twofactor.properties.TwoFactorAuthProperties
+import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthService
 import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.service.UserService
 import io.stereov.singularity.user.core.dto.response.UserResponse
@@ -23,10 +23,10 @@ import org.springframework.web.server.ServerWebExchange
  * # Service for managing two-factor authentication (2FA) for users.
  *
  * This service provides methods to set up, validate, and recover two-factor authentication for users.
- * It uses the [io.stereov.singularity.twofactorauth.service.TwoFactorAuthService] to generate and validate codes,
+ * It uses the [TwoFactorAuthService] to generate and validate codes,
  * the [io.stereov.singularity.database.encryption.service.EncryptionService] to encrypt and decrypt secrets,
  * and the [io.stereov.singularity.database.hash.service.HashService] to hash and check recovery codes.
- * It interacts with the [io.stereov.singularity.user.core.service.UserService] to save user data and the [io.stereov.singularity.auth.service.AuthenticationService] to get the current user.
+ * It interacts with the [io.stereov.singularity.user.core.service.UserService] to save user data and the [io.stereov.singularity.auth.core.service.AuthenticationService] to get the current user.
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
@@ -79,7 +79,7 @@ class UserTwoFactorAuthService(
      * @param code The two-factor authentication code to validate.
      *
      * @throws io.stereov.singularity.global.exception.model.InvalidDocumentException If the user document does not contain a two-factor authentication secret.
-     * @throws io.stereov.singularity.auth.exception.AuthException If the setup token is invalid.
+     * @throws io.stereov.singularity.auth.core.exception.AuthException If the setup token is invalid.
      *
      * @return The updated user document.
      */

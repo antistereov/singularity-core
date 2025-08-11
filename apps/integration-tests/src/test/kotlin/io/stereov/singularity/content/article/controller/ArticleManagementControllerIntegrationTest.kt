@@ -3,12 +3,12 @@ package io.stereov.singularity.content.article.controller
 import io.stereov.singularity.content.article.dto.ArticleOverviewResponse
 import io.stereov.singularity.content.article.dto.ArticleResponse
 import io.stereov.singularity.content.article.model.ArticleState
-import io.stereov.singularity.content.common.content.model.ContentAccessRole
-import io.stereov.singularity.content.common.content.model.ContentAccessSubject
-import io.stereov.singularity.content.core.tag.dto.CreateTagRequest
-import io.stereov.singularity.auth.model.AccessType
+import io.stereov.singularity.content.core.model.ContentAccessRole
+import io.stereov.singularity.content.core.model.ContentAccessSubject
+import io.stereov.singularity.content.tag.dto.CreateTagRequest
+import io.stereov.singularity.auth.core.model.AccessType
 import io.stereov.singularity.global.util.Constants
-import io.stereov.singularity.group.model.KnownGroups
+import io.stereov.singularity.user.group.model.KnownGroups
 import io.stereov.singularity.test.BaseContentTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals

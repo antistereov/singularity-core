@@ -2,7 +2,7 @@ package io.stereov.singularity.test
 
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.test.config.MockMailSenderConfig
-import io.stereov.singularity.twofactorauth.service.TwoFactorAuthService
+import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthService
 import io.stereov.singularity.user.token.service.TwoFactorTokenService
 import io.stereov.singularity.user.token.service.AccessTokenService
 import org.springframework.beans.factory.annotation.Autowired

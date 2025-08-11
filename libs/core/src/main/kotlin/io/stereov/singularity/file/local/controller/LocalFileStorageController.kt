@@ -1,8 +1,8 @@
 package io.stereov.singularity.file.local.controller
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.auth.model.AccessType
-import io.stereov.singularity.content.common.content.model.ContentAccessRole
+import io.stereov.singularity.auth.core.model.AccessType
+import io.stereov.singularity.content.core.model.ContentAccessRole
 import io.stereov.singularity.file.core.exception.model.FileNotFoundException
 import io.stereov.singularity.file.core.service.FileMetadataService
 import io.stereov.singularity.file.local.properties.LocalFileStorageProperties

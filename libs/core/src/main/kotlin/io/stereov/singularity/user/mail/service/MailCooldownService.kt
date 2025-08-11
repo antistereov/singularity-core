@@ -2,7 +2,7 @@ package io.stereov.singularity.user.mail.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.mail.properties.MailProperties
+import io.stereov.singularity.mail.core.properties.MailProperties
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.bson.types.ObjectId
 import org.springframework.data.redis.core.ReactiveRedisTemplate

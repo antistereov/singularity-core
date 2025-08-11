@@ -4,10 +4,10 @@ import io.stereov.singularity.content.article.dto.CreateArticleRequest
 import io.stereov.singularity.content.article.dto.FullArticleResponse
 import io.stereov.singularity.content.article.model.Article
 import io.stereov.singularity.content.article.service.ArticleService
-import io.stereov.singularity.content.core.tag.service.TagService
+import io.stereov.singularity.content.tag.service.TagService
 import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.content.translate.model.Language
-import io.stereov.singularity.group.model.KnownGroups
+import io.stereov.singularity.user.group.model.KnownGroups
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach
 import org.springframework.beans.factory.annotation.Autowired

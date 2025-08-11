@@ -2,7 +2,7 @@ package io.stereov.singularity.user.device.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.auth.service.AuthenticationService
+import io.stereov.singularity.auth.core.service.AuthenticationService
 import io.stereov.singularity.user.core.model.DeviceInfo
 import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.service.UserService
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service
  *
  * This service provides methods to get, remove, and clear user devices.
  * It interacts with the [io.stereov.singularity.user.core.service.UserService] to manage user data
- * and the [io.stereov.singularity.auth.service.AuthenticationService] to get the current user.
+ * and the [io.stereov.singularity.auth.core.service.AuthenticationService] to get the current user.
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */

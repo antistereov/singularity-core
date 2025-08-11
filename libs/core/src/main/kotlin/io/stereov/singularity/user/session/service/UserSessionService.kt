@@ -2,9 +2,9 @@ package io.stereov.singularity.user.session.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.auth.exception.model.InvalidCredentialsException
-import io.stereov.singularity.auth.service.AuthenticationService
-import io.stereov.singularity.auth.service.CookieService
+import io.stereov.singularity.auth.core.exception.model.InvalidCredentialsException
+import io.stereov.singularity.auth.core.service.AuthenticationService
+import io.stereov.singularity.auth.core.service.CookieService
 import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.file.core.exception.model.UnsupportedMediaTypeException
@@ -30,7 +30,7 @@ import org.springframework.web.server.ServerWebExchange
  * application info retrieval, and user logout.
  * It interacts with the [io.stereov.singularity.user.core.service.UserService] to manage user data,
  * the [io.stereov.singularity.database.hash.service.HashService] for password hashing,
- * the [io.stereov.singularity.auth.service.AuthenticationService] for authentication-related operations,
+ * the [io.stereov.singularity.auth.core.service.AuthenticationService] for authentication-related operations,
  * the [UserDeviceService] for managing user devices,
  * and the [io.stereov.singularity.user.twofactor.service.UserTwoFactorAuthService] for two-factor authentication.
  *
@@ -59,8 +59,8 @@ class UserSessionService(
      *
      * @return The [io.stereov.singularity.user.core.model.UserDocument] of the logged-in user.
      *
-     * @throws io.stereov.singularity.auth.exception.model.InvalidCredentialsException If the email or password is invalid.
-     * @throws io.stereov.singularity.auth.exception.AuthException If the user document does not contain an ID.
+     * @throws io.stereov.singularity.auth.core.exception.model.InvalidCredentialsException If the email or password is invalid.
+     * @throws io.stereov.singularity.auth.core.exception.AuthException If the user document does not contain an ID.
      */
     suspend fun checkCredentialsAndGetUser(payload: LoginRequest): UserDocument {
         logger.debug { "Logging in user ${payload.email}" }
@@ -83,7 +83,7 @@ class UserSessionService(
      * @return The [UserDocument] of the registered user.
      *
      * @throws io.stereov.singularity.user.core.exception.model.EmailAlreadyExistsException If the email already exists in the system.
-     * @throws io.stereov.singularity.auth.exception.AuthException If the user document does not contain an ID.
+     * @throws io.stereov.singularity.auth.core.exception.AuthException If the user document does not contain an ID.
      */
     suspend fun registerAndGetUser(payload: RegisterUserRequest, sendEmail: Boolean, lang: Language): UserDocument {
         logger.debug { "Registering user ${payload.email}" }

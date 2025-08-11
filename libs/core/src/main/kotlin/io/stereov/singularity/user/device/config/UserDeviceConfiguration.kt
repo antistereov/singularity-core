@@ -1,6 +1,6 @@
 package io.stereov.singularity.user.device.config
 
-import io.stereov.singularity.auth.service.AuthenticationService
+import io.stereov.singularity.auth.core.service.AuthenticationService
 import io.stereov.singularity.user.core.config.UserConfiguration
 import io.stereov.singularity.user.core.service.UserService
 import io.stereov.singularity.user.device.controller.UserDeviceController

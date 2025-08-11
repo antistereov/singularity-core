@@ -2,11 +2,11 @@ package io.stereov.singularity.user.mail.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.global.properties.UiProperties
-import io.stereov.singularity.mail.exception.model.MailCooldownException
-import io.stereov.singularity.mail.service.MailService
-import io.stereov.singularity.mail.util.MailConstants
-import io.stereov.singularity.template.service.TemplateService
-import io.stereov.singularity.template.util.TemplateBuilder
+import io.stereov.singularity.mail.core.exception.model.MailCooldownException
+import io.stereov.singularity.mail.core.service.MailService
+import io.stereov.singularity.mail.core.util.MailConstants
+import io.stereov.singularity.mail.template.service.TemplateService
+import io.stereov.singularity.mail.template.util.TemplateBuilder
 import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.content.translate.model.TranslateKey
 import io.stereov.singularity.content.translate.service.TranslateService

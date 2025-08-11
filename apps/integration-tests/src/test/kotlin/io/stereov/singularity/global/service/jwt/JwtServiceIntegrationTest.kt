@@ -5,10 +5,10 @@ import com.nimbusds.jose.JWSHeader
 import com.nimbusds.jose.crypto.MACSigner
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
-import io.stereov.singularity.jwt.exception.model.InvalidTokenException
-import io.stereov.singularity.jwt.exception.model.TokenExpiredException
-import io.stereov.singularity.jwt.service.JwtSecretService
-import io.stereov.singularity.jwt.service.JwtService
+import io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException
+import io.stereov.singularity.auth.jwt.exception.model.TokenExpiredException
+import io.stereov.singularity.auth.jwt.service.JwtSecretService
+import io.stereov.singularity.auth.jwt.service.JwtService
 import io.stereov.singularity.secrets.core.model.Secret
 import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.test.runTest
