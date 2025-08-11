@@ -1,6 +1,6 @@
-<h1 style="text-align: center;">Singularity Core</h1>
+<h1 align="center">Singularity Core</h1>
 
-<p style="text-align: center;">
+<p align="center">
   <a href="https://central.sonatype.com/artifact/io.stereov.singularity/core">
     <img src="https://img.shields.io/maven-central/v/io.stereov.singularity/core.svg?logo=apachemaven" alt="Maven Central">
   </a>
@@ -15,7 +15,7 @@
   </a>
 </p>
 
-<p style="text-align: center;">
+<p align="center">
   <a href="https://stereov.io">
     <img src="https://img.shields.io/badge/My_Website-stereov.io-blue" alt="Website">
   </a>
@@ -27,11 +27,11 @@
   </a>
 </p>
 
-<p style="text-align: center;">
+<p align="center">
   Welcome to the foundation for your next backend! 
   Build your app with everything from authentication to content management, ready out of the box. 🚀
 </p>
-<p style="text-align: center;">
+<p align="center">
   Save time, ensure consistency, and focus on features whether you're building an API,
   a microservice, or a full-stack app.
 </p>
