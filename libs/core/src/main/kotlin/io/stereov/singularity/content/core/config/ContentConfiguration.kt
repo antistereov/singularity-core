@@ -21,7 +21,7 @@ import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.invitation.service.InvitationService
 import io.stereov.singularity.mail.config.MailConfiguration
 import io.stereov.singularity.content.translate.service.TranslateService
-import io.stereov.singularity.user.service.UserService
+import io.stereov.singularity.user.core.service.UserService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration

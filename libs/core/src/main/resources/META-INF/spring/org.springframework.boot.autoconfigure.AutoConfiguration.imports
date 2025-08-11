@@ -46,4 +46,9 @@ io.stereov.singularity.content.translate.config.TranslateConfiguration
 
 io.stereov.singularity.twofactorauth.config.TwoFactorAuthConfiguration
 
-io.stereov.singularity.user.config.UserConfiguration
+io.stereov.singularity.user.core.config.UserConfiguration
+io.stereov.singularity.user.device.config.UserDeviceConfiguration
+io.stereov.singularity.user.mail.config.UserMailConfiguration
+io.stereov.singularity.user.session.config.UserSessionConfiguration
+io.stereov.singularity.user.token.config.UserTokenConfiguration
+io.stereov.singularity.user.twofactor.config.UserTwoFactorConfiguration

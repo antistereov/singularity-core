@@ -9,9 +9,9 @@ import io.stereov.singularity.auth.model.CustomAuthenticationToken
 import io.stereov.singularity.auth.model.ErrorAuthenticationToken
 import io.stereov.singularity.jwt.exception.TokenException
 import io.stereov.singularity.jwt.exception.model.InvalidTokenException
-import io.stereov.singularity.user.model.Role
-import io.stereov.singularity.user.model.UserDocument
-import io.stereov.singularity.user.service.UserService
+import io.stereov.singularity.user.core.model.Role
+import io.stereov.singularity.user.core.model.UserDocument
+import io.stereov.singularity.user.core.service.UserService
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.bson.types.ObjectId
 import org.springframework.security.core.context.ReactiveSecurityContextHolder

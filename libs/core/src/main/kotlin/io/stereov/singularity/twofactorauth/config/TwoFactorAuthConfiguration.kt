@@ -9,7 +9,7 @@ import io.stereov.singularity.jwt.service.JwtService
 import io.stereov.singularity.twofactorauth.exception.handler.TwoFactorAuthExceptionHandler
 import io.stereov.singularity.twofactorauth.properties.TwoFactorAuthProperties
 import io.stereov.singularity.twofactorauth.service.TwoFactorAuthService
-import io.stereov.singularity.user.service.token.TwoFactorAuthTokenService
+import io.stereov.singularity.user.token.service.TwoFactorTokenService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -37,8 +37,8 @@ class TwoFactorAuthConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun twoFactorAuthTokenService(jwtService: JwtService, jwtProperties: JwtProperties, authenticationService: AuthenticationService, twoFactorAuthService: TwoFactorAuthService, hashService: HashService): TwoFactorAuthTokenService {
-        return TwoFactorAuthTokenService(jwtService, jwtProperties, authenticationService, twoFactorAuthService, hashService)
+    fun twoFactorAuthTokenService(jwtService: JwtService, jwtProperties: JwtProperties, authenticationService: AuthenticationService, twoFactorAuthService: TwoFactorAuthService, hashService: HashService): TwoFactorTokenService {
+        return TwoFactorTokenService(jwtService, jwtProperties, authenticationService, twoFactorAuthService, hashService)
     }
 
     // Exception Handler

@@ -3,8 +3,8 @@ package io.stereov.singularity.test
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.test.config.MockMailSenderConfig
 import io.stereov.singularity.twofactorauth.service.TwoFactorAuthService
-import io.stereov.singularity.user.service.token.TwoFactorAuthTokenService
-import io.stereov.singularity.user.service.token.UserTokenService
+import io.stereov.singularity.user.token.service.TwoFactorTokenService
+import io.stereov.singularity.user.token.service.AccessTokenService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.DynamicPropertyRegistry
@@ -21,13 +21,13 @@ class BaseIntegrationTest : BaseSpringBootTest() {
     final val basePath = "/api"
 
     @Autowired
-    lateinit var userTokenService: UserTokenService
+    lateinit var accessTokenService: AccessTokenService
 
     @Autowired
     lateinit var twoFactorAuthService: TwoFactorAuthService
 
     @Autowired
-    lateinit var twoFactorAuthTokenService: TwoFactorAuthTokenService
+    lateinit var twoFactorTokenService: TwoFactorTokenService
 
     @Autowired
     lateinit var hashService: HashService

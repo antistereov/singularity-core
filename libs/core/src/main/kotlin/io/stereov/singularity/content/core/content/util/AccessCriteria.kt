@@ -5,7 +5,7 @@ import io.stereov.singularity.content.common.content.model.ContentAccessPermissi
 import io.stereov.singularity.content.common.content.model.ContentDocument
 import io.stereov.singularity.auth.model.AccessType
 import io.stereov.singularity.auth.service.AuthenticationService
-import io.stereov.singularity.user.model.UserDocument
+import io.stereov.singularity.user.core.model.UserDocument
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.stereotype.Component

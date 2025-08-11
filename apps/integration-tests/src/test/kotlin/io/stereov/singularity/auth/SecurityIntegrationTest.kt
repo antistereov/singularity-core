@@ -2,7 +2,7 @@ package io.stereov.singularity.auth
 
 import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.jwt.service.JwtSecretService
-import io.stereov.singularity.user.dto.request.DeviceInfoRequest
+import io.stereov.singularity.user.device.dto.DeviceInfoRequest
 import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.test.runTest
@@ -48,7 +48,7 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
     }
     @Test fun `unexpired token required`() = runTest {
         val user = registerUser()
-        val token = userTokenService.createAccessToken(user.info.id, "device", Instant.ofEpochSecond(0))
+        val token = accessTokenService.createAccessToken(user.info.id, "device", Instant.ofEpochSecond(0))
 
         webTestClient.get()
             .uri("/api/user/me")
@@ -90,7 +90,7 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
     }
     @Test fun `invalid device will not be authorized`() = runTest {
         val user = registerUser(deviceId = "device")
-        val accessToken = userTokenService.createAccessToken(user.info.id, "device")
+        val accessToken = accessTokenService.createAccessToken(user.info.id, "device")
 
         webTestClient.get()
             .uri("/api/user/me")

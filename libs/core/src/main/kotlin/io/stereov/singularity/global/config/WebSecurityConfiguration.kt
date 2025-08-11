@@ -7,9 +7,9 @@ import io.stereov.singularity.global.filter.LoggingFilter
 import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.ratelimit.filter.RateLimitFilter
 import io.stereov.singularity.ratelimit.service.RateLimitService
-import io.stereov.singularity.user.model.Role
-import io.stereov.singularity.user.service.UserService
-import io.stereov.singularity.user.service.token.UserTokenService
+import io.stereov.singularity.user.core.model.Role
+import io.stereov.singularity.user.core.service.UserService
+import io.stereov.singularity.user.token.service.AccessTokenService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
@@ -43,7 +43,7 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
  * the necessary configurations are applied in the correct order.
  *
  * It enables the following services:
- * - [UserTokenService]
+ * - [AccessTokenService]
  * - [UserService]
  *
  * It enables the following beans:
@@ -76,7 +76,7 @@ class WebSecurityConfiguration {
         http: ServerHttpSecurity,
         authProperties: AuthProperties,
         uiProperties: UiProperties,
-        userTokenService: UserTokenService,
+        accessTokenService: AccessTokenService,
         userService: UserService,
         rateLimitService: RateLimitService,
     ): SecurityWebFilterChain {
@@ -103,7 +103,7 @@ class WebSecurityConfiguration {
             }
             .addFilterBefore(RateLimitFilter(rateLimitService), SecurityWebFiltersOrder.FIRST)
             .addFilterBefore(LoggingFilter(), SecurityWebFiltersOrder.AUTHENTICATION)
-            .addFilterBefore(CookieAuthenticationFilter(userTokenService, userService, authProperties), SecurityWebFiltersOrder.AUTHENTICATION)
+            .addFilterBefore(CookieAuthenticationFilter(accessTokenService, userService, authProperties), SecurityWebFiltersOrder.AUTHENTICATION)
             .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())
             .build()
     }

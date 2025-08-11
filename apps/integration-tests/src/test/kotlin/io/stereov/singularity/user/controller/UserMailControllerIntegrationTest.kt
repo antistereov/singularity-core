@@ -4,9 +4,14 @@ import io.mockk.verify
 import io.stereov.singularity.database.encryption.service.EncryptionSecretService
 import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.test.BaseMailIntegrationTest
-import io.stereov.singularity.user.dto.UserResponse
-import io.stereov.singularity.user.dto.request.*
-import io.stereov.singularity.user.service.mail.MailTokenService
+import io.stereov.singularity.user.core.dto.response.UserResponse
+import io.stereov.singularity.user.mail.service.MailTokenService
+import io.stereov.singularity.user.session.dto.request.ChangeEmailRequest
+import io.stereov.singularity.user.device.dto.DeviceInfoRequest
+import io.stereov.singularity.user.mail.dto.MailCooldownResponse
+import io.stereov.singularity.user.mail.dto.ResetPasswordRequest
+import io.stereov.singularity.user.mail.dto.SendPasswordResetRequest
+import io.stereov.singularity.user.session.dto.request.LoginRequest
 import jakarta.mail.internet.MimeMessage
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*
@@ -94,7 +99,7 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(io.stereov.singularity.user.dto.response.MailCooldownResponse::class.java)
+            .expectBody(MailCooldownResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -110,7 +115,7 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(io.stereov.singularity.user.dto.response.MailCooldownResponse::class.java)
+            .expectBody(MailCooldownResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -252,7 +257,7 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(io.stereov.singularity.user.dto.response.MailCooldownResponse::class.java)
+            .expectBody(MailCooldownResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -268,7 +273,7 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(io.stereov.singularity.user.dto.response.MailCooldownResponse::class.java)
+            .expectBody(MailCooldownResponse::class.java)
             .returnResult()
             .responseBody
 

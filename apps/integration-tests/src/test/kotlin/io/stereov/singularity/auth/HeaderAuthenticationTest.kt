@@ -1,8 +1,8 @@
 package io.stereov.singularity.auth
 
 import io.stereov.singularity.test.BaseSpringBootTest
-import io.stereov.singularity.user.dto.request.DeviceInfoRequest
-import io.stereov.singularity.user.service.token.UserTokenService
+import io.stereov.singularity.user.device.dto.DeviceInfoRequest
+import io.stereov.singularity.user.token.service.AccessTokenService
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -17,7 +17,7 @@ import java.time.Instant
 class HeaderAuthenticationTest : BaseSpringBootTest() {
 
     @Autowired
-    lateinit var userTokenService: UserTokenService
+    lateinit var accessTokenService: AccessTokenService
 
     companion object {
         val mongoDBContainer = MongoDBContainer("mongo:latest").apply {
@@ -79,7 +79,7 @@ class HeaderAuthenticationTest : BaseSpringBootTest() {
     }
     @Test fun `unexpired token required`() = runTest {
         val user = registerUser()
-        val token = userTokenService.createAccessToken(user.info.id, "device", Instant.ofEpochSecond(0))
+        val token = accessTokenService.createAccessToken(user.info.id, "device", Instant.ofEpochSecond(0))
 
         webTestClient.get()
             .uri("/api/user/me")
@@ -121,7 +121,7 @@ class HeaderAuthenticationTest : BaseSpringBootTest() {
     }
     @Test fun `invalid device will not be authorized`() = runTest {
         val user = registerUser(deviceId = "device")
-        val accessToken = userTokenService.createAccessToken(user.info.id, "device")
+        val accessToken = accessTokenService.createAccessToken(user.info.id, "device")
 
         webTestClient.get()
             .uri("/api/user/me")

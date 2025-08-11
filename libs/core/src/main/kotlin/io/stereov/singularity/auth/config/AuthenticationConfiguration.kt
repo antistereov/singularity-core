@@ -10,9 +10,9 @@ import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.jwt.properties.JwtProperties
 import io.stereov.singularity.twofactorauth.service.TwoFactorAuthService
-import io.stereov.singularity.user.service.UserService
-import io.stereov.singularity.user.service.token.TwoFactorAuthTokenService
-import io.stereov.singularity.user.service.token.UserTokenService
+import io.stereov.singularity.user.core.service.UserService
+import io.stereov.singularity.user.token.service.TwoFactorTokenService
+import io.stereov.singularity.user.token.service.AccessTokenService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -40,16 +40,16 @@ class AuthenticationConfiguration {
     @Bean
     @ConditionalOnMissingBean
     fun cookieService(
-        userTokenService: UserTokenService,
+        accessTokenService: AccessTokenService,
         jwtProperties: JwtProperties,
         appProperties: AppProperties,
         geoLocationService: GeoLocationService,
         userService: UserService,
-        twoFactorAuthTokenService: TwoFactorAuthTokenService,
+        twoFactorTokenService: TwoFactorTokenService,
         authenticationService: AuthenticationService,
         twoFactorAuthService: TwoFactorAuthService
     ): CookieService {
-        return CookieService(userTokenService, jwtProperties, appProperties, geoLocationService, userService, twoFactorAuthTokenService, authenticationService, twoFactorAuthService)
+        return CookieService(accessTokenService, jwtProperties, appProperties, geoLocationService, userService, twoFactorTokenService, authenticationService, twoFactorAuthService)
     }
 
     // Exception Handler

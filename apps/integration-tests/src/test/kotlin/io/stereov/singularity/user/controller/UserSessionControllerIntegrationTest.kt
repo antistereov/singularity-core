@@ -3,11 +3,17 @@ package io.stereov.singularity.user.controller
 import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.test.BaseIntegrationTest
-import io.stereov.singularity.user.dto.UserResponse
-import io.stereov.singularity.user.dto.request.*
-import io.stereov.singularity.user.dto.response.LoginResponse
-import io.stereov.singularity.user.dto.response.RegisterResponse
-import io.stereov.singularity.user.service.mail.MailTokenService
+import io.stereov.singularity.user.core.dto.response.UserResponse
+import io.stereov.singularity.user.session.dto.response.LoginResponse
+import io.stereov.singularity.user.session.dto.response.RegisterResponse
+import io.stereov.singularity.user.mail.service.MailTokenService
+import io.stereov.singularity.user.session.dto.request.ChangeEmailRequest
+import io.stereov.singularity.user.session.dto.request.ChangePasswordRequest
+import io.stereov.singularity.user.session.dto.request.ChangeUserRequest
+import io.stereov.singularity.user.device.dto.DeviceInfoRequest
+import io.stereov.singularity.user.mail.dto.SendPasswordResetRequest
+import io.stereov.singularity.user.session.dto.request.LoginRequest
+import io.stereov.singularity.user.session.dto.request.RegisterUserRequest
 import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*
@@ -113,13 +119,25 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/user/login")
-            .bodyValue(LoginRequest(user.info.sensitive.email, "wrong password", user.info.sensitive.devices.first().toRequestDto()))
+            .bodyValue(
+                LoginRequest(
+                    user.info.sensitive.email,
+                    "wrong password",
+                    user.info.sensitive.devices.first().toRequestDto()
+                )
+            )
             .exchange()
             .expectStatus().isUnauthorized
 
         webTestClient.post()
             .uri("/api/user/login")
-            .bodyValue(LoginRequest("another@email.com", "wrong password", user.info.sensitive.devices.first().toRequestDto()))
+            .bodyValue(
+                LoginRequest(
+                    "another@email.com",
+                    "wrong password",
+                    user.info.sensitive.devices.first().toRequestDto()
+                )
+            )
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -235,7 +253,14 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val deviceInfo = DeviceInfoRequest("device")
         webTestClient.post()
             .uri("/api/user/register")
-            .bodyValue(RegisterUserRequest(email = "invalid", password = "password", name = "Name", device = deviceInfo))
+            .bodyValue(
+                RegisterUserRequest(
+                    email = "invalid",
+                    password = "password",
+                    name = "Name",
+                    device = deviceInfo
+                )
+            )
             .exchange()
             .expectStatus().isBadRequest
 
@@ -268,7 +293,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         webTestClient.put()
             .uri("/api/user/me/email")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
-            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken(user.info.id, user.info.sensitive.devices.first().id))
+            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorTokenService.createStepUpToken(user.info.id, user.info.sensitive.devices.first().id))
             .bodyValue(ChangeEmailRequest(newEmail, password))
             .exchange()
             .expectStatus().isOk
@@ -403,7 +428,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         webTestClient.put()
             .uri("/api/user/me/email")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
-            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken(anotherUser.info.id, user.info.sensitive.devices.first().id))
+            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorTokenService.createStepUpToken(anotherUser.info.id, user.info.sensitive.devices.first().id))
             .bodyValue(ChangeEmailRequest(newEmail, password))
             .exchange()
             .expectStatus().isUnauthorized
@@ -417,7 +442,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         webTestClient.put()
             .uri("/api/user/me/email")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
-            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken(user.info.id, "another-device"))
+            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorTokenService.createStepUpToken(user.info.id, "another-device"))
             .bodyValue(ChangeEmailRequest(newEmail, password))
             .exchange()
             .expectStatus().isUnauthorized
@@ -433,7 +458,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
             .cookie(
                 Constants.STEP_UP_TOKEN_COOKIE,
-                twoFactorAuthTokenService.createStepUpToken(user.info.id, user.info.sensitive.devices.first().id, Instant.ofEpochSecond(0))
+                twoFactorTokenService.createStepUpToken(user.info.id, user.info.sensitive.devices.first().id, Instant.ofEpochSecond(0))
             )
             .bodyValue(ChangeEmailRequest(newEmail, password))
             .exchange()
@@ -502,7 +527,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val res = webTestClient.put()
             .uri("/api/user/me/password")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
-            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken(user.info.id, user.info.sensitive.devices.first().id))
+            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorTokenService.createStepUpToken(user.info.id, user.info.sensitive.devices.first().id))
             .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
             .exchange()
             .expectStatus().isOk
@@ -603,7 +628,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         webTestClient.put()
             .uri("/api/user/me/password")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
-            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken(anotherUser.info.id, user.info.sensitive.devices.first().id))
+            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorTokenService.createStepUpToken(anotherUser.info.id, user.info.sensitive.devices.first().id))
             .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
             .exchange()
             .expectStatus().isUnauthorized
@@ -617,7 +642,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         webTestClient.put()
             .uri("/api/user/me/password")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
-            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken(user.info.id, "another-device"))
+            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorTokenService.createStepUpToken(user.info.id, "another-device"))
             .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
             .exchange()
             .expectStatus().isUnauthorized
@@ -631,7 +656,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         webTestClient.put()
             .uri("/api/user/me/password")
             .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
-            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorAuthTokenService.createStepUpToken(user.info.id, user.info.sensitive.devices.first().id, Instant.ofEpochSecond(0)))
+            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorTokenService.createStepUpToken(user.info.id, user.info.sensitive.devices.first().id, Instant.ofEpochSecond(0)))
             .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
             .exchange()
             .expectStatus().isUnauthorized
@@ -759,7 +784,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
     }
     @Test fun `refresh requires associated token to account`() = runTest {
         val user = registerUser()
-        val refreshToken = userTokenService.createRefreshToken(user.info.id, user.info.sensitive.devices.first().id, Random.generateCode(20))
+        val refreshToken = accessTokenService.createRefreshToken(user.info.id, user.info.sensitive.devices.first().id, Random.generateCode(20))
         webTestClient.post()
             .uri("/api/user/refresh")
             .cookie(Constants.REFRESH_TOKEN_COOKIE, refreshToken)
