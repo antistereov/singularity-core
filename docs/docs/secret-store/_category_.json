@@ -1,6 +1,5 @@
 {
-  "label": "Configuration",
-  "position": 3,
+  "label": "Secret Store",
   "link": {
     "type": "generated-index"
   }

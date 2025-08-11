@@ -1,6 +1,5 @@
 {
-  "label": "Features",
-  "position": 3,
+  "label": "Cache",
   "link": {
     "type": "generated-index"
   }
