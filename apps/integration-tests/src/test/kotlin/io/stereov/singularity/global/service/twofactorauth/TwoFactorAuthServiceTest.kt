@@ -23,9 +23,9 @@ class TwoFactorAuthServiceTest {
     @Test
     fun `Invalid code will be invalid`() {
         val secret = twoFactorAuthService.generateSecretKey()
-        var code = twoFactorAuthService.getTotpPassword(secret)
+        val code = twoFactorAuthService.getTotpPassword(secret)
 
-        val isValid = twoFactorAuthService.validateCode(secret, ++code)
+        val isValid = twoFactorAuthService.validateCode(secret, code + 1)
         assertFalse(isValid, "OTP should be invalid")
     }
 }
