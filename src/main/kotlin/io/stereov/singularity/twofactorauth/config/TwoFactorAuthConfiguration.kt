@@ -3,7 +3,7 @@ package io.stereov.singularity.twofactorauth.config
 import com.warrenstrange.googleauth.GoogleAuthenticator
 import io.stereov.singularity.auth.service.AuthenticationService
 import io.stereov.singularity.global.config.ApplicationConfiguration
-import io.stereov.singularity.hash.service.HashService
+import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.jwt.properties.JwtProperties
 import io.stereov.singularity.jwt.service.JwtService
 import io.stereov.singularity.twofactorauth.exception.handler.TwoFactorAuthExceptionHandler

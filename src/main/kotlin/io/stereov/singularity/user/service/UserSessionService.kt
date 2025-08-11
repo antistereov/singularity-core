@@ -9,8 +9,8 @@ import io.stereov.singularity.auth.service.CookieService
 import io.stereov.singularity.file.core.exception.model.UnsupportedMediaTypeException
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.global.properties.AppProperties
-import io.stereov.singularity.hash.service.HashService
-import io.stereov.singularity.translate.model.Language
+import io.stereov.singularity.database.hash.service.HashService
+import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.user.cache.AccessTokenCache
 import io.stereov.singularity.user.dto.UserResponse
 import io.stereov.singularity.user.dto.request.ChangeEmailRequest

@@ -7,10 +7,10 @@ io.stereov.singularity.cache.config.RedisConfiguration
 
 io.stereov.singularity.content.core.config.ContentConfiguration
 
-io.stereov.singularity.database.config.DatabaseConfiguration
-io.stereov.singularity.database.config.MongoConfiguration
+io.stereov.singularity.database.core.config.DatabaseConfiguration
+io.stereov.singularity.database.core.config.MongoConfiguration
 
-io.stereov.singularity.encryption.config.EncryptionConfiguration
+io.stereov.singularity.database.encryption.config.EncryptionConfiguration
 
 io.stereov.singularity.file.core.config.StorageConfiguration
 io.stereov.singularity.file.local.config.LocalFileStorageConfiguration
@@ -26,7 +26,7 @@ io.stereov.singularity.global.config.WebSecurityConfiguration
 
 io.stereov.singularity.group.config.GroupConfiguration
 
-io.stereov.singularity.hash.config.HashConfiguration
+io.stereov.singularity.database.hash.config.HashConfiguration
 
 io.stereov.singularity.invitation.config.InvitationConfiguration
 
@@ -42,7 +42,7 @@ io.stereov.singularity.secrets.vault.config.VaultSecretStoreConfiguration
 
 io.stereov.singularity.template.config.TemplateConfiguration
 
-io.stereov.singularity.translate.config.TranslateConfiguration
+io.stereov.singularity.content.translate.config.TranslateConfiguration
 
 io.stereov.singularity.twofactorauth.config.TwoFactorAuthConfiguration
 

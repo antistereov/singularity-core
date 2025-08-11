@@ -2,12 +2,12 @@ package io.stereov.singularity.user.model
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.database.model.SensitiveDocument
-import io.stereov.singularity.encryption.model.Encrypted
+import io.stereov.singularity.database.core.model.SensitiveDocument
+import io.stereov.singularity.database.encryption.model.Encrypted
 import io.stereov.singularity.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.global.exception.model.MissingFunctionParameterException
-import io.stereov.singularity.hash.model.SearchableHash
-import io.stereov.singularity.hash.model.SecureHash
+import io.stereov.singularity.database.hash.model.SearchableHash
+import io.stereov.singularity.database.hash.model.SecureHash
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Transient
 import java.time.Instant

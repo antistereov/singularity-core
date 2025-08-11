@@ -5,7 +5,7 @@ import io.stereov.singularity.group.dto.CreateGroupRequest
 import io.stereov.singularity.group.dto.GroupResponse
 import io.stereov.singularity.group.dto.UpdateGroupRequest
 import io.stereov.singularity.group.service.GroupService
-import io.stereov.singularity.translate.model.Language
+import io.stereov.singularity.content.translate.model.Language
 import org.springframework.data.domain.Page
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*

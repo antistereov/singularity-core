@@ -1,7 +1,7 @@
 package io.stereov.singularity.invitation.config
 
-import io.stereov.singularity.encryption.service.EncryptionSecretService
-import io.stereov.singularity.encryption.service.EncryptionService
+import io.stereov.singularity.database.encryption.service.EncryptionSecretService
+import io.stereov.singularity.database.encryption.service.EncryptionService
 import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.invitation.controller.InvitationController
@@ -13,7 +13,7 @@ import io.stereov.singularity.jwt.service.JwtService
 import io.stereov.singularity.mail.config.MailConfiguration
 import io.stereov.singularity.mail.service.MailService
 import io.stereov.singularity.template.service.TemplateService
-import io.stereov.singularity.translate.service.TranslateService
+import io.stereov.singularity.content.translate.service.TranslateService
 import io.stereov.singularity.user.service.UserService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean

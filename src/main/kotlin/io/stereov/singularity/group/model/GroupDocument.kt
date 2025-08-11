@@ -3,8 +3,8 @@ package io.stereov.singularity.group.model
 import io.stereov.singularity.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.group.dto.CreateGroupRequest
 import io.stereov.singularity.group.dto.GroupResponse
-import io.stereov.singularity.translate.model.Language
-import io.stereov.singularity.translate.model.Translatable
+import io.stereov.singularity.content.translate.model.Language
+import io.stereov.singularity.content.translate.model.Translatable
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.index.Indexed

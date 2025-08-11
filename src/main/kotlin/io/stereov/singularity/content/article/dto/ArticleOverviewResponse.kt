@@ -5,7 +5,7 @@ import io.stereov.singularity.content.article.model.ArticleState
 import io.stereov.singularity.content.common.content.dto.ContentAccessDetailsResponse
 import io.stereov.singularity.content.core.tag.dto.TagResponse
 import io.stereov.singularity.file.core.dto.FileMetadataResponse
-import io.stereov.singularity.translate.model.Language
+import io.stereov.singularity.content.translate.model.Language
 import org.bson.types.ObjectId
 import java.time.Instant
 

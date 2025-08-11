@@ -1,7 +1,7 @@
 package io.stereov.singularity.template.util
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.translate.model.Language
+import io.stereov.singularity.content.translate.model.Language
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.springframework.core.io.ClassPathResource

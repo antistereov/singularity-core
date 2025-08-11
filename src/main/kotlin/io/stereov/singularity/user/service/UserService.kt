@@ -1,13 +1,13 @@
 package io.stereov.singularity.user.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.database.service.SensitiveCrudService
-import io.stereov.singularity.encryption.service.EncryptionSecretService
-import io.stereov.singularity.encryption.service.EncryptionService
+import io.stereov.singularity.database.core.service.SensitiveCrudService
+import io.stereov.singularity.database.encryption.service.EncryptionSecretService
+import io.stereov.singularity.database.encryption.service.EncryptionService
 import io.stereov.singularity.file.core.dto.FileMetadataResponse
 import io.stereov.singularity.file.core.exception.model.FileNotFoundException
 import io.stereov.singularity.file.core.service.FileStorage
-import io.stereov.singularity.hash.service.HashService
+import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.user.dto.UserOverviewResponse
 import io.stereov.singularity.user.dto.UserResponse
 import io.stereov.singularity.user.exception.model.UserDoesNotExistException

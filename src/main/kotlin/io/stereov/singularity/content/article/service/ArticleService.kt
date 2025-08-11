@@ -15,7 +15,7 @@ import io.stereov.singularity.content.common.content.service.ContentService
 import io.stereov.singularity.content.common.content.util.AccessCriteria
 import io.stereov.singularity.content.core.tag.service.TagService
 import io.stereov.singularity.file.core.service.FileStorage
-import io.stereov.singularity.translate.model.Language
+import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.user.model.UserDocument
 import io.stereov.singularity.user.service.UserService
 import kotlinx.coroutines.reactive.awaitFirstOrNull

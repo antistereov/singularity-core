@@ -5,8 +5,8 @@ import io.stereov.singularity.content.article.dto.FullArticleResponse
 import io.stereov.singularity.content.common.content.model.ContentAccessDetails
 import io.stereov.singularity.content.common.content.model.ContentDocument
 import io.stereov.singularity.global.exception.model.InvalidDocumentException
-import io.stereov.singularity.translate.model.Language
-import io.stereov.singularity.translate.model.Translatable
+import io.stereov.singularity.content.translate.model.Language
+import io.stereov.singularity.content.translate.model.Translatable
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.index.Indexed
