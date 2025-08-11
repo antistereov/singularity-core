@@ -11,14 +11,14 @@ import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.jwt.exception.model.InvalidTokenException
 import io.stereov.singularity.jwt.properties.JwtProperties
 import io.stereov.singularity.twofactorauth.service.TwoFactorAuthService
-import io.stereov.singularity.user.dto.UserResponse
-import io.stereov.singularity.user.dto.request.DeviceInfoRequest
-import io.stereov.singularity.user.dto.request.TwoFactorStartSetupRequest
-import io.stereov.singularity.user.model.DeviceInfo
-import io.stereov.singularity.user.service.UserService
-import io.stereov.singularity.user.service.token.TwoFactorAuthTokenService
-import io.stereov.singularity.user.service.token.UserTokenService
-import io.stereov.singularity.user.service.token.model.StepUpToken
+import io.stereov.singularity.user.core.dto.response.UserResponse
+import io.stereov.singularity.user.device.dto.DeviceInfoRequest
+import io.stereov.singularity.user.twofactor.dto.request.TwoFactorStartSetupRequest
+import io.stereov.singularity.user.core.model.DeviceInfo
+import io.stereov.singularity.user.core.service.UserService
+import io.stereov.singularity.user.token.service.TwoFactorTokenService
+import io.stereov.singularity.user.token.service.AccessTokenService
+import io.stereov.singularity.user.token.model.StepUpToken
 import org.bson.types.ObjectId
 import org.springframework.http.ResponseCookie
 import org.springframework.stereotype.Service
@@ -35,12 +35,12 @@ import java.time.Instant
  */
 @Service
 class CookieService(
-    private val userTokenService: UserTokenService,
+    private val accessTokenService: AccessTokenService,
     private val jwtProperties: JwtProperties,
     private val appProperties: AppProperties,
     private val geoLocationService: GeoLocationService,
     private val userService: UserService,
-    private val twoFactorAuthTokenService: TwoFactorAuthTokenService,
+    private val twoFactorTokenService: TwoFactorTokenService,
     private val authenticationService: AuthenticationService,
     private val twoFactorAuthService: TwoFactorAuthService,
 ) {
@@ -59,7 +59,7 @@ class CookieService(
     suspend fun createAccessTokenCookie(userId: ObjectId, deviceId: String): ResponseCookie {
         logger.debug { "Creating access token cookie for user $userId" }
 
-        val accessToken = userTokenService.createAccessToken(userId, deviceId)
+        val accessToken = accessTokenService.createAccessToken(userId, deviceId)
 
         val cookie = ResponseCookie.from(Constants.ACCESS_TOKEN_COOKIE, accessToken)
             .httpOnly(true)
@@ -90,7 +90,7 @@ class CookieService(
         logger.info { "Creating refresh token cookie" }
 
         val refreshTokenId = Random.generateCode(20)
-        val refreshToken = userTokenService.createRefreshToken(userId, deviceInfoDto.id, refreshTokenId)
+        val refreshToken = accessTokenService.createRefreshToken(userId, deviceInfoDto.id, refreshTokenId)
 
         val ipAddress = exchange.request.remoteAddress?.address?.hostAddress
         val location = ipAddress?.let { try { geoLocationService.getLocation(it) } catch(_: Exception) { null } }
@@ -187,7 +187,7 @@ class CookieService(
         val refreshTokenCookie = exchange.request.cookies[Constants.REFRESH_TOKEN_COOKIE]?.firstOrNull()?.value
             ?: throw InvalidTokenException("No refresh token provided")
 
-        val refreshToken = userTokenService.extractRefreshToken(refreshTokenCookie, deviceId)
+        val refreshToken = accessTokenService.extractRefreshToken(refreshTokenCookie, deviceId)
 
         val user = userService.findById(refreshToken.userId)
 
@@ -208,7 +208,7 @@ class CookieService(
     suspend fun createLoginVerificationCookie(userId: ObjectId): ResponseCookie {
         logger.debug { "Creating cookie for two factor login verification token" }
 
-        val cookie = ResponseCookie.from(Constants.LOGIN_VERIFICATION_TOKEN_COOKIE, twoFactorAuthTokenService.createLoginToken(userId))
+        val cookie = ResponseCookie.from(Constants.LOGIN_VERIFICATION_TOKEN_COOKIE, twoFactorTokenService.createLoginToken(userId))
             .httpOnly(true)
             .sameSite("Strict")
             .maxAge(jwtProperties.expiresIn)
@@ -236,7 +236,7 @@ class CookieService(
         val twoFactorCookie = exchange.request.cookies[Constants.LOGIN_VERIFICATION_TOKEN_COOKIE]?.firstOrNull()?.value
             ?: throw InvalidTokenException("No two factor authentication token provided")
 
-        return twoFactorAuthTokenService.validateLoginTokenAndExtractUserId(twoFactorCookie)
+        return twoFactorTokenService.validateLoginTokenAndExtractUserId(twoFactorCookie)
     }
 
     /**
@@ -273,7 +273,7 @@ class CookieService(
         val user = authenticationService.getCurrentUser()
 
         twoFactorAuthService.validateTwoFactorCode(user, code)
-        val token = twoFactorAuthTokenService.createStepUpToken(code)
+        val token = twoFactorTokenService.createStepUpToken(code)
 
         return createStepUpCookie(token)
     }
@@ -293,7 +293,7 @@ class CookieService(
     internal suspend fun createStepUpCookieForRecovery(userId: ObjectId, deviceId: String, exchange: ServerWebExchange): ResponseCookie {
         logger.debug { "Creating step up cookie" }
 
-        val token = twoFactorAuthTokenService.createStepUpTokenForRecovery(userId, deviceId, exchange)
+        val token = twoFactorTokenService.createStepUpTokenForRecovery(userId, deviceId, exchange)
 
         return createStepUpCookie(token)
     }
@@ -330,7 +330,7 @@ class CookieService(
         val stepUpCookie = exchange.request.cookies[Constants.STEP_UP_TOKEN_COOKIE]?.firstOrNull()?.value
             ?: throw InvalidTokenException("No step up token provided")
 
-        return twoFactorAuthTokenService.validateAndExtractStepUpToken(stepUpCookie)
+        return twoFactorTokenService.validateAndExtractStepUpToken(stepUpCookie)
     }
 
     /**
@@ -353,7 +353,7 @@ class CookieService(
     }
 
     suspend fun createTwoFactorSetupCookie(req: TwoFactorStartSetupRequest): ResponseCookie {
-        val token = twoFactorAuthTokenService.createSetupStartToken(req)
+        val token = twoFactorTokenService.createSetupStartToken(req)
 
         val cookie = ResponseCookie.from(Constants.TWO_FACTOR_SETUP_TOKEN_COOKIE, token)
             .httpOnly(true)
@@ -371,6 +371,6 @@ class CookieService(
         val token = exchange.request.cookies[Constants.TWO_FACTOR_SETUP_TOKEN_COOKIE]?.firstOrNull()?.value
             ?: throw InvalidTokenException("No setup token provided")
 
-        twoFactorAuthTokenService.validateSetupStartToken(token)
+        twoFactorTokenService.validateSetupStartToken(token)
     }
 }

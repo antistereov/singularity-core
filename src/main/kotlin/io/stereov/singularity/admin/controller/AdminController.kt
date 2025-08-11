@@ -3,8 +3,8 @@ package io.stereov.singularity.admin.controller
 import io.stereov.singularity.admin.dto.RotationStatusResponse
 import io.stereov.singularity.admin.service.AdminService
 import io.stereov.singularity.global.model.SuccessResponse
-import io.stereov.singularity.user.dto.UserResponse
-import io.stereov.singularity.user.service.UserService
+import io.stereov.singularity.user.core.dto.response.UserResponse
+import io.stereov.singularity.user.core.service.UserService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.map

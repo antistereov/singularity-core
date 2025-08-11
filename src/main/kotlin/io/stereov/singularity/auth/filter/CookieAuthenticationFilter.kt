@@ -8,8 +8,8 @@ import io.stereov.singularity.global.exception.model.DocumentNotFoundException
 import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.jwt.exception.TokenException
 import io.stereov.singularity.jwt.exception.model.InvalidTokenException
-import io.stereov.singularity.user.service.UserService
-import io.stereov.singularity.user.service.token.UserTokenService
+import io.stereov.singularity.user.core.service.UserService
+import io.stereov.singularity.user.token.service.AccessTokenService
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.mono
 import org.apache.http.HttpHeaders
@@ -30,7 +30,7 @@ import reactor.core.publisher.Mono
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
 class CookieAuthenticationFilter(
-    private val userTokenService: UserTokenService,
+    private val accessTokenService: AccessTokenService,
     private val userService: UserService,
     private val authProperties: AuthProperties
 ) : WebFilter {
@@ -41,7 +41,7 @@ class CookieAuthenticationFilter(
 
         if (!authToken.isNullOrBlank()) {
             val accessToken = try {
-                userTokenService.validateAndExtractAccessToken(authToken)
+                accessTokenService.validateAndExtractAccessToken(authToken)
             } catch(e: TokenException) {
                 return@mono setSecurityContext(chain, exchange, e)
             }

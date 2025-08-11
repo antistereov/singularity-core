@@ -14,7 +14,7 @@ import io.stereov.singularity.mail.config.MailConfiguration
 import io.stereov.singularity.mail.service.MailService
 import io.stereov.singularity.template.service.TemplateService
 import io.stereov.singularity.content.translate.service.TranslateService
-import io.stereov.singularity.user.service.UserService
+import io.stereov.singularity.user.core.service.UserService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean

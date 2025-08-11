@@ -3,8 +3,8 @@ package io.stereov.singularity.content.common.content.model
 import io.stereov.singularity.auth.model.AccessType
 import io.stereov.singularity.content.common.content.dto.ChangeContentVisibilityRequest
 import io.stereov.singularity.content.common.content.dto.ContentAccessDetailsResponse
-import io.stereov.singularity.user.model.Role
-import io.stereov.singularity.user.model.UserDocument
+import io.stereov.singularity.user.core.model.Role
+import io.stereov.singularity.user.core.model.UserDocument
 import org.bson.types.ObjectId
 
 data class ContentAccessDetails(

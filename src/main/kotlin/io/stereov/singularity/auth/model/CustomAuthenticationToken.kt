@@ -1,6 +1,6 @@
 package io.stereov.singularity.auth.model
 
-import io.stereov.singularity.user.model.UserDocument
+import io.stereov.singularity.user.core.model.UserDocument
 import org.bson.types.ObjectId
 import org.springframework.security.authentication.AbstractAuthenticationToken
 import org.springframework.security.core.GrantedAuthority

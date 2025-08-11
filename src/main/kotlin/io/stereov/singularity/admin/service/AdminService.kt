@@ -7,9 +7,9 @@ import io.stereov.singularity.database.core.service.SensitiveCrudService
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.secrets.core.service.SecretService
-import io.stereov.singularity.user.model.Role
-import io.stereov.singularity.user.model.UserDocument
-import io.stereov.singularity.user.service.UserService
+import io.stereov.singularity.user.core.model.Role
+import io.stereov.singularity.user.core.model.UserDocument
+import io.stereov.singularity.user.core.service.UserService
 import jakarta.annotation.PostConstruct
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

@@ -4,7 +4,7 @@ import com.warrenstrange.googleauth.GoogleAuthenticator
 import io.stereov.singularity.auth.exception.model.TwoFactorAuthDisabledException
 import io.stereov.singularity.twofactorauth.exception.model.InvalidTwoFactorCodeException
 import io.stereov.singularity.global.exception.model.InvalidDocumentException
-import io.stereov.singularity.user.model.UserDocument
+import io.stereov.singularity.user.core.model.UserDocument
 import org.springframework.stereotype.Service
 
 /**

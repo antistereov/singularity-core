@@ -16,7 +16,7 @@ import io.stereov.singularity.template.util.TemplateBuilder
 import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.content.translate.model.TranslateKey
 import io.stereov.singularity.content.translate.service.TranslateService
-import io.stereov.singularity.user.service.UserService
+import io.stereov.singularity.user.core.service.UserService
 import kotlinx.coroutines.reactive.awaitLast
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria

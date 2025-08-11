@@ -3,7 +3,7 @@ package io.stereov.singularity.content.common.content.dto
 import io.stereov.singularity.content.common.content.model.ContentAccessDetails
 import io.stereov.singularity.content.common.content.model.ContentAccessRole
 import io.stereov.singularity.auth.model.AccessType
-import io.stereov.singularity.user.model.UserDocument
+import io.stereov.singularity.user.core.model.UserDocument
 import org.bson.types.ObjectId
 
 data class ContentAccessDetailsResponse(

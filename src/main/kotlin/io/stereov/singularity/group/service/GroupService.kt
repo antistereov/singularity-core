@@ -11,7 +11,7 @@ import io.stereov.singularity.group.exception.model.GroupKeyExistsException
 import io.stereov.singularity.group.model.GroupDocument
 import io.stereov.singularity.group.model.GroupTranslation
 import io.stereov.singularity.group.repository.GroupRepository
-import io.stereov.singularity.user.model.Role
+import io.stereov.singularity.user.core.model.Role
 import jakarta.annotation.PostConstruct
 import kotlinx.coroutines.runBlocking
 import org.bson.types.ObjectId

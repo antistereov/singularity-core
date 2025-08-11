@@ -11,7 +11,7 @@ import io.stereov.singularity.invitation.exception.model.InvalidInvitationExcept
 import io.stereov.singularity.invitation.model.InvitationDocument
 import io.stereov.singularity.invitation.service.InvitationService
 import io.stereov.singularity.content.translate.model.Language
-import io.stereov.singularity.user.service.UserService
+import io.stereov.singularity.user.core.service.UserService
 import org.bson.types.ObjectId
 
 interface ContentManagementService<T: ContentDocument<T>> {

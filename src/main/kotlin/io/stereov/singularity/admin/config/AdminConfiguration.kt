@@ -6,8 +6,8 @@ import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.database.hash.config.HashConfiguration
 import io.stereov.singularity.database.hash.service.HashService
-import io.stereov.singularity.user.config.UserConfiguration
-import io.stereov.singularity.user.service.UserService
+import io.stereov.singularity.user.twofactor.config.UserTwoFactorConfiguration
+import io.stereov.singularity.user.core.service.UserService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.ApplicationContext
@@ -18,7 +18,7 @@ import org.springframework.context.annotation.Configuration
 @AutoConfiguration(
     after = [
         ApplicationConfiguration::class,
-        UserConfiguration::class,
+        UserTwoFactorConfiguration::class,
         HashConfiguration::class,
     ]
 )

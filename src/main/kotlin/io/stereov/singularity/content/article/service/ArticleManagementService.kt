@@ -16,8 +16,8 @@ import io.stereov.singularity.content.translate.exception.model.TranslationForLa
 import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.content.translate.model.TranslateKey
 import io.stereov.singularity.content.translate.service.TranslateService
-import io.stereov.singularity.user.model.Role
-import io.stereov.singularity.user.service.UserService
+import io.stereov.singularity.user.core.model.Role
+import io.stereov.singularity.user.core.service.UserService
 import org.bson.types.ObjectId
 import org.springframework.http.MediaType
 import org.springframework.http.codec.multipart.FilePart
