@@ -9,12 +9,16 @@ on:
       - '.github/workflows/core-sync.yml'
       - '.github/workflows/deploy-docs.yml'
       - '.github/workflows/release-and-deploy.yml'
-      - 'README.md'
+      - '**/README.md'
   pull_request:
     branches:
       - main
     paths-ignore:
       - 'docs/**'
+      - '.github/workflows/core-sync.yml'
+      - '.github/workflows/deploy-docs.yml'
+      - '.github/workflows/release-and-deploy.yml'
+      - '**/README.md'
 
 jobs:
   build_and_test:
