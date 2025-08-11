@@ -1,7 +1,7 @@
 package io.stereov.singularity.file.core.dto
 
-import io.stereov.singularity.content.common.content.model.ContentAccessDetails
-import io.stereov.singularity.content.common.content.model.ContentDocument
+import io.stereov.singularity.content.core.model.ContentAccessDetails
+import io.stereov.singularity.content.core.model.ContentDocument
 import org.bson.types.ObjectId
 import java.time.Instant
 

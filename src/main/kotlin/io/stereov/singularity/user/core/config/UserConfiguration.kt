@@ -1,12 +1,12 @@
 package io.stereov.singularity.user.core.config
 
-import io.stereov.singularity.auth.config.AuthenticationConfiguration
+import io.stereov.singularity.auth.core.config.AuthenticationConfiguration
 import io.stereov.singularity.database.encryption.service.EncryptionSecretService
 import io.stereov.singularity.database.encryption.service.EncryptionService
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.global.config.ApplicationConfiguration
-import io.stereov.singularity.mail.config.MailConfiguration
+import io.stereov.singularity.mail.core.config.MailConfiguration
 import io.stereov.singularity.user.core.controller.UserController
 import io.stereov.singularity.user.core.exception.handler.UserExceptionHandler
 import io.stereov.singularity.user.core.repository.UserRepository

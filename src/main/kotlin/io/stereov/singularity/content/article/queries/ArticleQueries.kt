@@ -1,6 +1,6 @@
 package io.stereov.singularity.content.article.queries
 
-import io.stereov.singularity.content.common.content.util.AccessCriteria
+import io.stereov.singularity.content.core.component.AccessCriteria
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.convert.MappingMongoConverter
 import org.springframework.stereotype.Component

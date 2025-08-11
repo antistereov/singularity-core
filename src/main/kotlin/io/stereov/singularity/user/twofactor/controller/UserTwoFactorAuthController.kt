@@ -1,10 +1,10 @@
 package io.stereov.singularity.user.twofactor.controller
 
-import io.stereov.singularity.auth.exception.model.TwoFactorAuthDisabledException
-import io.stereov.singularity.auth.service.AuthenticationService
-import io.stereov.singularity.auth.service.CookieService
+import io.stereov.singularity.auth.core.exception.model.TwoFactorAuthDisabledException
+import io.stereov.singularity.auth.core.service.AuthenticationService
+import io.stereov.singularity.auth.core.service.CookieService
 import io.stereov.singularity.global.model.SuccessResponse
-import io.stereov.singularity.jwt.exception.TokenException
+import io.stereov.singularity.auth.jwt.exception.TokenException
 import io.stereov.singularity.user.core.service.UserService
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.device.dto.DeviceInfoRequest

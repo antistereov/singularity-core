@@ -1,16 +1,22 @@
 io.stereov.singularity.admin.config.AdminConfiguration
 
-io.stereov.singularity.auth.config.AuthenticationConfiguration
+io.stereov.singularity.auth.core.config.AuthenticationConfiguration
+io.stereov.singularity.auth.jwt.config.JwtConfiguration
+io.stereov.singularity.auth.twofactor.config.TwoFactorAuthConfiguration
 
 io.stereov.singularity.cache.config.CacheConfiguration
 io.stereov.singularity.cache.config.RedisConfiguration
 
+io.stereov.singularity.content.article.config.ArticleConfiguration
 io.stereov.singularity.content.core.config.ContentConfiguration
+io.stereov.singularity.content.invitation.config.InvitationConfiguration
+io.stereov.singularity.content.tag.config.TagConfiguration
+io.stereov.singularity.content.translate.config.TranslateConfiguration
 
 io.stereov.singularity.database.core.config.DatabaseConfiguration
 io.stereov.singularity.database.core.config.MongoConfiguration
-
 io.stereov.singularity.database.encryption.config.EncryptionConfiguration
+io.stereov.singularity.database.hash.config.HashConfiguration
 
 io.stereov.singularity.file.core.config.StorageConfiguration
 io.stereov.singularity.file.local.config.LocalFileStorageConfiguration
@@ -24,15 +30,8 @@ io.stereov.singularity.global.config.WebClientConfiguration
 io.stereov.singularity.global.config.WebFluxConfiguration
 io.stereov.singularity.global.config.WebSecurityConfiguration
 
-io.stereov.singularity.group.config.GroupConfiguration
-
-io.stereov.singularity.database.hash.config.HashConfiguration
-
-io.stereov.singularity.invitation.config.InvitationConfiguration
-
-io.stereov.singularity.jwt.config.JwtConfiguration
-
-io.stereov.singularity.mail.config.MailConfiguration
+io.stereov.singularity.mail.core.config.MailConfiguration
+io.stereov.singularity.mail.template.config.TemplateConfiguration
 
 io.stereov.singularity.ratelimit.config.RateLimitConfiguration
 
@@ -40,14 +39,9 @@ io.stereov.singularity.secrets.core.config.SecretsConfiguration
 io.stereov.singularity.secrets.local.config.LocalSecretStoreConfiguration
 io.stereov.singularity.secrets.vault.config.VaultSecretStoreConfiguration
 
-io.stereov.singularity.template.config.TemplateConfiguration
-
-io.stereov.singularity.content.translate.config.TranslateConfiguration
-
-io.stereov.singularity.twofactorauth.config.TwoFactorAuthConfiguration
-
 io.stereov.singularity.user.core.config.UserConfiguration
 io.stereov.singularity.user.device.config.UserDeviceConfiguration
+io.stereov.singularity.user.group.config.GroupConfiguration
 io.stereov.singularity.user.mail.config.UserMailConfiguration
 io.stereov.singularity.user.session.config.UserSessionConfiguration
 io.stereov.singularity.user.token.config.UserTokenConfiguration

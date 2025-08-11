@@ -4,7 +4,7 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.lettuce.core.ExperimentalLettuceCoroutinesApi
 import io.lettuce.core.api.coroutines.RedisCoroutinesCommands
-import io.stereov.singularity.jwt.properties.JwtProperties
+import io.stereov.singularity.auth.jwt.properties.JwtProperties
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.map
 import org.bson.types.ObjectId

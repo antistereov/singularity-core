@@ -2,20 +2,20 @@ package io.stereov.singularity.content.article.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.auth.service.AuthenticationService
+import io.stereov.singularity.auth.core.service.AuthenticationService
 import io.stereov.singularity.content.article.dto.ArticleOverviewResponse
 import io.stereov.singularity.content.article.dto.ArticleResponse
 import io.stereov.singularity.content.article.dto.FullArticleResponse
 import io.stereov.singularity.content.article.model.Article
 import io.stereov.singularity.content.article.model.ArticleState
 import io.stereov.singularity.content.article.repository.ArticleRepository
-import io.stereov.singularity.content.common.content.dto.ContentAccessDetailsResponse
-import io.stereov.singularity.content.common.content.model.ContentAccessRole
-import io.stereov.singularity.content.common.content.service.ContentService
-import io.stereov.singularity.content.common.content.util.AccessCriteria
-import io.stereov.singularity.content.core.tag.service.TagService
-import io.stereov.singularity.file.core.service.FileStorage
+import io.stereov.singularity.content.core.component.AccessCriteria
+import io.stereov.singularity.content.core.dto.ContentAccessDetailsResponse
+import io.stereov.singularity.content.core.model.ContentAccessRole
+import io.stereov.singularity.content.core.service.ContentService
+import io.stereov.singularity.content.tag.service.TagService
 import io.stereov.singularity.content.translate.model.Language
+import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.service.UserService
 import kotlinx.coroutines.reactive.awaitFirstOrNull

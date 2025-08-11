@@ -1,7 +1,7 @@
 package io.stereov.singularity.global.properties
 
-import com.github.slugify.Slugify
-import io.stereov.singularity.group.dto.CreateGroupRequest
+import io.stereov.singularity.global.util.toSlug
+import io.stereov.singularity.user.group.dto.CreateGroupRequest
 import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "singularity.app")
@@ -18,5 +18,5 @@ data class AppProperties(
 ) {
 
     val slug: String
-        get() = Slugify.builder().build().slugify(name)
+        get() = name.toSlug()
 }

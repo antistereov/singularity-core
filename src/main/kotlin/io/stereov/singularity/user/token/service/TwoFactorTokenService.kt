@@ -2,17 +2,17 @@ package io.stereov.singularity.user.token.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.auth.exception.AuthException
-import io.stereov.singularity.auth.exception.model.InvalidCredentialsException
-import io.stereov.singularity.auth.service.AuthenticationService
+import io.stereov.singularity.auth.core.exception.AuthException
+import io.stereov.singularity.auth.core.exception.model.InvalidCredentialsException
+import io.stereov.singularity.auth.core.service.AuthenticationService
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.global.util.Constants
-import io.stereov.singularity.jwt.exception.model.InvalidTokenException
-import io.stereov.singularity.jwt.properties.JwtProperties
-import io.stereov.singularity.jwt.service.JwtService
-import io.stereov.singularity.twofactorauth.exception.model.InvalidTwoFactorCodeException
-import io.stereov.singularity.twofactorauth.service.TwoFactorAuthService
+import io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException
+import io.stereov.singularity.auth.jwt.properties.JwtProperties
+import io.stereov.singularity.auth.jwt.service.JwtService
+import io.stereov.singularity.auth.twofactor.exception.model.InvalidTwoFactorCodeException
+import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthService
 import io.stereov.singularity.user.token.model.SetupToken
 import io.stereov.singularity.user.token.model.StepUpToken
 import io.stereov.singularity.user.twofactor.dto.request.TwoFactorStartSetupRequest

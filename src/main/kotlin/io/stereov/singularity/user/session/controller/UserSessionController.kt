@@ -2,9 +2,9 @@ package io.stereov.singularity.user.session.controller
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.auth.properties.AuthProperties
-import io.stereov.singularity.auth.service.AuthenticationService
-import io.stereov.singularity.auth.service.CookieService
+import io.stereov.singularity.auth.core.properties.AuthProperties
+import io.stereov.singularity.auth.core.service.AuthenticationService
+import io.stereov.singularity.auth.core.service.CookieService
 import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.user.core.service.UserService
 import io.stereov.singularity.user.core.dto.response.UserResponse

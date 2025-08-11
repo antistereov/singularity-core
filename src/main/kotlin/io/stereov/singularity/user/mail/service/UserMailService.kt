@@ -1,8 +1,8 @@
 package io.stereov.singularity.user.mail.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.auth.exception.AuthException
-import io.stereov.singularity.auth.service.AuthenticationService
+import io.stereov.singularity.auth.core.exception.AuthException
+import io.stereov.singularity.auth.core.service.AuthenticationService
 import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.content.translate.model.Language

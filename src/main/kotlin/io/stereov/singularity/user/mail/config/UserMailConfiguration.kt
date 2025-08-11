@@ -1,14 +1,14 @@
 package io.stereov.singularity.user.mail.config
 
-import io.stereov.singularity.auth.service.AuthenticationService
+import io.stereov.singularity.auth.core.service.AuthenticationService
 import io.stereov.singularity.content.translate.service.TranslateService
 import io.stereov.singularity.database.encryption.service.EncryptionService
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.global.properties.UiProperties
-import io.stereov.singularity.jwt.service.JwtService
-import io.stereov.singularity.mail.properties.MailProperties
-import io.stereov.singularity.mail.service.MailService
-import io.stereov.singularity.template.service.TemplateService
+import io.stereov.singularity.auth.jwt.service.JwtService
+import io.stereov.singularity.mail.core.properties.MailProperties
+import io.stereov.singularity.mail.core.service.MailService
+import io.stereov.singularity.mail.template.service.TemplateService
 import io.stereov.singularity.user.core.config.UserConfiguration
 import io.stereov.singularity.user.core.service.UserService
 import io.stereov.singularity.user.mail.controller.UserMailController

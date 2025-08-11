@@ -2,8 +2,8 @@ package io.stereov.singularity.content.article.dto
 
 import io.stereov.singularity.content.article.model.ArticleColors
 import io.stereov.singularity.content.article.model.ArticleState
-import io.stereov.singularity.content.common.content.dto.ContentAccessDetailsResponse
-import io.stereov.singularity.content.core.tag.dto.TagResponse
+import io.stereov.singularity.content.core.dto.ContentAccessDetailsResponse
+import io.stereov.singularity.content.tag.dto.TagResponse
 import io.stereov.singularity.file.core.dto.FileMetadataResponse
 import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.user.core.dto.response.UserOverviewResponse

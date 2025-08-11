@@ -1,8 +1,8 @@
 package io.stereov.singularity.global.config
 
-import io.stereov.singularity.auth.config.AuthenticationConfiguration
-import io.stereov.singularity.auth.filter.CookieAuthenticationFilter
-import io.stereov.singularity.auth.properties.AuthProperties
+import io.stereov.singularity.auth.core.config.AuthenticationConfiguration
+import io.stereov.singularity.auth.core.filter.CookieAuthenticationFilter
+import io.stereov.singularity.auth.core.properties.AuthProperties
 import io.stereov.singularity.global.filter.LoggingFilter
 import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.ratelimit.filter.RateLimitFilter

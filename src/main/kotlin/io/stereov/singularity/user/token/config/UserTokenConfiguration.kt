@@ -2,11 +2,11 @@ package io.stereov.singularity.user.token.config
 
 import io.lettuce.core.ExperimentalLettuceCoroutinesApi
 import io.lettuce.core.api.coroutines.RedisCoroutinesCommands
-import io.stereov.singularity.auth.service.AuthenticationService
+import io.stereov.singularity.auth.core.service.AuthenticationService
 import io.stereov.singularity.database.hash.service.HashService
-import io.stereov.singularity.jwt.properties.JwtProperties
-import io.stereov.singularity.jwt.service.JwtService
-import io.stereov.singularity.twofactorauth.service.TwoFactorAuthService
+import io.stereov.singularity.auth.jwt.properties.JwtProperties
+import io.stereov.singularity.auth.jwt.service.JwtService
+import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthService
 import io.stereov.singularity.user.core.config.UserConfiguration
 import io.stereov.singularity.user.token.cache.AccessTokenCache
 import io.stereov.singularity.user.token.service.AccessTokenService

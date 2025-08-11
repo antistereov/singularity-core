@@ -3,7 +3,7 @@ package io.stereov.singularity.ratelimit.service
 import io.github.bucket4j.Bucket
 import io.github.bucket4j.BucketConfiguration
 import io.github.bucket4j.redis.lettuce.cas.LettuceBasedProxyManager
-import io.stereov.singularity.auth.service.AuthenticationService
+import io.stereov.singularity.auth.core.service.AuthenticationService
 import io.stereov.singularity.ratelimit.excpetion.model.TooManyRequestsException
 import io.stereov.singularity.ratelimit.properties.LoginAttemptLimitProperties
 import io.stereov.singularity.ratelimit.properties.RateLimitProperties

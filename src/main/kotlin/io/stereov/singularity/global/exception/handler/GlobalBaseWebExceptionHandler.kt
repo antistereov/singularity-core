@@ -1,6 +1,6 @@
 package io.stereov.singularity.global.exception.handler
 
-import io.stereov.singularity.auth.exception.AuthException
+import io.stereov.singularity.auth.core.exception.AuthException
 import io.stereov.singularity.global.exception.BaseExceptionHandler
 import io.stereov.singularity.global.exception.GlobalBaseWebException
 import io.stereov.singularity.global.exception.model.DocumentNotFoundException
