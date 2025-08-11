@@ -1,4 +1,4 @@
-package io.stereov.singularity.geolocation.exception
+package io.stereov.singularity.auth.geolocation.exception
 
 import io.stereov.singularity.global.exception.BaseWebException
 

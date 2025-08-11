@@ -1,7 +1,7 @@
-package io.stereov.singularity.geolocation.service
+package io.stereov.singularity.auth.geolocation.service
 
-import io.stereov.singularity.geolocation.exception.GeoLocationException
-import io.stereov.singularity.geolocation.model.GeoLocationResponse
+import io.stereov.singularity.auth.geolocation.exception.GeoLocationException
+import io.stereov.singularity.auth.geolocation.model.GeoLocationResponse
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody

@@ -1,4 +1,4 @@
-package io.stereov.singularity.geolocation.model
+package io.stereov.singularity.auth.geolocation.model
 
 /**
  * # GeoLocationResponse data class.
