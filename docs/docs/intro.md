@@ -5,19 +5,15 @@ title: Intro
 
 # Singularity
 
-Welcome to your production-ready Spring starter with built-in authentication with 2FA and email verification, content management,
-database connection, file storage, caching, rate limiting & async processing.
-🚀
+Welcome to the foundation for your next backend!
+Build your app with everything from authentication to content management, ready out of the box. 🚀
 
 Save time, ensure consistency, and focus on features — whether you're building an API, microservice, or full-stack app.
-
 
 ## ⚡ Why Use This?
 
 - ✔ **Batteries Included:** authentication with 2FA and email verification, content management, file storage, and key rotation already set up.
-- ✔ **Code Reuse Made Easy:** Shared libraries mean no more copying boilerplate between projects.
 - ✔ **Production-Ready by Default:** All components are built with real-world usage and scalability in mind.
-- ✔ **Fast Start, Every Time:** Create a new backend app in minutes using the existing architecture and libs.
 - ✔ **Open & Extensible:** Contributions welcome! Let’s refine this into a toolkit others can benefit from too.
 
 ## 🔐 Features at a Glance
