@@ -1,6 +1,7 @@
 io.stereov.singularity.admin.config.AdminConfiguration
 
 io.stereov.singularity.auth.core.config.AuthenticationConfiguration
+io.stereov.singularity.auth.geolocation.config.GeoLocationConfiguration
 io.stereov.singularity.auth.jwt.config.JwtConfiguration
 io.stereov.singularity.auth.twofactor.config.TwoFactorAuthConfiguration
 
@@ -21,8 +22,6 @@ io.stereov.singularity.database.hash.config.HashConfiguration
 io.stereov.singularity.file.core.config.StorageConfiguration
 io.stereov.singularity.file.local.config.LocalFileStorageConfiguration
 io.stereov.singularity.file.s3.config.S3Configuration
-
-io.stereov.singularity.geolocation.config.GeoLocationConfiguration
 
 io.stereov.singularity.global.config.ApplicationConfiguration
 io.stereov.singularity.global.config.JsonConfiguration
