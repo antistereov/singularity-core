@@ -1,9 +1,9 @@
 package io.stereov.singularity.user.model
 
-import io.stereov.singularity.database.model.EncryptedSensitiveDocument
-import io.stereov.singularity.encryption.model.Encrypted
-import io.stereov.singularity.hash.model.SearchableHash
-import io.stereov.singularity.hash.model.SecureHash
+import io.stereov.singularity.database.core.model.EncryptedSensitiveDocument
+import io.stereov.singularity.database.encryption.model.Encrypted
+import io.stereov.singularity.database.hash.model.SearchableHash
+import io.stereov.singularity.database.hash.model.SecureHash
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document

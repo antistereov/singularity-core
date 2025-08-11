@@ -7,7 +7,7 @@ import io.stereov.singularity.group.model.GroupDocument
 import io.stereov.singularity.group.model.GroupTranslation
 import io.stereov.singularity.group.service.GroupService
 import io.stereov.singularity.test.config.MockConfig
-import io.stereov.singularity.translate.model.Language
+import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.user.dto.request.*
 import io.stereov.singularity.user.dto.response.TwoFactorSetupResponse
 import io.stereov.singularity.user.model.Role

@@ -3,7 +3,7 @@ package io.stereov.singularity.mail.service
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.mail.properties.MailProperties
-import io.stereov.singularity.translate.model.Language
+import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.user.service.mail.MailTokenService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

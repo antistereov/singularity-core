@@ -2,7 +2,7 @@ package io.stereov.singularity.group.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.service.AuthenticationService
-import io.stereov.singularity.database.service.TranslatableCrudService
+import io.stereov.singularity.database.core.service.TranslatableCrudService
 import io.stereov.singularity.global.exception.model.DocumentNotFoundException
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.group.dto.CreateGroupRequest

@@ -1,7 +1,7 @@
 package io.stereov.singularity.mail.service
 
 import io.github.oshai.kotlinlogging.KLogger
-import io.stereov.singularity.translate.model.Language
+import io.stereov.singularity.content.translate.model.Language
 
 interface MailService {
 

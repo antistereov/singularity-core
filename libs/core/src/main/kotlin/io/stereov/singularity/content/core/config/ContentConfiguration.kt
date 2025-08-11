@@ -20,7 +20,7 @@ import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.invitation.service.InvitationService
 import io.stereov.singularity.mail.config.MailConfiguration
-import io.stereov.singularity.translate.service.TranslateService
+import io.stereov.singularity.content.translate.service.TranslateService
 import io.stereov.singularity.user.service.UserService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean

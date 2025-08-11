@@ -10,7 +10,7 @@ import io.stereov.singularity.content.common.content.service.ContentService
 import io.stereov.singularity.invitation.exception.model.InvalidInvitationException
 import io.stereov.singularity.invitation.model.InvitationDocument
 import io.stereov.singularity.invitation.service.InvitationService
-import io.stereov.singularity.translate.model.Language
+import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.user.service.UserService
 import org.bson.types.ObjectId
 

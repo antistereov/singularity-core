@@ -4,8 +4,8 @@ import io.stereov.singularity.admin.controller.AdminController
 import io.stereov.singularity.admin.service.AdminService
 import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.global.properties.AppProperties
-import io.stereov.singularity.hash.config.HashConfiguration
-import io.stereov.singularity.hash.service.HashService
+import io.stereov.singularity.database.hash.config.HashConfiguration
+import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.user.config.UserConfiguration
 import io.stereov.singularity.user.service.UserService
 import org.springframework.boot.autoconfigure.AutoConfiguration

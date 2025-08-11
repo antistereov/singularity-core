@@ -7,9 +7,9 @@ import io.stereov.singularity.mail.service.MailService
 import io.stereov.singularity.mail.util.MailConstants
 import io.stereov.singularity.template.service.TemplateService
 import io.stereov.singularity.template.util.TemplateBuilder
-import io.stereov.singularity.translate.model.Language
-import io.stereov.singularity.translate.model.TranslateKey
-import io.stereov.singularity.translate.service.TranslateService
+import io.stereov.singularity.content.translate.model.Language
+import io.stereov.singularity.content.translate.model.TranslateKey
+import io.stereov.singularity.content.translate.service.TranslateService
 import io.stereov.singularity.user.model.UserDocument
 import org.springframework.stereotype.Component
 

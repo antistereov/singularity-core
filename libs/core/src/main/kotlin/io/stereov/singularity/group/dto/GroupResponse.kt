@@ -1,6 +1,6 @@
 package io.stereov.singularity.group.dto
 
-import io.stereov.singularity.translate.model.Language
+import io.stereov.singularity.content.translate.model.Language
 
 data class GroupResponse (
     val key: String,

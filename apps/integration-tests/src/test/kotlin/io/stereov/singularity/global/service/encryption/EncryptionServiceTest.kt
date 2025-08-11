@@ -1,6 +1,6 @@
 package io.stereov.singularity.global.service.encryption
 
-import io.stereov.singularity.encryption.service.EncryptionSecretService
+import io.stereov.singularity.database.encryption.service.EncryptionSecretService
 import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals

@@ -1,7 +1,7 @@
 package io.stereov.singularity.global.config
 
-import io.stereov.singularity.translate.util.LanguageToStringConverter
-import io.stereov.singularity.translate.util.StringToLanguageConverter
+import io.stereov.singularity.content.translate.util.LanguageToStringConverter
+import io.stereov.singularity.content.translate.util.StringToLanguageConverter
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.format.FormatterRegistry
 import org.springframework.web.reactive.config.WebFluxConfigurer

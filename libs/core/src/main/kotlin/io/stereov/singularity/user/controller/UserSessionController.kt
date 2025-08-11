@@ -5,7 +5,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.properties.AuthProperties
 import io.stereov.singularity.auth.service.AuthenticationService
 import io.stereov.singularity.auth.service.CookieService
-import io.stereov.singularity.translate.model.Language
+import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.user.dto.UserResponse
 import io.stereov.singularity.user.dto.request.*
 import io.stereov.singularity.user.dto.response.LoginResponse

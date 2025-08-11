@@ -12,10 +12,10 @@ import io.stereov.singularity.file.core.exception.model.UnsupportedMediaTypeExce
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.invitation.service.InvitationService
-import io.stereov.singularity.translate.exception.model.TranslationForLangMissingException
-import io.stereov.singularity.translate.model.Language
-import io.stereov.singularity.translate.model.TranslateKey
-import io.stereov.singularity.translate.service.TranslateService
+import io.stereov.singularity.content.translate.exception.model.TranslationForLangMissingException
+import io.stereov.singularity.content.translate.model.Language
+import io.stereov.singularity.content.translate.model.TranslateKey
+import io.stereov.singularity.content.translate.service.TranslateService
 import io.stereov.singularity.user.model.Role
 import io.stereov.singularity.user.service.UserService
 import org.bson.types.ObjectId

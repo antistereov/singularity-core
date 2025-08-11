@@ -1,6 +1,6 @@
 package io.stereov.singularity.test
 
-import io.stereov.singularity.hash.service.HashService
+import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.test.config.MockMailSenderConfig
 import io.stereov.singularity.twofactorauth.service.TwoFactorAuthService
 import io.stereov.singularity.user.service.token.TwoFactorAuthTokenService

@@ -1,7 +1,7 @@
 package io.stereov.singularity.user.controller
 
 import io.mockk.verify
-import io.stereov.singularity.encryption.service.EncryptionSecretService
+import io.stereov.singularity.database.encryption.service.EncryptionSecretService
 import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.test.BaseMailIntegrationTest
 import io.stereov.singularity.user.dto.UserResponse

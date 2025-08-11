@@ -4,8 +4,8 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.exception.AuthException
 import io.stereov.singularity.auth.service.AuthenticationService
 import io.stereov.singularity.global.util.Random
-import io.stereov.singularity.hash.service.HashService
-import io.stereov.singularity.translate.model.Language
+import io.stereov.singularity.database.hash.service.HashService
+import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.user.dto.UserResponse
 import io.stereov.singularity.user.dto.request.ResetPasswordRequest
 import io.stereov.singularity.user.dto.request.SendPasswordResetRequest

@@ -5,10 +5,10 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.exception.AuthException
 import io.stereov.singularity.auth.service.AuthenticationService
 import io.stereov.singularity.auth.service.CookieService
-import io.stereov.singularity.encryption.service.EncryptionService
+import io.stereov.singularity.database.encryption.service.EncryptionService
 import io.stereov.singularity.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.global.util.Random
-import io.stereov.singularity.hash.service.HashService
+import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.twofactorauth.properties.TwoFactorAuthProperties
 import io.stereov.singularity.twofactorauth.service.TwoFactorAuthService
 import io.stereov.singularity.user.cache.AccessTokenCache

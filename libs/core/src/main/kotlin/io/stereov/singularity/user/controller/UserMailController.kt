@@ -1,6 +1,6 @@
 package io.stereov.singularity.user.controller
 
-import io.stereov.singularity.translate.model.Language
+import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.user.dto.UserResponse
 import io.stereov.singularity.user.dto.request.ResetPasswordRequest
 import io.stereov.singularity.user.dto.request.SendPasswordResetRequest

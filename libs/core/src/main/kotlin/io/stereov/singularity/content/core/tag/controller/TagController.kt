@@ -6,7 +6,7 @@ import io.stereov.singularity.content.core.tag.dto.TagResponse
 import io.stereov.singularity.content.core.tag.dto.UpdateTagRequest
 import io.stereov.singularity.content.core.tag.service.TagService
 import io.stereov.singularity.global.model.SuccessResponse
-import io.stereov.singularity.translate.model.Language
+import io.stereov.singularity.content.translate.model.Language
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
