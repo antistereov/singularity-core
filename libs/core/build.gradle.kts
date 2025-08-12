@@ -91,6 +91,9 @@ dependencies {
     api("com.bucket4j:bucket4j_jdk17-redis-common:$bucket4jVersion")
     api("com.bucket4j:bucket4j_jdk17-lettuce:$bucket4jVersion")
 
+    // Geolocation
+    api("com.maxmind.geoip2:geoip2:4.3.1")
+
     // Serialization and Validation
     api("org.springframework.boot:spring-boot-starter-validation")
     api("com.fasterxml.jackson.module:jackson-module-kotlin")

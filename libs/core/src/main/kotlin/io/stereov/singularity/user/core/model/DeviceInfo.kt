@@ -46,14 +46,12 @@ data class DeviceInfo(
      * @property latitude The latitude of the device's location.
      * @property longitude The longitude of the device's location.
      * @property cityName The name of the city where the device is located.
-     * @property regionName The name of the region where the device is located.
      * @property countryCode The country code of the device's location.
      */
     data class LocationInfo(
         val latitude: Double,
         val longitude: Double,
         val cityName: String,
-        val regionName: String,
         val countryCode: String,
     )
 

@@ -1,10 +1,10 @@
 package io.stereov.singularity.auth.geolocation.service
 
+import com.maxmind.geoip2.model.CityResponse
 import io.stereov.singularity.auth.geolocation.exception.GeoLocationException
 import io.stereov.singularity.auth.geolocation.model.GeoLocationResponse
 import org.springframework.stereotype.Service
-import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.awaitBody
+import java.net.InetAddress
 
 /**
  * # GeoLocationService
@@ -16,7 +16,7 @@ import org.springframework.web.reactive.function.client.awaitBody
  */
 @Service
 class GeoLocationService(
-    private val webClient: WebClient,
+    private val geoIpDatabaseService: GeoIpDatabaseService
 ) {
 
     /**
@@ -26,14 +26,10 @@ class GeoLocationService(
      * @return A [GeoLocationResponse] containing the geolocation information.
      * @throws GeoLocationException If there is an error retrieving the geolocation information.
      */
-    suspend fun getLocation(ipAddress: String): GeoLocationResponse {
-        val uri = "https://freeipapi.com/api/json/$ipAddress"
+    suspend fun getLocation(ipAddress: InetAddress): CityResponse {
 
         return try {
-            webClient.get()
-                .uri(uri)
-                .retrieve()
-                .awaitBody<GeoLocationResponse>()
+            geoIpDatabaseService.getCity(ipAddress)
         } catch (e: Exception) {
             throw GeoLocationException("Unable to retrieve current geolocation", e)
         }
