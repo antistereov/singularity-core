@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
+import org.springframework.web.reactive.function.client.WebClient
 
 @AutoConfiguration(
     after = [
@@ -30,7 +31,7 @@ class GeoLocationConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun geoIpDatabaseService(properties: GeolocationProperties) = GeoIpDatabaseService(properties)
+    fun geoIpDatabaseService(properties: GeolocationProperties, webClient: WebClient) = GeoIpDatabaseService(properties, webClient)
 
     // Exception Handler
 
