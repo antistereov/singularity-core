@@ -19,8 +19,6 @@ import org.springframework.web.reactive.function.client.WebClient
 @EnableConfigurationProperties(GeolocationProperties::class)
 class GeoLocationConfiguration {
 
-    // TODO: add properties to Spring metadata
-
     // Service
 
     @Bean
