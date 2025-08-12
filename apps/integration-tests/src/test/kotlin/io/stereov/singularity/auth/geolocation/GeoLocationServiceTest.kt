@@ -31,6 +31,7 @@ class GeoLocationServiceTest : BaseIntegrationTest() {
         fun properties(registry: DynamicPropertyRegistry) {
             registry.add("singularity.auth.geolocation.enabled") { true }
             registry.add("singularity.auth.geolocation.database-directory") { dir.absolutePath.toString() }
+            registry.add("singularity.auth.geolocation.download") { false }
         }
     }
 
