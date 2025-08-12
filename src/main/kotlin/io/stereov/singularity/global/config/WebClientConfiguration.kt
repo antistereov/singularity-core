@@ -7,7 +7,10 @@ import org.springframework.boot.autoconfigure.data.web.SpringDataWebAutoConfigur
 import org.springframework.boot.autoconfigure.mongo.MongoReactiveAutoConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import org.springframework.web.reactive.function.client.WebClient
+import reactor.netty.http.client.HttpClient
+import java.time.Duration
 
 /**
  * # Configuration class for the web client.
@@ -35,6 +38,13 @@ class WebClientConfiguration {
     @ConditionalOnMissingBean
     fun webClient(): WebClient {
         return WebClient.builder()
+            .clientConnector(
+                ReactorClientHttpConnector(
+                    HttpClient.create()
+                        .responseTimeout(Duration.ofSeconds(10))
+                        .followRedirect(true)
+                )
+            )
             .build()
     }
 }
