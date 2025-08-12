@@ -32,6 +32,13 @@ singularity:
     root-email: ${ROOT_EMAIL}
     root-password: ${ROOT_PASSWORD}
     enable-mail: true
+  auth:
+    geolocation:
+      enabled: true
+      database-directory: ${GEOLOCATION_DIRECTORY}
+      account-id: ${MAXMIND_ACCOUNT_ID}
+      license-key: ${MAXMIND_LICENSE_KEY}
+    allow-header-authentication: false
   file:
     storage:
       type: ${STORAGE_TYPE}

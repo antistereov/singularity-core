@@ -18,6 +18,9 @@ jobs:
 
       - name: Connect & deploy via SSH
         uses: appleboy/ssh-action@v1
+        env:
+          MAXMIND_ACCOUNT_ID: ${{ secrets.MAXMIND_ACCOUNT_ID }}
+          MAXMIND_LICENSE_KEY: ${{ secrets.MAXMIND_LICENSE_KEY }}
         with:
           host: ${{ secrets.DEPLOYMENT_SERVER_HOST }}
           username: ${{ secrets.DEPLOYMENT_SERVER_USERNAME }}
@@ -27,4 +30,8 @@ jobs:
             cd ~/dev/antistereov/singularity/docs
             git pull origin main
             docker compose pull
+            
+            sed -i "s|<your-maxmind-account-id>|${MAXMIND_ACCOUNT_ID}|g" docs/docker-compose.yaml
+            sed -i "s|<your-maxmind-license-key>|${MAXMIND_LICENSE_KEY}|g" docs/docker-compose.yaml
+            
             docker compose up -d --build

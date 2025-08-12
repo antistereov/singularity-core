@@ -26,6 +26,11 @@ singularity:
   auth:
     allow-header-authentication: true
     prefer-header-authentication: true
+    geolocation:
+      enabled: true
+      database-directory: .data/demo/geolocation
+      account-id: ${MAXMIND_ACCOUNT_ID}
+      license-key: ${MAXMIND_LICENSE_KEY}
   app:
     name: TestApplication
     base-url: ${BACKEND_BASE_URL:http://localhost:8000}
@@ -39,11 +44,11 @@ singularity:
     storage:
       type: local
       local:
-        file-directory: .data/test/files
+        file-directory: .data/demo/files
   secrets:
     store: local
     local:
-      secret-directory: ./.data/test/secrets
+      secret-directory: ./.data/demo/secrets
     key-rotation-cron: 0 0 4 1 1,4,7,10 *
     cache-expiration: 900000
   security:
