@@ -11,6 +11,11 @@
       "sourceType": "io.stereov.singularity.auth.core.properties.AuthProperties"
     },
     {
+      "name": "singularity.auth.geolocation",
+      "type": "io.stereov.singularity.auth.geolocation.properties.GeolocationProperties",
+      "sourceType": "io.stereov.singularity.auth.geolocation.properties.GeolocationProperties"
+    },
+    {
       "name": "singularity.file.storage",
       "type": "io.stereov.singularity.file.core.properties.StorageProperties",
       "sourceType": "io.stereov.singularity.file.core.properties.StorageProperties"
@@ -89,14 +94,14 @@
       "name": "singularity.app.name",
       "type": "java.lang.String",
       "sourceType": "io.stereov.singularity.global.properties.AppProperties",
-      "defaultValue": "Spring Application",
+      "defaultValue": "Singularity",
       "description": "The name of the application. This is used in various places, including the UI and emails."
     },
     {
       "name": "singularity.app.create-root-user",
       "type": "java.lang.Boolean",
       "sourceType": "io.stereov.singularity.global.properties.AppProperties",
-      "defaultValue": "False",
+      "defaultValue": false,
       "description": "Should the application create a root user at application start?"
     },
     {
@@ -158,6 +163,46 @@
       "default": true
     },
     {
+      "name": "singularity.auth.geolocation.enabled",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.stereov.singularity.auth.geolocation.properties.GeolocationProperties",
+      "description": "Enable resolving IP addresses to geolocations. This will download the GeoLite2-City database from maxmind. Account ID and license key are required for the download.",
+      "default": false
+    },
+    {
+      "name": "singularity.auth.geolocation.download",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.stereov.singularity.auth.geolocation.properties.GeolocationProperties",
+      "description": "Enable automated downloads and updates of the database. You can also provide this file yourself.",
+      "default": true
+    },
+    {
+      "name": "singularity.auth.geolocation.database-directory",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.auth.geolocation.properties.GeolocationProperties",
+      "description": "The directory where the GeoLite2-City database will be saved to.",
+      "defaultValue": "./.data/geolocation"
+    },
+    {
+      "name": "singularity.auth.geolocation.database-filename",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.auth.geolocation.properties.GeolocationProperties",
+      "description": "The filename of the GeoLit2-City database. Defaults to GeoLite2-City.mmdb.",
+      "defaultValue": "GeoLite2-City.mmdb"
+    },
+    {
+      "name": "singularity.auth.geolocation.account-id",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.auth.geolocation.properties.GeolocationProperties",
+      "description": "The account ID of your maxmind account. Required to download the GeoLite2-City database to resolve your geolocation."
+    },
+    {
+      "name": "singularity.auth.geolocation.license-key",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.auth.geolocation.properties.GeolocationProperties",
+      "description": "The license key of your maxmind account. Required to download the GeoLite2-City database to resolve your geolocation."
+    },
+    {
       "name": "singularity.file.storage.type",
       "type": "io.stereov.singularity.file.core.properties.StorageType",
       "sourceType": "io.stereov.singularity.file.s3.properties.S3Properties",
@@ -169,14 +214,7 @@
       "type": "io.stereov.singularity.file.local.properties.LocalFileStorageProperties",
       "sourceType": "io.stereov.singularity.file.local.properties.LocalFileStorageProperties",
       "description": "The directory where your private files will be stored.",
-      "defaultValue": "./private"
-    },
-    {
-      "name": "singularity.file.storage.local.public-path",
-      "type": "io.stereov.singularity.file.local.properties.LocalFileStorageProperties",
-      "sourceType": "io.stereov.singularity.file.local.properties.LocalFileStorageProperties",
-      "description": "The directory where your public files will be stored.",
-      "defaultValue": "./public"
+      "defaultValue": "./.data/files"
     },
     {
       "name": "singularity.file.storage.s3.domain",

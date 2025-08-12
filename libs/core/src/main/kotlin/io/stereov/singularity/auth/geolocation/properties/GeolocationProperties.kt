@@ -6,6 +6,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 data class GeolocationProperties(
     val enabled: Boolean = false,
     val databaseDirectory: String = "./.data/geolocation",
+    val databaseFilename: String = "GeoLite2-City.mmdb",
+    val download: Boolean = true,
+    val accountId: String? = null,
     val licenseKey: String? = null,
-    val user: String? = null,
 )
