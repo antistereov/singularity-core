@@ -31,7 +31,7 @@ jobs:
             git reset --hard origin/main
             
             # Build images
-            docker build -t singularity-demo:latest ../ -f apps/demo/Dockerfile
+            docker build -t singularity-demo:latest ../ -f ../apps/demo/Dockerfile
             docker build -t singularity-docusaurus:latest .
             
             # Deploy stack with zero downtime
