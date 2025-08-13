@@ -1,6 +1,5 @@
 services:
   singularity-demo:
-    restart: unless-stopped
     image: singularity-demo:latest
     depends_on:
       - singularity-demo-mongo
@@ -12,30 +11,42 @@ services:
       REDIS_HOST: singularity-demo-redis
       UI_BASE_URL: https://singularity.stereov.io
     networks:
-      default_network:
+      - default_network
+    deploy:
+      replicas: 1
+      update_config:
+        order: start-first
 
   singularity-demo-mongo:
+    container_name: singularity-demo-mongo
     restart: unless-stopped
-    image: mongodb/mongodb-community-server:8.0.12
+    image: mongodb/mongodb-community-server:latest
     environment:
       MONGO_INITDB_ROOT_USERNAME: singularity
       MONGO_INITDB_ROOT_PASSWORD: singularity
     networks:
-      default_network:
+      - default_network
+    deploy:
+      replicas: 1
+      update_config:
+        order: start-first
     healthcheck:
-      test: >
-        mongosh mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@localhost:27017 --quiet --eval 'db.runCommand({ ping: 1 }).ok'
+      test: ["CMD", "mongosh", "mongodb://singularity:singularity@localhost:27017", "--quiet", "--eval", "db.runCommand({ ping: 1 }).ok"]
       interval: 30s
       timeout: 10s
       retries: 3
 
-
   singularity-demo-redis:
+    container_name: singularity-demo-redis
     restart: unless-stopped
     image: redis:8.2.0
-    command: [ "redis-server", "--requirepass", "singularity" ]
+    command: ["CMD", "redis-server", "--requirepass", "singularity" ]
     networks:
-      default_network:
+      - default_network
+    deploy:
+      replicas: 1
+      update_config:
+        order: start-first
     healthcheck:
       test: ["CMD", "redis-cli", "-a", "singularity", "ping"]
       interval: 30s
@@ -43,12 +54,17 @@ services:
       retries: 3
 
   singularity-docusaurus:
+    container_name: singularity-docusaurus
     restart: unless-stopped
     image: singularity-docusaurus:latest
     networks:
-      default_network:
+      - default_network
+    deploy:
+      replicas: 1
+      update_config:
+        order: start-first
     healthcheck:
-      test: ["curl", "http://localhost:3000"]
+      test: ["CMD", "curl", "http://localhost:3000"]
 
 networks:
   default_network:

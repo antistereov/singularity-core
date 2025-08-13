@@ -35,4 +35,4 @@ jobs:
             docker build -t singularity-docusaurus:latest .
             
             # Deploy stack
-            docker compose up -d
+            docker stack deploy -c docker-compose.yaml
