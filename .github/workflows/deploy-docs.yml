@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Connect & deploy via SSH
-        uses: appleboy/ssh-action@v1
+        uses: appleboy/ssh-action@v1.2.2
         env:
           MAXMIND_ACCOUNT_ID: ${{ secrets.MAXMIND_ACCOUNT_ID }}
           MAXMIND_LICENSE_KEY: ${{ secrets.MAXMIND_LICENSE_KEY }}
@@ -26,6 +26,7 @@ jobs:
           username: ${{ secrets.DEPLOYMENT_SERVER_USERNAME }}
           key: ${{ secrets.DEPLOYMENT_SERVER_SSH_KEY }}
           port: ${{ secrets.DEPLOYMENT_SERVER_PORT }}
+          envs: MAXMIND_ACCOUNT_ID,MAXMIND_LICENSE_KEY
           script: |
             cd ~/dev/antistereov/singularity/docs
             git pull origin main
