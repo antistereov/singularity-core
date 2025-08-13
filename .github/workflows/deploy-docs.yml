@@ -34,5 +34,5 @@ jobs:
             docker build -t singularity-demo:latest ../ -f ../apps/demo/Dockerfile
             docker build -t singularity-docusaurus:latest .
             
-            # Deploy stack with zero downtime
-            docker stack deploy -c docker-compose.yaml singularity-docs
+            # Deploy stack
+            docker compose up -d
