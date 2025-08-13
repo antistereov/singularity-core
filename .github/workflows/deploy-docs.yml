@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'libs/core/**'
+      - 'apps/demo/**'
       - '.github/workflows/deploy-docs.yml'
       - 'docs/**'
     branches:
