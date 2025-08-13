@@ -30,4 +30,4 @@ jobs:
             git reset --hard origin/main
             
             docker compose pull
-            docker compose up -d --build
+            docker stack deploy -c docker-compose.yaml singularity-docs

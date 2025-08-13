@@ -1,7 +1,8 @@
 services:
   singularity-demo:
-    container_name: singularity-demo
-    restart: unless-stopped
+    build:
+      context: ../
+      dockerfile: apps/demo/Dockerfile
     depends_on:
       - singularity-demo-mongo
       - singularity-demo-redis
@@ -11,36 +12,71 @@ services:
       MONGO_DB_HOST: singularity-demo-mongo
       REDIS_HOST: singularity-demo-redis
       UI_BASE_URL: https://singularity.stereov.io
-    build:
-      context: ../
-      dockerfile: apps/demo/Dockerfile
     networks:
       default_network:
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+      restart_policy:
+        condition: on-failure
 
   singularity-demo-mongo:
     image: mongodb/mongodb-community-server:latest
-    container_name: singularity-demo-mongo
-    restart: unless-stopped
     environment:
       MONGO_INITDB_ROOT_USERNAME: singularity
       MONGO_INITDB_ROOT_PASSWORD: singularity
     networks:
       default_network:
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+      restart_policy:
+        condition: on-failure
+    healthcheck:
+      test: |
+        mongosh mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@localhost:27017 --quiet --eval 'db.runCommand({ ping: 1 }).ok'
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
 
   singularity-demo-redis:
     image: redis:latest
-    container_name: singularity-demo-redis
-    restart: unless-stopped
     command: [ "redis-server", "--requirepass", "singularity" ]
     networks:
       default_network:
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+      restart_policy:
+        condition: on-failure
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "singularity", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
-  docusaurus:
-    container_name: docusaurus
-    restart: unless-stopped
+  singularity-docusaurus:
     build: .
     networks:
       default_network:
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+      restart_policy:
+        condition: on-failure
 
 networks:
   default_network:
