@@ -5,12 +5,12 @@ services:
     depends_on:
       - singularity-demo-mongo
       - singularity-demo-redis
+    env_file:
+      - .env
     environment:
       MONGO_DB_HOST: singularity-demo-mongo
       REDIS_HOST: singularity-demo-redis
       UI_BASE_URL: https://singularity.stereov.io
-      MAXMIND_ACCOUNT_ID: <your-maxmind-account-id>
-      MAXMIND_LICENSE_KEY: <your-maxmind-license-key>
     build:
       context: ../
       dockerfile: apps/demo/Dockerfile
