@@ -2,6 +2,7 @@ package io.stereov.singularity.global.filter
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.global.util.getClientIp
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilter
@@ -26,7 +27,7 @@ class LoggingFilter : WebFilter {
         val request = exchange.request
         val method = request.method
         val path = request.uri.path
-        val ipAddress = request.remoteAddress?.address?.hostAddress
+        val ipAddress = exchange.request.getClientIp()
         val origin = request.headers.origin
         val cookies = request.cookies.values.joinToString("; ")
 

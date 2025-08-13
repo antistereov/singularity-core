@@ -11,6 +11,7 @@ import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthService
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.global.util.Random
+import io.stereov.singularity.global.util.getClientIp
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.core.model.DeviceInfo
 import io.stereov.singularity.user.core.service.UserService
@@ -93,7 +94,8 @@ class CookieService(
         val refreshTokenId = Random.generateCode(20)
         val refreshToken = accessTokenService.createRefreshToken(userId, deviceInfoDto.id, refreshTokenId)
 
-        val ipAddress = exchange.request.remoteAddress?.address?.hostAddress
+        val ipAddress = exchange.request.getClientIp()
+
         val location = ipAddress?.let {
             try {
                 geoLocationService.getLocation(InetAddress.getByName(ipAddress))
