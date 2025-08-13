@@ -1,7 +1,6 @@
 services:
   singularity-demo:
     image: singularity-demo:latest
-    pull_policy: never
     depends_on:
       - singularity-demo-mongo
       - singularity-demo-redis
@@ -23,7 +22,7 @@ services:
         condition: on-failure
 
   singularity-demo-mongo:
-    image: mongodb/mongodb-community-server:latest
+    image: mongodb/mongodb-community-server:8.0.12
     environment:
       MONGO_INITDB_ROOT_USERNAME: singularity
       MONGO_INITDB_ROOT_PASSWORD: singularity
@@ -46,7 +45,7 @@ services:
 
 
   singularity-demo-redis:
-    image: redis:latest
+    image: redis:8.2.0
     command: [ "redis-server", "--requirepass", "singularity" ]
     networks:
       default_network:
@@ -66,7 +65,6 @@ services:
 
   singularity-docusaurus:
     image: singularity-docusaurus:latest
-    pull_policy: never
     networks:
       default_network:
     deploy:
