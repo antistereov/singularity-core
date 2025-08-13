@@ -1,8 +1,7 @@
 services:
   singularity-demo:
-    build:
-      context: ../
-      dockerfile: apps/demo/Dockerfile
+    image: singularity-demo:latest
+    pull_policy: never
     depends_on:
       - singularity-demo-mongo
       - singularity-demo-redis
@@ -66,7 +65,8 @@ services:
       retries: 3
 
   singularity-docusaurus:
-    build: .
+    image: singularity-docusaurus:latest
+    pull_policy: never
     networks:
       default_network:
     deploy:
