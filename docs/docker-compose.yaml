@@ -1,5 +1,6 @@
 services:
   singularity-demo:
+    container_name: singularity_demo
     image: singularity-demo:latest
     depends_on:
       - singularity-demo-mongo
