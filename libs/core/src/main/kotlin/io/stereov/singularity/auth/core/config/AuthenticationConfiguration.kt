@@ -4,10 +4,11 @@ import io.stereov.singularity.auth.core.exception.handler.AuthExceptionHandler
 import io.stereov.singularity.auth.core.properties.AuthProperties
 import io.stereov.singularity.auth.core.service.AuthenticationService
 import io.stereov.singularity.auth.core.service.CookieService
+import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
+import io.stereov.singularity.auth.geolocation.service.GeoLocationService
 import io.stereov.singularity.auth.jwt.properties.JwtProperties
 import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthService
 import io.stereov.singularity.file.s3.config.S3Configuration
-import io.stereov.singularity.auth.geolocation.service.GeoLocationService
 import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.user.core.service.UserService
@@ -47,9 +48,20 @@ class AuthenticationConfiguration {
         userService: UserService,
         twoFactorTokenService: TwoFactorTokenService,
         authenticationService: AuthenticationService,
-        twoFactorAuthService: TwoFactorAuthService
+        twoFactorAuthService: TwoFactorAuthService,
+        geolocationProperties: GeolocationProperties
     ): CookieService {
-        return CookieService(accessTokenService, jwtProperties, appProperties, geoLocationService, userService, twoFactorTokenService, authenticationService, twoFactorAuthService)
+        return CookieService(
+            accessTokenService,
+            jwtProperties,
+            appProperties,
+            geoLocationService,
+            userService,
+            twoFactorTokenService,
+            authenticationService,
+            twoFactorAuthService,
+            geolocationProperties
+        )
     }
 
     // Exception Handler

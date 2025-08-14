@@ -2,12 +2,17 @@ package io.stereov.singularity.global.filter
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
+import io.stereov.singularity.auth.geolocation.service.GeoLocationService
 import io.stereov.singularity.global.util.getClientIp
+import kotlinx.coroutines.reactor.awaitSingleOrNull
+import kotlinx.coroutines.reactor.mono
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Mono
+import java.net.InetAddress
 
 /**
  * # Filter for logging incoming requests and outgoing responses.
@@ -17,37 +22,47 @@ import reactor.core.publisher.Mono
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
-class LoggingFilter : WebFilter {
+class LoggingFilter(
+    private val geolocationProperties: GeolocationProperties,
+    private val geoLocationService: GeoLocationService
+) : WebFilter {
 
     private val logger: KLogger
         get() = KotlinLogging.logger {}
 
-    override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
-
+    override fun filter(
+        exchange: ServerWebExchange,
+        chain: WebFilterChain,
+    ): Mono<Void> = mono {
         val request = exchange.request
         val method = request.method
         val path = request.uri.path
-        val ipAddress = exchange.request.getClientIp()
         val origin = request.headers.origin
-        val cookies = request.cookies.values.joinToString("; ")
+        val originString = origin?.let { " with origin $origin" } ?: ""
+        val ipAddress = exchange.request.getClientIp(geolocationProperties.header)
+        val location = ipAddress?.let {
+            runCatching { geoLocationService.getLocation(InetAddress.getByName(it)) }
+                .onFailure { error -> logger.warn(error) { "Unable to resolve geolocation of IP address $ipAddress" } }
+                .getOrNull()
+        }
+        val locationString = location?.let { " (${location.city.names["en"]}, ${location.country.isoCode})" } ?: ""
 
-        logger.debug { "Incoming request  - $method $path from $ipAddress with origin $origin and cookies $cookies" }
+        logger.debug { "Incoming request  - $method $path from $ipAddress$locationString$originString" }
 
-        return chain.filter(exchange)
-            .doOnSuccess {
-
-                val status = exchange.response.statusCode
-                logger.debug { "Outgoing response - $method $path: $status" }
+        try {
+            chain.filter(exchange).awaitSingleOrNull()
+            val status = exchange.response.statusCode
+            logger.debug { "Outgoing response - $method $path: $status" }
+        } catch (error: Throwable) {
+            val status = if (error is ResponseStatusException) {
+                error.statusCode
+            } else {
+                exchange.response.statusCode ?: "UNKNOWN"
             }
-            .onErrorResume { error ->
-                val status = if (error is ResponseStatusException) {
-                    error.statusCode
-                } else {
-                    exchange.response.statusCode ?: "UNKNOWN"
-                }
+            logger.warn { "Request failed    - $method $path: $status - Error: ${error.message}" }
+            throw error
+        }
 
-                logger.warn { "Request failed    - $method $path: $status - Error: ${error.message}" }
-                throw error
-            }
+        return@mono null
     }
 }

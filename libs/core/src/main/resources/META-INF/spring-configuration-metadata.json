@@ -170,6 +170,13 @@
       "default": false
     },
     {
+      "name": "singularity.auth.geolocation.header",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.auth.geolocation.properties.GeolocationProperties",
+      "description": "The preferred header used for identification of the real IP address of the client.",
+      "defaultValue": "X-Real-IP"
+    },
+    {
       "name": "singularity.auth.geolocation.download",
       "type": "java.lang.Boolean",
       "sourceType": "io.stereov.singularity.auth.geolocation.properties.GeolocationProperties",

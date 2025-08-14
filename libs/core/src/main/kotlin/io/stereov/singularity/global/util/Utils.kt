@@ -13,7 +13,9 @@ fun String.toSlug(): String {
     return Slugify.builder().build().slugify(this)
 }
 
-fun ServerHttpRequest.getClientIp(): String? {
-    return headers["X-Real-IP"]?.firstOrNull()
+fun ServerHttpRequest.getClientIp(preferredHeader: String = "X-Real-IP"): String? {
+    return headers[preferredHeader]?.firstOrNull()
+        ?: headers["X-Real-IP"]?.firstOrNull()
         ?: headers["X-Forwarded-For"]?.firstOrNull()?.split(",")?.firstOrNull()
+        ?: remoteAddress?.address?.hostAddress
 }

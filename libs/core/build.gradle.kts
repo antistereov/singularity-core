@@ -94,6 +94,9 @@ dependencies {
     // Geolocation
     api("com.maxmind.geoip2:geoip2:4.3.1")
 
+    // Compression
+    api("org.apache.commons:commons-compress:1.28.0")
+
     // Serialization and Validation
     api("org.springframework.boot:spring-boot-starter-validation")
     api("com.fasterxml.jackson.module:jackson-module-kotlin")

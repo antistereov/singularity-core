@@ -51,7 +51,7 @@ data class DeviceInfo(
     data class LocationInfo(
         val latitude: Double,
         val longitude: Double,
-        val cityName: String,
+        val cityName: String?,
         val countryCode: String,
     )
 
