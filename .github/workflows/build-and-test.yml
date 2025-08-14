@@ -25,8 +25,8 @@ jobs:
     name: Build and Test
     runs-on: ubuntu-latest
     env:
-      MAXMIND_ACCOUNT_ID: ${{ secret.MAXMIND_ACCOUNT_ID }}
-      MAXMIND_LICENSE_KEY: ${{ secret.MAXMIND_LICENSE_KEY }}
+      MAXMIND_ACCOUNT_ID: ${{ secrets.MAXMIND_ACCOUNT_ID }}
+      MAXMIND_LICENSE_KEY: ${{ secrets.MAXMIND_LICENSE_KEY }}
 
     steps:
       - name: Checkout Code
