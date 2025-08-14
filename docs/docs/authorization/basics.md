@@ -4,8 +4,9 @@ sidebar_position: 1
 
 # Basics
 
-Authentication is one of the core features of `singularity`.
-Mail verification and two-factor authentication are included out of the box.
+Authorization is one of the core features of *Singularity*.
+Every important endpoint for user registration, login and session control is already built-in.
+Useful features such as mail verification and two-factor authentication are included out of the box.
 
 Learn how you can use the predefined endpoints to authorize your users.
 
@@ -16,7 +17,7 @@ All paths are public by default.
 :::
 
 There are two ways to secure your endpoints:
-* Using the `Authentication Service` for authorization on the [service level](#authorization-at-service-level).
+* Using the `AuthenticationService` for authorization on the [service level](#authorization-at-service-level).
 * Defining required roles [by path](#authorization-by-path) as an easy option to secure endpoints.
 
 :::warning

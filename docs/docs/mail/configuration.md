@@ -3,3 +3,17 @@ sidebar_position: 1
 ---
 
 # Configuration
+
+Singularity includes an easy-to-use mail templating engine.
+Some automated mails come out-of-the-box, such as an email verification email and a password reset email.
+
+You can enable or disable mails.
+By default, this feature is disabled.
+Setting up or configuring a mail server can be tricky.
+Therefore, we decided to disable it by default to allow fast onboarding without much hustle.
+
+You can choose to enable it any time. But make sure to configure it correctly.
+
+| Property                      | Type      | Description                                                                                                   | Default |
+|-------------------------------|-----------|---------------------------------------------------------------------------------------------------------------|---------|
+| `singularity.app.enable-mail` | `Boolean` | Enable mails for email verification, password resets and much more. Make sure to configure your email server. | `false` |
