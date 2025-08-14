@@ -43,7 +43,7 @@ class GeoIpDatabaseService(
     private val downloadUrl = "https://download.maxmind.com/geoip/databases/GeoLite2-City/download?suffix=tar.gz"
 
     @PostConstruct
-    private fun initialize() = runBlocking {
+    fun initialize() = runBlocking {
          updateDatabase()
     }
 

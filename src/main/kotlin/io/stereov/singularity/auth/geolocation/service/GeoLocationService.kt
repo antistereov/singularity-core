@@ -1,8 +1,12 @@
 package io.stereov.singularity.auth.geolocation.service
 
 import com.maxmind.geoip2.model.CityResponse
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.geolocation.exception.GeoLocationException
 import io.stereov.singularity.auth.geolocation.model.GeoLocationResponse
+import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
+import io.stereov.singularity.global.util.getClientIp
+import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.stereotype.Service
 import java.net.InetAddress
 
@@ -16,8 +20,11 @@ import java.net.InetAddress
  */
 @Service
 class GeoLocationService(
-    private val geoIpDatabaseService: GeoIpDatabaseService
+    private val geoIpDatabaseService: GeoIpDatabaseService,
+    private val properties: GeolocationProperties,
 ) {
+
+    private val logger = KotlinLogging.logger {}
 
     /**
      * Retrieves the geolocation information for a given IP address.
@@ -31,7 +38,22 @@ class GeoLocationService(
         return try {
             geoIpDatabaseService.getCity(ipAddress)
         } catch (e: Exception) {
-            throw GeoLocationException("Unable to retrieve current geolocation", e)
+            throw GeoLocationException("Unable to retrieve current geolocation for IP address $ipAddress", e)
         }
+    }
+
+    suspend fun getLocation(request: ServerHttpRequest): CityResponse {
+        val ipAddress = request.getClientIp(properties.header)
+
+        return getLocation(InetAddress.getByName(ipAddress))
+    }
+
+    suspend fun getLocationOrNull(request: ServerHttpRequest): CityResponse? {
+        return runCatching { getLocation(request) }
+            .onFailure { error ->
+                logger.warn { error.message }
+                null
+            }
+            .getOrNull()
     }
 }

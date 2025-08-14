@@ -5,15 +5,12 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.properties.AuthProperties
 import io.stereov.singularity.auth.core.service.AuthenticationService
 import io.stereov.singularity.auth.core.service.CookieService
+import io.stereov.singularity.auth.geolocation.service.GeoLocationService
 import io.stereov.singularity.content.translate.model.Language
-import io.stereov.singularity.user.core.service.UserService
 import io.stereov.singularity.user.core.dto.response.UserResponse
-import io.stereov.singularity.user.session.dto.request.ChangeEmailRequest
-import io.stereov.singularity.user.session.dto.request.ChangePasswordRequest
-import io.stereov.singularity.user.session.dto.request.ChangeUserRequest
+import io.stereov.singularity.user.core.service.UserService
 import io.stereov.singularity.user.device.dto.DeviceInfoRequest
-import io.stereov.singularity.user.session.dto.request.LoginRequest
-import io.stereov.singularity.user.session.dto.request.RegisterUserRequest
+import io.stereov.singularity.user.session.dto.request.*
 import io.stereov.singularity.user.session.dto.response.LoginResponse
 import io.stereov.singularity.user.session.dto.response.RegisterResponse
 import io.stereov.singularity.user.session.service.UserSessionService
@@ -23,15 +20,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.http.codec.multipart.FilePart
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RequestPart
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ServerWebExchange
 
 /**
@@ -58,7 +47,8 @@ class UserSessionController(
     private val userSessionService: UserSessionService,
     private val cookieService: CookieService,
     private val userService: UserService,
-    private val authProperties: AuthProperties
+    private val authProperties: AuthProperties,
+    private val geoLocationService: GeoLocationService
 ) {
 
     private val logger: KLogger
@@ -107,7 +97,9 @@ class UserSessionController(
         val res = LoginResponse(
             false,
             userService.createResponse(user),
-            if (authProperties.allowHeaderAuthentication) accessTokenCookie.value else null
+            if (authProperties.allowHeaderAuthentication) accessTokenCookie.value else null,
+            if (authProperties.allowHeaderAuthentication) refreshTokenCookie.value else null,
+            geoLocationService.getLocationOrNull(exchange.request)
         )
 
         return ResponseEntity.ok()
@@ -139,7 +131,9 @@ class UserSessionController(
 
         val res = RegisterResponse(
             userService.createResponse(user),
-            if (authProperties.allowHeaderAuthentication) accessTokenCookie.value else null
+            if (authProperties.allowHeaderAuthentication) accessTokenCookie.value else null,
+            if (authProperties.allowHeaderAuthentication) refreshTokenCookie.value else null,
+            geoLocationService.getLocationOrNull(exchange.request)
         )
 
         return ResponseEntity.ok()
