@@ -4,7 +4,7 @@ import io.stereov.singularity.auth.core.config.AuthenticationConfiguration
 import io.stereov.singularity.auth.core.filter.CookieAuthenticationFilter
 import io.stereov.singularity.auth.core.properties.AuthProperties
 import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
-import io.stereov.singularity.auth.geolocation.service.GeoLocationService
+import io.stereov.singularity.auth.geolocation.service.GeolocationService
 import io.stereov.singularity.global.filter.LoggingFilter
 import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.ratelimit.filter.RateLimitFilter
@@ -81,7 +81,7 @@ class WebSecurityConfiguration {
         accessTokenService: AccessTokenService,
         userService: UserService,
         rateLimitService: RateLimitService, geolocationProperties: GeolocationProperties,
-        geoLocationService: GeoLocationService,
+        geoLocationService: GeolocationService,
     ): SecurityWebFilterChain {
         return http
             .csrf { it.disable() }

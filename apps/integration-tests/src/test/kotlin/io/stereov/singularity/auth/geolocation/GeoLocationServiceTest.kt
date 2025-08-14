@@ -1,6 +1,6 @@
 package io.stereov.singularity.auth.geolocation
 
-import io.stereov.singularity.auth.geolocation.service.GeoLocationService
+import io.stereov.singularity.auth.geolocation.service.GeolocationService
 import io.stereov.singularity.test.BaseIntegrationTest
 import io.stereov.singularity.user.device.dto.DeviceInfoRequest
 import io.stereov.singularity.user.session.dto.request.RegisterUserRequest
@@ -18,7 +18,7 @@ import java.net.URL
 class GeoLocationServiceTest : BaseIntegrationTest() {
 
     @Autowired
-    private lateinit var geoLocationService: GeoLocationService
+    private lateinit var geoLocationService: GeolocationService
 
     companion object {
         val resourceUrl: URL = object {}.javaClass.classLoader.getResource("geolocation/GeoLite2-City.mmdb")
