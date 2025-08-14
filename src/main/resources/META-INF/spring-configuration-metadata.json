@@ -504,46 +504,50 @@
     {
       "name": "singularity.ui.icon-url",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.global.properties.AppProperties"
+      "sourceType": "io.stereov.singularity.global.properties.AppProperties",
+      "description": "URL to the application icon. "
     },
     {
       "name": "singularity.ui.primary-color",
       "type": "java.lang.String",
       "sourceType": "io.stereov.singularity.global.properties.UiProperties",
       "defaultValue": "#6366f1",
-      "description": "The primary UI color used in mail templates"
+      "description": "Primary color for the UI, used in email templates and other branding elements. "
     },
     {
       "name": "singularity.ui.contact-path",
       "type": "java.lang.String",
       "sourceType": "io.stereov.singularity.global.properties.AppProperties",
-      "defaultValue": "/contact"
+      "defaultValue": "/contact",
+      "description": "Path to the contact page in your frontend application.  "
     },
     {
       "name": "singularity.ui.legal-notice-path",
       "type": "java.lang.String",
       "sourceType": "io.stereov.singularity.global.properties.AppProperties",
-      "defaultValue": "/legal-notice"
+      "defaultValue": "/legal-notice",
+      "description": "Path to the legal notice page."
     },
     {
       "name": "singularity.ui.privacy-policy-path",
       "type": "java.lang.String",
       "sourceType": "io.stereov.singularity.global.properties.AppProperties",
-      "defaultValue": "/privacy-policy"
+      "defaultValue": "/privacy-policy",
+      "description": "Path to the privacy policy page."
     },
     {
       "name": "singularity.ui.password-reset-path",
       "type": "java.lang.String",
       "sourceType": "io.stereov.singularity.mail.core.properties.MailProperties",
       "defaultValue": "/auth/reset-password",
-      "description": "The path to the password reset page in the UI application."
+      "description": "The path to the password reset page in your frontend application."
     },
     {
       "name": "singularity.ui.email-verification-path",
       "type": "java.lang.String",
       "sourceType": "io.stereov.singularity.mail.core.properties.MailProperties",
       "defaultValue": "/auth/verify-email",
-      "description": "The path to the verification page in the UI application."
+      "description": "The path to the verification page in your frontend application."
     }
   ],
   "hints": []
