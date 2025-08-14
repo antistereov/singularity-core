@@ -4,6 +4,12 @@ sidebar_position: 3
 
 # Configuration
 
+
+:::note
+This guide assumes familiarity with the [Spring Framework](https://spring.io).  
+If you are new to Spring, we recommend starting with their [official guides](https://spring.io/quickstart) to get up to speed.
+:::
+
 *Singularity* is highly configurable. 
 This allows you to use it as a baseline for any type of project.
 It includes well-thought defaults that make your onboarding really smooth. 

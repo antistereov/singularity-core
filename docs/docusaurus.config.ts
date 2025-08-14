@@ -93,9 +93,13 @@ const config: Config = {
           title: 'Docs',
           items: [
             {
-              label: 'Tutorial',
+              label: 'Singlarity',
               to: '/docs/intro',
             },
+            {
+              label: 'Spring',
+              href: 'https://spring.io'
+            }
           ],
         },
         {

@@ -4,6 +4,11 @@ sidebar_position: 1
 
 # Basics
 
+:::note
+This guide assumes familiarity with the [Spring Framework](https://spring.io).  
+If you are new to Spring, we recommend starting with their [official guides](https://spring.io/quickstart) to get up to speed.
+:::
+
 Authorization is one of the core features of *Singularity*.
 Every important endpoint for user registration, login and session control is already built-in.
 Useful features such as mail verification and two-factor authentication are included out of the box.

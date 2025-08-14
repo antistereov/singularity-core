@@ -13,7 +13,7 @@ Save time, ensure consistency, and focus on features — whether you're building
 ## ⚡ Why Use This?
 
 - ✅ **Batteries Included:** Authentication with 2FA and email verification, content management, file storage, and key rotation already set up.
-- ✅ **Production-Ready by Default:** All components are built with real-world usage and scalability in mind. This foundation is built on [Spring Boot](https://spring.io/projects/spring-boot), ensuring a reliable, mature, and modern technology stack.
+- ✅ **Production-Ready by Default:** All components are built with real-world usage and scalability in mind. This foundation is built on [Spring](https://spring.io/), ensuring a reliable, mature, and modern technology stack.
 - ✅ **Open & Extensible:** Contributions welcome! Let’s refine this into a toolkit others can benefit from too.
 
 ## 🔐 Features at a Glance

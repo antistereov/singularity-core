@@ -4,6 +4,11 @@ sidebar_position: 4
 
 # Geolocation
 
+:::note
+This guide assumes familiarity with the [Spring Framework](https://spring.io).  
+If you are new to Spring, we recommend starting with their [official guides](https://spring.io/quickstart) to get up to speed.
+:::
+
 *Singularity* integrates automated geolocation resolving for requests.
 When enabled and configured correctly, it downloads the latest version of the [MaxMind GeoLite2-City](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data/) database.
 

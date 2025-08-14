@@ -4,6 +4,11 @@ sidebar_position: 1
 
 # Quickstart
 
+:::note
+This guide assumes familiarity with the [Spring Framework](https://spring.io).  
+If you are new to Spring, we recommend starting with their [official guides](https://spring.io/quickstart) to get up to speed.
+:::
+
 ## 1. Create a new project
 
 Use your favorite IDE or build tool to create a new Java or Kotlin project with JDK 21 or higher.
