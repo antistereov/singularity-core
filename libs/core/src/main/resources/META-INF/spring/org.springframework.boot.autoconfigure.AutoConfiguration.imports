@@ -27,7 +27,7 @@ io.stereov.singularity.global.config.ApplicationConfiguration
 io.stereov.singularity.global.config.JsonConfiguration
 io.stereov.singularity.global.config.WebClientConfiguration
 io.stereov.singularity.global.config.WebFluxConfiguration
-io.stereov.singularity.global.config.WebSecurityConfiguration
+io.stereov.singularity.security.core.config.WebSecurityConfiguration
 
 io.stereov.singularity.mail.core.config.MailConfiguration
 io.stereov.singularity.mail.template.config.TemplateConfiguration
