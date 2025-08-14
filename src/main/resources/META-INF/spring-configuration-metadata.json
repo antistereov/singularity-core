@@ -82,20 +82,20 @@
       "type": "java.lang.String",
       "sourceType": "io.stereov.singularity.global.properties.AppProperties",
       "defaultValue": "http://localhost:8000",
-      "description": "Base URL for the application. This is used to generate links in emails and other notifications."
+      "description": "Base URL for the application. This is used to generate links to files, emails and other application resources. Do not use /api, use the base path instead."
     },
     {
       "name": "singularity.app.support-mail",
       "type": "java.lang.String",
       "sourceType": "io.stereov.singularity.global.properties.AppProperties",
-      "description": "The email address that is used for support requests."
+      "description": "The email address users can contact for questions about your app."
     },
     {
       "name": "singularity.app.name",
       "type": "java.lang.String",
       "sourceType": "io.stereov.singularity.global.properties.AppProperties",
       "defaultValue": "Singularity",
-      "description": "The name of the application. This is used in various places, including the UI and emails."
+      "description": "The name of the application. This is used in various places, including database names and email templates."
     },
     {
       "name": "singularity.app.create-root-user",
@@ -121,14 +121,20 @@
       "type": "java.lang.Boolean",
       "sourceType": "io.stereov.singularity.global.properties.AppProperties",
       "defaultValue": false,
-      "description": "Enable HTTPS and secure cookies for the application. Default is false."
+      "description": "Enable HTTPS and secure cookies for the application. Please set this to true in a production setup."
     },
     {
       "name": "singularity.app.enable-mail",
       "type": "java.lang.Boolean",
       "sourceType": "io.stereov.singularity.global.properties.AppProperties",
       "defaultValue": false,
-      "description": "Enable mails for email verification, password resets, ..."
+      "description": "Enable mails for email verification, password resets and much more. Make sure to configure your email server."
+    },
+    {
+      "name": "singularity.app.groups",
+      "type": "java.util.List<java.lang.String>",
+      "sourceType": "io.stereov.singularity.global.properties.AppProperties",
+      "description": "Groups that will be created on application startup."
     },
     {
       "name": "singularity.auth.admin-paths",
@@ -493,7 +499,7 @@
       "type": "java.lang.String",
       "sourceType": "io.stereov.singularity.global.properties.UiProperties",
       "defaultValue": "http://localhost:4200",
-      "description": "Base URL for the UI application. This is used to generate links in emails and other notifications."
+      "description": "Base URL for the user interface of your application. This address will be set as trusted in the CORS configuration. It will also be used in email templates and more places."
     },
     {
       "name": "singularity.ui.icon-url",

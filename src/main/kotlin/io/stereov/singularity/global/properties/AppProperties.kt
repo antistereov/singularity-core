@@ -6,14 +6,21 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "singularity.app")
 data class AppProperties(
-    val name: String = "Spring Boot Application",
+    // core
+    val name: String = "Singularity",
     val baseUrl: String = "http://localhost:8000",
     val supportMail: String = "support@example.com",
     val secure: Boolean = false,
+
+    // root user
     val createRootUser: Boolean = false,
     val rootEmail: String = "admin@example.com",
     val rootPassword: String = "strong-password",
+
+    // groups
     val groups: List<CreateGroupRequest> = emptyList(),
+
+    // mail
     val enableMail: Boolean = false,
 ) {
 
