@@ -5,7 +5,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 @ConfigurationProperties(prefix = "singularity.auth.geolocation")
 data class GeolocationProperties(
     val enabled: Boolean = false,
-    val header: String = "X-Real-IP",
+    val realIpHeader: String = "X-Real-IP",
     val databaseDirectory: String = "./.data/geolocation",
     val databaseFilename: String = "GeoLite2-City.mmdb",
     val download: Boolean = true,

@@ -43,7 +43,7 @@ class GeoLocationService(
     }
 
     suspend fun getLocation(request: ServerHttpRequest): CityResponse {
-        val ipAddress = request.getClientIp(properties.header)
+        val ipAddress = request.getClientIp(properties.realIpHeader)
 
         return getLocation(InetAddress.getByName(ipAddress))
     }

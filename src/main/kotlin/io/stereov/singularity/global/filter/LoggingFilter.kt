@@ -39,7 +39,7 @@ class LoggingFilter(
         val origin = request.headers.origin
         val originString = origin?.let { " with origin $origin" } ?: ""
 
-        val ipAddress = exchange.request.getClientIp(geolocationProperties.header)
+        val ipAddress = exchange.request.getClientIp(geolocationProperties.realIpHeader)
         val location = geoLocationService.getLocationOrNull(request)
         val locationString = location?.let { " (${location.city.names["en"]}, ${location.country.isoCode})" } ?: ""
 
