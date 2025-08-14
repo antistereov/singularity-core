@@ -194,7 +194,7 @@
       "name": "singularity.auth.geolocation.database-filename",
       "type": "java.lang.String",
       "sourceType": "io.stereov.singularity.auth.geolocation.properties.GeolocationProperties",
-      "description": "The filename of the GeoLit2-City database. Defaults to GeoLite2-City.mmdb.",
+      "description": "The filename of the GeoLite2-City database. Defaults to GeoLite2-City.mmdb.",
       "defaultValue": "GeoLite2-City.mmdb"
     },
     {
