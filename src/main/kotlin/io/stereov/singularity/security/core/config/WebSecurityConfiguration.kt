@@ -1,4 +1,4 @@
-package io.stereov.singularity.global.config
+package io.stereov.singularity.security.core.config
 
 import io.stereov.singularity.auth.core.config.AuthenticationConfiguration
 import io.stereov.singularity.auth.core.filter.CookieAuthenticationFilter
@@ -9,14 +9,13 @@ import io.stereov.singularity.global.filter.LoggingFilter
 import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.ratelimit.filter.RateLimitFilter
 import io.stereov.singularity.ratelimit.service.RateLimitService
+import io.stereov.singularity.security.core.properties.SecurityProperties
 import io.stereov.singularity.user.core.model.Role
 import io.stereov.singularity.user.core.service.UserService
 import io.stereov.singularity.user.token.service.AccessTokenService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
-import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
-import org.springframework.boot.autoconfigure.data.web.SpringDataWebAutoConfiguration
-import org.springframework.boot.autoconfigure.mongo.MongoReactiveAutoConfiguration
+import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
@@ -40,19 +39,19 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
  * This class is responsible for configuring the web security settings
  * and components in the application.
  *
- * It runs after the [MongoReactiveAutoConfiguration], [SpringDataWebAutoConfiguration],
- * [RedisAutoConfiguration], [ApplicationConfiguration] and [AuthenticationConfiguration] classes to ensure that
+ * It runs after the [org.springframework.boot.autoconfigure.mongo.MongoReactiveAutoConfiguration], [org.springframework.boot.autoconfigure.data.web.SpringDataWebAutoConfiguration],
+ * [org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration], [io.stereov.singularity.global.config.ApplicationConfiguration] and [io.stereov.singularity.auth.core.config.AuthenticationConfiguration] classes to ensure that
  * the necessary configurations are applied in the correct order.
  *
  * It enables the following services:
- * - [AccessTokenService]
- * - [UserService]
+ * - [io.stereov.singularity.user.token.service.AccessTokenService]
+ * - [io.stereov.singularity.user.core.service.UserService]
  *
  * It enables the following beans:
- * - [PasswordEncoder]
- * - [ServerAuthenticationEntryPoint]
- * - [SecurityWebFilterChain]
- * - [CorsConfigurationSource]
+ * - [org.springframework.security.crypto.password.PasswordEncoder]
+ * - [org.springframework.security.web.server.ServerAuthenticationEntryPoint]
+ * - [org.springframework.security.web.server.SecurityWebFilterChain]
+ * - [org.springframework.web.cors.reactive.CorsConfigurationSource]
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
@@ -64,6 +63,7 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
         AuthenticationConfiguration::class
     ]
 )
+@EnableConfigurationProperties(SecurityProperties::class)
 class WebSecurityConfiguration {
 
     @Bean
@@ -82,10 +82,11 @@ class WebSecurityConfiguration {
         userService: UserService,
         rateLimitService: RateLimitService, geolocationProperties: GeolocationProperties,
         geoLocationService: GeolocationService,
+        securityProperties: SecurityProperties
     ): SecurityWebFilterChain {
         return http
             .csrf { it.disable() }
-            .cors { it.configurationSource(corsConfigurationSource(uiProperties)) }
+            .cors { it.configurationSource(corsConfigurationSource(uiProperties, securityProperties)) }
             .httpBasic { it.disable() }
             .formLogin { it.disable() }
             .exceptionHandling {
@@ -119,9 +120,14 @@ class WebSecurityConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun corsConfigurationSource(uiProperties: UiProperties): CorsConfigurationSource {
+    fun corsConfigurationSource(uiProperties: UiProperties, securityProperties: SecurityProperties): CorsConfigurationSource {
         val configuration = CorsConfiguration()
-        configuration.allowedOrigins = listOf(uiProperties.baseUrl)
+
+        val allowedOrigins = mutableListOf<String>()
+        allowedOrigins.addAll(securityProperties.allowedOrigins)
+        allowedOrigins.add(uiProperties.baseUrl)
+
+        configuration.allowedOrigins = allowedOrigins
         configuration.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
         configuration.allowedHeaders = listOf("Authorization", "Content-Type")
         configuration.allowCredentials = true
