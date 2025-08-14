@@ -25,7 +25,6 @@ import org.bson.types.ObjectId
 import org.springframework.http.ResponseCookie
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ServerWebExchange
-import java.net.InetAddress
 import java.time.Instant
 
 /**
@@ -97,15 +96,7 @@ class CookieService(
         val refreshToken = accessTokenService.createRefreshToken(userId, deviceInfoDto.id, refreshTokenId)
 
         val ipAddress = exchange.request.getClientIp(geolocationProperties.header)
-
-        val location = ipAddress?.let {
-            try {
-                geoLocationService.getLocation(InetAddress.getByName(ipAddress))
-            } catch(e: Exception) {
-                logger.warn(e) { "Location of IP address $ipAddress could not be resolved." }
-                null
-            }
-        }
+        val location = geoLocationService.getLocationOrNull(exchange.request)
 
         val deviceInfo = DeviceInfo(
             id = deviceInfoDto.id,

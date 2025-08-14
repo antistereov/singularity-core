@@ -23,8 +23,8 @@ class GeoLocationConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun geoLocationService(geoIpDatabaseService: GeoIpDatabaseService): GeoLocationService {
-        return GeoLocationService(geoIpDatabaseService)
+    fun geoLocationService(geoIpDatabaseService: GeoIpDatabaseService, properties: GeolocationProperties): GeoLocationService {
+        return GeoLocationService(geoIpDatabaseService, properties)
     }
 
     @Bean

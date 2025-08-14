@@ -12,7 +12,6 @@ import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Mono
-import java.net.InetAddress
 
 /**
  * # Filter for logging incoming requests and outgoing responses.
@@ -39,12 +38,9 @@ class LoggingFilter(
         val path = request.uri.path
         val origin = request.headers.origin
         val originString = origin?.let { " with origin $origin" } ?: ""
+
         val ipAddress = exchange.request.getClientIp(geolocationProperties.header)
-        val location = ipAddress?.let {
-            runCatching { geoLocationService.getLocation(InetAddress.getByName(it)) }
-                .onFailure { error -> logger.warn(error) { "Unable to resolve geolocation of IP address $ipAddress" } }
-                .getOrNull()
-        }
+        val location = geoLocationService.getLocationOrNull(request)
         val locationString = location?.let { " (${location.city.names["en"]}, ${location.country.isoCode})" } ?: ""
 
         logger.debug { "Incoming request  - $method $path from $ipAddress$locationString$originString" }
