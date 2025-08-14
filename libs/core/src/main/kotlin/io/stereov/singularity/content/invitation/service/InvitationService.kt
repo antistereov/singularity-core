@@ -1,21 +1,21 @@
 package io.stereov.singularity.content.invitation.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.database.core.service.SensitiveCrudService
-import io.stereov.singularity.database.encryption.service.EncryptionSecretService
-import io.stereov.singularity.database.encryption.service.EncryptionService
-import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.content.invitation.exception.model.InvalidInvitationException
 import io.stereov.singularity.content.invitation.model.EncryptedInvitationDocument
 import io.stereov.singularity.content.invitation.model.InvitationDocument
 import io.stereov.singularity.content.invitation.model.SensitiveInvitationData
 import io.stereov.singularity.content.invitation.repository.InvitationRepository
-import io.stereov.singularity.mail.core.service.MailService
-import io.stereov.singularity.mail.template.service.TemplateService
-import io.stereov.singularity.mail.template.util.TemplateBuilder
 import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.content.translate.model.TranslateKey
 import io.stereov.singularity.content.translate.service.TranslateService
+import io.stereov.singularity.database.core.service.SensitiveCrudService
+import io.stereov.singularity.database.encryption.service.EncryptionSecretService
+import io.stereov.singularity.database.encryption.service.EncryptionService
+import io.stereov.singularity.global.properties.UiProperties
+import io.stereov.singularity.mail.core.service.MailService
+import io.stereov.singularity.mail.template.service.TemplateService
+import io.stereov.singularity.mail.template.util.TemplateBuilder
 import io.stereov.singularity.user.core.service.UserService
 import kotlinx.coroutines.reactive.awaitLast
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
@@ -118,7 +118,7 @@ class InvitationService(
 
         val query = Query(Criteria.where(EncryptedInvitationDocument::expiresAt.name).lte(Instant.now()))
 
-        reactiveMongoTemplate.remove(query).awaitLast()
+        reactiveMongoTemplate.remove(query, EncryptedInvitationDocument::class.java).awaitLast()
     }
 
     @Scheduled(cron = "0 */15 * * * *")
