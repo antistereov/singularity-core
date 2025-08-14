@@ -4,7 +4,7 @@ import com.maxmind.db.CHMCache
 import com.maxmind.geoip2.DatabaseReader
 import com.maxmind.geoip2.model.CityResponse
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.auth.geolocation.exception.GeoLocationException
+import io.stereov.singularity.auth.geolocation.exception.GeolocationException
 import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
 import jakarta.annotation.PostConstruct
 import kotlinx.coroutines.Dispatchers
@@ -71,15 +71,15 @@ class GeoIpDatabaseService(
         cityDb = try {
             DatabaseReader.Builder(cityDbFile).withCache(CHMCache()).build()
         } catch(e: Exception) {
-            throw GeoLocationException("GeoLite2-City database could not be initialized", e)
+            throw GeolocationException("GeoLite2-City database could not be initialized", e)
         }
 
         logger.info { "Successfully initialized GeoLite2-City database" }
     }
 
     private suspend fun shouldUpdate(): Boolean {
-        if (properties.accountId == null) throw GeoLocationException("Cannot update GeoLite2-City database: account ID is not set")
-        if (properties.licenseKey == null) throw GeoLocationException("Cannot update GeoLite2-City database: license key is not set")
+        if (properties.accountId == null) throw GeolocationException("Cannot update GeoLite2-City database: account ID is not set")
+        if (properties.licenseKey == null) throw GeolocationException("Cannot update GeoLite2-City database: license key is not set")
 
         val responseHeaders = webClient.head()
             .uri(URI(downloadUrl))
@@ -104,8 +104,8 @@ class GeoIpDatabaseService(
     private suspend fun download() {
         logger.info { "Downloading GeoLite2-City database" }
 
-        if (properties.accountId == null) throw GeoLocationException("Cannot download GeoLite2-City database: account ID is not set")
-        if (properties.licenseKey == null) throw GeoLocationException("Cannot download GeoLite2-City database: license key is not set")
+        if (properties.accountId == null) throw GeolocationException("Cannot download GeoLite2-City database: account ID is not set")
+        if (properties.licenseKey == null) throw GeolocationException("Cannot download GeoLite2-City database: license key is not set")
 
 
         val dataBuffer = DataBufferUtils.join(
@@ -157,7 +157,7 @@ class GeoIpDatabaseService(
         val response = cityDb?.city(ipAddress)
 
         if (response == null) {
-            throw GeoLocationException("GeoIP2-City database is not initialized. Cannot resolve IP address $ipAddress")
+            throw GeolocationException("GeoIP2-City database is not initialized. Cannot resolve IP address $ipAddress")
         }
 
         return@withContext response

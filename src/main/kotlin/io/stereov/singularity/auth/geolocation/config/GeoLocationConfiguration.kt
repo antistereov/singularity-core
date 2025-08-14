@@ -1,6 +1,6 @@
 package io.stereov.singularity.auth.geolocation.config
 
-import io.stereov.singularity.auth.geolocation.exception.handler.GeoLocationExceptionHandler
+import io.stereov.singularity.auth.geolocation.exception.handler.GeolocationExceptionHandler
 import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
 import io.stereov.singularity.auth.geolocation.service.GeoIpDatabaseService
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
@@ -35,5 +35,5 @@ class GeoLocationConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun geoLocationExceptionHandler() = GeoLocationExceptionHandler()
+    fun geoLocationExceptionHandler() = GeolocationExceptionHandler()
 }
