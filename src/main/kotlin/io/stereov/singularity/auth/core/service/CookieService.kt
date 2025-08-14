@@ -5,7 +5,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.exception.AuthException
 import io.stereov.singularity.auth.core.exception.model.TwoFactorAuthDisabledException
 import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
-import io.stereov.singularity.auth.geolocation.service.GeoLocationService
+import io.stereov.singularity.auth.geolocation.service.GeolocationService
 import io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException
 import io.stereov.singularity.auth.jwt.properties.JwtProperties
 import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthService
@@ -40,7 +40,7 @@ class CookieService(
     private val accessTokenService: AccessTokenService,
     private val jwtProperties: JwtProperties,
     private val appProperties: AppProperties,
-    private val geoLocationService: GeoLocationService,
+    private val geoLocationService: GeolocationService,
     private val userService: UserService,
     private val twoFactorTokenService: TwoFactorTokenService,
     private val authenticationService: AuthenticationService,

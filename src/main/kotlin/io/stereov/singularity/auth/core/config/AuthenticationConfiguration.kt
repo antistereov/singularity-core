@@ -5,7 +5,7 @@ import io.stereov.singularity.auth.core.properties.AuthProperties
 import io.stereov.singularity.auth.core.service.AuthenticationService
 import io.stereov.singularity.auth.core.service.CookieService
 import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
-import io.stereov.singularity.auth.geolocation.service.GeoLocationService
+import io.stereov.singularity.auth.geolocation.service.GeolocationService
 import io.stereov.singularity.auth.jwt.properties.JwtProperties
 import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthService
 import io.stereov.singularity.file.s3.config.S3Configuration
@@ -44,7 +44,7 @@ class AuthenticationConfiguration {
         accessTokenService: AccessTokenService,
         jwtProperties: JwtProperties,
         appProperties: AppProperties,
-        geoLocationService: GeoLocationService,
+        geoLocationService: GeolocationService,
         userService: UserService,
         twoFactorTokenService: TwoFactorTokenService,
         authenticationService: AuthenticationService,

@@ -5,7 +5,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.properties.AuthProperties
 import io.stereov.singularity.auth.core.service.AuthenticationService
 import io.stereov.singularity.auth.core.service.CookieService
-import io.stereov.singularity.auth.geolocation.service.GeoLocationService
+import io.stereov.singularity.auth.geolocation.service.GeolocationService
 import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.core.service.UserService
@@ -48,7 +48,7 @@ class UserSessionController(
     private val cookieService: CookieService,
     private val userService: UserService,
     private val authProperties: AuthProperties,
-    private val geoLocationService: GeoLocationService
+    private val geoLocationService: GeolocationService
 ) {
 
     private val logger: KLogger

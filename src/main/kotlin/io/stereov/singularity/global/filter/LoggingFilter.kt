@@ -3,7 +3,7 @@ package io.stereov.singularity.global.filter
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
-import io.stereov.singularity.auth.geolocation.service.GeoLocationService
+import io.stereov.singularity.auth.geolocation.service.GeolocationService
 import io.stereov.singularity.global.util.getClientIp
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.reactor.mono
@@ -23,7 +23,7 @@ import reactor.core.publisher.Mono
  */
 class LoggingFilter(
     private val geolocationProperties: GeolocationProperties,
-    private val geoLocationService: GeoLocationService
+    private val geoLocationService: GeolocationService
 ) : WebFilter {
 
     private val logger: KLogger

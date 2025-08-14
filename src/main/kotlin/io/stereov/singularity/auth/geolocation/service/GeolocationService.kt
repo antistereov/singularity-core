@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service
 import java.net.InetAddress
 
 /**
- * # GeoLocationService
+ * # GeolocationService
  *
  * This service is responsible for retrieving geolocation information based on an IP address.
  * It uses the `WebClient` to make HTTP requests to a geolocation API.
@@ -19,7 +19,7 @@ import java.net.InetAddress
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
 @Service
-class GeoLocationService(
+class GeolocationService(
     private val geoIpDatabaseService: GeoIpDatabaseService,
     private val properties: GeolocationProperties,
 ) {

@@ -3,7 +3,7 @@ package io.stereov.singularity.auth.geolocation.config
 import io.stereov.singularity.auth.geolocation.exception.handler.GeoLocationExceptionHandler
 import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
 import io.stereov.singularity.auth.geolocation.service.GeoIpDatabaseService
-import io.stereov.singularity.auth.geolocation.service.GeoLocationService
+import io.stereov.singularity.auth.geolocation.service.GeolocationService
 import io.stereov.singularity.global.config.ApplicationConfiguration
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
@@ -23,8 +23,8 @@ class GeoLocationConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun geoLocationService(geoIpDatabaseService: GeoIpDatabaseService, properties: GeolocationProperties): GeoLocationService {
-        return GeoLocationService(geoIpDatabaseService, properties)
+    fun geoLocationService(geoIpDatabaseService: GeoIpDatabaseService, properties: GeolocationProperties): GeolocationService {
+        return GeolocationService(geoIpDatabaseService, properties)
     }
 
     @Bean
