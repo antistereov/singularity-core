@@ -4,6 +4,7 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.exception.AuthException
 import io.stereov.singularity.auth.core.exception.model.TwoFactorAuthDisabledException
+import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
 import io.stereov.singularity.auth.geolocation.service.GeoLocationService
 import io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException
 import io.stereov.singularity.auth.jwt.properties.JwtProperties
@@ -45,6 +46,7 @@ class CookieService(
     private val twoFactorTokenService: TwoFactorTokenService,
     private val authenticationService: AuthenticationService,
     private val twoFactorAuthService: TwoFactorAuthService,
+    private val geolocationProperties: GeolocationProperties,
 ) {
 
     private val logger: KLogger
@@ -94,7 +96,7 @@ class CookieService(
         val refreshTokenId = Random.generateCode(20)
         val refreshToken = accessTokenService.createRefreshToken(userId, deviceInfoDto.id, refreshTokenId)
 
-        val ipAddress = exchange.request.getClientIp()
+        val ipAddress = exchange.request.getClientIp(geolocationProperties.header)
 
         val location = ipAddress?.let {
             try {
@@ -116,7 +118,7 @@ class CookieService(
                 DeviceInfo.LocationInfo(
                     location.location.latitude,
                     location.location.longitude,
-                    location.city.name,
+                    location.city.names["en"],
                     location.country.isoCode
                 )
             } else null,

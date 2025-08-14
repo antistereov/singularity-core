@@ -1,5 +1,6 @@
 package io.stereov.singularity.auth.geolocation.service
 
+import com.maxmind.db.CHMCache
 import com.maxmind.geoip2.DatabaseReader
 import com.maxmind.geoip2.model.CityResponse
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -7,17 +8,16 @@ import io.stereov.singularity.auth.geolocation.exception.GeoLocationException
 import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
 import jakarta.annotation.PostConstruct
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.invoke
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.core.io.buffer.DataBufferUtils
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToFlux
-import java.io.BufferedOutputStream
 import java.io.File
 import java.net.InetAddress
 import java.net.URI
@@ -43,7 +43,7 @@ class GeoIpDatabaseService(
     private val downloadUrl = "https://download.maxmind.com/geoip/databases/GeoLite2-City/download?suffix=tar.gz"
 
     @PostConstruct
-    private fun initialize() = runBlocking{
+    private fun initialize() = runBlocking {
          updateDatabase()
     }
 
@@ -69,7 +69,7 @@ class GeoIpDatabaseService(
         }
 
         cityDb = try {
-            DatabaseReader.Builder(cityDbFile).build()
+            DatabaseReader.Builder(cityDbFile).withCache(CHMCache()).build()
         } catch(e: Exception) {
             throw GeoLocationException("GeoLite2-City database could not be initialized", e)
         }
@@ -123,24 +123,29 @@ class GeoIpDatabaseService(
 
     private suspend fun saveDatabase(dataBuffer: DataBuffer) = withContext(Dispatchers.IO) {
         logger.info { "Extracting and saving database to ${cityDbFile.absolutePath}" }
-        try {
-            val inputStream = dataBuffer.asInputStream()
 
-            Dispatchers.IO {
-                GZIPInputStream(inputStream).use { gzipInput ->
-                    BufferedOutputStream(
-                        Files.newOutputStream(
-                            cityDbFile.toPath(),
-                            StandardOpenOption.CREATE,
-                            StandardOpenOption.TRUNCATE_EXISTING
-                        )
-                    )
-                        .use { fileOutput ->
-                            gzipInput.copyTo(fileOutput)
+        try {
+            dataBuffer.asInputStream().use { input ->
+                GZIPInputStream(input).use { gzipInput ->
+                    TarArchiveInputStream(gzipInput).use { tarIn ->
+                        var entry = tarIn.nextEntry
+                        while (entry != null) {
+                            if (!entry.isDirectory && entry.name.endsWith(".mmdb")) {
+                                logger.debug { "Found ${entry.name}, extracting..." }
+                                Files.newOutputStream(
+                                    cityDbFile.toPath(),
+                                    StandardOpenOption.CREATE,
+                                    StandardOpenOption.TRUNCATE_EXISTING
+                                ).use { fileOutput ->
+                                    tarIn.copyTo(fileOutput)
+                                }
+                                break
+                            }
+                            entry = tarIn.nextEntry
                         }
+                    }
                 }
             }
-
         } finally {
             DataBufferUtils.release(dataBuffer)
         }
