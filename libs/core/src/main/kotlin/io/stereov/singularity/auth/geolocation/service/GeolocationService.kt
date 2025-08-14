@@ -2,7 +2,7 @@ package io.stereov.singularity.auth.geolocation.service
 
 import com.maxmind.geoip2.model.CityResponse
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.auth.geolocation.exception.GeoLocationException
+import io.stereov.singularity.auth.geolocation.exception.GeolocationException
 import io.stereov.singularity.auth.geolocation.model.GeoLocationResponse
 import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
 import io.stereov.singularity.global.util.getClientIp
@@ -31,14 +31,14 @@ class GeolocationService(
      *
      * @param ipAddress The IP address to retrieve geolocation information for.
      * @return A [GeoLocationResponse] containing the geolocation information.
-     * @throws GeoLocationException If there is an error retrieving the geolocation information.
+     * @throws GeolocationException If there is an error retrieving the geolocation information.
      */
     suspend fun getLocation(ipAddress: InetAddress): CityResponse {
 
         return try {
             geoIpDatabaseService.getCity(ipAddress)
         } catch (e: Exception) {
-            throw GeoLocationException("Unable to retrieve current geolocation for IP address $ipAddress", e)
+            throw GeolocationException("Unable to retrieve current geolocation for IP address $ipAddress", e)
         }
     }
 
