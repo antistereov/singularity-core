@@ -7,6 +7,7 @@ import io.stereov.singularity.content.article.model.Article
 import io.stereov.singularity.content.core.dto.*
 import io.stereov.singularity.content.core.model.ContentAccessRole
 import io.stereov.singularity.content.core.service.ContentManagementService
+import io.stereov.singularity.content.invitation.service.InvitationService
 import io.stereov.singularity.content.translate.exception.model.TranslationForLangMissingException
 import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.content.translate.model.TranslateKey
@@ -15,7 +16,7 @@ import io.stereov.singularity.file.core.exception.model.UnsupportedMediaTypeExce
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.global.util.toSlug
-import io.stereov.singularity.content.invitation.service.InvitationService
+import io.stereov.singularity.user.core.mapper.UserMapper
 import io.stereov.singularity.user.core.model.Role
 import io.stereov.singularity.user.core.service.UserService
 import org.bson.types.ObjectId
@@ -33,6 +34,7 @@ class ArticleManagementService(
     private val translateService: TranslateService,
     private val uiProperties: UiProperties,
     override val userService: UserService,
+    override val userMapper: UserMapper
 ) : ContentManagementService<Article> {
 
     override val logger = KotlinLogging.logger {}

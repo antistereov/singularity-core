@@ -9,7 +9,7 @@ import io.stereov.singularity.auth.twofactor.properties.TwoFactorAuthProperties
 import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthService
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.global.config.ApplicationConfiguration
-import io.stereov.singularity.user.token.service.TwoFactorTokenService
+import io.stereov.singularity.auth.token.service.TwoFactorTokenService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties

@@ -12,8 +12,6 @@ import io.stereov.singularity.user.core.exception.model.UserDoesNotExistExceptio
 import io.stereov.singularity.user.core.model.EncryptedUserDocument
 import io.stereov.singularity.user.core.model.SensitiveUserData
 import io.stereov.singularity.user.core.model.UserDocument
-import io.stereov.singularity.user.core.dto.response.UserOverviewResponse
-import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.core.repository.UserRepository
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
@@ -119,47 +117,6 @@ class UserService(
         val user = findById(userId)
         return user.sensitive.avatarFileKey?.let { fileStorage.metadataResponseByKey(it) }
             ?: throw FileNotFoundException(file = null, "No avatar set for user")
-    }
-
-    /**
-     * Convert this [UserDocument] to a [UserResponse].
-     *
-     * This method is used to create a data transfer object (DTO) for the user.
-     *
-     * @return A [UserResponse] containing the user information.
-     */
-    suspend fun createResponse(user: UserDocument): UserResponse {
-        logger.debug { "Creating UserResponse for user with ID \"${user.id}\"" }
-
-        val avatarKey = user.sensitive.avatarFileKey
-        val avatarMetadata = avatarKey?.let { fileStorage.metadataResponseByKeyOrNull(it) }
-
-        return UserResponse(
-            user.id,
-            user.sensitive.name,
-            user.sensitive.email,
-            user.sensitive.roles,
-            user.sensitive.security.mail.verified,
-            user.lastActive.toString(),
-            user.sensitive.security.twoFactor.enabled,
-            avatarMetadata,
-            user.created.toString(),
-            user.sensitive.groups
-        )
-    }
-
-    suspend fun createOverview(user: UserDocument): UserOverviewResponse {
-        logger.debug { "Creating UserOverviewResponse for user with ID \"${user.id}\"" }
-
-        val avatarKey = user.sensitive.avatarFileKey
-        val avatarMetadata = avatarKey?.let { fileStorage.metadataResponseByKeyOrNull(it) }
-
-        return UserOverviewResponse(
-            user.id,
-            user.sensitive.name,
-            user.sensitive.email,
-            avatarMetadata
-        )
     }
 
 }

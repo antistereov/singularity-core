@@ -4,23 +4,24 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.exception.AuthException
 import io.stereov.singularity.auth.core.exception.model.TwoFactorAuthDisabledException
+import io.stereov.singularity.auth.device.dto.DeviceInfoRequest
 import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
 import io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException
 import io.stereov.singularity.auth.jwt.properties.JwtProperties
+import io.stereov.singularity.auth.token.model.StepUpToken
+import io.stereov.singularity.auth.token.service.AccessTokenService
+import io.stereov.singularity.auth.token.service.TwoFactorTokenService
+import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorStartSetupRequest
 import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthService
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.global.util.getClientIp
 import io.stereov.singularity.user.core.dto.response.UserResponse
+import io.stereov.singularity.user.core.mapper.UserMapper
 import io.stereov.singularity.user.core.model.DeviceInfo
 import io.stereov.singularity.user.core.service.UserService
-import io.stereov.singularity.user.device.dto.DeviceInfoRequest
-import io.stereov.singularity.user.token.model.StepUpToken
-import io.stereov.singularity.user.token.service.AccessTokenService
-import io.stereov.singularity.user.token.service.TwoFactorTokenService
-import io.stereov.singularity.user.twofactor.dto.request.TwoFactorStartSetupRequest
 import org.bson.types.ObjectId
 import org.springframework.http.ResponseCookie
 import org.springframework.stereotype.Service
@@ -46,6 +47,7 @@ class CookieService(
     private val authenticationService: AuthenticationService,
     private val twoFactorAuthService: TwoFactorAuthService,
     private val geolocationProperties: GeolocationProperties,
+    private val userMapper: UserMapper
 ) {
 
     private val logger: KLogger
@@ -194,7 +196,7 @@ class CookieService(
         val user = userService.findById(refreshToken.userId)
 
         if (user.sensitive.devices.any { it.id == refreshToken.deviceId && it.refreshTokenId == refreshToken.tokenId }) {
-            return userService.createResponse(user)
+            return userMapper.toResponse(user)
         } else {
             throw InvalidTokenException("Invalid refresh token")
         }

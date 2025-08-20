@@ -1,7 +1,7 @@
 package io.stereov.singularity.global.properties
 
 import io.stereov.singularity.global.util.toSlug
-import io.stereov.singularity.user.group.dto.CreateGroupRequest
+import io.stereov.singularity.auth.group.dto.request.CreateGroupRequest
 import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "singularity.app")

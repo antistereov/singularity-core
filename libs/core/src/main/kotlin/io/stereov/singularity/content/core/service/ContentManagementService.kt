@@ -3,14 +3,14 @@ package io.stereov.singularity.content.core.service
 import io.github.oshai.kotlinlogging.KLogger
 import io.stereov.singularity.auth.core.service.AuthenticationService
 import io.stereov.singularity.content.core.dto.*
-import io.stereov.singularity.content.core.dto.AcceptInvitationToContentRequest
 import io.stereov.singularity.content.core.model.ContentAccessRole
 import io.stereov.singularity.content.core.model.ContentAccessSubject
 import io.stereov.singularity.content.core.model.ContentDocument
-import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.content.invitation.exception.model.InvalidInvitationException
 import io.stereov.singularity.content.invitation.model.InvitationDocument
 import io.stereov.singularity.content.invitation.service.InvitationService
+import io.stereov.singularity.content.translate.model.Language
+import io.stereov.singularity.user.core.mapper.UserMapper
 import io.stereov.singularity.user.core.service.UserService
 import org.bson.types.ObjectId
 
@@ -21,6 +21,7 @@ interface ContentManagementService<T: ContentDocument<T>> {
     val authenticationService: AuthenticationService
     val invitationService: InvitationService
     val acceptPath: String
+    val userMapper: UserMapper
 
     val logger: KLogger
 
@@ -131,7 +132,7 @@ interface ContentManagementService<T: ContentDocument<T>> {
             val foundUser = userService.findByIdOrNull(ObjectId(id))
 
             if (foundUser != null) {
-                users.add(UserContentAccessDetails(userService.createOverview(foundUser), ContentAccessRole.ADMIN))
+                users.add(UserContentAccessDetails(userMapper.toOverview(foundUser), ContentAccessRole.ADMIN))
             } else {
                 content.access.users.admin.remove(id)
             }
@@ -141,7 +142,7 @@ interface ContentManagementService<T: ContentDocument<T>> {
             val foundUser = userService.findByIdOrNull(ObjectId(id))
 
             if (foundUser != null) {
-                users.add(UserContentAccessDetails(userService.createOverview(foundUser), ContentAccessRole.EDITOR))
+                users.add(UserContentAccessDetails(userMapper.toOverview(foundUser), ContentAccessRole.EDITOR))
             } else {
                 content.access.users.editor.remove(id)
             }
@@ -151,7 +152,7 @@ interface ContentManagementService<T: ContentDocument<T>> {
             val foundUser = userService.findByIdOrNull(ObjectId(id))
 
             if (foundUser != null) {
-                users.add(UserContentAccessDetails(userService.createOverview(foundUser), ContentAccessRole.VIEWER))
+                users.add(UserContentAccessDetails(userMapper.toOverview(foundUser), ContentAccessRole.VIEWER))
             } else {
                 content.access.users.viewer.remove(id)
             }

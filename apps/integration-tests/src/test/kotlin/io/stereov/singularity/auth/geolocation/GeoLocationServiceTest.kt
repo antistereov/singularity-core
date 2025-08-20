@@ -2,8 +2,8 @@ package io.stereov.singularity.auth.geolocation
 
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
 import io.stereov.singularity.test.BaseIntegrationTest
-import io.stereov.singularity.user.device.dto.DeviceInfoRequest
-import io.stereov.singularity.user.session.dto.request.RegisterUserRequest
+import io.stereov.singularity.auth.device.dto.DeviceInfoRequest
+import io.stereov.singularity.auth.session.dto.request.RegisterUserRequest
 import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

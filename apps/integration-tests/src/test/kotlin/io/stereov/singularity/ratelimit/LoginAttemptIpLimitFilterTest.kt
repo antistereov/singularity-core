@@ -2,8 +2,8 @@ package io.stereov.singularity.ratelimit
 
 import io.stereov.singularity.ratelimit.properties.LoginAttemptLimitProperties
 import io.stereov.singularity.test.BaseSpringBootTest
-import io.stereov.singularity.user.device.dto.DeviceInfoRequest
-import io.stereov.singularity.user.session.dto.request.LoginRequest
+import io.stereov.singularity.auth.device.dto.DeviceInfoRequest
+import io.stereov.singularity.auth.session.dto.request.LoginRequest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

@@ -8,7 +8,7 @@ import io.stereov.singularity.content.core.model.ContentAccessRole
 import io.stereov.singularity.content.core.model.ContentDocument
 import io.stereov.singularity.content.core.repository.ContentRepository
 import io.stereov.singularity.global.exception.model.DocumentNotFoundException
-import io.stereov.singularity.user.group.model.KnownGroups
+import io.stereov.singularity.auth.group.model.KnownGroups
 import org.bson.types.ObjectId
 import java.time.Instant
 

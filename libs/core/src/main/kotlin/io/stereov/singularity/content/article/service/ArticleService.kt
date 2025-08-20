@@ -16,6 +16,7 @@ import io.stereov.singularity.content.core.service.ContentService
 import io.stereov.singularity.content.tag.service.TagService
 import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.file.core.service.FileStorage
+import io.stereov.singularity.user.core.mapper.UserMapper
 import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.service.UserService
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -37,6 +38,7 @@ class ArticleService(
     private val reactiveMongoTemplate: ReactiveMongoTemplate,
     private val accessCriteria: AccessCriteria,
     private val fileStorage: FileStorage,
+    private val userMapper: UserMapper
 ) : ContentService<Article> {
 
     override val logger: KLogger = KotlinLogging.logger {}
@@ -69,7 +71,7 @@ class ArticleService(
             createdAt = article.createdAt,
             publishedAt = article.publishedAt,
             updatedAt = article.updatedAt,
-            owner = userService.createOverview(actualOwner),
+            owner = userMapper.toOverview(actualOwner),
             path = article.path,
             state = article.state,
             colors = article.colors,

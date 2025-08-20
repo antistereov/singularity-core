@@ -9,7 +9,7 @@ import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.auth.jwt.exception.TokenException
 import io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException
 import io.stereov.singularity.user.core.service.UserService
-import io.stereov.singularity.user.token.service.AccessTokenService
+import io.stereov.singularity.auth.token.service.AccessTokenService
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.mono
 import org.apache.http.HttpHeaders

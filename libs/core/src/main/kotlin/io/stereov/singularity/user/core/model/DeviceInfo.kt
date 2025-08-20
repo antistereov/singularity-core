@@ -2,8 +2,8 @@ package io.stereov.singularity.user.core.model
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.user.device.dto.DeviceInfoRequest
-import io.stereov.singularity.user.device.dto.DeviceInfoResponse
+import io.stereov.singularity.auth.device.dto.DeviceInfoRequest
+import io.stereov.singularity.auth.device.dto.DeviceInfoResponse
 import java.time.Instant
 
 /**

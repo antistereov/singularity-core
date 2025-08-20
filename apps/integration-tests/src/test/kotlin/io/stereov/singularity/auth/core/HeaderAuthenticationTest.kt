@@ -1,8 +1,8 @@
 package io.stereov.singularity.auth.core.core
 
 import io.stereov.singularity.test.BaseSpringBootTest
-import io.stereov.singularity.user.device.dto.DeviceInfoRequest
-import io.stereov.singularity.user.token.service.AccessTokenService
+import io.stereov.singularity.auth.device.dto.DeviceInfoRequest
+import io.stereov.singularity.auth.token.service.AccessTokenService
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

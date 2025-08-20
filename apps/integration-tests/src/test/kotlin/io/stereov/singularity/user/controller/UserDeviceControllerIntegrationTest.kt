@@ -1,7 +1,7 @@
 package io.stereov.singularity.user.controller
 
 import io.stereov.singularity.global.util.Constants
-import io.stereov.singularity.user.device.dto.DeviceInfoResponse
+import io.stereov.singularity.auth.device.dto.DeviceInfoResponse
 import io.stereov.singularity.user.core.model.DeviceInfo
 import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.test.runTest

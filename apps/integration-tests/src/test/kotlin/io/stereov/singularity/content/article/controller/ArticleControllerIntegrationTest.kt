@@ -1,7 +1,7 @@
 package io.stereov.singularity.content.article.controller
 
 import io.stereov.singularity.global.util.Constants
-import io.stereov.singularity.user.group.model.KnownGroups
+import io.stereov.singularity.auth.group.model.KnownGroups
 import io.stereov.singularity.user.core.model.Role
 import io.stereov.singularity.test.BaseContentTest
 import kotlinx.coroutines.test.runTest

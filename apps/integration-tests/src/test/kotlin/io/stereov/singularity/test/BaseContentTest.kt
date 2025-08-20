@@ -7,7 +7,7 @@ import io.stereov.singularity.content.article.service.ArticleService
 import io.stereov.singularity.content.tag.service.TagService
 import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.content.translate.model.Language
-import io.stereov.singularity.user.group.model.KnownGroups
+import io.stereov.singularity.auth.group.model.KnownGroups
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach
 import org.springframework.beans.factory.annotation.Autowired
