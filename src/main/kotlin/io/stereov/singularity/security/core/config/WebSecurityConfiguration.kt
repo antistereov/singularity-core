@@ -12,7 +12,7 @@ import io.stereov.singularity.ratelimit.service.RateLimitService
 import io.stereov.singularity.security.core.properties.SecurityProperties
 import io.stereov.singularity.user.core.model.Role
 import io.stereov.singularity.user.core.service.UserService
-import io.stereov.singularity.user.token.service.AccessTokenService
+import io.stereov.singularity.auth.token.service.AccessTokenService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -44,7 +44,7 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
  * the necessary configurations are applied in the correct order.
  *
  * It enables the following services:
- * - [io.stereov.singularity.user.token.service.AccessTokenService]
+ * - [AccessTokenService]
  * - [io.stereov.singularity.user.core.service.UserService]
  *
  * It enables the following beans:
@@ -105,7 +105,7 @@ class WebSecurityConfiguration {
                 it.pathMatchers("/admin/**").hasRole(Role.ADMIN.name)
                 it.anyExchange().permitAll()
             }
-            .addFilterBefore(RateLimitFilter(rateLimitService), SecurityWebFiltersOrder.FIRST)
+            .addFilterBefore(RateLimitFilter(rateLimitService, geolocationProperties), SecurityWebFiltersOrder.FIRST)
             .addFilterBefore(LoggingFilter(geolocationProperties, geoLocationService), SecurityWebFiltersOrder.AUTHENTICATION)
             .addFilterBefore(CookieAuthenticationFilter(accessTokenService, userService, authProperties), SecurityWebFiltersOrder.AUTHENTICATION)
             .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())

@@ -13,6 +13,7 @@ import io.stereov.singularity.content.tag.service.TagService
 import io.stereov.singularity.content.translate.service.TranslateService
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.global.properties.UiProperties
+import io.stereov.singularity.user.core.mapper.UserMapper
 import io.stereov.singularity.user.core.service.UserService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
@@ -55,7 +56,8 @@ class ArticleConfiguration {
         tagService: TagService,
         reactiveMongoTemplate: ReactiveMongoTemplate,
         accessCriteria: AccessCriteria,
-        fileStorage: FileStorage
+        fileStorage: FileStorage,
+        userMapper: UserMapper,
     ): ArticleService {
         return ArticleService(
             articleRepository,
@@ -65,12 +67,22 @@ class ArticleConfiguration {
             reactiveMongoTemplate,
             accessCriteria,
             fileStorage,
+            userMapper
         )
     }
 
     @Bean
     @ConditionalOnMissingBean
-    fun articleManagementService(articleService: ArticleService, authenticationService: AuthenticationService, invitationService: InvitationService, fileStorage: FileStorage, translateService: TranslateService, uiProperties: UiProperties, userService: UserService): ArticleManagementService {
+    fun articleManagementService(
+        articleService: ArticleService,
+        authenticationService: AuthenticationService,
+        invitationService: InvitationService,
+        fileStorage: FileStorage,
+        translateService: TranslateService,
+        uiProperties: UiProperties,
+        userService: UserService,
+        userMapper: UserMapper
+    ): ArticleManagementService {
         return ArticleManagementService(
             articleService,
             authenticationService,
@@ -78,7 +90,8 @@ class ArticleConfiguration {
             fileStorage,
             translateService,
             uiProperties,
-            userService
+            userService,
+            userMapper
         )
     }
 }

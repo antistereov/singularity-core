@@ -9,6 +9,7 @@ import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.mail.core.config.MailConfiguration
 import io.stereov.singularity.user.core.controller.UserController
 import io.stereov.singularity.user.core.exception.handler.UserExceptionHandler
+import io.stereov.singularity.user.core.mapper.UserMapper
 import io.stereov.singularity.user.core.repository.UserRepository
 import io.stereov.singularity.user.core.service.UserService
 import org.springframework.boot.autoconfigure.AutoConfiguration
@@ -33,6 +34,12 @@ class UserConfiguration {
     @Bean
     @ConditionalOnMissingBean
     fun userController(userService: UserService) = UserController(userService)
+
+    // Mapper
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun userMapper(fileStorage: FileStorage) = UserMapper(fileStorage)
 
     // Service
 
