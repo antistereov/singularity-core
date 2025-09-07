@@ -1,5 +1,6 @@
 ---
 sidebar_position: 3
+description: Learn how to register, log in or log out your users.
 ---
 
 # Authentication Flow

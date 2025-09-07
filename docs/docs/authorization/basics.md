@@ -1,5 +1,6 @@
 ---
 sidebar_position: 1
+description: Learn how to secure an endpoint.
 ---
 
 # Basics
