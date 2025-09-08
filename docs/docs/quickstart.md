@@ -21,7 +21,9 @@ Add the dependency to your `build.gradle.kts`, `build.gradle` or `pom.xml` if us
 
 **For Gradle with Kotlin DSL:**
 ```kotlin
-implementation("io.stereov.singularity:core:<version>") // Check the maven status batch for the latest version
+dependencies {
+    implementation("io.stereov.singularity:core:<version>") // Check the maven status batch for the latest version
+}
 ```
 
 **For Gradle with Groovy:**
