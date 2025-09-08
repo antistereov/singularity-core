@@ -193,7 +193,8 @@ class CookieService(
 
         val refreshToken = accessTokenService.extractRefreshToken(refreshTokenCookie, deviceId)
 
-        val user = userService.findById(refreshToken.userId)
+        val user = userService.findByIdOrNull(refreshToken.userId)
+            ?: throw AuthException("Invalid access token: user does not exist")
 
         if (user.sensitive.devices.any { it.id == refreshToken.deviceId && it.refreshTokenId == refreshToken.tokenId }) {
             return userMapper.toResponse(user)

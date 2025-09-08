@@ -10,12 +10,18 @@ import io.stereov.singularity.auth.geolocation.service.GeolocationService
 import io.stereov.singularity.auth.session.dto.request.LoginRequest
 import io.stereov.singularity.auth.session.dto.request.RegisterUserRequest
 import io.stereov.singularity.auth.session.dto.response.LoginResponse
+import io.stereov.singularity.auth.session.dto.response.RefreshTokenResponse
 import io.stereov.singularity.auth.session.dto.response.RegisterResponse
 import io.stereov.singularity.auth.session.service.UserSessionService
 import io.stereov.singularity.content.translate.model.Language
+import io.stereov.singularity.global.model.ErrorResponse
+import io.stereov.singularity.global.model.SuccessResponse
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.core.mapper.UserMapper
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
@@ -41,7 +47,10 @@ import org.springframework.web.server.ServerWebExchange
  */
 @RestController
 @RequestMapping("/api/user")
-@Tag(name = "User Session", description = "Operations related to login and session management")
+@Tag(
+    name = "User Session",
+    description = "Operations related to login and session management"
+)
 class UserSessionController(
     private val authenticationService: AuthenticationService,
     private val userSessionService: UserSessionService,
@@ -61,9 +70,22 @@ class UserSessionController(
      */
     @GetMapping("/me")
     @Operation(
-        summary = "Get currently logged in user",
+        summary = "Get currently authenticated user",
+        description = "Retrieves the user profile information of the currently authenticated user.",
+        security = [SecurityRequirement(name = "bearerAuth")],
+        responses = [
+            ApiResponse(
+                responseCode = "200",
+                description = "User found.",
+                content = [Content(schema = Schema(implementation = UserResponse::class))]
+            ),
+            ApiResponse(
+                responseCode = "401",
+                description = "Unauthorized. No valid token provided.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            )
+        ]
     )
-    @SecurityRequirement(name = "bearerAuth")
     suspend fun getUser(): ResponseEntity<UserResponse> {
         val user = authenticationService.getCurrentUser()
 
@@ -76,6 +98,23 @@ class UserSessionController(
      * @return The current user's information with application info as a [UserResponse].
      */
     @PostMapping("/login")
+    @Operation(
+        summary = "User login",
+        description = "Authenticates a user, returns an access and refresh token and sets those tokens as Http-Only Cookies.",
+        security = [SecurityRequirement(name = "bearerAuth")],
+        responses = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Login successful. Returns tokens and user details.",
+                content = [Content(schema = Schema(implementation = LoginResponse::class))]
+            ),
+            ApiResponse(
+                responseCode = "401",
+                description = "Invalid credentials.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            )
+        ]
+    )
     suspend fun login(
         exchange: ServerWebExchange,
         @RequestBody payload: LoginRequest
@@ -116,6 +155,22 @@ class UserSessionController(
      * @return The registered user's information as a [UserResponse].
      */
     @PostMapping("/register")
+    @Operation(
+        summary = "Register a new user",
+        description = "Creates a new user account and logs them in.",
+        responses = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Registration successful. Returns user details and tokens.",
+                content = [Content(schema = Schema(implementation = RegisterResponse::class))]
+            ),
+            ApiResponse(
+                responseCode = "409",
+                description = "Email already exists.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            )
+        ]
+    )
     suspend fun register(
         exchange: ServerWebExchange,
         @RequestBody @Valid payload: RegisterUserRequest,
@@ -149,7 +204,14 @@ class UserSessionController(
      * @return The user's information as a [UserResponse].
      */
     @PostMapping("/logout")
-    suspend fun logout(@RequestBody deviceInfo: DeviceInfoRequest): ResponseEntity<Map<String, String>> {
+    @Operation(
+        summary = "Log out a user",
+        description = "Invalidates the current session's access and refresh tokens.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "Logout successful.", content = [Content(schema = Schema(implementation = SuccessResponse::class))])
+        ]
+    )
+    suspend fun logout(@RequestBody deviceInfo: DeviceInfoRequest): ResponseEntity<SuccessResponse> {
         logger.info { "Executing logout" }
 
         val clearAccessTokenCookie = cookieService.clearAccessTokenCookie()
@@ -162,7 +224,7 @@ class UserSessionController(
             .header("Set-Cookie", clearAccessTokenCookie.toString())
             .header("Set-Cookie", clearRefreshTokenCookie.toString())
             .header("Set-Cookie", clearStepUpTokenCookie.toString())
-            .body(mapOf("message" to "success"))
+            .body(SuccessResponse(true))
     }
 
     /**
@@ -171,7 +233,14 @@ class UserSessionController(
      * @return A response indicating the success of the operation.
      */
     @PostMapping("/logout-all")
-    suspend fun logoutFromAllDevices(): ResponseEntity<Map<String, String>> {
+    @Operation(
+        summary = "Log out a user from all devices",
+        description = "Invalidates all the current session's access and refresh tokens from all devices.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "Logout successful.", content = [Content(schema = Schema(implementation = SuccessResponse::class))])
+        ]
+    )
+    suspend fun logoutFromAllDevices(): ResponseEntity<SuccessResponse> {
         logger.debug { "Logging out user from all devices" }
 
         val clearAccessTokenCookie = cookieService.clearAccessTokenCookie()
@@ -184,7 +253,7 @@ class UserSessionController(
             .header("Set-Cookie", clearAccessTokenCookie.toString())
             .header("Set-Cookie", clearRefreshTokenCookie.toString())
             .header("Set-Cookie", clearStepUpTokenCookie.toString())
-            .body(mapOf("message" to "success"))
+            .body(SuccessResponse(true))
     }
 
     /**
@@ -195,10 +264,27 @@ class UserSessionController(
      * @return The user's information as a [UserResponse].
      */
     @PostMapping("/refresh")
+    @Operation(
+        summary = "Refresh access token",
+        description = "Refresh the access token. Returns a new access and refresh token and sets those tokens as Http-Only Cookies.",
+        security = [SecurityRequirement(name = "bearerAuth")],
+        responses = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Login successful. Returns tokens and user details.",
+                content = [Content(schema = Schema(implementation = RefreshTokenResponse::class))]
+            ),
+            ApiResponse(
+                responseCode = "401",
+                description = "Invalid credentials.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            )
+        ]
+    )
     suspend fun refreshToken(
         exchange: ServerWebExchange,
         @RequestBody deviceInfoDto: DeviceInfoRequest
-    ): ResponseEntity<UserResponse> {
+    ): ResponseEntity<RefreshTokenResponse> {
         logger.debug { "Refreshing token" }
 
         val userDto = cookieService.validateRefreshTokenAndGetUserDto(exchange, deviceInfoDto.id)
@@ -207,9 +293,15 @@ class UserSessionController(
         val newAccessToken = cookieService.createAccessTokenCookie(userId, deviceInfoDto.id)
         val newRefreshToken = cookieService.createRefreshTokenCookie(userId, deviceInfoDto, exchange)
 
+        val res = RefreshTokenResponse(
+            userDto,
+            if (authProperties.allowHeaderAuthentication) newAccessToken.value else null,
+            if (authProperties.allowHeaderAuthentication) newRefreshToken.value else null,
+        )
+
         return ResponseEntity.ok()
             .header("Set-Cookie", newAccessToken.toString())
             .header("Set-Cookie", newRefreshToken.toString())
-            .body(userDto)
+            .body(res)
     }
 }
