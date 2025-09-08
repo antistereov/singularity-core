@@ -436,7 +436,14 @@
       "type": "java.lang.Long",
       "sourceType": "io.stereov.singularity.auth.jwt.properties.JwtProperties",
       "defaultValue": 900,
-      "description": "Expiration time for the JWT token in seconds. Default is 15 minutes."
+      "description": "Expiration time for JWT tokens in seconds. Default is 15 minutes."
+    },
+    {
+      "name": "singularity.security.jwt.refresh-expires-in",
+      "type": "java.lang.Long",
+      "sourceType": "io.stereov.singularity.auth.jwt.properties.JwtProperties",
+      "defaultValue": 788400,
+      "description": "Expiration time for refresh tokens in seconds. Default is about three months."
     },
     {
       "name": "singularity.security.rate-limit.ip-limit",

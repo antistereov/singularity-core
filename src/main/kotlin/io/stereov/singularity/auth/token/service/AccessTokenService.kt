@@ -2,14 +2,14 @@ package io.stereov.singularity.auth.token.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.global.util.Constants
-import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException
 import io.stereov.singularity.auth.jwt.properties.JwtProperties
 import io.stereov.singularity.auth.jwt.service.JwtService
 import io.stereov.singularity.auth.token.cache.AccessTokenCache
 import io.stereov.singularity.auth.token.model.AccessToken
 import io.stereov.singularity.auth.token.model.RefreshToken
+import io.stereov.singularity.global.util.Constants
+import io.stereov.singularity.global.util.Random
 import org.bson.types.ObjectId
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
 import org.springframework.stereotype.Service
@@ -34,6 +34,7 @@ class AccessTokenService(
         get() = KotlinLogging.logger {}
 
     private val expiresIn = jwtProperties.expiresIn
+    private val refreshExpiresIn = jwtProperties.refreshExpiresIn
 
     /**
      * Creates an access token for the given user ID and device ID.
@@ -103,14 +104,15 @@ class AccessTokenService(
      *
      * @return The generated refresh token.
      */
-    suspend fun createRefreshToken(userId: ObjectId, deviceId: String, tokenId: String): String {
+    suspend fun createRefreshToken(userId: ObjectId, deviceId: String, tokenId: String, issuedAt: Instant = Instant.now()): String {
         logger.debug { "Creating refresh token for user $userId and device $deviceId" }
 
         val claims = JwtClaimsSet.builder()
             .id(tokenId)
             .subject(userId.toHexString())
+            .issuedAt(issuedAt)
+            .expiresAt(issuedAt.plusSeconds(refreshExpiresIn))
             .claim(Constants.JWT_DEVICE_CLAIM, deviceId)
-            .issuedAt(Instant.now())
             .build()
 
         return jwtService.encodeJwt(claims)
@@ -130,7 +132,7 @@ class AccessTokenService(
         logger.debug { "Extracting refresh token" }
 
         val jwt = try {
-            jwtService.decodeJwt(refreshToken, false)
+            jwtService.decodeJwt(refreshToken, true)
         } catch (e: Exception) {
             throw InvalidTokenException("Cannot decode refresh token", e)
         }
