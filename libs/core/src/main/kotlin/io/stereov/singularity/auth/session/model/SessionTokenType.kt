@@ -5,6 +5,18 @@ import org.springframework.http.HttpHeaders
 
 interface SessionTokenType {
 
-    object Access : TokenType("access_token", HttpHeaders.AUTHORIZATION)
-    object Refresh : TokenType("refresh_token", HttpHeaders.AUTHORIZATION)
+    object Access : TokenType {
+        const val HEADER = HttpHeaders.AUTHORIZATION
+        const val COOKIE_NAME = "access_token"
+
+        override val header = HEADER
+        override val cookieName = COOKIE_NAME
+    }
+    object Refresh : TokenType {
+        const val HEADER = HttpHeaders.AUTHORIZATION
+        const val COOKIE_NAME = "refresh_token"
+
+        override val header = HEADER
+        override val cookieName = COOKIE_NAME
+    }
 }

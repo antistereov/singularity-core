@@ -21,7 +21,7 @@ class UserDeviceControllerIntegrationTest : BaseIntegrationTest() {
 
         val response = webTestClient.get()
             .uri("/api/user/devices")
-            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(object : ParameterizedTypeReference<List<DeviceInfoResponse>>() {})
@@ -48,7 +48,7 @@ class UserDeviceControllerIntegrationTest : BaseIntegrationTest() {
 
         webTestClient.delete()
             .uri("/api/user/devices/$deviceId")
-            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isOk
 
@@ -68,7 +68,7 @@ class UserDeviceControllerIntegrationTest : BaseIntegrationTest() {
         val user = registerUser()
         webTestClient.delete()
             .uri("/api/user/devices")
-            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus()
             .isOk

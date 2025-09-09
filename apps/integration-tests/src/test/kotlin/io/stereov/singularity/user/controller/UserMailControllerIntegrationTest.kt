@@ -78,7 +78,7 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/user/mail/verify/send")
-            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isOk
 
@@ -90,13 +90,13 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/user/mail/verify/send")
-            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isOk
 
         val res = webTestClient.get()
             .uri("/api/user/mail/verify/cooldown")
-            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(MailCooldownResponse::class.java)
@@ -112,7 +112,7 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
 
         val res = webTestClient.get()
             .uri("/api/user/mail/verify/cooldown")
-            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(MailCooldownResponse::class.java)
@@ -138,7 +138,7 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
 
         val res = webTestClient.put()
             .uri("/api/user/me/email")
-            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .bodyValue(ChangeEmailRequest(newEmail, password))
             .exchange()
             .expectStatus().isOk
@@ -227,7 +227,7 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
         webTestClient.post()
             .uri("/api/user/mail/reset-password/send")
             .bodyValue(SendPasswordResetRequest(user.info.sensitive.email))
-            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isOk
 
@@ -238,7 +238,7 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/user/mail/reset-password/send")
-            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isBadRequest
     }
@@ -254,7 +254,7 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
 
         val res = webTestClient.get()
             .uri("/api/user/mail/reset-password/cooldown")
-            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(MailCooldownResponse::class.java)
@@ -270,7 +270,7 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
 
         val res = webTestClient.get()
             .uri("/api/user/mail/reset-password/cooldown")
-            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(MailCooldownResponse::class.java)

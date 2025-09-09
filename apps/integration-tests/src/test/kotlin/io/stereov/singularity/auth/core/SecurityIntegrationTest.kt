@@ -27,14 +27,14 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
 
         webTestClient.get()
             .uri("/api/user/me")
-            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isOk
     }
     @Test fun `valid token required`() = runTest {
         webTestClient.get()
             .uri("/api/user/me")
-            .cookie(SessionTokenType.Access.cookieKey, "access_token")
+            .cookie(SessionTokenType.Access.cookieName, "access_token")
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -44,7 +44,7 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
 
         webTestClient.get()
             .uri("/api/user/me")
-            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -54,7 +54,7 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
 
         webTestClient.get()
             .uri("/api/user/me")
-            .cookie(SessionTokenType.Access.cookieKey, token.value)
+            .cookie(SessionTokenType.Access.cookieName, token.value)
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -63,14 +63,14 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/user/logout")
-            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.first().id))
             .exchange()
             .expectStatus().isOk
 
         webTestClient.get()
             .uri("/api/user/me")
-            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -79,14 +79,14 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/user/logout-all")
-            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.first().id))
             .exchange()
             .expectStatus().isOk
 
         webTestClient.get()
             .uri("/api/user/me")
-            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -96,7 +96,7 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
 
         webTestClient.get()
             .uri("/api/user/me")
-            .cookie(SessionTokenType.Access.cookieKey, cookieCreator.createCookie(accessToken).value)
+            .cookie(SessionTokenType.Access.cookieName, cookieCreator.createCookie(accessToken).value)
             .exchange()
             .expectStatus().isOk
 
@@ -106,7 +106,7 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
 
         webTestClient.get()
             .uri("/api/user/me")
-            .cookie(SessionTokenType.Access.cookieKey, cookieCreator.createCookie(accessToken).value)
+            .cookie(SessionTokenType.Access.cookieName, cookieCreator.createCookie(accessToken).value)
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -117,7 +117,7 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
         val response = webTestClient.post()
             .uri("/api/user/refresh")
             .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.first().id))
-            .cookie(SessionTokenType.Refresh.cookieKey, user.refreshToken)
+            .cookie(SessionTokenType.Refresh.cookieName, user.refreshToken)
             .exchange()
             .expectStatus().isOk
             .expectBody<RefreshTokenResponse>()
@@ -128,7 +128,7 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
 
         webTestClient.get()
             .uri("/api/user/me")
-            .cookie(SessionTokenType.Access.cookieKey, response.accessToken!!)
+            .cookie(SessionTokenType.Access.cookieName, response.accessToken!!)
             .exchange()
             .expectStatus().isOk
     }
@@ -138,7 +138,7 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
         val response = webTestClient.post()
             .uri("/api/user/refresh")
             .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.first().id))
-            .cookie(SessionTokenType.Refresh.cookieKey, user.refreshToken)
+            .cookie(SessionTokenType.Refresh.cookieName, user.refreshToken)
             .exchange()
             .expectStatus().isOk
             .expectBody<RefreshTokenResponse>()
@@ -149,13 +149,13 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
 
         webTestClient.get()
             .uri("/api/user/me")
-            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isOk
 
         webTestClient.get()
             .uri("/api/user/me")
-            .cookie(SessionTokenType.Access.cookieKey, response.accessToken!!)
+            .cookie(SessionTokenType.Access.cookieName, response.accessToken!!)
             .exchange()
             .expectStatus().isOk
     }
@@ -164,7 +164,7 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/user/refresh")
-            .cookie(SessionTokenType.Refresh.cookieKey, "invalid-token")
+            .cookie(SessionTokenType.Refresh.cookieName, "invalid-token")
             .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.first().id))
             .exchange()
             .expectStatus().isUnauthorized
@@ -175,7 +175,7 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/user/refresh")
-            .cookie(SessionTokenType.Refresh.cookieKey, token.value)
+            .cookie(SessionTokenType.Refresh.cookieName, token.value)
             .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.first().id))
             .exchange()
             .expectStatus().isUnauthorized
@@ -186,7 +186,7 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/user/refresh")
-            .cookie(SessionTokenType.Refresh.cookieKey, user.refreshToken)
+            .cookie(SessionTokenType.Refresh.cookieName, user.refreshToken)
             .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.first().id))
             .exchange()
             .expectStatus().isUnauthorized
@@ -196,14 +196,14 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/user/logout")
-            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.first().id))
             .exchange()
             .expectStatus().isOk
 
         webTestClient.post()
             .uri("/api/user/refresh")
-            .cookie(SessionTokenType.Refresh.cookieKey, user.refreshToken)
+            .cookie(SessionTokenType.Refresh.cookieName, user.refreshToken)
             .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.first().id))
             .exchange()
             .expectStatus().isUnauthorized
@@ -213,14 +213,14 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/user/logout-all")
-            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.first().id))
             .exchange()
             .expectStatus().isOk
 
         webTestClient.post()
             .uri("/api/user/refresh")
-            .cookie(SessionTokenType.Refresh.cookieKey, user.refreshToken)
+            .cookie(SessionTokenType.Refresh.cookieName, user.refreshToken)
             .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.first().id))
             .exchange()
             .expectStatus().isUnauthorized
@@ -231,7 +231,7 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
 
         webTestClient.get()
             .uri("/api/user/me")
-            .cookie(SessionTokenType.Access.cookieKey, cookieCreator.createCookie(accessToken).value)
+            .cookie(SessionTokenType.Access.cookieName, cookieCreator.createCookie(accessToken).value)
             .exchange()
             .expectStatus().isOk
 
@@ -242,7 +242,7 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
         webTestClient.post()
             .uri("/api/user/refresh")
             .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.first().id))
-            .cookie(SessionTokenType.Refresh.cookieKey, user.refreshToken)
+            .cookie(SessionTokenType.Refresh.cookieName, user.refreshToken)
             .exchange()
             .expectStatus().isUnauthorized
     }

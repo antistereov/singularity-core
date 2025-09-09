@@ -15,9 +15,9 @@ class TokenValueExtractor(
     private val logger = KotlinLogging.logger {}
 
     fun extractValueOrNull(exchange: ServerWebExchange, tokenType: TokenType, useBearerPrefix: Boolean = false): String? {
-        logger.debug { "Extracting ${tokenType.cookieKey} from request" }
+        logger.debug { "Extracting ${tokenType.cookieName} from request" }
 
-        val cookieToken = exchange.request.cookies[tokenType.cookieKey]?.firstOrNull()?.value
+        val cookieToken = exchange.request.cookies[tokenType.cookieName]?.firstOrNull()?.value
 
         if (!authProperties.allowHeaderAuthentication) return cookieToken
 
@@ -38,7 +38,7 @@ class TokenValueExtractor(
 
     fun extractValue(exchange: ServerWebExchange, tokenType: TokenType, useBearerPrefix: Boolean = false): String {
         return extractValueOrNull(exchange, tokenType, useBearerPrefix)
-            ?: throw InvalidTokenException("No ${tokenType.cookieKey} found")
+            ?: throw InvalidTokenException("No ${tokenType.cookieName} found")
     }
 
 }

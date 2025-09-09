@@ -17,7 +17,7 @@ class ArticleControllerIntegrationTest : BaseContentTest() {
 
         webTestClient.put()
             .uri("/api/content/articles/${article.key}/trusted?trusted=false")
-            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus()
             .isForbidden
@@ -32,7 +32,7 @@ class ArticleControllerIntegrationTest : BaseContentTest() {
 
         webTestClient.put()
             .uri("/api/content/articles/${article.key}/trusted?trusted=true")
-            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus()
             .isOk

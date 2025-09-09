@@ -101,8 +101,8 @@ class BaseSpringBootTest {
             .returnResult<Void>()
             .responseCookies
 
-        var accessToken = responseCookies[SessionTokenType.Access.cookieKey]?.firstOrNull()?.value
-        var refreshToken = responseCookies[SessionTokenType.Refresh.cookieKey]?.firstOrNull()?.value
+        var accessToken = responseCookies[SessionTokenType.Access.cookieName]?.firstOrNull()?.value
+        var refreshToken = responseCookies[SessionTokenType.Refresh.cookieName]?.firstOrNull()?.value
 
         requireNotNull(accessToken) { "No access token contained in response" }
         requireNotNull(refreshToken) { "No refresh token contained in response" }
@@ -115,13 +115,13 @@ class BaseSpringBootTest {
         if (twoFactorEnabled) {
             val twoFactorSetupStartRes = webTestClient.post()
                 .uri("/api/user/2fa/init-setup")
-                .cookie(SessionTokenType.Access.cookieKey, accessToken)
+                .cookie(SessionTokenType.Access.cookieName, accessToken)
                 .bodyValue(TwoFactorSetupInitRequest(password))
                 .exchange()
                 .expectStatus().isOk
                 .expectBody()
                 .returnResult()
-                .responseCookies[TwoFactorTokenType.InitSetup.cookieKey]?.firstOrNull()?.value
+                .responseCookies[TwoFactorTokenType.InitSetup.cookieName]?.firstOrNull()?.value
 
             requireNotNull(twoFactorSetupStartRes)
 
@@ -129,8 +129,8 @@ class BaseSpringBootTest {
 
             val twoFactorRes = webTestClient.get()
                 .uri("/api/user/2fa/setup")
-                .cookie(TwoFactorTokenType.InitSetup.cookieKey, twoFactorStartSetupToken)
-                .cookie(SessionTokenType.Access.cookieKey, accessToken)
+                .cookie(TwoFactorTokenType.InitSetup.cookieName, twoFactorStartSetupToken)
+                .cookie(SessionTokenType.Access.cookieName, accessToken)
                 .exchange()
                 .expectStatus().isOk
                 .expectBody(TwoFactorSetupResponse::class.java)
@@ -150,7 +150,7 @@ class BaseSpringBootTest {
 
             webTestClient.post()
                 .uri("/api/user/2fa/setup")
-                .cookie(SessionTokenType.Access.cookieKey, accessToken)
+                .cookie(SessionTokenType.Access.cookieName, accessToken)
                 .bodyValue(twoFactorSetupReq)
                 .exchange()
                 .expectStatus().isOk
@@ -161,21 +161,21 @@ class BaseSpringBootTest {
                 .exchange()
                 .expectStatus().isOk
                 .returnResult<Void>()
-                .responseCookies[TwoFactorTokenType.Login.cookieKey]
+                .responseCookies[TwoFactorTokenType.Login.cookieName]
                 ?.firstOrNull()
                 ?.value
 
             responseCookies = webTestClient.post()
                 .uri("/api/user/2fa/verify-login?code=${gAuth.getTotpPassword(twoFactorSecret)}")
                 .bodyValue(DeviceInfoRequest(deviceId))
-                .cookie(TwoFactorTokenType.Login.cookieKey, twoFactorToken!!)
+                .cookie(TwoFactorTokenType.Login.cookieName, twoFactorToken!!)
                 .exchange()
                 .expectStatus().isOk
                 .returnResult<Void>()
                 .responseCookies
 
-            accessToken = responseCookies[SessionTokenType.Access.cookieKey]?.firstOrNull()?.value
-            refreshToken = responseCookies[SessionTokenType.Refresh.cookieKey]?.firstOrNull()?.value
+            accessToken = responseCookies[SessionTokenType.Access.cookieName]?.firstOrNull()?.value
+            refreshToken = responseCookies[SessionTokenType.Refresh.cookieName]?.firstOrNull()?.value
 
             requireNotNull(accessToken) { "No access token contained in response" }
             requireNotNull(refreshToken) { "No refresh token contained in response" }
@@ -201,7 +201,7 @@ class BaseSpringBootTest {
     suspend fun deleteAccount(response: TestRegisterResponse) {
         webTestClient.delete()
             .uri("/api/user/me")
-            .header(HttpHeaders.COOKIE, "${SessionTokenType.Access.cookieKey}=${response.accessToken}")
+            .header(HttpHeaders.COOKIE, "${SessionTokenType.Access.cookieName}=${response.accessToken}")
             .exchange()
             .expectStatus().isOk
     }

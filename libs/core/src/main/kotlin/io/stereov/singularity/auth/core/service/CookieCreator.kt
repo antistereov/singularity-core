@@ -17,9 +17,9 @@ class CookieCreator(
     private val logger = KotlinLogging.logger {}
 
     fun createCookie(token: Token<*>, path: String = "/"): ResponseCookie {
-        logger.debug { "Creating cookie from token of type ${token.type.cookieKey}" }
+        logger.debug { "Creating cookie from token of type ${token.type.cookieName}" }
 
-        val cookie = ResponseCookie.from(token.type.cookieKey, token.jwt.tokenValue)
+        val cookie = ResponseCookie.from(token.type.cookieName, token.jwt.tokenValue)
             .httpOnly(true)
             .sameSite("Strict")
             .path(path)
@@ -37,9 +37,9 @@ class CookieCreator(
     }
 
     suspend fun clearCookie(tokenType: TokenType, path: String = "/"): ResponseCookie {
-        logger.debug { "Clearing cookie for ${tokenType.cookieKey}" }
+        logger.debug { "Clearing cookie for ${tokenType.cookieName}" }
 
-        val cookie = ResponseCookie.from(tokenType.cookieKey, "")
+        val cookie = ResponseCookie.from(tokenType.cookieName, "")
             .httpOnly(true)
             .sameSite("Strict")
             .maxAge(0)

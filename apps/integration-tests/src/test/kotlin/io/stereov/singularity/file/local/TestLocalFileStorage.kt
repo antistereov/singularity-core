@@ -101,7 +101,7 @@ class TestLocalFileStorage : BaseIntegrationTest() {
 
             webTestClient.get()
                 .uri("/api/assets/${metadata.key}")
-                .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
+                .cookie(SessionTokenType.Access.cookieName, user.accessToken)
                 .exchange()
                 .expectStatus().isOk
                 .expectHeader().contentType(MediaType.IMAGE_JPEG)
@@ -129,7 +129,7 @@ class TestLocalFileStorage : BaseIntegrationTest() {
 
             webTestClient.get()
                 .uri("/api/assets/${metadata.key}")
-                .cookie(SessionTokenType.Access.cookieKey, anotherUser.accessToken)
+                .cookie(SessionTokenType.Access.cookieName, anotherUser.accessToken)
                 .exchange()
                 .expectStatus().isForbidden
         }
