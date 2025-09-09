@@ -116,7 +116,6 @@ class TwoFactorAuthConfiguration {
         authenticationService: AuthenticationService,
         jwtService: JwtService,
         jwtProperties: JwtProperties,
-        tokenValueExtractor: TokenValueExtractor
     ) = TwoFactorSetupTokenService(authenticationService, jwtService, jwtProperties)
 
     @Bean
