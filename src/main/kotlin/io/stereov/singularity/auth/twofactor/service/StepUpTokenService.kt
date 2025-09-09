@@ -68,6 +68,10 @@ class StepUpTokenService(
     suspend fun extract(exchange: ServerWebExchange): StepUpToken {
         logger.debug { "Extracting step up token" }
 
+        if (!authenticationService.getCurrentUser().sensitive.security.twoFactor.enabled) {
+            throw TwoFactorAuthDisabledException()
+        }
+
         val token = tokenValueExtractor.extractValue(exchange, tokenType)
 
         val jwt = jwtService.decodeJwt(token, true)
@@ -77,10 +81,6 @@ class StepUpTokenService(
 
         if (userId != authenticationService.getCurrentUserId()) {
             throw InvalidTokenException("Step up token is not valid for currently logged in user")
-        }
-
-        if (!authenticationService.getCurrentUser().sensitive.security.twoFactor.enabled) {
-            throw TwoFactorAuthDisabledException()
         }
 
         val deviceId = jwt.claims[Constants.JWT_DEVICE_CLAIM] as? String
