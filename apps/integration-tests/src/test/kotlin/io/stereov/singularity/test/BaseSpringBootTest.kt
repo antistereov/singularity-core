@@ -114,7 +114,7 @@ class BaseSpringBootTest {
 
         if (twoFactorEnabled) {
             val twoFactorSetupStartRes = webTestClient.post()
-                .uri("/api/user/2fa/start-setup")
+                .uri("/api/user/2fa/init-setup")
                 .cookie(SessionTokenType.Access.cookieKey, accessToken)
                 .bodyValue(TwoFactorSetupInitRequest(password))
                 .exchange()

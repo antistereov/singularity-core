@@ -2,6 +2,7 @@ package io.stereov.singularity.auth.twofactor.controller
 
 import io.stereov.singularity.auth.core.exception.model.TwoFactorAuthDisabledException
 import io.stereov.singularity.auth.core.properties.AuthProperties
+import io.stereov.singularity.auth.core.service.AuthenticationService
 import io.stereov.singularity.auth.core.service.CookieCreator
 import io.stereov.singularity.auth.device.dto.DeviceInfoRequest
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
@@ -29,15 +30,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ServerWebExchange
 
-/**
- * # UserTwoFactorAuthController
- *
- * This controller handles two-factor authentication (2FA) for users.
- * It provides endpoints for setting up 2FA, verifying 2FA codes,
- * checking 2FA status, and recovering user accounts.
- *
- * @author <a href="https://github.com/antistereov">antistereov</a>
- */
 @RestController
 @RequestMapping("/api/user/2fa")
 class UserTwoFactorAuthController(
@@ -49,10 +41,11 @@ class UserTwoFactorAuthController(
     private val refreshTokenService: RefreshTokenService,
     private val setupInitTokenService: TwoFactorInitSetupTokenService,
     private val stepUpTokenService: StepUpTokenService,
-    private val cookieCreator: CookieCreator
+    private val cookieCreator: CookieCreator,
+    private val authenticationService: AuthenticationService
 ) {
 
-    @PostMapping("/start-setup")
+    @PostMapping("/init-setup")
     @Operation(
         summary = "Initialize 2FA setup",
         description = "Initialize the 2FA by authorizing the current user. If successful, an SetupStartupToken will be set.",
@@ -126,13 +119,14 @@ class UserTwoFactorAuthController(
         val stepUpToken = stepUpTokenService.createForRecovery(user.id, device.id, exchange)
 
         val res = TwoFactorRecoveryResponse(
+            userMapper.toResponse(user),
             if (authProperties.allowHeaderAuthentication) accessToken.value else null,
             if (authProperties.allowHeaderAuthentication) refreshToken.value else null,
             if (authProperties.allowHeaderAuthentication) stepUpToken.value else null
         )
 
         return ResponseEntity.ok()
-            .header("Set-Cookie", clearTwoFactorCookie.value)
+            .header("Set-Cookie", clearTwoFactorCookie.toString())
             .header("Set-Cookie", cookieCreator.createCookie(accessToken).toString())
             .header("Set-Cookie", cookieCreator.createCookie(refreshToken).toString())
             .header("Set-Cookie", cookieCreator.createCookie(stepUpToken).toString())
@@ -161,7 +155,7 @@ class UserTwoFactorAuthController(
         )
 
         return ResponseEntity.ok()
-            .header("Set-Cookie", clearTwoFactorCookie.value)
+            .header("Set-Cookie", clearTwoFactorCookie.toString())
             .header("Set-Cookie", cookieCreator.createCookie(accessToken).toString())
             .header("Set-Cookie", cookieCreator.createCookie(refreshToken).toString())
             .body(res)
@@ -189,12 +183,12 @@ class UserTwoFactorAuthController(
      * @return A response indicating the success of the operation.
      */
     @PostMapping("/verify-step-up")
-    suspend fun setStepUp(@RequestParam code: Int): ResponseEntity<TwoFactorStepUpResponse> {
+    suspend fun setStepUp(@RequestParam code: Int): ResponseEntity<StepUpResponse> {
         val stepUpTokenCookie = stepUpTokenService.create(code)
 
         return ResponseEntity.ok()
             .header("Set-Cookie", cookieCreator.createCookie(stepUpTokenCookie).toString())
-            .body(TwoFactorStepUpResponse(if (authProperties.allowHeaderAuthentication) stepUpTokenCookie.value else null))
+            .body(StepUpResponse(if (authProperties.allowHeaderAuthentication) stepUpTokenCookie.value else null))
     }
 
     /**
@@ -206,6 +200,8 @@ class UserTwoFactorAuthController(
      */
     @GetMapping("/step-up-status")
     suspend fun getStepUpStatus(exchange: ServerWebExchange): ResponseEntity<TwoFactorStatusResponse> {
+        authenticationService.requireAuthentication()
+
         val twoFactorRequired = try {
             stepUpTokenService.extract(exchange)
             false

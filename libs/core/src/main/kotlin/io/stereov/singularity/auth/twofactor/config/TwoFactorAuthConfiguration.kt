@@ -45,7 +45,8 @@ class TwoFactorAuthConfiguration {
         refreshTokenService: RefreshTokenService,
         setupInitTokenService: TwoFactorInitSetupTokenService,
         stepUpTokenService: StepUpTokenService,
-        cookieCreator: CookieCreator
+        cookieCreator: CookieCreator,
+        authenticationService: AuthenticationService
     ): UserTwoFactorAuthController {
         return UserTwoFactorAuthController(
             userTwoFactorAuthService,
@@ -56,7 +57,8 @@ class TwoFactorAuthConfiguration {
             refreshTokenService,
             setupInitTokenService,
             stepUpTokenService,
-            cookieCreator
+            cookieCreator,
+            authenticationService
         )
     }
 

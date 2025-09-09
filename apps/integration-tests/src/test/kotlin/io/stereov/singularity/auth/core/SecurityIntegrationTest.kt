@@ -96,7 +96,7 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
 
         webTestClient.get()
             .uri("/api/user/me")
-            .cookie(SessionTokenType.Access.cookieKey, cookieCreator.createCookie(accessToken).toString())
+            .cookie(SessionTokenType.Access.cookieKey, cookieCreator.createCookie(accessToken).value)
             .exchange()
             .expectStatus().isOk
 
@@ -106,7 +106,7 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
 
         webTestClient.get()
             .uri("/api/user/me")
-            .cookie(SessionTokenType.Access.cookieKey, cookieCreator.createCookie(accessToken).toString())
+            .cookie(SessionTokenType.Access.cookieKey, cookieCreator.createCookie(accessToken).value)
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -231,7 +231,7 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
 
         webTestClient.get()
             .uri("/api/user/me")
-            .cookie(SessionTokenType.Access.cookieKey, cookieCreator.createCookie(accessToken).toString())
+            .cookie(SessionTokenType.Access.cookieKey, cookieCreator.createCookie(accessToken).value)
             .exchange()
             .expectStatus().isOk
 
