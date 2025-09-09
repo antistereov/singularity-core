@@ -23,10 +23,10 @@ class TokenValueExtractor(
 
         val headerToken = if (useBearerPrefix) {
             exchange.request.headers.getFirst(tokenType.header)
-        } else {
-            exchange.request.headers.getFirst(tokenType.header)
                 ?.takeIf { it.startsWith("Bearer ") }
                 ?.removePrefix("Bearer ")
+        } else {
+            exchange.request.headers.getFirst(tokenType.header)
         }
 
         return if (authProperties.preferHeaderAuthentication) {

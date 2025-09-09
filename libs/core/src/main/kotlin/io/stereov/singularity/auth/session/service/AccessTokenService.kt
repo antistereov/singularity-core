@@ -10,6 +10,7 @@ import io.stereov.singularity.auth.session.model.AccessToken
 import io.stereov.singularity.auth.session.model.SessionTokenType
 import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.global.util.Random
+import io.stereov.singularity.user.core.service.UserService
 import org.bson.types.ObjectId
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
 import org.springframework.stereotype.Service

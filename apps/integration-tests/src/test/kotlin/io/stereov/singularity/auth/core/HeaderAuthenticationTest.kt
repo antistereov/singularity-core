@@ -125,7 +125,7 @@ class HeaderAuthenticationTest : BaseSpringBootTest() {
 
         webTestClient.get()
             .uri("/api/user/me")
-            .header(HttpHeaders.AUTHORIZATION, "Bearer $accessToken")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer ${accessToken.value}")
             .exchange()
             .expectStatus().isOk
 
@@ -135,7 +135,7 @@ class HeaderAuthenticationTest : BaseSpringBootTest() {
 
         webTestClient.get()
             .uri("/api/user/me")
-            .header(HttpHeaders.AUTHORIZATION, "Bearer $accessToken")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer ${accessToken.value}")
             .exchange()
             .expectStatus().isUnauthorized
     }

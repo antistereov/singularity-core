@@ -20,5 +20,6 @@ data class LoginResponse(
     val user: UserResponse,
     val accessToken: String? = null,
     val refreshToken: String? = null,
+    val twoFactorLoginToken: String? = null,
     val location: CityResponse? = null,
 )
