@@ -1,5 +1,6 @@
 ---
-sidebar_position: 5
+sidebar_position: 7
+description: Learn how to use groups to control access.
 ---
 
 # Groups

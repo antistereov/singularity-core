@@ -97,6 +97,10 @@ const config: Config = {
                             to: '/docs/intro',
                         },
                         {
+                            label: 'API',
+                            to: '/swagger'
+                        },
+                        {
                             label: 'Spring',
                             href: 'https://spring.io'
                         }

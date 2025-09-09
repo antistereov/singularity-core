@@ -127,8 +127,6 @@ class BaseSpringBootTest {
 
             twoFactorStartSetupToken = twoFactorSetupStartRes
 
-
-
             val twoFactorRes = webTestClient.get()
                 .uri("/api/user/2fa/setup")
                 .cookie(TwoFactorTokenType.InitSetup.cookieKey, twoFactorStartSetupToken)

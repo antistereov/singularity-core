@@ -1,5 +1,6 @@
 ---
-sidebar_position: 4
+sidebar_position: 6
+description: Use geolocation data to secure access.
 ---
 
 # Geolocation
