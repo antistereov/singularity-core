@@ -74,7 +74,8 @@ class UserTwoFactorAuthController(
         val setupInitToken = setupInitTokenService.create(req)
 
         return ResponseEntity.ok()
-            .header("Set-Cookie", setupInitToken.value)
+            .header("Set-Cookie", cookieCreator.createCookie(setupInitToken).toString())
+            .header("Set-Cookie", cookieCreator.createCookie(setupInitToken).toString())
             .body(TwoFactorSetupStartupResponse(if (authProperties.allowHeaderAuthentication) setupInitToken.value else null))
     }
 
