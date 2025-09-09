@@ -138,7 +138,11 @@ class UserSessionController(
 
             return ResponseEntity.ok()
                 .header("Set-Cookie", cookieCreator.createCookie(loginToken).toString())
-                .body(LoginResponse(true, userMapper.toResponse(user)))
+                .body(LoginResponse(
+                    true,
+                    userMapper.toResponse(user),
+                    twoFactorLoginToken = if (authProperties.allowHeaderAuthentication) loginToken.value else null
+                ))
         }
 
         val accessToken = accessTokenService.create(user.id, payload.device.id)
@@ -149,6 +153,7 @@ class UserSessionController(
             userMapper.toResponse(user),
             if (authProperties.allowHeaderAuthentication) accessToken.value else null,
             if (authProperties.allowHeaderAuthentication) refreshToken.value else null,
+            null,
             geoLocationService.getLocationOrNull(exchange.request)
         )
 

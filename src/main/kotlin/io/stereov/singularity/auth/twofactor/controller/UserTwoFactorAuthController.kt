@@ -151,6 +151,7 @@ class UserTwoFactorAuthController(
             userMapper.toResponse(user),
             if (authProperties.allowHeaderAuthentication) accessToken.value else null,
             if (authProperties.allowHeaderAuthentication) refreshToken.value else null,
+            null,
             geolocationService.getLocationOrNull(exchange.request)
         )
 

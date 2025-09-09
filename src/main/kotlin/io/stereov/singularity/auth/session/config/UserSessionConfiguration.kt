@@ -84,7 +84,7 @@ class UserSessionConfiguration {
         jwtService: JwtService,
         accessTokenCache: AccessTokenCache,
         jwtProperties: JwtProperties,
-        tokenValueExtractor: TokenValueExtractor
+        tokenValueExtractor: TokenValueExtractor,
     ) = AccessTokenService(jwtService, accessTokenCache, jwtProperties, tokenValueExtractor)
 
     @Bean
