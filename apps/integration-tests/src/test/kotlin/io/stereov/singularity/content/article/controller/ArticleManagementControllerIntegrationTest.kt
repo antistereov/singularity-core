@@ -1,14 +1,14 @@
 package io.stereov.singularity.content.article.controller
 
+import io.stereov.singularity.auth.core.model.AccessType
+import io.stereov.singularity.auth.group.model.KnownGroups
+import io.stereov.singularity.auth.session.model.SessionTokenType
 import io.stereov.singularity.content.article.dto.ArticleOverviewResponse
 import io.stereov.singularity.content.article.dto.ArticleResponse
 import io.stereov.singularity.content.article.model.ArticleState
 import io.stereov.singularity.content.core.model.ContentAccessRole
 import io.stereov.singularity.content.core.model.ContentAccessSubject
 import io.stereov.singularity.content.tag.dto.CreateTagRequest
-import io.stereov.singularity.auth.core.model.AccessType
-import io.stereov.singularity.global.util.Constants
-import io.stereov.singularity.auth.group.model.KnownGroups
 import io.stereov.singularity.test.BaseContentTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -89,7 +89,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
 
         val res = webTestClient.get()
             .uri(articleBasePath)
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectBody(ArticleOverviewPage::class.java)
             .returnResult()
@@ -108,7 +108,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
 
         val res = webTestClient.get()
             .uri(articleBasePath)
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectBody(ArticleOverviewPage::class.java)
             .returnResult()
@@ -127,7 +127,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
 
         val res = webTestClient.get()
             .uri(articleBasePath)
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectBody(ArticleOverviewPage::class.java)
             .returnResult()
@@ -146,7 +146,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
 
         val res = webTestClient.get()
             .uri(articleBasePath)
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectBody(ArticleOverviewPage::class.java)
             .returnResult()
@@ -167,7 +167,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
 
         val res = webTestClient.get()
             .uri(articleBasePath)
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectBody(ArticleOverviewPage::class.java)
             .returnResult()
@@ -187,7 +187,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
 
         val res = webTestClient.get()
             .uri(articleBasePath)
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectBody(ArticleOverviewPage::class.java)
             .returnResult()
@@ -207,7 +207,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
 
         val res = webTestClient.get()
             .uri(articleBasePath)
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectBody(ArticleOverviewPage::class.java)
             .returnResult()
@@ -230,7 +230,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
 
         val res = webTestClient.get()
             .uri("$articleBasePath?tags=${tag.key}")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectBody(ArticleOverviewPage::class.java)
             .returnResult()
@@ -256,7 +256,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
 
         val res = webTestClient.get()
             .uri("$articleBasePath?tags=${tag.key},${anotherTag.key}")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectBody(ArticleOverviewPage::class.java)
             .returnResult()
@@ -370,7 +370,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
 
         val res = webTestClient.get()
             .uri("$articleBasePath/scroll")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectBody(ArticleResponse::class.java)
             .returnResult()
@@ -391,7 +391,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
 
         val res = webTestClient.get()
             .uri("$articleBasePath/scroll")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectBody(ArticleResponse::class.java)
             .returnResult()
@@ -412,7 +412,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
 
         val res = webTestClient.get()
             .uri("$articleBasePath/scroll")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectBody(ArticleResponse::class.java)
             .returnResult()
@@ -433,7 +433,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
 
         val res = webTestClient.get()
             .uri("$articleBasePath/scroll")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectBody(ArticleResponse::class.java)
             .returnResult()
@@ -455,7 +455,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
 
         val res = webTestClient.get()
             .uri("$articleBasePath/scroll")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectBody(ArticleResponse::class.java)
             .returnResult()
@@ -477,7 +477,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
 
         val res = webTestClient.get()
             .uri("$articleBasePath/scroll")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectBody(ArticleResponse::class.java)
             .returnResult()
@@ -499,7 +499,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
 
         val res = webTestClient.get()
             .uri("$articleBasePath/scroll")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectBody(ArticleResponse::class.java)
             .returnResult()

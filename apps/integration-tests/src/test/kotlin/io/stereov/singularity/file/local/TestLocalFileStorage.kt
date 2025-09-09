@@ -1,5 +1,6 @@
 package io.stereov.singularity.file.local
 
+import io.stereov.singularity.auth.session.model.SessionTokenType
 import io.stereov.singularity.file.core.model.FileMetadataDocument
 import io.stereov.singularity.file.core.service.FileMetadataService
 import io.stereov.singularity.file.core.service.FileStorage
@@ -8,7 +9,6 @@ import io.stereov.singularity.file.local.properties.LocalFileStorageProperties
 import io.stereov.singularity.file.local.service.LocalFileStorage
 import io.stereov.singularity.file.util.MockFilePart
 import io.stereov.singularity.global.exception.model.DocumentNotFoundException
-import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
@@ -101,7 +101,7 @@ class TestLocalFileStorage : BaseIntegrationTest() {
 
             webTestClient.get()
                 .uri("/api/assets/${metadata.key}")
-                .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+                .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
                 .exchange()
                 .expectStatus().isOk
                 .expectHeader().contentType(MediaType.IMAGE_JPEG)
@@ -129,7 +129,7 @@ class TestLocalFileStorage : BaseIntegrationTest() {
 
             webTestClient.get()
                 .uri("/api/assets/${metadata.key}")
-                .cookie(Constants.ACCESS_TOKEN_COOKIE, anotherUser.accessToken)
+                .cookie(SessionTokenType.Access.cookieKey, anotherUser.accessToken)
                 .exchange()
                 .expectStatus().isForbidden
         }

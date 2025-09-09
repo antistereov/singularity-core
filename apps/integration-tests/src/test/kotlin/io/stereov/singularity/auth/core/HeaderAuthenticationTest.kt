@@ -1,8 +1,8 @@
 package io.stereov.singularity.auth.core.core
 
-import io.stereov.singularity.test.BaseSpringBootTest
 import io.stereov.singularity.auth.device.dto.DeviceInfoRequest
-import io.stereov.singularity.auth.token.service.AccessTokenService
+import io.stereov.singularity.auth.session.service.AccessTokenService
+import io.stereov.singularity.test.BaseSpringBootTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -79,11 +79,11 @@ class HeaderAuthenticationTest : BaseSpringBootTest() {
     }
     @Test fun `unexpired token required`() = runTest {
         val user = registerUser()
-        val token = accessTokenService.createAccessToken(user.info.id, "device", Instant.ofEpochSecond(0))
+        val token = accessTokenService.create(user.info.id, "device", Instant.ofEpochSecond(0))
 
         webTestClient.get()
             .uri("/api/user/me")
-            .header(HttpHeaders.AUTHORIZATION, token)
+            .header(HttpHeaders.AUTHORIZATION, token.value)
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -121,7 +121,7 @@ class HeaderAuthenticationTest : BaseSpringBootTest() {
     }
     @Test fun `invalid device will not be authorized`() = runTest {
         val user = registerUser(deviceId = "device")
-        val accessToken = accessTokenService.createAccessToken(user.info.id, "device")
+        val accessToken = accessTokenService.create(user.info.id, "device")
 
         webTestClient.get()
             .uri("/api/user/me")

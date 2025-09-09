@@ -25,7 +25,7 @@ class InvitationTokenService(
             .subject(invitation.id.toString())
             .build()
 
-        return jwtService.encodeJwt(claims)
+        return jwtService.encodeJwt(claims).tokenValue
     }
 
     suspend fun validateInvitationTokenAndGetId(token: String): ObjectId {

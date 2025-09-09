@@ -6,9 +6,7 @@ io.stereov.singularity.auth.geolocation.config.GeoLocationConfiguration
 io.stereov.singularity.auth.group.config.GroupConfiguration
 io.stereov.singularity.auth.jwt.config.JwtConfiguration
 io.stereov.singularity.auth.session.config.UserSessionConfiguration
-io.stereov.singularity.auth.token.config.UserTokenConfiguration
 io.stereov.singularity.auth.twofactor.config.TwoFactorAuthConfiguration
-io.stereov.singularity.auth.twofactor.config.UserTwoFactorConfiguration
 
 io.stereov.singularity.cache.config.CacheConfiguration
 io.stereov.singularity.cache.config.RedisConfiguration

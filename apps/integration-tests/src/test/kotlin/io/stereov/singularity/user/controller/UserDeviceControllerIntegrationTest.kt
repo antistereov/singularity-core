@@ -1,9 +1,9 @@
 package io.stereov.singularity.user.controller
 
-import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.auth.device.dto.DeviceInfoResponse
-import io.stereov.singularity.user.core.model.DeviceInfo
+import io.stereov.singularity.auth.session.model.SessionTokenType
 import io.stereov.singularity.test.BaseIntegrationTest
+import io.stereov.singularity.user.core.model.DeviceInfo
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -21,7 +21,7 @@ class UserDeviceControllerIntegrationTest : BaseIntegrationTest() {
 
         val response = webTestClient.get()
             .uri("/api/user/devices")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(object : ParameterizedTypeReference<List<DeviceInfoResponse>>() {})
@@ -48,7 +48,7 @@ class UserDeviceControllerIntegrationTest : BaseIntegrationTest() {
 
         webTestClient.delete()
             .uri("/api/user/devices/$deviceId")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectStatus().isOk
 
@@ -68,7 +68,7 @@ class UserDeviceControllerIntegrationTest : BaseIntegrationTest() {
         val user = registerUser()
         webTestClient.delete()
             .uri("/api/user/devices")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectStatus()
             .isOk

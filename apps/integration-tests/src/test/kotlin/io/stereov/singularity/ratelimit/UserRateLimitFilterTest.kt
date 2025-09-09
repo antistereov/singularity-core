@@ -1,6 +1,6 @@
 package io.stereov.singularity.ratelimit
 
-import io.stereov.singularity.global.util.Constants
+import io.stereov.singularity.auth.session.model.SessionTokenType
 import io.stereov.singularity.ratelimit.properties.RateLimitProperties
 import io.stereov.singularity.test.BaseSpringBootTest
 import kotlinx.coroutines.test.runTest
@@ -49,19 +49,19 @@ class UserRateLimitFilterTest : BaseSpringBootTest() {
 
         webTestClient.get()
             .uri("/api/user/me")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectStatus().isOk
 
         webTestClient.get()
             .uri("/api/user/me")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectStatus().isOk
 
         webTestClient.get()
             .uri("/api/user/me")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectStatus().isEqualTo(HttpStatus.TOO_MANY_REQUESTS)
     }

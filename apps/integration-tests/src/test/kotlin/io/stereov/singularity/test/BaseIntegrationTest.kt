@@ -1,10 +1,12 @@
 package io.stereov.singularity.test
 
+import io.stereov.singularity.auth.core.service.CookieCreator
+import io.stereov.singularity.auth.session.service.AccessTokenService
+import io.stereov.singularity.auth.session.service.RefreshTokenService
+import io.stereov.singularity.auth.twofactor.service.StepUpTokenService
+import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthService
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.test.config.MockMailSenderConfig
-import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthService
-import io.stereov.singularity.auth.token.service.TwoFactorTokenService
-import io.stereov.singularity.auth.token.service.AccessTokenService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.DynamicPropertyRegistry
@@ -24,13 +26,19 @@ class BaseIntegrationTest : BaseSpringBootTest() {
     lateinit var accessTokenService: AccessTokenService
 
     @Autowired
+    lateinit var refreshTokenService: RefreshTokenService
+
+    @Autowired
     lateinit var twoFactorAuthService: TwoFactorAuthService
 
     @Autowired
-    lateinit var twoFactorTokenService: TwoFactorTokenService
+    lateinit var stepUpTokenService: StepUpTokenService
 
     @Autowired
     lateinit var hashService: HashService
+
+    @Autowired
+    lateinit var cookieCreator: CookieCreator
 
     companion object {
         val mongoDBContainer = MongoDBContainer("mongo:latest").apply {

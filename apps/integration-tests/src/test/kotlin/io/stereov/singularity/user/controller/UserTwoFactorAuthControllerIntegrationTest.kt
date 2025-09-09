@@ -1,23 +1,29 @@
 package io.stereov.singularity.user.controller
 
-import io.stereov.singularity.global.util.Constants
-import io.stereov.singularity.global.util.Random
-import io.stereov.singularity.user.core.dto.response.UserResponse
-import io.stereov.singularity.auth.session.dto.response.LoginResponse
-import io.stereov.singularity.auth.twofactor.dto.response.TwoFactorSetupResponse
-import io.stereov.singularity.auth.twofactor.dto.response.TwoFactorStatusResponse
-import io.stereov.singularity.test.BaseIntegrationTest
 import io.stereov.singularity.auth.device.dto.DeviceInfoRequest
 import io.stereov.singularity.auth.session.dto.request.LoginRequest
+import io.stereov.singularity.auth.session.dto.response.LoginResponse
+import io.stereov.singularity.auth.session.model.SessionTokenType
 import io.stereov.singularity.auth.twofactor.dto.request.DisableTwoFactorRequest
-import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorStartSetupRequest
+import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorSetupInitRequest
 import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorVerifySetupRequest
+import io.stereov.singularity.auth.twofactor.dto.response.TwoFactorSetupResponse
+import io.stereov.singularity.auth.twofactor.dto.response.TwoFactorStatusResponse
+import io.stereov.singularity.auth.twofactor.model.TwoFactorTokenType
+import io.stereov.singularity.auth.twofactor.service.TwoFactorSetupTokenService
+import io.stereov.singularity.global.util.Random
+import io.stereov.singularity.test.BaseIntegrationTest
+import io.stereov.singularity.user.core.dto.response.UserResponse
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import java.time.Instant
 
 class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
+
+    @Autowired
+    private lateinit var setupTokenService: TwoFactorSetupTokenService
 
     @Test fun `2fa setup succeeds`() = runTest {
         val email = "test@email.com"
@@ -28,20 +34,20 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
 
         val twoFactorSetupStartRes = webTestClient.post()
             .uri("/api/user/2fa/start-setup")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
-            .bodyValue(TwoFactorStartSetupRequest(password))
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
+            .bodyValue(TwoFactorSetupInitRequest(password))
             .exchange()
             .expectStatus().isOk
             .expectBody()
             .returnResult()
-            .responseCookies[Constants.TWO_FACTOR_SETUP_TOKEN_COOKIE]?.firstOrNull()?.value
+            .responseCookies[TwoFactorTokenType.InitSetup.cookieKey]?.firstOrNull()?.value
 
         requireNotNull(twoFactorSetupStartRes)
 
         val response = webTestClient.get()
             .uri("/api/user/2fa/setup")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
-            .cookie(Constants.TWO_FACTOR_SETUP_TOKEN_COOKIE, twoFactorSetupStartRes)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
+            .cookie(TwoFactorTokenType.InitSetup.cookieKey, twoFactorSetupStartRes)
             .exchange()
             .expectStatus().isOk
             .expectBody(TwoFactorSetupResponse::class.java)
@@ -54,7 +60,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
 
         val setupRes = webTestClient.post()
             .uri("/api/user/2fa/setup")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .bodyValue(TwoFactorVerifySetupRequest(response.token, code))
             .exchange()
             .expectStatus().isOk
@@ -82,7 +88,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
         val loginResBody = loginRes.responseBody
         requireNotNull(loginResBody)
 
-        val twoFactorToken = loginRes.responseCookies[Constants.LOGIN_VERIFICATION_TOKEN_COOKIE]
+        val twoFactorToken = loginRes.responseCookies[TwoFactorTokenType.Login.cookieKey]
             ?.first()
             ?.value
 
@@ -93,7 +99,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
 
         val userRes = webTestClient.post()
             .uri("/api/user/2fa/verify-login?code=$code")
-            .cookie(Constants.LOGIN_VERIFICATION_TOKEN_COOKIE, twoFactorToken)
+            .cookie(TwoFactorTokenType.Login.cookieKey, twoFactorToken)
             .bodyValue(DeviceInfoRequest(deviceId))
             .exchange()
             .expectStatus().isOk
@@ -112,19 +118,19 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
 
         val twoFactorSetupStartRes = webTestClient.post()
             .uri("/api/user/2fa/start-setup")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
-            .bodyValue(TwoFactorStartSetupRequest(password))
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
+            .bodyValue(TwoFactorSetupInitRequest(password))
             .exchange()
             .expectStatus().isOk
             .expectBody()
             .returnResult()
-            .responseCookies[Constants.TWO_FACTOR_SETUP_TOKEN_COOKIE]?.firstOrNull()?.value
+            .responseCookies[TwoFactorTokenType.InitSetup.cookieKey]?.firstOrNull()?.value
 
         requireNotNull(twoFactorSetupStartRes)
 
         webTestClient.get()
             .uri("/api/user/2fa/setup")
-            .cookie(Constants.TWO_FACTOR_SETUP_TOKEN_COOKIE, twoFactorSetupStartRes)
+            .cookie(TwoFactorTokenType.InitSetup.cookieKey, twoFactorSetupStartRes)
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -132,7 +138,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
         val user = registerUser()
         webTestClient.get()
             .uri("/api/user/2fa/setup")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken).exchange()
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken).exchange()
             .expectStatus().isUnauthorized
     }
     @Test fun `2fa setup clears all devices`() = runTest {
@@ -143,20 +149,20 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
 
         val twoFactorSetupStartRes = webTestClient.post()
             .uri("/api/user/2fa/start-setup")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
-            .bodyValue(TwoFactorStartSetupRequest(password))
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
+            .bodyValue(TwoFactorSetupInitRequest(password))
             .exchange()
             .expectStatus().isOk
             .expectBody()
             .returnResult()
-            .responseCookies[Constants.TWO_FACTOR_SETUP_TOKEN_COOKIE]?.firstOrNull()?.value
+            .responseCookies[TwoFactorTokenType.InitSetup.cookieKey]?.firstOrNull()?.value
 
         requireNotNull(twoFactorSetupStartRes)
 
         val response = webTestClient.get()
             .uri("/api/user/2fa/setup")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
-            .cookie(Constants.TWO_FACTOR_SETUP_TOKEN_COOKIE, twoFactorSetupStartRes)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
+            .cookie(TwoFactorTokenType.InitSetup.cookieKey, twoFactorSetupStartRes)
             .exchange()
             .expectStatus().isOk
             .expectBody(TwoFactorSetupResponse::class.java)
@@ -169,7 +175,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/user/2fa/setup")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .bodyValue(TwoFactorVerifySetupRequest(response.token, code))
             .exchange()
             .expectStatus().isOk
@@ -190,13 +196,13 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
 
         val secret = twoFactorAuthService.generateSecretKey()
         val recoveryCode = Random.generateCode(10)
-        val token = twoFactorTokenService.createSetupToken(user.info.id, secret, listOf(recoveryCode))
+        val token = setupTokenService.create(user.info.id, secret, listOf(recoveryCode))
         val code = gAuth.getTotpPassword(secret)
 
         val setupRes = webTestClient.post()
             .uri("/api/user/2fa/setup")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
-            .bodyValue(TwoFactorVerifySetupRequest(token, code))
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
+            .bodyValue(TwoFactorVerifySetupRequest(token.value, code))
             .exchange()
             .expectStatus().isOk
             .expectBody(UserResponse::class.java)
@@ -220,13 +226,13 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
 
         val secret = twoFactorAuthService.generateSecretKey()
         val recoveryCode = Random.generateCode(10)
-        val token = twoFactorTokenService.createSetupToken(user.info.id, secret, listOf(recoveryCode))
+        val token = setupTokenService.create(user.info.id, secret, listOf(recoveryCode))
         val code = gAuth.getTotpPassword(secret)
 
         webTestClient.post()
             .uri("/api/user/2fa/setup")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
-            .bodyValue(TwoFactorVerifySetupRequest(token + "a", code))
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
+            .bodyValue(TwoFactorVerifySetupRequest(token.value + "a", code))
             .exchange()
             .expectStatus().isUnauthorized
 
@@ -244,13 +250,13 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
 
         val secret = twoFactorAuthService.generateSecretKey()
         val recoveryCode = Random.generateCode(10)
-        val token = twoFactorTokenService.createSetupToken(user.info.id, secret, listOf(recoveryCode), Instant.ofEpochSecond(0))
+        val token = setupTokenService.create(user.info.id, secret, listOf(recoveryCode), Instant.ofEpochSecond(0))
         val code = gAuth.getTotpPassword(secret)
 
         webTestClient.post()
             .uri("/api/user/2fa/setup")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
-            .bodyValue(TwoFactorVerifySetupRequest(token, code))
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
+            .bodyValue(TwoFactorVerifySetupRequest(token.value, code))
             .exchange()
             .expectStatus().isUnauthorized
 
@@ -269,13 +275,13 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
 
         val secret = twoFactorAuthService.generateSecretKey()
         val recoveryCode = Random.generateCode(10)
-        val token = twoFactorTokenService.createSetupToken(anotherUser.info.id, secret, listOf(recoveryCode))
+        val token = setupTokenService.create(anotherUser.info.id, secret, listOf(recoveryCode))
         val code = gAuth.getTotpPassword(secret)
 
         webTestClient.post()
             .uri("/api/user/2fa/setup")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
-            .bodyValue(TwoFactorVerifySetupRequest(token, code))
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
+            .bodyValue(TwoFactorVerifySetupRequest(token.value, code))
             .exchange()
             .expectStatus().isUnauthorized
 
@@ -293,12 +299,12 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
 
         val secret = twoFactorAuthService.generateSecretKey()
         val recoveryCode = Random.generateCode(10)
-        val token = twoFactorTokenService.createSetupToken(user.info.id, secret, listOf(recoveryCode))
+        val token = setupTokenService.create(user.info.id, secret, listOf(recoveryCode))
         val code = gAuth.getTotpPassword(secret)
 
         webTestClient.post()
             .uri("/api/user/2fa/setup")
-            .bodyValue(TwoFactorVerifySetupRequest(token + "a", code))
+            .bodyValue(TwoFactorVerifySetupRequest(token.value + "a", code))
             .exchange()
             .expectStatus().isUnauthorized
 
@@ -318,7 +324,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
 
         val res = webTestClient.post()
             .uri("/api/user/2fa/recovery?code=${user.twoFactorRecovery}")
-            .cookie(Constants.LOGIN_VERIFICATION_TOKEN_COOKIE, user.twoFactorToken)
+            .cookie(TwoFactorTokenType.Login.cookieKey, user.twoFactorToken)
             .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.first().id))
             .exchange()
             .expectStatus().isOk
@@ -329,14 +335,14 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
         requireNotNull(body)
 
         assertEquals(user.info.id, body.id)
-        val token = res.responseCookies[Constants.LOGIN_VERIFICATION_TOKEN_COOKIE]
+        val token = res.responseCookies[TwoFactorTokenType.Login.cookieKey]
             ?.first()
             ?.value
         assertEquals("", token)
 
-        assertFalse(res.responseCookies[Constants.ACCESS_TOKEN_COOKIE]?.firstOrNull()?.value.isNullOrEmpty())
-        assertFalse(res.responseCookies[Constants.REFRESH_TOKEN_COOKIE]?.firstOrNull()?.value.isNullOrEmpty())
-        assertFalse(res.responseCookies[Constants.STEP_UP_TOKEN_COOKIE]?.firstOrNull()?.value.isNullOrEmpty())
+        assertFalse(res.responseCookies[SessionTokenType.Access.cookieKey]?.firstOrNull()?.value.isNullOrEmpty())
+        assertFalse(res.responseCookies[SessionTokenType.Refresh.cookieKey]?.firstOrNull()?.value.isNullOrEmpty())
+        assertFalse(res.responseCookies[TwoFactorTokenType.StepUp.cookieKey]?.firstOrNull()?.value.isNullOrEmpty())
 
         val userAfterRecovery = userService.findById(user.info.id)
         assertTrue(userAfterRecovery.sensitive.security.twoFactor.enabled)
@@ -352,7 +358,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
 
         val res = webTestClient.post()
             .uri("/api/user/2fa/recovery?code=${user.twoFactorRecovery}")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.first().id))
             .exchange()
             .expectStatus().isOk
@@ -363,14 +369,14 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
         requireNotNull(body)
 
         assertEquals(user.info.id, body.id)
-        val token = res.responseCookies[Constants.LOGIN_VERIFICATION_TOKEN_COOKIE]
+        val token = res.responseCookies[TwoFactorTokenType.Login.cookieKey]
             ?.first()
             ?.value
         assertEquals("", token)
 
-        assertFalse(res.responseCookies[Constants.ACCESS_TOKEN_COOKIE]?.firstOrNull()?.value.isNullOrEmpty())
-        assertFalse(res.responseCookies[Constants.REFRESH_TOKEN_COOKIE]?.firstOrNull()?.value.isNullOrEmpty())
-        assertFalse(res.responseCookies[Constants.STEP_UP_TOKEN_COOKIE]?.firstOrNull()?.value.isNullOrEmpty())
+        assertFalse(res.responseCookies[SessionTokenType.Access.cookieKey]?.firstOrNull()?.value.isNullOrEmpty())
+        assertFalse(res.responseCookies[SessionTokenType.Refresh.cookieKey]?.firstOrNull()?.value.isNullOrEmpty())
+        assertFalse(res.responseCookies[TwoFactorTokenType.StepUp.cookieKey]?.firstOrNull()?.value.isNullOrEmpty())
 
         val userAfterRecovery = userService.findById(user.info.id)
         assertTrue(userAfterRecovery.sensitive.security.twoFactor.enabled)
@@ -385,7 +391,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/user/2fa/recovery?code=$code?context=login")
-            .cookie(Constants.LOGIN_VERIFICATION_TOKEN_COOKIE, user.twoFactorToken)
+            .cookie(TwoFactorTokenType.Login.cookieKey, user.twoFactorToken)
             .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.first().id))
             .exchange()
             .expectStatus().isUnauthorized
@@ -396,7 +402,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/user/2fa/recovery")
-            .cookie(Constants.LOGIN_VERIFICATION_TOKEN_COOKIE, user.twoFactorToken)
+            .cookie(TwoFactorTokenType.Login.cookieKey, user.twoFactorToken)
             .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.first().id))
             .exchange()
             .expectStatus().isBadRequest
@@ -430,7 +436,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
         val res = webTestClient.post()
             .uri("/api/user/2fa/verify-login?code=$code")
             .bodyValue(user.info.sensitive.devices.first().toRequestDto())
-            .cookie(Constants.LOGIN_VERIFICATION_TOKEN_COOKIE, user.twoFactorToken)
+            .cookie(TwoFactorTokenType.Login.cookieKey, user.twoFactorToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(UserResponse::class.java)
@@ -440,13 +446,13 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
         requireNotNull(body)
 
         assertEquals(user.info.id, body.id)
-        val token = res.responseCookies[Constants.LOGIN_VERIFICATION_TOKEN_COOKIE]
+        val token = res.responseCookies[TwoFactorTokenType.Login.cookieKey]
             ?.first()
             ?.value
         assertEquals("", token)
 
-        assertFalse(res.responseCookies[Constants.ACCESS_TOKEN_COOKIE]?.firstOrNull()?.value.isNullOrEmpty())
-        assertFalse(res.responseCookies[Constants.REFRESH_TOKEN_COOKIE]?.firstOrNull()?.value.isNullOrEmpty())
+        assertFalse(res.responseCookies[SessionTokenType.Access.cookieKey]?.firstOrNull()?.value.isNullOrEmpty())
+        assertFalse(res.responseCookies[SessionTokenType.Refresh.cookieKey]?.firstOrNull()?.value.isNullOrEmpty())
     }
     @Test fun `verifyLogin needs correct code`() = runTest {
         val user = registerUser(twoFactorEnabled = true)
@@ -457,7 +463,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
         webTestClient.post()
             .uri("/api/user/2fa/verify-login?code=$code")
             .bodyValue(user.info.sensitive.devices.first().toRequestDto())
-            .cookie(Constants.LOGIN_VERIFICATION_TOKEN_COOKIE, user.twoFactorToken)
+            .cookie(TwoFactorTokenType.Login.cookieKey, user.twoFactorToken)
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -467,7 +473,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/user/2fa/verify-login")
-            .cookie(Constants.LOGIN_VERIFICATION_TOKEN_COOKIE, user.twoFactorToken)
+            .cookie(TwoFactorTokenType.Login.cookieKey, user.twoFactorToken)
             .bodyValue(user.info.sensitive.devices.first())
             .exchange()
             .expectStatus().isBadRequest
@@ -485,7 +491,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/user/2fa/verify-login")
-            .cookie(Constants.LOGIN_VERIFICATION_TOKEN_COOKIE, user.twoFactorToken)
+            .cookie(TwoFactorTokenType.Login.cookieKey, user.twoFactorToken)
             .exchange()
             .expectStatus().isBadRequest
     }
@@ -504,7 +510,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
     @Test fun `loginStatus not pending with invalid cookie`() = runTest {
         val status1 = webTestClient.get()
             .uri("/api/user/2fa/login-status")
-            .cookie(Constants.LOGIN_VERIFICATION_TOKEN_COOKIE, "test")
+            .cookie(TwoFactorTokenType.Login.cookieKey, "test")
             .exchange()
             .expectStatus().isOk
             .expectBody(TwoFactorStatusResponse::class.java)
@@ -520,7 +526,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
 
         val res = webTestClient.get()
             .uri("/api/user/2fa/login-status")
-            .cookie(Constants.LOGIN_VERIFICATION_TOKEN_COOKIE, user.twoFactorToken)
+            .cookie(TwoFactorTokenType.Login.cookieKey, user.twoFactorToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(TwoFactorStatusResponse::class.java)
@@ -536,13 +542,13 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
 
         val res = webTestClient.post()
             .uri("/api/user/2fa/verify-step-up?code=$twoFactorCode")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(UserResponse::class.java)
             .returnResult()
 
-        val token = res.responseCookies[Constants.STEP_UP_TOKEN_COOKIE]?.first()?.value
+        val token = res.responseCookies[TwoFactorTokenType.StepUp.cookieKey]?.first()?.value
 
         requireNotNull(token)
     }
@@ -560,7 +566,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/user/2fa/verify-step-up?code")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectStatus().isBadRequest
     }
@@ -570,7 +576,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/user/2fa/verify-step-up?code=$twoFactorCode")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -580,7 +586,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/user/2fa/verify-step-up?code=$twoFactorCode")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectStatus().isBadRequest
     }
@@ -590,8 +596,8 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
 
         val res = webTestClient.get()
             .uri("/api/user/2fa/step-up-status")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
-            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorTokenService.createStepUpToken(user.info.id, user.info.sensitive.devices.first().id))
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
+            .cookie(TwoFactorTokenType.StepUp.cookieKey, cookieCreator.createCookie(stepUpTokenService.create(user.info.id, user.info.sensitive.devices.first().id)).toString())
             .exchange()
             .expectStatus().isOk
             .expectBody(TwoFactorStatusResponse ::class.java)
@@ -608,8 +614,8 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
 
         val res = webTestClient.get()
             .uri("/api/user/2fa/step-up-status")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
-            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorTokenService.createStepUpToken(anotherUser.info.id, user.info.sensitive.devices.first().id))
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
+            .cookie(TwoFactorTokenType.StepUp.cookieKey, cookieCreator.createCookie(stepUpTokenService.create(anotherUser.info.id, user.info.sensitive.devices.first().id)).toString())
             .exchange()
             .expectStatus().isOk
             .expectBody(TwoFactorStatusResponse::class.java)
@@ -625,8 +631,8 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
 
         val res = webTestClient.get()
             .uri("/api/user/2fa/step-up-status")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
-            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorTokenService.createStepUpToken(user.info.id, "another-device"))
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
+            .cookie(TwoFactorTokenType.StepUp.cookieKey, cookieCreator.createCookie(stepUpTokenService.create(user.info.id, "another-device")).toString())
             .exchange()
             .expectStatus().isOk
             .expectBody(TwoFactorStatusResponse::class.java)
@@ -642,8 +648,8 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
 
         val res = webTestClient.get()
             .uri("/api/user/2fa/step-up-status")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
-            .cookie(Constants.STEP_UP_TOKEN_COOKIE, "another-token")
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
+            .cookie(TwoFactorTokenType.StepUp.cookieKey, "another-token")
             .exchange()
             .expectStatus().isOk
             .expectBody(TwoFactorStatusResponse::class.java)
@@ -659,8 +665,8 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
 
         val res = webTestClient.get()
             .uri("/api/user/2fa/step-up-status")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
-            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorTokenService.createStepUpToken(user.info.id, user.info.sensitive.devices.first().id, Instant.ofEpochSecond(0)))
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
+            .cookie(TwoFactorTokenType.StepUp.cookieKey, cookieCreator.createCookie(stepUpTokenService.create(user.info.id, user.info.sensitive.devices.first().id, Instant.ofEpochSecond(0))).toString())
             .exchange()
             .expectStatus().isOk
             .expectBody(TwoFactorStatusResponse::class.java)
@@ -676,7 +682,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
 
         webTestClient.get()
             .uri("/api/user/2fa/step-up-status")
-            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorTokenService.createStepUpToken(user.info.id, user.info.sensitive.devices.first().id))
+            .cookie(TwoFactorTokenType.StepUp.cookieKey, cookieCreator.createCookie(stepUpTokenService.create(user.info.id, user.info.sensitive.devices.first().id)).toString())
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -685,8 +691,8 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
 
         val res = webTestClient.get()
             .uri("/api/user/2fa/step-up-status")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
-            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorTokenService.createStepUpToken(user.info.id, user.info.sensitive.devices.first().id))
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
+            .cookie(TwoFactorTokenType.StepUp.cookieKey, cookieCreator.createCookie(stepUpTokenService.create(user.info.id, user.info.sensitive.devices.first().id)).toString())
             .exchange()
             .expectStatus().isOk
             .expectBody(TwoFactorStatusResponse::class.java)
@@ -702,7 +708,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
 
         val res = webTestClient.get()
             .uri("/api/user/2fa/step-up-status")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(TwoFactorStatusResponse::class.java)
@@ -718,14 +724,14 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
         val password = "password"
         val user = registerUser(twoFactorEnabled = true)
 
-        val stepUp = twoFactorTokenService.createStepUpToken(user.info.id, user.info.sensitive.devices.first().id)
+        val stepUp = stepUpTokenService.create(user.info.id, user.info.sensitive.devices.first().id)
         val req = DisableTwoFactorRequest(password)
 
         val res = webTestClient.post()
             .uri("/api/user/2fa/disable")
             .bodyValue(req)
-            .cookie(Constants.STEP_UP_TOKEN_COOKIE, stepUp)
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(TwoFactorTokenType.StepUp.cookieKey, cookieCreator.createCookie(stepUp).toString())
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(UserResponse::class.java)
@@ -748,7 +754,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
         webTestClient.post()
             .uri("/api/user/2fa/disable")
             .bodyValue(req)
-            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorTokenService.createStepUpToken(user.info.id, user.info.sensitive.devices.first().id))
+            .cookie(TwoFactorTokenType.StepUp.cookieKey, cookieCreator.createCookie(stepUpTokenService.create(user.info.id, user.info.sensitive.devices.first().id)).toString())
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -760,7 +766,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
         webTestClient.post()
             .uri("/api/user/2fa/disable")
             .bodyValue(req)
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -772,8 +778,8 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
         webTestClient.post()
             .uri("/api/user/2fa/disable")
             .bodyValue(req)
-            .cookie(Constants.STEP_UP_TOKEN_COOKIE, "test")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(TwoFactorTokenType.StepUp.cookieKey, "test")
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -785,8 +791,8 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
         webTestClient.post()
             .uri("/api/user/2fa/disable")
             .bodyValue(req)
-            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorTokenService.createStepUpToken(user.info.id, user.info.sensitive.devices.first().id, Instant.ofEpochSecond(0)))
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(TwoFactorTokenType.StepUp.cookieKey, cookieCreator.createCookie(stepUpTokenService.create(user.info.id, user.info.sensitive.devices.first().id, Instant.ofEpochSecond(0))).toString())
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -800,8 +806,8 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
         webTestClient.post()
             .uri("/api/user/2fa/disable")
             .bodyValue(req)
-            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorTokenService.createStepUpToken(anotherUser.info.id, user.info.sensitive.devices.first().id))
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(TwoFactorTokenType.StepUp.cookieKey, cookieCreator.createCookie(stepUpTokenService.create(anotherUser.info.id, user.info.sensitive.devices.first().id)).toString())
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -813,8 +819,8 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
         webTestClient.post()
             .uri("/api/user/2fa/disable")
             .bodyValue(req)
-            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorTokenService.createStepUpToken(user.info.id, "another-device"))
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(TwoFactorTokenType.StepUp.cookieKey, cookieCreator.createCookie(stepUpTokenService.create(user.info.id, "another-device")).toString())
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -825,22 +831,22 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
         webTestClient.post()
             .uri("/api/user/2fa/disable")
             .bodyValue(DisableTwoFactorRequest(password))
-            .cookie(Constants.STEP_UP_TOKEN_COOKIE, twoFactorTokenService.createStepUpToken(user.info.id, user.info.sensitive.devices.first().id))
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(TwoFactorTokenType.StepUp.cookieKey, cookieCreator.createCookie(stepUpTokenService.create(user.info.id, user.info.sensitive.devices.first().id)).toString())
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectStatus().isBadRequest
     }
     @Test fun `disable needs correct password`() = runTest {
         val user = registerUser(twoFactorEnabled = true)
 
-        val stepUp = twoFactorTokenService.createStepUpToken(user.info.id, user.info.sensitive.devices.first().id)
+        val stepUp = stepUpTokenService.create(user.info.id, user.info.sensitive.devices.first().id)
         val req = DisableTwoFactorRequest("wrong-password")
 
         webTestClient.post()
             .uri("/api/user/2fa/disable")
             .bodyValue(req)
-            .cookie(Constants.STEP_UP_TOKEN_COOKIE, stepUp)
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(TwoFactorTokenType.StepUp.cookieKey, cookieCreator.createCookie(stepUp).toString())
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectStatus().isUnauthorized
     }

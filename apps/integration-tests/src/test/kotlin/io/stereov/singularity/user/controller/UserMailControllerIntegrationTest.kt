@@ -1,17 +1,17 @@
 package io.stereov.singularity.user.controller
 
 import io.mockk.verify
-import io.stereov.singularity.database.encryption.service.EncryptionSecretService
-import io.stereov.singularity.global.util.Constants
-import io.stereov.singularity.test.BaseMailIntegrationTest
-import io.stereov.singularity.user.core.dto.response.UserResponse
-import io.stereov.singularity.mail.user.service.MailTokenService
-import io.stereov.singularity.user.settings.dto.request.ChangeEmailRequest
 import io.stereov.singularity.auth.device.dto.DeviceInfoRequest
+import io.stereov.singularity.auth.session.dto.request.LoginRequest
+import io.stereov.singularity.auth.session.model.SessionTokenType
+import io.stereov.singularity.database.encryption.service.EncryptionSecretService
 import io.stereov.singularity.mail.user.dto.MailCooldownResponse
 import io.stereov.singularity.mail.user.dto.ResetPasswordRequest
 import io.stereov.singularity.mail.user.dto.SendPasswordResetRequest
-import io.stereov.singularity.auth.session.dto.request.LoginRequest
+import io.stereov.singularity.mail.user.service.MailTokenService
+import io.stereov.singularity.test.BaseMailIntegrationTest
+import io.stereov.singularity.user.core.dto.response.UserResponse
+import io.stereov.singularity.user.settings.dto.request.ChangeEmailRequest
 import jakarta.mail.internet.MimeMessage
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*
@@ -78,7 +78,7 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/user/mail/verify/send")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectStatus().isOk
 
@@ -90,13 +90,13 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/user/mail/verify/send")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectStatus().isOk
 
         val res = webTestClient.get()
             .uri("/api/user/mail/verify/cooldown")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(MailCooldownResponse::class.java)
@@ -112,7 +112,7 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
 
         val res = webTestClient.get()
             .uri("/api/user/mail/verify/cooldown")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(MailCooldownResponse::class.java)
@@ -138,7 +138,7 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
 
         val res = webTestClient.put()
             .uri("/api/user/me/email")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .bodyValue(ChangeEmailRequest(newEmail, password))
             .exchange()
             .expectStatus().isOk
@@ -227,7 +227,7 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
         webTestClient.post()
             .uri("/api/user/mail/reset-password/send")
             .bodyValue(SendPasswordResetRequest(user.info.sensitive.email))
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectStatus().isOk
 
@@ -238,7 +238,7 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/user/mail/reset-password/send")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectStatus().isBadRequest
     }
@@ -254,7 +254,7 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
 
         val res = webTestClient.get()
             .uri("/api/user/mail/reset-password/cooldown")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(MailCooldownResponse::class.java)
@@ -270,7 +270,7 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
 
         val res = webTestClient.get()
             .uri("/api/user/mail/reset-password/cooldown")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .cookie(SessionTokenType.Access.cookieKey, user.accessToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(MailCooldownResponse::class.java)

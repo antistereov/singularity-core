@@ -7,7 +7,7 @@ import io.stereov.singularity.auth.core.service.AuthenticationService
 import io.stereov.singularity.auth.device.service.UserDeviceService
 import io.stereov.singularity.auth.session.dto.request.LoginRequest
 import io.stereov.singularity.auth.session.dto.request.RegisterUserRequest
-import io.stereov.singularity.auth.token.cache.AccessTokenCache
+import io.stereov.singularity.auth.session.cache.AccessTokenCache
 import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.global.properties.AppProperties

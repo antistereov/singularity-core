@@ -92,7 +92,7 @@ class JwtServiceIntegrationTest : BaseIntegrationTest() {
             .build()
 
         val encoded = jwtService.encodeJwt(claims)
-        val jwt = jwtService.decodeJwt(encoded)
+        val jwt = jwtService.decodeJwt(encoded.tokenValue)
 
         assertEquals("test-user", jwt.subject)
         assertEquals("admin", jwt.claims["role"])

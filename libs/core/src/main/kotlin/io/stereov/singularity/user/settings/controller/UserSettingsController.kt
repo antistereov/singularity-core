@@ -1,6 +1,8 @@
 package io.stereov.singularity.user.settings.controller
 
-import io.stereov.singularity.auth.core.service.CookieService
+import io.stereov.singularity.auth.core.service.CookieCreator
+import io.stereov.singularity.auth.session.model.SessionTokenType
+import io.stereov.singularity.auth.twofactor.model.TwoFactorTokenType
 import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.core.mapper.UserMapper
@@ -18,7 +20,7 @@ import org.springframework.web.server.ServerWebExchange
 class UserSettingsController(
     private val userMapper: UserMapper,
     private val userSettingsService: UserSettingsService,
-    private val cookieService: CookieService,
+    private val cookieCreator: CookieCreator
 ) {
 
     /**
@@ -94,16 +96,16 @@ class UserSettingsController(
      */
     @DeleteMapping
     suspend fun delete(): ResponseEntity<Map<String, String>> {
-        val clearAccessTokenCookie = cookieService.clearAccessTokenCookie()
-        val clearRefreshTokenCookie = cookieService.clearRefreshTokenCookie()
-        val clearStepUpTokenCookie = cookieService.clearStepUpCookie()
+        val clearAccessTokenCookie = cookieCreator.clearCookie(SessionTokenType.Access)
+        val clearRefreshTokenCookie = cookieCreator.clearCookie(SessionTokenType.Refresh)
+        val clearStepUpTokenCookie = cookieCreator.clearCookie(TwoFactorTokenType.StepUp)
 
         userSettingsService.deleteUser()
 
         return ResponseEntity.ok()
-            .header("Set-Cookie", clearAccessTokenCookie.toString())
-            .header("Set-Cookie", clearRefreshTokenCookie.toString())
-            .header("Set-Cookie", clearStepUpTokenCookie.toString())
+            .header("Set-Cookie", clearAccessTokenCookie.value)
+            .header("Set-Cookie", clearRefreshTokenCookie.value)
+            .header("Set-Cookie", clearStepUpTokenCookie.value)
             .body(mapOf("message" to "success"))
     }
 }

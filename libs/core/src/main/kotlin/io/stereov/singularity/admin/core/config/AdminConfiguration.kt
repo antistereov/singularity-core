@@ -2,7 +2,6 @@ package io.stereov.singularity.admin.core.config
 
 import io.stereov.singularity.admin.core.controller.AdminController
 import io.stereov.singularity.admin.core.service.AdminService
-import io.stereov.singularity.auth.twofactor.config.UserTwoFactorConfiguration
 import io.stereov.singularity.database.hash.config.HashConfiguration
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.global.config.ApplicationConfiguration
@@ -19,7 +18,6 @@ import org.springframework.context.annotation.Configuration
 @AutoConfiguration(
     after = [
         ApplicationConfiguration::class,
-        UserTwoFactorConfiguration::class,
         HashConfiguration::class,
     ]
 )
