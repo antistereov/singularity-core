@@ -1,10 +1,11 @@
 package io.stereov.singularity.security.core.config
 
 import io.stereov.singularity.auth.core.config.AuthenticationConfiguration
-import io.stereov.singularity.auth.core.filter.CookieAuthenticationFilter
+import io.stereov.singularity.auth.core.filter.AuthenticationFilter
 import io.stereov.singularity.auth.core.properties.AuthProperties
 import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
+import io.stereov.singularity.auth.session.service.AccessTokenService
 import io.stereov.singularity.global.filter.LoggingFilter
 import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.ratelimit.filter.RateLimitFilter
@@ -12,7 +13,6 @@ import io.stereov.singularity.ratelimit.service.RateLimitService
 import io.stereov.singularity.security.core.properties.SecurityProperties
 import io.stereov.singularity.user.core.model.Role
 import io.stereov.singularity.user.core.service.UserService
-import io.stereov.singularity.auth.token.service.AccessTokenService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -107,7 +107,7 @@ class WebSecurityConfiguration {
             }
             .addFilterBefore(RateLimitFilter(rateLimitService, geolocationProperties), SecurityWebFiltersOrder.FIRST)
             .addFilterBefore(LoggingFilter(geolocationProperties, geoLocationService), SecurityWebFiltersOrder.AUTHENTICATION)
-            .addFilterBefore(CookieAuthenticationFilter(accessTokenService, userService, authProperties), SecurityWebFiltersOrder.AUTHENTICATION)
+            .addFilterBefore(AuthenticationFilter(accessTokenService, userService), SecurityWebFiltersOrder.AUTHENTICATION)
             .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())
             .build()
     }

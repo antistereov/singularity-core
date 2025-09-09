@@ -3,8 +3,8 @@ package io.stereov.singularity.user.settings.service
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.exception.model.InvalidCredentialsException
 import io.stereov.singularity.auth.core.service.AuthenticationService
-import io.stereov.singularity.auth.core.service.CookieService
-import io.stereov.singularity.auth.token.cache.AccessTokenCache
+import io.stereov.singularity.auth.session.cache.AccessTokenCache
+import io.stereov.singularity.auth.twofactor.service.StepUpTokenService
 import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.file.core.exception.model.UnsupportedMediaTypeException
@@ -27,7 +27,7 @@ import org.springframework.web.server.ServerWebExchange
 @Service
 class UserSettingsService(
     private val authenticationService: AuthenticationService,
-    private val cookieService: CookieService,
+    private val stepUpTokenService: StepUpTokenService,
     private val userMailSender: UserMailSender,
     private val userService: UserService,
     private val hashService: HashService,
@@ -63,7 +63,7 @@ class UserSettingsService(
         }
 
         if (user.sensitive.security.twoFactor.enabled) {
-            cookieService.validateStepUpCookie(exchange)
+            stepUpTokenService.extract(exchange)
         }
 
         if (appProperties.enableMail) {
@@ -96,7 +96,7 @@ class UserSettingsService(
         }
 
         if (user.sensitive.security.twoFactor.enabled) {
-            cookieService.validateStepUpCookie(exchange)
+            stepUpTokenService.extract(exchange)
         }
 
         user.password = hashService.hashBcrypt(payload.newPassword)

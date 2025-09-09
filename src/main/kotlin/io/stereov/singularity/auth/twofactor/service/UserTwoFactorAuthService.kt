@@ -4,9 +4,7 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.exception.AuthException
 import io.stereov.singularity.auth.core.service.AuthenticationService
-import io.stereov.singularity.auth.core.service.CookieService
-import io.stereov.singularity.auth.token.cache.AccessTokenCache
-import io.stereov.singularity.auth.token.service.TwoFactorTokenService
+import io.stereov.singularity.auth.session.cache.AccessTokenCache
 import io.stereov.singularity.auth.twofactor.dto.request.DisableTwoFactorRequest
 import io.stereov.singularity.auth.twofactor.dto.response.TwoFactorSetupResponse
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorAuthProperties
@@ -19,17 +17,6 @@ import io.stereov.singularity.user.core.service.UserService
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ServerWebExchange
 
-/**
- * # Service for managing two-factor authentication (2FA) for users.
- *
- * This service provides methods to set up, validate, and recover two-factor authentication for users.
- * It uses the [TwoFactorAuthService] to generate and validate codes,
- * the [io.stereov.singularity.database.encryption.service.EncryptionService] to encrypt and decrypt secrets,
- * and the [io.stereov.singularity.database.hash.service.HashService] to hash and check recovery codes.
- * It interacts with the [io.stereov.singularity.user.core.service.UserService] to save user data and the [io.stereov.singularity.auth.core.service.AuthenticationService] to get the current user.
- *
- * @author <a href="https://github.com/antistereov">antistereov</a>
- */
 @Service
 class UserTwoFactorAuthService(
     private val userService: UserService,
@@ -37,10 +24,12 @@ class UserTwoFactorAuthService(
     private val authenticationService: AuthenticationService,
     private val twoFactorAuthProperties: TwoFactorAuthProperties,
     private val hashService: HashService,
-    private val cookieService: CookieService,
-    private val twoFactorTokenService: TwoFactorTokenService,
     private val accessTokenCache: AccessTokenCache,
-    private val userMapper: UserMapper
+    private val userMapper: UserMapper,
+    private val stepUpTokenService: StepUpTokenService,
+    private val initTokenService: TwoFactorInitSetupTokenService,
+    private val setupTokenService: TwoFactorSetupTokenService,
+    private val loginTokenService: TwoFactorLoginTokenService
 ) {
 
     private val logger: KLogger
@@ -51,26 +40,26 @@ class UserTwoFactorAuthService(
      * It generates a secret key, an OTP auth URL, a recovery code, and a token.
      * The token is used to validate the setup process and enable two-factor authentication for the current user.
      *
-     * It needs a valid step-up token to perform this action.
+     * It needs a valid two factor setup init token to perform this action.
      *
      * @return A [TwoFactorSetupResponse] containing the secret, OTP auth URL, recovery code and setup token.
      */
     suspend fun setUpTwoFactorAuth(exchange: ServerWebExchange): TwoFactorSetupResponse {
         logger.debug { "Setting up two factor authentication" }
 
-        cookieService.validateTwoFactorSetupCookie(exchange)
+        initTokenService.extract(exchange)
 
         val user = authenticationService.getCurrentUser()
 
         val secret = twoFactorAuthService.generateSecretKey()
         val otpAuthUrl = twoFactorAuthService.getOtpAuthUrl(user.sensitive.email, secret)
         val recoveryCodes = List(twoFactorAuthProperties.recoveryCodeCount) {
-            Random.Companion.generateCode(twoFactorAuthProperties.recoveryCodeLength)
+            Random.generateCode(twoFactorAuthProperties.recoveryCodeLength)
         }
 
-        val setupToken = twoFactorTokenService.createSetupToken(user.id, secret, recoveryCodes)
+        val setupToken = setupTokenService.create(user.id, secret, recoveryCodes)
 
-        return TwoFactorSetupResponse(secret, otpAuthUrl, recoveryCodes, setupToken)
+        return TwoFactorSetupResponse(secret, otpAuthUrl, recoveryCodes, setupToken.value)
     }
 
     /**
@@ -86,7 +75,7 @@ class UserTwoFactorAuthService(
      */
     suspend fun validateSetup(token: String, code: Int): UserResponse {
         val user = authenticationService.getCurrentUser()
-        val setupToken = twoFactorTokenService.validateAndExtractSetupToken(token)
+        val setupToken = setupTokenService.validate(token)
 
         if (!twoFactorAuthService.validateCode(setupToken.secret, code)) {
             throw AuthException("Invalid two-factor authentication code")
@@ -118,9 +107,9 @@ class UserTwoFactorAuthService(
     suspend fun validateTwoFactorCode(exchange: ServerWebExchange, code: Int): UserDocument {
         logger.debug { "Validating two factor code" }
 
-        val userId = cookieService.validateLoginVerificationCookieAndGetUserId(exchange)
+        val token = loginTokenService.extract(exchange)
 
-        val user = userService.findById(userId)
+        val user = userService.findById(token.userId)
 
         return twoFactorAuthService.validateTwoFactorCode(user, code)
     }
@@ -136,7 +125,7 @@ class UserTwoFactorAuthService(
         logger.debug { "Checking login verification is needed" }
 
         return try {
-            cookieService.validateLoginVerificationCookieAndGetUserId(exchange)
+            loginTokenService.extract(exchange)
             true
         } catch (_: Exception) {
             false
@@ -160,7 +149,7 @@ class UserTwoFactorAuthService(
         val userId = try {
             authenticationService.getCurrentUserId()
         } catch (_: Exception) {
-            cookieService.validateLoginVerificationCookieAndGetUserId(exchange)
+            loginTokenService.extract(exchange).userId
         }
 
         val user = userService.findById(userId)
@@ -185,7 +174,7 @@ class UserTwoFactorAuthService(
     suspend fun disable(exchange: ServerWebExchange, req: DisableTwoFactorRequest): UserResponse {
         logger.debug { "Disabling 2FA" }
 
-        cookieService.validateStepUpCookie(exchange)
+        stepUpTokenService.extract(exchange)
 
         val user = authenticationService.getCurrentUser()
 

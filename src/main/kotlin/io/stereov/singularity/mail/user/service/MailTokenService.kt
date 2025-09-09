@@ -2,11 +2,11 @@ package io.stereov.singularity.mail.user.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.database.encryption.model.Encrypted
-import io.stereov.singularity.database.encryption.service.EncryptionService
 import io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException
 import io.stereov.singularity.auth.jwt.exception.model.TokenExpiredException
 import io.stereov.singularity.auth.jwt.service.JwtService
+import io.stereov.singularity.database.encryption.model.Encrypted
+import io.stereov.singularity.database.encryption.service.EncryptionService
 import io.stereov.singularity.mail.core.model.EmailVerificationToken
 import io.stereov.singularity.mail.core.model.PasswordResetToken
 import io.stereov.singularity.mail.core.properties.MailProperties
@@ -55,7 +55,7 @@ class MailTokenService(
             .id(secret)
             .build()
 
-        return jwtService.encodeJwt(claims)
+        return jwtService.encodeJwt(claims).tokenValue
     }
 
     /**
@@ -107,7 +107,7 @@ class MailTokenService(
             .claim("encryption-key-id", encryptedSecret.secretKey)
             .build()
         
-        return jwtService.encodeJwt(claims)
+        return jwtService.encodeJwt(claims).tokenValue
     }
 
     /**
