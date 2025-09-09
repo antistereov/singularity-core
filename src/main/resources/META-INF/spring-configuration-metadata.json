@@ -492,14 +492,14 @@
       "type": "java.lang.Integer",
       "sourceType": "io.stereov.singularity.auth.twofactor.properties.TwoFactorAuthProperties",
       "defaultValue": 10,
-      "description": "Length of the recovery code. Default is 10 characters."
+      "description": "Length of the recovery code that can be used to log in if a user lost access to their second factor. Default is 10 characters."
     },
     {
-      "name": "singularity.security.two-factor.recovery-code-count",
+      "name": "singularity.auth.two-factor.recovery-code-count",
       "type": "java.lang.Integer",
       "sourceType": "io.stereov.singularity.auth.twofactor.properties.TwoFactorAuthProperties",
       "defaultValue": 6,
-      "description": "Count of recovery codes to generate. Default is 6."
+      "description": "The number of recovery codes to generate. Every code can only be used once. Default is 6."
     },
     {
       "name": "singularity.ui.base-url",
