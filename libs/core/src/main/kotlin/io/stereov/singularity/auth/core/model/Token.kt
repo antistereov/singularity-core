@@ -3,8 +3,7 @@ package io.stereov.singularity.auth.core.model
 import org.springframework.security.oauth2.jwt.Jwt
 import java.time.Instant
 
-interface Token<T: TokenType> {
-    val type: T
+interface Token {
     val jwt: Jwt
 
     val expiresAt: Instant?

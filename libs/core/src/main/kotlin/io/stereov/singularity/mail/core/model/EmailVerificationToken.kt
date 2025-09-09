@@ -1,6 +1,8 @@
 package io.stereov.singularity.mail.core.model
 
+import io.stereov.singularity.auth.core.model.Token
 import org.bson.types.ObjectId
+import org.springframework.security.oauth2.jwt.Jwt
 
 /**
  * # Email verification token.
@@ -17,4 +19,5 @@ data class EmailVerificationToken(
     val userId: ObjectId,
     val email: String,
     val secret: String,
-)
+    override val jwt: Jwt
+) : Token

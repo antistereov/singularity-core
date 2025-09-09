@@ -1,6 +1,6 @@
 package io.stereov.singularity.auth.core.model
 
-interface TokenType {
+interface SecurityTokenType {
     val cookieName: String
     val header: String
 }
