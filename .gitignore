@@ -56,4 +56,4 @@ bin/
 /demo/logs/
 /demo/tmp/
 /files/
-/.run/io.stereov.singularity in singularity.apps.integration-tests.test.run.xml
+/.run/
