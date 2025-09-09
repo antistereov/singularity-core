@@ -1,6 +1,8 @@
 package io.stereov.singularity.mail.core.model
 
+import io.stereov.singularity.auth.core.model.Token
 import org.bson.types.ObjectId
+import org.springframework.security.oauth2.jwt.Jwt
 
 /**
  * # Password reset token.
@@ -16,4 +18,5 @@ import org.bson.types.ObjectId
 data class PasswordResetToken(
     val userId: ObjectId,
     val secret: String,
-)
+    override val jwt: Jwt
+) : Token

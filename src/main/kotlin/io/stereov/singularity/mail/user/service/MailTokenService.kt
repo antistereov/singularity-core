@@ -80,7 +80,7 @@ class MailTokenService(
             ?: throw InvalidTokenException("No email found in claims")
         val secret = jwt.id
 
-        return EmailVerificationToken(userId, email, secret)
+        return EmailVerificationToken(userId, email, secret, jwt)
     }
 
     /**
@@ -135,6 +135,6 @@ class MailTokenService(
 
         val secret = encryptionService.decrypt(Encrypted<String>(kid, encryptedSecret))
 
-        return PasswordResetToken(userId, secret)
+        return PasswordResetToken(userId, secret, jwt)
     }
 }

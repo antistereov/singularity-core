@@ -7,7 +7,4 @@ data class TwoFactorSetupToken(
     val secret: String,
     val recoveryCodes: List<String>,
     override val jwt: Jwt
-) : Token<TwoFactorTokenType.Setup> {
-
-    override val type = TwoFactorTokenType.Setup
-}
+) : Token

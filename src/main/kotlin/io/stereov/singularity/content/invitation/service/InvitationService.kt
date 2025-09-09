@@ -55,7 +55,7 @@ class InvitationService(
         logger.debug { "Inviting \"$email\" with claims: $claims" }
 
         val invitation = save(email, claims, issuedAt, expiresInSeconds)
-        val token = invitationTokenService.createInvitationToken(invitation)
+        val token = invitationTokenService.create(invitation)
         val subject = translateService.translate(TranslateKey("invitation.subject"), "i18n/core/mail", lang)
 
         val placeholders = mapOf(
@@ -63,7 +63,7 @@ class InvitationService(
             "invited_to" to invitedTo,
             "expiration_days" to (expiresInSeconds / 60 / 60 / 24).toInt(),
             "accept_url" to uiProperties.baseUrl.removeSuffix("/") + "/" + acceptPath.removePrefix("/"),
-            "accept_token" to token
+            "accept_token" to token.value
         )
         val template = TemplateBuilder
             .fromResource("templates/mail/invitation.html")
@@ -77,16 +77,16 @@ class InvitationService(
         return invitation
     }
 
-    suspend fun accept(token: String): InvitationDocument {
+    suspend fun accept(tokenValue: String): InvitationDocument {
         logger.debug { "Validating invitation" }
 
-        val id = try {
-            invitationTokenService.validateInvitationTokenAndGetId(token)
+        val token = try {
+            invitationTokenService.extract(tokenValue)
         } catch (e: Exception) {
             throw InvalidInvitationException(cause = e)
         }
 
-        val invitation = findByIdOrNull(id)
+        val invitation = findByIdOrNull(token.invitationId)
             ?: throw InvalidInvitationException()
 
         return invitation

@@ -1,8 +1,8 @@
 package io.stereov.singularity.auth.core.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.auth.core.model.Token
-import io.stereov.singularity.auth.core.model.TokenType
+import io.stereov.singularity.auth.core.model.SecurityToken
+import io.stereov.singularity.auth.core.model.SecurityTokenType
 import io.stereov.singularity.global.properties.AppProperties
 import org.springframework.http.ResponseCookie
 import org.springframework.stereotype.Service
@@ -16,7 +16,7 @@ class CookieCreator(
 
     private val logger = KotlinLogging.logger {}
 
-    fun createCookie(token: Token<*>, path: String = "/"): ResponseCookie {
+    fun createCookie(token: SecurityToken<*>, path: String = "/"): ResponseCookie {
         logger.debug { "Creating cookie from token of type ${token.type.cookieName}" }
 
         val cookie = ResponseCookie.from(token.type.cookieName, token.jwt.tokenValue)
@@ -36,10 +36,10 @@ class CookieCreator(
         return cookie.build()
     }
 
-    suspend fun clearCookie(tokenType: TokenType, path: String = "/"): ResponseCookie {
-        logger.debug { "Clearing cookie for ${tokenType.cookieName}" }
+    suspend fun clearCookie(securityTokenType: SecurityTokenType, path: String = "/"): ResponseCookie {
+        logger.debug { "Clearing cookie for ${securityTokenType.cookieName}" }
 
-        val cookie = ResponseCookie.from(tokenType.cookieName, "")
+        val cookie = ResponseCookie.from(securityTokenType.cookieName, "")
             .httpOnly(true)
             .sameSite("Strict")
             .maxAge(0)
