@@ -39,6 +39,9 @@ singularity:
       account-id: ${MAXMIND_ACCOUNT_ID}
       license-key: ${MAXMIND_LICENSE_KEY}
     allow-header-authentication: false
+    two-factor:
+      recovery-code-length: 10
+      recovery-code-count: 6
   file:
     storage:
       type: ${STORAGE_TYPE}
@@ -87,9 +90,6 @@ singularity:
     login-attempt-limit:
       ip-limit: 1000
       ip-time-window: 1
-    two-factor:
-      recovery-code-length: 10
-      recovery-code-count: 6
   ui:
     base-url: ${UI_BASE_URL}
     icon-url: ${ICON_URL}

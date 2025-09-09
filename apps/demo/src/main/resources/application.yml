@@ -31,6 +31,9 @@ singularity:
       database-directory: .data/demo/geolocation
       account-id: ${MAXMIND_ACCOUNT_ID}
       license-key: ${MAXMIND_LICENSE_KEY}
+    two-factor:
+      recovery-code-length: 10
+      recovery-code-count: 6
   app:
     name: TestApplication
     base-url: ${BACKEND_BASE_URL:http://localhost:8000}
@@ -62,8 +65,5 @@ singularity:
     login-attempt-limit:
       ip-limit: 10000
       ip-time-window: 1
-    two-factor:
-      recovery-code-length: 10
-      recovery-code-count: 6
   ui:
     base-url: ${UI_BASE_URL:http://localhost:3000}

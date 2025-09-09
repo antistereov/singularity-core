@@ -4,6 +4,7 @@ import io.stereov.singularity.auth.device.dto.DeviceInfoRequest
 import io.stereov.singularity.auth.session.dto.request.LoginRequest
 import io.stereov.singularity.auth.session.dto.request.RegisterUserRequest
 import io.stereov.singularity.auth.session.dto.response.LoginResponse
+import io.stereov.singularity.auth.session.dto.response.RefreshTokenResponse
 import io.stereov.singularity.auth.session.dto.response.RegisterResponse
 import io.stereov.singularity.auth.session.model.SessionTokenType
 import io.stereov.singularity.auth.twofactor.model.TwoFactorTokenType
@@ -826,23 +827,23 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
             .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.first().id))
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserResponse::class.java)
+            .expectBody(RefreshTokenResponse::class.java)
             .returnResult()
 
-        val account = response.responseBody
+        val res = response.responseBody
         val accessToken = response.responseCookies[SessionTokenType.Access.cookieKey]
             ?.firstOrNull()?.value
         val refreshToken = response.responseCookies[SessionTokenType.Refresh.cookieKey]
             ?.firstOrNull()?.value
 
-        requireNotNull(account) { "No account provided in response" }
+        requireNotNull(res) { "No account provided in response" }
         requireNotNull(accessToken) { "No access token provided in response" }
         requireNotNull(refreshToken) { "No refresh token provided in response" }
 
         assertTrue(accessToken.isNotBlank())
         assertTrue(refreshToken.isNotBlank())
 
-        assertEquals(user.info.id, account.id)
+        assertEquals(user.info.id, res.user.id)
 
         webTestClient.post()
             .uri("/api/user/refresh")

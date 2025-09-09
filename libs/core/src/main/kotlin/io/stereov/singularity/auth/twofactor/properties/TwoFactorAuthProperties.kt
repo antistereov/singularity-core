@@ -16,7 +16,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
-@ConfigurationProperties(prefix = "singularity.security.two-factor")
+@ConfigurationProperties(prefix = "singularity.auth.two-factor")
 data class TwoFactorAuthProperties(
     val recoveryCodeLength: Int = 10,
     val recoveryCodeCount: Int = 6,

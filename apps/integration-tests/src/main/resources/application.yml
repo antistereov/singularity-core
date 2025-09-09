@@ -32,6 +32,10 @@ singularity:
     root-email: ${ROOT_EMAIL}
     root-password: ${ROOT_PASSWORD}
     enable-mail: false
+  auth:
+    two-factor:
+      recovery-code-length: 10
+      recovery-code-count: 6
   file:
     storage:
       type: local
@@ -54,8 +58,5 @@ singularity:
     login-attempt-limit:
       ip-limit: 10000
       ip-time-window: 1
-    two-factor:
-      recovery-code-length: 10
-      recovery-code-count: 6
   ui:
     base-url: http://localhost:4200
