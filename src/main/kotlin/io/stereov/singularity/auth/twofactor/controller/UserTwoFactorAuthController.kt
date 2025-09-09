@@ -19,6 +19,7 @@ import io.stereov.singularity.auth.twofactor.service.StepUpTokenService
 import io.stereov.singularity.auth.twofactor.service.TwoFactorInitSetupTokenService
 import io.stereov.singularity.auth.twofactor.service.UserTwoFactorAuthService
 import io.stereov.singularity.global.model.ErrorResponse
+import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.core.mapper.UserMapper
 import io.swagger.v3.oas.annotations.Operation
@@ -26,12 +27,17 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ServerWebExchange
 
 @RestController
 @RequestMapping("/api/user/2fa")
+@Tag(
+    name = "Two Factor Authentication",
+    description = "Operations related to two-factor authentication"
+)
 class UserTwoFactorAuthController(
     private val twoFactorService: UserTwoFactorAuthService,
     private val authProperties: AuthProperties,
@@ -49,7 +55,9 @@ class UserTwoFactorAuthController(
     @Operation(
         summary = "Initialize 2FA setup",
         description = "Initialize the 2FA by authorizing the current user. If successful, an SetupStartupToken will be set.",
-        security = [SecurityRequirement(name = "bearerAuth")],
+        security = [
+            SecurityRequirement(name = OpenApiConstants.STEP_UP_HEADER)
+        ],
         responses = [
             ApiResponse(
                 responseCode = "200",
@@ -105,7 +113,7 @@ class UserTwoFactorAuthController(
         )
     }
 
-    @PostMapping("/recovery")
+    @PostMapping("/recover")
     suspend fun recoverUser(
         @RequestParam("code") code: String,
         exchange: ServerWebExchange,

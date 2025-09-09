@@ -28,6 +28,7 @@ io.stereov.singularity.file.s3.config.S3Configuration
 
 io.stereov.singularity.global.config.ApplicationConfiguration
 io.stereov.singularity.global.config.JsonConfiguration
+io.stereov.singularity.global.config.OpenApiConfig
 io.stereov.singularity.global.config.WebClientConfiguration
 io.stereov.singularity.global.config.WebFluxConfiguration
 io.stereov.singularity.security.core.config.WebSecurityConfiguration
