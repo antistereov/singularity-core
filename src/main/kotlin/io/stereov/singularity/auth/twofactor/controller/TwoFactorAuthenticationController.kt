@@ -16,8 +16,8 @@ import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorVerifySetupReq
 import io.stereov.singularity.auth.twofactor.dto.response.*
 import io.stereov.singularity.auth.twofactor.model.TwoFactorTokenType
 import io.stereov.singularity.auth.twofactor.service.StepUpTokenService
+import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthenticationService
 import io.stereov.singularity.auth.twofactor.service.TwoFactorInitSetupTokenService
-import io.stereov.singularity.auth.twofactor.service.UserTwoFactorAuthService
 import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.user.core.dto.response.UserResponse
@@ -38,8 +38,8 @@ import org.springframework.web.server.ServerWebExchange
     name = "Two Factor Authentication",
     description = "Operations related to two-factor authentication"
 )
-class UserTwoFactorAuthController(
-    private val twoFactorService: UserTwoFactorAuthService,
+class TwoFactorAuthenticationController(
+    private val twoFactorService: TwoFactorAuthenticationService,
     private val authProperties: AuthProperties,
     private val geolocationService: GeolocationService,
     private val userMapper: UserMapper,
@@ -56,7 +56,8 @@ class UserTwoFactorAuthController(
         summary = "Initialize 2FA setup",
         description = "Initialize the 2FA by authorizing the current user. If successful, an SetupStartupToken will be set.",
         security = [
-            SecurityRequirement(name = OpenApiConstants.STEP_UP_HEADER)
+            SecurityRequirement(name = OpenApiConstants.ACCESS_TOKEN_HEADER),
+            SecurityRequirement(name = OpenApiConstants.ACCESS_TOKEN_COOKIE),
         ],
         responses = [
             ApiResponse(
@@ -81,24 +82,31 @@ class UserTwoFactorAuthController(
     }
 
     @Operation(
-        summary = "Perform 2FA setup",
-        description = "Generate 2FA secret, recovery codes ",
-        security = [SecurityRequirement(name = "bearerAuth")],
+        summary = "Get 2FA secret and recovery codes",
+        description = "Get a 2FA secret, recovery codes and a TOTP URL. " +
+                "This information will be stored inside a token that you will get in the response. " +
+                "Use this token to perform the validation.",
+        security = [
+            SecurityRequirement(name = OpenApiConstants.ACCESS_TOKEN_HEADER),
+            SecurityRequirement(name = OpenApiConstants.ACCESS_TOKEN_COOKIE),
+            SecurityRequirement(name = OpenApiConstants.TWO_FACTOR_INIT_SETUP_HEADER),
+            SecurityRequirement(name = OpenApiConstants.TWO_FACTOR_INIT_SETUP_COOKIE)
+        ],
         responses = [
             ApiResponse(
                 responseCode = "200",
-                description = "Authorization successful.",
+                description = "Success.",
                 content = [Content(schema = Schema(implementation = TwoFactorSetupResponse::class))]
             ),
             ApiResponse(
                 responseCode = "401",
-                description = "Invalid credentials.",
+                description = "Not authenticated.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
     )
     @GetMapping("/setup")
-    suspend fun setupTwoFactorAuth(exchange: ServerWebExchange): ResponseEntity<TwoFactorSetupResponse> {
+    suspend fun setupTwoFactor(exchange: ServerWebExchange): ResponseEntity<TwoFactorSetupResponse> {
         val res = twoFactorService.setUpTwoFactorAuth(exchange)
 
         return ResponseEntity.ok().body(res)

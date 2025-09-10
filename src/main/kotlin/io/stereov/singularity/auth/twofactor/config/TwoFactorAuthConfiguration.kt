@@ -11,7 +11,7 @@ import io.stereov.singularity.auth.jwt.service.JwtService
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.service.AccessTokenService
 import io.stereov.singularity.auth.core.service.RefreshTokenService
-import io.stereov.singularity.auth.twofactor.controller.UserTwoFactorAuthController
+import io.stereov.singularity.auth.twofactor.controller.TwoFactorAuthenticationController
 import io.stereov.singularity.auth.twofactor.exception.handler.TwoFactorAuthExceptionHandler
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorAuthProperties
 import io.stereov.singularity.auth.twofactor.service.*
@@ -37,7 +37,7 @@ class TwoFactorAuthConfiguration {
     @Bean
     @ConditionalOnMissingBean
     fun userTwoFactorAuthController(
-        userTwoFactorAuthService: UserTwoFactorAuthService,
+        twoFactorAuthenticationService: TwoFactorAuthenticationService,
         authProperties: AuthProperties,
         geolocationService: GeolocationService,
         userMapper: UserMapper,
@@ -47,9 +47,9 @@ class TwoFactorAuthConfiguration {
         stepUpTokenService: StepUpTokenService,
         cookieCreator: CookieCreator,
         authorizationService: AuthorizationService
-    ): UserTwoFactorAuthController {
-        return UserTwoFactorAuthController(
-            userTwoFactorAuthService,
+    ): TwoFactorAuthenticationController {
+        return TwoFactorAuthenticationController(
+            twoFactorAuthenticationService,
             authProperties,
             geolocationService,
             userMapper,
@@ -82,16 +82,16 @@ class TwoFactorAuthConfiguration {
         jwtService: JwtService,
         jwtProperties: JwtProperties,
         authorizationService: AuthorizationService,
-        twoFactorAuthService: TwoFactorAuthService,
+        twoFactorService: TwoFactorService,
         tokenValueExtractor: TokenValueExtractor,
     ): StepUpTokenService {
-        return StepUpTokenService(jwtService, jwtProperties, authorizationService, twoFactorAuthService, tokenValueExtractor)
+        return StepUpTokenService(jwtService, jwtProperties, authorizationService, twoFactorService, tokenValueExtractor)
     }
 
     @Bean
     @ConditionalOnMissingBean
-    fun twoFactorAuthService(googleAuthenticator: GoogleAuthenticator): TwoFactorAuthService {
-        return TwoFactorAuthService(googleAuthenticator)
+    fun twoFactorAuthService(googleAuthenticator: GoogleAuthenticator): TwoFactorService {
+        return TwoFactorService(googleAuthenticator)
     }
 
     @Bean
@@ -124,7 +124,7 @@ class TwoFactorAuthConfiguration {
     @ConditionalOnMissingBean
     fun userTwoFactorAuthService(
         userService: UserService,
-        twoFactorAuthService: TwoFactorAuthService,
+        twoFactorService: TwoFactorService,
         authorizationService: AuthorizationService,
         twoFactorAuthProperties: TwoFactorAuthProperties,
         hashService: HashService,
@@ -134,10 +134,10 @@ class TwoFactorAuthConfiguration {
         initTokenService: TwoFactorInitSetupTokenService,
         setupTokenService: TwoFactorSetupTokenService,
         loginTokenService: TwoFactorLoginTokenService
-    ): UserTwoFactorAuthService {
-        return UserTwoFactorAuthService(
+    ): TwoFactorAuthenticationService {
+        return TwoFactorAuthenticationService(
             userService,
-            twoFactorAuthService,
+            twoFactorService,
             authorizationService,
             twoFactorAuthProperties,
             hashService,

@@ -22,7 +22,7 @@ class StepUpTokenService(
     private val jwtService: JwtService,
     private val jwtProperties: JwtProperties,
     private val authorizationService: AuthorizationService,
-    private val twoFactorAuthService: TwoFactorAuthService,
+    private val twoFactorService: TwoFactorService,
     private val tokenValueExtractor: TokenValueExtractor,
 ) {
 
@@ -36,7 +36,7 @@ class StepUpTokenService(
         val user = authorizationService.getCurrentUser()
         val sessionId = authorizationService.getCurrentsessionId()
 
-        twoFactorAuthService.validateTwoFactorCode(user, code)
+        twoFactorService.validateTwoFactorCode(user, code)
 
         return create(user.id, sessionId, issuedAt)
     }
