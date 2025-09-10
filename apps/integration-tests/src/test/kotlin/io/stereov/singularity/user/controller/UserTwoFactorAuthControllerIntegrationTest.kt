@@ -196,7 +196,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
         val sessionId = "session"
         val user = registerUser(email, password, sessionId)
 
-        val secret = twoFactorAuthService.generateSecretKey()
+        val secret = twoFactorService.generateSecretKey()
         val recoveryCode = Random.generateCode(10)
         val token = setupTokenService.create(user.info.id, secret, listOf(recoveryCode))
         val code = gAuth.getTotpPassword(secret)
@@ -226,7 +226,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
         val sessionId = "session"
         val user = registerUser(email, password, sessionId)
 
-        val secret = twoFactorAuthService.generateSecretKey()
+        val secret = twoFactorService.generateSecretKey()
         val recoveryCode = Random.generateCode(10)
         val token = setupTokenService.create(user.info.id, secret, listOf(recoveryCode))
         val code = gAuth.getTotpPassword(secret)
@@ -250,7 +250,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
         val sessionId = "session"
         val user = registerUser(email, password, sessionId)
 
-        val secret = twoFactorAuthService.generateSecretKey()
+        val secret = twoFactorService.generateSecretKey()
         val recoveryCode = Random.generateCode(10)
         val token = setupTokenService.create(user.info.id, secret, listOf(recoveryCode), Instant.ofEpochSecond(0))
         val code = gAuth.getTotpPassword(secret)
@@ -275,7 +275,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
         val user = registerUser(email, password, sessionId)
         val anotherUser = registerUser("another@email.com")
 
-        val secret = twoFactorAuthService.generateSecretKey()
+        val secret = twoFactorService.generateSecretKey()
         val recoveryCode = Random.generateCode(10)
         val token = setupTokenService.create(anotherUser.info.id, secret, listOf(recoveryCode))
         val code = gAuth.getTotpPassword(secret)
@@ -299,7 +299,7 @@ class UserTwoFactorAuthControllerIntegrationTest : BaseIntegrationTest() {
         val sessionId = "session"
         val user = registerUser(email, password, sessionId)
 
-        val secret = twoFactorAuthService.generateSecretKey()
+        val secret = twoFactorService.generateSecretKey()
         val recoveryCode = Random.generateCode(10)
         val token = setupTokenService.create(user.info.id, secret, listOf(recoveryCode))
         val code = gAuth.getTotpPassword(secret)

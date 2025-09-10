@@ -7,19 +7,8 @@ import io.stereov.singularity.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.user.core.model.UserDocument
 import org.springframework.stereotype.Service
 
-/**
- * # Service for Two-Factor Authentication (2FA).
- *
- * This service provides methods for generating and validating
- * two-factor authentication codes using the Google Authenticator.
- *
- * It includes methods for generating secret keys, validating codes,
- * generating recovery codes, and generating OTP Auth URLs.
- *
- * @author <a href="https://github.com/antistereov">antistereov</a>
- */
 @Service
-class TwoFactorAuthService(
+class TwoFactorService(
     private val gAuth: GoogleAuthenticator,
 ) {
 

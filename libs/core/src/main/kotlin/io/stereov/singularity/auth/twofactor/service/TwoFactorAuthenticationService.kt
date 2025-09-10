@@ -2,9 +2,9 @@ package io.stereov.singularity.auth.twofactor.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.exception.AuthException
 import io.stereov.singularity.auth.core.service.AuthorizationService
-import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.twofactor.dto.request.DisableTwoFactorRequest
 import io.stereov.singularity.auth.twofactor.dto.response.TwoFactorSetupResponse
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorAuthProperties
@@ -18,9 +18,9 @@ import org.springframework.stereotype.Service
 import org.springframework.web.server.ServerWebExchange
 
 @Service
-class UserTwoFactorAuthService(
+class TwoFactorAuthenticationService(
     private val userService: UserService,
-    private val twoFactorAuthService: TwoFactorAuthService,
+    private val twoFactorService: TwoFactorService,
     private val authorizationService: AuthorizationService,
     private val twoFactorAuthProperties: TwoFactorAuthProperties,
     private val hashService: HashService,
@@ -51,8 +51,8 @@ class UserTwoFactorAuthService(
 
         val user = authorizationService.getCurrentUser()
 
-        val secret = twoFactorAuthService.generateSecretKey()
-        val otpAuthUrl = twoFactorAuthService.getOtpAuthUrl(user.sensitive.email, secret)
+        val secret = twoFactorService.generateSecretKey()
+        val otpAuthUrl = twoFactorService.getOtpAuthUrl(user.sensitive.email, secret)
         val recoveryCodes = List(twoFactorAuthProperties.recoveryCodeCount) {
             Random.generateCode(twoFactorAuthProperties.recoveryCodeLength)
         }
@@ -77,7 +77,7 @@ class UserTwoFactorAuthService(
         val user = authorizationService.getCurrentUser()
         val setupToken = setupTokenService.validate(token)
 
-        if (!twoFactorAuthService.validateCode(setupToken.secret, code)) {
+        if (!twoFactorService.validateCode(setupToken.secret, code)) {
             throw AuthException("Invalid two-factor authentication code")
         }
 
@@ -111,7 +111,7 @@ class UserTwoFactorAuthService(
 
         val user = userService.findById(token.userId)
 
-        return twoFactorAuthService.validateTwoFactorCode(user, code)
+        return twoFactorService.validateTwoFactorCode(user, code)
     }
 
     /**

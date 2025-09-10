@@ -23,7 +23,7 @@ All paths are public by default.
 :::
 
 There are two ways to secure your endpoints:
-* Using the `AuthenticationService` for authorization on the [service level](#authorization-at-service-level).
+* Using the [`AuthorizationService`](https://github.com/antistereov/singularity-core/blob/main/src/main/kotlin/io/stereov/singularity/auth/core/service/AuthorizationService.kt) for authorization on the [service level](#authorization-at-service-level).
 * Defining required roles [by path](#authorization-by-path) as an easy option to secure endpoints.
 
 :::warning
@@ -34,7 +34,7 @@ It also allows setting more specific requirements such as group memberships.
 
 ## Authorization at Service Level
 
-The [`AuthenticationService`](https://github.com/antistereov/singularity-core/blob/main/src/main/kotlin/io/stereov/singularity/auth/service/AuthenticationService.kt) provides an easy way to sure endpoints at the lowest level.
+The [`AuthorizationService`](https://github.com/antistereov/singularity-core/blob/main/src/main/kotlin/io/stereov/singularity/auth/core/service/AuthorizationService.kt) provides an easy way to sure endpoints at the lowest level.
 This philosophy ensures that if a specific method `doAdminThings()` requires authorization, 
 all methods that call `doAdminThings()` also require the same authorization.
 
@@ -84,7 +84,7 @@ class CoolStuffController(
 
 @Service
 class CoolStuffService(
-    private val authService: AuthenticationService
+    private val authService: AuthorizationService
 ) {
     
     suspend fun getCoolStuff(): CoolStuff {
@@ -146,7 +146,7 @@ class CoolStuffController(
 
 @Service
 class CoolStuffService(
-    private val authService: AuthenticationService
+    private val authService: AuthorizationService
 ) {
 
     suspend fun getCoolStuffForCoolGroup(): CoolStuff {
@@ -189,7 +189,7 @@ class CoolStuffController(
 
 @Service
 class CoolStuffService(
-    private val authService: AuthenticationService
+    private val authService: AuthorizationService
 ) {
 
     suspend fun getCoolStuffForUserWithId(): CoolStuff {
@@ -216,7 +216,7 @@ You can change the method slightly to do this:
 ```kotlin
 @Service
 class CoolStuffService(
-    private val authService: AuthenticationService
+    private val authService: AuthorizationService
 ) {
 
     suspend fun getCoolStuffForUserWithId(): CoolStuff {

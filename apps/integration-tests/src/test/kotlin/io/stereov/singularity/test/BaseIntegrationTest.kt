@@ -4,7 +4,7 @@ import io.stereov.singularity.auth.core.service.CookieCreator
 import io.stereov.singularity.auth.core.service.AccessTokenService
 import io.stereov.singularity.auth.core.service.RefreshTokenService
 import io.stereov.singularity.auth.twofactor.service.StepUpTokenService
-import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthService
+import io.stereov.singularity.auth.twofactor.service.TwoFactorService
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.test.config.MockMailSenderConfig
 import org.springframework.beans.factory.annotation.Autowired
@@ -29,7 +29,7 @@ class BaseIntegrationTest : BaseSpringBootTest() {
     lateinit var refreshTokenService: RefreshTokenService
 
     @Autowired
-    lateinit var twoFactorAuthService: TwoFactorAuthService
+    lateinit var twoFactorService: TwoFactorService
 
     @Autowired
     lateinit var stepUpTokenService: StepUpTokenService
