@@ -6,6 +6,7 @@ import com.maxmind.geoip2.model.CityResponse
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.geolocation.exception.GeolocationException
 import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
+import io.stereov.singularity.ratelimit.excpetion.model.TooManyRequestsException
 import jakarta.annotation.PostConstruct
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.reactor.awaitSingle
@@ -14,10 +15,12 @@ import kotlinx.coroutines.withContext
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.core.io.buffer.DataBufferUtils
+import org.springframework.http.HttpStatus
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToFlux
+import reactor.core.publisher.Mono
 import java.io.File
 import java.net.InetAddress
 import java.net.URI
@@ -81,17 +84,23 @@ class GeoIpDatabaseService(
         if (properties.accountId == null) throw GeolocationException("Cannot update GeoLite2-City database: account ID is not set")
         if (properties.licenseKey == null) throw GeolocationException("Cannot update GeoLite2-City database: license key is not set")
 
-        val responseHeaders = webClient.head()
-            .uri(URI(downloadUrl))
-            .headers { it.setBasicAuth(properties.accountId, properties.licenseKey) }
-            .retrieve()
-            .toBodilessEntity()
-            .awaitSingle()
-            .headers
+        val responseHeaders = try {
+            webClient.head()
+                .uri(URI(downloadUrl))
+                .headers { it.setBasicAuth(properties.accountId, properties.licenseKey) }
+                .retrieve()
+                .onStatus({ it == HttpStatus.TOO_MANY_REQUESTS}) { res ->
+                    Mono.error(TooManyRequestsException("Cannot fetch database: too many request for your account"))
+                }
+                .toBodilessEntity()
+                .awaitSingle()
+                .headers
+        } catch (e: TooManyRequestsException) {
+            logger.warn(e) { "Database download failed: too many requests" }
+            return false
+        }
 
-        val lastModifiedHeader = responseHeaders["Last-Modified"]?.firstOrNull()
-
-        if (lastModifiedHeader == null) return true
+        val lastModifiedHeader = responseHeaders["Last-Modified"]?.firstOrNull() ?: return true
 
         val remoteLastModified = ZonedDateTime.parse(lastModifiedHeader, DateTimeFormatter.RFC_1123_DATE_TIME).toInstant()
 
