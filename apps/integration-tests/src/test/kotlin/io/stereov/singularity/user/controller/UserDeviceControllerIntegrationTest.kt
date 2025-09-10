@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.core.ParameterizedTypeReference
 import java.time.Instant
 
-class UsersessionControllerIntegrationTest : BaseIntegrationTest() {
+class UserDeviceControllerIntegrationTest : BaseIntegrationTest() {
 
     @Test fun `getsessions returns sessions`() = runTest {
         val user = registerUser(sessionId = "first")
