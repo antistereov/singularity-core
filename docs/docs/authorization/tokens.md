@@ -36,19 +36,19 @@ It is only valid for a short amount of time
 After successful login or registration this token will be set as HTTP-only cookie with this token will be set.
 
 **You can retrieve this token from these endpoints:**
-* [`POST /api/user/login`](/swagger#/User%20Session/login)
-* [`POST /api/user/register`](/swagger#/User%20Session/register)
+* [`POST /api/auth/login`](/swagger#/User%20Session/login)
+* [`POST /api/auth/register`](/swagger#/User%20Session/register)
 
 ### Refresh Token
 
 The **refresh token** can be used to retrieve a new access token once it is invalid.
 They can be used once only.
 
-Every single device a user logs in on has a unique refresh token.
-Therefore, the user can revoke refresh tokens using the [device management](/docs/authorization/devices).
+Every single session a user logs in on has a unique refresh token.
+Therefore, the user can revoke refresh tokens using the [session management](/docs/authorization/sessions).
 
 **You can retrieve this token from these endpoints:**
-* [`POST /api/user/refresh`](/swagger#/User%20Session/refresh)
+* [`POST /api/auth/refresh`](/swagger#/User%20Session/refresh)
 
 ## Two-Factor
 

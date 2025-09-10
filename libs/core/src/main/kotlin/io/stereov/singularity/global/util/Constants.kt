@@ -1,7 +1,7 @@
 package io.stereov.singularity.global.util
 
 object Constants {
-    const val JWT_DEVICE_CLAIM = "device"
+    const val JWT_session_CLAIM = "session"
     const val TWO_FACTOR_SECRET_CLAIM = "2fa_secret"
     const val TWO_FACTOR_RECOVERY_CLAIM = "2fa_recovery"
 

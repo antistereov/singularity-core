@@ -1,16 +1,16 @@
 package io.stereov.singularity.user.controller
 
-import io.stereov.singularity.auth.device.dto.DeviceInfoRequest
-import io.stereov.singularity.auth.session.dto.request.LoginRequest
-import io.stereov.singularity.auth.session.dto.request.RegisterUserRequest
-import io.stereov.singularity.auth.session.dto.response.LoginResponse
-import io.stereov.singularity.auth.session.dto.response.RefreshTokenResponse
-import io.stereov.singularity.auth.session.dto.response.RegisterResponse
-import io.stereov.singularity.auth.session.model.SessionTokenType
+import io.stereov.singularity.auth.core.dto.request.LoginRequest
+import io.stereov.singularity.auth.core.dto.request.RegisterUserRequest
+import io.stereov.singularity.auth.core.dto.request.SendPasswordResetRequest
+import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
+import io.stereov.singularity.auth.core.dto.response.LoginResponse
+import io.stereov.singularity.auth.core.dto.response.RefreshTokenResponse
+import io.stereov.singularity.auth.core.dto.response.RegisterResponse
+import io.stereov.singularity.auth.core.model.SessionTokenType
+import io.stereov.singularity.auth.core.service.EmailVerificationTokenService
 import io.stereov.singularity.auth.twofactor.model.TwoFactorTokenType
 import io.stereov.singularity.global.util.Random
-import io.stereov.singularity.mail.user.dto.SendPasswordResetRequest
-import io.stereov.singularity.mail.user.service.MailTokenService
 import io.stereov.singularity.test.BaseIntegrationTest
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.settings.dto.request.ChangeEmailRequest
@@ -30,13 +30,13 @@ import java.time.Instant
 class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
 
     @Autowired
-    private lateinit var mailTokenService: MailTokenService
+    private lateinit var emailVerificationTokenService: EmailVerificationTokenService
 
     @Test fun `getAccount returns user account`() = runTest {
         val user = registerUser()
 
         val responseBody = webTestClient.get()
-            .uri("/api/user/me")
+            .uri("/api/users/me")
             .header(HttpHeaders.COOKIE, "${SessionTokenType.Access.cookieName}=${user.accessToken}")
             .exchange()
             .expectStatus().isOk
@@ -50,7 +50,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
     }
     @Test fun `getAccount needs authentication`() = runTest {
         webTestClient.get()
-            .uri("/api/user/me")
+            .uri("/api/users/me")
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -58,12 +58,12 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
     @Test fun `login logs in user`() = runTest {
         val email = "test@email.com"
         val password = "password"
-        val deviceId = "device"
-        val user = registerUser(email, password, deviceId)
-        val loginRequest = LoginRequest(email, password, DeviceInfoRequest(deviceId))
+        val sessionId = "session"
+        val user = registerUser(email, password, sessionId)
+        val loginRequest = LoginRequest(email, password, SessionInfoRequest(sessionId))
 
         val response = webTestClient.post()
-            .uri("/api/user/login")
+            .uri("/api/auth/login")
             .bodyValue(loginRequest)
             .exchange()
             .expectStatus().isOk
@@ -85,7 +85,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         assertEquals(user.info.id, account.id)
 
         val userResponse = webTestClient.get()
-            .uri("/api/user/me")
+            .uri("/api/users/me")
             .cookie(SessionTokenType.Access.cookieName, accessToken)
             .exchange()
             .expectStatus().isOk
@@ -98,20 +98,20 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         assertEquals(user.info.id, userResponse.id)
         assertEquals(user.info.sensitive.email, userResponse.email)
 
-        assertEquals(deviceId, user.info.sensitive.devices.firstOrNull()?.id)
-        assertEquals(1, user.info.sensitive.devices.size)
+        assertEquals(sessionId, user.info.sensitive.sessions.firstOrNull()?.id)
+        assertEquals(1, user.info.sensitive.sessions.size)
 
         assertEquals(1, userService.findAll().count())
     }
     @Test fun `login needs body`() = runTest {
         webTestClient.post()
-            .uri("/api/user/login")
+            .uri("/api/auth/login")
             .exchange()
             .expectStatus().isBadRequest
     }
     @Test fun `login needs correct body`() = runTest {
         webTestClient.post()
-            .uri("/api/user/login")
+            .uri("/api/auth/login")
             .bodyValue("Test")
             .exchange()
             .expectStatus().isEqualTo(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
@@ -120,40 +120,40 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val user = registerUser()
 
         webTestClient.post()
-            .uri("/api/user/login")
+            .uri("/api/auth/login")
             .bodyValue(
                 LoginRequest(
                     user.info.sensitive.email,
                     "wrong password",
-                    user.info.sensitive.devices.first().toRequestDto()
+                    user.info.sensitive.sessions.first().toRequestDto()
                 )
             )
             .exchange()
             .expectStatus().isUnauthorized
 
         webTestClient.post()
-            .uri("/api/user/login")
+            .uri("/api/auth/login")
             .bodyValue(
                 LoginRequest(
                     "another@email.com",
                     "wrong password",
-                    user.info.sensitive.devices.first().toRequestDto()
+                    user.info.sensitive.sessions.first().toRequestDto()
                 )
             )
             .exchange()
             .expectStatus().isUnauthorized
     }
-    @Test fun `login from new device saves device`() = runTest {
+    @Test fun `login from new session saves session`() = runTest {
         val email = "test@email.com"
         val password = "password"
-        val deviceId = "device"
-        val newDeviceId = "newDeviceId"
+        val sessionId = "session"
+        val newsessionId = "newsessionId"
 
-        val user = registerUser(email, password, deviceId)
+        val user = registerUser(email, password, sessionId)
 
         val accessToken = webTestClient.post()
-            .uri("/api/user/login")
-            .bodyValue(LoginRequest(email, password, DeviceInfoRequest(newDeviceId)))
+            .uri("/api/auth/login")
+            .bodyValue(LoginRequest(email, password, SessionInfoRequest(newsessionId)))
             .exchange()
             .expectStatus().isOk
             .expectBody(LoginResponse::class.java)
@@ -163,7 +163,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         requireNotNull(accessToken) { "No access token provided in response" }
 
         val userInfo = webTestClient.get()
-            .uri("/api/user/me")
+            .uri("/api/users/me")
             .cookie(SessionTokenType.Access.cookieName, accessToken)
             .exchange()
             .expectStatus().isOk
@@ -173,23 +173,23 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
 
         requireNotNull(userInfo) { "No UserDetails provided in response" }
 
-        val devices = userService.findById(user.info.id).sensitive.devices
+        val sessions = userService.findById(user.info.id).sensitive.sessions
 
-        assertEquals(2, devices.size)
-        assertTrue(devices.any { it.id == deviceId })
-        assertTrue(devices.any { it.id == newDeviceId })
+        assertEquals(2, sessions.size)
+        assertTrue(sessions.any { it.id == sessionId })
+        assertTrue(sessions.any { it.id == newsessionId })
     }
     @Test fun `login with two factor works as expected`() = runTest {
         val email = "test@email.com"
         val password = "password"
-        val deviceId = "device"
+        val sessionId = "session"
 
-        val user = registerUser(email, password, deviceId, true)
+        val user = registerUser(email, password, sessionId, true)
 
-        val loginRequest = LoginRequest(email, password, DeviceInfoRequest(deviceId))
+        val loginRequest = LoginRequest(email, password, SessionInfoRequest(sessionId))
 
         val response = webTestClient.post()
-            .uri("/api/user/login")
+            .uri("/api/auth/login")
             .bodyValue(loginRequest)
             .exchange()
             .expectStatus().isOk
@@ -208,12 +208,12 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
     @Test fun `register registers new user`() = runTest {
         val email = "test@email.com"
         val password = "password"
-        val deviceId = "device"
-        val deviceInfo = DeviceInfoRequest(id = deviceId)
+        val sessionId = "session"
+        val sessionInfo = SessionInfoRequest(id = sessionId)
 
         val response = webTestClient.post()
-            .uri("/api/user/register")
-            .bodyValue(RegisterUserRequest(email = email, password = password, name = "Name", device = deviceInfo))
+            .uri("/api/auth/register")
+            .bodyValue(RegisterUserRequest(email = email, password = password, name = "Name", session = sessionInfo))
             .exchange()
             .expectStatus().isOk
             .expectBody(RegisterResponse::class.java)
@@ -233,7 +233,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         assertTrue(refreshToken.isNotBlank())
 
         val userDetails = webTestClient.get()
-            .uri("/api/user/me")
+            .uri("/api/users/me")
             .cookie(SessionTokenType.Access.cookieName, accessToken)
             .exchange()
             .expectStatus().isOk
@@ -243,44 +243,44 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
 
         requireNotNull(userDetails) { "No UserDetails provided in response" }
 
-        val devices = userService.findById(userDto.id).sensitive.devices
+        val sessions = userService.findById(userDto.id).sensitive.sessions
 
         assertEquals(userDto.id, userDetails.id)
-        assertEquals(1, devices.size)
-        assertEquals(deviceId, devices.first().id)
+        assertEquals(1, sessions.size)
+        assertEquals(sessionId, sessions.first().id)
 
         assertEquals(1, userService.findAll().count())
     }
     @Test fun `register requires valid credentials`() = runTest {
-        val deviceInfo = DeviceInfoRequest("device")
+        val sessionInfo = SessionInfoRequest("session")
         webTestClient.post()
-            .uri("/api/user/register")
+            .uri("/api/auth/register")
             .bodyValue(
                 RegisterUserRequest(
                     email = "invalid",
                     password = "password",
                     name = "Name",
-                    device = deviceInfo
+                    session = sessionInfo
                 )
             )
             .exchange()
             .expectStatus().isBadRequest
 
         webTestClient.post()
-            .uri("/api/user/register")
-            .bodyValue(RegisterUserRequest(email = "", password = "password", name = "Name", device = deviceInfo))
+            .uri("/api/auth/register")
+            .bodyValue(RegisterUserRequest(email = "", password = "password", name = "Name", session = sessionInfo))
             .exchange()
             .expectStatus().isBadRequest
 
         webTestClient.post()
-            .uri("/api/user/register")
-            .bodyValue(RegisterUserRequest(email = "test@email.com", password = "", name = "Name", device = deviceInfo))
+            .uri("/api/auth/register")
+            .bodyValue(RegisterUserRequest(email = "test@email.com", password = "", name = "Name", session = sessionInfo))
             .exchange()
             .expectStatus().isBadRequest
     }
     @Test fun `register needs body`() = runTest {
         webTestClient.post()
-            .uri("/api/user/login")
+            .uri("/api/auth/login")
             .exchange()
             .expectStatus().isBadRequest
     }
@@ -293,9 +293,9 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
 
 
         webTestClient.put()
-            .uri("/api/user/me/email")
+            .uri("/api/users/me/email")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .cookie(TwoFactorTokenType.StepUp.cookieName, stepUpTokenService.create(user.info.id, user.info.sensitive.devices.first().id).value)
+            .cookie(TwoFactorTokenType.StepUp.cookieName, stepUpTokenService.create(user.info.id, user.info.sensitive.sessions.first().id).value)
             .bodyValue(ChangeEmailRequest(newEmail, password))
             .exchange()
             .expectStatus().isOk
@@ -303,10 +303,10 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
             .returnResult()
             .responseBody
 
-        val token = mailTokenService.createVerificationToken(user.info.id, newEmail, user.mailVerificationSecret)
+        val token = emailVerificationTokenService.create(user.info.id, newEmail, user.mailVerificationSecret)
 
         val res = webTestClient.post()
-            .uri("/api/user/mail/verify?token=$token")
+            .uri("/api/auth/email/verify?token=$token")
             .exchange()
             .expectStatus().isOk
             .expectBody(UserResponse::class.java)
@@ -325,7 +325,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val user = registerUser(oldEmail, password)
 
         webTestClient.put()
-            .uri("/api/user/me/email")
+            .uri("/api/users/me/email")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .bodyValue(ChangeEmailRequest(newEmail, password))
             .exchange()
@@ -334,10 +334,10 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
             .returnResult()
             .responseBody
 
-        val token = mailTokenService.createVerificationToken(user.info.id, newEmail, user.mailVerificationSecret)
+        val token = emailVerificationTokenService.create(user.info.id, newEmail, user.mailVerificationSecret)
 
         val res = webTestClient.post()
-            .uri("/api/user/mail/verify?token=$token")
+            .uri("/api/auth/email/verify?token=$token")
             .exchange()
             .expectStatus().isOk
             .expectBody(UserResponse::class.java)
@@ -356,7 +356,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val user = registerUser(oldEmail, password)
 
         val res = webTestClient.put()
-            .uri("/api/user/me/email")
+            .uri("/api/users/me/email")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .bodyValue(ChangeEmailRequest(newEmail, password))
             .exchange()
@@ -377,7 +377,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         registerUser(oldEmail, password)
 
         webTestClient.put()
-            .uri("/api/user/me/email")
+            .uri("/api/users/me/email")
             .bodyValue(ChangeEmailRequest(newEmail, password))
             .exchange()
             .expectStatus().isUnauthorized
@@ -388,7 +388,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val user = registerUser(oldEmail, password)
 
         webTestClient.put()
-            .uri("/api/user/me/email")
+            .uri("/api/users/me/email")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isBadRequest
@@ -401,7 +401,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         gAuth.getTotpPassword(user.twoFactorSecret)
 
         webTestClient.put()
-            .uri("/api/user/me/email")
+            .uri("/api/users/me/email")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .bodyValue(ChangeEmailRequest(newEmail, "wrong-password"))
             .exchange()
@@ -414,7 +414,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val user = registerUser(oldEmail, password, twoFactorEnabled = true)
 
         webTestClient.put()
-            .uri("/api/user/me/email")
+            .uri("/api/users/me/email")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .bodyValue(ChangeEmailRequest(newEmail, "wrong-password"))
             .exchange()
@@ -428,23 +428,23 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val anotherUser = registerUser("ttest@email.com")
 
         webTestClient.put()
-            .uri("/api/user/me/email")
+            .uri("/api/users/me/email")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .cookie(TwoFactorTokenType.StepUp.cookieName, stepUpTokenService.create(anotherUser.info.id, user.info.sensitive.devices.first().id).value)
+            .cookie(TwoFactorTokenType.StepUp.cookieName, stepUpTokenService.create(anotherUser.info.id, user.info.sensitive.sessions.first().id).value)
             .bodyValue(ChangeEmailRequest(newEmail, password))
             .exchange()
             .expectStatus().isUnauthorized
     }
-    @Test fun `changeEmail requires step up token for same device`() = runTest {
+    @Test fun `changeEmail requires step up token for same session`() = runTest {
         val oldEmail = "old@email.com"
         val newEmail = "new@email.com"
         val password = "password"
         val user = registerUser(oldEmail, password, twoFactorEnabled = true)
 
         webTestClient.put()
-            .uri("/api/user/me/email")
+            .uri("/api/users/me/email")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .cookie(TwoFactorTokenType.StepUp.cookieName, stepUpTokenService.create(user.info.id, "another-device").value)
+            .cookie(TwoFactorTokenType.StepUp.cookieName, stepUpTokenService.create(user.info.id, "another-session").value)
             .bodyValue(ChangeEmailRequest(newEmail, password))
             .exchange()
             .expectStatus().isUnauthorized
@@ -456,11 +456,11 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val user = registerUser(oldEmail, password, twoFactorEnabled = true)
 
         webTestClient.put()
-            .uri("/api/user/me/email")
+            .uri("/api/users/me/email")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .cookie(
                 TwoFactorTokenType.StepUp.cookieName,
-                stepUpTokenService.create(user.info.id, user.info.sensitive.devices.first().id, Instant.ofEpochSecond(0)).value
+                stepUpTokenService.create(user.info.id, user.info.sensitive.sessions.first().id, Instant.ofEpochSecond(0)).value
             )
             .bodyValue(ChangeEmailRequest(newEmail, password))
             .exchange()
@@ -473,7 +473,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val user = registerUser(oldEmail, password, twoFactorEnabled = true)
 
         webTestClient.put()
-            .uri("/api/user/me/email")
+            .uri("/api/users/me/email")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .cookie(
                 TwoFactorTokenType.StepUp.cookieName,
@@ -491,7 +491,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         registerUser(newEmail)
 
         webTestClient.put()
-            .uri("/api/user/me/email")
+            .uri("/api/users/me/email")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .bodyValue(ChangeEmailRequest(newEmail, password))
             .exchange()
@@ -502,7 +502,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val user = registerUser()
 
         webTestClient.post()
-            .uri("/api/user/mail/verify/send")
+            .uri("/api/auth/email/verify/send")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus()
@@ -512,7 +512,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val user = registerUser()
 
         webTestClient.post()
-            .uri("/api/user/mail/reset-password/send")
+            .uri("/api/auth/password/reset-request")
             .bodyValue(SendPasswordResetRequest(user.info.sensitive.email))
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
@@ -527,9 +527,9 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val user = registerUser(email, oldPassword, twoFactorEnabled = true)
 
         val res = webTestClient.put()
-            .uri("/api/user/me/password")
+            .uri("/api/users/me/password")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .cookie(TwoFactorTokenType.StepUp.cookieName, stepUpTokenService.create(user.info.id, user.info.sensitive.devices.first().id).value)
+            .cookie(TwoFactorTokenType.StepUp.cookieName, stepUpTokenService.create(user.info.id, user.info.sensitive.sessions.first().id).value)
             .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
             .exchange()
             .expectStatus().isOk
@@ -540,8 +540,8 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         requireNotNull(res)
 
         webTestClient.post()
-            .uri("/api/user/login")
-            .bodyValue(LoginRequest(email, newPassword, DeviceInfoRequest("device")))
+            .uri("/api/auth/login")
+            .bodyValue(LoginRequest(email, newPassword, SessionInfoRequest("session")))
             .exchange()
             .expectStatus().isOk
     }
@@ -552,7 +552,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val user = registerUser(email, oldPassword)
 
         val res = webTestClient.put()
-            .uri("/api/user/me/password")
+            .uri("/api/users/me/password")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
             .exchange()
@@ -564,8 +564,8 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         requireNotNull(res)
 
         webTestClient.post()
-            .uri("/api/user/login")
-            .bodyValue(LoginRequest(email, newPassword, DeviceInfoRequest("device")))
+            .uri("/api/auth/login")
+            .bodyValue(LoginRequest(email, newPassword, SessionInfoRequest("session")))
             .exchange()
             .expectStatus().isOk
     }
@@ -577,7 +577,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         gAuth.getTotpPassword(user.twoFactorSecret)
 
         webTestClient.put()
-            .uri("/api/user/me/password")
+            .uri("/api/users/me/password")
             .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
             .exchange()
             .expectStatus().isUnauthorized
@@ -588,7 +588,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val user = registerUser(email, oldPassword)
 
         webTestClient.put()
-            .uri("/api/user/me/password")
+            .uri("/api/users/me/password")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isBadRequest
@@ -601,7 +601,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         gAuth.getTotpPassword(user.twoFactorSecret)
 
         webTestClient.put()
-            .uri("/api/user/me/password")
+            .uri("/api/users/me/password")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .bodyValue(ChangePasswordRequest("wrong-password", newPassword))
             .exchange()
@@ -614,7 +614,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val user = registerUser(email, oldPassword, twoFactorEnabled = true)
 
         webTestClient.put()
-            .uri("/api/user/me/password")
+            .uri("/api/users/me/password")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
             .exchange()
@@ -628,23 +628,23 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val anotherUser = registerUser("another@email.com")
 
         webTestClient.put()
-            .uri("/api/user/me/password")
+            .uri("/api/users/me/password")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .cookie(TwoFactorTokenType.StepUp.cookieName, stepUpTokenService.create(anotherUser.info.id, user.info.sensitive.devices.first().id).value)
+            .cookie(TwoFactorTokenType.StepUp.cookieName, stepUpTokenService.create(anotherUser.info.id, user.info.sensitive.sessions.first().id).value)
             .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
             .exchange()
             .expectStatus().isUnauthorized
     }
-    @Test fun `changePassword requires step up token for same device`() = runTest {
+    @Test fun `changePassword requires step up token for same session`() = runTest {
         val email = "old@email.com"
         val oldPassword = "password"
         val newPassword = "newPassword"
         val user = registerUser(email, oldPassword, twoFactorEnabled = true)
 
         webTestClient.put()
-            .uri("/api/user/me/password")
+            .uri("/api/users/me/password")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .cookie(TwoFactorTokenType.StepUp.cookieName, stepUpTokenService.create(user.info.id, "another-device").value)
+            .cookie(TwoFactorTokenType.StepUp.cookieName, stepUpTokenService.create(user.info.id, "another-session").value)
             .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
             .exchange()
             .expectStatus().isUnauthorized
@@ -656,9 +656,9 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val user = registerUser(email, oldPassword, twoFactorEnabled = true)
 
         webTestClient.put()
-            .uri("/api/user/me/password")
+            .uri("/api/users/me/password")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .cookie(TwoFactorTokenType.StepUp.cookieName, stepUpTokenService.create(user.info.id, user.info.sensitive.devices.first().id, Instant.ofEpochSecond(0)).value)
+            .cookie(TwoFactorTokenType.StepUp.cookieName, stepUpTokenService.create(user.info.id, user.info.sensitive.sessions.first().id, Instant.ofEpochSecond(0)).value)
             .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
             .exchange()
             .expectStatus().isUnauthorized
@@ -670,7 +670,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val user = registerUser(email, oldPassword, twoFactorEnabled = true)
 
         webTestClient.put()
-            .uri("/api/user/me/password")
+            .uri("/api/users/me/password")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .cookie(TwoFactorTokenType.StepUp.cookieName, "wrong-token")
             .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
@@ -684,7 +684,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val accessToken = user.accessToken
 
         val res = webTestClient.put()
-            .uri("/api/user/me")
+            .uri("/api/users/me")
             .cookie(SessionTokenType.Access.cookieName, accessToken)
             .bodyValue(ChangeUserRequest(newName))
             .exchange()
@@ -703,7 +703,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val newName = "MyName"
 
         webTestClient.put()
-            .uri("/api/user/me")
+            .uri("/api/users/me")
             .bodyValue(ChangeUserRequest(newName))
             .exchange()
             .expectStatus().isUnauthorized
@@ -713,7 +713,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val accessToken = user.accessToken
 
         webTestClient.put()
-            .uri("/api/user/me")
+            .uri("/api/users/me")
             .cookie(SessionTokenType.Access.cookieName, accessToken)
             .exchange()
             .expectStatus().isBadRequest
@@ -724,7 +724,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val accessToken = user.accessToken
 
         webTestClient.put()
-            .uri("/api/user/me/avatar")
+            .uri("/api/users/me/avatar")
             .cookie(SessionTokenType.Access.cookieName, accessToken)
             .bodyValue(
                 MultipartBodyBuilder().apply {
@@ -740,7 +740,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
 
     @Test fun `checkAuthentication requires authentication`() = runTest {
         webTestClient.get()
-            .uri("/api/user/me")
+            .uri("/api/users/me")
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -748,7 +748,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val user = registerUser()
 
         val response = webTestClient.get()
-            .uri("/api/user/me")
+            .uri("/api/users/me")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isOk
@@ -763,68 +763,68 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
 
     @Test fun `refresh requires body`() = runTest {
         webTestClient.post()
-            .uri("/api/user/refresh")
+            .uri("/api/auth/refresh")
             .exchange()
             .expectStatus().isBadRequest
     }
     @Test fun `refresh requires token`() = runTest {
-        val deviceInfo = DeviceInfoRequest("device")
+        val sessionInfo = SessionInfoRequest("session")
         webTestClient.post()
-            .uri("/api/user/refresh")
-            .bodyValue(deviceInfo)
+            .uri("/api/auth/refresh")
+            .bodyValue(sessionInfo)
             .exchange()
             .expectStatus().isUnauthorized
     }
     @Test fun `refresh requires valid token`() = runTest {
-        val deviceInfo = DeviceInfoRequest("device")
+        val sessionInfo = SessionInfoRequest("session")
         webTestClient.post()
-            .uri("/api/user/refresh")
+            .uri("/api/auth/refresh")
             .cookie(SessionTokenType.Refresh.cookieName, "Refresh")
-            .bodyValue(deviceInfo)
+            .bodyValue(sessionInfo)
             .exchange()
             .expectStatus().isUnauthorized
     }
     @Test fun `refresh requires associated token to account`() = runTest {
         val user = registerUser()
-        val refreshToken = refreshTokenService.create(user.info.id, user.info.sensitive.devices.first().id, Random.generateCode(20))
+        val refreshToken = refreshTokenService.create(user.info.id, user.info.sensitive.sessions.first().id, Random.generateCode(20))
         webTestClient.post()
-            .uri("/api/user/refresh")
+            .uri("/api/auth/refresh")
             .cookie(SessionTokenType.Refresh.cookieName, refreshToken.value)
-            .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.firstOrNull()?.id!!))
+            .bodyValue(SessionInfoRequest(user.info.sensitive.sessions.firstOrNull()?.id!!))
             .exchange()
             .expectStatus().isUnauthorized
     }
     @Test fun `refresh token is valid once`() = runTest {
         val user = registerUser()
         webTestClient.post()
-            .uri("/api/user/refresh")
+            .uri("/api/auth/refresh")
             .cookie(SessionTokenType.Refresh.cookieName, user.refreshToken)
-            .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.firstOrNull()?.id!!))
+            .bodyValue(SessionInfoRequest(user.info.sensitive.sessions.firstOrNull()?.id!!))
             .exchange()
             .expectStatus().isOk
 
         webTestClient.post()
-            .uri("/api/user/refresh")
+            .uri("/api/auth/refresh")
             .cookie(SessionTokenType.Refresh.cookieName, user.refreshToken)
-            .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.firstOrNull()?.id!!))
+            .bodyValue(SessionInfoRequest(user.info.sensitive.sessions.firstOrNull()?.id!!))
             .exchange()
             .expectStatus().isUnauthorized
     }
-    @Test fun `refresh token requires associated device`() = runTest {
+    @Test fun `refresh token requires associated session`() = runTest {
         val user = registerUser()
         webTestClient.post()
-            .uri("/api/user/refresh")
+            .uri("/api/auth/refresh")
             .cookie(SessionTokenType.Refresh.cookieName, user.refreshToken)
-            .bodyValue(DeviceInfoRequest("another device"))
+            .bodyValue(SessionInfoRequest("another session"))
             .exchange()
             .expectStatus().isUnauthorized
     }
     @Test fun `refresh returns valid tokens`() = runTest {
         val user = registerUser()
         val response = webTestClient.post()
-            .uri("/api/user/refresh")
+            .uri("/api/auth/refresh")
             .cookie(SessionTokenType.Refresh.cookieName, user.refreshToken)
-            .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.first().id))
+            .bodyValue(SessionInfoRequest(user.info.sensitive.sessions.first().id))
             .exchange()
             .expectStatus().isOk
             .expectBody(RefreshTokenResponse::class.java)
@@ -846,14 +846,14 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         assertEquals(user.info.id, res.user.id)
 
         webTestClient.post()
-            .uri("/api/user/refresh")
+            .uri("/api/auth/refresh")
             .cookie(SessionTokenType.Refresh.cookieName, refreshToken)
-            .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.first().id))
+            .bodyValue(SessionInfoRequest(user.info.sensitive.sessions.first().id))
             .exchange()
             .expectStatus().isOk
 
         webTestClient.get()
-            .uri("/api/user/me")
+            .uri("/api/users/me")
             .cookie(SessionTokenType.Access.cookieName, accessToken)
             .exchange()
             .expectStatus().isOk
@@ -863,7 +863,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val user = registerUser()
 
         webTestClient.post()
-            .uri("/api/user/logout")
+            .uri("/api/auth/logout")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isBadRequest
@@ -872,8 +872,8 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val user = registerUser()
 
         val response = webTestClient.post()
-            .uri("/api/user/logout")
-            .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.first().id))
+            .uri("/api/auth/logout")
+            .bodyValue(SessionInfoRequest(user.info.sensitive.sessions.first().id))
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isOk
@@ -892,43 +892,43 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
 
         requireNotNull(account) { "No account provided in response" }
 
-        assertTrue(userService.findById(user.info.id).sensitive.devices.isEmpty())
+        assertTrue(userService.findById(user.info.id).sensitive.sessions.isEmpty())
     }
     @Test fun `logout requires authentication`() = runTest {
         webTestClient.post()
-            .uri("/api/user/logout")
-            .bodyValue(DeviceInfoRequest("device"))
+            .uri("/api/auth/logout")
+            .bodyValue(SessionInfoRequest("session"))
             .exchange()
             .expectStatus().isUnauthorized
     }
 
-    @Test fun `logoutAllDevices works`() = runTest {
+    @Test fun `logoutAllsessions works`() = runTest {
         val email = "test@email.com"
         val password = "password"
-        val deviceId1 = "device"
-        val deviceId2 = "device2"
-        val registeredUser = registerUser(email, password, deviceId1)
+        val sessionId1 = "session"
+        val sessionId2 = "session2"
+        val registeredUser = registerUser(email, password, sessionId1)
 
         webTestClient.post()
-            .uri("/api/user/login")
-            .bodyValue(LoginRequest(email, password, DeviceInfoRequest(deviceId1)))
+            .uri("/api/auth/login")
+            .bodyValue(LoginRequest(email, password, SessionInfoRequest(sessionId1)))
             .exchange()
             .expectStatus().isOk
 
         webTestClient.post()
-            .uri("/api/user/login")
-            .bodyValue(LoginRequest(email, password, DeviceInfoRequest(deviceId2)))
+            .uri("/api/auth/login")
+            .bodyValue(LoginRequest(email, password, SessionInfoRequest(sessionId2)))
             .exchange()
             .expectStatus().isOk
 
         var user = userService.findByEmail(email)
 
-        assertEquals(2, user.sensitive.devices.size)
-        assertTrue(user.sensitive.devices.any { it.id == deviceId1 })
-        assertTrue(user.sensitive.devices.any { it.id == deviceId2 })
+        assertEquals(2, user.sensitive.sessions.size)
+        assertTrue(user.sensitive.sessions.any { it.id == sessionId1 })
+        assertTrue(user.sensitive.sessions.any { it.id == sessionId2 })
 
-        val response = webTestClient.post()
-            .uri("/api/user/logout-all")
+        val response = webTestClient.delete()
+            .uri("/api/auth/sessions")
             .cookie(SessionTokenType.Access.cookieName, registeredUser.accessToken)
             .exchange()
             .expectStatus().isOk
@@ -945,18 +945,18 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
 
         user = userService.findByEmail(email)
 
-        assertTrue(user.sensitive.devices.isEmpty())
+        assertTrue(user.sensitive.sessions.isEmpty())
     }
-    @Test fun `logoutAllDevices requires authentication`() = runTest {
-        webTestClient.post()
-            .uri("/api/user/logout-all")
+    @Test fun `logoutAllsessions requires authentication`() = runTest {
+        webTestClient.delete()
+            .uri("/api/auth/sessions")
             .exchange()
             .expectStatus().isUnauthorized
     }
 
     @Test fun `delete requires authentication`() = runTest {
         webTestClient.delete()
-            .uri("/api/user/me")
+            .uri("/api/users/me")
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -964,7 +964,7 @@ class UserSessionControllerIntegrationTest : BaseIntegrationTest() {
         val user = registerUser()
 
         val response = webTestClient.delete()
-            .uri("/api/user/me")
+            .uri("/api/users/me")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectBody()

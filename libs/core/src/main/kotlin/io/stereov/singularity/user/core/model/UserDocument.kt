@@ -35,9 +35,9 @@ data class UserDocument(
         roles: MutableSet<Role> = mutableSetOf(Role.USER),
         groups: MutableSet<String> = mutableSetOf(),
         security: UserSecurityDetails = UserSecurityDetails(),
-        devices: MutableList<DeviceInfo> = mutableListOf(),
+        sessions: MutableList<SessionInfo> = mutableListOf(),
         avatarFileKey: String? = null,
-    ): this(id, password, created, lastActive, SensitiveUserData(name, email, roles, groups, security, devices, avatarFileKey))
+    ): this(id, password, created, lastActive, SensitiveUserData(name, email, roles, groups, security, sessions, avatarFileKey))
 
     @get:Transient
     private val logger: KLogger
@@ -111,49 +111,49 @@ data class UserDocument(
     }
 
     /**
-     * Add or update a device for the user.
+     * Add or update a session for the user.
      *
-     * This method adds a new device or updates an existing device in the user's device list.
+     * This method adds a new session or updates an existing session in the user's session list.
      *
-     * @param deviceInfo The device information to add or update.
+     * @param sessionInfo The session information to add or update.
      *
      * @return The updated [UserDocument].
      */
-    fun addOrUpdateDevice(deviceInfo: DeviceInfo): UserDocument {
-        logger.debug { "Adding or updating device ${deviceInfo.id}" }
+    fun addOrUpdatesession(sessionInfo: SessionInfo): UserDocument {
+        logger.debug { "Adding or updating session ${sessionInfo.id}" }
 
-        removeDevice(deviceInfo.id)
-        this.sensitive.devices.add(deviceInfo)
+        removesession(sessionInfo.id)
+        this.sensitive.sessions.add(sessionInfo)
 
         return this
     }
 
     /**
-     * Remove a device from the user's device list.
+     * Remove a session from the user's session list.
      *
-     * This method removes a device from the user's device list based on the device ID.
+     * This method removes a session from the user's session list based on the session ID.
      *
-     * @param deviceId The ID of the device to remove.
+     * @param sessionId The ID of the session to remove.
      *
      * @return The updated [UserDocument].
      */
-    fun removeDevice(deviceId: String): UserDocument {
-        logger.debug { "Removing device $deviceId" }
+    fun removesession(sessionId: String): UserDocument {
+        logger.debug { "Removing session $sessionId" }
 
-        this.sensitive.devices.removeAll { device -> device.id == deviceId }
+        this.sensitive.sessions.removeAll { session -> session.id == sessionId }
 
         return this
     }
 
     /**
-     * Clear all devices from the user's device list.
+     * Clear all sessions from the user's session list.
      *
-     * This method removes all devices from the user's device list.
+     * This method removes all sessions from the user's session list.
      */
-    fun clearDevices() {
-        logger.debug { "Clearing devices" }
+    fun clearsessions() {
+        logger.debug { "Clearing sessions" }
 
-        this.sensitive.devices.clear()
+        this.sensitive.sessions.clear()
     }
 
     /**

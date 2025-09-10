@@ -1,7 +1,7 @@
 package io.stereov.singularity.content.core.config
 
 import io.stereov.singularity.auth.core.config.AuthenticationConfiguration
-import io.stereov.singularity.auth.core.service.AuthenticationService
+import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.content.core.component.AccessCriteria
 import io.stereov.singularity.content.core.exception.handler.ContentExceptionHandler
 import io.stereov.singularity.content.core.properties.ContentProperties
@@ -32,8 +32,8 @@ class ContentConfiguration {
     
     @Bean
     @ConditionalOnMissingBean
-    fun accessCriteria(authenticationService: AuthenticationService): AccessCriteria {
-        return AccessCriteria(authenticationService)
+    fun accessCriteria(authorizationService: AuthorizationService): AccessCriteria {
+        return AccessCriteria(authorizationService)
     }
 
     // ExceptionHandler

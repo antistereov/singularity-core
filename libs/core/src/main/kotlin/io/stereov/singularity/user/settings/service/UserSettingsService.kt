@@ -1,16 +1,16 @@
 package io.stereov.singularity.user.settings.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.exception.model.InvalidCredentialsException
-import io.stereov.singularity.auth.core.service.AuthenticationService
-import io.stereov.singularity.auth.session.cache.AccessTokenCache
+import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.twofactor.service.StepUpTokenService
 import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.file.core.exception.model.UnsupportedMediaTypeException
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.global.properties.AppProperties
-import io.stereov.singularity.mail.user.service.UserMailSender
+import io.stereov.singularity.auth.core.service.EmailVerificationService
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.core.exception.model.EmailAlreadyExistsException
 import io.stereov.singularity.user.core.mapper.UserMapper
@@ -26,9 +26,9 @@ import org.springframework.web.server.ServerWebExchange
 
 @Service
 class UserSettingsService(
-    private val authenticationService: AuthenticationService,
+    private val authorizationService: AuthorizationService,
     private val stepUpTokenService: StepUpTokenService,
-    private val userMailSender: UserMailSender,
+    private val emailVerificationService: EmailVerificationService,
     private val userService: UserService,
     private val hashService: HashService,
     private val appProperties: AppProperties,
@@ -52,7 +52,7 @@ class UserSettingsService(
     suspend fun changeEmail(payload: ChangeEmailRequest, exchange: ServerWebExchange, lang: Language): UserDocument {
         logger.debug { "Changing email" }
 
-        val user = authenticationService.getCurrentUser()
+        val user = authorizationService.getCurrentUser()
 
         if (userService.existsByEmail(payload.newEmail)) {
             throw EmailAlreadyExistsException("Failed to register user ${payload.newEmail}")
@@ -67,7 +67,7 @@ class UserSettingsService(
         }
 
         if (appProperties.enableMail) {
-            userMailSender.sendVerificationEmail(user, lang, payload.newEmail)
+            emailVerificationService.sendVerificationEmail(user, lang, payload.newEmail)
         } else {
             user.sensitive.email = payload.newEmail
             user.sensitive.security.mail.verified = true
@@ -89,7 +89,7 @@ class UserSettingsService(
     suspend fun changePassword(payload: ChangePasswordRequest, exchange: ServerWebExchange): UserDocument {
         logger.debug { "Changing password" }
 
-        val user = authenticationService.getCurrentUser()
+        val user = authorizationService.getCurrentUser()
 
         if (!hashService.checkBcrypt(payload.oldPassword, user.password)) {
             throw InvalidCredentialsException()
@@ -112,7 +112,7 @@ class UserSettingsService(
      * @return The [UserDocument] of the updated user.
      */
     suspend fun changeUser(payload: ChangeUserRequest): UserDocument {
-        val user = authenticationService.getCurrentUser()
+        val user = authorizationService.getCurrentUser()
 
         if (payload.name != null) user.sensitive.name = payload.name
 
@@ -120,7 +120,7 @@ class UserSettingsService(
     }
 
     suspend fun setAvatar(file: FilePart): UserResponse {
-        val user = authenticationService.getCurrentUser()
+        val user = authorizationService.getCurrentUser()
 
         val currentAvatar = user.sensitive.avatarFileKey
 
@@ -148,7 +148,7 @@ class UserSettingsService(
     }
 
     suspend fun deleteAvatar(): UserResponse {
-        val user = authenticationService.getCurrentUser()
+        val user = authorizationService.getCurrentUser()
 
         val currentAvatar = user.sensitive.avatarFileKey
 
@@ -169,7 +169,7 @@ class UserSettingsService(
     suspend fun deleteUser() {
         logger.debug { "Deleting user" }
 
-        val userId = authenticationService.getCurrentUserId()
+        val userId = authorizationService.getCurrentUserId()
         accessTokenCache.invalidateAllTokens(userId)
 
         userService.deleteById(userId)

@@ -1,9 +1,9 @@
 package io.stereov.singularity.user.controller
 
-import io.stereov.singularity.auth.device.dto.DeviceInfoResponse
-import io.stereov.singularity.auth.session.model.SessionTokenType
+import io.stereov.singularity.auth.core.dto.response.SessionInfoResponse
+import io.stereov.singularity.auth.core.model.SessionTokenType
 import io.stereov.singularity.test.BaseIntegrationTest
-import io.stereov.singularity.user.core.model.DeviceInfo
+import io.stereov.singularity.user.core.model.SessionInfo
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -11,20 +11,20 @@ import org.junit.jupiter.api.Test
 import org.springframework.core.ParameterizedTypeReference
 import java.time.Instant
 
-class UserDeviceControllerIntegrationTest : BaseIntegrationTest() {
+class UsersessionControllerIntegrationTest : BaseIntegrationTest() {
 
-    @Test fun `getDevices returns devices`() = runTest {
-        val user = registerUser(deviceId = "first")
-        user.info.sensitive.devices.addAll(listOf(DeviceInfo("second", issuedAt = Instant.now()), DeviceInfo("third", issuedAt = Instant.now())))
+    @Test fun `getsessions returns sessions`() = runTest {
+        val user = registerUser(sessionId = "first")
+        user.info.sensitive.sessions.addAll(listOf(SessionInfo("second", issuedAt = Instant.now()), SessionInfo("third", issuedAt = Instant.now())))
 
         userService.save(user.info)
 
         val response = webTestClient.get()
-            .uri("/api/user/devices")
+            .uri("/api/auth/sessions")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(object : ParameterizedTypeReference<List<DeviceInfoResponse>>() {})
+            .expectBody(object : ParameterizedTypeReference<List<SessionInfoResponse>>() {})
             .returnResult()
             .responseBody
 
@@ -35,52 +35,52 @@ class UserDeviceControllerIntegrationTest : BaseIntegrationTest() {
         assertTrue(response.any { it.id == "second" })
         assertTrue(response.any { it.id == "third" })
     }
-    @Test fun `getDevices requires authentication`() = runTest {
+    @Test fun `getsessions requires authentication`() = runTest {
         webTestClient.get()
-            .uri("/api/user/devices")
+            .uri("/api/auth/sessions")
             .exchange()
             .expectStatus().isUnauthorized
     }
 
-    @Test fun `removeDevice deletes device`() = runTest {
-        val deviceId = "device"
-        val user = registerUser(deviceId = deviceId)
+    @Test fun `removesession deletes session`() = runTest {
+        val sessionId = "session"
+        val user = registerUser(sessionId = sessionId)
 
         webTestClient.delete()
-            .uri("/api/user/devices/$deviceId")
+            .uri("/api/auth/sessions/$sessionId")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isOk
 
         val updatedUser = userService.findById(user.info.id)
-        val devices = updatedUser.sensitive.devices
+        val sessions = updatedUser.sensitive.sessions
 
-        assertEquals(0, devices.size)
+        assertEquals(0, sessions.size)
     }
-    @Test fun `removeDevice requires authentication`() = runTest {
+    @Test fun `removesession requires authentication`() = runTest {
         webTestClient.delete()
-            .uri("/api/user/devices/device")
+            .uri("/api/auth/sessions/session")
             .exchange()
             .expectStatus().isUnauthorized
     }
 
-    @Test fun `clearDevices deletes devices`() = runTest {
+    @Test fun `clearsessions deletes sessions`() = runTest {
         val user = registerUser()
         webTestClient.delete()
-            .uri("/api/user/devices")
+            .uri("/api/auth/sessions")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus()
             .isOk
 
         val updatedUser = userService.findById(user.info.id)
-        val devices = updatedUser.sensitive.devices
+        val sessions = updatedUser.sensitive.sessions
 
-        assertEquals(0, devices.size)
+        assertEquals(0, sessions.size)
     }
-    @Test fun `clearDevices requires authentication`() = runTest {
+    @Test fun `clearsessions requires authentication`() = runTest {
         webTestClient.delete()
-            .uri("/api/user/devices")
+            .uri("/api/auth/sessions")
             .exchange()
             .expectStatus().isUnauthorized
     }

@@ -1,8 +1,8 @@
 package io.stereov.singularity.test
 
 import io.stereov.singularity.auth.core.service.CookieCreator
-import io.stereov.singularity.auth.session.service.AccessTokenService
-import io.stereov.singularity.auth.session.service.RefreshTokenService
+import io.stereov.singularity.auth.core.service.AccessTokenService
+import io.stereov.singularity.auth.core.service.RefreshTokenService
 import io.stereov.singularity.auth.twofactor.service.StepUpTokenService
 import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthService
 import io.stereov.singularity.database.hash.service.HashService

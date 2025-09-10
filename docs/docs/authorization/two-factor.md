@@ -25,33 +25,33 @@ By default, users have no 2FA configured. To enable it, you have to follow this 
 
 #### 1. Initialize
 Before enabling 2FA, entering the password is required.
-Use [`POST /api/user/2fa/init-setup`](/swagger#/User%20Session/register) TODO
+Use [`POST /api/auth/2fa/setup/init`](/swagger#/User%20Session/register) TODO
 When successful, you will an HTTP-only cookie with a `Two-Factor-Setup-Init-Token` is set.
 
 If header authentication is enabled, you will get the token in the response body.
 
 #### 2. Setup
 
-Start the setup with [`GET /api/user/2fa/setup`](/swagger#/User%20Session/register) TODO.
+Start the setup with [`GET /api/auth/2fa/setup`](/swagger#/User%20Session/register) TODO.
 You will receive your 2FA secret, a TOTP link and the recovery codes.
 
 #### 3. Validate
 
-Validate the setup with [`POST /api/user/2fa/setup`](/swagger#/User%20Session/register) TODO.
+Validate the setup with [`POST /api/auth/2fa/setup`](/swagger#/User%20Session/register) TODO.
 You need to send the token and the correct code.
 If the setup was successful, you will get the updated user information with 2FA enabled.
 The cookie containing the `Two-Factor-Setup-Init-Token` will cleared as well.
 
    The 2FA secret and the recovery codes are only saved inside the token.
    Therefore, no problem occurs if the setup is canceled or not finished.
-   Every time you call [`GET /api/user/2fa/setup`](/swagger#/User%20Session/register), a new 2FA secret and new recovery codes will be generated.
+   Every time you call [`GET /api/auth/2fa/setup`](/swagger#/User%20Session/register), a new 2FA secret and new recovery codes will be generated.
 
 ### Login
 
 If 2FA is enabled, the login flow will be more complex.
 After entering the correct credentials, you will get a `Two-Factor-Login-Token`.
 
-Use this token to send a request to [`POST /api/user/2fa/verify-login`](/swagger#/User%20Session/register) TODO.
+Use this token to send a request to [`POST /api/auth/2fa/login`](/swagger#/User%20Session/register) TODO.
 If the token is valid and the code is correct, access token and refresh token will be set as HTTP-only cookies. 
 The user is logged in.
 
@@ -59,12 +59,12 @@ If header authentication is enabled, you will receive both access token and refr
 
 ### Disabling
 
-2FA can be disabled using [`POST /api/user/2fa/disable`](/swagger#/User%20Session/register) TODO.
+2FA can be disabled using [`POST /api/auth/2fa/disable`](/swagger#/User%20Session/register) TODO.
 
 ### Recovery
 
-If a user loses access to their 2FA device, they can use one of their recovery codes to recover their account.
+If a user loses access to their 2FA session, they can use one of their recovery codes to recover their account.
 This automatically sets a **Step-Up-Token**. 
 Therefore, the user can perform tasks that require step up authentication, e.g. disabling 2FA.
 
-This can be done using [`POST /api/user/2fa/recover`](/swagger#/User%20Session/register) TODO.
+This can be done using [`POST /api/auth/2fa/recover`](/swagger#/User%20Session/register) TODO.

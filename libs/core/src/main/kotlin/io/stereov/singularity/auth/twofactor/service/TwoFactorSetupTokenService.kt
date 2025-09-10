@@ -1,7 +1,7 @@
 package io.stereov.singularity.auth.twofactor.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.auth.core.service.AuthenticationService
+import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException
 import io.stereov.singularity.auth.jwt.properties.JwtProperties
 import io.stereov.singularity.auth.jwt.service.JwtService
@@ -14,7 +14,7 @@ import java.time.Instant
 
 @Server
 class TwoFactorSetupTokenService(
-    private val authenticationService: AuthenticationService,
+    private val authorizationService: AuthorizationService,
     private val jwtService: JwtService,
     private val jwtProperties: JwtProperties,
 ) {
@@ -42,7 +42,7 @@ class TwoFactorSetupTokenService(
 
         val jwt = jwtService.decodeJwt(token, true)
 
-        val userId = authenticationService.getCurrentUserId()
+        val userId = authorizationService.getCurrentUserId()
         val subject = jwt.subject?.let { ObjectId(it) }
 
         if (subject != userId) {

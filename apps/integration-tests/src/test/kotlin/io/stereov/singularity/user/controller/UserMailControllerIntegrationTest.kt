@@ -1,14 +1,15 @@
 package io.stereov.singularity.user.controller
 
 import io.mockk.verify
-import io.stereov.singularity.auth.device.dto.DeviceInfoRequest
-import io.stereov.singularity.auth.session.dto.request.LoginRequest
-import io.stereov.singularity.auth.session.model.SessionTokenType
+import io.stereov.singularity.auth.core.dto.request.LoginRequest
+import io.stereov.singularity.auth.core.dto.request.ResetPasswordRequest
+import io.stereov.singularity.auth.core.dto.request.SendPasswordResetRequest
+import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
+import io.stereov.singularity.auth.core.dto.response.MailCooldownResponse
+import io.stereov.singularity.auth.core.model.SessionTokenType
+import io.stereov.singularity.auth.core.service.EmailVerificationTokenService
+import io.stereov.singularity.auth.core.service.PasswordResetTokenService
 import io.stereov.singularity.database.encryption.service.EncryptionSecretService
-import io.stereov.singularity.mail.user.dto.MailCooldownResponse
-import io.stereov.singularity.mail.user.dto.ResetPasswordRequest
-import io.stereov.singularity.mail.user.dto.SendPasswordResetRequest
-import io.stereov.singularity.mail.user.service.MailTokenService
 import io.stereov.singularity.test.BaseMailIntegrationTest
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.settings.dto.request.ChangeEmailRequest
@@ -25,16 +26,19 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
     private lateinit var encryptionSecretService: EncryptionSecretService
 
     @Autowired
-    private lateinit var mailTokenService: MailTokenService
+    private lateinit var emailVerificationTokenService: EmailVerificationTokenService
+
+    @Autowired
+    private lateinit var passwordResetTokenService: PasswordResetTokenService
 
     @Test fun `verifyEmail works`() = runTest {
         val user = registerUser()
-        val token = mailTokenService.createVerificationToken(user.info.id, user.info.sensitive.email,user.mailVerificationSecret)
+        val token = emailVerificationTokenService.create(user.info.id, user.info.sensitive.email,user.mailVerificationSecret)
 
         assertFalse(user.info.sensitive.security.mail.verified)
 
         webTestClient.post()
-            .uri("/api/user/mail/verify?token=$token")
+            .uri("/api/auth/email/verify?token=$token")
             .exchange()
             .expectStatus().isOk
 
@@ -44,31 +48,31 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
     }
     @Test fun `verifyEmail requires token`() = runTest {
         webTestClient.post()
-            .uri("/api/user/mail/verify")
+            .uri("/api/auth/email/verify")
             .exchange()
             .expectStatus().isBadRequest
     }
     @Test fun `verifyEmail requires valid token`() = runTest {
         webTestClient.post()
-            .uri("/api/user/mail/verify?token=test")
+            .uri("/api/auth/email/verify?token=test")
             .exchange()
             .expectStatus().isUnauthorized
     }
     @Test fun `verifyEmail requires right token`() = runTest {
         val user = registerUser()
-        val token = mailTokenService.createVerificationToken(user.info.id, user.info.sensitive.email, encryptionSecretService.getCurrentSecret().value)
+        val token = emailVerificationTokenService.create(user.info.id, user.info.sensitive.email, encryptionSecretService.getCurrentSecret().value)
 
         webTestClient.post()
-            .uri("/api/user/mail/verify?token=$token")
+            .uri("/api/auth/email/verify?token=$token")
             .exchange()
             .expectStatus().isUnauthorized
     }
     @Test fun `verifyEmail requires unexpired token`() = runTest {
         val user = registerUser()
-        val token = mailTokenService.createVerificationToken(user.info.id, user.info.sensitive.email, user.mailVerificationSecret, Instant.ofEpochSecond(0))
+        val token = emailVerificationTokenService.create(user.info.id, user.info.sensitive.email, user.mailVerificationSecret, Instant.ofEpochSecond(0))
 
         webTestClient.post()
-            .uri("/api/user/mail/verify?token=$token")
+            .uri("/api/auth/email/verify?token=$token")
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -77,7 +81,7 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
         val user = registerUser()
 
         webTestClient.post()
-            .uri("/api/user/mail/verify/send")
+            .uri("/api/auth/email/verify/send")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isOk
@@ -89,13 +93,13 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
         val user = registerUser()
 
         webTestClient.post()
-            .uri("/api/user/mail/verify/send")
+            .uri("/api/auth/email/verify/send")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isOk
 
         val res = webTestClient.get()
-            .uri("/api/user/mail/verify/cooldown")
+            .uri("/api/auth/email/verify/cooldown")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isOk
@@ -111,7 +115,7 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
         val user = registerUser()
 
         val res = webTestClient.get()
-            .uri("/api/user/mail/verify/cooldown")
+            .uri("/api/auth/email/verify/cooldown")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isOk
@@ -125,7 +129,7 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
     }
     @Test fun `verifyCooldown requires authentication`() = runTest {
         webTestClient.get()
-            .uri("/api/user/mail/verify/cooldown")
+            .uri("/api/auth/email/verify/cooldown")
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -137,7 +141,7 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
         val user = registerUser(oldEmail, password)
 
         val res = webTestClient.put()
-            .uri("/api/user/me/email")
+            .uri("/api/users/me/email")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .bodyValue(ChangeEmailRequest(newEmail, password))
             .exchange()
@@ -154,7 +158,7 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
 
     @Test fun `resetPassword works`() = runTest {
         val user = registerUser()
-        val token = mailTokenService.createPasswordResetToken(user.info.id, user.passwordResetSecret)
+        val token = passwordResetTokenService.create(user.info.id, user.passwordResetSecret)
 
         assertFalse(user.info.sensitive.security.mail.verified)
 
@@ -162,7 +166,7 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
         val req = ResetPasswordRequest(newPassword)
 
         webTestClient.post()
-            .uri("/api/user/mail/reset-password?token=$token")
+            .uri("/api/auth/password/reset?token=$token")
             .bodyValue(req)
             .exchange()
             .expectStatus().isOk
@@ -172,10 +176,10 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
         assertNotEquals(user.info.sensitive.security.mail.passwordResetSecret, verifiedUser.sensitive.security.mail.passwordResetSecret)
         assertNotEquals(user.info.password, verifiedUser.password)
 
-        val credentials = LoginRequest(user.info.sensitive.email, newPassword, DeviceInfoRequest("test"))
+        val credentials = LoginRequest(user.info.sensitive.email, newPassword, SessionInfoRequest("test"))
 
         webTestClient.post()
-            .uri("/api/user/login")
+            .uri("/api/auth/login")
             .bodyValue(credentials)
             .exchange()
             .expectStatus().isOk
@@ -184,7 +188,7 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
         val req = ResetPasswordRequest("test")
 
         webTestClient.post()
-            .uri("/api/user/mail/reset-password")
+            .uri("/api/auth/password/reset")
             .bodyValue(req)
             .exchange()
             .expectStatus().isBadRequest
@@ -193,30 +197,30 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
         val req = ResetPasswordRequest("test")
 
         webTestClient.post()
-            .uri("/api/user/mail/verify?token=test")
+            .uri("/api/auth/email/verify?token=test")
             .bodyValue(req)
             .exchange()
             .expectStatus().isUnauthorized
     }
     @Test fun `resetPassword requires unexpired token`() = runTest {
         val user = registerUser()
-        val token = mailTokenService.createPasswordResetToken(user.info.id, user.passwordResetSecret, Instant.ofEpochSecond(0))
+        val token = passwordResetTokenService.create(user.info.id, user.passwordResetSecret, Instant.ofEpochSecond(0))
 
         val req = ResetPasswordRequest("Test")
 
         webTestClient.post()
-            .uri("/api/user/mail/verify?token=$token")
+            .uri("/api/auth/email/verify?token=$token")
             .bodyValue(req)
             .exchange()
             .expectStatus().isUnauthorized
     }
     @Test fun `resetPassword needs body`() = runTest {
         val user = registerUser()
-        val token = mailTokenService.createPasswordResetToken(user.info.id, user.passwordResetSecret)
+        val token = passwordResetTokenService.create(user.info.id, user.passwordResetSecret)
 
 
         webTestClient.post()
-            .uri("/api/user/mail/reset-password?token=$token")
+            .uri("/api/auth/password/reset?token=$token")
             .exchange()
             .expectStatus().isBadRequest
     }
@@ -225,7 +229,7 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
         val user = registerUser()
 
         webTestClient.post()
-            .uri("/api/user/mail/reset-password/send")
+            .uri("/api/auth/password/reset-request")
             .bodyValue(SendPasswordResetRequest(user.info.sensitive.email))
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
@@ -237,7 +241,7 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
         val user = registerUser()
 
         webTestClient.post()
-            .uri("/api/user/mail/reset-password/send")
+            .uri("/api/auth/password/reset-request")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isBadRequest
@@ -247,13 +251,13 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
         val user = registerUser()
 
         webTestClient.post()
-            .uri("/api/user/mail/reset-password/send")
+            .uri("/api/auth/password/reset-request")
             .bodyValue(SendPasswordResetRequest(user.info.sensitive.email))
             .exchange()
             .expectStatus().isOk
 
         val res = webTestClient.get()
-            .uri("/api/user/mail/reset-password/cooldown")
+            .uri("/api/auth/password/reset/cooldown")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isOk
@@ -269,7 +273,7 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
         val user = registerUser()
 
         val res = webTestClient.get()
-            .uri("/api/user/mail/reset-password/cooldown")
+            .uri("/api/auth/password/reset/cooldown")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isOk
@@ -283,7 +287,7 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
     }
     @Test fun `passwordRestCooldown requires authentication`() = runTest {
         webTestClient.get()
-            .uri("/api/user/mail/reset-password/cooldown")
+            .uri("/api/auth/password/reset/cooldown")
             .exchange()
             .expectStatus().isUnauthorized
     }

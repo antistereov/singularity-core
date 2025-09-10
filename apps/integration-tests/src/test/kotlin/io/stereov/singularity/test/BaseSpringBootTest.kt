@@ -2,13 +2,13 @@ package io.stereov.singularity.test
 
 import com.warrenstrange.googleauth.GoogleAuthenticator
 import io.mockk.every
-import io.stereov.singularity.auth.device.dto.DeviceInfoRequest
+import io.stereov.singularity.auth.core.dto.request.LoginRequest
+import io.stereov.singularity.auth.core.dto.request.RegisterUserRequest
+import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
+import io.stereov.singularity.auth.core.model.SessionTokenType
 import io.stereov.singularity.auth.group.model.GroupDocument
 import io.stereov.singularity.auth.group.model.GroupTranslation
 import io.stereov.singularity.auth.group.service.GroupService
-import io.stereov.singularity.auth.session.dto.request.LoginRequest
-import io.stereov.singularity.auth.session.dto.request.RegisterUserRequest
-import io.stereov.singularity.auth.session.model.SessionTokenType
 import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorSetupInitRequest
 import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorVerifySetupRequest
 import io.stereov.singularity.auth.twofactor.dto.response.TwoFactorSetupResponse
@@ -85,17 +85,17 @@ class BaseSpringBootTest {
     suspend fun registerUser(
         email: String = "test@email.com",
         password: String = "password",
-        deviceId: String = "device",
+        sessionId: String = "session",
         twoFactorEnabled: Boolean = false,
         name: String = "Name",
         roles: List<Role> = listOf(Role.USER),
         groups: List<String> = listOf(),
     ): TestRegisterResponse {
-        val device = DeviceInfoRequest(id = deviceId)
+        val session = SessionInfoRequest(id = sessionId)
 
         var responseCookies = webTestClient.post()
-            .uri("/api/user/register?send-email=false")
-            .bodyValue(RegisterUserRequest(email = email, password = password, name = name, device = device))
+            .uri("/api/auth/register?send-email=false")
+            .bodyValue(RegisterUserRequest(email = email, password = password, name = name, session = session))
             .exchange()
             .expectStatus().isOk
             .returnResult<Void>()
@@ -114,7 +114,7 @@ class BaseSpringBootTest {
 
         if (twoFactorEnabled) {
             val twoFactorSetupStartRes = webTestClient.post()
-                .uri("/api/user/2fa/init-setup")
+                .uri("/api/auth/2fa/setup/init")
                 .cookie(SessionTokenType.Access.cookieName, accessToken)
                 .bodyValue(TwoFactorSetupInitRequest(password))
                 .exchange()
@@ -128,7 +128,7 @@ class BaseSpringBootTest {
             twoFactorStartSetupToken = twoFactorSetupStartRes
 
             val twoFactorRes = webTestClient.get()
-                .uri("/api/user/2fa/setup")
+                .uri("/api/auth/2fa/setup")
                 .cookie(TwoFactorTokenType.InitSetup.cookieName, twoFactorStartSetupToken)
                 .cookie(SessionTokenType.Access.cookieName, accessToken)
                 .exchange()
@@ -149,15 +149,15 @@ class BaseSpringBootTest {
             )
 
             webTestClient.post()
-                .uri("/api/user/2fa/setup")
+                .uri("/api/auth/2fa/setup")
                 .cookie(SessionTokenType.Access.cookieName, accessToken)
                 .bodyValue(twoFactorSetupReq)
                 .exchange()
                 .expectStatus().isOk
 
             twoFactorToken = webTestClient.post()
-                .uri("/api/user/login")
-                .bodyValue(LoginRequest(email, password, device))
+                .uri("/api/auth/login")
+                .bodyValue(LoginRequest(email, password, session))
                 .exchange()
                 .expectStatus().isOk
                 .returnResult<Void>()
@@ -166,8 +166,8 @@ class BaseSpringBootTest {
                 ?.value
 
             responseCookies = webTestClient.post()
-                .uri("/api/user/2fa/verify-login?code=${gAuth.getTotpPassword(twoFactorSecret)}")
-                .bodyValue(DeviceInfoRequest(deviceId))
+                .uri("/api/auth/2fa/login?code=${gAuth.getTotpPassword(twoFactorSecret)}")
+                .bodyValue(SessionInfoRequest(sessionId))
                 .cookie(TwoFactorTokenType.Login.cookieName, twoFactorToken!!)
                 .exchange()
                 .expectStatus().isOk
@@ -200,7 +200,7 @@ class BaseSpringBootTest {
 
     suspend fun deleteAccount(response: TestRegisterResponse) {
         webTestClient.delete()
-            .uri("/api/user/me")
+            .uri("/api/users/me")
             .header(HttpHeaders.COOKIE, "${SessionTokenType.Access.cookieName}=${response.accessToken}")
             .exchange()
             .expectStatus().isOk

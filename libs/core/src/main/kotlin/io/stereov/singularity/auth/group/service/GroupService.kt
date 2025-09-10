@@ -1,7 +1,7 @@
 package io.stereov.singularity.auth.group.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.auth.core.service.AuthenticationService
+import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.group.dto.request.CreateGroupRequest
 import io.stereov.singularity.auth.group.dto.response.UpdateGroupRequest
 import io.stereov.singularity.auth.group.exception.model.GroupKeyExistsException
@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service
 class GroupService(
     private val repository: GroupRepository,
     private val appProperties: AppProperties,
-    private val authenticationService: AuthenticationService,
+    private val authorizationService: AuthorizationService,
     override val reactiveMongoTemplate: ReactiveMongoTemplate
 ) : TranslatableCrudService<GroupTranslation, GroupDocument> {
 
@@ -45,7 +45,7 @@ class GroupService(
     }
 
     suspend fun create(req: CreateGroupRequest): GroupDocument {
-        authenticationService.requireRole(Role.ADMIN)
+        authorizationService.requireRole(Role.ADMIN)
 
         return createNotAuthorized(req)
     }
@@ -96,7 +96,7 @@ class GroupService(
     suspend fun update(key: String, req: UpdateGroupRequest): GroupDocument {
         logger.debug { "Updating group with key \"$key\"" }
 
-        authenticationService.requireRole(Role.ADMIN)
+        authorizationService.requireRole(Role.ADMIN)
 
         val group = findByKeyOrNull(key)
             ?: throw DocumentNotFoundException("No group with key \"$key\" found")
@@ -109,7 +109,7 @@ class GroupService(
     suspend fun deleteByKey(key: String) {
         logger.debug { "Deleting group with key \"$key\"" }
 
-        authenticationService.requireRole(Role.ADMIN)
+        authorizationService.requireRole(Role.ADMIN)
 
         return repository.deleteByKey(key)
     }

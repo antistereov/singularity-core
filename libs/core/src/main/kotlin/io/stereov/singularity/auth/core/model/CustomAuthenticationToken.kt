@@ -11,17 +11,17 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
  *
  * This class extends the [AbstractAuthenticationToken] class and represents a custom authentication token
  * for user authentication.
- * It contains the user's ID, device-ID, and the user's authorities.
+ * It contains the user's ID, session-ID, and the user's authorities.
  *
  * @property user The [UserDocument] object containing user information.
- * @property deviceId The ID of the device.
+ * @property sessionId The ID of the session.
  * @property authorities The collection of granted authorities for the user.
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
 class CustomAuthenticationToken(
     val user: UserDocument,
-    val deviceId: String,
+    val sessionId: String,
     val tokenId: String,
     authorities: Collection<GrantedAuthority>
 ) : AbstractAuthenticationToken(authorities) {
@@ -34,15 +34,15 @@ class CustomAuthenticationToken(
     override fun getPrincipal(): ObjectId = user.id
 
     /**
-     * Constructs a [CustomAuthenticationToken] from a [UserDocument] and a device ID.
+     * Constructs a [CustomAuthenticationToken] from a [UserDocument] and a session ID.
      *
      * @param userDocument The [UserDocument] object containing user information.
-     * @param deviceId The ID of the device.
+     * @param sessionId The ID of the session.
      */
-    constructor(userDocument: UserDocument, deviceId: String, tokenId: String): this(
+    constructor(userDocument: UserDocument, sessionId: String, tokenId: String): this(
         user = userDocument,
         authorities = userDocument.sensitive.roles.map { SimpleGrantedAuthority("ROLE_$it") },
-        deviceId = deviceId,
+        sessionId = sessionId,
         tokenId = tokenId
     )
 }

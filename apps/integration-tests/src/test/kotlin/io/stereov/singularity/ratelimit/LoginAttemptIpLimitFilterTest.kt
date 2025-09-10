@@ -2,8 +2,8 @@ package io.stereov.singularity.ratelimit
 
 import io.stereov.singularity.ratelimit.properties.LoginAttemptLimitProperties
 import io.stereov.singularity.test.BaseSpringBootTest
-import io.stereov.singularity.auth.device.dto.DeviceInfoRequest
-import io.stereov.singularity.auth.session.dto.request.LoginRequest
+import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
+import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -44,23 +44,23 @@ class LoginAttemptIpLimitFilterTest : BaseSpringBootTest() {
 
     @Test fun `ip rate limit works`() = runTest {
         assertEquals(2, loginAttemptLimitProperties.ipLimit)
-        val device = DeviceInfoRequest("device")
+        val session = SessionInfoRequest("session")
 
         webTestClient.post()
-            .uri("/api/user/login")
-            .bodyValue(LoginRequest("test@email.com", "password1", device))
+            .uri("/api/auth/login")
+            .bodyValue(LoginRequest("test@email.com", "password1", session))
             .exchange()
             .expectStatus().isUnauthorized
 
         webTestClient.post()
-            .uri("/api/user/login")
-            .bodyValue(LoginRequest("test1@email.com", "password1", device))
+            .uri("/api/auth/login")
+            .bodyValue(LoginRequest("test1@email.com", "password1", session))
             .exchange()
             .expectStatus().isUnauthorized
 
         webTestClient.post()
-            .uri("/api/user/login")
-            .bodyValue(LoginRequest("test2@email.com", "password1", device))
+            .uri("/api/auth/login")
+            .bodyValue(LoginRequest("test2@email.com", "password1", session))
             .exchange()
             .expectStatus().isEqualTo(HttpStatus.TOO_MANY_REQUESTS)
     }

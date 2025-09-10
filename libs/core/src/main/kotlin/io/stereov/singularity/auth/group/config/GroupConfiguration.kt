@@ -1,7 +1,7 @@
 package io.stereov.singularity.auth.group.config
 
 import io.stereov.singularity.auth.core.config.AuthenticationConfiguration
-import io.stereov.singularity.auth.core.service.AuthenticationService
+import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.group.controller.GroupController
 import io.stereov.singularity.auth.group.controller.GroupMemberController
 import io.stereov.singularity.auth.group.exception.handler.GroupExceptionHandler
@@ -34,10 +34,10 @@ class GroupConfiguration {
     fun groupService(
         groupRepository: GroupRepository,
         appProperties: AppProperties,
-        authenticationService: AuthenticationService,
+        authorizationService: AuthorizationService,
         reactiveMongoTemplate: ReactiveMongoTemplate
     ): GroupService {
-        return GroupService(groupRepository, appProperties, authenticationService, reactiveMongoTemplate)
+        return GroupService(groupRepository, appProperties, authorizationService, reactiveMongoTemplate)
     }
 
     @Bean
@@ -45,7 +45,7 @@ class GroupConfiguration {
     fun groupMemberService(
         userService: UserService,
         groupService: GroupService,
-        authService: AuthenticationService
+        authService: AuthorizationService
     ) = GroupMemberService(userService, groupService, authService)
 
     // Controller

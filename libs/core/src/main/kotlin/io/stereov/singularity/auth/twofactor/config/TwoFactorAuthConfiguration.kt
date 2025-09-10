@@ -2,15 +2,15 @@ package io.stereov.singularity.auth.twofactor.config
 
 import com.warrenstrange.googleauth.GoogleAuthenticator
 import io.stereov.singularity.auth.core.properties.AuthProperties
-import io.stereov.singularity.auth.core.service.AuthenticationService
+import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.core.service.CookieCreator
 import io.stereov.singularity.auth.core.service.TokenValueExtractor
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
 import io.stereov.singularity.auth.jwt.properties.JwtProperties
 import io.stereov.singularity.auth.jwt.service.JwtService
-import io.stereov.singularity.auth.session.cache.AccessTokenCache
-import io.stereov.singularity.auth.session.service.AccessTokenService
-import io.stereov.singularity.auth.session.service.RefreshTokenService
+import io.stereov.singularity.auth.core.cache.AccessTokenCache
+import io.stereov.singularity.auth.core.service.AccessTokenService
+import io.stereov.singularity.auth.core.service.RefreshTokenService
 import io.stereov.singularity.auth.twofactor.controller.UserTwoFactorAuthController
 import io.stereov.singularity.auth.twofactor.exception.handler.TwoFactorAuthExceptionHandler
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorAuthProperties
@@ -46,7 +46,7 @@ class TwoFactorAuthConfiguration {
         setupInitTokenService: TwoFactorInitSetupTokenService,
         stepUpTokenService: StepUpTokenService,
         cookieCreator: CookieCreator,
-        authenticationService: AuthenticationService
+        authorizationService: AuthorizationService
     ): UserTwoFactorAuthController {
         return UserTwoFactorAuthController(
             userTwoFactorAuthService,
@@ -58,7 +58,7 @@ class TwoFactorAuthConfiguration {
             setupInitTokenService,
             stepUpTokenService,
             cookieCreator,
-            authenticationService
+            authorizationService
         )
     }
 
@@ -81,11 +81,11 @@ class TwoFactorAuthConfiguration {
     fun stepUpTokenService(
         jwtService: JwtService,
         jwtProperties: JwtProperties,
-        authenticationService: AuthenticationService,
+        authorizationService: AuthorizationService,
         twoFactorAuthService: TwoFactorAuthService,
         tokenValueExtractor: TokenValueExtractor,
     ): StepUpTokenService {
-        return StepUpTokenService(jwtService, jwtProperties, authenticationService, twoFactorAuthService, tokenValueExtractor)
+        return StepUpTokenService(jwtService, jwtProperties, authorizationService, twoFactorAuthService, tokenValueExtractor)
     }
 
     @Bean
@@ -105,27 +105,27 @@ class TwoFactorAuthConfiguration {
     @Bean
     @ConditionalOnMissingBean
     fun twoFactorSetupInitTokenService(
-        authenticationService: AuthenticationService,
+        authorizationService: AuthorizationService,
         hashService: HashService,
         jwtService: JwtService,
         jwtProperties: JwtProperties,
         tokenValueExtractor: TokenValueExtractor
-    ) = TwoFactorInitSetupTokenService(authenticationService, hashService, jwtService, jwtProperties, tokenValueExtractor)
+    ) = TwoFactorInitSetupTokenService(authorizationService, hashService, jwtService, jwtProperties, tokenValueExtractor)
 
     @Bean
     @ConditionalOnMissingBean
     fun twoFactorSetupTokenService(
-        authenticationService: AuthenticationService,
+        authorizationService: AuthorizationService,
         jwtService: JwtService,
         jwtProperties: JwtProperties,
-    ) = TwoFactorSetupTokenService(authenticationService, jwtService, jwtProperties)
+    ) = TwoFactorSetupTokenService(authorizationService, jwtService, jwtProperties)
 
     @Bean
     @ConditionalOnMissingBean
     fun userTwoFactorAuthService(
         userService: UserService,
         twoFactorAuthService: TwoFactorAuthService,
-        authenticationService: AuthenticationService,
+        authorizationService: AuthorizationService,
         twoFactorAuthProperties: TwoFactorAuthProperties,
         hashService: HashService,
         accessTokenCache: AccessTokenCache,
@@ -138,7 +138,7 @@ class TwoFactorAuthConfiguration {
         return UserTwoFactorAuthService(
             userService,
             twoFactorAuthService,
-            authenticationService,
+            authorizationService,
             twoFactorAuthProperties,
             hashService,
             accessTokenCache,

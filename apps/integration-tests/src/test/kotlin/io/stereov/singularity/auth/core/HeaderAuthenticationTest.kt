@@ -1,10 +1,10 @@
 package io.stereov.singularity.auth.core.core
 
-import io.stereov.singularity.auth.device.dto.DeviceInfoRequest
-import io.stereov.singularity.auth.session.dto.response.RefreshTokenResponse
-import io.stereov.singularity.auth.session.model.SessionTokenType
-import io.stereov.singularity.auth.session.service.AccessTokenService
-import io.stereov.singularity.auth.session.service.RefreshTokenService
+import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
+import io.stereov.singularity.auth.core.dto.response.RefreshTokenResponse
+import io.stereov.singularity.auth.core.model.SessionTokenType
+import io.stereov.singularity.auth.core.service.AccessTokenService
+import io.stereov.singularity.auth.core.service.RefreshTokenService
 import io.stereov.singularity.test.BaseSpringBootTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
@@ -53,7 +53,7 @@ class HeaderAuthenticationTest : BaseSpringBootTest() {
         val user = registerUser()
 
         webTestClient.get()
-            .uri("/api/user/me")
+            .uri("/api/users/me")
             .header(HttpHeaders.AUTHORIZATION, "Bearer ${user.accessToken}")
             .exchange()
             .expectStatus().isOk
@@ -62,14 +62,14 @@ class HeaderAuthenticationTest : BaseSpringBootTest() {
         val user = registerUser()
 
         webTestClient.get()
-            .uri("/api/user/me")
+            .uri("/api/users/me")
             .header(HttpHeaders.AUTHORIZATION, user.accessToken)
             .exchange()
             .expectStatus().isUnauthorized
     }
     @Test fun `valid token required`() = runTest {
         webTestClient.get()
-            .uri("/api/user/me")
+            .uri("/api/users/me")
             .header(HttpHeaders.AUTHORIZATION, "access_token")
             .exchange()
             .expectStatus().isUnauthorized
@@ -79,17 +79,17 @@ class HeaderAuthenticationTest : BaseSpringBootTest() {
         deleteAccount(user)
 
         webTestClient.get()
-            .uri("/api/user/me")
+            .uri("/api/users/me")
             .header(HttpHeaders.AUTHORIZATION, "Bearer ${user.accessToken}")
             .exchange()
             .expectStatus().isUnauthorized
     }
     @Test fun `unexpired token required`() = runTest {
         val user = registerUser()
-        val token = accessTokenService.create(user.info.id, "device", Instant.ofEpochSecond(0))
+        val token = accessTokenService.create(user.info.id, "session", Instant.ofEpochSecond(0))
 
         webTestClient.get()
-            .uri("/api/user/me")
+            .uri("/api/users/me")
             .header(HttpHeaders.AUTHORIZATION, token.value)
             .exchange()
             .expectStatus().isUnauthorized
@@ -98,14 +98,14 @@ class HeaderAuthenticationTest : BaseSpringBootTest() {
         val user = registerUser()
 
         webTestClient.post()
-            .uri("/api/user/logout")
+            .uri("/api/auth/logout")
             .header(HttpHeaders.AUTHORIZATION, "Bearer ${user.accessToken}")
-            .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.first().id))
+            .bodyValue(SessionInfoRequest(user.info.sensitive.sessions.first().id))
             .exchange()
             .expectStatus().isOk
 
         webTestClient.get()
-            .uri("/api/user/me")
+            .uri("/api/users/me")
             .header(HttpHeaders.AUTHORIZATION, "Bearer ${user.accessToken}")
             .exchange()
             .expectStatus().isUnauthorized
@@ -113,46 +113,45 @@ class HeaderAuthenticationTest : BaseSpringBootTest() {
     @Test fun `token gets invalid after logoutAll`() = runTest {
         val user = registerUser()
 
-        webTestClient.post()
-            .uri("/api/user/logout-all")
+        webTestClient.delete()
+            .uri("/api/auth/sessions")
             .header(HttpHeaders.AUTHORIZATION, "Bearer ${user.accessToken}")
-            .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.first().id))
             .exchange()
             .expectStatus().isOk
 
         webTestClient.get()
-            .uri("/api/user/me")
+            .uri("/api/users/me")
             .header(HttpHeaders.AUTHORIZATION, "Bearer ${user.accessToken}")
             .exchange()
             .expectStatus().isUnauthorized
     }
-    @Test fun `invalid device will not be authorized`() = runTest {
-        val user = registerUser(deviceId = "device")
-        val accessToken = accessTokenService.create(user.info.id, "device")
+    @Test fun `invalid session will not be authorized`() = runTest {
+        val user = registerUser(sessionId = "session")
+        val accessToken = accessTokenService.create(user.info.id, "session")
 
         webTestClient.get()
-            .uri("/api/user/me")
+            .uri("/api/users/me")
             .header(HttpHeaders.AUTHORIZATION, "Bearer ${accessToken.value}")
             .exchange()
             .expectStatus().isOk
 
         val foundUser = userService.findById(user.info.id)
-        foundUser.sensitive.devices.clear()
+        foundUser.sensitive.sessions.clear()
         userService.save(foundUser)
 
         webTestClient.get()
-            .uri("/api/user/me")
+            .uri("/api/users/me")
             .header(HttpHeaders.AUTHORIZATION, "Bearer ${accessToken.value}")
             .exchange()
             .expectStatus().isUnauthorized
     }
 
     @Test fun `refresh works`() = runTest {
-        val user = registerUser(deviceId = "device")
+        val user = registerUser(sessionId = "session")
 
         val response = webTestClient.post()
-            .uri("/api/user/refresh")
-            .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.first().id))
+            .uri("/api/auth/refresh")
+            .bodyValue(SessionInfoRequest(user.info.sensitive.sessions.first().id))
             .header(HttpHeaders.AUTHORIZATION, "Bearer ${user.refreshToken}")
             .exchange()
             .expectStatus().isOk
@@ -163,17 +162,17 @@ class HeaderAuthenticationTest : BaseSpringBootTest() {
         requireNotNull(response)
 
         webTestClient.get()
-            .uri("/api/user/me")
+            .uri("/api/users/me")
             .header(SessionTokenType.Refresh.header, "Bearer ${response.accessToken!!}")
             .exchange()
             .expectStatus().isOk
     }
     @Test fun `refresh does not invalidate old token`() = runTest {
-        val user = registerUser(deviceId = "device")
+        val user = registerUser(sessionId = "session")
 
         val response = webTestClient.post()
-            .uri("/api/user/refresh")
-            .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.first().id))
+            .uri("/api/auth/refresh")
+            .bodyValue(SessionInfoRequest(user.info.sensitive.sessions.first().id))
             .header(HttpHeaders.AUTHORIZATION, "Bearer ${user.refreshToken}")
             .exchange()
             .expectStatus().isOk
@@ -184,35 +183,35 @@ class HeaderAuthenticationTest : BaseSpringBootTest() {
         requireNotNull(response)
 
         webTestClient.get()
-            .uri("/api/user/me")
+            .uri("/api/users/me")
             .header(SessionTokenType.Refresh.header, "Bearer ${user.accessToken}")
             .exchange()
             .expectStatus().isOk
 
         webTestClient.get()
-            .uri("/api/user/me")
+            .uri("/api/users/me")
             .header(SessionTokenType.Refresh.header, "Bearer ${response.accessToken!!}")
             .exchange()
             .expectStatus().isOk
     }
     @Test fun `refresh requires valid token`() = runTest {
-        val user = registerUser(deviceId = "device")
+        val user = registerUser(sessionId = "session")
 
         webTestClient.post()
-            .uri("/api/user/refresh")
+            .uri("/api/auth/refresh")
             .header(SessionTokenType.Refresh.header, "invalid-token")
-            .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.first().id))
+            .bodyValue(SessionInfoRequest(user.info.sensitive.sessions.first().id))
             .exchange()
             .expectStatus().isUnauthorized
     }
     @Test fun `refresh requires unexpired token`() = runTest {
-        val user = registerUser(deviceId = "device")
-        val token = refreshTokenService.create(user.info.id, "device", user.info.sensitive.devices.first().refreshTokenId!!,Instant.ofEpochSecond(0))
+        val user = registerUser(sessionId = "session")
+        val token = refreshTokenService.create(user.info.id, "session", user.info.sensitive.sessions.first().refreshTokenId!!,Instant.ofEpochSecond(0))
 
         webTestClient.post()
-            .uri("/api/user/refresh")
+            .uri("/api/auth/refresh")
             .header(SessionTokenType.Refresh.header, "Bearer ${token.value}")
-            .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.first().id))
+            .bodyValue(SessionInfoRequest(user.info.sensitive.sessions.first().id))
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -221,9 +220,9 @@ class HeaderAuthenticationTest : BaseSpringBootTest() {
         deleteAccount(user)
 
         webTestClient.post()
-            .uri("/api/user/refresh")
+            .uri("/api/auth/refresh")
             .header(HttpHeaders.AUTHORIZATION, "Bearer ${user.refreshToken}")
-            .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.first().id))
+            .bodyValue(SessionInfoRequest(user.info.sensitive.sessions.first().id))
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -231,53 +230,52 @@ class HeaderAuthenticationTest : BaseSpringBootTest() {
         val user = registerUser()
 
         webTestClient.post()
-            .uri("/api/user/logout")
+            .uri("/api/auth/logout")
             .header(SessionTokenType.Refresh.header, "Bearer ${user.accessToken}")
-            .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.first().id))
+            .bodyValue(SessionInfoRequest(user.info.sensitive.sessions.first().id))
             .exchange()
             .expectStatus().isOk
 
         webTestClient.post()
-            .uri("/api/user/refresh")
+            .uri("/api/auth/refresh")
             .header(HttpHeaders.AUTHORIZATION, "Bearer ${user.refreshToken}")
-            .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.first().id))
+            .bodyValue(SessionInfoRequest(user.info.sensitive.sessions.first().id))
             .exchange()
             .expectStatus().isUnauthorized
     }
     @Test fun `refresh token gets invalid after logoutAll`() = runTest {
         val user = registerUser()
 
-        webTestClient.post()
-            .uri("/api/user/logout-all")
+        webTestClient.delete()
+            .uri("/api/auth/sessions")
             .header(SessionTokenType.Refresh.header, "Bearer ${user.accessToken}")
-            .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.first().id))
             .exchange()
             .expectStatus().isOk
 
         webTestClient.post()
-            .uri("/api/user/refresh")
+            .uri("/api/auth/refresh")
             .header(HttpHeaders.AUTHORIZATION, "Bearer ${user.refreshToken}")
-            .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.first().id))
+            .bodyValue(SessionInfoRequest(user.info.sensitive.sessions.first().id))
             .exchange()
             .expectStatus().isUnauthorized
     }
-    @Test fun `refresh invalid device will not be authorized`() = runTest {
-        val user = registerUser(deviceId = "device")
-        val accessToken = accessTokenService.create(user.info.id, "device")
+    @Test fun `refresh invalid session will not be authorized`() = runTest {
+        val user = registerUser(sessionId = "session")
+        val accessToken = accessTokenService.create(user.info.id, "session")
 
         webTestClient.get()
-            .uri("/api/user/me")
+            .uri("/api/users/me")
             .header(SessionTokenType.Refresh.header, "Bearer ${accessToken.value}")
             .exchange()
             .expectStatus().isOk
 
         val foundUser = userService.findById(user.info.id)
-        foundUser.sensitive.devices.clear()
+        foundUser.sensitive.sessions.clear()
         userService.save(foundUser)
 
         webTestClient.post()
-            .uri("/api/user/refresh")
-            .bodyValue(DeviceInfoRequest(user.info.sensitive.devices.first().id))
+            .uri("/api/auth/refresh")
+            .bodyValue(SessionInfoRequest(user.info.sensitive.sessions.first().id))
             .header(HttpHeaders.AUTHORIZATION, "Bearer ${user.refreshToken}")
             .exchange()
             .expectStatus().isUnauthorized

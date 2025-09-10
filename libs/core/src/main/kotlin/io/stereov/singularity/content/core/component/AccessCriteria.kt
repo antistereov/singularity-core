@@ -1,7 +1,7 @@
 package io.stereov.singularity.content.core.component
 
 import io.stereov.singularity.auth.core.model.AccessType
-import io.stereov.singularity.auth.core.service.AuthenticationService
+import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.content.core.model.ContentAccessDetails
 import io.stereov.singularity.content.core.model.ContentAccessPermissions
 import io.stereov.singularity.content.core.model.ContentDocument
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class AccessCriteria(
-    private val authenticationService: AuthenticationService
+    private val authorizationService: AuthorizationService
 ) {
 
     private final val accessField = ContentDocument<*>::access.name
@@ -44,7 +44,7 @@ class AccessCriteria(
     private fun isAdminGroup(user: UserDocument) = Criteria.where(isAdminGroupsField).`in`(user.sensitive.groups)
 
     suspend fun getViewCriteria(): Criteria {
-        val user = authenticationService.getCurrentUserOrNull()
+        val user = authorizationService.getCurrentUserOrNull()
 
         return if (user != null) {
             Criteria().orOperator(

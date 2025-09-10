@@ -12,7 +12,7 @@ If you are new to Spring, we recommend starting with their [official guides](htt
 
 ## 1. Registering Users
 
-A new user can be registered using the endpoint [`POST /api/user/register`](/swagger#/User%20Session/register).
+A new user can be registered using the endpoint [`POST /api/auth/register`](/swagger#/User%20Session/register).
 Users are uniquely identified by email address. 
 An error response will be returned if a register request is send with an email that is already used.
 

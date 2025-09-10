@@ -3,8 +3,8 @@ package io.stereov.singularity.auth.twofactor.service
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.exception.AuthException
-import io.stereov.singularity.auth.core.service.AuthenticationService
-import io.stereov.singularity.auth.session.cache.AccessTokenCache
+import io.stereov.singularity.auth.core.service.AuthorizationService
+import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.twofactor.dto.request.DisableTwoFactorRequest
 import io.stereov.singularity.auth.twofactor.dto.response.TwoFactorSetupResponse
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorAuthProperties
@@ -21,7 +21,7 @@ import org.springframework.web.server.ServerWebExchange
 class UserTwoFactorAuthService(
     private val userService: UserService,
     private val twoFactorAuthService: TwoFactorAuthService,
-    private val authenticationService: AuthenticationService,
+    private val authorizationService: AuthorizationService,
     private val twoFactorAuthProperties: TwoFactorAuthProperties,
     private val hashService: HashService,
     private val accessTokenCache: AccessTokenCache,
@@ -49,7 +49,7 @@ class UserTwoFactorAuthService(
 
         initTokenService.extract(exchange)
 
-        val user = authenticationService.getCurrentUser()
+        val user = authorizationService.getCurrentUser()
 
         val secret = twoFactorAuthService.generateSecretKey()
         val otpAuthUrl = twoFactorAuthService.getOtpAuthUrl(user.sensitive.email, secret)
@@ -74,7 +74,7 @@ class UserTwoFactorAuthService(
      * @return The updated user document.
      */
     suspend fun validateSetup(token: String, code: Int): UserResponse {
-        val user = authenticationService.getCurrentUser()
+        val user = authorizationService.getCurrentUser()
         val setupToken = setupTokenService.validate(token)
 
         if (!twoFactorAuthService.validateCode(setupToken.secret, code)) {
@@ -87,7 +87,7 @@ class UserTwoFactorAuthService(
         }
 
         user.setupTwoFactorAuth(encryptedSecret, hashedRecoveryCodes)
-            .clearDevices()
+            .clearsessions()
 
         userService.save(user)
         accessTokenCache.invalidateAllTokens(user.id)
@@ -133,8 +133,8 @@ class UserTwoFactorAuthService(
     }
 
     /**
-     * Recovers the user by validating the recovery code and clearing all devices and
-     * therefore, signing out the user on all devices.
+     * Recovers the user by validating the recovery code and clearing all sessions and
+     * therefore, signing out the user on all sessions.
      *
      * @param exchange The server web exchange containing the request and response.
      * @param recoveryCode The recovery code to validate.
@@ -144,10 +144,10 @@ class UserTwoFactorAuthService(
      * @return The user document after recovery.
      */
     suspend fun recoverUser(exchange: ServerWebExchange, recoveryCode: String): UserDocument {
-        logger.debug { "Recovering user and clearing all devices" }
+        logger.debug { "Recovering user and clearing all sessions" }
 
         val userId = try {
-            authenticationService.getCurrentUserId()
+            authorizationService.getCurrentUserId()
         } catch (_: Exception) {
             loginTokenService.extract(exchange).userId
         }
@@ -176,7 +176,7 @@ class UserTwoFactorAuthService(
 
         stepUpTokenService.extract(exchange)
 
-        val user = authenticationService.getCurrentUser()
+        val user = authorizationService.getCurrentUser()
 
         if (!hashService.checkBcrypt(req.password, user.password)) {
             throw AuthException("Password is wrong")

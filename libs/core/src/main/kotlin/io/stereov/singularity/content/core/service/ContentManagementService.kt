@@ -1,7 +1,7 @@
 package io.stereov.singularity.content.core.service
 
 import io.github.oshai.kotlinlogging.KLogger
-import io.stereov.singularity.auth.core.service.AuthenticationService
+import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.content.core.dto.*
 import io.stereov.singularity.content.core.model.ContentAccessRole
 import io.stereov.singularity.content.core.model.ContentAccessSubject
@@ -18,7 +18,7 @@ interface ContentManagementService<T: ContentDocument<T>> {
 
     val userService: UserService
     val contentService: ContentService<T>
-    val authenticationService: AuthenticationService
+    val authorizationService: AuthorizationService
     val invitationService: InvitationService
     val acceptPath: String
     val userMapper: UserMapper
@@ -52,7 +52,7 @@ interface ContentManagementService<T: ContentDocument<T>> {
     ): ExtendedContentAccessDetailsResponse {
         logger.debug { "Inviting user with email \"${req.email}\" to content with key \"$key\" as ${req.role}" }
 
-        val user = authenticationService.getCurrentUser()
+        val user = authorizationService.getCurrentUser()
         val content = contentService.findAuthorizedByKey(key, ContentAccessRole.ADMIN)
         val invitation = invitationService.invite(
             email = req.email,

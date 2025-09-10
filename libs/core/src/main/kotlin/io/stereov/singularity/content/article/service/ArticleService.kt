@@ -2,7 +2,7 @@ package io.stereov.singularity.content.article.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.auth.core.service.AuthenticationService
+import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.content.article.dto.ArticleOverviewResponse
 import io.stereov.singularity.content.article.dto.ArticleResponse
 import io.stereov.singularity.content.article.dto.FullArticleResponse
@@ -33,7 +33,7 @@ import org.springframework.stereotype.Service
 class ArticleService(
     override val repository: ArticleRepository,
     private val userService: UserService,
-    override val authenticationService: AuthenticationService,
+    override val authorizationService: AuthorizationService,
     private val tagService: TagService,
     private val reactiveMongoTemplate: ReactiveMongoTemplate,
     private val accessCriteria: AccessCriteria,
@@ -55,7 +55,7 @@ class ArticleService(
     }
 
     suspend fun fullArticledResponseFrom(article: Article, lang: Language, owner: UserDocument? = null): FullArticleResponse {
-        val currentUser = authenticationService.getCurrentUserOrNull()
+        val currentUser = authorizationService.getCurrentUserOrNull()
 
         val actualOwner = owner ?: userService.findById(article.access.ownerId)
         val access = ContentAccessDetailsResponse.create(article.access, currentUser)

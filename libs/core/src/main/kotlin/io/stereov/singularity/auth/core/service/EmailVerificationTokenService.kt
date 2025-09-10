@@ -1,0 +1,70 @@
+package io.stereov.singularity.auth.core.service
+
+import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.auth.core.model.EmailVerificationToken
+import io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException
+import io.stereov.singularity.auth.jwt.service.JwtService
+import io.stereov.singularity.mail.core.properties.MailProperties
+import org.bson.types.ObjectId
+import org.springframework.security.oauth2.jwt.JwtClaimsSet
+import org.springframework.stereotype.Service
+import java.time.Instant
+
+@Service
+class EmailVerificationTokenService(
+    private val mailProperties: MailProperties,
+    private val jwtService: JwtService,
+) {
+
+    private val logger = KotlinLogging.logger {}
+
+    /**
+     * Creates an email verification token.
+     *
+     * This method generates a JWT token with the email and secret as claims.
+     * The token is valid for the duration specified in the mail properties.
+     *
+     * @param email The email address to be verified.
+     * @param secret The secret associated with the email.
+     *
+     * @return The generated JWT token.
+     */
+    suspend fun create(userId: ObjectId, email: String, secret: String, issuedAt: Instant = Instant.now()): String {
+        logger.debug { "Creating email verification token" }
+
+        val claims = JwtClaimsSet.builder()
+            .issuedAt(issuedAt)
+            .expiresAt(issuedAt.plusSeconds(mailProperties.verificationExpiration))
+            .subject(userId.toHexString())
+            .claim("email", email)
+            .id(secret)
+            .build()
+
+        return jwtService.encodeJwt(claims).tokenValue
+    }
+
+    /**
+     * Validates and extracts the email verification token.
+     *
+     * This method decodes the JWT token and extracts the email and secret claims.
+     *
+     * @param token The JWT token to be validated.
+     *
+     * @return An [io.stereov.singularity.auth.core.model.EmailVerificationToken] object containing the email and secret.
+     *
+     * @throws io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException if the token is invalid or expired.
+     * @throws io.stereov.singularity.auth.jwt.exception.model.TokenExpiredException if the token is expired.
+     */
+    suspend fun extract(token: String): EmailVerificationToken {
+        logger.debug { "Validating email verification token" }
+
+        val jwt = jwtService.decodeJwt(token, true)
+
+        val userId = ObjectId(jwt.subject)
+        val email = jwt.claims["email"] as? String
+            ?: throw InvalidTokenException("No email found in claims")
+        val secret = jwt.id
+
+        return EmailVerificationToken(userId, email, secret, jwt)
+    }
+}

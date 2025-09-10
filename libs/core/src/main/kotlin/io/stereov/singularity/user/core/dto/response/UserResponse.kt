@@ -9,7 +9,7 @@ import org.bson.types.ObjectId
  *
  * This data class represents a user in the system.
  * It contains various properties such as user ID, name, email,
- * roles, email verification status, device information,
+ * roles, email verification status, session information,
  * last active time, two-factor authentication status,
  * and application information.
  *

@@ -17,8 +17,8 @@ This database is completely free to use and does not have any usage limits.
 The only thing you need to do is to create a free [MaxMind account](https://support.maxmind.com/hc/en-us/articles/4407099783707-Create-an-Account#h_01G4G4NV169TJWFCJ1KGFAM1CD) 
 and provide your [account ID and license key](https://support.maxmind.com/hc/en-us/articles/4407111582235-Generate-a-License-Key).
 
-When enabled, the geolocation of every device that is used for login or registration will be stored.
-This can enhance security since users can revoke access to devices that they do not know.
+When enabled, the geolocation of every session that is used for login or registration will be stored.
+This can enhance security since users can revoke access to sessions that they do not know.
 
 ## Highlights
 
