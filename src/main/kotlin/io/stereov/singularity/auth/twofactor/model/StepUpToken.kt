@@ -6,7 +6,7 @@ import org.springframework.security.oauth2.jwt.Jwt
 
 data class StepUpToken(
     val userId: ObjectId,
-    val deviceId: String,
+    val sessionId: String,
     override val jwt: Jwt
 ) : SecurityToken<TwoFactorTokenType.StepUp> {
 

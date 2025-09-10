@@ -1,11 +1,9 @@
 io.stereov.singularity.admin.core.config.AdminConfiguration
 
 io.stereov.singularity.auth.core.config.AuthenticationConfiguration
-io.stereov.singularity.auth.device.config.UserDeviceConfiguration
 io.stereov.singularity.auth.geolocation.config.GeoLocationConfiguration
 io.stereov.singularity.auth.group.config.GroupConfiguration
 io.stereov.singularity.auth.jwt.config.JwtConfiguration
-io.stereov.singularity.auth.session.config.UserSessionConfiguration
 io.stereov.singularity.auth.twofactor.config.TwoFactorAuthConfiguration
 
 io.stereov.singularity.cache.config.CacheConfiguration
@@ -35,7 +33,6 @@ io.stereov.singularity.security.core.config.WebSecurityConfiguration
 
 io.stereov.singularity.mail.core.config.MailConfiguration
 io.stereov.singularity.mail.template.config.TemplateConfiguration
-io.stereov.singularity.mail.user.config.UserMailConfiguration
 
 io.stereov.singularity.ratelimit.config.RateLimitConfiguration
 

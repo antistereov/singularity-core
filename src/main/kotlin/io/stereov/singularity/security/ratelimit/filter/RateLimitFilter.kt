@@ -37,11 +37,11 @@ class RateLimitFilter(
         return Mono.defer {
             val clientIp = exchange.request.getClientIp(geolocationProperties.realIpHeader) ?: "unknown"
             val path = exchange.request.path.toString()
-            val isLoginAttempt = path.contains("/api/user/login") ||
-                    path.contains("/api/user/2fa/recovery") ||
-                    path.contains("/api/user/mail/reset-password") ||
-                    path.contains("/api/user/2fa/verify-step-up") ||
-                    path.contains("/api/user/2fa/verify-login")
+            val isLoginAttempt = path.contains("/api/auth/login") ||
+                    path.contains("/api/auth/2fa/recovery") ||
+                    path.contains("/api/auth/password/reset") ||
+                    path.contains("/api/auth/2fa/step-up") ||
+                    path.contains("/api/auth/2fa/login")
 
             rateLimitService.checkIpRateLimit(clientIp)
                 .then(rateLimitService.checkUserRateLimit())

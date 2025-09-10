@@ -1,7 +1,7 @@
 package io.stereov.singularity.content.article.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.auth.core.service.AuthenticationService
+import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.content.article.dto.*
 import io.stereov.singularity.content.article.model.Article
 import io.stereov.singularity.content.core.dto.*
@@ -28,7 +28,7 @@ import java.util.*
 @Service
 class ArticleManagementService(
     override val contentService: ArticleService,
-    override val authenticationService: AuthenticationService,
+    override val authorizationService: AuthorizationService,
     override val invitationService: InvitationService,
     private val fileStorage: FileStorage,
     private val translateService: TranslateService,
@@ -44,7 +44,7 @@ class ArticleManagementService(
         logger.debug { "Creating article with title ${req.title}" }
 
         contentService.requireEditorGroupMembership()
-        val user = authenticationService.getCurrentUser()
+        val user = authorizationService.getCurrentUser()
 
         val key = getUniqueKey(req.title.toSlug())
 
@@ -56,7 +56,7 @@ class ArticleManagementService(
 
     suspend fun setTrustedState(key: String, trusted: Boolean): Article {
         logger.debug { "Setting trusted state" }
-        authenticationService.requireRole(Role.ADMIN)
+        authorizationService.requireRole(Role.ADMIN)
 
         val article = contentService.findAuthorizedByKey(key, ContentAccessRole.EDITOR)
 
@@ -140,7 +140,7 @@ class ArticleManagementService(
         logger.debug { "Changing image of article with key \"$key\"" }
 
         val article = contentService.findAuthorizedByKey(key, ContentAccessRole.EDITOR)
-        val userId = authenticationService.getCurrentUserId()
+        val userId = authorizationService.getCurrentUserId()
 
         val currentImage = article.imageKey
 

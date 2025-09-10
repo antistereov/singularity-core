@@ -1,15 +1,15 @@
 package io.stereov.singularity.auth.twofactor.controller
 
+import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
+import io.stereov.singularity.auth.core.dto.response.LoginResponse
 import io.stereov.singularity.auth.core.exception.model.TwoFactorAuthDisabledException
 import io.stereov.singularity.auth.core.properties.AuthProperties
-import io.stereov.singularity.auth.core.service.AuthenticationService
+import io.stereov.singularity.auth.core.service.AccessTokenService
+import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.core.service.CookieCreator
-import io.stereov.singularity.auth.device.dto.DeviceInfoRequest
+import io.stereov.singularity.auth.core.service.RefreshTokenService
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
 import io.stereov.singularity.auth.jwt.exception.TokenException
-import io.stereov.singularity.auth.session.dto.response.LoginResponse
-import io.stereov.singularity.auth.session.service.AccessTokenService
-import io.stereov.singularity.auth.session.service.RefreshTokenService
 import io.stereov.singularity.auth.twofactor.dto.request.DisableTwoFactorRequest
 import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorSetupInitRequest
 import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorVerifySetupRequest
@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ServerWebExchange
 
 @RestController
-@RequestMapping("/api/user/2fa")
+@RequestMapping("/api/auth/2fa")
 @Tag(
     name = "Two Factor Authentication",
     description = "Operations related to two-factor authentication"
@@ -48,10 +48,10 @@ class UserTwoFactorAuthController(
     private val setupInitTokenService: TwoFactorInitSetupTokenService,
     private val stepUpTokenService: StepUpTokenService,
     private val cookieCreator: CookieCreator,
-    private val authenticationService: AuthenticationService
+    private val authorizationService: AuthorizationService
 ) {
 
-    @PostMapping("/init-setup")
+    @PostMapping("/setup/init")
     @Operation(
         summary = "Initialize 2FA setup",
         description = "Initialize the 2FA by authorizing the current user. If successful, an SetupStartupToken will be set.",
@@ -117,14 +117,14 @@ class UserTwoFactorAuthController(
     suspend fun recoverUser(
         @RequestParam("code") code: String,
         exchange: ServerWebExchange,
-        @RequestBody device: DeviceInfoRequest
+        @RequestBody session: SessionInfoRequest
     ): ResponseEntity<TwoFactorRecoveryResponse> {
         val user = twoFactorService.recoverUser(exchange, code)
 
         val clearTwoFactorCookie = cookieCreator.clearCookie(TwoFactorTokenType.Login)
-        val accessToken = accessTokenService.create(user.id, device.id)
-        val refreshToken = refreshTokenService.create(user.id, device, exchange)
-        val stepUpToken = stepUpTokenService.createForRecovery(user.id, device.id, exchange)
+        val accessToken = accessTokenService.create(user.id, session.id)
+        val refreshToken = refreshTokenService.create(user.id, session, exchange)
+        val stepUpToken = stepUpTokenService.createForRecovery(user.id, session.id, exchange)
 
         val res = TwoFactorRecoveryResponse(
             userMapper.toResponse(user),
@@ -141,16 +141,16 @@ class UserTwoFactorAuthController(
             .body(res)
     }
 
-    @PostMapping("/verify-login")
+    @PostMapping("/login")
     suspend fun verifyTwoFactorAuth(
         @RequestParam("code") code: Int,
         exchange: ServerWebExchange,
-        @RequestBody device: DeviceInfoRequest
+        @RequestBody session: SessionInfoRequest
     ): ResponseEntity<LoginResponse> {
         val user = twoFactorService.validateTwoFactorCode(exchange, code)
 
-        val accessToken = accessTokenService.create(user.id, device.id)
-        val refreshToken = refreshTokenService.create(user.id, device, exchange)
+        val accessToken = accessTokenService.create(user.id, session.id)
+        val refreshToken = refreshTokenService.create(user.id, session, exchange)
 
         val clearTwoFactorCookie = cookieCreator.clearCookie(TwoFactorTokenType.Login)
 
@@ -170,7 +170,7 @@ class UserTwoFactorAuthController(
             .body(res)
     }
 
-    @GetMapping("/login-status")
+    @GetMapping("/login/status")
     suspend fun getTwoFactorAuthStatus(exchange: ServerWebExchange): ResponseEntity<TwoFactorStatusResponse> {
         val isPending = twoFactorService.loginVerificationNeeded(exchange)
 
@@ -191,7 +191,7 @@ class UserTwoFactorAuthController(
      *
      * @return A response indicating the success of the operation.
      */
-    @PostMapping("/verify-step-up")
+    @PostMapping("/step-up")
     suspend fun setStepUp(@RequestParam code: Int): ResponseEntity<StepUpResponse> {
         val stepUpTokenCookie = stepUpTokenService.create(code)
 
@@ -207,9 +207,9 @@ class UserTwoFactorAuthController(
      *
      * @return The step-up authentication status as a [TwoFactorStatusResponse].
      */
-    @GetMapping("/step-up-status")
+    @GetMapping("/step-up/status")
     suspend fun getStepUpStatus(exchange: ServerWebExchange): ResponseEntity<TwoFactorStatusResponse> {
-        authenticationService.requireAuthentication()
+        authorizationService.requireAuthentication()
 
         val twoFactorRequired = try {
             stepUpTokenService.extract(exchange)

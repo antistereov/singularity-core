@@ -1,6 +1,7 @@
 package io.stereov.singularity.user.core.config
 
 import io.stereov.singularity.auth.core.config.AuthenticationConfiguration
+import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.database.encryption.service.EncryptionSecretService
 import io.stereov.singularity.database.encryption.service.EncryptionService
 import io.stereov.singularity.database.hash.service.HashService
@@ -33,7 +34,11 @@ class UserConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun userController(userService: UserService) = UserController(userService)
+    fun userController(
+        userService: UserService,
+        authorizationService: AuthorizationService,
+        userMapper: UserMapper
+    ) = UserController(userService, authorizationService, userMapper)
 
     // Mapper
 

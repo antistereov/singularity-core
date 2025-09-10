@@ -1,6 +1,6 @@
 package io.stereov.singularity.global.config
 
-import io.stereov.singularity.auth.session.model.SessionTokenType
+import io.stereov.singularity.auth.core.model.SessionTokenType
 import io.stereov.singularity.auth.twofactor.model.TwoFactorTokenType
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn

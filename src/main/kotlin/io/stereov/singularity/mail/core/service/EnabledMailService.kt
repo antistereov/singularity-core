@@ -4,7 +4,7 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.mail.core.properties.MailProperties
 import io.stereov.singularity.content.translate.model.Language
-import io.stereov.singularity.mail.user.service.MailTokenService
+import io.stereov.singularity.auth.core.service.EmailVerificationTokenService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service
  * # Service for sending emails.
  *
  * This service provides methods to send verification and password reset emails.
- * It uses the [JavaMailSender] to send emails and the [MailTokenService] to create tokens for
+ * It uses the [JavaMailSender] to send emails and the [EmailVerificationTokenService] to create tokens for
  * email verification and password resets.
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>

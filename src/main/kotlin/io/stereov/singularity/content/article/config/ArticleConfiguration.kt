@@ -1,6 +1,6 @@
 package io.stereov.singularity.content.article.config
 
-import io.stereov.singularity.auth.core.service.AuthenticationService
+import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.content.article.controller.ArticleController
 import io.stereov.singularity.content.article.controller.ArticleManagementController
 import io.stereov.singularity.content.article.repository.ArticleRepository
@@ -52,7 +52,7 @@ class ArticleConfiguration {
     fun articleService(
         articleRepository: ArticleRepository,
         userService: UserService,
-        authenticationService: AuthenticationService,
+        authorizationService: AuthorizationService,
         tagService: TagService,
         reactiveMongoTemplate: ReactiveMongoTemplate,
         accessCriteria: AccessCriteria,
@@ -62,7 +62,7 @@ class ArticleConfiguration {
         return ArticleService(
             articleRepository,
             userService,
-            authenticationService,
+            authorizationService,
             tagService,
             reactiveMongoTemplate,
             accessCriteria,
@@ -75,7 +75,7 @@ class ArticleConfiguration {
     @ConditionalOnMissingBean
     fun articleManagementService(
         articleService: ArticleService,
-        authenticationService: AuthenticationService,
+        authorizationService: AuthorizationService,
         invitationService: InvitationService,
         fileStorage: FileStorage,
         translateService: TranslateService,
@@ -85,7 +85,7 @@ class ArticleConfiguration {
     ): ArticleManagementService {
         return ArticleManagementService(
             articleService,
-            authenticationService,
+            authorizationService,
             invitationService,
             fileStorage,
             translateService,

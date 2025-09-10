@@ -3,7 +3,7 @@ package io.stereov.singularity.ratelimit.service
 import io.github.bucket4j.Bucket
 import io.github.bucket4j.BucketConfiguration
 import io.github.bucket4j.redis.lettuce.cas.LettuceBasedProxyManager
-import io.stereov.singularity.auth.core.service.AuthenticationService
+import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.ratelimit.excpetion.model.TooManyRequestsException
 import io.stereov.singularity.ratelimit.properties.LoginAttemptLimitProperties
 import io.stereov.singularity.ratelimit.properties.RateLimitProperties
@@ -24,7 +24,7 @@ import java.time.Duration
  */
 @Service
 class RateLimitService(
-    private val authenticationService: AuthenticationService,
+    private val authorizationService: AuthorizationService,
     private val proxyManager: LettuceBasedProxyManager<String>,
     private val rateLimitProperties: RateLimitProperties,
     private val loginAttemptLimitProperties: LoginAttemptLimitProperties,
@@ -55,7 +55,7 @@ class RateLimitService(
      *
      * @return a Mono<Void> that completes if the user is within the rate limit or emits an error if the limit is exceeded
      */
-    fun checkUserRateLimit() = mono { authenticationService.getCurrentUserId() }
+    fun checkUserRateLimit() = mono { authorizationService.getCurrentUserId() }
         .onErrorResume { Mono.empty() }
         .flatMap { userId ->
             val userBucket = resolveBucket(

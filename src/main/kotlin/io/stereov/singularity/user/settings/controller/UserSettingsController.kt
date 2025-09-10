@@ -1,7 +1,7 @@
 package io.stereov.singularity.user.settings.controller
 
+import io.stereov.singularity.auth.core.model.SessionTokenType
 import io.stereov.singularity.auth.core.service.CookieCreator
-import io.stereov.singularity.auth.session.model.SessionTokenType
 import io.stereov.singularity.auth.twofactor.model.TwoFactorTokenType
 import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.user.core.dto.response.UserResponse
@@ -10,13 +10,18 @@ import io.stereov.singularity.user.settings.dto.request.ChangeEmailRequest
 import io.stereov.singularity.user.settings.dto.request.ChangePasswordRequest
 import io.stereov.singularity.user.settings.dto.request.ChangeUserRequest
 import io.stereov.singularity.user.settings.service.UserSettingsService
+import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.ResponseEntity
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ServerWebExchange
 
 @RestController
-@RequestMapping("/api/user/me")
+@RequestMapping("/api/users/me")
+@Tag(
+    name = "User Settings",
+    description = "Operations related to user settings."
+)
 class UserSettingsController(
     private val userMapper: UserMapper,
     private val userSettingsService: UserSettingsService,

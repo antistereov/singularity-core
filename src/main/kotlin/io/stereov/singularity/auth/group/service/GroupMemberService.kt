@@ -1,7 +1,7 @@
 package io.stereov.singularity.auth.group.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.auth.core.service.AuthenticationService
+import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.global.exception.model.DocumentNotFoundException
 import io.stereov.singularity.user.core.model.Role
 import io.stereov.singularity.user.core.model.UserDocument
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service
 class GroupMemberService(
     private val userService: UserService,
     private val groupService: GroupService,
-    private val authService: AuthenticationService
+    private val authService: AuthorizationService
 ) {
 
     private val logger = KotlinLogging.logger {}

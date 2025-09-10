@@ -7,6 +7,6 @@ data class SensitiveUserData(
     val roles: MutableSet<Role> = mutableSetOf(Role.USER),
     val groups: MutableSet<String> = mutableSetOf(),
     val security: UserSecurityDetails = UserSecurityDetails(),
-    val devices: MutableList<DeviceInfo> = mutableListOf(),
+    val sessions: MutableList<SessionInfo> = mutableListOf(),
     var avatarFileKey: String? = null,
 )
