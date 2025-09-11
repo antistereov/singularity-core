@@ -6,9 +6,9 @@ import io.stereov.singularity.auth.core.dto.request.ResetPasswordRequest
 import io.stereov.singularity.auth.core.dto.request.SendPasswordResetRequest
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
 import io.stereov.singularity.auth.core.dto.response.MailCooldownResponse
-import io.stereov.singularity.auth.core.model.SessionTokenType
-import io.stereov.singularity.auth.core.service.EmailVerificationTokenService
-import io.stereov.singularity.auth.core.service.PasswordResetTokenService
+import io.stereov.singularity.auth.core.model.token.SessionTokenType
+import io.stereov.singularity.auth.core.service.token.EmailVerificationTokenService
+import io.stereov.singularity.auth.core.service.token.PasswordResetTokenService
 import io.stereov.singularity.database.encryption.service.EncryptionSecretService
 import io.stereov.singularity.test.BaseMailIntegrationTest
 import io.stereov.singularity.user.core.dto.response.UserResponse
@@ -143,7 +143,7 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
         val res = webTestClient.put()
             .uri("/api/users/me/email")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .bodyValue(ChangeEmailRequest(newEmail, password))
+            .bodyValue(ChangeEmailRequest(newEmail))
             .exchange()
             .expectStatus().isOk
             .expectBody(UserResponse::class.java)
@@ -173,7 +173,7 @@ class UserMailControllerIntegrationTest : BaseMailIntegrationTest() {
 
         val verifiedUser = userService.findById(user.info.id)
 
-        assertNotEquals(user.info.sensitive.security.mail.passwordResetSecret, verifiedUser.sensitive.security.mail.passwordResetSecret)
+        assertNotEquals(user.info.sensitive.security.password.resetSecret, verifiedUser.sensitive.security.password.resetSecret)
         assertNotEquals(user.info.password, verifiedUser.password)
 
         val credentials = LoginRequest(user.info.sensitive.email, newPassword, SessionInfoRequest("test"))

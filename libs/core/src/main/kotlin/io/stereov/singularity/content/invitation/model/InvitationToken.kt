@@ -1,6 +1,6 @@
 package io.stereov.singularity.content.invitation.model
 
-import io.stereov.singularity.auth.core.model.Token
+import io.stereov.singularity.global.model.Token
 import org.bson.types.ObjectId
 import org.springframework.security.oauth2.jwt.Jwt
 

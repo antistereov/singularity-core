@@ -1,6 +1,6 @@
 package io.stereov.singularity.file.local
 
-import io.stereov.singularity.auth.core.model.SessionTokenType
+import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.file.core.model.FileMetadataDocument
 import io.stereov.singularity.file.core.service.FileMetadataService
 import io.stereov.singularity.file.core.service.FileStorage

@@ -1,5 +1,6 @@
 package io.stereov.singularity.user.core.dto.response
 
+import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
 import io.stereov.singularity.file.core.dto.FileMetadataResponse
 import io.stereov.singularity.user.core.model.Role
 import org.bson.types.ObjectId
@@ -32,6 +33,7 @@ data class UserResponse(
     val emailVerified: Boolean = false,
     val lastActive: String,
     val twoFactorAuthEnabled: Boolean,
+    val twoFactorAuthMethods: List<TwoFactorMethod>,
     val avatar: FileMetadataResponse?,
     val created: String,
     val groups: Set<String>,

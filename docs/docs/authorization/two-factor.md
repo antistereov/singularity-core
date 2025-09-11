@@ -12,10 +12,11 @@ If you are new to Spring, we recommend starting with their [official guides](htt
 
 ## Configuration
 
-| Property                                               | Type      | Description                                                                                                                    | Default value |
-|--------------------------------------------------------|-----------|--------------------------------------------------------------------------------------------------------------------------------|---------------|
-| `singularity.security.two-factor.recovery-code-length` | `Integer` | Length of the recovery code that can be used to log in if a user lost access to their second factor. Default is 10 characters. | `10`          |
-| `singularity.auth.two-factor.recovery-code-count`      | `Integer` | The number of recovery codes to generate. Every code can only be used once. Default is 6.                                      | `6`           |
+| Property                                                      | Type      | Description                                                                                                                    | Default value |
+|---------------------------------------------------------------|-----------|--------------------------------------------------------------------------------------------------------------------------------|---------------|
+| `singularity.security.two-factor.recovery-code-length`        | `Integer` | Length of the recovery code that can be used to log in if a user lost access to their second factor. Default is 10 characters. | `10`          |
+| `singularity.auth.two-factor.recovery-code-count`             | `Integer` | The number of recovery codes to generate. Every code can only be used once. Default is 6.                                      | `6`           |
+| `singularity.auth.two-factor.mail-two-factor-code-expires-in` | `Long`    | The number of seconds the 2FA code sent by email is valid.                                                                     | `900`         |
 
 ## Usage
 

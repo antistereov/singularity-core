@@ -2,7 +2,7 @@ package io.stereov.singularity.auth.core.core
 
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
 import io.stereov.singularity.auth.core.dto.response.RefreshTokenResponse
-import io.stereov.singularity.auth.core.model.SessionTokenType
+import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.auth.jwt.service.JwtSecretService
 import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.reactive.awaitFirst

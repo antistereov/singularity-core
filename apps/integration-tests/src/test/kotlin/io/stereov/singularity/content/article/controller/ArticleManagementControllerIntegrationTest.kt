@@ -1,8 +1,8 @@
 package io.stereov.singularity.content.article.controller
 
-import io.stereov.singularity.auth.core.model.AccessType
+import io.stereov.singularity.auth.core.model.token.AccessType
 import io.stereov.singularity.auth.group.model.KnownGroups
-import io.stereov.singularity.auth.core.model.SessionTokenType
+import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.content.article.dto.ArticleOverviewResponse
 import io.stereov.singularity.content.article.dto.ArticleResponse
 import io.stereov.singularity.content.article.model.ArticleState

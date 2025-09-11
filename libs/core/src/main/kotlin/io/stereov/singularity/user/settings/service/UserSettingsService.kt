@@ -3,14 +3,16 @@ package io.stereov.singularity.user.settings.service
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.exception.model.InvalidCredentialsException
+import io.stereov.singularity.auth.core.exception.model.WrongLoginTypeException
+import io.stereov.singularity.auth.core.model.LoginType
 import io.stereov.singularity.auth.core.service.AuthorizationService
-import io.stereov.singularity.auth.twofactor.service.StepUpTokenService
+import io.stereov.singularity.auth.core.service.EmailVerificationService
+import io.stereov.singularity.auth.core.service.token.StepUpTokenService
 import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.file.core.exception.model.UnsupportedMediaTypeException
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.global.properties.AppProperties
-import io.stereov.singularity.auth.core.service.EmailVerificationService
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.core.exception.model.EmailAlreadyExistsException
 import io.stereov.singularity.user.core.mapper.UserMapper
@@ -22,7 +24,6 @@ import io.stereov.singularity.user.settings.dto.request.ChangeUserRequest
 import org.springframework.http.MediaType
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
-import org.springframework.web.server.ServerWebExchange
 
 @Service
 class UserSettingsService(
@@ -49,21 +50,18 @@ class UserSettingsService(
      *
      * @throws InvalidCredentialsException If the password is invalid.
      */
-    suspend fun changeEmail(payload: ChangeEmailRequest, exchange: ServerWebExchange, lang: Language): UserDocument {
+    suspend fun changeEmail(payload: ChangeEmailRequest, lang: Language): UserDocument {
         logger.debug { "Changing email" }
 
         val user = authorizationService.getCurrentUser()
 
+        if (user.loginType != LoginType.PASSWORD)
+            throw WrongLoginTypeException("Changing email is forbidden for users that signed up using ${user.loginType}")
+
+        authorizationService.requireStepUp()
+
         if (userService.existsByEmail(payload.newEmail)) {
             throw EmailAlreadyExistsException("Failed to register user ${payload.newEmail}")
-        }
-
-        if (!hashService.checkBcrypt(payload.password, user.password)) {
-            throw InvalidCredentialsException()
-        }
-
-        if (user.sensitive.security.twoFactor.enabled) {
-            stepUpTokenService.extract(exchange)
         }
 
         if (appProperties.enableMail) {
@@ -86,18 +84,14 @@ class UserSettingsService(
      *
      * @throws InvalidCredentialsException If the old password is invalid.
      */
-    suspend fun changePassword(payload: ChangePasswordRequest, exchange: ServerWebExchange): UserDocument {
+    suspend fun changePassword(payload: ChangePasswordRequest): UserDocument {
         logger.debug { "Changing password" }
 
         val user = authorizationService.getCurrentUser()
+        if (user.loginType != LoginType.PASSWORD)
+            throw WrongLoginTypeException("Changing email is forbidden for users that signed up using ${user.loginType}")
 
-        if (!hashService.checkBcrypt(payload.oldPassword, user.password)) {
-            throw InvalidCredentialsException()
-        }
-
-        if (user.sensitive.security.twoFactor.enabled) {
-            stepUpTokenService.extract(exchange)
-        }
+        authorizationService.requireStepUp()
 
         user.password = hashService.hashBcrypt(payload.newPassword)
 
@@ -169,6 +163,7 @@ class UserSettingsService(
     suspend fun deleteUser() {
         logger.debug { "Deleting user" }
 
+        authorizationService.requireStepUp()
         val userId = authorizationService.getCurrentUserId()
         accessTokenCache.invalidateAllTokens(userId)
 

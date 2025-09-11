@@ -2,21 +2,24 @@ package io.stereov.singularity.auth.core.controller
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.auth.core.component.CookieCreator
 import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.auth.core.dto.request.RegisterUserRequest
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
+import io.stereov.singularity.auth.core.dto.request.StepUpRequest
 import io.stereov.singularity.auth.core.dto.response.LoginResponse
 import io.stereov.singularity.auth.core.dto.response.RefreshTokenResponse
 import io.stereov.singularity.auth.core.dto.response.RegisterResponse
-import io.stereov.singularity.auth.core.model.SessionTokenType
+import io.stereov.singularity.auth.core.dto.response.StepUpResponse
+import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.auth.core.properties.AuthProperties
-import io.stereov.singularity.auth.core.service.AccessTokenService
 import io.stereov.singularity.auth.core.service.AuthenticationService
-import io.stereov.singularity.auth.core.service.CookieCreator
-import io.stereov.singularity.auth.core.service.RefreshTokenService
+import io.stereov.singularity.auth.core.service.token.AccessTokenService
+import io.stereov.singularity.auth.core.service.token.RefreshTokenService
+import io.stereov.singularity.auth.core.service.token.StepUpTokenService
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
-import io.stereov.singularity.auth.twofactor.model.TwoFactorTokenType
-import io.stereov.singularity.auth.twofactor.service.TwoFactorLoginTokenService
+import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthenticationService
+import io.stereov.singularity.auth.twofactor.service.token.TwoFactorAuthenticationTokenService
 import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.model.OpenApiConstants
@@ -45,11 +48,13 @@ class AuthenticationController(
     private val userMapper: UserMapper,
     private val authProperties: AuthProperties,
     private val geoLocationService: GeolocationService,
-    private val loginTokenService: TwoFactorLoginTokenService,
+    private val twoFactorAuthTokenService: TwoFactorAuthenticationTokenService,
     private val cookieCreator: CookieCreator,
     private val accessTokenService: AccessTokenService,
     private val refreshTokenService: RefreshTokenService,
-    private val userService: UserService
+    private val userService: UserService,
+    private val stepUpTokenService: StepUpTokenService,
+    private val twoFactorAuthenticationService: TwoFactorAuthenticationService
 ) {
 
     private val logger: KLogger
@@ -66,7 +71,7 @@ class AuthenticationController(
         responses = [
             ApiResponse(
                 responseCode = "200",
-                description = "Login successful. Returns tokens and user details.",
+                description = "Authentication successful. Returns tokens and user details.",
                 content = [Content(schema = Schema(implementation = LoginResponse::class))]
             ),
             ApiResponse(
@@ -78,21 +83,27 @@ class AuthenticationController(
     )
     suspend fun login(
         exchange: ServerWebExchange,
-        @RequestBody payload: LoginRequest
+        @RequestBody payload: LoginRequest,
+        @RequestParam lang: Language = Language.EN
     ): ResponseEntity<LoginResponse> {
         logger.info { "Executing login" }
 
-        val user = authenticationService.checkCredentialsAndGetUser(payload)
+        val user = authenticationService.login(payload)
 
-        if (user.sensitive.security.twoFactor.enabled) {
-            val loginToken = loginTokenService.create(user.id)
+        if (user.twoFactorEnabled) {
+            twoFactorAuthenticationService.handleTwoFactor(user, lang)
+            val loginToken = twoFactorAuthTokenService.create(user.id)
 
             return ResponseEntity.ok()
                 .header("Set-Cookie", cookieCreator.createCookie(loginToken).toString())
                 .body(LoginResponse(
-                    true,
-                    userMapper.toResponse(user),
-                    twoFactorLoginToken = if (authProperties.allowHeaderAuthentication) loginToken.value else null
+                    user = userMapper.toResponse(user),
+                    twoFactorRequired = true,
+                    allowedTwoFactorMethods = user.twoFactorMethods,
+                    twoFactorAuthenticationToken = if (authProperties.allowHeaderAuthentication) loginToken.value else null,
+                    accessToken = null,
+                    refreshToken = null,
+                    location = geoLocationService.getLocationOrNull(exchange.request)
                 ))
         }
 
@@ -100,12 +111,13 @@ class AuthenticationController(
         val refreshToken = refreshTokenService.create(user.id, payload.session, exchange)
 
         val res = LoginResponse(
-            false,
-            userMapper.toResponse(user),
-            if (authProperties.allowHeaderAuthentication) accessToken.value else null,
-            if (authProperties.allowHeaderAuthentication) refreshToken.value else null,
-            null,
-            geoLocationService.getLocationOrNull(exchange.request)
+            user = userMapper.toResponse(user),
+            accessToken = if (authProperties.allowHeaderAuthentication) accessToken.value else null,
+            refreshToken = if (authProperties.allowHeaderAuthentication) refreshToken.value else null,
+            twoFactorRequired = false,
+            allowedTwoFactorMethods = null,
+            twoFactorAuthenticationToken = null,
+            location = geoLocationService.getLocationOrNull(exchange.request)
         )
 
         return ResponseEntity.ok()
@@ -139,7 +151,7 @@ class AuthenticationController(
     ): ResponseEntity<RegisterResponse> {
         logger.info { "Executing register" }
 
-        val user = authenticationService.registerAndGetUser(payload, sendEmail, lang)
+        val user = authenticationService.register(payload, sendEmail, lang)
 
         val accessToken = accessTokenService.create(user.id, payload.session.id)
         val refreshToken = refreshTokenService.create(user.id, payload.session, exchange)
@@ -174,7 +186,7 @@ class AuthenticationController(
 
         val clearAccessToken = cookieCreator.clearCookie(SessionTokenType.Access)
         val clearRefreshToken = cookieCreator.clearCookie(SessionTokenType.Refresh)
-        val clearStepUpToken = cookieCreator.clearCookie(TwoFactorTokenType.StepUp)
+        val clearStepUpToken = cookieCreator.clearCookie(SessionTokenType.StepUp)
 
         authenticationService.logout(sessionInfo.id)
 
@@ -196,7 +208,7 @@ class AuthenticationController(
         responses = [
             ApiResponse(
                 responseCode = "200",
-                description = "Login successful. Returns tokens and user details.",
+                description = "Authentication successful. Returns tokens and user details.",
                 content = [Content(schema = Schema(implementation = RefreshTokenResponse::class))]
             ),
             ApiResponse(
@@ -227,6 +239,63 @@ class AuthenticationController(
         return ResponseEntity.ok()
             .header("Set-Cookie", cookieCreator.createCookie(newAccessToken).toString())
             .header("Set-Cookie", cookieCreator.createCookie(newRefreshToken).toString())
+            .body(res)
+    }
+
+    @PostMapping("/step-up")
+    @Operation(
+        summary = "Request step-up",
+        description = "Requests step-up authentification. This re-authentication is required by critical endpoints.",
+        security = [
+            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER),
+            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE)
+        ],
+        responses = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Logout successful.",
+                content = [Content(schema = Schema(implementation = StepUpResponse::class))]
+            ),
+            ApiResponse(
+                responseCode = "401",
+                description = "Unauthorized.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            )
+        ]
+    )
+    suspend fun stepUp(
+        @RequestBody req: StepUpRequest,
+        @RequestParam lang: Language = Language.EN
+    ): ResponseEntity<StepUpResponse> {
+        logger.info { "Executing step up request" }
+
+        val user = authenticationService.stepUp(req)
+
+        if (user.twoFactorEnabled) {
+            twoFactorAuthenticationService.handleTwoFactor(user, lang)
+            val twoFactorToken = twoFactorAuthTokenService.create(user.id)
+
+            return ResponseEntity.ok()
+                .header("Set-Cookie", cookieCreator.createCookie(twoFactorToken).toString())
+                .body(StepUpResponse(
+                    twoFactorRequired = true,
+                    allowedTwoFactorMethods = user.twoFactorMethods,
+                    twoFactorAuthenticationToken = if (authProperties.allowHeaderAuthentication) twoFactorToken.value else null,
+                    stepUpToken = null,
+                ))
+        }
+
+        val stepUpToken = stepUpTokenService.create(user.id, req.session.id)
+
+        val res = StepUpResponse(
+            twoFactorRequired = false,
+            allowedTwoFactorMethods = null,
+            twoFactorAuthenticationToken = null,
+            stepUpToken = if (authProperties.allowHeaderAuthentication) stepUpToken.value else null
+        )
+
+        return ResponseEntity.ok()
+            .header("Set-Cookie", cookieCreator.createCookie(stepUpToken).toString())
             .body(res)
     }
 }

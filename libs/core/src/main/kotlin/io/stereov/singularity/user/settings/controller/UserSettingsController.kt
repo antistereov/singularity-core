@@ -1,8 +1,7 @@
 package io.stereov.singularity.user.settings.controller
 
-import io.stereov.singularity.auth.core.model.SessionTokenType
-import io.stereov.singularity.auth.core.service.CookieCreator
-import io.stereov.singularity.auth.twofactor.model.TwoFactorTokenType
+import io.stereov.singularity.auth.core.component.CookieCreator
+import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.core.mapper.UserMapper
@@ -14,7 +13,6 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.ResponseEntity
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.server.ServerWebExchange
 
 @RestController
 @RequestMapping("/api/users/me")
@@ -40,9 +38,8 @@ class UserSettingsController(
     suspend fun changeEmail(
         @RequestBody payload: ChangeEmailRequest,
         @RequestParam lang: Language = Language.EN,
-        exchange: ServerWebExchange
     ): ResponseEntity<UserResponse> {
-        val user = userSettingsService.changeEmail(payload, exchange, lang)
+        val user = userSettingsService.changeEmail(payload, lang)
         return ResponseEntity.ok().body(
             userMapper.toResponse(user)
         )
@@ -57,8 +54,8 @@ class UserSettingsController(
      * @return The user's information as a [UserResponse].
      */
     @PutMapping("/password")
-    suspend fun changePassword(@RequestBody payload: ChangePasswordRequest, exchange: ServerWebExchange): ResponseEntity<UserResponse> {
-        val user = userSettingsService.changePassword(payload, exchange)
+    suspend fun changePassword(@RequestBody payload: ChangePasswordRequest): ResponseEntity<UserResponse> {
+        val user = userSettingsService.changePassword(payload)
 
         return ResponseEntity.ok().body(
             userMapper.toResponse(user)
@@ -103,7 +100,7 @@ class UserSettingsController(
     suspend fun delete(): ResponseEntity<Map<String, String>> {
         val clearAccessTokenCookie = cookieCreator.clearCookie(SessionTokenType.Access)
         val clearRefreshTokenCookie = cookieCreator.clearCookie(SessionTokenType.Refresh)
-        val clearStepUpTokenCookie = cookieCreator.clearCookie(TwoFactorTokenType.StepUp)
+        val clearStepUpTokenCookie = cookieCreator.clearCookie(SessionTokenType.StepUp)
 
         userSettingsService.deleteUser()
 

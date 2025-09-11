@@ -1,7 +1,7 @@
 package io.stereov.singularity.user.controller
 
 import io.stereov.singularity.auth.core.dto.response.SessionInfoResponse
-import io.stereov.singularity.auth.core.model.SessionTokenType
+import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.test.BaseIntegrationTest
 import io.stereov.singularity.user.core.model.SessionInfo
 import kotlinx.coroutines.test.runTest

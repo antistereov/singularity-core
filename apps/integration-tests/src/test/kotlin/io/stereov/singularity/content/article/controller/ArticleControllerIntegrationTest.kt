@@ -1,7 +1,7 @@
 package io.stereov.singularity.content.article.controller
 
 import io.stereov.singularity.auth.group.model.KnownGroups
-import io.stereov.singularity.auth.core.model.SessionTokenType
+import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.test.BaseContentTest
 import io.stereov.singularity.user.core.model.Role
 import kotlinx.coroutines.test.runTest

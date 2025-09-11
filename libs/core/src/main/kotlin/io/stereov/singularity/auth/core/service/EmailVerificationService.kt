@@ -3,6 +3,7 @@ package io.stereov.singularity.auth.core.service
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.dto.response.MailCooldownResponse
 import io.stereov.singularity.auth.core.exception.AuthException
+import io.stereov.singularity.auth.core.service.token.EmailVerificationTokenService
 import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.content.translate.model.TranslateKey
 import io.stereov.singularity.content.translate.service.TranslateService
@@ -64,7 +65,7 @@ class EmailVerificationService(
 
             userMapper.toResponse(savedUser)
         } else {
-            throw AuthException("Verification token does not match")
+            throw AuthException("Authentication token does not match")
         }
     }
 
@@ -128,7 +129,7 @@ class EmailVerificationService(
 
         val key = "email-verification-cooldown:$userId"
         val isNewKey = redisTemplate.opsForValue()
-            .setIfAbsent(key, "1", Duration.ofSeconds(mailProperties.verificationSendCooldown))
+            .setIfAbsent(key, "1", Duration.ofSeconds(mailProperties.sendCooldown))
             .awaitSingleOrNull()
             ?: false
 

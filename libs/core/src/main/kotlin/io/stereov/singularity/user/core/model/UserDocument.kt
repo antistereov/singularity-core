@@ -2,24 +2,23 @@ package io.stereov.singularity.user.core.model
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.auth.core.exception.model.WrongLoginTypeException
+import io.stereov.singularity.auth.core.model.LoginType
+import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
 import io.stereov.singularity.database.core.model.SensitiveDocument
 import io.stereov.singularity.database.encryption.model.Encrypted
-import io.stereov.singularity.global.exception.model.InvalidDocumentException
-import io.stereov.singularity.global.exception.model.MissingFunctionParameterException
 import io.stereov.singularity.database.hash.model.SearchableHash
 import io.stereov.singularity.database.hash.model.SecureHash
+import io.stereov.singularity.global.exception.model.InvalidDocumentException
+import io.stereov.singularity.global.exception.model.MissingFunctionParameterException
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Transient
 import java.time.Instant
 
-/**
- * # The User Document
-
- * @author <a href="https://github.com/antistereov">antistereov</a>
- */
 data class UserDocument(
     private var _id: ObjectId? = null,
-    var password: SecureHash,
+    val loginType: String,
+    var password: SecureHash?,
     val created: Instant = Instant.now(),
     var lastActive: Instant = Instant.now(),
     override var sensitive: SensitiveUserData,
@@ -27,17 +26,34 @@ data class UserDocument(
 
     constructor(
         id: ObjectId? = null,
-        password: SecureHash,
+        loginType: String,
+        password: SecureHash?,
         created: Instant = Instant.now(),
         lastActive: Instant = Instant.now(),
         name: String,
         email: String,
         roles: MutableSet<Role> = mutableSetOf(Role.USER),
         groups: MutableSet<String> = mutableSetOf(),
-        security: UserSecurityDetails = UserSecurityDetails(),
+        mailEnabled: Boolean,
+        mailTwoFactorCodeExpiresIn: Long,
         sessions: MutableList<SessionInfo> = mutableListOf(),
         avatarFileKey: String? = null,
-    ): this(id, password, created, lastActive, SensitiveUserData(name, email, roles, groups, security, sessions, avatarFileKey))
+    ): this(
+        id,
+        loginType,
+        password,
+        created,
+        lastActive,
+        SensitiveUserData(
+            name,
+            email,
+            roles,
+            groups,
+            UserSecurityDetails(mailEnabled, mailTwoFactorCodeExpiresIn),
+            sessions,
+            avatarFileKey
+        )
+    )
 
     @get:Transient
     private val logger: KLogger
@@ -61,6 +77,29 @@ data class UserDocument(
     val fileStoragePath: String
         get() = "users/$id"
 
+    @get:Transient
+    val twoFactorEnabled: Boolean
+        get() = sensitive.security.twoFactor.enabled
+
+    @get:Transient
+    val twoFactorMethods: List<TwoFactorMethod>
+        get() = sensitive.security.twoFactor.methods
+
+    /**
+     * Check if user authenticated using password and return [SecureHash] if so.
+     *
+     * @throws WrongLoginTypeException If the user authenticated using a different method.
+     * @throws InvalidDocumentException If the user authenticated using password but no password is set.
+     */
+    fun validateLoginTypeAndGetPassword(): SecureHash {
+        if (loginType != LoginType.PASSWORD) {
+            throw WrongLoginTypeException("Authentication via password failed: user authenticated using $loginType")
+        }
+
+        return password ?: throw InvalidDocumentException("No password is set for user $id")
+    }
+
+
     override fun toEncryptedDocument(
         encryptedSensitiveData: Encrypted<SensitiveUserData>,
         otherValues: List<Any>
@@ -69,7 +108,7 @@ data class UserDocument(
             ?: throw MissingFunctionParameterException("Please provide the hashed email as parameter.")
 
         return EncryptedUserDocument(
-            _id, hashedEmail, password, created, lastActive, encryptedSensitiveData
+            _id, hashedEmail, loginType, password, created, lastActive, encryptedSensitiveData
         )
     }
 
@@ -83,12 +122,14 @@ data class UserDocument(
      *
      * @return The updated [UserDocument].
      */
-    fun setupTwoFactorAuth(secret: String, recoveryCodes: List<SecureHash>): UserDocument {
+    fun setupTotp(secret: String, recoveryCodes: List<SecureHash>): UserDocument {
         logger.debug { "Setting up two factor authentication" }
 
-        this.sensitive.security.twoFactor.enabled = true
-        this.sensitive.security.twoFactor.secret = secret
-        this.sensitive.security.twoFactor.recoveryCodes = recoveryCodes.toMutableList()
+        this.sensitive.security.twoFactor.totp.enabled = true
+        this.sensitive.security.twoFactor.totp.secret = secret
+        this.sensitive.security.twoFactor.totp.recoveryCodes = recoveryCodes.toMutableList()
+
+        this.sensitive.security.twoFactor.preferred = TwoFactorMethod.TOTP
 
         return this
     }
@@ -100,12 +141,14 @@ data class UserDocument(
      *
      * @return The updated [UserDocument].
      */
-    fun disableTwoFactorAuth(): UserDocument {
+    fun disableTotp(): UserDocument {
         logger.debug { "Disabling two factor authentication" }
 
-        this.sensitive.security.twoFactor.enabled = false
-        this.sensitive.security.twoFactor.secret = null
-        this.sensitive.security.twoFactor.recoveryCodes = mutableListOf()
+        this.sensitive.security.twoFactor.totp.enabled = false
+        this.sensitive.security.twoFactor.totp.secret = null
+        this.sensitive.security.twoFactor.totp.recoveryCodes = mutableListOf()
+
+        this.sensitive.security.twoFactor.preferred = TwoFactorMethod.MAIL
 
         return this
     }
@@ -122,7 +165,7 @@ data class UserDocument(
     fun addOrUpdatesession(sessionInfo: SessionInfo): UserDocument {
         logger.debug { "Adding or updating session ${sessionInfo.id}" }
 
-        removesession(sessionInfo.id)
+        removeSession(sessionInfo.id)
         this.sensitive.sessions.add(sessionInfo)
 
         return this
@@ -137,7 +180,7 @@ data class UserDocument(
      *
      * @return The updated [UserDocument].
      */
-    fun removesession(sessionId: String): UserDocument {
+    fun removeSession(sessionId: String): UserDocument {
         logger.debug { "Removing session $sessionId" }
 
         this.sensitive.sessions.removeAll { session -> session.id == sessionId }
@@ -150,7 +193,7 @@ data class UserDocument(
      *
      * This method removes all sessions from the user's session list.
      */
-    fun clearsessions() {
+    fun clearSessions() {
         logger.debug { "Clearing sessions" }
 
         this.sensitive.sessions.clear()

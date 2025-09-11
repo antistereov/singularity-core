@@ -1,11 +1,11 @@
 package io.stereov.singularity.auth.core.filter
 
 import io.stereov.singularity.auth.core.exception.AuthException
-import io.stereov.singularity.auth.core.model.CustomAuthenticationToken
-import io.stereov.singularity.auth.core.model.ErrorAuthenticationToken
+import io.stereov.singularity.auth.core.model.token.CustomAuthenticationToken
+import io.stereov.singularity.auth.core.model.token.ErrorAuthenticationToken
+import io.stereov.singularity.auth.core.service.token.AccessTokenService
 import io.stereov.singularity.auth.jwt.exception.TokenException
 import io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException
-import io.stereov.singularity.auth.core.service.AccessTokenService
 import io.stereov.singularity.global.exception.model.DocumentNotFoundException
 import io.stereov.singularity.user.core.service.UserService
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -41,7 +41,7 @@ class AuthenticationFilter(
             return@mono setSecurityContext(chain, exchange, e)
         }
 
-        val authentication = CustomAuthenticationToken(user, accessToken.sessionId, accessToken.tokenId)
+        val authentication = CustomAuthenticationToken(user, accessToken.sessionId, accessToken.tokenId, exchange)
 
         val securityContext = SecurityContextImpl(authentication)
         return@mono chain.filter(exchange)

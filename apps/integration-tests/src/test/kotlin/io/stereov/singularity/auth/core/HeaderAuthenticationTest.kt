@@ -2,9 +2,9 @@ package io.stereov.singularity.auth.core.core
 
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
 import io.stereov.singularity.auth.core.dto.response.RefreshTokenResponse
-import io.stereov.singularity.auth.core.model.SessionTokenType
-import io.stereov.singularity.auth.core.service.AccessTokenService
-import io.stereov.singularity.auth.core.service.RefreshTokenService
+import io.stereov.singularity.auth.core.model.token.SessionTokenType
+import io.stereov.singularity.auth.core.service.token.AccessTokenService
+import io.stereov.singularity.auth.core.service.token.RefreshTokenService
 import io.stereov.singularity.test.BaseSpringBootTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test

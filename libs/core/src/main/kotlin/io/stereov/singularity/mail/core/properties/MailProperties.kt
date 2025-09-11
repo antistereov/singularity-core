@@ -13,8 +13,7 @@ data class MailProperties(
     val smtpAuth: Boolean = true,
     val smtpStarttls: Boolean = true,
     val debug: Boolean = false,
+    val sendCooldown: Long = 60,
     val verificationExpiration: Long = 900,
-    val verificationSendCooldown: Long = 60,
     val passwordResetExpiration: Long = 900,
-    val passwordResetSendCooldown: Long = 60,
 )

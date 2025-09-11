@@ -2,7 +2,7 @@ package io.stereov.singularity.content.core.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.stereov.singularity.auth.core.exception.model.NotAuthorizedException
-import io.stereov.singularity.auth.core.model.AccessType
+import io.stereov.singularity.auth.core.model.token.AccessType
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.content.core.model.ContentAccessRole
 import io.stereov.singularity.content.core.model.ContentDocument

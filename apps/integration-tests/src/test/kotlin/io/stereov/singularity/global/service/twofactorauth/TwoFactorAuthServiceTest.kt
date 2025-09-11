@@ -1,7 +1,7 @@
 package io.stereov.singularity.global.service.twofactorauth
 
 import com.warrenstrange.googleauth.GoogleAuthenticator
-import io.stereov.singularity.auth.twofactor.service.TwoFactorService
+import io.stereov.singularity.auth.twofactor.service.TotpService
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -9,23 +9,23 @@ import org.junit.jupiter.api.Test
 class TwoFactorAuthServiceTest {
 
     private val gAuth = GoogleAuthenticator()
-    private val twoFactorService = TwoFactorService(gAuth)
+    private val totpService = TotpService(gAuth)
 
     @Test
     fun `2FA works as expected`() {
-        val secret = twoFactorService.generateSecretKey()
-        val code = twoFactorService.getTotpPassword(secret)
+        val secret = totpService.generateSecretKey()
+        val code = totpService.getTotpPassword(secret)
 
-        val isValid = twoFactorService.validateCode(secret, code)
+        val isValid = totpService.codeIsValid(secret, code)
         assertTrue(isValid, "OTP should be valid")
     }
 
     @Test
     fun `Invalid code will be invalid`() {
-        val secret = twoFactorService.generateSecretKey()
-        val code = twoFactorService.getTotpPassword(secret)
+        val secret = totpService.generateSecretKey()
+        val code = totpService.getTotpPassword(secret)
 
-        val isValid = twoFactorService.validateCode(secret, code + 1)
+        val isValid = totpService.codeIsValid(secret, code + 1)
         assertFalse(isValid, "OTP should be invalid")
     }
 }

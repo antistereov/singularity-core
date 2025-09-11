@@ -1,6 +1,6 @@
 package io.stereov.singularity.ratelimit
 
-import io.stereov.singularity.auth.core.model.SessionTokenType
+import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.ratelimit.properties.RateLimitProperties
 import io.stereov.singularity.test.BaseSpringBootTest
 import kotlinx.coroutines.test.runTest

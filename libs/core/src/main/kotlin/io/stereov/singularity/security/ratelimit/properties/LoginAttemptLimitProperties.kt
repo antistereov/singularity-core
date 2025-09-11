@@ -3,7 +3,7 @@ package io.stereov.singularity.ratelimit.properties
 import org.springframework.boot.context.properties.ConfigurationProperties
 
 /**
- * # Login Attempt Limit properties.
+ * # Authentication Attempt Limit properties.
  *
  * This class is responsible for holding the login attempt limit properties
  * and is annotated with [ConfigurationProperties]
