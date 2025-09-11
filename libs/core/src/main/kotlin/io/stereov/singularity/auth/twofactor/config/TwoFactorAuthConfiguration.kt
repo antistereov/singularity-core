@@ -86,7 +86,8 @@ class TwoFactorAuthConfiguration {
         stepUpTokenService: StepUpTokenService,
         cookieCreator: CookieCreator,
         authorizationService: AuthorizationService,
-        twoFactorAuthenticationTokenService: TwoFactorAuthenticationTokenService
+        twoFactorAuthenticationTokenService: TwoFactorAuthenticationTokenService,
+        userService: UserService
     ): TwoFactorAuthenticationController {
         return TwoFactorAuthenticationController(
             twoFactorAuthenticationService,
@@ -99,6 +100,7 @@ class TwoFactorAuthConfiguration {
             cookieCreator,
             authorizationService,
             twoFactorAuthenticationTokenService,
+            userService,
         )
     }
 
