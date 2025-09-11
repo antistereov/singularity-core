@@ -171,7 +171,7 @@ class EmailVerificationService(
         val templatePath = "${MailConstants.TEMPLATE_DIR}/$slug.html"
 
         val subject = translateService.translate(TranslateKey("$slug.subject"), MailConstants.RESOURCE_BUNDLE, lang)
-        val content = TemplateBuilder.Companion.fromResource(templatePath)
+        val content = TemplateBuilder.fromResource(templatePath)
             .translate(MailConstants.RESOURCE_BUNDLE, lang)
             .replacePlaceholders(templateService.getPlaceholders(mapOf(
                 "name" to user.sensitive.name,

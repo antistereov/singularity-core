@@ -28,7 +28,6 @@ import org.springframework.stereotype.Service
 @Service
 class UserSettingsService(
     private val authorizationService: AuthorizationService,
-    private val stepUpTokenService: StepUpTokenService,
     private val emailVerificationService: EmailVerificationService,
     private val userService: UserService,
     private val hashService: HashService,

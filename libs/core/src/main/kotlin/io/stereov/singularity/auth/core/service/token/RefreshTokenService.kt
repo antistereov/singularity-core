@@ -1,11 +1,11 @@
 package io.stereov.singularity.auth.core.service.token
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.auth.core.component.TokenValueExtractor
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
 import io.stereov.singularity.auth.core.exception.AuthException
 import io.stereov.singularity.auth.core.model.token.RefreshToken
 import io.stereov.singularity.auth.core.model.token.SessionTokenType
-import io.stereov.singularity.auth.core.component.TokenValueExtractor
 import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
 import io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException
@@ -84,7 +84,7 @@ class RefreshTokenService(
         sessionInfo: SessionInfoRequest,
         exchange: ServerWebExchange
     ): RefreshToken {
-        val refreshTokenId = Random.Companion.generateString(20)
+        val refreshTokenId = Random.generateString(20)
         val refreshToken = create(userId, sessionInfo.id, refreshTokenId)
 
         updatesessions(exchange, userId, sessionInfo, refreshTokenId)

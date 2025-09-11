@@ -136,7 +136,6 @@ class TwoFactorAuthConfiguration {
     @Bean
     @ConditionalOnMissingBean
     fun mailAuthenticationService(
-         authorizationService: AuthorizationService,
          twoFactorAuthProperties: TwoFactorAuthProperties,
          userService: UserService,
          translateService: TranslateService,
@@ -145,7 +144,6 @@ class TwoFactorAuthConfiguration {
          mailService: MailService,
          mailProperties: MailProperties
     ) = MailAuthenticationService(
-        authorizationService,
         twoFactorAuthProperties,
         userService,
         translateService,

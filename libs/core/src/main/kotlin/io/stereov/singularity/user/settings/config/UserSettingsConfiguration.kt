@@ -1,14 +1,13 @@
 package io.stereov.singularity.user.settings.config
 
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
+import io.stereov.singularity.auth.core.component.CookieCreator
 import io.stereov.singularity.auth.core.config.AuthenticationConfiguration
 import io.stereov.singularity.auth.core.service.AuthorizationService
-import io.stereov.singularity.auth.core.component.CookieCreator
-import io.stereov.singularity.auth.core.service.token.StepUpTokenService
+import io.stereov.singularity.auth.core.service.EmailVerificationService
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.global.properties.AppProperties
-import io.stereov.singularity.auth.core.service.EmailVerificationService
 import io.stereov.singularity.user.core.mapper.UserMapper
 import io.stereov.singularity.user.core.service.UserService
 import io.stereov.singularity.user.settings.controller.UserSettingsController
@@ -38,7 +37,6 @@ class UserSettingsConfiguration {
     @ConditionalOnMissingBean
     fun userSettingsService(
         authService: AuthorizationService,
-        stepUpTokenService: StepUpTokenService,
         emailVerificationService: EmailVerificationService,
         userService: UserService,
         hashService: HashService,
@@ -46,5 +44,12 @@ class UserSettingsConfiguration {
         fileStorage: FileStorage,
         accessTokenCache: AccessTokenCache,
         userMapper: UserMapper
-    ) = UserSettingsService(authService, stepUpTokenService, emailVerificationService, userService, hashService, appProperties, fileStorage, accessTokenCache, userMapper)
+    ) = UserSettingsService(
+        authService,
+        emailVerificationService,
+        userService, hashService,
+        appProperties, fileStorage,
+        accessTokenCache,
+        userMapper
+    )
 }
