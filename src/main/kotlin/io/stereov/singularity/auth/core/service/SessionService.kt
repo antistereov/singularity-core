@@ -41,7 +41,7 @@ class SessionService(
 
         val user = authorizationService.getCurrentUser()
 
-        user.removesession(sessionId)
+        user.removeSession(sessionId)
 
         return userService.save(user)
     }
@@ -57,7 +57,7 @@ class SessionService(
 
         val user = authorizationService.getCurrentUser()
         accessTokenCache.invalidateAllTokens(user.id)
-        user.clearsessions()
+        user.clearSessions()
 
         return userService.save(user)
     }

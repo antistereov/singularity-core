@@ -3,8 +3,8 @@ package io.stereov.singularity.user.settings.config
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.config.AuthenticationConfiguration
 import io.stereov.singularity.auth.core.service.AuthorizationService
-import io.stereov.singularity.auth.core.service.CookieCreator
-import io.stereov.singularity.auth.twofactor.service.StepUpTokenService
+import io.stereov.singularity.auth.core.component.CookieCreator
+import io.stereov.singularity.auth.core.service.token.StepUpTokenService
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.global.properties.AppProperties

@@ -5,6 +5,7 @@ import io.stereov.singularity.auth.core.dto.request.ResetPasswordRequest
 import io.stereov.singularity.auth.core.dto.request.SendPasswordResetRequest
 import io.stereov.singularity.auth.core.dto.response.MailCooldownResponse
 import io.stereov.singularity.auth.core.exception.AuthException
+import io.stereov.singularity.auth.core.service.token.PasswordResetTokenService
 import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.content.translate.model.TranslateKey
 import io.stereov.singularity.content.translate.service.TranslateService
@@ -66,7 +67,7 @@ class PasswordResetService(
         val resetToken = passwordResetTokenService.extract(token)
         val user = userService.findById(resetToken.userId)
 
-        val savedSecret = user.sensitive.security.mail.passwordResetSecret
+        val savedSecret = user.sensitive.security.password.resetSecret
 
         val tokenIsValid = resetToken.secret == savedSecret
 
@@ -74,7 +75,7 @@ class PasswordResetService(
             throw AuthException("Password request secret does not match")
         }
 
-        user.sensitive.security.mail.passwordResetSecret = Random.generateCode(20)
+        user.sensitive.security.password.resetSecret = Random.generateString(20)
         user.password = hashService.hashBcrypt(req.newPassword)
         userService.save(user)
     }
@@ -109,7 +110,7 @@ class PasswordResetService(
 
         val key = "password-reset-cooldown:$userId"
         val isNewKey = redisTemplate.opsForValue()
-            .setIfAbsent(key, "1", Duration.ofSeconds(mailProperties.passwordResetSendCooldown))
+            .setIfAbsent(key, "1", Duration.ofSeconds(mailProperties.sendCooldown))
             .awaitSingleOrNull()
             ?: false
 
@@ -149,7 +150,7 @@ class PasswordResetService(
             throw MailCooldownException(remainingCooldown)
         }
 
-        val secret = user.sensitive.security.mail.passwordResetSecret
+        val secret = user.sensitive.security.password.resetSecret
 
         val token = passwordResetTokenService.create(user.id, secret)
         val passwordResetUrl = generatePasswordResetUrl(token)

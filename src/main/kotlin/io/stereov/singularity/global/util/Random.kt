@@ -1,6 +1,8 @@
 package io.stereov.singularity.global.util
 
 import java.security.SecureRandom
+import kotlin.math.pow
+import kotlin.random.Random
 
 class Random {
     companion object {
@@ -13,11 +15,18 @@ class Random {
          *
          * @return A string representing the generated recovery code.
          */
-        fun generateCode(length: Int = 10): String {
+        fun generateString(length: Int = 10): String {
             val chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
             return (1..length)
                 .map { chars[random.nextInt(chars.length)] }
                 .joinToString("")
+        }
+
+        fun generateInt(length: Int = 6): String {
+            val upperBound = 10.0.pow(length).toInt()
+
+            val number = Random.nextInt(upperBound)
+            return String.format("%06d", number)
         }
     }
 

@@ -27,7 +27,8 @@ class AuthExceptionHandler : BaseExceptionHandler<AuthException> {
         is NotAuthorizedException -> HttpStatus.FORBIDDEN
         is NoTokenProvidedException -> HttpStatus.UNAUTHORIZED
         is NoTwoFactorUserAttributeException -> HttpStatus.BAD_REQUEST
-        is TwoFactorAuthDisabledException -> HttpStatus.BAD_REQUEST
+        is TwoFactorMethodDisabledException -> HttpStatus.BAD_REQUEST
+        is WrongLoginTypeException -> HttpStatus.FORBIDDEN
         else -> HttpStatus.UNAUTHORIZED
     }
 

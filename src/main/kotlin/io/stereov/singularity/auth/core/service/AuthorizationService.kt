@@ -5,8 +5,10 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.exception.AuthException
 import io.stereov.singularity.auth.core.exception.model.InvalidPrincipalException
 import io.stereov.singularity.auth.core.exception.model.NotAuthorizedException
-import io.stereov.singularity.auth.core.model.CustomAuthenticationToken
-import io.stereov.singularity.auth.core.model.ErrorAuthenticationToken
+import io.stereov.singularity.auth.core.model.token.CustomAuthenticationToken
+import io.stereov.singularity.auth.core.model.token.ErrorAuthenticationToken
+import io.stereov.singularity.auth.core.model.token.StepUpToken
+import io.stereov.singularity.auth.core.service.token.StepUpTokenService
 import io.stereov.singularity.auth.jwt.exception.TokenException
 import io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException
 import io.stereov.singularity.user.core.model.Role
@@ -18,7 +20,9 @@ import org.springframework.security.core.context.SecurityContext
 import org.springframework.stereotype.Service
 
 @Service
-class AuthorizationService {
+class AuthorizationService(
+    private val stepUpTokenService: StepUpTokenService
+) {
 
     private val logger: KLogger
         get() = KotlinLogging.logger {}
@@ -70,7 +74,7 @@ class AuthorizationService {
      * @throws InvalidPrincipalException If the security context or authentication is missing.
      * @throws InvalidTokenException If the authentication does not contain the necessary properties.
      */
-    suspend fun getCurrentsessionId(): String {
+    suspend fun getCurrentSessionId(): String {
         logger.debug { "Extracting session ID" }
 
         val auth = getCurrentAuthentication()
@@ -124,6 +128,13 @@ class AuthorizationService {
         if (!user.sensitive.groups.contains(groupKey) && !user.sensitive.roles.contains(Role.ADMIN)) {
             throw NotAuthorizedException("User does not have sufficient permission: User does not belong to group \"$groupKey\"")
         }
+    }
+
+    suspend fun requireStepUp(): StepUpToken {
+        logger.debug { "Validating step up" }
+
+        val authentication = getCurrentAuthentication()
+        return stepUpTokenService.extract(authentication.exchange, authentication.user.id, authentication.sessionId)
     }
 
     /**

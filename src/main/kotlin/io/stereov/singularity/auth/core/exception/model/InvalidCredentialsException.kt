@@ -11,4 +11,4 @@ import io.stereov.singularity.auth.core.exception.AuthException
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
-class InvalidCredentialsException(msg: String = "Login failed: Invalid credentials") : AuthException(msg)
+class InvalidCredentialsException(msg: String = "Authentication failed: Invalid credentials") : AuthException(msg)

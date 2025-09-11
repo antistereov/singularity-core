@@ -2,10 +2,10 @@ package io.stereov.singularity.auth.core.controller
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.dto.response.SessionInfoResponse
-import io.stereov.singularity.auth.core.model.SessionTokenType
-import io.stereov.singularity.auth.core.service.CookieCreator
+import io.stereov.singularity.auth.core.model.token.SessionTokenType
+import io.stereov.singularity.auth.core.component.CookieCreator
 import io.stereov.singularity.auth.core.service.SessionService
-import io.stereov.singularity.auth.twofactor.model.TwoFactorTokenType
+import io.stereov.singularity.auth.twofactor.model.token.TwoFactorTokenType
 import io.stereov.singularity.global.model.SuccessResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -59,7 +59,7 @@ class SessionController(
 
         val clearAccessToken = cookieCreator.clearCookie(SessionTokenType.Access)
         val clearRefreshToken = cookieCreator.clearCookie(SessionTokenType.Refresh)
-        val clearStepUpToken = cookieCreator.clearCookie(TwoFactorTokenType.StepUp)
+        val clearStepUpToken = cookieCreator.clearCookie(SessionTokenType.StepUp)
 
         sessionService.deleteAllSessions()
 

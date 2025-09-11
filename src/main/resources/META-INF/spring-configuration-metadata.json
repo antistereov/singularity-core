@@ -315,11 +315,11 @@
       "description": "Expiration time for the password reset token in seconds. Default is 15 minutes."
     },
     {
-      "name": "singularity.mail.password-reset-send-cooldown",
+      "name": "singularity.mail.send-cooldown",
       "type": "java.lang.Long",
       "sourceType": "io.stereov.singularity.mail.core.properties.MailProperties",
       "defaultValue": 60,
-      "description": "Cooldown period in seconds for sending password reset emails."
+      "description": "Cooldown period in seconds for sending the same email."
     },
     {
       "name": "singularity.mail.port",
@@ -361,13 +361,6 @@
       "sourceType": "io.stereov.singularity.mail.core.properties.MailProperties",
       "defaultValue": 900,
       "description": "Expiration time for the verification token in seconds. Default is 15 minutes."
-    },
-    {
-      "name": "singularity.mail.verification-send-cooldown",
-      "type": "java.lang.Long",
-      "sourceType": "io.stereov.singularity.mail.core.properties.MailProperties",
-      "defaultValue": 60,
-      "description": "Cooldown period in seconds for sending verification emails."
     },
     {
       "name": "singularity.secrets.store",
@@ -500,6 +493,13 @@
       "sourceType": "io.stereov.singularity.auth.twofactor.properties.TwoFactorAuthProperties",
       "defaultValue": 6,
       "description": "The number of recovery codes to generate. Every code can only be used once. Default is 6."
+    },
+    {
+      "name": "singularity.auth.two-factor.mail-two-factor-code-expires-in",
+      "type": "java.lang.Long",
+      "sourceType": "io.stereov.singularity.auth.twofactor.properties.TwoFactorAuthProperties",
+      "defaultValue": 900,
+      "description": "The number of seconds the 2FA code sent by email is valid."
     },
     {
       "name": "singularity.ui.base-url",
