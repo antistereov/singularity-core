@@ -2,7 +2,6 @@ package io.stereov.singularity.auth.twofactor.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.exception.model.TwoFactorMethodDisabledException
-import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.twofactor.exception.model.InvalidTwoFactorCodeException
 import io.stereov.singularity.auth.twofactor.exception.model.TwoFactorCodeExpiredException
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
@@ -28,7 +27,6 @@ import java.time.Instant
 
 @Service
 class MailAuthenticationService(
-    private val authorizationService: AuthorizationService,
     private val twoFactorAuthProperties: TwoFactorAuthProperties,
     private val userService: UserService,
     private val translateService: TranslateService,

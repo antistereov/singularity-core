@@ -15,9 +15,6 @@ import org.springframework.web.server.ServerWebExchange
 @ControllerAdvice
 class TwoFactorAuthExceptionHandler : BaseExceptionHandler<TwoFactorAuthException> {
 
-    private val logger: KLogger
-        get() = KotlinLogging.logger {}
-
     override fun getHttpStatus(ex: TwoFactorAuthException) = when (ex) {
         is InvalidTwoFactorCodeException -> HttpStatus.UNAUTHORIZED
         is InvalidTwoFactorRequestException -> HttpStatus.BAD_REQUEST

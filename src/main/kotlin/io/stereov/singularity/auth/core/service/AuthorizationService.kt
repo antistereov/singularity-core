@@ -100,6 +100,7 @@ class AuthorizationService(
      * @throws InvalidPrincipalException If the security context or authentication is missing.
      * @throws InvalidTokenException If the authentication does not contain the necessary properties.
      */
+    @Suppress("UNUSED")
     suspend fun requireAuthentication() {
         getCurrentAuthentication()
     }

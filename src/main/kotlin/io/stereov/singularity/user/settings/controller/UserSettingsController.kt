@@ -26,14 +26,6 @@ class UserSettingsController(
     private val cookieCreator: CookieCreator
 ) {
 
-    /**
-     * Verify the two-factor authentication code.
-     *
-     * @param payload The two-factor authentication request payload.
-     * @param exchange The server web exchange.
-     *
-     * @return The user's information as a [UserResponse].
-     */
     @PutMapping("/email")
     suspend fun changeEmail(
         @RequestBody payload: ChangeEmailRequest,
@@ -45,14 +37,6 @@ class UserSettingsController(
         )
     }
 
-    /**
-     * Change the user's password.
-     *
-     * @param payload The change password request payload.
-     * @param exchange The server web exchange.
-     *
-     * @return The user's information as a [UserResponse].
-     */
     @PutMapping("/password")
     suspend fun changePassword(@RequestBody payload: ChangePasswordRequest): ResponseEntity<UserResponse> {
         val user = userSettingsService.changePassword(payload)
@@ -62,12 +46,6 @@ class UserSettingsController(
         )
     }
 
-    /**
-     * Change the user's information.
-     *
-     * @param payload The change user request payload.
-     * @return The user's information as a [UserResponse].
-     */
     @PutMapping
     suspend fun changeUser(@RequestBody payload: ChangeUserRequest): ResponseEntity<UserResponse> {
         val user = userSettingsService.changeUser(payload)
@@ -91,11 +69,6 @@ class UserSettingsController(
         )
     }
 
-    /**
-     * Delete the user's account.
-     *
-     * @return A response indicating the success of the operation.
-     */
     @DeleteMapping
     suspend fun delete(): ResponseEntity<Map<String, String>> {
         val clearAccessTokenCookie = cookieCreator.clearCookie(SessionTokenType.Access)
