@@ -9,7 +9,6 @@ import io.stereov.singularity.user.settings.dto.request.ChangeEmailRequest
 import io.stereov.singularity.user.settings.dto.request.ChangePasswordRequest
 import io.stereov.singularity.user.settings.dto.request.ChangeUserRequest
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.core.io.ClassPathResource
@@ -52,7 +51,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
 
         requireNotNull(res)
 
-        Assertions.assertEquals(newEmail, res.email)
+        assertEquals(newEmail, res.email)
         userService.findByEmail(newEmail)
     }
     @Test fun `changeEmail works without 2fa`() = runTest {
@@ -83,7 +82,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
 
         requireNotNull(res)
 
-        Assertions.assertEquals(newEmail, res.email)
+        assertEquals(newEmail, res.email)
         userService.findByEmail(newEmail)
     }
     @Test fun `changeEmail changes email`() = runTest {
@@ -103,9 +102,9 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
             .responseBody
 
         requireNotNull(res)
-        Assertions.assertEquals(newEmail, res.email)
+        assertEquals(newEmail, res.email)
         val foundUser = userService.findByEmail(newEmail)
-        Assertions.assertEquals(user.info.id, foundUser.id)
+        assertEquals(user.info.id, foundUser.id)
     }
     @Test fun `changeEmail requires authentication`() = runTest {
         val oldEmail = "old@email.com"
@@ -457,8 +456,8 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
 
         requireNotNull(res)
 
-        Assertions.assertEquals(newName, res.name)
-        Assertions.assertEquals(newName, userService.findById(user.info.id).sensitive.name)
+        assertEquals(newName, res.name)
+        assertEquals(newName, userService.findById(user.info.id).sensitive.name)
     }
     @Test fun `changeUser requires authentication`() = runTest {
         registerUser()

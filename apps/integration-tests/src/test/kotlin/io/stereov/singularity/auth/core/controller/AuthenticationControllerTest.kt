@@ -306,7 +306,7 @@ class AuthenticationControllerTest : BaseIntegrationTest() {
         val refreshToken = refreshTokenService.create(
             user.info.id,
             user.info.sensitive.sessions.first().id,
-            Random.Companion.generateString(20)
+            Random.generateString(20)
         )
         webTestClient.post()
             .uri("/api/auth/refresh")
