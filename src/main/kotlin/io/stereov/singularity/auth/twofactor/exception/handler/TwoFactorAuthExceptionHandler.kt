@@ -1,7 +1,5 @@
 package io.stereov.singularity.auth.twofactor.exception.handler
 
-import io.github.oshai.kotlinlogging.KLogger
-import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.twofactor.exception.TwoFactorAuthException
 import io.stereov.singularity.auth.twofactor.exception.model.InvalidTwoFactorCodeException
 import io.stereov.singularity.auth.twofactor.exception.model.InvalidTwoFactorRequestException
