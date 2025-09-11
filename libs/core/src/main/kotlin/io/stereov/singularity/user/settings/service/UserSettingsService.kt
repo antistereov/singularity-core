@@ -2,12 +2,10 @@ package io.stereov.singularity.user.settings.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
-import io.stereov.singularity.auth.core.exception.model.InvalidCredentialsException
 import io.stereov.singularity.auth.core.exception.model.WrongLoginTypeException
 import io.stereov.singularity.auth.core.model.LoginType
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.core.service.EmailVerificationService
-import io.stereov.singularity.auth.core.service.token.StepUpTokenService
 import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.file.core.exception.model.UnsupportedMediaTypeException
@@ -39,16 +37,6 @@ class UserSettingsService(
 
     private val logger = KotlinLogging.logger {}
 
-    /**
-     * Changes the user's email address and returns the updated user document.
-     *
-     * @param payload The request containing the new email, password, and two-factor code.
-     * @param exchange The server web exchange containing the request and response.
-     *
-     * @return The [UserDocument] of the updated user.
-     *
-     * @throws InvalidCredentialsException If the password is invalid.
-     */
     suspend fun changeEmail(payload: ChangeEmailRequest, lang: Language): UserDocument {
         logger.debug { "Changing email" }
 
@@ -73,16 +61,6 @@ class UserSettingsService(
         return userService.save(user)
     }
 
-    /**
-     * Changes the user's password and returns the updated user document.
-     *
-     * @param payload The request containing the old password, new password, and two-factor code.
-     * @param exchange The server web exchange containing the request and response.
-     *
-     * @return The [UserDocument] of the updated user.
-     *
-     * @throws InvalidCredentialsException If the old password is invalid.
-     */
     suspend fun changePassword(payload: ChangePasswordRequest): UserDocument {
         logger.debug { "Changing password" }
 
@@ -97,13 +75,6 @@ class UserSettingsService(
         return userService.save(user)
     }
 
-    /**
-     * Changes the user's name and returns the updated user document.
-     *
-     * @param payload The request containing the new name.
-     *
-     * @return The [UserDocument] of the updated user.
-     */
     suspend fun changeUser(payload: ChangeUserRequest): UserDocument {
         val user = authorizationService.getCurrentUser()
 
@@ -156,9 +127,6 @@ class UserSettingsService(
         return userMapper.toResponse(savedUser)
     }
 
-    /**
-     * Deletes the user account and invalidates all tokens.
-     */
     suspend fun deleteUser() {
         logger.debug { "Deleting user" }
 
