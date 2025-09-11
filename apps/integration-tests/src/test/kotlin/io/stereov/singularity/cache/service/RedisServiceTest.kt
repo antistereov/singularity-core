@@ -1,4 +1,4 @@
-package io.stereov.singularity.global.service.cache
+package io.stereov.singularity.cache.service
 
 import io.stereov.singularity.cache.service.RedisService
 import io.stereov.singularity.cache.exception.model.RedisKeyNotFoundException

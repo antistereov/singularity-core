@@ -1,19 +1,14 @@
-package io.stereov.singularity.global.service.encryption
+package io.stereov.singularity.database.encryption.service
 
-import io.stereov.singularity.database.encryption.service.EncryptionSecretService
 import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 
 class EncryptionServiceTest : BaseIntegrationTest() {
 
-    @Autowired
-    private lateinit var encryptionSecretService: EncryptionSecretService
-
-    @Test fun rotationWorks() = runTest {
+    @Test
+    fun rotationWorks() = runTest {
         val user = registerUser()
 
         val encryptedUser = userService.findEncryptedById(user.info.id)
@@ -27,10 +22,10 @@ class EncryptionServiceTest : BaseIntegrationTest() {
         val rotatedEncryptedUser = userService.findEncryptedById(user.info.id)
         val newSecret = rotatedEncryptedUser.sensitive.secretKey
 
-        assertNotEquals(oldSecret, newSecret)
+        Assertions.assertNotEquals(oldSecret, newSecret)
 
         val newDecryptedUser = userService.decrypt(rotatedEncryptedUser)
 
-        assertEquals(decryptedUser, newDecryptedUser)
+        Assertions.assertEquals(decryptedUser, newDecryptedUser)
     }
 }

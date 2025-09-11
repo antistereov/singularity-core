@@ -1,4 +1,4 @@
-package io.stereov.singularity.auth.core.core
+package io.stereov.singularity.auth.core
 
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
 import io.stereov.singularity.auth.core.dto.response.RefreshTokenResponse

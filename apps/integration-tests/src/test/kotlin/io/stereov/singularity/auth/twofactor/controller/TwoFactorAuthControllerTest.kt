@@ -1,4 +1,4 @@
-package io.stereov.singularity.auth.twofactor
+package io.stereov.singularity.auth.twofactor.controller
 
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
 import io.stereov.singularity.auth.core.dto.response.LoginResponse

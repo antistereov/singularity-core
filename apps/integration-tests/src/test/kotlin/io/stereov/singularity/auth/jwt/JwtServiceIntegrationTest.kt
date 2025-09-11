@@ -1,4 +1,4 @@
-package io.stereov.singularity.global.service.jwt
+package io.stereov.singularity.auth.jwt
 
 import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.JWSHeader
@@ -12,13 +12,15 @@ import io.stereov.singularity.auth.jwt.service.JwtService
 import io.stereov.singularity.secrets.core.model.Secret
 import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
 import java.time.Instant
-import java.util.*
+import java.util.Base64
+import java.util.Date
+import java.util.UUID
 
 class JwtServiceIntegrationTest : BaseIntegrationTest() {
 
@@ -49,25 +51,43 @@ class JwtServiceIntegrationTest : BaseIntegrationTest() {
         return signedJWT.serialize()
     }
 
-    @Test fun `valid JWT should decode successfully`() = runTest {
+    @Test
+    fun `valid JWT should decode successfully`() = runTest {
         val token = createJwt(jwtSecretService.getCurrentSecret())
 
         val jwt = jwtService.decodeJwt(token)
 
-        assertEquals("test-user", jwt.subject)
-        assertEquals("user", jwt.claims["role"])
+        Assertions.assertEquals("test-user", jwt.subject)
+        Assertions.assertEquals("user", jwt.claims["role"])
     }
-    @Test fun `JWT with secret that is not saved in key manager should fail`() = runTest {
-        val tamperedToken = createJwt(Secret(UUID.randomUUID(), "value", jwtSecretService.generateKey(algorithm = "HmacSHA256"), Instant.now()))
+    @Test
+    fun `JWT with secret that is not saved in key manager should fail`() = runTest {
+        val tamperedToken = createJwt(
+            Secret(
+                UUID.randomUUID(),
+                "value",
+                jwtSecretService.generateKey(algorithm = "HmacSHA256"),
+                Instant.now()
+            )
+        )
 
         assertThrows<InvalidTokenException> { jwtService.decodeJwt(tamperedToken) }
     }
-    @Test fun `JWT with wrong secret should fail`() = runTest {
-        val tamperedToken = createJwt(Secret(UUID.randomUUID(), "value", jwtSecretService.generateKey(algorithm = "HmacSHA256"), Instant.now()))
+    @Test
+    fun `JWT with wrong secret should fail`() = runTest {
+        val tamperedToken = createJwt(
+            Secret(
+                UUID.randomUUID(),
+                "value",
+                jwtSecretService.generateKey(algorithm = "HmacSHA256"),
+                Instant.now()
+            )
+        )
 
         assertThrows<InvalidTokenException> { jwtService.decodeJwt(tamperedToken) }
     }
-    @Test fun `JWT with missing key id should fail`() = runTest {
+    @Test
+    fun `JWT with missing key id should fail`() = runTest {
         val claims = JWTClaimsSet.Builder()
             .subject("test-user")
             .issueTime(Date())
@@ -83,7 +103,8 @@ class JwtServiceIntegrationTest : BaseIntegrationTest() {
 
         assertThrows<InvalidTokenException> { jwtService.decodeJwt(token) }
     }
-    @Test fun `JWT encoder should create a valid token`() = runTest {
+    @Test
+    fun `JWT encoder should create a valid token`() = runTest {
         val claims = JwtClaimsSet.builder()
             .subject("test-user")
             .issuedAt(Instant.now())
@@ -94,11 +115,12 @@ class JwtServiceIntegrationTest : BaseIntegrationTest() {
         val encoded = jwtService.encodeJwt(claims)
         val jwt = jwtService.decodeJwt(encoded.tokenValue)
 
-        assertEquals("test-user", jwt.subject)
-        assertEquals("admin", jwt.claims["role"])
+        Assertions.assertEquals("test-user", jwt.subject)
+        Assertions.assertEquals("admin", jwt.claims["role"])
     }
 
-    @Test fun `unsigned JWT should fail decoding`() = runTest {
+    @Test
+    fun `unsigned JWT should fail decoding`() = runTest {
         val header = Base64.getUrlEncoder().withoutPadding()
             .encodeToString("""{"alg":"none","typ":"JWT"}""".toByteArray())
         val payload = Base64.getUrlEncoder().withoutPadding()
@@ -109,7 +131,8 @@ class JwtServiceIntegrationTest : BaseIntegrationTest() {
         assertThrows<InvalidTokenException> { jwtService.decodeJwt(unsignedJwt) }
     }
 
-    @Test fun `unexpired JWT should be decoded`() = runTest {
+    @Test
+    fun `unexpired JWT should be decoded`() = runTest {
         val claims = JWTClaimsSet.Builder()
             .subject("unexpired-user")
             .issueTime(Date.from(Instant.now().minusSeconds(7200)))
@@ -119,10 +142,11 @@ class JwtServiceIntegrationTest : BaseIntegrationTest() {
 
         val token = createJwt(jwtSecretService.getCurrentSecret(), claims)
 
-        assertEquals("unexpired-user", jwtService.decodeJwt(token).subject)
-        assertEquals("user", jwtService.decodeJwt(token).claims["role"])
+        Assertions.assertEquals("unexpired-user", jwtService.decodeJwt(token).subject)
+        Assertions.assertEquals("user", jwtService.decodeJwt(token).claims["role"])
     }
-    @Test fun `expired JWT should fail decoding`() = runTest {
+    @Test
+    fun `expired JWT should fail decoding`() = runTest {
         val claims = JWTClaimsSet.Builder()
             .subject("expired-user")
             .issueTime(Date.from(Instant.now().minusSeconds(7200)))
@@ -135,7 +159,8 @@ class JwtServiceIntegrationTest : BaseIntegrationTest() {
         assertThrows<TokenExpiredException> { jwtService.decodeJwt(token, true) }
     }
 
-    @Test fun `JWT with past nbf should be decoded`() = runTest {
+    @Test
+    fun `JWT with past nbf should be decoded`() = runTest {
         val claims = JWTClaimsSet.Builder()
             .subject("future-user")
             .claim("role", "user")
@@ -150,10 +175,11 @@ class JwtServiceIntegrationTest : BaseIntegrationTest() {
         signedJWT.sign(MACSigner(jwtSecretService.getCurrentSecret().value.toByteArray()))
         val token = signedJWT.serialize()
 
-        assertEquals("future-user", jwtService.decodeJwt(token).subject)
-        assertEquals("user", jwtService.decodeJwt(token).claims["role"])
+        Assertions.assertEquals("future-user", jwtService.decodeJwt(token).subject)
+        Assertions.assertEquals("user", jwtService.decodeJwt(token).claims["role"])
     }
-    @Test fun `JWT with future nbf should fail decoding`() = runTest {
+    @Test
+    fun `JWT with future nbf should fail decoding`() = runTest {
         val claims = JWTClaimsSet.Builder()
             .subject("future-user")
             .notBeforeTime(Date.from(Instant.now().plusSeconds(300))) // ⏱ 5 Minuten in der Zukunft
@@ -170,7 +196,8 @@ class JwtServiceIntegrationTest : BaseIntegrationTest() {
         assertThrows<InvalidTokenException> { jwtService.decodeJwt(token) }
     }
 
-    @Test fun `JWT with manipulated payload should fail`() = runTest {
+    @Test
+    fun `JWT with manipulated payload should fail`() = runTest {
         val token = createJwt(jwtSecretService.getCurrentSecret())
 
         val parts = token.split(".")
@@ -181,11 +208,12 @@ class JwtServiceIntegrationTest : BaseIntegrationTest() {
 
         assertThrows<InvalidTokenException> { jwtService.decodeJwt(tampered) }
     }
-    @Test fun `JWT with invalid base64 should fail decoding`() = runTest {
-            val invalidToken = "abc.def$%.ghi"
+    @Test
+    fun `JWT with invalid base64 should fail decoding`() = runTest {
+        val invalidToken = "abc.def$%.ghi"
 
-            assertThrows<InvalidTokenException> {
-                jwtService.decodeJwt(invalidToken)
-            }
+        assertThrows<InvalidTokenException> {
+            jwtService.decodeJwt(invalidToken)
         }
+    }
 }

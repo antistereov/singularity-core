@@ -1,11 +1,6 @@
 package io.stereov.singularity.test
 
-import io.stereov.singularity.auth.core.service.token.AccessTokenService
-import io.stereov.singularity.auth.core.service.token.RefreshTokenService
-import io.stereov.singularity.auth.twofactor.service.TotpService
-import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.test.config.MockMailSenderConfig
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
@@ -19,18 +14,6 @@ import org.testcontainers.utility.DockerImageName
 class BaseIntegrationTest : BaseSpringBootTest() {
 
     final val basePath = "/api"
-
-    @Autowired
-    lateinit var accessTokenService: AccessTokenService
-
-    @Autowired
-    lateinit var refreshTokenService: RefreshTokenService
-
-    @Autowired
-    lateinit var totpService: TotpService
-
-    @Autowired
-    lateinit var hashService: HashService
 
     companion object {
         val mongoDBContainer = MongoDBContainer("mongo:latest").apply {

@@ -7,14 +7,17 @@ import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.auth.core.dto.request.RegisterUserRequest
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
 import io.stereov.singularity.auth.core.model.token.SessionTokenType
-import io.stereov.singularity.auth.core.service.token.StepUpTokenService
+import io.stereov.singularity.auth.core.service.token.*
 import io.stereov.singularity.auth.group.model.GroupDocument
 import io.stereov.singularity.auth.group.model.GroupTranslation
 import io.stereov.singularity.auth.group.service.GroupService
 import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorVerifySetupRequest
 import io.stereov.singularity.auth.twofactor.dto.response.TwoFactorSetupResponse
 import io.stereov.singularity.auth.twofactor.model.token.TwoFactorTokenType
+import io.stereov.singularity.auth.twofactor.service.TotpService
 import io.stereov.singularity.content.translate.model.Language
+import io.stereov.singularity.database.encryption.service.EncryptionSecretService
+import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.test.config.MockConfig
 import io.stereov.singularity.user.core.model.Role
 import io.stereov.singularity.user.core.model.UserDocument
@@ -54,6 +57,27 @@ class BaseSpringBootTest {
 
     @Autowired
     lateinit var gAuth: GoogleAuthenticator
+
+    @Autowired
+    lateinit var accessTokenService: AccessTokenService
+
+    @Autowired
+    lateinit var emailVerificationTokenService: EmailVerificationTokenService
+
+    @Autowired
+    lateinit var passwordResetTokenService: PasswordResetTokenService
+
+    @Autowired
+    lateinit var refreshTokenService: RefreshTokenService
+
+    @Autowired
+    lateinit var totpService: TotpService
+
+    @Autowired
+    lateinit var hashService: HashService
+
+    @Autowired
+    lateinit var encryptionSecretService: EncryptionSecretService
 
     @AfterEach
     fun clearDatabase() = runBlocking {

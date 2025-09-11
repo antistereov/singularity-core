@@ -1,14 +1,11 @@
-package io.stereov.singularity.auth.core.core
+package io.stereov.singularity.auth.core
 
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
 import io.stereov.singularity.auth.core.dto.response.RefreshTokenResponse
 import io.stereov.singularity.auth.core.model.token.SessionTokenType
-import io.stereov.singularity.auth.core.service.token.AccessTokenService
-import io.stereov.singularity.auth.core.service.token.RefreshTokenService
 import io.stereov.singularity.test.BaseSpringBootTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
@@ -19,12 +16,6 @@ import org.testcontainers.utility.DockerImageName
 import java.time.Instant
 
 class HeaderAuthenticationTest : BaseSpringBootTest() {
-
-    @Autowired
-    lateinit var accessTokenService: AccessTokenService
-    
-    @Autowired
-    lateinit var refreshTokenService: RefreshTokenService
 
     companion object {
         val mongoDBContainer = MongoDBContainer("mongo:latest").apply {
