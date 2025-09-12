@@ -87,9 +87,8 @@ singularity:
     smtp-starttls: ${MAIL_SMTP_STARTTLS:true}
     debug: ${MAIL_DEBUG:false}
     verification-expiration: ${MAIL_VERIFICATION_EXPIRATION:900}
-    verification-send-cooldown: ${MAIL_VERIFICATION_SEND_COOLDOWN:60}
+    send-cooldown: ${MAIL_VERIFICATION_SEND_COOLDOWN:60}
     password-reset-expiration: 900
-    password-reset-send-cooldown: 60
   security:
     jwt:
       expires-in: 900
