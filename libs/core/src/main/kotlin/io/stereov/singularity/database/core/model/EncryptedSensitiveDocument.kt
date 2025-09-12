@@ -7,5 +7,5 @@ interface EncryptedSensitiveDocument<T> {
 
     val _id: ObjectId?
     val sensitive: Encrypted<T>
-    fun toSensitiveDocument(decrypted: T, otherValues: List<Any> = emptyList()): SensitiveDocument<T>
+    fun toSensitiveDocument(decrypted: T, otherValues: List<Any?> = emptyList()): SensitiveDocument<T>
 }

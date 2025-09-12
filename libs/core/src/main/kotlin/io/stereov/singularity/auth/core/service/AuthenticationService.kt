@@ -8,7 +8,6 @@ import io.stereov.singularity.auth.core.dto.request.RegisterUserRequest
 import io.stereov.singularity.auth.core.dto.request.StepUpRequest
 import io.stereov.singularity.auth.core.exception.AuthException
 import io.stereov.singularity.auth.core.exception.model.InvalidCredentialsException
-import io.stereov.singularity.auth.core.model.LoginType
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorAuthProperties
 import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.database.hash.service.HashService
@@ -75,8 +74,7 @@ class AuthenticationService(
             throw EmailAlreadyExistsException("Failed to register user ${payload.email}")
         }
 
-        val userDocument = UserDocument(
-            loginType = LoginType.PASSWORD,
+        val userDocument = UserDocument.ofPassword(
             email = payload.email,
             password = hashService.hashBcrypt(payload.password),
             name = payload.name,

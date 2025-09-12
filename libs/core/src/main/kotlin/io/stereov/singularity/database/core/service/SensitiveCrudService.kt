@@ -21,12 +21,12 @@ interface SensitiveCrudService<S, D: SensitiveDocument<S>, E: EncryptedSensitive
 
 
     @Suppress("UNCHECKED_CAST")
-    suspend fun encrypt(document: D, otherValues: List<Any> = emptyList()): E {
+    suspend fun encrypt(document: D, otherValues: List<Any?> = emptyList()): E {
         return this.encryptionService.encrypt(document) as E
     }
 
     @Suppress("UNCHECKED_CAST")
-    suspend fun decrypt(encrypted: E, otherValues: List<Any> = emptyList()): D {
+    suspend fun decrypt(encrypted: E, otherValues: List<Any?> = emptyList()): D {
         return encryptionService.decrypt(encrypted, otherValues, clazz) as D
     }
 

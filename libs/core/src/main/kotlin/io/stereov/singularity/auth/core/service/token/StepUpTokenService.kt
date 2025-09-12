@@ -32,7 +32,7 @@ class StepUpTokenService(
             .issuedAt(issuedAt)
             .expiresAt(issuedAt.plusSeconds(jwtProperties.expiresIn))
             .subject(userId.toHexString())
-            .claim(Constants.JWT_session_CLAIM, sessionId)
+            .claim(Constants.JWT_SESSION_CLAIM, sessionId)
             .build()
 
         val jwt = jwtService.encodeJwt(claims)
@@ -63,7 +63,7 @@ class StepUpTokenService(
             throw InvalidTokenException("Step up token is not valid for currently logged in user")
         }
 
-        val sessionId = jwt.claims[Constants.JWT_session_CLAIM] as? String
+        val sessionId = jwt.claims[Constants.JWT_SESSION_CLAIM] as? String
             ?: throw InvalidTokenException("JWT does not contain session id")
 
         if (sessionId != currentSessionId) {

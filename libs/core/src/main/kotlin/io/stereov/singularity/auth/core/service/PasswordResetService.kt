@@ -5,6 +5,8 @@ import io.stereov.singularity.auth.core.dto.request.ResetPasswordRequest
 import io.stereov.singularity.auth.core.dto.request.SendPasswordResetRequest
 import io.stereov.singularity.auth.core.dto.response.MailCooldownResponse
 import io.stereov.singularity.auth.core.exception.AuthException
+import io.stereov.singularity.auth.core.exception.model.WrongIdentityProviderException
+import io.stereov.singularity.auth.core.model.IdentityProvider
 import io.stereov.singularity.auth.core.service.token.PasswordResetTokenService
 import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.content.translate.model.TranslateKey
@@ -76,7 +78,10 @@ class PasswordResetService(
         }
 
         user.sensitive.security.password.resetSecret = Random.generateString(20)
-        user.password = hashService.hashBcrypt(req.newPassword)
+        val passwordIdentity = user.sensitive.identities.firstOrNull { it.provider == IdentityProvider.PASSWORD }
+            ?: throw WrongIdentityProviderException("No password authentication is set for user")
+
+        passwordIdentity.password = hashService.hashBcrypt(req.newPassword)
         userService.save(user)
     }
 

@@ -119,9 +119,10 @@ class AuthenticationConfiguration {
     @ConditionalOnMissingBean
     fun sessionController(
         sessionService: SessionService,
-        cookieCreator: CookieCreator
+        cookieCreator: CookieCreator,
+        sessionTokenService: SessionTokenService
     ): SessionController {
-        return SessionController(sessionService, cookieCreator)
+        return SessionController(sessionService, cookieCreator, sessionTokenService)
     }
 
     // Exception Handler
@@ -181,6 +182,15 @@ class AuthenticationConfiguration {
         tokenValueExtractor
     )
 
+    @Bean
+    @ConditionalOnMissingBean
+    fun sessionTokenService(
+        jwtService: JwtService,
+        jwtProperties: JwtProperties
+    ) = SessionTokenService(
+        jwtService, jwtProperties
+    )
+    
     @Bean
     @ConditionalOnMissingBean
     fun stepUpTokenService(

@@ -6,6 +6,7 @@ import io.stereov.singularity.global.exception.GlobalBaseWebException
 import io.stereov.singularity.global.exception.model.DocumentNotFoundException
 import io.stereov.singularity.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.global.exception.model.MissingFunctionParameterException
+import io.stereov.singularity.global.exception.model.MissingRequestParameterException
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -28,6 +29,7 @@ class GlobalBaseWebExceptionHandler : BaseExceptionHandler<GlobalBaseWebExceptio
         is MissingFunctionParameterException -> HttpStatus.INTERNAL_SERVER_ERROR
         is DocumentNotFoundException -> HttpStatus.NOT_FOUND
         is InvalidDocumentException -> HttpStatus.INTERNAL_SERVER_ERROR
+        is MissingRequestParameterException -> HttpStatus.BAD_REQUEST
         else -> HttpStatus.INTERNAL_SERVER_ERROR
     }
 

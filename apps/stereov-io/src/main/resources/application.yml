@@ -13,6 +13,17 @@ spring:
       timeout: ${REDIS_TIMEOUT:5000ms}
       ssl:
         enabled: ${REDIS_SSL_ENABLED:false}
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id: ${GITHUB_OAUTH2_CLIENT_ID}
+            client-secret: ${GITHUB_OAUTH2_CLIENT_SECRET}
+            scope:
+              - user:email
+              - read:user
+
   devtools:
     restart:
       enabled: ${DEV_MODE:false}

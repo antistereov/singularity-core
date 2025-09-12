@@ -17,7 +17,7 @@ data class EncryptedInvitationDocument(
 
     override fun toSensitiveDocument(
         decrypted: SensitiveInvitationData,
-        otherValues: List<Any>
+        otherValues: List<Any?>
     ): SensitiveDocument<SensitiveInvitationData> {
         return InvitationDocument(
             _id,

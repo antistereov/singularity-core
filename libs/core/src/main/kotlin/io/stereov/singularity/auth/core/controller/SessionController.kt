@@ -1,10 +1,13 @@
 package io.stereov.singularity.auth.core.controller
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.auth.core.component.CookieCreator
+import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
+import io.stereov.singularity.auth.core.dto.response.GenerateSessionTokenResponse
 import io.stereov.singularity.auth.core.dto.response.SessionInfoResponse
 import io.stereov.singularity.auth.core.model.token.SessionTokenType
-import io.stereov.singularity.auth.core.component.CookieCreator
 import io.stereov.singularity.auth.core.service.SessionService
+import io.stereov.singularity.auth.core.service.token.SessionTokenService
 import io.stereov.singularity.global.model.SuccessResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -23,6 +26,7 @@ import org.springframework.web.bind.annotation.*
 class SessionController(
     private val sessionService: SessionService,
     private val cookieCreator: CookieCreator,
+    private val sessionTokenService: SessionTokenService
 ) {
 
     private val logger = KotlinLogging.logger {}
@@ -32,6 +36,15 @@ class SessionController(
         val sessions = sessionService.getSessions()
 
         return ResponseEntity.ok(sessions.map { it.toResponseDto() })
+    }
+
+    @GetMapping("/token")
+    suspend fun generateTokenForCurrentSession(
+        @RequestBody sessionInfo: SessionInfoRequest
+    ): ResponseEntity<GenerateSessionTokenResponse> {
+        val token = sessionTokenService.create(sessionInfo)
+
+        return ResponseEntity.ok(GenerateSessionTokenResponse(token.value))
     }
 
     @DeleteMapping("/{sessionId}")
