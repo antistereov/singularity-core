@@ -2,8 +2,8 @@ package io.stereov.singularity.user.settings.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
-import io.stereov.singularity.auth.core.exception.model.WrongLoginTypeException
-import io.stereov.singularity.auth.core.model.LoginType
+import io.stereov.singularity.auth.core.exception.model.WrongIdentityProviderException
+import io.stereov.singularity.auth.core.model.IdentityProvider
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.core.service.EmailVerificationService
 import io.stereov.singularity.content.translate.model.Language
@@ -42,9 +42,6 @@ class UserSettingsService(
 
         val user = authorizationService.getCurrentUser()
 
-        if (user.loginType != LoginType.PASSWORD)
-            throw WrongLoginTypeException("Changing email is forbidden for users that signed up using ${user.loginType}")
-
         authorizationService.requireStepUp()
 
         if (userService.existsByEmail(payload.newEmail)) {
@@ -65,12 +62,12 @@ class UserSettingsService(
         logger.debug { "Changing password" }
 
         val user = authorizationService.getCurrentUser()
-        if (user.loginType != LoginType.PASSWORD)
-            throw WrongLoginTypeException("Changing email is forbidden for users that signed up using ${user.loginType}")
+        val passwordProvider = user.sensitive.identities.firstOrNull { it.provider == IdentityProvider.PASSWORD }
+            ?: throw WrongIdentityProviderException("Cannot change password: user did not set up password authentication")
 
         authorizationService.requireStepUp()
 
-        user.password = hashService.hashBcrypt(payload.newPassword)
+        passwordProvider.password = hashService.hashBcrypt(payload.newPassword)
 
         return userService.save(user)
     }

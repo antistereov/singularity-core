@@ -44,7 +44,7 @@ class RefreshTokenService(
             .subject(userId.toHexString())
             .issuedAt(issuedAt)
             .expiresAt(issuedAt.plusSeconds(jwtProperties.refreshExpiresIn))
-            .claim(Constants.JWT_session_CLAIM, sessionId)
+            .claim(Constants.JWT_SESSION_CLAIM, sessionId)
             .build()
 
         val jwt = jwtService.encodeJwt(claims)
@@ -52,7 +52,7 @@ class RefreshTokenService(
         return RefreshToken(userId, sessionId, tokenId, jwt)
     }
 
-    private suspend fun updatesessions(exchange: ServerWebExchange,
+    private suspend fun updateSessions(exchange: ServerWebExchange,
                                        userId: ObjectId, sessionInfo: SessionInfoRequest, tokenId: String) {
         val ipAddress = exchange.request.getClientIp(geolocationProperties.realIpHeader)
         val location = geolocationService.getLocationOrNull(exchange.request)
@@ -87,7 +87,7 @@ class RefreshTokenService(
         val refreshTokenId = Random.generateString(20)
         val refreshToken = create(userId, sessionInfo.id, refreshTokenId)
 
-        updatesessions(exchange, userId, sessionInfo, refreshTokenId)
+        updateSessions(exchange, userId, sessionInfo, refreshTokenId)
 
         return refreshToken
     }
@@ -95,7 +95,7 @@ class RefreshTokenService(
     suspend fun extract(exchange: ServerWebExchange, sessionId: String): RefreshToken {
         logger.debug { "Extracting refresh token" }
 
-        val tokenValue = tokenValueExtractor.extractValue(exchange, tokenType, true)
+        val tokenValue = tokenValueExtractor.extractValue(exchange, tokenType)
 
         val jwt = try {
             jwtService.decodeJwt(tokenValue, true)

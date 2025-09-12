@@ -3,7 +3,7 @@ package io.stereov.singularity.admin.core.service
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.admin.core.dto.RotationStatusResponse
-import io.stereov.singularity.auth.core.model.LoginType
+import io.stereov.singularity.auth.core.model.IdentityProvider
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorAuthProperties
 import io.stereov.singularity.database.core.service.SensitiveCrudService
 import io.stereov.singularity.database.hash.service.HashService
@@ -49,8 +49,7 @@ class AdminService(
         if (!this.userService.existsByEmail(appProperties.rootEmail) && appProperties.createRootUser) {
             this.logger.info { "Creating root account" }
 
-            val rootUser = UserDocument(
-                loginType = LoginType.PASSWORD,
+            val rootUser = UserDocument.ofPassword(
                 email = appProperties.rootEmail,
                 password = hashService.hashBcrypt(appProperties.rootPassword),
                 name = "Root",

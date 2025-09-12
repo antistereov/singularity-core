@@ -26,10 +26,9 @@ import org.springframework.boot.autoconfigure.AutoConfiguration
 
 @SecurityScheme(
     name = OpenApiConstants.REFRESH_TOKEN_HEADER,
-    type = SecuritySchemeType.HTTP,
-    scheme = "bearer",
-    bearerFormat = "JWT",
-    paramName = SessionTokenType.Access.HEADER,
+    type = SecuritySchemeType.APIKEY,
+    `in` = SecuritySchemeIn.HEADER,
+    paramName = SessionTokenType.Refresh.HEADER,
     description = "Refresh token to request new access tokens"
 )
 @SecurityScheme(

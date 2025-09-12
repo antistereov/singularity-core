@@ -52,6 +52,7 @@ dependencies {
     api("org.springframework.security:spring-security-config")
     api("org.springframework.security:spring-security-oauth2-resource-server")
     api("org.springframework.security:spring-security-oauth2-jose")
+    api("org.springframework.boot:spring-boot-starter-oauth2-client")
 
     // File Storage
     implementation(platform("software.amazon.awssdk:bom:2.27.21"))

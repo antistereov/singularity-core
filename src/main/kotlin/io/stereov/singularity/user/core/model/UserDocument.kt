@@ -2,8 +2,8 @@ package io.stereov.singularity.user.core.model
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.auth.core.exception.model.WrongLoginTypeException
-import io.stereov.singularity.auth.core.model.LoginType
+import io.stereov.singularity.auth.core.exception.model.WrongIdentityProviderException
+import io.stereov.singularity.auth.core.model.IdentityProvider
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
 import io.stereov.singularity.database.core.model.SensitiveDocument
 import io.stereov.singularity.database.encryption.model.Encrypted
@@ -11,49 +11,18 @@ import io.stereov.singularity.database.hash.model.SearchableHash
 import io.stereov.singularity.database.hash.model.SecureHash
 import io.stereov.singularity.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.global.exception.model.MissingFunctionParameterException
+import io.stereov.singularity.user.core.model.identity.HashedUserIdentity
+import io.stereov.singularity.user.core.model.identity.UserIdentity
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Transient
 import java.time.Instant
 
 data class UserDocument(
     private var _id: ObjectId? = null,
-    val loginType: String,
-    var password: SecureHash?,
     val created: Instant = Instant.now(),
     var lastActive: Instant = Instant.now(),
     override var sensitive: SensitiveUserData,
 ) : SensitiveDocument<SensitiveUserData> {
-
-    constructor(
-        id: ObjectId? = null,
-        loginType: String,
-        password: SecureHash?,
-        created: Instant = Instant.now(),
-        lastActive: Instant = Instant.now(),
-        name: String,
-        email: String,
-        roles: MutableSet<Role> = mutableSetOf(Role.USER),
-        groups: MutableSet<String> = mutableSetOf(),
-        mailEnabled: Boolean,
-        mailTwoFactorCodeExpiresIn: Long,
-        sessions: MutableList<SessionInfo> = mutableListOf(),
-        avatarFileKey: String? = null,
-    ): this(
-        id,
-        loginType,
-        password,
-        created,
-        lastActive,
-        SensitiveUserData(
-            name,
-            email,
-            roles,
-            groups,
-            UserSecurityDetails(mailEnabled, mailTwoFactorCodeExpiresIn),
-            sessions,
-            avatarFileKey
-        )
-    )
 
     @get:Transient
     private val logger: KLogger
@@ -85,15 +54,19 @@ data class UserDocument(
     val twoFactorMethods: List<TwoFactorMethod>
         get() = sensitive.security.twoFactor.methods
 
+    @get:Transient
+    val password: SecureHash?
+        get() = sensitive.identities.firstOrNull { it.provider == IdentityProvider.PASSWORD }?.password
+
     /**
      * Check if user authenticated using password and return [SecureHash] if so.
      *
-     * @throws WrongLoginTypeException If the user authenticated using a different method.
+     * @throws WrongIdentityProviderException If the user authenticated using a different method.
      * @throws InvalidDocumentException If the user authenticated using password but no password is set.
      */
     fun validateLoginTypeAndGetPassword(): SecureHash {
-        if (loginType != LoginType.PASSWORD) {
-            throw WrongLoginTypeException("Authentication via password failed: user authenticated using $loginType")
+        if (sensitive.identities.none { it.provider == IdentityProvider.PASSWORD }) {
+            throw WrongIdentityProviderException("Authentication via password failed: user did not set up authentication using username and password")
         }
 
         return password ?: throw InvalidDocumentException("No password is set for user $id")
@@ -102,13 +75,21 @@ data class UserDocument(
 
     override fun toEncryptedDocument(
         encryptedSensitiveData: Encrypted<SensitiveUserData>,
-        otherValues: List<Any>
+        otherValues: List<Any?>
     ): EncryptedUserDocument {
-        val hashedEmail = otherValues[0] as? SearchableHash
-            ?: throw MissingFunctionParameterException("Please provide the hashed email as parameter.")
+        val hashedEmail = runCatching { otherValues[0] as SearchableHash }
+            .getOrElse { e -> throw MissingFunctionParameterException("Please provide the hashed email as parameter.", e) }
+
+        val hashedIdentitiesParameter = runCatching { otherValues[1] as List<*> }
+            .getOrElse { e ->  throw MissingFunctionParameterException("Please provide the list of hashed user identities as a parameter", e) }
+        val hashedIdentities = hashedIdentitiesParameter
+            .map {
+                runCatching { it as HashedUserIdentity }
+                    .getOrElse { e -> throw MissingFunctionParameterException("Please provide a list of HashedUserIdentity", e) }
+            }
 
         return EncryptedUserDocument(
-            _id, hashedEmail, loginType, password, created, lastActive, encryptedSensitiveData
+            _id, hashedEmail, hashedIdentities, created, lastActive, encryptedSensitiveData
         )
     }
 
@@ -225,5 +206,67 @@ data class UserDocument(
 
         this.lastActive = Instant.now()
         return this
+    }
+
+    companion object {
+
+        fun ofPassword(
+            id: ObjectId? = null,
+            password: SecureHash,
+            created: Instant = Instant.now(),
+            lastActive: Instant = Instant.now(),
+            name: String,
+            email: String,
+            roles: MutableSet<Role> = mutableSetOf(Role.USER),
+            groups: MutableSet<String> = mutableSetOf(),
+            mailEnabled: Boolean,
+            mailTwoFactorCodeExpiresIn: Long,
+            sessions: MutableList<SessionInfo> = mutableListOf(),
+            avatarFileKey: String? = null,
+        ) = UserDocument(
+            id,
+            created,
+            lastActive,
+            SensitiveUserData(
+                name,
+                email,
+                mutableListOf(UserIdentity.ofPassword(password, true)),
+                roles,
+                groups,
+                UserSecurityDetails(mailEnabled, mailTwoFactorCodeExpiresIn),
+                sessions,
+                avatarFileKey
+            )
+        )
+
+        fun ofIdentityProvider(
+            id: ObjectId? = null,
+            provider: String,
+            principalId: String,
+            created: Instant = Instant.now(),
+            lastActive: Instant = Instant.now(),
+            name: String,
+            email: String,
+            roles: MutableSet<Role> = mutableSetOf(Role.USER),
+            groups: MutableSet<String> = mutableSetOf(),
+            mailEnabled: Boolean,
+            mailTwoFactorCodeExpiresIn: Long,
+            sessions: MutableList<SessionInfo> = mutableListOf(),
+            avatarFileKey: String? = null,
+        ) = UserDocument(
+            id,
+            created,
+            lastActive,
+            SensitiveUserData(
+                name,
+                email,
+                mutableListOf(UserIdentity.ofProvider(provider, principalId, true)),
+                roles,
+                groups,
+                UserSecurityDetails(mailEnabled, mailTwoFactorCodeExpiresIn),
+                sessions,
+                avatarFileKey
+            )
+        )
     }
 }

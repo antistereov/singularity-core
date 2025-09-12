@@ -2,9 +2,9 @@ package io.stereov.singularity.auth.core.service.token
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
+import io.stereov.singularity.auth.core.component.TokenValueExtractor
 import io.stereov.singularity.auth.core.model.token.AccessToken
 import io.stereov.singularity.auth.core.model.token.SessionTokenType
-import io.stereov.singularity.auth.core.component.TokenValueExtractor
 import io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException
 import io.stereov.singularity.auth.jwt.properties.JwtProperties
 import io.stereov.singularity.auth.jwt.service.JwtService
@@ -38,7 +38,7 @@ class AccessTokenService(
             .issuedAt(issuedAt)
             .expiresAt(issuedAt.plusSeconds(jwtProperties.expiresIn))
             .subject(userId.toHexString())
-            .claim(Constants.JWT_session_CLAIM, sessionId)
+            .claim(Constants.JWT_SESSION_CLAIM, sessionId)
             .id(tokenId)
             .build()
 
@@ -57,7 +57,7 @@ class AccessTokenService(
         val userId = jwt.subject?.let { ObjectId(it) }
             ?: throw InvalidTokenException("JWT does not contain sub")
 
-        val sessionId = jwt.claims[Constants.JWT_session_CLAIM] as? String
+        val sessionId = jwt.claims[Constants.JWT_SESSION_CLAIM] as? String
             ?: throw InvalidTokenException("JWT does not contain session id")
 
         val tokenId = jwt.id

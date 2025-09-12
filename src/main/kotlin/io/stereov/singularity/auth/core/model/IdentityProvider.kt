@@ -1,6 +1,6 @@
 package io.stereov.singularity.auth.core.model
 
-object LoginType {
+object IdentityProvider {
 
     const val PASSWORD = "password"
 }

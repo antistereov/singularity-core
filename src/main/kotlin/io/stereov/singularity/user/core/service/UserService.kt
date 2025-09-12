@@ -12,6 +12,7 @@ import io.stereov.singularity.user.core.exception.model.UserDoesNotExistExceptio
 import io.stereov.singularity.user.core.model.EncryptedUserDocument
 import io.stereov.singularity.user.core.model.SensitiveUserData
 import io.stereov.singularity.user.core.model.UserDocument
+import io.stereov.singularity.user.core.model.identity.HashedUserIdentity
 import io.stereov.singularity.user.core.repository.UserRepository
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
@@ -38,12 +39,22 @@ class UserService(
     override val logger = KotlinLogging.logger {}
     override val clazz = SensitiveUserData::class.java
 
-    override suspend fun encrypt(document: UserDocument, otherValues: List<Any>): EncryptedUserDocument {
+    override suspend fun encrypt(document: UserDocument, otherValues: List<Any?>): EncryptedUserDocument {
 
         if (otherValues.getOrNull(0) == true || otherValues.getOrNull(0) == null) document.updateLastActive()
 
         val hashedEmail = hashService.hashSearchableHmacSha256(document.sensitive.email)
-        return this.encryptionService.encrypt(document, listOf(hashedEmail)) as EncryptedUserDocument
+        val hashedPrincipalId = document.sensitive.identities
+            .map { identity ->
+                HashedUserIdentity(
+                    provider = identity.provider,
+                    password = identity.password,
+                    principalId = identity.principalId?.let { hashService.hashSearchableHmacSha256(it) },
+                    isPrimary = identity.isPrimary
+                )
+
+            }
+        return this.encryptionService.encrypt(document, listOf(hashedEmail, hashedPrincipalId)) as EncryptedUserDocument
     }
 
     override suspend fun rotateSecret() {
@@ -77,7 +88,7 @@ class UserService(
 
         val hashedEmail = hashService.hashSearchableHmacSha256(email)
         val encrypted =  this.repository.findByEmail(hashedEmail)
-            ?: throw UserDoesNotExistException("No user account found with email $email")
+            ?: throw UserDoesNotExistException("No user found with email $email")
 
         return this.decrypt(encrypted)
     }
@@ -117,6 +128,20 @@ class UserService(
         val user = findById(userId)
         return user.sensitive.avatarFileKey?.let { fileStorage.metadataResponseByKey(it) }
             ?: throw FileNotFoundException(file = null, "No avatar set for user")
+    }
+
+    suspend fun findByIdentity(provider: String, principalId: String): UserDocument {
+        return findByIdentityOrNull(provider, principalId)
+            ?: throw UserDoesNotExistException("No user found with principal ID $principalId of login type $provider")
+    }
+
+    suspend fun findByIdentityOrNull(provider: String, principalId: String): UserDocument? {
+        logger.debug { "Finding user by principal ID $principalId and provider $provider" }
+
+        val hashedPrincipalId = hashService.hashSearchableHmacSha256(principalId)
+        val user = repository.findByIdentity(provider, hashedPrincipalId)
+
+        return user?.let { decrypt(it) }
     }
 
 }
