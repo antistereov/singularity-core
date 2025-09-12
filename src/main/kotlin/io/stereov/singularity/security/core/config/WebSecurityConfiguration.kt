@@ -1,5 +1,6 @@
 package io.stereov.singularity.security.core.config
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.stereov.singularity.auth.core.component.CookieCreator
 import io.stereov.singularity.auth.core.config.AuthenticationConfiguration
 import io.stereov.singularity.auth.core.filter.AuthenticationFilter
@@ -11,7 +12,9 @@ import io.stereov.singularity.auth.core.service.token.RefreshTokenService
 import io.stereov.singularity.auth.core.service.token.SessionTokenService
 import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
+import io.stereov.singularity.auth.oauth2.component.CustomOAuth2AuthorizationRequestResolver
 import io.stereov.singularity.auth.oauth2.config.OAuth2Configuration
+import io.stereov.singularity.auth.oauth2.model.CustomState
 import io.stereov.singularity.auth.oauth2.service.OAuth2Service
 import io.stereov.singularity.global.exception.model.MissingRequestParameterException
 import io.stereov.singularity.global.filter.LoggingFilter
@@ -38,6 +41,7 @@ import org.springframework.security.core.context.SecurityContextImpl
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
+import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository
 import org.springframework.security.web.server.SecurityWebFilterChain
 import org.springframework.security.web.server.ServerAuthenticationEntryPoint
 import org.springframework.security.web.server.authentication.HttpStatusServerEntryPoint
@@ -101,7 +105,9 @@ class WebSecurityConfiguration {
         oAuth2Service: OAuth2Service,
         refreshTokenService: RefreshTokenService,
         cookieCreator: CookieCreator,
-        sessionTokenService: SessionTokenService
+        sessionTokenService: SessionTokenService,
+        clientRegistrations: ReactiveClientRegistrationRepository,
+        objectMapper: ObjectMapper
     ): SecurityWebFilterChain {
         return http
             .csrf { it.disable() }
@@ -124,23 +130,25 @@ class WebSecurityConfiguration {
                 it.pathMatchers("/admin/**").hasRole(Role.ADMIN.name)
                 it.anyExchange().permitAll()
             }
-            .addFilterBefore(RateLimitFilter(rateLimitService, geolocationProperties), SecurityWebFiltersOrder.FIRST)
-            .addFilterBefore(LoggingFilter(geolocationProperties, geoLocationService), SecurityWebFiltersOrder.AUTHENTICATION)
-            .addFilterBefore(AuthenticationFilter(accessTokenService, userService), SecurityWebFiltersOrder.AUTHENTICATION)
             .oauth2Login { oAuth2 ->
+                oAuth2.authorizationRequestResolver(CustomOAuth2AuthorizationRequestResolver(clientRegistrations, objectMapper))
                 oAuth2.authenticationSuccessHandler { exchange, authentication ->
                     mono {
                         val oauth2Token = authentication as OAuth2AuthenticationToken
-                        val sessionToken = exchange.exchange.request.queryParams.getFirst("session-token")
-                            ?: throw MissingRequestParameterException("No session token provided")
+                        val stateValue = exchange.exchange.request.queryParams.getFirst("state")
+                            ?: throw MissingRequestParameterException("No state parameter provided")
+                        val state = objectMapper.readValue(stateValue, CustomState::class.java)
+                        val sessionTokenValue = state.sessionToken
 
-                        val session = sessionTokenService.extract(sessionToken)
+                        if (sessionTokenValue.isBlank()) throw MissingRequestParameterException("No session token provided")
+
+                        val sessionToken = sessionTokenService.extract(sessionTokenValue)
 
                         val user = oAuth2Service.findOrCreateUser(oauth2Token)
-                        val accessToken = accessTokenService.create(user.id, session.id)
-                        val refreshToken = refreshTokenService.create(user.id, session.toSessionInfoRequest(), exchange.exchange)
+                        val accessToken = accessTokenService.create(user.id, sessionToken.id)
+                        val refreshToken = refreshTokenService.create(user.id, sessionToken.toSessionInfoRequest(), exchange.exchange)
 
-                        val customAuthToken = CustomAuthenticationToken(user, session.id, accessToken.tokenId, exchange.exchange)
+                        val customAuthToken = CustomAuthenticationToken(user, sessionToken.id, accessToken.tokenId, exchange.exchange)
                         val securityContext = SecurityContextImpl(customAuthToken)
 
                         val response = exchange.exchange.response
@@ -162,6 +170,9 @@ class WebSecurityConfiguration {
                     }.then()
                 }
             }
+            .addFilterBefore(RateLimitFilter(rateLimitService, geolocationProperties), SecurityWebFiltersOrder.FIRST)
+            .addFilterBefore(LoggingFilter(geolocationProperties, geoLocationService), SecurityWebFiltersOrder.AUTHENTICATION)
+            .addFilterAfter(AuthenticationFilter(accessTokenService, userService), SecurityWebFiltersOrder.AUTHENTICATION)
             .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())
             .build()
     }
