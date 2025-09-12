@@ -44,7 +44,7 @@ class JwtService(
             jwtDecoder.decode(token).awaitFirst()
         } catch(e: Exception) {
             logger.error(e) {}
-            throw InvalidTokenException("Cannot decode access token", e)
+            throw InvalidTokenException("Cannot decode token", e)
         }
 
         if (jwt.notBefore != null && jwt.notBefore > Instant.now()) {
