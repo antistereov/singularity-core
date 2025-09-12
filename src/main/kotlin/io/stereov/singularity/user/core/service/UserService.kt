@@ -130,11 +130,6 @@ class UserService(
             ?: throw FileNotFoundException(file = null, "No avatar set for user")
     }
 
-    suspend fun findByIdentity(provider: String, principalId: String): UserDocument {
-        return findByIdentityOrNull(provider, principalId)
-            ?: throw UserDoesNotExistException("No user found with principal ID $principalId of login type $provider")
-    }
-
     suspend fun findByIdentityOrNull(provider: String, principalId: String): UserDocument? {
         logger.debug { "Finding user by principal ID $principalId and provider $provider" }
 
