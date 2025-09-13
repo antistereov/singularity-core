@@ -9,11 +9,13 @@ import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.user.core.exception.model.EmailAlreadyExistsException
 import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.service.UserService
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ServerWebExchange
 
 @Service
+@ConditionalOnProperty("singularity.auth.allow-oauth2-providers", matchIfMissing = false)
 class OAuth2AuthenticationService(
     private val userService: UserService,
     private val appProperties: AppProperties,

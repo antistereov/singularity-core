@@ -50,6 +50,7 @@ singularity:
       account-id: ${MAXMIND_ACCOUNT_ID}
       license-key: ${MAXMIND_LICENSE_KEY}
     allow-header-authentication: false
+    allow-oauth2-providers: true
     two-factor:
       recovery-code-length: 10
       recovery-code-count: 6

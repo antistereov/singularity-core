@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/auth/providers/oauth2")
 @Tag(name = "OAuth2 Identity Provider", description = "Operations related to OAuth2 identity providers")
+@ConditionalOnProperty("singularity.auth.allow-oauth2-providers", matchIfMissing = false)
 class OAuth2ProviderController(
     private val authorizationService: AuthorizationService,
     private val oAuth2ProviderConnectionTokenService: OAuth2ProviderConnectionTokenService,

@@ -23,6 +23,7 @@ import io.stereov.singularity.user.core.model.Role
 import io.stereov.singularity.user.core.service.UserService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -41,6 +42,7 @@ import org.springframework.security.web.server.context.NoOpServerSecurityContext
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.reactive.CorsConfigurationSource
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
+import reactor.core.publisher.Mono
 
 /**
  * # Configuration class for web security.
@@ -155,5 +157,12 @@ class WebSecurityConfiguration {
         val source = UrlBasedCorsConfigurationSource()
         source.registerCorsConfiguration("/**", configuration)
         return source
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty("singularity.auth.allow-oauth2-providers", havingValue = "false", matchIfMissing = true)
+    fun emptyClientRegistrationRepository(): ReactiveClientRegistrationRepository {
+        return ReactiveClientRegistrationRepository { Mono.empty() }
     }
 }

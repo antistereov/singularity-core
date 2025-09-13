@@ -29,7 +29,7 @@ Before enabling 2FA, entering the password is required.
 Use [`POST /api/auth/2fa/setup/init`](/swagger#/User%20Session/register) TODO
 When successful, you will an HTTP-only cookie with a `Two-Factor-Setup-Init-Token` is set.
 
-If header authentication is enabled, you will get the token in the response body.
+If [header authentication](/docs/authorization/basics#header-authentication) is enabled, you will get the token in the response body.
 
 #### 2. Setup
 
@@ -56,7 +56,7 @@ Use this token to send a request to [`POST /api/auth/2fa/login`](/swagger#/User%
 If the token is valid and the code is correct, access token and refresh token will be set as HTTP-only cookies. 
 The user is logged in.
 
-If header authentication is enabled, you will receive both access token and refresh token in the response body.
+If [header authentication](/docs/authorization/basics#header-authentication) is enabled, you will receive both access token and refresh token in the response body.
 
 ### Disabling
 
