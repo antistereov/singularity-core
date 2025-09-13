@@ -45,15 +45,14 @@ class UserService(
 
         val hashedEmail = hashService.hashSearchableHmacSha256(document.sensitive.email)
         val hashedPrincipalId = document.sensitive.identities
-            .map { identity ->
-                HashedUserIdentity(
-                    provider = identity.provider,
+            .map { (provider, identity) ->
+                val hashedUserIdentity = HashedUserIdentity(
                     password = identity.password,
                     principalId = identity.principalId?.let { hashService.hashSearchableHmacSha256(it) },
                     isPrimary = identity.isPrimary
                 )
-
-            }
+                provider to hashedUserIdentity
+            }.toMap()
         return this.encryptionService.encrypt(document, listOf(hashedEmail, hashedPrincipalId)) as EncryptedUserDocument
     }
 

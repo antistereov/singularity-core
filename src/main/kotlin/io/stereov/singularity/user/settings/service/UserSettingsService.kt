@@ -62,7 +62,7 @@ class UserSettingsService(
         logger.debug { "Changing password" }
 
         val user = authorizationService.getCurrentUser()
-        val passwordProvider = user.sensitive.identities.firstOrNull { it.provider == IdentityProvider.PASSWORD }
+        val passwordProvider = user.sensitive.identities[IdentityProvider.PASSWORD]
             ?: throw WrongIdentityProviderException("Cannot change password: user did not set up password authentication")
 
         authorizationService.requireStepUp()

@@ -16,6 +16,11 @@
       "sourceType": "io.stereov.singularity.auth.geolocation.properties.GeolocationProperties"
     },
     {
+      "name": "singularity.auth.oauth2",
+      "type": "io.stereov.singularity.auth.oauth2.properties.OAuth2Properties",
+      "sourceType": "io.stereov.singularity.auth.oauth2.properties.OAuth2Properties"
+    },
+    {
       "name": "singularity.file.storage",
       "type": "io.stereov.singularity.file.core.properties.StorageProperties",
       "sourceType": "io.stereov.singularity.file.core.properties.StorageProperties"
@@ -169,13 +174,6 @@
       "default": true
     },
     {
-      "name": "singularity.auth.allow-oauth2-providers",
-      "type": "java.lang.Boolean",
-      "sourceType": "io.stereov.singularity.auth.core.properties.AuthProperties",
-      "description": "Allow authentication using OAuth2 identity providers. Disabled by default.",
-      "default": false
-    },
-    {
       "name": "singularity.auth.geolocation.enabled",
       "type": "java.lang.Boolean",
       "sourceType": "io.stereov.singularity.auth.geolocation.properties.GeolocationProperties",
@@ -221,6 +219,20 @@
       "type": "java.lang.String",
       "sourceType": "io.stereov.singularity.auth.geolocation.properties.GeolocationProperties",
       "description": "The license key of your maxmind account. Required to download the GeoLite2-City database to resolve your geolocation."
+    },
+    {
+      "name": "singularity.auth.oauth2.enable",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.stereov.singularity.auth.oauth2.properties.OAuth2Properties",
+      "description": "Allow authentication using OAuth2 identity providers. Disabled by default.",
+      "defaultValue": false
+    },
+    {
+      "name": "singularity.auth.oauth2.error-redirect-uri",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.auth.oauth2.properties.OAuth2Properties",
+      "description": "The URI the user will be redirected to if there was an error in the OAuth2 flow.",
+      "defaultValue": "http://localhost:8000/auth/oauth2/error"
     },
     {
       "name": "singularity.file.storage.type",

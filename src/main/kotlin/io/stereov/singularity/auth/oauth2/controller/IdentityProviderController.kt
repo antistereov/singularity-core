@@ -1,9 +1,9 @@
-package io.stereov.singularity.auth.core.controller
+package io.stereov.singularity.auth.oauth2.controller
 
 import io.stereov.singularity.auth.core.dto.request.ConnectPasswordIdentityRequest
 import io.stereov.singularity.auth.core.dto.response.IdentityProviderResponse
 import io.stereov.singularity.auth.core.service.AuthorizationService
-import io.stereov.singularity.auth.core.service.IdentityProviderService
+import io.stereov.singularity.auth.oauth2.service.IdentityProviderService
 import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.user.core.dto.response.UserResponse
@@ -15,11 +15,13 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/auth/providers")
+@ConditionalOnProperty("singularity.auth.oauth2.enable", matchIfMissing = false)
 @Tag(name = "Identity Provider", description = "Operations related to connecting and disconnecting identity providers to existing accounts.")
 class IdentityProviderController(
     private val identityProviderService: IdentityProviderService,
@@ -50,7 +52,7 @@ class IdentityProviderController(
     )
     suspend fun getProviders(): ResponseEntity<List<IdentityProviderResponse>> {
         val identityProviders = authorizationService.getCurrentUser().sensitive.identities
-            .map { IdentityProviderResponse(it.provider) }
+            .map { IdentityProviderResponse(it.key) }
 
         return ResponseEntity.ok(identityProviders)
     }

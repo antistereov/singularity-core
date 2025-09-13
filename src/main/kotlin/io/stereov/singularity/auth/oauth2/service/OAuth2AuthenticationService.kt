@@ -2,7 +2,6 @@ package io.stereov.singularity.auth.oauth2.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.service.AuthorizationService
-import io.stereov.singularity.auth.core.service.IdentityProviderService
 import io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException
 import io.stereov.singularity.auth.oauth2.exception.OAuth2Exception
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorAuthProperties
@@ -10,12 +9,10 @@ import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.user.core.exception.model.EmailAlreadyExistsException
 import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.service.UserService
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
 import org.springframework.stereotype.Service
 
 @Service
-@ConditionalOnProperty("singularity.auth.allow-oauth2-providers", matchIfMissing = false)
 class OAuth2AuthenticationService(
     private val userService: UserService,
     private val appProperties: AppProperties,
