@@ -11,14 +11,15 @@ data class UserSecurityDetails(
     val mail: MailVerificationDetails = MailVerificationDetails(),
 ) {
 
-    constructor(mailEnabled: Boolean, mailTwoFactorCodeExpiresIn: Long): this(
+    constructor(mailEnabled: Boolean, mailTwoFactorCodeExpiresIn: Long, mailVerified: Boolean = false): this(
         twoFactor = TwoFactorDetails(
             totp = TwoFactorDetails.TotpDetails(),
             mail = TwoFactorDetails.MailTwoFactorDetails(
                 enabled = mailEnabled,
                 expiresAt = Instant.now().plusSeconds(mailTwoFactorCodeExpiresIn)
             )
-        )
+        ),
+        mail = MailVerificationDetails(mailVerified)
     )
 
     data class TwoFactorDetails(
