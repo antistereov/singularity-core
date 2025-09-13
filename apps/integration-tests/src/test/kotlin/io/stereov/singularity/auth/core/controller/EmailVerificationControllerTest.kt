@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.Instant
 
-class EmailVerificationController : BaseMailIntegrationTest() {
+class EmailVerificationControllerTest : BaseMailIntegrationTest() {
 
     @Test fun `verifyEmail works`() = runTest {
         val user = registerUser()
