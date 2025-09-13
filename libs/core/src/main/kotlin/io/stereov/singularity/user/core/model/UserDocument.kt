@@ -56,7 +56,7 @@ data class UserDocument(
 
     @get:Transient
     val password: SecureHash?
-        get() = sensitive.identities.firstOrNull { it.provider == IdentityProvider.PASSWORD }?.password
+        get() = sensitive.identities[IdentityProvider.PASSWORD]?.password
 
     /**
      * Check if user authenticated using password and return [SecureHash] if so.
@@ -65,7 +65,7 @@ data class UserDocument(
      * @throws InvalidDocumentException If the user authenticated using password but no password is set.
      */
     fun validateLoginTypeAndGetPassword(): SecureHash {
-        if (sensitive.identities.none { it.provider == IdentityProvider.PASSWORD }) {
+        if (sensitive.identities.containsKey(IdentityProvider.PASSWORD)) {
             throw WrongIdentityProviderException("Authentication via password failed: user did not set up authentication using username and password")
         }
 
@@ -80,13 +80,21 @@ data class UserDocument(
         val hashedEmail = runCatching { otherValues[0] as SearchableHash }
             .getOrElse { e -> throw MissingFunctionParameterException("Please provide the hashed email as parameter.", e) }
 
-        val hashedIdentitiesParameter = runCatching { otherValues[1] as List<*> }
+        val hashedIdentitiesParameter = runCatching { otherValues[1] as Map<*, *> }
             .getOrElse { e ->  throw MissingFunctionParameterException("Please provide the list of hashed user identities as a parameter", e) }
         val hashedIdentities = hashedIdentitiesParameter
-            .map {
-                runCatching { it as HashedUserIdentity }
-                    .getOrElse { e -> throw MissingFunctionParameterException("Please provide a list of HashedUserIdentity", e) }
-            }
+            .map { (key, value) ->
+                val keyString = runCatching { key as String }
+                    .getOrElse { e -> throw MissingFunctionParameterException(
+                        "Failed to convert the key to a String. " +
+                                "Please provide a map of String and HashedUserIdentity", e) }
+                val hashedIdentity = runCatching { value as HashedUserIdentity }
+                    .getOrElse { e -> throw MissingFunctionParameterException(
+                        "Failed to convert the identity to a HashedUserIdentity. " +
+                                "Please provide a map of String and HashedUserIdentity", e) }
+
+                keyString to hashedIdentity
+            }.toMap()
 
         return EncryptedUserDocument(
             _id, hashedEmail, hashedIdentities, created, lastActive, encryptedSensitiveData
@@ -230,7 +238,7 @@ data class UserDocument(
             SensitiveUserData(
                 name,
                 email,
-                mutableListOf(UserIdentity.ofPassword(password, true)),
+                mutableMapOf(IdentityProvider.PASSWORD to UserIdentity.ofPassword(password, true)),
                 roles,
                 groups,
                 UserSecurityDetails(mailEnabled, mailTwoFactorCodeExpiresIn),
@@ -260,7 +268,7 @@ data class UserDocument(
             SensitiveUserData(
                 name,
                 email,
-                mutableListOf(UserIdentity.ofProvider(provider, principalId, true)),
+                mutableMapOf(provider to UserIdentity.ofProvider(principalId, true)),
                 roles,
                 groups,
                 UserSecurityDetails(mailEnabled, mailTwoFactorCodeExpiresIn),

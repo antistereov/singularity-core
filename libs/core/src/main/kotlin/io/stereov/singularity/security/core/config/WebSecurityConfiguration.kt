@@ -13,6 +13,7 @@ import io.stereov.singularity.auth.geolocation.service.GeolocationService
 import io.stereov.singularity.auth.oauth2.component.CustomOAuth2AuthenticationSuccessHandler
 import io.stereov.singularity.auth.oauth2.component.CustomOAuth2AuthorizationRequestResolver
 import io.stereov.singularity.auth.oauth2.config.OAuth2Configuration
+import io.stereov.singularity.auth.oauth2.properties.OAuth2Properties
 import io.stereov.singularity.auth.oauth2.service.OAuth2AuthenticationService
 import io.stereov.singularity.global.filter.LoggingFilter
 import io.stereov.singularity.global.properties.UiProperties
@@ -100,7 +101,8 @@ class WebSecurityConfiguration {
         cookieCreator: CookieCreator,
         sessionTokenService: SessionTokenService,
         clientRegistrations: ReactiveClientRegistrationRepository,
-        objectMapper: ObjectMapper
+        objectMapper: ObjectMapper,
+        oAuth2Properties: OAuth2Properties
     ): SecurityWebFilterChain {
         return http
             .csrf { it.disable() }
@@ -125,7 +127,7 @@ class WebSecurityConfiguration {
             }
             .oauth2Login { oauth2 ->
                 oauth2.authorizationRequestResolver(CustomOAuth2AuthorizationRequestResolver(clientRegistrations, objectMapper))
-                oauth2.authenticationSuccessHandler(CustomOAuth2AuthenticationSuccessHandler(objectMapper, accessTokenService, refreshTokenService, sessionTokenService, oAuth2AuthenticationService, cookieCreator))
+                oauth2.authenticationSuccessHandler(CustomOAuth2AuthenticationSuccessHandler(objectMapper, accessTokenService, refreshTokenService, sessionTokenService, oAuth2AuthenticationService, cookieCreator, oAuth2Properties))
             }
             .addFilterBefore(RateLimitFilter(rateLimitService, geolocationProperties), SecurityWebFiltersOrder.FIRST)
             .addFilterBefore(LoggingFilter(geolocationProperties, geoLocationService), SecurityWebFiltersOrder.AUTHENTICATION)
@@ -161,7 +163,7 @@ class WebSecurityConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnProperty("singularity.auth.allow-oauth2-providers", havingValue = "false", matchIfMissing = true)
+    @ConditionalOnProperty("singularity.auth.oauth2.enable", havingValue = "false", matchIfMissing = true)
     fun emptyClientRegistrationRepository(): ReactiveClientRegistrationRepository {
         return ReactiveClientRegistrationRepository { Mono.empty() }
     }

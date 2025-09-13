@@ -29,13 +29,14 @@ Copy the `client-id` and `client-secret` for the next step.
 Please make sure that the **email** is in scope for your OAuth2 client. Check out their official documentation.
 :::
 
-At first, you need to enable authentication via OAuth2 clients:
+| Property                                     | Type      | Description                                                                       | Default value                             |
+|----------------------------------------------|-----------|-----------------------------------------------------------------------------------|-------------------------------------------|
+| `singularity.auth.oauth2.enable`             | `Boolean` | Allow authentication using OAuth2 identity providers. Disabled by default.        | `false`                                   |
+| `singularity.auth.oauth2.error-redirect-uri` | `String`  | The path the user will be redirected to if there was an error in the OAuth2 flow. | `http://localhost:8000/auth/oauth2/error` |
 
-```yaml
-singularity:
-  auth:
-    allow-oauth2-providers: true
-```
+Make sure to set `singularity.auth.oauth2.enable` to `true`.
+
+### Clients
 
 You can configure your clients with the following properties. 
 
@@ -105,13 +106,6 @@ If the authorization was successful, you will be redirected to `/login/oauth2/{r
 
 The user is now authenticated.
 
-#### Errors
-
-The check can fail in the following cases:
-
-* The session token is expired. Perform the authorization again with a new token.
-* A user with the same e-mail address is already registered. In case that the users wants to connect the OAuth2 client to his account, you can follow [this](#connecting-an-oauth2-client-to-an-existing-account) guide.
-
 ## Connecting an OAuth2 Client to an Existing Account
 
 It is possible to connect multiple OAuth2 clients to an account.
@@ -129,3 +123,18 @@ This token will be set as an HTTP-only cookie and returned in the response if [h
 
 With the `OAuth2ProviderConnectionToken` set and the user authenticated, you can follow the same steps. 
 As a result, the user will be connected to the new provider.
+
+## Error Handling
+
+If authentication failed, 
+the user will be redirected to the URI you specify in `singularity.auth.oauth2.error-redirect-uri`.
+The full URI will contain a query parameter `error` that specifies the type of error that occurred.
+The following error types exist:
+
+| Type                    | Description                                                                                                                         |
+|-------------------------|-------------------------------------------------------------------------------------------------------------------------------------|
+| `email_exists`          | A user with the same email as in the email claim of the OAuth2 client is already registered. Therefore, no new user can be created. |
+| `client_conntected`     | The user already connected another account of the same OAuth2 client. It is not possible to link another.                           |
+| `invalid_token`         | If a token is invalid.                                                                                                              |
+| `missing_session_token` | If the session token is not set.                                                                                                    |
+| `server_error`          | An unspecified error occurred.                                                                                                      |

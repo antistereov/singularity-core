@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/auth/providers/oauth2")
 @Tag(name = "OAuth2 Identity Provider", description = "Operations related to OAuth2 identity providers")
-@ConditionalOnProperty("singularity.auth.allow-oauth2-providers", matchIfMissing = false)
+@ConditionalOnProperty("singularity.auth.oauth2.enable", matchIfMissing = false)
 class OAuth2ProviderController(
     private val authorizationService: AuthorizationService,
     private val oAuth2ProviderConnectionTokenService: OAuth2ProviderConnectionTokenService,

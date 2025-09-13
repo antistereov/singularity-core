@@ -6,11 +6,15 @@ import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.auth.core.service.token.AccessTokenService
 import io.stereov.singularity.auth.core.service.token.RefreshTokenService
 import io.stereov.singularity.auth.core.service.token.SessionTokenService
+import io.stereov.singularity.auth.oauth2.exception.model.OAuth2ProviderConnectedException
 import io.stereov.singularity.auth.oauth2.model.CustomState
 import io.stereov.singularity.auth.oauth2.model.token.OAuth2TokenType
+import io.stereov.singularity.auth.oauth2.properties.OAuth2Properties
 import io.stereov.singularity.auth.oauth2.service.OAuth2AuthenticationService
 import io.stereov.singularity.global.exception.model.MissingRequestParameterException
+import io.stereov.singularity.user.core.exception.model.EmailAlreadyExistsException
 import kotlinx.coroutines.reactor.mono
+import org.apache.http.client.utils.URIBuilder
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.Authentication
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
@@ -26,6 +30,7 @@ class CustomOAuth2AuthenticationSuccessHandler(
     private val sessionTokenService: SessionTokenService,
     private val oAuth2AuthenticationService: OAuth2AuthenticationService,
     private val cookieCreator: CookieCreator,
+    private val oAuth2Properties: OAuth2Properties
 ) : ServerAuthenticationSuccessHandler {
 
     override fun onAuthenticationSuccess(
@@ -66,5 +71,19 @@ class CustomOAuth2AuthenticationSuccessHandler(
         } else {
             response.statusCode = HttpStatus.OK
         }
+    }.onErrorResume { e ->
+        val errorCode = when (e) {
+            is EmailAlreadyExistsException -> "email_exists"
+            is OAuth2ProviderConnectedException  -> "client_connected"
+            else -> "server_error"
+        }
+
+        val response = exchange.exchange.response
+        response.statusCode = HttpStatus.FOUND
+        response.headers.location = URIBuilder(oAuth2Properties.errorRedirectUri)
+            .addParameter("error", errorCode)
+            .build()
+
+        Mono.empty()
     }.then()
 }

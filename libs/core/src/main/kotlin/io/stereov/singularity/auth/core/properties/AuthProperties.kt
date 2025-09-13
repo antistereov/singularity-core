@@ -9,5 +9,4 @@ data class AuthProperties(
     val adminPaths: List<String> = emptyList(),
     val allowHeaderAuthentication: Boolean = true,
     val preferHeaderAuthentication: Boolean = true,
-    val allowOauth2Providers: Boolean = false,
 )

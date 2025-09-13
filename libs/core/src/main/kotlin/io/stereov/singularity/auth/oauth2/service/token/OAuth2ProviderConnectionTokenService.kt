@@ -8,11 +8,13 @@ import io.stereov.singularity.auth.jwt.service.JwtService
 import io.stereov.singularity.auth.oauth2.model.token.OAuth2ProviderConnectionToken
 import io.stereov.singularity.global.util.Constants
 import org.bson.types.ObjectId
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
 import org.springframework.stereotype.Service
 import java.time.Instant
 
 @Service
+@ConditionalOnProperty("singularity.auth.oauth2.enable", matchIfMissing = false)
 class OAuth2ProviderConnectionTokenService(
     private val jwtService: JwtService,
     private val jwtProperties: JwtProperties,

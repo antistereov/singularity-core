@@ -13,7 +13,7 @@ import java.time.Instant
 data class EncryptedUserDocument(
     @Id override val _id: ObjectId? = null,
     val email: SearchableHash,
-    val identities: List<HashedUserIdentity>,
+    val identities: Map<String, HashedUserIdentity>,
     val created: Instant = Instant.now(),
     var lastActive: Instant = Instant.now(),
     override var sensitive: Encrypted<SensitiveUserData>,

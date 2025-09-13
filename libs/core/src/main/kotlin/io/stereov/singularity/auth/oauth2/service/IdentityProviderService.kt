@@ -1,11 +1,13 @@
-package io.stereov.singularity.auth.core.service
+package io.stereov.singularity.auth.oauth2.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.dto.request.ConnectPasswordIdentityRequest
 import io.stereov.singularity.auth.core.model.IdentityProvider
+import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException
 import io.stereov.singularity.auth.oauth2.exception.model.CannotConnectIdentityProviderException
 import io.stereov.singularity.auth.oauth2.exception.model.CannotDisconnectIdentityProviderException
+import io.stereov.singularity.auth.oauth2.exception.model.OAuth2ProviderConnectedException
 import io.stereov.singularity.auth.oauth2.service.token.OAuth2ProviderConnectionTokenService
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.user.core.model.UserDocument
@@ -31,10 +33,10 @@ class IdentityProviderService(
         val user = authorizationService.getCurrentUser()
         val identities = user.sensitive.identities
 
-        if (identities.any { it.provider == IdentityProvider.PASSWORD })
+        if (identities.containsKey(IdentityProvider.PASSWORD))
             throw CannotConnectIdentityProviderException("The user already identified with password")
 
-        identities.add(UserIdentity.ofPassword(hashService.hashBcrypt(req.password), true))
+        identities[IdentityProvider.PASSWORD] = UserIdentity.ofPassword(hashService.hashBcrypt(req.password), true)
 
         return userService.save(user)
     }
@@ -52,11 +54,12 @@ class IdentityProviderService(
 
         val identities = user.sensitive.identities
 
-        if (identities.any { it.provider == provider })
-            throw CannotConnectIdentityProviderException("The user already connected to the provider: $provider")
+        val providerIdentity = identities[provider]
 
-        identities.add(UserIdentity.ofProvider(provider, principalId, false))
+        if (providerIdentity != null && providerIdentity.principalId != principalId)
+            throw OAuth2ProviderConnectedException(provider)
 
+        identities[provider] = UserIdentity.ofProvider(principalId, false)
         return userService.save(user)
     }
 
@@ -71,13 +74,13 @@ class IdentityProviderService(
         if (provider == IdentityProvider.PASSWORD)
             throw CannotDisconnectIdentityProviderException("Password provider cannot be disconnected from user")
 
-        if (identities.none { it.provider == provider })
+        if (!identities.containsKey(provider))
             throw CannotDisconnectIdentityProviderException("Provider $provider is not connected with user")
 
         if (identities.size == 1)
             throw CannotDisconnectIdentityProviderException("Provider $provider is the only identity provider")
 
-        identities.removeAll { it.provider == provider }
+        identities.remove(provider)
 
         return userService.save(user)
     }

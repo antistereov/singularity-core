@@ -78,7 +78,7 @@ class PasswordResetService(
         }
 
         user.sensitive.security.password.resetSecret = Random.generateString(20)
-        val passwordIdentity = user.sensitive.identities.firstOrNull { it.provider == IdentityProvider.PASSWORD }
+        val passwordIdentity = user.sensitive.identities[IdentityProvider.PASSWORD]
             ?: throw WrongIdentityProviderException("No password authentication is set for user")
 
         passwordIdentity.password = hashService.hashBcrypt(req.newPassword)
