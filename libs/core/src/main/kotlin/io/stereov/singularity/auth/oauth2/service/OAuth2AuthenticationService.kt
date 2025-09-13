@@ -1,7 +1,6 @@
 package io.stereov.singularity.auth.oauth2.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.oauth2.exception.OAuth2Exception
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorAuthProperties
 import io.stereov.singularity.global.properties.AppProperties
