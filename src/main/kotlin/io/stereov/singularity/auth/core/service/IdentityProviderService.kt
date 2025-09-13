@@ -35,7 +35,7 @@ class IdentityProviderService(
         if (identities.any { it.provider == IdentityProvider.PASSWORD })
             throw CannotConnectIdentityProviderException("The user already identified with password")
 
-        identities.add(UserIdentity.Companion.ofPassword(hashService.hashBcrypt(req.password), true))
+        identities.add(UserIdentity.ofPassword(hashService.hashBcrypt(req.password), true))
 
         return userService.save(user)
     }
@@ -56,7 +56,7 @@ class IdentityProviderService(
         if (identities.any { it.provider == provider })
             throw CannotConnectIdentityProviderException("The user already connected to the provider: $provider")
 
-        identities.add(UserIdentity.Companion.ofProvider(provider, principalId, false))
+        identities.add(UserIdentity.ofProvider(provider, principalId, false))
 
         return userService.save(user)
     }
