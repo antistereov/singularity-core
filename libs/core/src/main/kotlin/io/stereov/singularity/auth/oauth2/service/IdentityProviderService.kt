@@ -41,25 +41,27 @@ class IdentityProviderService(
         return userService.save(user)
     }
 
-    suspend fun connect(provider: String, principalId: String, oauth2ProviderConnectionTokenValue: String): UserDocument {
+    suspend fun connect(provider: String, principalId: String, oauth2ProviderConnectionTokenValue: String?): UserDocument {
         logger.debug { "Connecting a new OAuth2 provider $provider to user" }
 
-        authorizationService.requireStepUp()
+        val connectedUser = userService.findByIdentityOrNull(provider, principalId)
+        if (connectedUser != null) return connectedUser
 
         val user = authorizationService.getCurrentUser()
+        authorizationService.requireStepUp()
+
+        if (user.sensitive.identities.containsKey(provider))
+            throw OAuth2ProviderConnectedException(provider)
+
+        if (oauth2ProviderConnectionTokenValue == null)
+            throw InvalidTokenException("No OAuth2ProviderConnection set as cookie or sent as request parameter")
+
         val connectionToken = oAuth2ProviderConnectionTokenService.extract(oauth2ProviderConnectionTokenValue)
 
         if (provider != connectionToken.provider)
             throw InvalidTokenException("The OAuth2ProviderConnectionToken does not match the requested provider")
 
-        val identities = user.sensitive.identities
-
-        val providerIdentity = identities[provider]
-
-        if (providerIdentity != null && providerIdentity.principalId != principalId)
-            throw OAuth2ProviderConnectedException(provider)
-
-        identities[provider] = UserIdentity.ofProvider(principalId, false)
+        user.sensitive.identities[provider] = UserIdentity.ofProvider(principalId, false)
         return userService.save(user)
     }
 

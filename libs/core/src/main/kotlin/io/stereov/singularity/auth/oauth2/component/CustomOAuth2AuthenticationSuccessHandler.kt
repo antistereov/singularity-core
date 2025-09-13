@@ -1,11 +1,15 @@
 package io.stereov.singularity.auth.oauth2.component
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.component.CookieCreator
 import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.auth.core.service.token.AccessTokenService
 import io.stereov.singularity.auth.core.service.token.RefreshTokenService
 import io.stereov.singularity.auth.core.service.token.SessionTokenService
+import io.stereov.singularity.auth.core.service.token.StepUpTokenService
+import io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException
+import io.stereov.singularity.auth.jwt.exception.model.TokenExpiredException
 import io.stereov.singularity.auth.oauth2.exception.model.OAuth2ProviderConnectedException
 import io.stereov.singularity.auth.oauth2.model.CustomState
 import io.stereov.singularity.auth.oauth2.model.token.OAuth2TokenType
@@ -30,8 +34,11 @@ class CustomOAuth2AuthenticationSuccessHandler(
     private val sessionTokenService: SessionTokenService,
     private val oAuth2AuthenticationService: OAuth2AuthenticationService,
     private val cookieCreator: CookieCreator,
-    private val oAuth2Properties: OAuth2Properties
+    private val oAuth2Properties: OAuth2Properties,
+    private val stepUpTokenService: StepUpTokenService
 ) : ServerAuthenticationSuccessHandler {
+
+    private val logger = KotlinLogging.logger {}
 
     override fun onAuthenticationSuccess(
         exchange: WebFilterExchange,
@@ -57,14 +64,15 @@ class CustomOAuth2AuthenticationSuccessHandler(
         val response = exchange.exchange.response
         response.headers.add(SessionTokenType.Access.HEADER, accessToken.value)
         response.headers.add(SessionTokenType.Refresh.HEADER, refreshToken.value)
-        response.cookies.add(
-            SessionTokenType.Access.COOKIE_NAME,
-            cookieCreator.createCookie(accessToken)
-        )
-        response.cookies.add(
-            SessionTokenType.Refresh.COOKIE_NAME,
-            cookieCreator.createCookie(refreshToken)
-        )
+        response.cookies.add(SessionTokenType.Access.COOKIE_NAME, cookieCreator.createCookie(accessToken))
+        response.cookies.add(SessionTokenType.Refresh.COOKIE_NAME, cookieCreator.createCookie(refreshToken))
+
+        if (state.stepUp) {
+            val stepUpToken = stepUpTokenService.create(user.id, sessionToken.id)
+            response.headers.add(SessionTokenType.StepUp.HEADER, stepUpToken.value)
+            response.cookies.add(SessionTokenType.StepUp.COOKIE_NAME, cookieCreator.createCookie(stepUpToken))
+        }
+
         if (state.redirectUri != null) {
             response.statusCode = HttpStatus.FOUND
             response.headers.location = URI(state.redirectUri)
@@ -74,9 +82,12 @@ class CustomOAuth2AuthenticationSuccessHandler(
     }.onErrorResume { e ->
         val errorCode = when (e) {
             is EmailAlreadyExistsException -> "email_exists"
-            is OAuth2ProviderConnectedException  -> "client_connected"
+            is OAuth2ProviderConnectedException -> "client_connected"
+            is TokenExpiredException -> "token_expired"
+            is InvalidTokenException -> "invalid_token"
             else -> "server_error"
         }
+        logger.debug(e) { "OAuth2 authorization failed" }
 
         val response = exchange.exchange.response
         response.statusCode = HttpStatus.FOUND

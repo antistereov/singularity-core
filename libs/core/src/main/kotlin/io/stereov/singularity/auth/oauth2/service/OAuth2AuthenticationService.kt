@@ -2,11 +2,9 @@ package io.stereov.singularity.auth.oauth2.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.service.AuthorizationService
-import io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException
 import io.stereov.singularity.auth.oauth2.exception.OAuth2Exception
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorAuthProperties
 import io.stereov.singularity.global.properties.AppProperties
-import io.stereov.singularity.user.core.exception.model.EmailAlreadyExistsException
 import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.service.UserService
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
@@ -51,7 +49,10 @@ class OAuth2AuthenticationService(
     ): UserDocument{
         logger.debug { "Handling existing user" }
 
-        return when (authorizationService.isAuthenticated()) {
+        val existingUser = userService.findByIdentityOrNull(provider, principalId)
+        if (existingUser != null) return existingUser
+
+        return when (userService.existsByEmail(email)) {
             true -> handleConnection(provider, principalId, oauth2ProviderConnectionToken)
             false -> handleRegistration(name, email, provider, principalId)
         }
@@ -64,8 +65,6 @@ class OAuth2AuthenticationService(
         principalId: String
     ): UserDocument {
         logger.debug { "Handling registration after OAuth2 registration" }
-
-        if (userService.existsByEmail(email)) throw EmailAlreadyExistsException("Failed to register user with email $email")
 
         val user = UserDocument.ofIdentityProvider(
             name = name,
@@ -85,9 +84,6 @@ class OAuth2AuthenticationService(
         oauth2ProviderConnectionToken: String?
     ): UserDocument {
         logger.debug { "Handling connection" }
-
-        if (oauth2ProviderConnectionToken == null)
-            throw InvalidTokenException("No OAuth2ProviderConnection set as cookie or sent as request parameter")
 
         return identityProviderService.connect(provider, principalId, oauth2ProviderConnectionToken)
     }

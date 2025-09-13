@@ -65,7 +65,7 @@ data class UserDocument(
      * @throws InvalidDocumentException If the user authenticated using password but no password is set.
      */
     fun validateLoginTypeAndGetPassword(): SecureHash {
-        if (sensitive.identities.containsKey(IdentityProvider.PASSWORD)) {
+        if (!sensitive.identities.containsKey(IdentityProvider.PASSWORD)) {
             throw WrongIdentityProviderException("Authentication via password failed: user did not set up authentication using username and password")
         }
 

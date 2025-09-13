@@ -8,6 +8,7 @@ import io.stereov.singularity.auth.core.properties.AuthProperties
 import io.stereov.singularity.auth.core.service.token.AccessTokenService
 import io.stereov.singularity.auth.core.service.token.RefreshTokenService
 import io.stereov.singularity.auth.core.service.token.SessionTokenService
+import io.stereov.singularity.auth.core.service.token.StepUpTokenService
 import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
 import io.stereov.singularity.auth.oauth2.component.CustomOAuth2AuthenticationSuccessHandler
@@ -102,7 +103,8 @@ class WebSecurityConfiguration {
         sessionTokenService: SessionTokenService,
         clientRegistrations: ReactiveClientRegistrationRepository,
         objectMapper: ObjectMapper,
-        oAuth2Properties: OAuth2Properties
+        oAuth2Properties: OAuth2Properties,
+        stepUpTokenService: StepUpTokenService
     ): SecurityWebFilterChain {
         return http
             .csrf { it.disable() }
@@ -127,7 +129,7 @@ class WebSecurityConfiguration {
             }
             .oauth2Login { oauth2 ->
                 oauth2.authorizationRequestResolver(CustomOAuth2AuthorizationRequestResolver(clientRegistrations, objectMapper))
-                oauth2.authenticationSuccessHandler(CustomOAuth2AuthenticationSuccessHandler(objectMapper, accessTokenService, refreshTokenService, sessionTokenService, oAuth2AuthenticationService, cookieCreator, oAuth2Properties))
+                oauth2.authenticationSuccessHandler(CustomOAuth2AuthenticationSuccessHandler(objectMapper, accessTokenService, refreshTokenService, sessionTokenService, oAuth2AuthenticationService, cookieCreator, oAuth2Properties, stepUpTokenService))
             }
             .addFilterBefore(RateLimitFilter(rateLimitService, geolocationProperties), SecurityWebFiltersOrder.FIRST)
             .addFilterBefore(LoggingFilter(geolocationProperties, geoLocationService), SecurityWebFiltersOrder.AUTHENTICATION)
