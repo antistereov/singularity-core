@@ -101,13 +101,11 @@ class OAuth2Configuration {
         userService: UserService,
         appProperties: AppProperties,
         twoFactorAuthProperties: TwoFactorAuthProperties,
-        authorizationService: AuthorizationService,
         identityProviderService: IdentityProviderService
     ) = OAuth2AuthenticationService(
         userService,
         appProperties,
         twoFactorAuthProperties,
-        authorizationService,
         identityProviderService
     )
 }

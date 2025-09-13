@@ -15,7 +15,6 @@ class OAuth2AuthenticationService(
     private val userService: UserService,
     private val appProperties: AppProperties,
     private val twoFactorAuthProperties: TwoFactorAuthProperties,
-    private val authorizationService: AuthorizationService,
     private val identityProviderService: IdentityProviderService
 ) {
 
