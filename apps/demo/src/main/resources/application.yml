@@ -17,6 +17,16 @@ spring:
     restart:
       enabled: false
       additional-paths: src/main
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id: ${GITHUB_OAUTH2_CLIENT_ID}
+            client-secret: ${GITHUB_OAUTH2_CLIENT_SECRET}
+            scope:
+              - user:email
+              - read:user
 
 logging:
   level:
@@ -34,6 +44,7 @@ singularity:
     two-factor:
       recovery-code-length: 10
       recovery-code-count: 6
+    allow-oauth2-providers: true
   app:
     name: TestApplication
     base-url: ${BACKEND_BASE_URL:http://localhost:8000}

@@ -37,8 +37,9 @@ class CustomOAuth2AuthorizationRequestResolver(
     ): OAuth2AuthorizationRequest {
         val sessionToken = exchange.request.queryParams.getFirst(Constants.SESSION_TOKEN_PARAMETER)
         val redirectUri = exchange.request.queryParams.getFirst(Constants.REDIRECT_URI_PARAMETER)
+        val oauth2ProviderConnectionToken = exchange.request.queryParams.getFirst(Constants.OAUTH2_PROVIDER_CONNECTION_TOKEN_PARAMETER)
 
-        val customState = CustomState(request.state, sessionToken, redirectUri)
+        val customState = CustomState(request.state, sessionToken, redirectUri, oauth2ProviderConnectionToken)
         val customStateJson = objectMapper.writeValueAsString(customState)
 
         return OAuth2AuthorizationRequest.from(request)

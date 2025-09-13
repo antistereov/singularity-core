@@ -9,7 +9,7 @@ data class OAuth2ProviderConnectionToken(
     val sessionId: String,
     val provider: String,
     override val jwt: Jwt
-) : SecurityToken<OAuth2TokenType.Connection> {
+) : SecurityToken<OAuth2TokenType.ProviderConnection> {
 
-    override val type = OAuth2TokenType.Connection
+    override val type = OAuth2TokenType.ProviderConnection
 }

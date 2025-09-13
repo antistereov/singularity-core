@@ -7,6 +7,7 @@ import io.stereov.singularity.auth.core.service.token.AccessTokenService
 import io.stereov.singularity.auth.core.service.token.RefreshTokenService
 import io.stereov.singularity.auth.core.service.token.SessionTokenService
 import io.stereov.singularity.auth.oauth2.model.CustomState
+import io.stereov.singularity.auth.oauth2.model.token.OAuth2TokenType
 import io.stereov.singularity.auth.oauth2.service.OAuth2AuthenticationService
 import io.stereov.singularity.global.exception.model.MissingRequestParameterException
 import kotlinx.coroutines.reactor.mono
@@ -35,13 +36,16 @@ class CustomOAuth2AuthenticationSuccessHandler(
         val stateValue = exchange.exchange.request.queryParams.getFirst("state")
             ?: throw MissingRequestParameterException("No state parameter provided")
         val state = objectMapper.readValue(stateValue, CustomState::class.java)
-        val sessionTokenValue = state.sessionToken
+
+        val sessionTokenValue = state.sessionTokenValue
             ?: exchange.exchange.request.cookies.getFirst(SessionTokenType.Session.COOKIE_NAME)?.value
             ?: throw MissingRequestParameterException("No session token provided")
+        val sessionToken = sessionTokenService.extract(sessionTokenValue)
 
-        val sessionToken = sessionTokenValue.let { sessionTokenService.extract(sessionTokenValue) }
+        val oauth2ProviderConnectionToken = state.oauth2ProviderConnectionTokenValue
+            ?: exchange.exchange.request.cookies.getFirst(OAuth2TokenType.ProviderConnection.COOKIE_NAME)?.value
 
-        val user = oAuth2AuthenticationService.findOrCreateUser(oauth2Token, exchange.exchange)
+        val user = oAuth2AuthenticationService.findOrCreateUser(oauth2Token, oauth2ProviderConnectionToken)
         val accessToken = accessTokenService.create(user.id, sessionToken.id)
         val refreshToken = refreshTokenService.create(user.id, sessionToken.toSessionInfoRequest(), exchange.exchange)
 

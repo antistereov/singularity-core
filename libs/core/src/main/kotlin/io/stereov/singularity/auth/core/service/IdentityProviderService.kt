@@ -12,7 +12,6 @@ import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.model.identity.UserIdentity
 import io.stereov.singularity.user.core.service.UserService
 import org.springframework.stereotype.Service
-import org.springframework.web.server.ServerWebExchange
 
 @Service
 class IdentityProviderService(
@@ -40,13 +39,13 @@ class IdentityProviderService(
         return userService.save(user)
     }
 
-    suspend fun connect(provider: String, principalId: String, exchange: ServerWebExchange): UserDocument {
+    suspend fun connect(provider: String, principalId: String, oauth2ProviderConnectionTokenValue: String): UserDocument {
         logger.debug { "Connecting a new OAuth2 provider $provider to user" }
 
         authorizationService.requireStepUp()
 
         val user = authorizationService.getCurrentUser()
-        val connectionToken = oAuth2ProviderConnectionTokenService.extract(exchange)
+        val connectionToken = oAuth2ProviderConnectionTokenService.extract(oauth2ProviderConnectionTokenValue)
 
         if (provider != connectionToken.provider)
             throw InvalidTokenException("The OAuth2ProviderConnectionToken does not match the requested provider")

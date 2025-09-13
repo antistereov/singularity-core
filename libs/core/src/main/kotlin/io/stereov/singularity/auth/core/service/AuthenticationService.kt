@@ -111,8 +111,9 @@ class AuthenticationService(
         logger.debug { "Executing step up" }
 
         val user = authorizationService.getCurrentUser()
+        val sessionId = authorizationService.getCurrentSessionId()
 
-        if (user.sensitive.sessions.none { it.id == req.session.id }) {
+        if (user.sensitive.sessions.none { it.id == sessionId }) {
             throw AuthException("Step up failed: trying to execute for step up for invalid session, user logged out out revoked session")
         }
 
