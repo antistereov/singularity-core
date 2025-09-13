@@ -28,6 +28,15 @@ class AuthorizationService(
         get() = KotlinLogging.logger {}
 
     /**
+     * Check if the current user is authenticated.
+     */
+    suspend fun isAuthenticated(): Boolean {
+        logger.debug { "Checking if user is authenticated" }
+
+        return getCurrentUserOrNull() != null
+    }
+
+    /**
      * Get the ID of the currently authenticated user.
      *
      * @throws InvalidPrincipalException If the security context or authentication is missing.

@@ -6,6 +6,7 @@ import io.stereov.singularity.auth.core.properties.AuthProperties
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.core.service.token.AccessTokenService
 import io.stereov.singularity.auth.core.service.token.RefreshTokenService
+import io.stereov.singularity.auth.core.service.token.SessionTokenService
 import io.stereov.singularity.auth.core.service.token.StepUpTokenService
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
 import io.stereov.singularity.auth.jwt.exception.TokenException
@@ -40,6 +41,7 @@ class TwoFactorAuthenticationController(
     private val authorizationService: AuthorizationService,
     private val twoFactorAuthenticationTokenService: TwoFactorAuthenticationTokenService,
     private val userService: UserService,
+    private val sessionTokenService: SessionTokenService,
 ) {
 
     @PostMapping("/login")
@@ -51,6 +53,7 @@ class TwoFactorAuthenticationController(
 
         val accessToken = accessTokenService.create(user.id, req.session.id)
         val refreshToken = refreshTokenService.create(user.id, req.session, exchange)
+        val sessionToken = sessionTokenService.create(req.session)
 
         val clearTwoFactorCookie = cookieCreator.clearCookie(TwoFactorTokenType.Authentication)
 
@@ -59,6 +62,7 @@ class TwoFactorAuthenticationController(
             user = userMapper.toResponse(user),
             accessToken = if (authProperties.allowHeaderAuthentication) accessToken.value else null,
             refreshToken = if (authProperties.allowHeaderAuthentication) refreshToken.value else null,
+            sessionToken = if (authProperties.allowHeaderAuthentication) sessionToken.value else null,
             allowedTwoFactorMethods = null,
             twoFactorAuthenticationToken = null,
             location = geolocationService.getLocationOrNull(exchange.request)
@@ -68,6 +72,7 @@ class TwoFactorAuthenticationController(
             .header("Set-Cookie", clearTwoFactorCookie.toString())
             .header("Set-Cookie", cookieCreator.createCookie(accessToken).toString())
             .header("Set-Cookie", cookieCreator.createCookie(refreshToken).toString())
+            .header("Set-Cookie", cookieCreator.createCookie(sessionToken).toString())
             .body(res)
     }
 

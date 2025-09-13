@@ -8,6 +8,7 @@ import io.stereov.singularity.auth.core.properties.AuthProperties
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.core.service.token.AccessTokenService
 import io.stereov.singularity.auth.core.service.token.RefreshTokenService
+import io.stereov.singularity.auth.core.service.token.SessionTokenService
 import io.stereov.singularity.auth.core.service.token.StepUpTokenService
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
 import io.stereov.singularity.auth.jwt.properties.JwtProperties
@@ -87,7 +88,8 @@ class TwoFactorAuthConfiguration {
         cookieCreator: CookieCreator,
         authorizationService: AuthorizationService,
         twoFactorAuthenticationTokenService: TwoFactorAuthenticationTokenService,
-        userService: UserService
+        userService: UserService,
+        sessionTokenService: SessionTokenService
     ): TwoFactorAuthenticationController {
         return TwoFactorAuthenticationController(
             twoFactorAuthenticationService,
@@ -101,6 +103,7 @@ class TwoFactorAuthConfiguration {
             authorizationService,
             twoFactorAuthenticationTokenService,
             userService,
+            sessionTokenService,
         )
     }
 

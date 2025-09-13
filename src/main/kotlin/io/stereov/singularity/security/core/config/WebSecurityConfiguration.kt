@@ -4,19 +4,16 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.stereov.singularity.auth.core.component.CookieCreator
 import io.stereov.singularity.auth.core.config.AuthenticationConfiguration
 import io.stereov.singularity.auth.core.filter.AuthenticationFilter
-import io.stereov.singularity.auth.core.model.token.CustomAuthenticationToken
-import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.auth.core.properties.AuthProperties
 import io.stereov.singularity.auth.core.service.token.AccessTokenService
 import io.stereov.singularity.auth.core.service.token.RefreshTokenService
 import io.stereov.singularity.auth.core.service.token.SessionTokenService
 import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
+import io.stereov.singularity.auth.oauth2.component.CustomOAuth2AuthenticationSuccessHandler
 import io.stereov.singularity.auth.oauth2.component.CustomOAuth2AuthorizationRequestResolver
 import io.stereov.singularity.auth.oauth2.config.OAuth2Configuration
-import io.stereov.singularity.auth.oauth2.model.CustomState
-import io.stereov.singularity.auth.oauth2.service.OAuth2Service
-import io.stereov.singularity.global.exception.model.MissingRequestParameterException
+import io.stereov.singularity.auth.oauth2.service.OAuth2AuthenticationService
 import io.stereov.singularity.global.filter.LoggingFilter
 import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.ratelimit.filter.RateLimitFilter
@@ -24,8 +21,6 @@ import io.stereov.singularity.ratelimit.service.RateLimitService
 import io.stereov.singularity.security.core.properties.SecurityProperties
 import io.stereov.singularity.user.core.model.Role
 import io.stereov.singularity.user.core.service.UserService
-import kotlinx.coroutines.reactive.awaitFirstOrNull
-import kotlinx.coroutines.reactor.mono
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -36,11 +31,8 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder
 import org.springframework.security.config.web.server.ServerHttpSecurity
-import org.springframework.security.core.context.ReactiveSecurityContextHolder
-import org.springframework.security.core.context.SecurityContextImpl
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository
 import org.springframework.security.web.server.SecurityWebFilterChain
 import org.springframework.security.web.server.ServerAuthenticationEntryPoint
@@ -49,7 +41,6 @@ import org.springframework.security.web.server.context.NoOpServerSecurityContext
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.reactive.CorsConfigurationSource
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
-import reactor.core.publisher.Mono
 
 /**
  * # Configuration class for web security.
@@ -102,7 +93,7 @@ class WebSecurityConfiguration {
         rateLimitService: RateLimitService, geolocationProperties: GeolocationProperties,
         geoLocationService: GeolocationService,
         securityProperties: SecurityProperties,
-        oAuth2Service: OAuth2Service,
+        oAuth2AuthenticationService: OAuth2AuthenticationService,
         refreshTokenService: RefreshTokenService,
         cookieCreator: CookieCreator,
         sessionTokenService: SessionTokenService,
@@ -130,45 +121,9 @@ class WebSecurityConfiguration {
                 it.pathMatchers("/admin/**").hasRole(Role.ADMIN.name)
                 it.anyExchange().permitAll()
             }
-            .oauth2Login { oAuth2 ->
-                oAuth2.authorizationRequestResolver(CustomOAuth2AuthorizationRequestResolver(clientRegistrations, objectMapper))
-                oAuth2.authenticationSuccessHandler { exchange, authentication ->
-                    mono {
-                        val oauth2Token = authentication as OAuth2AuthenticationToken
-                        val stateValue = exchange.exchange.request.queryParams.getFirst("state")
-                            ?: throw MissingRequestParameterException("No state parameter provided")
-                        val state = objectMapper.readValue(stateValue, CustomState::class.java)
-                        val sessionTokenValue = state.sessionToken
-
-                        if (sessionTokenValue.isBlank()) throw MissingRequestParameterException("No session token provided")
-
-                        val sessionToken = sessionTokenService.extract(sessionTokenValue)
-
-                        val user = oAuth2Service.findOrCreateUser(oauth2Token)
-                        val accessToken = accessTokenService.create(user.id, sessionToken.id)
-                        val refreshToken = refreshTokenService.create(user.id, sessionToken.toSessionInfoRequest(), exchange.exchange)
-
-                        val customAuthToken = CustomAuthenticationToken(user, sessionToken.id, accessToken.tokenId, exchange.exchange)
-                        val securityContext = SecurityContextImpl(customAuthToken)
-
-                        val response = exchange.exchange.response
-                        response.headers.add(SessionTokenType.Access.HEADER, accessToken.value)
-                        response.headers.add(SessionTokenType.Refresh.HEADER, refreshToken.value)
-                        response.cookies.add(
-                            SessionTokenType.Access.COOKIE_NAME,
-                            cookieCreator.createCookie(accessToken)
-                        )
-                        response.cookies.add(
-                            SessionTokenType.Refresh.COOKIE_NAME,
-                            cookieCreator.createCookie(refreshToken)
-                        )
-                        response.statusCode = HttpStatus.OK
-
-                        exchange.chain.filter(exchange.exchange)
-                            .contextWrite(ReactiveSecurityContextHolder.withSecurityContext(Mono.just(securityContext)))
-                            .awaitFirstOrNull()
-                    }.then()
-                }
+            .oauth2Login { oauth2 ->
+                oauth2.authorizationRequestResolver(CustomOAuth2AuthorizationRequestResolver(clientRegistrations, objectMapper))
+                oauth2.authenticationSuccessHandler(CustomOAuth2AuthenticationSuccessHandler(objectMapper, accessTokenService, refreshTokenService, sessionTokenService, oAuth2AuthenticationService, cookieCreator))
             }
             .addFilterBefore(RateLimitFilter(rateLimitService, geolocationProperties), SecurityWebFiltersOrder.FIRST)
             .addFilterBefore(LoggingFilter(geolocationProperties, geoLocationService), SecurityWebFiltersOrder.AUTHENTICATION)

@@ -5,10 +5,7 @@ import io.lettuce.core.api.coroutines.RedisCoroutinesCommands
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.component.CookieCreator
 import io.stereov.singularity.auth.core.component.TokenValueExtractor
-import io.stereov.singularity.auth.core.controller.AuthenticationController
-import io.stereov.singularity.auth.core.controller.EmailVerificationController
-import io.stereov.singularity.auth.core.controller.PasswordResetController
-import io.stereov.singularity.auth.core.controller.SessionController
+import io.stereov.singularity.auth.core.controller.*
 import io.stereov.singularity.auth.core.exception.handler.AuthExceptionHandler
 import io.stereov.singularity.auth.core.properties.AuthProperties
 import io.stereov.singularity.auth.core.service.*
@@ -17,6 +14,7 @@ import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
 import io.stereov.singularity.auth.jwt.properties.JwtProperties
 import io.stereov.singularity.auth.jwt.service.JwtService
+import io.stereov.singularity.auth.oauth2.service.token.OAuth2ProviderConnectionTokenService
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorAuthProperties
 import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthenticationService
 import io.stereov.singularity.auth.twofactor.service.token.TwoFactorAuthenticationTokenService
@@ -86,7 +84,8 @@ class AuthenticationConfiguration {
         refreshTokenService: RefreshTokenService,
         userService: UserService,
         stepUpTokenService: StepUpTokenService,
-        twoFactorAuthenticationService: TwoFactorAuthenticationService
+        twoFactorAuthenticationService: TwoFactorAuthenticationService,
+        sessionTokenService: SessionTokenService
     ): AuthenticationController {
         return AuthenticationController(
             authenticationService,
@@ -99,7 +98,8 @@ class AuthenticationConfiguration {
             refreshTokenService,
             userService,
             stepUpTokenService,
-            twoFactorAuthenticationService
+            twoFactorAuthenticationService,
+            sessionTokenService
         )
     }
     
@@ -108,6 +108,18 @@ class AuthenticationConfiguration {
     fun emailVerificationController(
         emailVerificationService: EmailVerificationService
     ) = EmailVerificationController(emailVerificationService)
+    
+    @Bean
+    @ConditionalOnMissingBean
+    fun identityProviderController(
+        identityProviderService: IdentityProviderService,
+        authorizationService: AuthorizationService,
+        userMapper: UserMapper,
+    ) = IdentityProviderController(
+        identityProviderService,
+        authorizationService,
+        userMapper
+    )
     
     @Bean
     @ConditionalOnMissingBean
@@ -259,6 +271,20 @@ class AuthenticationConfiguration {
         translateService,
         mailService,
         templateService
+    )
+    
+    @Bean
+    @ConditionalOnMissingBean
+    fun identityProviderService(
+        userService: UserService,
+        oAuth2ProviderConnectionTokenService: OAuth2ProviderConnectionTokenService,
+        authorizationService: AuthorizationService,
+        hashService: HashService
+    ) = IdentityProviderService(
+        userService,
+        oAuth2ProviderConnectionTokenService,
+        authorizationService,
+        hashService
     )
     
     @Bean

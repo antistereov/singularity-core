@@ -8,6 +8,7 @@ data class LoginResponse(
     val user: UserResponse,
     val accessToken: String?,
     val refreshToken: String?,
+    val sessionToken: String?,
     val twoFactorRequired: Boolean,
     val allowedTwoFactorMethods: List<TwoFactorMethod>?,
     val twoFactorAuthenticationToken: String?,
