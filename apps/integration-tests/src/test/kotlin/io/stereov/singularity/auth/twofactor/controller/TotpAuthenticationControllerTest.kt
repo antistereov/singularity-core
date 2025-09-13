@@ -36,7 +36,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
         val response = webTestClient.get()
             .uri("/api/auth/2fa/totp/setup")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .cookie(SessionTokenType.StepUp.cookieName, cookieCreator.createCookie(stepUpToken).toString())
+            .cookie(SessionTokenType.StepUp.cookieName, cookieCreator.createCookie(stepUpToken).value)
             .exchange()
             .expectStatus().isOk
             .expectBody(TwoFactorSetupResponse::class.java)
@@ -108,7 +108,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
 
         webTestClient.get()
             .uri("/api/auth/2fa/totp/setup")
-            .cookie(SessionTokenType.StepUp.cookieName, cookieCreator.createCookie(stepUpToken).toString())
+            .cookie(SessionTokenType.StepUp.cookieName, cookieCreator.createCookie(stepUpToken).value)
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -129,7 +129,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
         val response = webTestClient.get()
             .uri("/api/auth/2fa/totp/setup")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .cookie(SessionTokenType.StepUp.cookieName, cookieCreator.createCookie(stepUpToken).toString())
+            .cookie(SessionTokenType.StepUp.cookieName, cookieCreator.createCookie(stepUpToken).value)
             .exchange()
             .expectStatus().isOk
             .expectBody(TwoFactorSetupResponse::class.java)

@@ -148,7 +148,7 @@ class BaseSpringBootTest {
 
             val twoFactorRes = webTestClient.get()
                 .uri("/api/auth/2fa/totp/setup")
-                .cookie(SessionTokenType.StepUp.cookieName, cookieCreator.createCookie(stepUpToken).toString())
+                .cookie(SessionTokenType.StepUp.cookieName, cookieCreator.createCookie(stepUpToken).value)
                 .cookie(SessionTokenType.Access.cookieName, accessToken)
                 .exchange()
                 .expectStatus().isOk
