@@ -17,9 +17,9 @@ This implementation is based on [Spring OAuth 2.0 Client](https://docs.spring.io
 
 Create an application for your OAuth2 client with the following parameters:
 
-* `Redirect URI`: Use your base URI (for example `https://example.com`), an identifier for the client (for example `github`) you configured for the client and the path `login/oauth2/<client-id>/code` (for example `https://example.com/login/oauth2/github/code`)
+* `Redirect URI`: Use the base URI of your application (for example `https://example.com`), an identifier for the client (for example `github`) you configured for the client and the path `login/oauth2/<client-id>/code` (for example `https://example.com/login/oauth2/github/code`)
 
-Copy the
+Copy the `client-id` and `client-secret` for the next step.
 
 ## Configuration
 
@@ -92,10 +92,11 @@ Spring automatically creates OAuth2 authorization endpoints for all of your clie
 
 #### Parameters
 
-| Parameter       | Description                                                                                                                                                                                                                                                                                                                                                            | Required |
-|-----------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|
-| `redirect_uri`  | The URI the user will be redirected to after the authentication was successful.                                                                                                                                                                                                                                                                                        | `false`  |
-| `session_token` | The token specifying the current session you obtained from calling [`GET /api/auth/sessions/token`](/swagger#/Sessions/generateTokenForCurrentSession). It is not necessary to set this parameter since it will already be set as a HTTP-only cookie. You can override this value using this parameter or use it instead if for some reason cookies are not available. | `false`  |
+| Parameter                          | Description                                                                                                                                                                                                                                                                                                                                                            | Required |
+|------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|
+| `redirect_uri`                     | The URI the user will be redirected to after the authentication was successful.                                                                                                                                                                                                                                                                                        | `false`  |
+| `session_token`                    | The token specifying the current session you obtained from calling [`GET /api/auth/sessions/token`](/swagger#/Sessions/generateTokenForCurrentSession). It is not necessary to set this parameter since it will already be set as a HTTP-only cookie. You can override this value using this parameter or use it instead if for some reason cookies are not available. | `false`  |
+| `oauth2_provider_connection_token` | A token used to connect a new OAuth2 client to an existing account. Go [here](#connecting-an-oauth2-client-to-an-existing-account) for more information.                                                                                                                                                                                                               | `false`  |
 
 ### 3. Redirect
 
@@ -112,3 +113,19 @@ The check can fail in the following cases:
 * A user with the same e-mail address is already registered. In case that the users wants to connect the OAuth2 client to his account, you can follow [this](#connecting-an-oauth2-client-to-an-existing-account) guide.
 
 ## Connecting an OAuth2 Client to an Existing Account
+
+It is possible to connect multiple OAuth2 clients to an account.
+
+### 1. Authenticate the User
+
+Log in the user and retrieve an `AccessToken`.
+
+### 1. Creating an OAuth2 Provider Connection Token
+
+Call [`POST /api/auth/providers/oauth2/token`](/swagger#/OAuth2%20Identity%20Provider/generateOAuth2ProviderConnectionToken) authenticated as the user to create an `OAuth2ProviderConnectionToken`.
+This token will be set as an HTTP-only cookie and returned in the response if [header-authentication](/docs/authorization/basics#header-authentication) is enabled.
+
+### 2. Follow the Steps For Registration
+
+With the `OAuth2ProviderConnectionToken` set and the user authenticated, you can follow the same steps. 
+As a result, the user will be connected to the new provider.
