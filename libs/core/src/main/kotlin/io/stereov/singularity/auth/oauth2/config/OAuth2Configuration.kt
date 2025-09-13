@@ -57,12 +57,10 @@ class OAuth2Configuration {
     fun oauth2ProviderConnectionTokenService(
         jwtService: JwtService,
         jwtProperties: JwtProperties,
-        tokenValueExtractor: TokenValueExtractor,
         authorizationService: AuthorizationService,
     ) = OAuth2ProviderConnectionTokenService(
         jwtService,
         jwtProperties,
-        tokenValueExtractor,
         authorizationService
     )
 
