@@ -17,7 +17,6 @@ import java.time.Instant
 class OAuth2ProviderConnectionTokenService(
     private val jwtService: JwtService,
     private val jwtProperties: JwtProperties,
-    private val tokenValueExtractor: TokenValueExtractor,
     private val authorizationService: AuthorizationService,
 ) {
 
