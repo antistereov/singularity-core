@@ -271,7 +271,7 @@ data class UserDocument(
                 mutableMapOf(provider to UserIdentity.ofProvider(principalId, true)),
                 roles,
                 groups,
-                UserSecurityDetails(mailEnabled, mailTwoFactorCodeExpiresIn),
+                UserSecurityDetails(mailEnabled, mailTwoFactorCodeExpiresIn, true),
                 sessions,
                 avatarFileKey
             )
