@@ -26,11 +26,15 @@ class SessionTokenService(
             .issuedAt(issuedAt)
             .expiresAt(issuedAt.plusSeconds(jwtProperties.expiresIn))
             .claim(Constants.JWT_SESSION_CLAIM, sessionInfo.id)
-            .claim(Constants.JWT_BROWSER_CLAIM, sessionInfo.browser)
-            .claim(Constants.JWT_OS_CLAIM, sessionInfo.os)
-            .build()
 
-        val jwt = jwtService.encodeJwt(claims)
+        if (sessionInfo.browser != null) {
+            claims.claim(Constants.JWT_BROWSER_CLAIM, sessionInfo.browser)
+        }
+        if (sessionInfo.os != null) {
+            claims.claim(Constants.JWT_OS_CLAIM, sessionInfo.os)
+        }
+
+        val jwt = jwtService.encodeJwt(claims.build())
 
         return SessionToken(sessionInfo.id, sessionInfo.browser, sessionInfo.os, jwt)
     }
