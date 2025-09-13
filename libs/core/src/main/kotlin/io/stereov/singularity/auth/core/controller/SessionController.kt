@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/api/auth/sessions")
 @Tag(
-    name = "Session",
+    name = "Sessions",
     description = "Operations related to session management"
 )
 class SessionController(
@@ -44,7 +44,9 @@ class SessionController(
     ): ResponseEntity<GenerateSessionTokenResponse> {
         val token = sessionTokenService.create(sessionInfo)
 
-        return ResponseEntity.ok(GenerateSessionTokenResponse(token.value))
+        return ResponseEntity.ok()
+            .header("Set-Cookie", cookieCreator.createCookie(token).toString())
+            .body(GenerateSessionTokenResponse(token.value))
     }
 
     @DeleteMapping("/{sessionId}")
@@ -72,13 +74,15 @@ class SessionController(
         val clearAccessToken = cookieCreator.clearCookie(SessionTokenType.Access)
         val clearRefreshToken = cookieCreator.clearCookie(SessionTokenType.Refresh)
         val clearStepUpToken = cookieCreator.clearCookie(SessionTokenType.StepUp)
+        val clearSessionCookie = cookieCreator.clearCookie(SessionTokenType.Session)
 
         sessionService.deleteAllSessions()
 
         return ResponseEntity.ok()
-            .header("Set-Cookie", clearAccessToken.value)
-            .header("Set-Cookie", clearRefreshToken.value)
-            .header("Set-Cookie", clearStepUpToken.value)
+            .header("Set-Cookie", clearAccessToken.toString())
+            .header("Set-Cookie", clearRefreshToken.toString())
+            .header("Set-Cookie", clearStepUpToken.toString())
+            .header("Set-Cookie", clearSessionCookie.toString())
             .body(SuccessResponse(true))
     }
 }

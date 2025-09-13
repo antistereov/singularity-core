@@ -114,7 +114,7 @@ class RefreshTokenService(
 
         // Check if the refresh token is linked to a session
         if (user.sensitive.sessions.none { it.id == sessionId && it.refreshTokenId == tokenId }) {
-            throw InvalidTokenException("Refresh token does not correspond to an ")
+            throw InvalidTokenException("Refresh token does not correspond to an existing session")
         }
 
         return RefreshToken(userId, sessionId, tokenId, jwt)

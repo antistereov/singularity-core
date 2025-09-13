@@ -2,7 +2,6 @@ package io.stereov.singularity.auth.oauth2.component
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.stereov.singularity.auth.oauth2.model.CustomState
-import io.stereov.singularity.global.exception.model.MissingRequestParameterException
 import io.stereov.singularity.global.util.Constants
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository
 import org.springframework.security.oauth2.client.web.server.DefaultServerOAuth2AuthorizationRequestResolver
@@ -37,9 +36,9 @@ class CustomOAuth2AuthorizationRequestResolver(
         request: OAuth2AuthorizationRequest
     ): OAuth2AuthorizationRequest {
         val sessionToken = exchange.request.queryParams.getFirst(Constants.SESSION_TOKEN_PARAMETER)
-            ?: throw MissingRequestParameterException("No session token found in oauth request")
+        val redirectUri = exchange.request.queryParams.getFirst(Constants.REDIRECT_URI_PARAMETER)
 
-        val customState = CustomState(request.state, sessionToken)
+        val customState = CustomState(request.state, sessionToken, redirectUri)
         val customStateJson = objectMapper.writeValueAsString(customState)
 
         return OAuth2AuthorizationRequest.from(request)

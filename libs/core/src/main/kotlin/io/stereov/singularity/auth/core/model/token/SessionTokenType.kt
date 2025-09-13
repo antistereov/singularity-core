@@ -25,4 +25,11 @@ object SessionTokenType {
         override val header = HEADER
         override val cookieName = COOKIE_NAME
     }
+    object Session : SecurityTokenType {
+        const val COOKIE_NAME = "session_token"
+        const val HEADER = "X-Session-Token"
+
+        override val header = HEADER
+        override val cookieName = COOKIE_NAME
+    }
 }

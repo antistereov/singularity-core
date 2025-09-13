@@ -16,6 +16,7 @@ import io.stereov.singularity.auth.core.properties.AuthProperties
 import io.stereov.singularity.auth.core.service.AuthenticationService
 import io.stereov.singularity.auth.core.service.token.AccessTokenService
 import io.stereov.singularity.auth.core.service.token.RefreshTokenService
+import io.stereov.singularity.auth.core.service.token.SessionTokenService
 import io.stereov.singularity.auth.core.service.token.StepUpTokenService
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
 import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthenticationService
@@ -54,7 +55,8 @@ class AuthenticationController(
     private val refreshTokenService: RefreshTokenService,
     private val userService: UserService,
     private val stepUpTokenService: StepUpTokenService,
-    private val twoFactorAuthenticationService: TwoFactorAuthenticationService
+    private val twoFactorAuthenticationService: TwoFactorAuthenticationService,
+    private val sessionTokenService: SessionTokenService
 ) {
 
     private val logger: KLogger
@@ -89,6 +91,7 @@ class AuthenticationController(
         logger.info { "Executing login" }
 
         val user = authenticationService.login(payload)
+        val sessionToken = sessionTokenService.create(payload.session)
 
         if (user.twoFactorEnabled) {
             twoFactorAuthenticationService.handleTwoFactor(user, lang)
@@ -96,6 +99,7 @@ class AuthenticationController(
 
             return ResponseEntity.ok()
                 .header("Set-Cookie", cookieCreator.createCookie(loginToken).toString())
+                .header("Set-Cookie", cookieCreator.createCookie(sessionToken).toString())
                 .body(LoginResponse(
                     user = userMapper.toResponse(user),
                     twoFactorRequired = true,
@@ -103,6 +107,7 @@ class AuthenticationController(
                     twoFactorAuthenticationToken = if (authProperties.allowHeaderAuthentication) loginToken.value else null,
                     accessToken = null,
                     refreshToken = null,
+                    sessionToken = if (authProperties.allowHeaderAuthentication) sessionToken.value else null,
                     location = geoLocationService.getLocationOrNull(exchange.request)
                 ))
         }
@@ -114,6 +119,7 @@ class AuthenticationController(
             user = userMapper.toResponse(user),
             accessToken = if (authProperties.allowHeaderAuthentication) accessToken.value else null,
             refreshToken = if (authProperties.allowHeaderAuthentication) refreshToken.value else null,
+            sessionToken = if (authProperties.allowHeaderAuthentication) sessionToken.value else null,
             twoFactorRequired = false,
             allowedTwoFactorMethods = null,
             twoFactorAuthenticationToken = null,
@@ -123,6 +129,7 @@ class AuthenticationController(
         return ResponseEntity.ok()
             .header("Set-Cookie", cookieCreator.createCookie(accessToken).toString())
             .header("Set-Cookie", cookieCreator.createCookie(refreshToken).toString())
+            .header("Set-Cookie", cookieCreator.createCookie(sessionToken).toString())
             .body(res)
     }
 
@@ -155,11 +162,13 @@ class AuthenticationController(
 
         val accessToken = accessTokenService.create(user.id, payload.session.id)
         val refreshToken = refreshTokenService.create(user.id, payload.session, exchange)
+        val sessionToken = sessionTokenService.create(payload.session)
 
         val res = RegisterResponse(
             userMapper.toResponse(user),
             if (authProperties.allowHeaderAuthentication) accessToken.value else null,
             if (authProperties.allowHeaderAuthentication) refreshToken.value else null,
+            if (authProperties.allowHeaderAuthentication) sessionToken.value else null,
             geoLocationService.getLocationOrNull(exchange.request)
         )
 
@@ -187,13 +196,15 @@ class AuthenticationController(
         val clearAccessToken = cookieCreator.clearCookie(SessionTokenType.Access)
         val clearRefreshToken = cookieCreator.clearCookie(SessionTokenType.Refresh)
         val clearStepUpToken = cookieCreator.clearCookie(SessionTokenType.StepUp)
+        val clearSessionToken = cookieCreator.clearCookie(SessionTokenType.Session)
 
         authenticationService.logout(sessionInfo.id)
 
         return ResponseEntity.ok()
-            .header("Set-Cookie", clearAccessToken.value)
-            .header("Set-Cookie", clearRefreshToken.value)
-            .header("Set-Cookie", clearStepUpToken.value)
+            .header("Set-Cookie", clearAccessToken.toString())
+            .header("Set-Cookie", clearRefreshToken.toString())
+            .header("Set-Cookie", clearStepUpToken.toString())
+            .header("Set-Cookie", clearSessionToken.toString())
             .body(SuccessResponse(true))
     }
 
@@ -220,25 +231,28 @@ class AuthenticationController(
     )
     suspend fun refreshToken(
         exchange: ServerWebExchange,
-        @RequestBody sessionInfoDto: SessionInfoRequest
+        @RequestBody sessionInfo: SessionInfoRequest
     ): ResponseEntity<RefreshTokenResponse> {
         logger.debug { "Refreshing token" }
 
-        val token = refreshTokenService.extract(exchange, sessionInfoDto.id)
+        val token = refreshTokenService.extract(exchange, sessionInfo.id)
         val user = userService.findById(token.userId)
 
-        val newAccessToken = accessTokenService.create(user.id, sessionInfoDto.id)
-        val newRefreshToken = refreshTokenService.create(user.id, sessionInfoDto, exchange)
+        val newAccessToken = accessTokenService.create(user.id, sessionInfo.id)
+        val newRefreshToken = refreshTokenService.create(user.id, sessionInfo, exchange)
+        val newSessionToken = sessionTokenService.create(sessionInfo)
 
         val res = RefreshTokenResponse(
             userMapper.toResponse(user),
             if (authProperties.allowHeaderAuthentication) newAccessToken.value else null,
             if (authProperties.allowHeaderAuthentication) newRefreshToken.value else null,
+            if (authProperties.allowHeaderAuthentication) newSessionToken.value else null,
         )
 
         return ResponseEntity.ok()
             .header("Set-Cookie", cookieCreator.createCookie(newAccessToken).toString())
             .header("Set-Cookie", cookieCreator.createCookie(newRefreshToken).toString())
+            .header("Set-Cookie", cookieCreator.createCookie(newSessionToken).toString())
             .body(res)
     }
 
