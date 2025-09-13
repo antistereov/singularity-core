@@ -23,7 +23,7 @@ interface UserRepository : SensitiveCrudRepository<EncryptedUserDocument> {
 
     suspend fun findByEmail(email: SearchableHash): EncryptedUserDocument?
 
-    @Query("{ 'identities':  { \$elemMatch: { 'provider': ?0, 'principalId': ?1 } } }")
+    @Query("{ 'identities.?0.principalId' : ?1 }")
     suspend fun findByIdentity(provider: String, principalId: SearchableHash): EncryptedUserDocument?
 
 }

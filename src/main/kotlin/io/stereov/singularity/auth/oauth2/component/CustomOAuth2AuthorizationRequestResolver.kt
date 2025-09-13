@@ -38,12 +38,27 @@ class CustomOAuth2AuthorizationRequestResolver(
         val sessionToken = exchange.request.queryParams.getFirst(Constants.SESSION_TOKEN_PARAMETER)
         val redirectUri = exchange.request.queryParams.getFirst(Constants.REDIRECT_URI_PARAMETER)
         val oauth2ProviderConnectionToken = exchange.request.queryParams.getFirst(Constants.OAUTH2_PROVIDER_CONNECTION_TOKEN_PARAMETER)
+        val stepUp = exchange.request.queryParams.getFirst(Constants.STEP_UP_PARAMETER).toBoolean()
 
-        val customState = CustomState(request.state, sessionToken, redirectUri, oauth2ProviderConnectionToken)
+        val customState = CustomState(
+            request.state,
+            sessionToken,
+            redirectUri,
+            oauth2ProviderConnectionToken,
+            stepUp
+        )
         val customStateJson = objectMapper.writeValueAsString(customState)
 
-        return OAuth2AuthorizationRequest.from(request)
+        val req = OAuth2AuthorizationRequest.from(request)
             .state(customStateJson)
-            .build()
+
+        if (stepUp) {
+            val additionalParameters = mutableMapOf<String, Any>()
+            additionalParameters["prompt"] = "login"
+
+            req.additionalParameters(additionalParameters)
+        }
+
+        return req.build()
     }
 }

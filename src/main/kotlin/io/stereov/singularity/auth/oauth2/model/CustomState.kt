@@ -5,4 +5,5 @@ data class CustomState(
     val sessionTokenValue: String?,
     val redirectUri: String?,
     val oauth2ProviderConnectionTokenValue: String?,
+    val stepUp: Boolean
 )
