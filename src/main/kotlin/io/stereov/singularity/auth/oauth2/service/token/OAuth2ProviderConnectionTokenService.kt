@@ -7,12 +7,10 @@ import io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException
 import io.stereov.singularity.auth.jwt.properties.JwtProperties
 import io.stereov.singularity.auth.jwt.service.JwtService
 import io.stereov.singularity.auth.oauth2.model.token.OAuth2ProviderConnectionToken
-import io.stereov.singularity.auth.oauth2.model.token.OAuth2TokenType
 import io.stereov.singularity.global.util.Constants
 import org.bson.types.ObjectId
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
 import org.springframework.stereotype.Service
-import org.springframework.web.server.ServerWebExchange
 import java.time.Instant
 
 @Service
@@ -41,10 +39,8 @@ class OAuth2ProviderConnectionTokenService(
         return OAuth2ProviderConnectionToken(userId, sessionId, provider, jwt)
     }
 
-    suspend fun extract(exchange: ServerWebExchange): OAuth2ProviderConnectionToken {
+    suspend fun extract(tokenValue: String): OAuth2ProviderConnectionToken {
         logger.debug { "Extracting OAuth2ProviderConnectionToken" }
-
-        val tokenValue = tokenValueExtractor.extractValue(exchange, OAuth2TokenType.Connection)
 
         val jwt = jwtService.decodeJwt(tokenValue, true)
 

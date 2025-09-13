@@ -85,7 +85,8 @@ class AuthenticationConfiguration {
         userService: UserService,
         stepUpTokenService: StepUpTokenService,
         twoFactorAuthenticationService: TwoFactorAuthenticationService,
-        sessionTokenService: SessionTokenService
+        sessionTokenService: SessionTokenService,
+        authorizationService: AuthorizationService
     ): AuthenticationController {
         return AuthenticationController(
             authenticationService,
@@ -99,7 +100,8 @@ class AuthenticationConfiguration {
             userService,
             stepUpTokenService,
             twoFactorAuthenticationService,
-            sessionTokenService
+            sessionTokenService,
+            authorizationService
         )
     }
     

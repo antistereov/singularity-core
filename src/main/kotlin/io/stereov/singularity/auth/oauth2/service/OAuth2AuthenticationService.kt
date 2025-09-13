@@ -3,6 +3,7 @@ package io.stereov.singularity.auth.oauth2.service
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.core.service.IdentityProviderService
+import io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException
 import io.stereov.singularity.auth.oauth2.exception.OAuth2Exception
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorAuthProperties
 import io.stereov.singularity.global.properties.AppProperties
@@ -12,7 +13,6 @@ import io.stereov.singularity.user.core.service.UserService
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
 import org.springframework.stereotype.Service
-import org.springframework.web.server.ServerWebExchange
 
 @Service
 @ConditionalOnProperty("singularity.auth.allow-oauth2-providers", matchIfMissing = false)
@@ -26,7 +26,10 @@ class OAuth2AuthenticationService(
 
     private val logger = KotlinLogging.logger {}
 
-     suspend fun findOrCreateUser(oauth2Token: OAuth2AuthenticationToken, exchange: ServerWebExchange): UserDocument {
+     suspend fun findOrCreateUser(
+         oauth2Token: OAuth2AuthenticationToken,
+         oauth2ProviderConnectionTokenValue: String?
+     ): UserDocument {
          logger.debug { "Finding or creating user after OAuth2 authentication" }
 
          val provider = oauth2Token.authorizedClientRegistrationId
@@ -39,19 +42,30 @@ class OAuth2AuthenticationService(
          val name = oauth2User.attributes["name"] as? String ?: "GitHub User"
 
          return userService.findByIdentityOrNull(provider, principalId)
-             ?: handleExistingUser(name, email, provider, principalId, exchange)
+             ?: handleExistingUser(name, email, provider, principalId, oauth2ProviderConnectionTokenValue)
     }
 
-    private suspend fun handleExistingUser(name: String, email: String, provider: String, principalId: String, exchange: ServerWebExchange): UserDocument{
+    private suspend fun handleExistingUser(
+        name: String,
+        email: String,
+        provider: String,
+        principalId: String,
+        oauth2ProviderConnectionToken: String?
+    ): UserDocument{
         logger.debug { "Handling existing user" }
 
         return when (authorizationService.isAuthenticated()) {
-            true -> handleConnection(provider, principalId, exchange)
+            true -> handleConnection(provider, principalId, oauth2ProviderConnectionToken)
             false -> handleRegistration(name, email, provider, principalId)
         }
     }
 
-    private suspend fun handleRegistration(name: String, email: String, provider: String, principalId: String): UserDocument {
+    private suspend fun handleRegistration(
+        name: String,
+        email: String,
+        provider: String,
+        principalId: String
+    ): UserDocument {
         logger.debug { "Handling registration after OAuth2 registration" }
 
         if (userService.existsByEmail(email)) throw EmailAlreadyExistsException("Failed to register user with email $email")
@@ -68,9 +82,16 @@ class OAuth2AuthenticationService(
         return userService.save(user)
     }
 
-    private suspend fun handleConnection(provider: String, principalId: String, exchange: ServerWebExchange): UserDocument {
+    private suspend fun handleConnection(
+        provider: String,
+        principalId: String,
+        oauth2ProviderConnectionToken: String?
+    ): UserDocument {
         logger.debug { "Handling connection" }
 
-        return identityProviderService.connect(provider, principalId, exchange)
+        if (oauth2ProviderConnectionToken == null)
+            throw InvalidTokenException("No OAuth2ProviderConnection set as cookie or sent as request parameter")
+
+        return identityProviderService.connect(provider, principalId, oauth2ProviderConnectionToken)
     }
 }

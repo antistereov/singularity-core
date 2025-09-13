@@ -14,6 +14,7 @@ import io.stereov.singularity.auth.core.dto.response.StepUpResponse
 import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.auth.core.properties.AuthProperties
 import io.stereov.singularity.auth.core.service.AuthenticationService
+import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.core.service.token.AccessTokenService
 import io.stereov.singularity.auth.core.service.token.RefreshTokenService
 import io.stereov.singularity.auth.core.service.token.SessionTokenService
@@ -56,7 +57,8 @@ class AuthenticationController(
     private val userService: UserService,
     private val stepUpTokenService: StepUpTokenService,
     private val twoFactorAuthenticationService: TwoFactorAuthenticationService,
-    private val sessionTokenService: SessionTokenService
+    private val sessionTokenService: SessionTokenService,
+    private val authorizationService: AuthorizationService
 ) {
 
     private val logger: KLogger
@@ -190,15 +192,17 @@ class AuthenticationController(
             ApiResponse(responseCode = "200", description = "Logout successful.", content = [Content(schema = Schema(implementation = SuccessResponse::class))])
         ]
     )
-    suspend fun logout(@RequestBody sessionInfo: SessionInfoRequest): ResponseEntity<SuccessResponse> {
+    suspend fun logout(): ResponseEntity<SuccessResponse> {
         logger.info { "Executing logout" }
+
+        val sessionId = authorizationService.getCurrentSessionId()
 
         val clearAccessToken = cookieCreator.clearCookie(SessionTokenType.Access)
         val clearRefreshToken = cookieCreator.clearCookie(SessionTokenType.Refresh)
         val clearStepUpToken = cookieCreator.clearCookie(SessionTokenType.StepUp)
         val clearSessionToken = cookieCreator.clearCookie(SessionTokenType.Session)
 
-        authenticationService.logout(sessionInfo.id)
+        authenticationService.logout(sessionId)
 
         return ResponseEntity.ok()
             .header("Set-Cookie", clearAccessToken.toString())
@@ -299,7 +303,8 @@ class AuthenticationController(
                 ))
         }
 
-        val stepUpToken = stepUpTokenService.create(user.id, req.session.id)
+        val sessionId = authorizationService.getCurrentSessionId()
+        val stepUpToken = stepUpTokenService.create(user.id, sessionId)
 
         val res = StepUpResponse(
             twoFactorRequired = false,

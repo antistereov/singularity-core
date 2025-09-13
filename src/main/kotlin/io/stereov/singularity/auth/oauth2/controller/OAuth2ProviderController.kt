@@ -16,7 +16,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -32,7 +32,7 @@ class OAuth2ProviderController(
     private val cookieCreator: CookieCreator
 ) {
 
-    @GetMapping("oauth2/token")
+    @PostMapping("token")
     @Operation(
         summary = "Generate an OAuth2ProviderConnectionToken",
         description = "Generate an OAuth2ProviderConnectionToken that enables the user to connect new OAuth2 providers.",
@@ -45,7 +45,7 @@ class OAuth2ProviderController(
         responses = [
             ApiResponse(
                 responseCode = "200",
-                description = "Success.",
+                description = "Returns the token if header authentication is enabled.",
                 content = [Content(schema = Schema(implementation = OAuth2ProviderConnectionTokenResponse::class))]
             ),
             ApiResponse(
@@ -57,7 +57,8 @@ class OAuth2ProviderController(
     )
     suspend fun generateOAuth2ProviderConnectionToken(@RequestBody req: OAuth2ProviderConnectionRequest): ResponseEntity<OAuth2ProviderConnectionTokenResponse> {
         val userId = authorizationService.getCurrentUserId()
-        val token = oAuth2ProviderConnectionTokenService.create(userId, req.session.id, req.provider)
+        val sessionId = authorizationService.getCurrentSessionId()
+        val token = oAuth2ProviderConnectionTokenService.create(userId, sessionId, req.provider)
 
         val res = OAuth2ProviderConnectionTokenResponse(
             token = if (authProperties.allowHeaderAuthentication) token.value else null

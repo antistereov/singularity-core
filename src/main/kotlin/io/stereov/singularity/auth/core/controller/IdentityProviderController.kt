@@ -92,7 +92,8 @@ class IdentityProviderController(
     @DeleteMapping("{provider}")
     @Operation(
         summary = "Delete an identity provider",
-        description = "Delete an identity provider from the connected identity providers of the current user",
+        description = "Delete an identity provider from the connected identity providers of the current user." +
+                "You are not allowed to delete the password identity or the only existing identity.",
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER),
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE),

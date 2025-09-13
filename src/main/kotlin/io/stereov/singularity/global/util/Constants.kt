@@ -10,6 +10,7 @@ object Constants {
 
     const val SESSION_TOKEN_PARAMETER = "session_token"
     const val REDIRECT_URI_PARAMETER = "redirect_uri"
+    const val OAUTH2_PROVIDER_CONNECTION_TOKEN_PARAMETER = "oauth2_provider_connection_token"
 
     const val ENCRYPTION_SECRET = "encryption-secret"
     const val JWT_SECRET = "jwt-secret"

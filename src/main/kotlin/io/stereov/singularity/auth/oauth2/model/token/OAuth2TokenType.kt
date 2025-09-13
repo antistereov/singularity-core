@@ -4,7 +4,7 @@ import io.stereov.singularity.auth.core.model.token.SecurityTokenType
 
 interface OAuth2TokenType {
 
-    object Connection : SecurityTokenType {
+    object ProviderConnection : SecurityTokenType {
         const val HEADER = "X-OAuth2-Provider-Connection-Token"
         const val COOKIE_NAME = "oauth2_provider_connection_token"
 

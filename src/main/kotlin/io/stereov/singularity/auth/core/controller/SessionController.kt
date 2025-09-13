@@ -38,7 +38,7 @@ class SessionController(
         return ResponseEntity.ok(sessions.map { it.toResponseDto() })
     }
 
-    @GetMapping("/token")
+    @PostMapping("/token")
     suspend fun generateTokenForCurrentSession(
         @RequestBody sessionInfo: SessionInfoRequest
     ): ResponseEntity<GenerateSessionTokenResponse> {
