@@ -169,6 +169,13 @@
       "default": true
     },
     {
+      "name": "singularity.auth.allow-oauth2-providers",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.stereov.singularity.auth.core.properties.AuthProperties",
+      "description": "Allow authentication using OAuth2 identity providers. Disabled by default.",
+      "default": false
+    },
+    {
       "name": "singularity.auth.geolocation.enabled",
       "type": "java.lang.Boolean",
       "sourceType": "io.stereov.singularity.auth.geolocation.properties.GeolocationProperties",

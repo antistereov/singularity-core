@@ -17,6 +17,7 @@ import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.user.core.service.UserService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 
 @AutoConfiguration(
@@ -27,8 +28,9 @@ import org.springframework.context.annotation.Bean
 class OAuth2Configuration {
     
     // Controller
-    
+
     @Bean
+    @ConditionalOnProperty("singularity.auth.allow-oauth2-providers", matchIfMissing = false)
     @ConditionalOnMissingBean
     fun oauth2ProviderController(
         authorizationService: AuthorizationService,
