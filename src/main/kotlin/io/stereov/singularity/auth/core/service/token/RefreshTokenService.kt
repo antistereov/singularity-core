@@ -4,7 +4,9 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.component.TokenValueExtractor
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
 import io.stereov.singularity.auth.core.exception.AuthException
+import io.stereov.singularity.auth.core.model.SessionInfo
 import io.stereov.singularity.auth.core.model.token.RefreshToken
+import io.stereov.singularity.auth.core.model.token.SessionToken
 import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
@@ -14,13 +16,13 @@ import io.stereov.singularity.auth.jwt.service.JwtService
 import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.global.util.getClientIp
-import io.stereov.singularity.user.core.model.SessionInfo
 import io.stereov.singularity.user.core.service.UserService
 import org.bson.types.ObjectId
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ServerWebExchange
 import java.time.Instant
+import java.util.*
 
 @Service
 class RefreshTokenService(
@@ -35,8 +37,12 @@ class RefreshTokenService(
     private val logger = KotlinLogging.logger {}
     private val tokenType = SessionTokenType.Refresh
 
-    suspend fun create(userId: ObjectId, sessionId: String,
-                       tokenId: String, issuedAt: Instant = Instant.now()): RefreshToken {
+    suspend fun create(
+        userId: ObjectId,
+        sessionId: UUID,
+        tokenId: String,
+        issuedAt: Instant = Instant.now()
+    ): RefreshToken {
         logger.debug { "Creating refresh token for user $userId and session $sessionId" }
 
         val claims = JwtClaimsSet.builder()
@@ -52,16 +58,20 @@ class RefreshTokenService(
         return RefreshToken(userId, sessionId, tokenId, jwt)
     }
 
-    private suspend fun updateSessions(exchange: ServerWebExchange,
-                                       userId: ObjectId, sessionInfo: SessionInfoRequest, tokenId: String) {
+    private suspend fun updateSessions(
+        exchange: ServerWebExchange,
+        userId: ObjectId,
+        sessionId: UUID,
+        sessionInfo: SessionInfoRequest?,
+        tokenId: String
+    ) {
         val ipAddress = exchange.request.getClientIp(geolocationProperties.realIpHeader)
         val location = geolocationService.getLocationOrNull(exchange.request)
 
         val sessionInfo = SessionInfo(
-            id = sessionInfo.id,
             refreshTokenId = tokenId,
-            browser = sessionInfo.browser,
-            os = sessionInfo.os,
+            browser = sessionInfo?.browser,
+            os = sessionInfo?.os,
             issuedAt = Instant.now(),
             ipAddress = ipAddress,
             location = location?.let {
@@ -75,24 +85,25 @@ class RefreshTokenService(
         )
 
         val user = userService.findById(userId)
-        user.addOrUpdatesession(sessionInfo)
+        user.addOrUpdatesession(sessionId, sessionInfo)
         userService.save(user)
     }
 
     suspend fun create(
         userId: ObjectId,
-        sessionInfo: SessionInfoRequest,
+        sessionId: UUID,
+        sessionInfo: SessionInfoRequest?,
         exchange: ServerWebExchange
     ): RefreshToken {
         val refreshTokenId = Random.generateString(20)
-        val refreshToken = create(userId, sessionInfo.id, refreshTokenId)
+        val refreshToken = create(userId, sessionId, refreshTokenId)
 
-        updateSessions(exchange, userId, sessionInfo, refreshTokenId)
+        updateSessions(exchange, userId, sessionId, sessionInfo, refreshTokenId)
 
         return refreshToken
     }
 
-    suspend fun extract(exchange: ServerWebExchange, sessionId: String): RefreshToken {
+    suspend fun extract(exchange: ServerWebExchange, sessionToken: SessionToken): RefreshToken {
         logger.debug { "Extracting refresh token" }
 
         val tokenValue = tokenValueExtractor.extractValue(exchange, tokenType)
@@ -106,16 +117,21 @@ class RefreshTokenService(
         val userId = jwt.subject?.let { ObjectId(it) }
             ?: throw InvalidTokenException("Refresh token does not contain user id")
 
+        val sessionId = jwt.claims[Constants.JWT_SESSION_CLAIM] as? UUID
+            ?: throw InvalidTokenException("Refresh token does not contain session id")
+
         val tokenId = jwt.id
             ?: throw InvalidTokenException("Refresh token does not contain token id")
 
         val user = userService.findByIdOrNull(userId)
-            ?: throw AuthException("Invalid access token: user does not exist")
+            ?: throw AuthException("Invalid refresh token: user does not exist")
 
-        // Check if the refresh token is linked to a session
-        if (user.sensitive.sessions.none { it.id == sessionId && it.refreshTokenId == tokenId }) {
+        if (sessionId != sessionToken.id)
+            throw InvalidTokenException("The session this token belongs to is not valid.")
+
+
+        if (user.sensitive.sessions[sessionId]?.refreshTokenId != tokenId)
             throw InvalidTokenException("Refresh token does not correspond to an existing session")
-        }
 
         return RefreshToken(userId, sessionId, tokenId, jwt)
     }

@@ -5,7 +5,6 @@ import io.stereov.singularity.auth.core.model.token.CustomAuthenticationToken
 import io.stereov.singularity.auth.core.model.token.ErrorAuthenticationToken
 import io.stereov.singularity.auth.core.service.token.AccessTokenService
 import io.stereov.singularity.auth.jwt.exception.TokenException
-import io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException
 import io.stereov.singularity.global.exception.model.DocumentNotFoundException
 import io.stereov.singularity.user.core.service.UserService
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -34,11 +33,6 @@ class AuthenticationFilter(
         } catch (_: DocumentNotFoundException) {
             val authException = AuthException("Invalid access token: user does not exist")
             return@mono setSecurityContext(chain, exchange, authException)
-        }
-
-        if (!user.sensitive.sessions.any { it.id == accessToken.sessionId }) {
-            val e = InvalidTokenException("Trying to login from invalid session")
-            return@mono setSecurityContext(chain, exchange, e)
         }
 
         val authentication = CustomAuthenticationToken(user, accessToken.sessionId, accessToken.tokenId, exchange)

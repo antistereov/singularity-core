@@ -18,6 +18,7 @@ import org.bson.types.ObjectId
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.stereotype.Service
+import java.util.UUID
 
 @Service
 class AuthorizationService(
@@ -83,11 +84,19 @@ class AuthorizationService(
      * @throws InvalidPrincipalException If the security context or authentication is missing.
      * @throws InvalidTokenException If the authentication does not contain the necessary properties.
      */
-    suspend fun getCurrentSessionId(): String {
+    suspend fun getCurrentSessionId(): UUID {
         logger.debug { "Extracting session ID" }
 
         val auth = getCurrentAuthentication()
         return auth.sessionId
+    }
+
+    suspend fun getCurrentSessionIdOrNull(): UUID? {
+        return try {
+            getCurrentSessionId()
+        } catch(_: Exception) {
+            null
+        }
     }
 
     /**

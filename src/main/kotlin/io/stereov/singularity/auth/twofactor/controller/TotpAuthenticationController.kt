@@ -5,6 +5,7 @@ import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
 import io.stereov.singularity.auth.core.properties.AuthProperties
 import io.stereov.singularity.auth.core.service.token.AccessTokenService
 import io.stereov.singularity.auth.core.service.token.RefreshTokenService
+import io.stereov.singularity.auth.core.service.token.SessionTokenService
 import io.stereov.singularity.auth.core.service.token.StepUpTokenService
 import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorVerifySetupRequest
 import io.stereov.singularity.auth.twofactor.dto.response.TwoFactorRecoveryResponse
@@ -38,7 +39,8 @@ class TotpAuthenticationController(
     private val refreshTokenService: RefreshTokenService,
     private val stepUpTokenService: StepUpTokenService,
     private val userMapper: UserMapper,
-    private val authProperties: AuthProperties
+    private val authProperties: AuthProperties,
+    private val sessionTokenService: SessionTokenService
 ) {
 
     @Operation(
@@ -49,8 +51,8 @@ class TotpAuthenticationController(
         security = [
             SecurityRequirement(name = OpenApiConstants.ACCESS_TOKEN_HEADER),
             SecurityRequirement(name = OpenApiConstants.ACCESS_TOKEN_COOKIE),
-            SecurityRequirement(name = OpenApiConstants.TWO_FACTOR_INIT_SETUP_HEADER),
-            SecurityRequirement(name = OpenApiConstants.TWO_FACTOR_INIT_SETUP_COOKIE)
+            SecurityRequirement(name = OpenApiConstants.STEP_UP_TOKEN_HEADER),
+            SecurityRequirement(name = OpenApiConstants.STEP_UP_TOKEN_COOKIE)
         ],
         responses = [
             ApiResponse(
@@ -90,20 +92,22 @@ class TotpAuthenticationController(
     suspend fun recoverUser(
         @RequestParam("code") code: String,
         exchange: ServerWebExchange,
-        @RequestBody session: SessionInfoRequest
+        @RequestBody session: SessionInfoRequest?
     ): ResponseEntity<TwoFactorRecoveryResponse> {
         val user = totpAuthenticationService.recoverUser(exchange, code)
 
         val clearTwoFactorCookie = cookieCreator.clearCookie(TwoFactorTokenType.Authentication)
-        val accessToken = accessTokenService.create(user.id, session.id)
-        val refreshToken = refreshTokenService.create(user.id, session, exchange)
-        val stepUpToken = stepUpTokenService.createForRecovery(user.id, session.id, exchange)
+        val sessionToken = sessionTokenService.create(sessionInfo = session)
+        val accessToken = accessTokenService.create(user.id, sessionToken.id)
+        val refreshToken = refreshTokenService.create(user.id, sessionToken.id,session, exchange)
+        val stepUpToken = stepUpTokenService.createForRecovery(user.id, sessionToken.id, exchange)
 
         val res = TwoFactorRecoveryResponse(
             userMapper.toResponse(user),
             if (authProperties.allowHeaderAuthentication) accessToken.value else null,
             if (authProperties.allowHeaderAuthentication) refreshToken.value else null,
-            if (authProperties.allowHeaderAuthentication) stepUpToken.value else null
+            if (authProperties.allowHeaderAuthentication) stepUpToken.value else null,
+            if (authProperties.allowHeaderAuthentication) sessionToken.value else null,
         )
 
         return ResponseEntity.ok()
@@ -111,6 +115,7 @@ class TotpAuthenticationController(
             .header("Set-Cookie", cookieCreator.createCookie(accessToken).toString())
             .header("Set-Cookie", cookieCreator.createCookie(refreshToken).toString())
             .header("Set-Cookie", cookieCreator.createCookie(stepUpToken).toString())
+            .header("Set-Cookie", cookieCreator.createCookie(sessionToken).toString())
             .body(res)
     }
 }

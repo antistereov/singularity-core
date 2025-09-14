@@ -30,6 +30,12 @@ interface SensitiveCrudService<S, D: SensitiveDocument<S>, E: EncryptedSensitive
         return encryptionService.decrypt(encrypted, otherValues, clazz) as D
     }
 
+    suspend fun existsById(id: ObjectId): Boolean {
+        logger.debug { "Checking if document with ID $id exists" }
+
+        return repository.existsById(id)
+    }
+
     suspend fun findById(id: ObjectId): D {
         logger.debug { "Finding document by ID: $id" }
 

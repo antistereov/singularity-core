@@ -6,10 +6,11 @@ import org.springframework.security.authentication.AbstractAuthenticationToken
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.web.server.ServerWebExchange
+import java.util.*
 
 class CustomAuthenticationToken(
     val user: UserDocument,
-    val sessionId: String,
+    val sessionId: UUID,
     val tokenId: String,
     val exchange: ServerWebExchange,
     authorities: Collection<GrantedAuthority>
@@ -28,7 +29,7 @@ class CustomAuthenticationToken(
      * @param userDocument The [UserDocument] object containing user information.
      * @param sessionId The ID of the session.
      */
-    constructor(userDocument: UserDocument, sessionId: String, tokenId: String, exchange: ServerWebExchange): this(
+    constructor(userDocument: UserDocument, sessionId: UUID, tokenId: String, exchange: ServerWebExchange): this(
         user = userDocument,
         authorities = userDocument.sensitive.roles.map { SimpleGrantedAuthority("ROLE_$it") },
         sessionId = sessionId,

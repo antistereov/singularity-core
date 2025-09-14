@@ -64,8 +64,8 @@ class IdentityProviderController(
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER),
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE),
-            SecurityRequirement(OpenApiConstants.STEP_UP_HEADER),
-            SecurityRequirement(OpenApiConstants.STEP_UP_COOKIE)
+            SecurityRequirement(OpenApiConstants.STEP_UP_TOKEN_HEADER),
+            SecurityRequirement(OpenApiConstants.STEP_UP_TOKEN_COOKIE)
         ],
         responses = [
             ApiResponse(
@@ -99,8 +99,8 @@ class IdentityProviderController(
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER),
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE),
-            SecurityRequirement(OpenApiConstants.STEP_UP_HEADER),
-            SecurityRequirement(OpenApiConstants.STEP_UP_COOKIE)
+            SecurityRequirement(OpenApiConstants.STEP_UP_TOKEN_HEADER),
+            SecurityRequirement(OpenApiConstants.STEP_UP_TOKEN_COOKIE)
         ],
         responses = [
             ApiResponse(

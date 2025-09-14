@@ -8,12 +8,9 @@ object OpenApiConstants {
     const val REFRESH_TOKEN_HEADER = "refreshTokenHeader"
     const val REFRESH_TOKEN_COOKIE = "refreshTokenCookie"
 
-    const val TWO_FACTOR_INIT_SETUP_HEADER = "twoFactorInitSetupHeader"
-    const val TWO_FACTOR_INIT_SETUP_COOKIE = "twoFactorInitSetupCookie"
+    const val TWO_FACTOR_AUTHENTICATION_TOKEN_HEADER = "twoFactorAuthenticationTokenHeader"
+    const val TWO_FACTOR_AUTHENTICATION_TOKEN_COOKIE = "twoFactorAuthenticationTokenCookie"
 
-    const val TWO_FACTOR_LOGIN_HEADER = "twoFactorLoginHeader"
-    const val TWO_FACTOR_LOGIN_COOKIE = "twoFactorLoginCookie"
-
-    const val STEP_UP_HEADER = "stepUpHeader"
-    const val STEP_UP_COOKIE = "stepUpCookie"
+    const val STEP_UP_TOKEN_HEADER = "stepUpTokenHeader"
+    const val STEP_UP_TOKEN_COOKIE = "stepUpTokenCookie"
 }

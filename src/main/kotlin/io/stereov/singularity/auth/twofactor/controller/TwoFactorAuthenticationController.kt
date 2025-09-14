@@ -9,18 +9,17 @@ import io.stereov.singularity.auth.core.service.token.RefreshTokenService
 import io.stereov.singularity.auth.core.service.token.SessionTokenService
 import io.stereov.singularity.auth.core.service.token.StepUpTokenService
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
-import io.stereov.singularity.auth.jwt.exception.TokenException
 import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorRequest
 import io.stereov.singularity.auth.twofactor.dto.response.StepUpResponse
-import io.stereov.singularity.auth.twofactor.dto.response.TwoFactorStatusResponse
 import io.stereov.singularity.auth.twofactor.model.token.TwoFactorTokenType
 import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthenticationService
-import io.stereov.singularity.auth.twofactor.service.token.TwoFactorAuthenticationTokenService
 import io.stereov.singularity.user.core.mapper.UserMapper
-import io.stereov.singularity.user.core.service.UserService
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ServerWebExchange
 
 @RestController
@@ -39,8 +38,6 @@ class TwoFactorAuthenticationController(
     private val stepUpTokenService: StepUpTokenService,
     private val cookieCreator: CookieCreator,
     private val authorizationService: AuthorizationService,
-    private val twoFactorAuthenticationTokenService: TwoFactorAuthenticationTokenService,
-    private val userService: UserService,
     private val sessionTokenService: SessionTokenService,
 ) {
 
@@ -51,9 +48,9 @@ class TwoFactorAuthenticationController(
     ): ResponseEntity<LoginResponse> {
         val user = twoFactorAuthService.validateTwoFactor(exchange, req)
 
-        val accessToken = accessTokenService.create(user.id, req.session.id)
-        val refreshToken = refreshTokenService.create(user.id, req.session, exchange)
-        val sessionToken = sessionTokenService.create(req.session)
+        val sessionToken = sessionTokenService.create(sessionInfo = req.session)
+        val accessToken = accessTokenService.create(user.id, sessionToken.id)
+        val refreshToken = refreshTokenService.create(user.id, sessionToken.id, req.session, exchange)
 
         val clearTwoFactorCookie = cookieCreator.clearCookie(TwoFactorTokenType.Authentication)
 
@@ -79,52 +76,12 @@ class TwoFactorAuthenticationController(
     @PostMapping("/step-up")
     suspend fun verifyStepUp(@RequestBody req: TwoFactorRequest, exchange: ServerWebExchange): ResponseEntity<StepUpResponse> {
         val user = twoFactorAuthService.validateTwoFactor(exchange, req)
+        val sessionId = authorizationService.getCurrentSessionId()
 
-        val stepUpTokenCookie = stepUpTokenService.create(user.id, req.session.id)
+        val stepUpTokenCookie = stepUpTokenService.create(user.id, sessionId)
 
         return ResponseEntity.ok()
             .header("Set-Cookie", cookieCreator.createCookie(stepUpTokenCookie).toString())
             .body(StepUpResponse(if (authProperties.allowHeaderAuthentication) stepUpTokenCookie.value else null))
-    }
-
-
-    @GetMapping("/status")
-    suspend fun getStatus(
-        exchange: ServerWebExchange
-    ): ResponseEntity<TwoFactorStatusResponse> {
-        val authorizedUser = authorizationService.getCurrentUserOrNull()
-        val sessionId = authorizationService.getCurrentSessionId()
-
-        val stepUp = try {
-            authorizedUser?.id?.let {
-                stepUpTokenService.extract(exchange, authorizedUser.id, sessionId)
-                true
-            } ?: false
-        } catch (_: TokenException) {
-            false
-        }
-
-        val token = try {
-           twoFactorAuthenticationTokenService.extract(exchange)
-        } catch (_: TokenException) {
-            return ResponseEntity.ok(
-                TwoFactorStatusResponse(
-                    false,
-                    authorizedUser != null,
-                    stepUp,
-                    null,
-                )
-            )
-       }
-
-        val user = userService.findByIdOrNull(token.userId)
-
-        return ResponseEntity.ok(
-            TwoFactorStatusResponse(
-                true,
-                authorizedUser != null,
-                stepUp,
-                user?.twoFactorMethods
-            ))
     }
 }

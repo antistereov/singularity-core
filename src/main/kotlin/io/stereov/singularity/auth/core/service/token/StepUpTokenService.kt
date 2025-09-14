@@ -14,6 +14,7 @@ import org.springframework.security.oauth2.jwt.JwtClaimsSet
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ServerWebExchange
 import java.time.Instant
+import java.util.*
 
 @Service
 class StepUpTokenService(
@@ -25,7 +26,7 @@ class StepUpTokenService(
     private val logger = KotlinLogging.logger {}
     private val tokenType = SessionTokenType.StepUp
 
-    suspend fun create(userId: ObjectId, sessionId: String, issuedAt: Instant = Instant.now()): StepUpToken {
+    suspend fun create(userId: ObjectId, sessionId: UUID, issuedAt: Instant = Instant.now()): StepUpToken {
         logger.debug { "Creating step up token" }
 
         val claims = JwtClaimsSet.builder()
@@ -40,7 +41,7 @@ class StepUpTokenService(
         return StepUpToken(userId, sessionId, jwt)
     }
 
-    suspend fun createForRecovery(userId: ObjectId, sessionId: String, exchange: ServerWebExchange, issuedAt: Instant = Instant.now()): StepUpToken {
+    suspend fun createForRecovery(userId: ObjectId, sessionId: UUID, exchange: ServerWebExchange, issuedAt: Instant = Instant.now()): StepUpToken {
         logger.debug { "Creating step up token" }
 
         if (exchange.request.path.toString() != "/api/auth/2fa/recover")
@@ -49,7 +50,7 @@ class StepUpTokenService(
         return create(userId, sessionId, issuedAt)
     }
 
-    suspend fun extract(exchange: ServerWebExchange, currentUserId: ObjectId, currentSessionId: String): StepUpToken {
+    suspend fun extract(exchange: ServerWebExchange, currentUserId: ObjectId, currentSessionId: UUID): StepUpToken {
         logger.debug { "Extracting step up token" }
 
         val token = tokenValueExtractor.extractValue(exchange, tokenType)
@@ -63,7 +64,7 @@ class StepUpTokenService(
             throw InvalidTokenException("Step up token is not valid for currently logged in user")
         }
 
-        val sessionId = jwt.claims[Constants.JWT_SESSION_CLAIM] as? String
+        val sessionId = jwt.claims[Constants.JWT_SESSION_CLAIM] as? UUID
             ?: throw InvalidTokenException("JWT does not contain session id")
 
         if (sessionId != currentSessionId) {

@@ -45,6 +45,7 @@ class IdentityProviderService(
         logger.debug { "Connecting a new OAuth2 provider $provider to user" }
 
         val user = authorizationService.getCurrentUser()
+        val sessionId = authorizationService.getCurrentSessionId()
         authorizationService.requireStepUp()
 
         if (oauth2ProviderConnectionTokenValue == null)
@@ -67,6 +68,12 @@ class IdentityProviderService(
                     "The provided OAuth2ProviderConnectionToken cannot be decoded.")
             }
         }
+
+        if (connectionToken.sessionId != sessionId)
+            throw OAuth2FlowException(
+                "invalid_connection_token",
+                "The session contained in the OAuth2ConnectionToken does not match the current session"
+            )
 
         if (provider != connectionToken.provider)
             throw OAuth2FlowException("connection_token_provider_mismatch",

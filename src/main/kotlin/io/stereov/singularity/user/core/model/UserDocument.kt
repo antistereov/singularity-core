@@ -4,6 +4,7 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.exception.model.WrongIdentityProviderException
 import io.stereov.singularity.auth.core.model.IdentityProvider
+import io.stereov.singularity.auth.core.model.SessionInfo
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
 import io.stereov.singularity.database.core.model.SensitiveDocument
 import io.stereov.singularity.database.encryption.model.Encrypted
@@ -16,6 +17,7 @@ import io.stereov.singularity.user.core.model.identity.UserIdentity
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Transient
 import java.time.Instant
+import java.util.*
 
 data class UserDocument(
     private var _id: ObjectId? = null,
@@ -151,11 +153,11 @@ data class UserDocument(
      *
      * @return The updated [UserDocument].
      */
-    fun addOrUpdatesession(sessionInfo: SessionInfo): UserDocument {
-        logger.debug { "Adding or updating session ${sessionInfo.id}" }
+    fun addOrUpdatesession(sessionId: UUID, sessionInfo: SessionInfo): UserDocument {
+        logger.debug { "Adding or updating session $sessionId" }
 
-        removeSession(sessionInfo.id)
-        this.sensitive.sessions.add(sessionInfo)
+        removeSession(sessionId)
+        this.sensitive.sessions[sessionId] = sessionInfo
 
         return this
     }
@@ -169,10 +171,10 @@ data class UserDocument(
      *
      * @return The updated [UserDocument].
      */
-    fun removeSession(sessionId: String): UserDocument {
+    fun removeSession(sessionId: UUID): UserDocument {
         logger.debug { "Removing session $sessionId" }
 
-        this.sensitive.sessions.removeAll { session -> session.id == sessionId }
+        this.sensitive.sessions.remove(sessionId)
 
         return this
     }
@@ -229,7 +231,7 @@ data class UserDocument(
             groups: MutableSet<String> = mutableSetOf(),
             mailEnabled: Boolean,
             mailTwoFactorCodeExpiresIn: Long,
-            sessions: MutableList<SessionInfo> = mutableListOf(),
+            sessions: MutableMap<UUID, SessionInfo> = mutableMapOf(),
             avatarFileKey: String? = null,
         ) = UserDocument(
             id,
@@ -259,7 +261,7 @@ data class UserDocument(
             groups: MutableSet<String> = mutableSetOf(),
             mailEnabled: Boolean,
             mailTwoFactorCodeExpiresIn: Long,
-            sessions: MutableList<SessionInfo> = mutableListOf(),
+            sessions: MutableMap<UUID, SessionInfo> = mutableMapOf(),
             avatarFileKey: String? = null,
         ) = UserDocument(
             id,

@@ -16,6 +16,7 @@ import io.stereov.singularity.user.core.exception.model.EmailAlreadyExistsExcept
 import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.service.UserService
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 class AuthenticationService(
@@ -96,7 +97,7 @@ class AuthenticationService(
      *
      * @return The [UserDocument] of the logged-out user.
      */
-    suspend fun logout(sessionId: String): UserDocument {
+    suspend fun logout(sessionId: UUID): UserDocument {
         logger.debug { "Logging out user" }
 
         val userId = authorizationService.getCurrentUserId()
@@ -113,7 +114,7 @@ class AuthenticationService(
         val user = authorizationService.getCurrentUser()
         val sessionId = authorizationService.getCurrentSessionId()
 
-        if (user.sensitive.sessions.none { it.id == sessionId }) {
+        if (!user.sensitive.sessions.containsKey(sessionId)) {
             throw AuthException("Step up failed: trying to execute for step up for invalid session, user logged out out revoked session")
         }
 

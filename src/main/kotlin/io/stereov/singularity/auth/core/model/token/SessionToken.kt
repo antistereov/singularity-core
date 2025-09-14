@@ -2,9 +2,10 @@ package io.stereov.singularity.auth.core.model.token
 
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
 import org.springframework.security.oauth2.jwt.Jwt
+import java.util.*
 
 data class SessionToken(
-    val id: String,
+    val id: UUID,
     val browser: String?,
     val os: String?,
     override val jwt: Jwt
@@ -12,5 +13,5 @@ data class SessionToken(
 
     override val type = SessionTokenType.Session
 
-    fun toSessionInfoRequest() = SessionInfoRequest(id, browser, os)
+    fun toSessionInfoRequest() = SessionInfoRequest(browser, os)
 }

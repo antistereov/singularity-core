@@ -40,14 +40,14 @@ import org.springframework.boot.autoconfigure.AutoConfiguration
 )
 
 @SecurityScheme(
-    name = OpenApiConstants.STEP_UP_HEADER,
+    name = OpenApiConstants.STEP_UP_TOKEN_HEADER,
     type = SecuritySchemeType.APIKEY,
     `in` = SecuritySchemeIn.HEADER,
     paramName = SessionTokenType.StepUp.HEADER,
     description = "Token for step up authentication allowing access of secure resources."
 )
 @SecurityScheme(
-    name = OpenApiConstants.STEP_UP_COOKIE,
+    name = OpenApiConstants.STEP_UP_TOKEN_COOKIE,
     type = SecuritySchemeType.APIKEY,
     `in` = SecuritySchemeIn.COOKIE,
     paramName = SessionTokenType.StepUp.COOKIE_NAME,
@@ -55,14 +55,14 @@ import org.springframework.boot.autoconfigure.AutoConfiguration
 )
 
 @SecurityScheme(
-    name = OpenApiConstants.TWO_FACTOR_LOGIN_HEADER,
+    name = OpenApiConstants.TWO_FACTOR_AUTHENTICATION_TOKEN_HEADER,
     type = SecuritySchemeType.APIKEY,
     `in` = SecuritySchemeIn.HEADER,
     paramName = TwoFactorTokenType.Authentication.HEADER,
     description = "Token for successful authentication with email and password, indicating 2FA is required."
 )
 @SecurityScheme(
-    name = OpenApiConstants.TWO_FACTOR_LOGIN_COOKIE,
+    name = OpenApiConstants.TWO_FACTOR_AUTHENTICATION_TOKEN_COOKIE,
     type = SecuritySchemeType.APIKEY,
     `in` = SecuritySchemeIn.COOKIE,
     paramName = TwoFactorTokenType.Authentication.COOKIE_NAME,

@@ -64,7 +64,8 @@ class TwoFactorAuthConfiguration {
         refreshTokenService: RefreshTokenService,
         stepUpTokenService: StepUpTokenService,
         userMapper: UserMapper,
-        authProperties: AuthProperties
+        authProperties: AuthProperties,
+        sessionTokenService: SessionTokenService
     ) = TotpAuthenticationController(
         totpAuthenticationService,
         cookieCreator,
@@ -72,7 +73,8 @@ class TwoFactorAuthConfiguration {
         refreshTokenService,
         stepUpTokenService,
         userMapper,
-        authProperties
+        authProperties,
+        sessionTokenService
     )
 
     @Bean
@@ -87,8 +89,6 @@ class TwoFactorAuthConfiguration {
         stepUpTokenService: StepUpTokenService,
         cookieCreator: CookieCreator,
         authorizationService: AuthorizationService,
-        twoFactorAuthenticationTokenService: TwoFactorAuthenticationTokenService,
-        userService: UserService,
         sessionTokenService: SessionTokenService
     ): TwoFactorAuthenticationController {
         return TwoFactorAuthenticationController(
@@ -101,8 +101,6 @@ class TwoFactorAuthConfiguration {
             stepUpTokenService,
             cookieCreator,
             authorizationService,
-            twoFactorAuthenticationTokenService,
-            userService,
             sessionTokenService,
         )
     }
