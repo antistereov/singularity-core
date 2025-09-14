@@ -74,7 +74,7 @@ class AccessTokenService(
         val user = userService.findByIdOrNull(userId)
             ?: throw InvalidTokenException("Access token does not belong to existing user")
 
-        if (user.sensitive.sessions.containsKey(sessionId))
+        if (!user.sensitive.sessions.containsKey(sessionId))
             throw InvalidTokenException("Access token belongs to invalid session")
 
         val isValid = accessTokenCache.isTokenIdValid(userId, tokenId)
