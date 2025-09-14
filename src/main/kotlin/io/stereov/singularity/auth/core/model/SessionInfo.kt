@@ -6,7 +6,7 @@ data class SessionInfo(
     val refreshTokenId: String? = null,
     val browser: String? = null,
     val os: String? = null,
-    val issuedAt: Instant,
+    val issuedAt: Instant = Instant.now(),
     val ipAddress: String? = null,
     val location: LocationInfo? = null
 ) {

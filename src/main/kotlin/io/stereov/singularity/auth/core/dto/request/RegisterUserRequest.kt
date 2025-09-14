@@ -11,5 +11,5 @@ data class RegisterUserRequest(
     val password: String,
     @field:NotBlank
     val name: String,
-    val session: SessionInfoRequest?,
+    val session: SessionInfoRequest? = null,
 )
