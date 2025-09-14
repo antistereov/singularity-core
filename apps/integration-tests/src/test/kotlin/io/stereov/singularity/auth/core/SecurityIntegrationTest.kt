@@ -1,6 +1,5 @@
 package io.stereov.singularity.auth.core
 
-import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
 import io.stereov.singularity.auth.core.dto.response.RefreshTokenResponse
 import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.auth.jwt.service.JwtSecretService
@@ -50,7 +49,7 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
     }
     @Test fun `unexpired token required`() = runTest {
         val user = registerUser()
-        val token = accessTokenService.create(user.info.id, "session", Instant.ofEpochSecond(0))
+        val token = accessTokenService.create(user.info.id, user.sessionId, Instant.ofEpochSecond(0))
 
         webTestClient.get()
             .uri("/api/users/me")
@@ -64,7 +63,6 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
         webTestClient.post()
             .uri("/api/auth/logout")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .bodyValue(SessionInfoRequest(user.info.sensitive.sessions.first().id))
             .exchange()
             .expectStatus().isOk
 
@@ -90,8 +88,8 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
             .expectStatus().isUnauthorized
     }
     @Test fun `invalid session will not be authorized`() = runTest {
-        val user = registerUser(sessionId = "session")
-        val accessToken = accessTokenService.create(user.info.id, "session")
+        val user = registerUser()
+        val accessToken = accessTokenService.create(user.info.id, user.sessionId)
 
         webTestClient.get()
             .uri("/api/users/me")
@@ -111,11 +109,10 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
     }
 
     @Test fun `refresh works`() = runTest {
-        val user = registerUser(sessionId = "session")
+        val user = registerUser()
 
         val response = webTestClient.post()
             .uri("/api/auth/refresh")
-            .bodyValue(SessionInfoRequest(user.info.sensitive.sessions.first().id))
             .cookie(SessionTokenType.Refresh.cookieName, user.refreshToken)
             .exchange()
             .expectStatus().isOk
@@ -132,11 +129,10 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
             .expectStatus().isOk
     }
     @Test fun `refresh does not invalidate old token`() = runTest {
-        val user = registerUser(sessionId = "session")
+        val user = registerUser()
 
         val response = webTestClient.post()
             .uri("/api/auth/refresh")
-            .bodyValue(SessionInfoRequest(user.info.sensitive.sessions.first().id))
             .cookie(SessionTokenType.Refresh.cookieName, user.refreshToken)
             .exchange()
             .expectStatus().isOk
@@ -159,23 +155,25 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
             .expectStatus().isOk
     }
     @Test fun `refresh requires valid token`() = runTest {
-        val user = registerUser(sessionId = "session")
+        val user = registerUser()
 
         webTestClient.post()
             .uri("/api/auth/refresh")
             .cookie(SessionTokenType.Refresh.cookieName, "invalid-token")
-            .bodyValue(SessionInfoRequest(user.info.sensitive.sessions.first().id))
             .exchange()
             .expectStatus().isUnauthorized
     }
     @Test fun `refresh requires unexpired token`() = runTest {
-        val user = registerUser(sessionId = "session")
-        val token = refreshTokenService.create(user.info.id, "session", user.info.sensitive.sessions.first().refreshTokenId!!,Instant.ofEpochSecond(0))
+        val user = registerUser()
+        val token = refreshTokenService.create(
+            user.info.id,
+            user.sessionId,
+            user.info.sensitive.sessions.values.first().refreshTokenId!!,
+            Instant.ofEpochSecond(0))
 
         webTestClient.post()
             .uri("/api/auth/refresh")
             .cookie(SessionTokenType.Refresh.cookieName, token.value)
-            .bodyValue(SessionInfoRequest(user.info.sensitive.sessions.first().id))
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -186,7 +184,6 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
         webTestClient.post()
             .uri("/api/auth/refresh")
             .cookie(SessionTokenType.Refresh.cookieName, user.refreshToken)
-            .bodyValue(SessionInfoRequest(user.info.sensitive.sessions.first().id))
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -196,14 +193,12 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
         webTestClient.post()
             .uri("/api/auth/logout")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .bodyValue(SessionInfoRequest(user.info.sensitive.sessions.first().id))
             .exchange()
             .expectStatus().isOk
 
         webTestClient.post()
             .uri("/api/auth/refresh")
             .cookie(SessionTokenType.Refresh.cookieName, user.refreshToken)
-            .bodyValue(SessionInfoRequest(user.info.sensitive.sessions.first().id))
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -219,13 +214,12 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
         webTestClient.post()
             .uri("/api/auth/refresh")
             .cookie(SessionTokenType.Refresh.cookieName, user.refreshToken)
-            .bodyValue(SessionInfoRequest(user.info.sensitive.sessions.first().id))
             .exchange()
             .expectStatus().isUnauthorized
     }
     @Test fun `refresh invalid session will not be authorized`() = runTest {
-        val user = registerUser(sessionId = "session")
-        val accessToken = accessTokenService.create(user.info.id, "session")
+        val user = registerUser()
+        val accessToken = accessTokenService.create(user.info.id, user.sessionId)
 
         webTestClient.get()
             .uri("/api/users/me")
@@ -239,7 +233,6 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/auth/refresh")
-            .bodyValue(SessionInfoRequest(user.info.sensitive.sessions.first().id))
             .cookie(SessionTokenType.Refresh.cookieName, user.refreshToken)
             .exchange()
             .expectStatus().isUnauthorized

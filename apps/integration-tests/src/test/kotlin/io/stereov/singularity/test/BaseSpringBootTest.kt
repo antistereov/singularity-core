@@ -38,6 +38,9 @@ import java.util.*
 class BaseSpringBootTest {
 
     @Autowired
+    lateinit var sessionTokenService: SessionTokenService
+
+    @Autowired
     lateinit var cookieCreator: CookieCreator
 
     @Autowired

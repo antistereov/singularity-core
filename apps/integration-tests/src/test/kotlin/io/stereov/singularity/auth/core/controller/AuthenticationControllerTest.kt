@@ -17,14 +17,13 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
 
-class AuthenticationControllerTest : BaseIntegrationTest() {
+class AuthenticationControllerTest() : BaseIntegrationTest() {
 
     @Test fun `login logs in user`() = runTest {
         val email = "test@email.com"
         val password = "password"
-        val sessionId = "session"
-        val user = registerUser(email, password, sessionId)
-        val loginRequest = LoginRequest(email, password, SessionInfoRequest(sessionId))
+        val user = registerUser(email, password,)
+        val loginRequest = LoginRequest(email, password)
 
         val response = webTestClient.post()
             .uri("/api/auth/login")
@@ -62,7 +61,7 @@ class AuthenticationControllerTest : BaseIntegrationTest() {
         Assertions.assertEquals(user.info.id, userResponse.id)
         Assertions.assertEquals(user.info.sensitive.email, userResponse.email)
 
-        Assertions.assertEquals(sessionId, user.info.sensitive.sessions.firstOrNull()?.id)
+        Assertions.assertEquals(user.sessionId, user.info.sensitive.sessions.keys.first())
         Assertions.assertEquals(1, user.info.sensitive.sessions.size)
 
         Assertions.assertEquals(1, userService.findAll().count())
@@ -88,8 +87,7 @@ class AuthenticationControllerTest : BaseIntegrationTest() {
             .bodyValue(
                 LoginRequest(
                     user.info.sensitive.email,
-                    "wrong password",
-                    user.info.sensitive.sessions.first().toRequestDto()
+                    "wrong password"
                 )
             )
             .exchange()
@@ -100,8 +98,7 @@ class AuthenticationControllerTest : BaseIntegrationTest() {
             .bodyValue(
                 LoginRequest(
                     "another@email.com",
-                    "wrong password",
-                    user.info.sensitive.sessions.first().toRequestDto()
+                    "wrong password"
                 )
             )
             .exchange()
@@ -110,19 +107,20 @@ class AuthenticationControllerTest : BaseIntegrationTest() {
     @Test fun `login from new session saves session`() = runTest {
         val email = "test@email.com"
         val password = "password"
-        val sessionId = "session"
-        val newsessionId = "newsessionId"
 
-        val user = registerUser(email, password, sessionId)
+        val user = registerUser(email, password)
 
-        val accessToken = webTestClient.post()
+        val res = webTestClient.post()
             .uri("/api/auth/login")
-            .bodyValue(LoginRequest(email, password, SessionInfoRequest(newsessionId)))
+            .bodyValue(LoginRequest(email, password))
             .exchange()
             .expectStatus().isOk
             .expectBody(LoginResponse::class.java)
             .returnResult()
+        val accessToken = res
             .responseCookies[SessionTokenType.Access.cookieName]?.firstOrNull()?.value
+        val sessionToken = res.responseCookies[SessionTokenType.Session.cookieName]?.firstOrNull()?.value
+        val sessionId = sessionTokenService.extract(sessionToken!!)
 
         requireNotNull(accessToken) { "No access token provided in response" }
 
@@ -140,17 +138,16 @@ class AuthenticationControllerTest : BaseIntegrationTest() {
         val sessions = userService.findById(user.info.id).sensitive.sessions
 
         Assertions.assertEquals(2, sessions.size)
-        Assertions.assertTrue(sessions.any { it.id == sessionId })
-        Assertions.assertTrue(sessions.any { it.id == newsessionId })
+        Assertions.assertTrue(sessions.keys.any { it == user.sessionId })
+        Assertions.assertTrue(sessions.keys.any { it == sessionId })
     }
     @Test fun `login with two factor works as expected`() = runTest {
         val email = "test@email.com"
         val password = "password"
-        val sessionId = "session"
 
-        val user = registerUser(email, password, sessionId, true)
+        val user = registerUser(email, password, true)
 
-        val loginRequest = LoginRequest(email, password, SessionInfoRequest(sessionId))
+        val loginRequest = LoginRequest(email, password)
 
         val response = webTestClient.post()
             .uri("/api/auth/login")
@@ -172,12 +169,10 @@ class AuthenticationControllerTest : BaseIntegrationTest() {
     @Test fun `register registers new user`() = runTest {
         val email = "test@email.com"
         val password = "password"
-        val sessionId = "session"
-        val sessionInfo = SessionInfoRequest(id = sessionId)
 
         val response = webTestClient.post()
             .uri("/api/auth/register")
-            .bodyValue(RegisterUserRequest(email = email, password = password, name = "Name", session = sessionInfo))
+            .bodyValue(RegisterUserRequest(email = email, password = password, name = "Name"))
             .exchange()
             .expectStatus().isOk
             .expectBody(RegisterResponse::class.java)
@@ -188,6 +183,9 @@ class AuthenticationControllerTest : BaseIntegrationTest() {
         val refreshToken = response.responseCookies[SessionTokenType.Refresh.cookieName]
             ?.firstOrNull()?.value
         val userDto = response.responseBody!!.user
+        val sessionToken = response.responseCookies[SessionTokenType.Session.cookieName]
+            ?.firstOrNull()?.value
+            ?.let { sessionTokenService.extract(it) }
 
         requireNotNull(accessToken) { "No access token provided in response" }
         requireNotNull(refreshToken) { "No refresh token provided in response" }
@@ -211,7 +209,7 @@ class AuthenticationControllerTest : BaseIntegrationTest() {
 
         Assertions.assertEquals(userDto.id, userDetails.id)
         Assertions.assertEquals(1, sessions.size)
-        Assertions.assertEquals(sessionId, sessions.first().id)
+        Assertions.assertEquals(sessionToken?.id, sessions.keys.first())
 
         Assertions.assertEquals(1, userService.findAll().count())
     }
@@ -305,13 +303,12 @@ class AuthenticationControllerTest : BaseIntegrationTest() {
         val user = registerUser()
         val refreshToken = refreshTokenService.create(
             user.info.id,
-            user.info.sensitive.sessions.first().id,
+            user.sessionId,
             Random.generateString(20)
         )
         webTestClient.post()
             .uri("/api/auth/refresh")
             .cookie(SessionTokenType.Refresh.cookieName, refreshToken.value)
-            .bodyValue(SessionInfoRequest(user.info.sensitive.sessions.firstOrNull()?.id!!))
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -320,14 +317,12 @@ class AuthenticationControllerTest : BaseIntegrationTest() {
         webTestClient.post()
             .uri("/api/auth/refresh")
             .cookie(SessionTokenType.Refresh.cookieName, user.refreshToken)
-            .bodyValue(SessionInfoRequest(user.info.sensitive.sessions.firstOrNull()?.id!!))
             .exchange()
             .expectStatus().isOk
 
         webTestClient.post()
             .uri("/api/auth/refresh")
             .cookie(SessionTokenType.Refresh.cookieName, user.refreshToken)
-            .bodyValue(SessionInfoRequest(user.info.sensitive.sessions.firstOrNull()?.id!!))
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -345,7 +340,6 @@ class AuthenticationControllerTest : BaseIntegrationTest() {
         val response = webTestClient.post()
             .uri("/api/auth/refresh")
             .cookie(SessionTokenType.Refresh.cookieName, user.refreshToken)
-            .bodyValue(SessionInfoRequest(user.info.sensitive.sessions.first().id))
             .exchange()
             .expectStatus().isOk
             .expectBody(RefreshTokenResponse::class.java)
@@ -369,7 +363,6 @@ class AuthenticationControllerTest : BaseIntegrationTest() {
         webTestClient.post()
             .uri("/api/auth/refresh")
             .cookie(SessionTokenType.Refresh.cookieName, refreshToken)
-            .bodyValue(SessionInfoRequest(user.info.sensitive.sessions.first().id))
             .exchange()
             .expectStatus().isOk
 
@@ -394,7 +387,6 @@ class AuthenticationControllerTest : BaseIntegrationTest() {
 
         val response = webTestClient.post()
             .uri("/api/auth/logout")
-            .bodyValue(SessionInfoRequest(user.info.sensitive.sessions.first().id))
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isOk
@@ -426,27 +418,35 @@ class AuthenticationControllerTest : BaseIntegrationTest() {
     @Test fun `logoutAllsessions works`() = runTest {
         val email = "test@email.com"
         val password = "password"
-        val sessionId1 = "session"
-        val sessionId2 = "session2"
-        val registeredUser = registerUser(email, password, sessionId1)
+        val registeredUser = registerUser(email, password)
 
-        webTestClient.post()
+        val sessionId1 = webTestClient.post()
             .uri("/api/auth/login")
-            .bodyValue(LoginRequest(email, password, SessionInfoRequest(sessionId1)))
+            .bodyValue(LoginRequest(email, password))
             .exchange()
             .expectStatus().isOk
+            .expectBody()
+            .returnResult()
+            .responseCookies[SessionTokenType.Session.cookieName]
+            ?.firstOrNull()?.value
+            ?.let { sessionTokenService.extract(it) }?.id
 
-        webTestClient.post()
+        val sessionId2 = webTestClient.post()
             .uri("/api/auth/login")
-            .bodyValue(LoginRequest(email, password, SessionInfoRequest(sessionId2)))
+            .bodyValue(LoginRequest(email, password))
             .exchange()
             .expectStatus().isOk
+            .expectBody()
+            .returnResult()
+            .responseCookies[SessionTokenType.Session.cookieName]
+            ?.firstOrNull()?.value
+            ?.let { sessionTokenService.extract(it) }?.id
 
         var user = userService.findByEmail(email)
 
         Assertions.assertEquals(2, user.sensitive.sessions.size)
-        Assertions.assertTrue(user.sensitive.sessions.any { it.id == sessionId1 })
-        Assertions.assertTrue(user.sensitive.sessions.any { it.id == sessionId2 })
+        Assertions.assertTrue(user.sensitive.sessions.containsKey(sessionId1))
+        Assertions.assertTrue(user.sensitive.sessions.containsKey(sessionId2))
 
         val response = webTestClient.delete()
             .uri("/api/auth/sessions")

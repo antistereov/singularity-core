@@ -15,6 +15,7 @@ import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpStatus
 import org.springframework.http.client.MultipartBodyBuilder
 import java.time.Instant
+import java.util.*
 
 class UserSettingsControllerTest : BaseIntegrationTest() {
 
@@ -30,7 +31,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .cookie(
                 SessionTokenType.StepUp.cookieName,
-                stepUpTokenService.create(user.info.id, user.info.sensitive.sessions.first().id).value
+                stepUpTokenService.create(user.info.id, user.sessionId).value
             )
             .bodyValue(ChangeEmailRequest(newEmail))
             .exchange()
@@ -168,7 +169,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .cookie(
                 SessionTokenType.StepUp.cookieName,
-                stepUpTokenService.create(anotherUser.info.id, user.info.sensitive.sessions.first().id).value
+                stepUpTokenService.create(anotherUser.info.id, user.sessionId).value
             )
             .bodyValue(ChangeEmailRequest(newEmail))
             .exchange()
@@ -185,7 +186,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .cookie(
                 SessionTokenType.StepUp.cookieName,
-                stepUpTokenService.create(user.info.id, "another-session").value
+                stepUpTokenService.create(user.info.id, UUID.randomUUID()).value
             )
             .bodyValue(ChangeEmailRequest(newEmail))
             .exchange()
@@ -204,7 +205,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
                 SessionTokenType.StepUp.cookieName,
                 stepUpTokenService.create(
                     user.info.id,
-                    user.info.sensitive.sessions.first().id,
+                    user.sessionId,
                     Instant.ofEpochSecond(0)
                 ).value
             )
@@ -276,7 +277,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .cookie(
                 SessionTokenType.StepUp.cookieName,
-                stepUpTokenService.create(user.info.id, user.info.sensitive.sessions.first().id).value
+                stepUpTokenService.create(user.info.id, user.sessionId).value
             )
             .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
             .exchange()
@@ -380,7 +381,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .cookie(
                 SessionTokenType.StepUp.cookieName,
-                stepUpTokenService.create(anotherUser.info.id, user.info.sensitive.sessions.first().id).value
+                stepUpTokenService.create(anotherUser.info.id, user.sessionId).value
             )
             .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
             .exchange()
@@ -397,7 +398,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .cookie(
                 SessionTokenType.StepUp.cookieName,
-                stepUpTokenService.create(user.info.id, "another-session").value
+                stepUpTokenService.create(user.info.id, UUID.randomUUID()).value
             )
             .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
             .exchange()
@@ -416,7 +417,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
                 SessionTokenType.StepUp.cookieName,
                 stepUpTokenService.create(
                     user.info.id,
-                    user.info.sensitive.sessions.first().id,
+                    user.sessionId,
                     Instant.ofEpochSecond(0)
                 ).value
             )

@@ -1,9 +1,8 @@
 package io.stereov.singularity.auth.geolocation
 
+import io.stereov.singularity.auth.core.dto.request.RegisterUserRequest
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
 import io.stereov.singularity.test.BaseIntegrationTest
-import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
-import io.stereov.singularity.auth.core.dto.request.RegisterUserRequest
 import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -45,8 +44,7 @@ class GeoLocationServiceTest : BaseIntegrationTest() {
 
     @Test fun `it should resolve geolocation in session`() = runTest {
         val email = "test@example.com"
-        val sessionId = "123456"
-        val body = RegisterUserRequest(email = email, password = "password", "Name", SessionInfoRequest(id = sessionId))
+        val body = RegisterUserRequest(email = email, password = "password", "Name")
 
         webTestClient.post()
             .uri("/api/auth/register")
@@ -57,7 +55,7 @@ class GeoLocationServiceTest : BaseIntegrationTest() {
             .isOk
 
         val user = userService.findByEmail(email)
-        val location = user.sensitive.sessions.firstOrNull { it.id == sessionId }?.location
+        val location = user.sensitive.sessions.values.first().location
 
         println(location)
 

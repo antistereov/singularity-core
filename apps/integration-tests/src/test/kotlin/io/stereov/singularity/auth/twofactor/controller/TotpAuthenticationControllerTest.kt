@@ -1,7 +1,6 @@
 package io.stereov.singularity.auth.twofactor.controller
 
 import io.stereov.singularity.auth.core.dto.request.LoginRequest
-import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
 import io.stereov.singularity.auth.core.dto.response.LoginResponse
 import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.auth.twofactor.dto.request.DisableTwoFactorRequest
@@ -18,6 +17,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.Instant
+import java.util.*
 
 class TotpAuthenticationControllerTest : BaseIntegrationTest() {
 
@@ -27,11 +27,10 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
     @Test fun `totp setup succeeds`() = runTest {
         val email = "test@email.com"
         val password = "password"
-        val sessionId = "session"
-        val user = registerUser(email, password, sessionId)
-        val login = LoginRequest(email, password, SessionInfoRequest(sessionId))
+        val user = registerUser(email, password, )
+        val login = LoginRequest(email, password)
 
-        val stepUpToken = stepUpTokenService.create(user.info.id, sessionId)
+        val stepUpToken = stepUpTokenService.create(user.info.id, user.sessionId)
 
         val response = webTestClient.get()
             .uri("/api/auth/2fa/totp/setup")
@@ -89,7 +88,6 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
         val userRes = webTestClient.post()
             .uri("/api/auth/2fa/login?code=$code")
             .cookie(TwoFactorTokenType.Authentication.cookieName, twoFactorToken)
-            .bodyValue(SessionInfoRequest(sessionId))
             .exchange()
             .expectStatus().isOk
             .expectBody(LoginResponse::class.java)
@@ -104,7 +102,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
     @Test fun `totp setup requires authentication`() = runTest {
         val user = registerUser()
 
-        val stepUpToken = stepUpTokenService.create(user.info.id, user.info.sensitive.sessions.first().id)
+        val stepUpToken = stepUpTokenService.create(user.info.id, user.sessionId)
 
         webTestClient.get()
             .uri("/api/auth/2fa/totp/setup")
@@ -121,10 +119,9 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
     }
     @Test fun `totp setup clears all sessions`() = runTest {
         val email = "test@email.com"
-        val sessionId = "session"
-        val user = registerUser(email, sessionId = sessionId)
+        val user = registerUser(email)
 
-        val stepUpToken = stepUpTokenService.create(user.info.id, sessionId)
+        val stepUpToken = stepUpTokenService.create(user.info.id, user.sessionId)
 
         val response = webTestClient.get()
             .uri("/api/auth/2fa/totp/setup")
@@ -158,8 +155,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
     @Test fun `totp setup validation works`() = runTest {
         val email = "test@email.com"
         val password = "password"
-        val sessionId = "session"
-        val user = registerUser(email, password, sessionId)
+        val user = registerUser(email, password, )
 
         val secret = totpService.generateSecretKey()
         val recoveryCode = Random.generateString(10)
@@ -188,8 +184,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
     @Test fun `totp setup validation needs valid token`() = runTest {
         val email = "test@email.com"
         val password = "password"
-        val sessionId = "session"
-        val user = registerUser(email, password, sessionId)
+        val user = registerUser(email, password)
 
         val secret = totpService.generateSecretKey()
         val recoveryCode = Random.generateString(10)
@@ -212,8 +207,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
     @Test fun `totp setup validation needs unexpired token`() = runTest {
         val email = "test@email.com"
         val password = "password"
-        val sessionId = "session"
-        val user = registerUser(email, password, sessionId)
+        val user = registerUser(email, password,)
 
         val secret = totpService.generateSecretKey()
         val recoveryCode = Random.generateString(10)
@@ -236,8 +230,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
     @Test fun `totp setup validation needs token for same user`() = runTest {
         val email = "test@email.com"
         val password = "password"
-        val sessionId = "session"
-        val user = registerUser(email, password, sessionId)
+        val user = registerUser(email, password)
         val anotherUser = registerUser("another@email.com")
 
         val secret = totpService.generateSecretKey()
@@ -261,8 +254,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
     @Test fun `totp setup validation needs authentication`() = runTest {
         val email = "test@email.com"
         val password = "password"
-        val sessionId = "session"
-        val user = registerUser(email, password, sessionId)
+        val user = registerUser(email, password)
 
         val secret = totpService.generateSecretKey()
         val recoveryCode = Random.generateString(10)
@@ -292,7 +284,6 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
         val res = webTestClient.post()
             .uri("/api/auth/2fa/recover?code=${user.totpRecovery}")
             .cookie(TwoFactorTokenType.Authentication.cookieName, user.twoFactorToken)
-            .bodyValue(SessionInfoRequest(user.info.sensitive.sessions.first().id))
             .exchange()
             .expectStatus().isOk
             .expectBody(TwoFactorRecoveryResponse::class.java)
@@ -326,7 +317,6 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
         val res = webTestClient.post()
             .uri("/api/auth/2fa/recover?code=${user.totpRecovery}")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .bodyValue(SessionInfoRequest(user.info.sensitive.sessions.first().id))
             .exchange()
             .expectStatus().isOk
             .expectBody(TwoFactorRecoveryResponse::class.java)
@@ -359,7 +349,6 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
         webTestClient.post()
             .uri("/api/auth/2fa/recover?code=$code?context=login")
             .cookie(TwoFactorTokenType.Authentication.cookieName, user.twoFactorToken)
-            .bodyValue(SessionInfoRequest(user.info.sensitive.sessions.first().id))
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -370,7 +359,6 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
         webTestClient.post()
             .uri("/api/auth/2fa/recover")
             .cookie(TwoFactorTokenType.Authentication.cookieName, user.twoFactorToken)
-            .bodyValue(SessionInfoRequest(user.info.sensitive.sessions.first().id))
             .exchange()
             .expectStatus().isBadRequest
     }
@@ -380,7 +368,6 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/auth/2fa/recover?code=25234")
-            .bodyValue(SessionInfoRequest(user.info.sensitive.sessions.first().id))
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -398,7 +385,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
         val password = "password"
         val user = registerUser(twoFactorEnabled = true)
 
-        val stepUp = stepUpTokenService.create(user.info.id, user.info.sensitive.sessions.first().id)
+        val stepUp = stepUpTokenService.create(user.info.id, user.sessionId)
         val req = DisableTwoFactorRequest(password)
 
         val res = webTestClient.post()
@@ -424,7 +411,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
         val password = "password"
         val user = registerUser(twoFactorEnabled = true)
         val req = DisableTwoFactorRequest(password)
-        val token = stepUpTokenService.create(user.info.id, user.info.sensitive.sessions.first().id)
+        val token = stepUpTokenService.create(user.info.id, user.sessionId)
 
         webTestClient.post()
             .uri("/api/auth/2fa/disable")
@@ -466,7 +453,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
         webTestClient.post()
             .uri("/api/auth/2fa/disable")
             .bodyValue(req)
-            .cookie(SessionTokenType.StepUp.cookieName, cookieCreator.createCookie(stepUpTokenService.create(user.info.id, user.info.sensitive.sessions.first().id, Instant.ofEpochSecond(0))).value)
+            .cookie(SessionTokenType.StepUp.cookieName, cookieCreator.createCookie(stepUpTokenService.create(user.info.id, user.sessionId, Instant.ofEpochSecond(0))).value)
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isUnauthorized
@@ -481,7 +468,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
         webTestClient.post()
             .uri("/api/auth/2fa/disable")
             .bodyValue(req)
-            .cookie(SessionTokenType.StepUp.cookieName, cookieCreator.createCookie(stepUpTokenService.create(anotherUser.info.id, user.info.sensitive.sessions.first().id)).value)
+            .cookie(SessionTokenType.StepUp.cookieName, cookieCreator.createCookie(stepUpTokenService.create(anotherUser.info.id, user.sessionId)).value)
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isUnauthorized
@@ -494,7 +481,8 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
         webTestClient.post()
             .uri("/api/auth/2fa/disable")
             .bodyValue(req)
-            .cookie(SessionTokenType.StepUp.cookieName, cookieCreator.createCookie(stepUpTokenService.create(user.info.id, "another-session")).value)
+            .cookie(SessionTokenType.StepUp.cookieName, cookieCreator.createCookie(stepUpTokenService.create(user.info.id,
+                UUID.randomUUID())).value)
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isUnauthorized
@@ -506,7 +494,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
         webTestClient.post()
             .uri("/api/auth/2fa/disable")
             .bodyValue(DisableTwoFactorRequest(password))
-            .cookie(SessionTokenType.StepUp.cookieName, cookieCreator.createCookie(stepUpTokenService.create(user.info.id, user.info.sensitive.sessions.first().id)).value)
+            .cookie(SessionTokenType.StepUp.cookieName, cookieCreator.createCookie(stepUpTokenService.create(user.info.id, user.sessionId)).value)
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isBadRequest
@@ -514,7 +502,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
     @Test fun `disable needs correct password`() = runTest {
         val user = registerUser(twoFactorEnabled = true)
 
-        val stepUp = stepUpTokenService.create(user.info.id, user.info.sensitive.sessions.first().id)
+        val stepUp = stepUpTokenService.create(user.info.id, user.sessionId)
         val req = DisableTwoFactorRequest("wrong-password")
 
         webTestClient.post()
