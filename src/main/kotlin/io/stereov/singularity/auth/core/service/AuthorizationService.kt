@@ -18,7 +18,7 @@ import org.bson.types.ObjectId
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.stereotype.Service
-import java.util.UUID
+import java.util.*
 
 @Service
 class AuthorizationService(
@@ -31,6 +31,7 @@ class AuthorizationService(
     /**
      * Check if the current user is authenticated.
      */
+    @Suppress("UNUSED")
     suspend fun isAuthenticated(): Boolean {
         logger.debug { "Checking if user is authenticated" }
 
