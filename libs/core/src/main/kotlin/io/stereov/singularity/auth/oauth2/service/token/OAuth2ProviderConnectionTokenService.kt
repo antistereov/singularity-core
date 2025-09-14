@@ -12,6 +12,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
 import org.springframework.stereotype.Service
 import java.time.Instant
+import java.util.*
 
 @Service
 @ConditionalOnProperty("singularity.auth.oauth2.enable", matchIfMissing = false)
@@ -23,7 +24,7 @@ class OAuth2ProviderConnectionTokenService(
 
     private val logger = KotlinLogging.logger {}
 
-    suspend fun create(userId: ObjectId, sessionId: String, provider: String, issuedAt: Instant = Instant.now()): OAuth2ProviderConnectionToken {
+    suspend fun create(userId: ObjectId, sessionId: UUID, provider: String, issuedAt: Instant = Instant.now()): OAuth2ProviderConnectionToken {
         logger.debug { "Creating OAuth2ProviderConnectionToken for user $userId and session $sessionId" }
 
         val claims = JwtClaimsSet.builder()
@@ -47,7 +48,7 @@ class OAuth2ProviderConnectionTokenService(
         val userId = jwt.subject?.let { ObjectId(it) }
             ?: throw InvalidTokenException("OAuth2ProviderConnectionToken does not contain sub")
 
-        val sessionId = jwt.claims[Constants.JWT_SESSION_CLAIM] as? String
+        val sessionId = jwt.claims[Constants.JWT_SESSION_CLAIM] as? UUID
             ?: throw InvalidTokenException("OAuth2ProviderConnectionToken does not contain session id")
 
         val provider = jwt.claims[Constants.JWT_OAUTH2_PROVIDER_CLAIM] as? String
@@ -56,7 +57,7 @@ class OAuth2ProviderConnectionTokenService(
         val user = authorizationService.getCurrentUser()
 
         // Check if the refresh token is linked to a session
-        if (user.sensitive.sessions.none { it.id == sessionId }) {
+        if (!user.sensitive.sessions.containsKey(sessionId)) {
             throw InvalidTokenException("OAuth2ProviderConnectionToken does not correspond to an existing session")
         }
 

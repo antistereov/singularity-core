@@ -10,11 +10,13 @@ import io.stereov.singularity.auth.jwt.properties.JwtProperties
 import io.stereov.singularity.auth.jwt.service.JwtService
 import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.global.util.Random
+import io.stereov.singularity.user.core.service.UserService
 import org.bson.types.ObjectId
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ServerWebExchange
 import java.time.Instant
+import java.util.*
 
 @Service
 class AccessTokenService(
@@ -22,12 +24,14 @@ class AccessTokenService(
     private val accessTokenCache: AccessTokenCache,
     private val jwtProperties: JwtProperties,
     private val tokenValueExtractor: TokenValueExtractor,
+    private val sessionTokenService: SessionTokenService,
+    private val userService: UserService,
 ) {
 
     private val logger = KotlinLogging.logger {}
     private val tokenType = SessionTokenType.Access
 
-    suspend fun create(userId: ObjectId, sessionId: String, issuedAt: Instant = Instant.now()): AccessToken {
+    suspend fun create(userId: ObjectId, sessionId: UUID, issuedAt: Instant = Instant.now()): AccessToken {
         logger.debug { "Creating access token for user $userId and session $sessionId" }
 
         val tokenId = Random.generateString(20)
@@ -51,17 +55,27 @@ class AccessTokenService(
         logger.debug { "Extracting and validating access token" }
 
         val token = tokenValueExtractor.extractValue(exchange, tokenType, true)
+        val sessionToken = sessionTokenService.extract(exchange)
 
         val jwt = jwtService.decodeJwt(token, true)
 
         val userId = jwt.subject?.let { ObjectId(it) }
             ?: throw InvalidTokenException("JWT does not contain sub")
 
-        val sessionId = jwt.claims[Constants.JWT_SESSION_CLAIM] as? String
+        val sessionId = jwt.claims[Constants.JWT_SESSION_CLAIM] as? UUID
             ?: throw InvalidTokenException("JWT does not contain session id")
 
         val tokenId = jwt.id
             ?: throw InvalidTokenException("JWT does not contain token id")
+
+        if (sessionId != sessionToken.id)
+            throw InvalidTokenException("Access token does not correspond to current session")
+
+        val user = userService.findByIdOrNull(userId)
+            ?: throw InvalidTokenException("Access token does not belong to existing user")
+
+        if (user.sensitive.sessions.containsKey(sessionId))
+            throw InvalidTokenException("Access token belongs to invalid session")
 
         val isValid = accessTokenCache.isTokenIdValid(userId, tokenId)
 

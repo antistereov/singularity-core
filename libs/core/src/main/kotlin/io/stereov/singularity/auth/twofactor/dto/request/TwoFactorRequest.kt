@@ -5,5 +5,5 @@ import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
 data class TwoFactorRequest(
     val mail: String?,
     val totp: Int?,
-    val session: SessionInfoRequest
+    val session: SessionInfoRequest?
 )

@@ -4,7 +4,7 @@ import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
 import io.stereov.singularity.auth.core.dto.response.LoginResponse
 import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.auth.twofactor.dto.response.StepUpResponse
-import io.stereov.singularity.auth.twofactor.dto.response.TwoFactorStatusResponse
+import io.stereov.singularity.auth.core.dto.response.AuthenticationStatusResponse
 import io.stereov.singularity.auth.twofactor.model.token.TwoFactorTokenType
 import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.test.runTest
@@ -88,7 +88,7 @@ class TwoFactorAuthControllerTest : BaseIntegrationTest() {
             .uri("/api/auth/2fa/login/status")
             .exchange()
             .expectStatus().isOk
-            .expectBody(TwoFactorStatusResponse::class.java)
+            .expectBody(AuthenticationStatusResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -100,7 +100,7 @@ class TwoFactorAuthControllerTest : BaseIntegrationTest() {
             .cookie(TwoFactorTokenType.Authentication.cookieName, "test")
             .exchange()
             .expectStatus().isOk
-            .expectBody(TwoFactorStatusResponse::class.java)
+            .expectBody(AuthenticationStatusResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -116,7 +116,7 @@ class TwoFactorAuthControllerTest : BaseIntegrationTest() {
             .cookie(TwoFactorTokenType.Authentication.cookieName, user.twoFactorToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(TwoFactorStatusResponse::class.java)
+            .expectBody(AuthenticationStatusResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -195,7 +195,7 @@ class TwoFactorAuthControllerTest : BaseIntegrationTest() {
             )
             .exchange()
             .expectStatus().isOk
-            .expectBody(TwoFactorStatusResponse::class.java)
+            .expectBody(AuthenticationStatusResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -221,7 +221,7 @@ class TwoFactorAuthControllerTest : BaseIntegrationTest() {
             )
             .exchange()
             .expectStatus().isOk
-            .expectBody(TwoFactorStatusResponse::class.java)
+            .expectBody(AuthenticationStatusResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -241,7 +241,7 @@ class TwoFactorAuthControllerTest : BaseIntegrationTest() {
             )
             .exchange()
             .expectStatus().isOk
-            .expectBody(TwoFactorStatusResponse::class.java)
+            .expectBody(AuthenticationStatusResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -258,7 +258,7 @@ class TwoFactorAuthControllerTest : BaseIntegrationTest() {
             .cookie(SessionTokenType.StepUp.cookieName, "another-token")
             .exchange()
             .expectStatus().isOk
-            .expectBody(TwoFactorStatusResponse::class.java)
+            .expectBody(AuthenticationStatusResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -284,7 +284,7 @@ class TwoFactorAuthControllerTest : BaseIntegrationTest() {
             )
             .exchange()
             .expectStatus().isOk
-            .expectBody(TwoFactorStatusResponse::class.java)
+            .expectBody(AuthenticationStatusResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -326,7 +326,7 @@ class TwoFactorAuthControllerTest : BaseIntegrationTest() {
             )
             .exchange()
             .expectStatus().isOk
-            .expectBody(TwoFactorStatusResponse::class.java)
+            .expectBody(AuthenticationStatusResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -342,7 +342,7 @@ class TwoFactorAuthControllerTest : BaseIntegrationTest() {
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(TwoFactorStatusResponse::class.java)
+            .expectBody(AuthenticationStatusResponse::class.java)
             .returnResult()
             .responseBody
 

@@ -3,10 +3,11 @@ package io.stereov.singularity.auth.core.service
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
-import io.stereov.singularity.user.core.model.SessionInfo
+import io.stereov.singularity.auth.core.model.SessionInfo
 import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.service.UserService
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 class SessionService(
@@ -18,12 +19,7 @@ class SessionService(
     private val logger: KLogger
         get() = KotlinLogging.logger {}
 
-    /**
-     * Gets the list of sessions associated with the current user.
-     *
-     * @return A list of [SessionInfo] objects representing the user's sessions.
-     */
-    suspend fun getSessions(): List<SessionInfo> {
+    suspend fun getSessions(): Map<UUID, SessionInfo> {
         logger.debug { "Getting session" }
 
         return authorizationService.getCurrentUser().sensitive.sessions
@@ -36,7 +32,7 @@ class SessionService(
      *
      * @return The updated [UserDocument] of the user.
      */
-    suspend fun deleteSession(sessionId: String): UserDocument {
+    suspend fun deleteSession(sessionId: UUID): UserDocument {
         logger.debug { "Deleting session $sessionId" }
 
         val user = authorizationService.getCurrentUser()

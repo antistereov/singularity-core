@@ -87,7 +87,7 @@ class CustomOAuth2AuthenticationSuccessHandler(
 
         val user = oAuth2AuthenticationService.findOrCreateUser(oauth2Authentication, oauth2ProviderConnectionToken)
         val accessToken = accessTokenService.create(user.id, sessionToken.id)
-        val refreshToken = refreshTokenService.create(user.id, sessionToken.toSessionInfoRequest(), exchange)
+        val refreshToken = refreshTokenService.create(user.id, sessionToken.id, sessionToken.toSessionInfoRequest(), exchange)
 
 
         exchange.response.headers.add(SessionTokenType.Access.HEADER, accessToken.value)

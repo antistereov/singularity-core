@@ -10,6 +10,7 @@ import io.stereov.singularity.auth.core.controller.EmailVerificationController
 import io.stereov.singularity.auth.core.controller.PasswordResetController
 import io.stereov.singularity.auth.core.controller.SessionController
 import io.stereov.singularity.auth.core.exception.handler.AuthExceptionHandler
+import io.stereov.singularity.auth.core.mapper.SessionMapper
 import io.stereov.singularity.auth.core.properties.AuthProperties
 import io.stereov.singularity.auth.core.service.*
 import io.stereov.singularity.auth.core.service.token.*
@@ -88,7 +89,8 @@ class AuthenticationConfiguration {
         stepUpTokenService: StepUpTokenService,
         twoFactorAuthenticationService: TwoFactorAuthenticationService,
         sessionTokenService: SessionTokenService,
-        authorizationService: AuthorizationService
+        authorizationService: AuthorizationService,
+
     ): AuthenticationController {
         return AuthenticationController(
             authenticationService,
@@ -124,9 +126,17 @@ class AuthenticationConfiguration {
     fun sessionController(
         sessionService: SessionService,
         cookieCreator: CookieCreator,
-        sessionTokenService: SessionTokenService
+        sessionTokenService: SessionTokenService,
+        authorizationService: AuthorizationService,
+        sessionMapper: SessionMapper
     ): SessionController {
-        return SessionController(sessionService, cookieCreator, sessionTokenService)
+        return SessionController(
+            sessionService,
+            cookieCreator,
+            sessionTokenService,
+            authorizationService,
+            sessionMapper
+        )
     }
 
     // Exception Handler
@@ -137,6 +147,12 @@ class AuthenticationConfiguration {
         return AuthExceptionHandler()
     }
 
+    // Mapper
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun sessionMapper() = SessionMapper()
+
     // Services
 
     @Bean
@@ -146,7 +162,16 @@ class AuthenticationConfiguration {
         accessTokenCache: AccessTokenCache,
         jwtProperties: JwtProperties,
         tokenValueExtractor: TokenValueExtractor,
-    ) = AccessTokenService(jwtService, accessTokenCache, jwtProperties, tokenValueExtractor)
+        sessionTokenService: SessionTokenService,
+        userService: UserService,
+    ) = AccessTokenService(
+        jwtService,
+        accessTokenCache,
+        jwtProperties,
+        tokenValueExtractor,
+        sessionTokenService,
+        userService
+    )
 
     @Bean
     @ConditionalOnMissingBean
@@ -176,23 +201,26 @@ class AuthenticationConfiguration {
         geolocationService: GeolocationService,
         geolocationProperties: GeolocationProperties,
         userService: UserService,
-        tokenValueExtractor: TokenValueExtractor
+        tokenValueExtractor: TokenValueExtractor,
     ) = RefreshTokenService(
         jwtService,
         jwtProperties,
         geolocationService,
         geolocationProperties,
         userService,
-        tokenValueExtractor
+        tokenValueExtractor,
     )
 
     @Bean
     @ConditionalOnMissingBean
     fun sessionTokenService(
         jwtService: JwtService,
-        jwtProperties: JwtProperties
+        jwtProperties: JwtProperties,
+        tokenValueExtractor: TokenValueExtractor
     ) = SessionTokenService(
-        jwtService, jwtProperties
+        jwtService,
+        jwtProperties,
+        tokenValueExtractor
     )
     
     @Bean

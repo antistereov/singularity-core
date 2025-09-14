@@ -1,6 +1,8 @@
 package io.stereov.singularity.user.core.model
 
+import io.stereov.singularity.auth.core.model.SessionInfo
 import io.stereov.singularity.user.core.model.identity.UserIdentity
+import java.util.*
 
 
 data class SensitiveUserData(
@@ -10,6 +12,6 @@ data class SensitiveUserData(
     val roles: MutableSet<Role> = mutableSetOf(Role.USER),
     val groups: MutableSet<String> = mutableSetOf(),
     val security: UserSecurityDetails,
-    val sessions: MutableList<SessionInfo> = mutableListOf(),
+    val sessions: MutableMap<UUID, SessionInfo> = mutableMapOf(),
     var avatarFileKey: String? = null,
 )

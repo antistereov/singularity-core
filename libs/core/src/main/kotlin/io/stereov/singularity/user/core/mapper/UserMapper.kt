@@ -32,6 +32,7 @@ class UserMapper(
             user.id,
             user.sensitive.name,
             user.sensitive.email,
+            user.sensitive.identities.map { it.key },
             user.sensitive.roles,
             user.sensitive.security.mail.verified,
             user.lastActive.toString(),
