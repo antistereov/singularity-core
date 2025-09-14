@@ -94,17 +94,17 @@ class AuthenticationController(
 
         if (user.twoFactorEnabled) {
             twoFactorAuthenticationService.handleTwoFactor(user, lang)
-            val loginToken = twoFactorAuthenticationTokenService.create(user.id)
+            val twoFactorAuthenticationToken = twoFactorAuthenticationTokenService.create(user.id)
 
             return ResponseEntity.ok()
-                .header("Set-Cookie", cookieCreator.createCookie(loginToken).toString())
+                .header("Set-Cookie", cookieCreator.createCookie(twoFactorAuthenticationToken).toString())
                 .header("Set-Cookie", cookieCreator.createCookie(sessionToken).toString())
                 .body(
                     LoginResponse(
                         user = userMapper.toResponse(user),
                         twoFactorRequired = true,
                         allowedTwoFactorMethods = user.twoFactorMethods,
-                        twoFactorAuthenticationToken = if (authProperties.allowHeaderAuthentication) loginToken.value else null,
+                        twoFactorAuthenticationToken = if (authProperties.allowHeaderAuthentication) twoFactorAuthenticationToken.value else null,
                         accessToken = null,
                         refreshToken = null,
                         sessionToken = if (authProperties.allowHeaderAuthentication) sessionToken.value else null,
@@ -176,6 +176,7 @@ class AuthenticationController(
         return ResponseEntity.ok()
             .header("Set-Cookie", cookieCreator.createCookie(accessToken).toString())
             .header("Set-Cookie", cookieCreator.createCookie(refreshToken).toString())
+            .header("Set-Cookie", cookieCreator.createCookie(sessionToken).toString())
             .body(res)
     }
 

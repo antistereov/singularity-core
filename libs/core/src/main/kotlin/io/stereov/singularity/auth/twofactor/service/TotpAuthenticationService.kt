@@ -90,10 +90,10 @@ class TotpAuthenticationService(
         user.setupTotp(encryptedSecret, hashedRecoveryCodes)
             .clearSessions()
 
-        userService.save(user)
+        val savedUser = userService.save(user)
         accessTokenCache.invalidateAllTokens(user.id)
 
-        return userMapper.toResponse(user)
+        return userMapper.toResponse(savedUser)
     }
 
     /**
@@ -112,11 +112,9 @@ class TotpAuthenticationService(
         val secret = user.sensitive.security.twoFactor.totp.secret
             ?: throw InvalidDocumentException("TOTP is enabled for user ${user.id} but no TOTP secret was found")
 
-        if (totpService.codeIsValid(secret, code)) {
-            throw InvalidTwoFactorCodeException()
-        }
+        if (totpService.codeIsValid(secret, code)) return user
 
-        return user
+        throw InvalidTwoFactorCodeException()
     }
 
     suspend fun recoverUser(exchange: ServerWebExchange, recoveryCode: String): UserDocument {

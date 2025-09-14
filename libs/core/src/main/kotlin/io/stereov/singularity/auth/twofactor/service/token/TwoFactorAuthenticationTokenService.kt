@@ -38,11 +38,15 @@ class TwoFactorAuthenticationTokenService(
     }
 
     suspend fun extract(exchange: ServerWebExchange): TwoFactorAuthenticationToken {
+        val tokenValue = tokenValueExtractor.extractValue(exchange, tokenType)
+
+       return extract(tokenValue)
+    }
+
+    suspend fun extract(tokenValue: String): TwoFactorAuthenticationToken {
         logger.debug { "Extracting two factor login token" }
 
-        val token = tokenValueExtractor.extractValue(exchange, tokenType)
-
-        val jwt = jwtService.decodeJwt(token, true)
+        val jwt = jwtService.decodeJwt(tokenValue, true)
 
         val userId = jwt.subject?.let { ObjectId(it) }
             ?: throw InvalidTokenException("JWT does not contain sub")

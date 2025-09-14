@@ -48,7 +48,8 @@ class OAuth2ProviderConnectionTokenService(
         val userId = jwt.subject?.let { ObjectId(it) }
             ?: throw InvalidTokenException("OAuth2ProviderConnectionToken does not contain sub")
 
-        val sessionId = jwt.claims[Constants.JWT_SESSION_CLAIM] as? UUID
+        val sessionId = (jwt.claims[Constants.JWT_SESSION_CLAIM] as? String)
+            ?.let { UUID.fromString(it) }
             ?: throw InvalidTokenException("OAuth2ProviderConnectionToken does not contain session id")
 
         val provider = jwt.claims[Constants.JWT_OAUTH2_PROVIDER_CLAIM] as? String

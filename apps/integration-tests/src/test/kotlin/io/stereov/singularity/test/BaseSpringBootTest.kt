@@ -10,10 +10,12 @@ import io.stereov.singularity.auth.core.service.token.*
 import io.stereov.singularity.auth.group.model.GroupDocument
 import io.stereov.singularity.auth.group.model.GroupTranslation
 import io.stereov.singularity.auth.group.service.GroupService
+import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorAuthenticationRequest
 import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorVerifySetupRequest
 import io.stereov.singularity.auth.twofactor.dto.response.TwoFactorSetupResponse
 import io.stereov.singularity.auth.twofactor.model.token.TwoFactorTokenType
 import io.stereov.singularity.auth.twofactor.service.TotpService
+import io.stereov.singularity.auth.twofactor.service.token.TwoFactorAuthenticationTokenService
 import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.database.encryption.service.EncryptionSecretService
 import io.stereov.singularity.database.hash.service.HashService
@@ -36,6 +38,9 @@ import java.util.*
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(MockConfig::class)
 class BaseSpringBootTest {
+
+    @Autowired
+    lateinit var twoFactorAuthenticationTokenService: TwoFactorAuthenticationTokenService
 
     @Autowired
     lateinit var sessionTokenService: SessionTokenService
@@ -135,9 +140,11 @@ class BaseSpringBootTest {
 
         var accessToken = responseCookies[SessionTokenType.Access.cookieName]?.firstOrNull()?.value
         var refreshToken = responseCookies[SessionTokenType.Refresh.cookieName]?.firstOrNull()?.value
+        val sessionToken = responseCookies[SessionTokenType.Session.cookieName]?.firstOrNull()?.value
 
         requireNotNull(accessToken) { "No access token contained in response" }
         requireNotNull(refreshToken) { "No refresh token contained in response" }
+        requireNotNull(sessionToken) { "No SessionToken contained in response" }
 
         var twoFactorToken: String? = null
         var twoFactorRecovery: String? = null
@@ -152,6 +159,7 @@ class BaseSpringBootTest {
                 .uri("/api/auth/2fa/totp/setup")
                 .cookie(SessionTokenType.StepUp.cookieName, cookieCreator.createCookie(stepUpToken).value)
                 .cookie(SessionTokenType.Access.cookieName, accessToken)
+                .cookie(SessionTokenType.Session.cookieName, sessionToken)
                 .exchange()
                 .expectStatus().isOk
                 .expectBody(TwoFactorSetupResponse::class.java)
@@ -172,6 +180,8 @@ class BaseSpringBootTest {
             webTestClient.post()
                 .uri("/api/auth/2fa/totp/setup")
                 .cookie(SessionTokenType.Access.cookieName, accessToken)
+                .cookie(SessionTokenType.Session.cookieName, sessionToken)
+                .cookie(SessionTokenType.Session.cookieName, stepUpToken.value)
                 .bodyValue(twoFactorSetupReq)
                 .exchange()
                 .expectStatus().isOk
@@ -187,8 +197,10 @@ class BaseSpringBootTest {
                 ?.value
 
             responseCookies = webTestClient.post()
-                .uri("/api/auth/2fa/login?code=${gAuth.getTotpPassword(twoFactorSecret)}")
+                .uri("/api/auth/2fa/login")
+                .bodyValue(TwoFactorAuthenticationRequest(totp = gAuth.getTotpPassword(twoFactorSecret)))
                 .cookie(TwoFactorTokenType.Authentication.cookieName, twoFactorToken!!)
+                .cookie(SessionTokenType.Session.cookieName, sessionToken)
                 .exchange()
                 .expectStatus().isOk
                 .returnResult<Void>()
@@ -200,6 +212,8 @@ class BaseSpringBootTest {
             requireNotNull(accessToken) { "No access token contained in response" }
             requireNotNull(refreshToken) { "No refresh token contained in response" }
         }
+
+        user = userService.findById(user.id)
         
         if (roles != listOf(Role.USER)) {
             roles.forEach { role ->
