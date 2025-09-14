@@ -1,7 +1,7 @@
 package io.stereov.singularity.auth.oauth2.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.auth.oauth2.exception.OAuth2Exception
+import io.stereov.singularity.auth.oauth2.exception.model.OAuth2FlowException
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorAuthProperties
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.user.core.model.UserDocument
@@ -20,40 +20,32 @@ class OAuth2AuthenticationService(
     private val logger = KotlinLogging.logger {}
 
      suspend fun findOrCreateUser(
-         oauth2Token: OAuth2AuthenticationToken,
+         oauth2Authentication: OAuth2AuthenticationToken,
          oauth2ProviderConnectionTokenValue: String?
      ): UserDocument {
          logger.debug { "Finding or creating user after OAuth2 authentication" }
 
-         val provider = oauth2Token.authorizedClientRegistrationId
-         val oauth2User = oauth2Token.principal
+         val provider = oauth2Authentication.authorizedClientRegistrationId
+         val oauth2User = oauth2Authentication.principal
 
          val principalId = oauth2User.attributes["id"]?.toString()
-             ?: throw OAuth2Exception("No ID provided in OAuth2 request")
-         val email = runCatching { oauth2User.attributes["email"] as String }
-             .getOrElse { throw OAuth2Exception("No email provided in OAuth2 request") }
-         val name = oauth2User.attributes["name"] as? String ?: "GitHub User"
+             ?: throw OAuth2FlowException("principal_id_missing","No principal ID provided from OAuth2 provider.")
 
-         return userService.findByIdentityOrNull(provider, principalId)
-             ?: handleExistingUser(name, email, provider, principalId, oauth2ProviderConnectionTokenValue)
-    }
+         val email = try {
+             oauth2User.attributes["email"] as String
+         } catch (e: Exception) {
+             throw OAuth2FlowException("email_attribute_missing","No email provided from OAuth2 provider.", e)
+         }
 
-    private suspend fun handleExistingUser(
-        name: String,
-        email: String,
-        provider: String,
-        principalId: String,
-        oauth2ProviderConnectionToken: String?
-    ): UserDocument{
-        logger.debug { "Handling existing user" }
+         val name = oauth2User.attributes["name"] as? String ?: "User"
 
-        val existingUser = userService.findByIdentityOrNull(provider, principalId)
-        if (existingUser != null) return existingUser
+         val existingUser = userService.findByIdentityOrNull(provider, principalId)
+         if (existingUser != null) return existingUser
 
-        return when (userService.existsByEmail(email)) {
-            true -> handleConnection(provider, principalId, oauth2ProviderConnectionToken)
-            false -> handleRegistration(name, email, provider, principalId)
-        }
+         return when (userService.existsByEmail(email)) {
+             true -> handleConnection(provider, principalId, oauth2ProviderConnectionTokenValue)
+             false -> handleRegistration(name, email, provider, principalId)
+         }
     }
 
     private suspend fun handleRegistration(

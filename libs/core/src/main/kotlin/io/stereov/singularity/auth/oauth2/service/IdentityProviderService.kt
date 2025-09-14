@@ -4,10 +4,10 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.dto.request.ConnectPasswordIdentityRequest
 import io.stereov.singularity.auth.core.model.IdentityProvider
 import io.stereov.singularity.auth.core.service.AuthorizationService
-import io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException
+import io.stereov.singularity.auth.jwt.exception.model.TokenExpiredException
 import io.stereov.singularity.auth.oauth2.exception.model.CannotConnectIdentityProviderException
 import io.stereov.singularity.auth.oauth2.exception.model.CannotDisconnectIdentityProviderException
-import io.stereov.singularity.auth.oauth2.exception.model.OAuth2ProviderConnectedException
+import io.stereov.singularity.auth.oauth2.exception.model.OAuth2FlowException
 import io.stereov.singularity.auth.oauth2.service.token.OAuth2ProviderConnectionTokenService
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.user.core.model.UserDocument
@@ -44,22 +44,33 @@ class IdentityProviderService(
     suspend fun connect(provider: String, principalId: String, oauth2ProviderConnectionTokenValue: String?): UserDocument {
         logger.debug { "Connecting a new OAuth2 provider $provider to user" }
 
-        val connectedUser = userService.findByIdentityOrNull(provider, principalId)
-        if (connectedUser != null) return connectedUser
-
         val user = authorizationService.getCurrentUser()
         authorizationService.requireStepUp()
 
-        if (user.sensitive.identities.containsKey(provider))
-            throw OAuth2ProviderConnectedException(provider)
-
         if (oauth2ProviderConnectionTokenValue == null)
-            throw InvalidTokenException("No OAuth2ProviderConnection set as cookie or sent as request parameter")
+            throw OAuth2FlowException(
+                "connection_token_missing",
+                "Failed to connect a new provider to the current user. " +
+                        "No OAuth2ProviderConnection set as cookie or sent as request parameter."
+            )
 
-        val connectionToken = oAuth2ProviderConnectionTokenService.extract(oauth2ProviderConnectionTokenValue)
+        if (user.sensitive.identities.containsKey(provider))
+            throw OAuth2FlowException("provider_already_connected", "The user already connected the provider $provider")
+
+        val connectionToken = try {
+            oAuth2ProviderConnectionTokenService.extract(oauth2ProviderConnectionTokenValue)
+        } catch(e: Exception) {
+            when (e) {
+                is TokenExpiredException -> throw OAuth2FlowException("connection_token_expired",
+                    "The provided OAuth2ProviderConnectionToken is expired.")
+                else -> throw OAuth2FlowException("invalid_connection_token",
+                    "The provided OAuth2ProviderConnectionToken cannot be decoded.")
+            }
+        }
 
         if (provider != connectionToken.provider)
-            throw InvalidTokenException("The OAuth2ProviderConnectionToken does not match the requested provider")
+            throw OAuth2FlowException("connection_token_provider_mismatch",
+                "The provided OAuth2ProviderConnectionToken does not match the requested provider.")
 
         user.sensitive.identities[provider] = UserIdentity.ofProvider(principalId, false)
         return userService.save(user)
