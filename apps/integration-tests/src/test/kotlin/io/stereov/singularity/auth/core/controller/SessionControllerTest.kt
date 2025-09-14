@@ -14,7 +14,7 @@ class SessionControllerTest : BaseIntegrationTest() {
 
     @Test fun `getSessions returns sessions`() = runTest {
         val user = registerUser(sessionId = "first")
-        user.info.sensitive.sessions.addAll(
+        user.info.sensitive.sessions[(
             listOf(
                 SessionInfo("second", issuedAt = Instant.now()),
                 SessionInfo("third", issuedAt = Instant.now())

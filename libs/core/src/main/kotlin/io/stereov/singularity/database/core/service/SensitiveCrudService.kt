@@ -30,6 +30,7 @@ interface SensitiveCrudService<S, D: SensitiveDocument<S>, E: EncryptedSensitive
         return encryptionService.decrypt(encrypted, otherValues, clazz) as D
     }
 
+    @Suppress("UNUSED")
     suspend fun existsById(id: ObjectId): Boolean {
         logger.debug { "Checking if document with ID $id exists" }
 

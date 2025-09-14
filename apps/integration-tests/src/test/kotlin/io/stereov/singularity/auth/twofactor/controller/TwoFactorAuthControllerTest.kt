@@ -1,16 +1,17 @@
 package io.stereov.singularity.auth.twofactor.controller
 
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
+import io.stereov.singularity.auth.core.dto.response.AuthenticationStatusResponse
 import io.stereov.singularity.auth.core.dto.response.LoginResponse
 import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.auth.twofactor.dto.response.StepUpResponse
-import io.stereov.singularity.auth.core.dto.response.AuthenticationStatusResponse
 import io.stereov.singularity.auth.twofactor.model.token.TwoFactorTokenType
 import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.Instant
+import java.util.*
 
 class TwoFactorAuthControllerTest : BaseIntegrationTest() {
 
@@ -22,7 +23,6 @@ class TwoFactorAuthControllerTest : BaseIntegrationTest() {
 
         val res = webTestClient.post()
             .uri("/api/auth/2fa/login?code=$code")
-            .bodyValue(user.info.sensitive.sessions.first().toRequestDto())
             .cookie(TwoFactorTokenType.Authentication.cookieName, user.twoFactorToken)
             .exchange()
             .expectStatus().isOk
@@ -49,7 +49,6 @@ class TwoFactorAuthControllerTest : BaseIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/auth/2fa/login?code=$code")
-            .bodyValue(user.info.sensitive.sessions.first().toRequestDto())
             .cookie(TwoFactorTokenType.Authentication.cookieName, user.twoFactorToken)
             .exchange()
             .expectStatus().isUnauthorized
@@ -61,7 +60,6 @@ class TwoFactorAuthControllerTest : BaseIntegrationTest() {
         webTestClient.post()
             .uri("/api/auth/2fa/login")
             .cookie(TwoFactorTokenType.Authentication.cookieName, user.twoFactorToken)
-            .bodyValue(user.info.sensitive.sessions.first())
             .exchange()
             .expectStatus().isBadRequest
     }
@@ -189,7 +187,7 @@ class TwoFactorAuthControllerTest : BaseIntegrationTest() {
                 cookieCreator.createCookie(
                     stepUpTokenService.create(
                         user.info.id,
-                        user.info.sensitive.sessions.first().id
+                        user.sessionId
                     )
                 ).value
             )
@@ -215,7 +213,7 @@ class TwoFactorAuthControllerTest : BaseIntegrationTest() {
                 cookieCreator.createCookie(
                     stepUpTokenService.create(
                         anotherUser.info.id,
-                        user.info.sensitive.sessions.first().id
+                        user.sessionId
                     )
                 ).value
             )
@@ -237,7 +235,7 @@ class TwoFactorAuthControllerTest : BaseIntegrationTest() {
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .cookie(
                 SessionTokenType.StepUp.cookieName,
-                cookieCreator.createCookie(stepUpTokenService.create(user.info.id, "another-session")).value
+                cookieCreator.createCookie(stepUpTokenService.create(user.info.id, UUID.randomUUID())).value
             )
             .exchange()
             .expectStatus().isOk
@@ -277,7 +275,7 @@ class TwoFactorAuthControllerTest : BaseIntegrationTest() {
                 cookieCreator.createCookie(
                     stepUpTokenService.create(
                         user.info.id,
-                        user.info.sensitive.sessions.first().id,
+                        user.sessionId,
                         Instant.ofEpochSecond(0)
                     )
                 ).value
@@ -302,7 +300,7 @@ class TwoFactorAuthControllerTest : BaseIntegrationTest() {
                 cookieCreator.createCookie(
                     stepUpTokenService.create(
                         user.info.id,
-                        user.info.sensitive.sessions.first().id
+                        user.sessionId
                     )
                 ).value
             )
@@ -320,7 +318,7 @@ class TwoFactorAuthControllerTest : BaseIntegrationTest() {
                 cookieCreator.createCookie(
                     stepUpTokenService.create(
                         user.info.id,
-                        user.info.sensitive.sessions.first().id
+                        user.sessionId
                     )
                 ).value
             )
