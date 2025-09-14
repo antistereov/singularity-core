@@ -3,7 +3,7 @@ package io.stereov.singularity.auth.twofactor.service
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.exception.AuthException
-import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorRequest
+import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorAuthenticationRequest
 import io.stereov.singularity.auth.twofactor.exception.model.InvalidTwoFactorRequestException
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
 import io.stereov.singularity.auth.twofactor.service.token.TwoFactorAuthenticationTokenService
@@ -40,7 +40,7 @@ class TwoFactorAuthenticationService(
      * @throws io.stereov.singularity.global.exception.model.InvalidDocumentException If the user document does not contain a two-factor authentication secret.
      * @throws AuthException If the two-factor code is invalid.
      */
-    suspend fun validateTwoFactor(exchange: ServerWebExchange, req: TwoFactorRequest): UserDocument {
+    suspend fun validateTwoFactor(exchange: ServerWebExchange, req: TwoFactorAuthenticationRequest): UserDocument {
         logger.debug { "Validating two factor code" }
 
         val token = twoFactorAuthTokenService.extract(exchange)

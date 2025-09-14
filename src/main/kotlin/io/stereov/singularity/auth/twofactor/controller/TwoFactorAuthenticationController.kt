@@ -9,7 +9,7 @@ import io.stereov.singularity.auth.core.service.token.RefreshTokenService
 import io.stereov.singularity.auth.core.service.token.SessionTokenService
 import io.stereov.singularity.auth.core.service.token.StepUpTokenService
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
-import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorRequest
+import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorAuthenticationRequest
 import io.stereov.singularity.auth.twofactor.dto.response.StepUpResponse
 import io.stereov.singularity.auth.twofactor.model.token.TwoFactorTokenType
 import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthenticationService
@@ -44,7 +44,7 @@ class TwoFactorAuthenticationController(
     @PostMapping("/login")
     suspend fun verifyLogin(
         exchange: ServerWebExchange,
-        @RequestBody req: TwoFactorRequest
+        @RequestBody req: TwoFactorAuthenticationRequest
     ): ResponseEntity<LoginResponse> {
         val user = twoFactorAuthService.validateTwoFactor(exchange, req)
 
@@ -74,7 +74,7 @@ class TwoFactorAuthenticationController(
     }
 
     @PostMapping("/step-up")
-    suspend fun verifyStepUp(@RequestBody req: TwoFactorRequest, exchange: ServerWebExchange): ResponseEntity<StepUpResponse> {
+    suspend fun verifyStepUp(@RequestBody req: TwoFactorAuthenticationRequest, exchange: ServerWebExchange): ResponseEntity<StepUpResponse> {
         val user = twoFactorAuthService.validateTwoFactor(exchange, req)
         val sessionId = authorizationService.getCurrentSessionId()
 

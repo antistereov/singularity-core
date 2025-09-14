@@ -64,7 +64,8 @@ class StepUpTokenService(
             throw InvalidTokenException("Step up token is not valid for currently logged in user")
         }
 
-        val sessionId = jwt.claims[Constants.JWT_SESSION_CLAIM] as? UUID
+        val sessionId = (jwt.claims[Constants.JWT_SESSION_CLAIM] as? String)
+            ?.let { UUID.fromString(it) }
             ?: throw InvalidTokenException("JWT does not contain session id")
 
         if (sessionId != currentSessionId) {

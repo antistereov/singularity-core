@@ -58,8 +58,9 @@ class SessionTokenService(
 
         val jwt = jwtService.decodeJwt(tokenValue, true)
 
-        val sessionId = jwt.claims[Constants.JWT_SESSION_CLAIM] as? UUID
-            ?: throw InvalidTokenException("No session ID found in claims")
+        val sessionId = (jwt.claims[Constants.JWT_SESSION_CLAIM] as? String)
+            ?.let { UUID.fromString(it) }
+            ?: throw InvalidTokenException("No session ID found in SessionToken")
         val browser = jwt.claims[Constants.JWT_BROWSER_CLAIM] as? String
         val os = jwt.claims[Constants.JWT_OS_CLAIM] as? String
 

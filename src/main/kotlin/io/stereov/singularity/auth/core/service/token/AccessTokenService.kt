@@ -60,27 +60,28 @@ class AccessTokenService(
         val jwt = jwtService.decodeJwt(token, true)
 
         val userId = jwt.subject?.let { ObjectId(it) }
-            ?: throw InvalidTokenException("JWT does not contain sub")
+            ?: throw InvalidTokenException("AccessToken does not contain sub")
 
-        val sessionId = jwt.claims[Constants.JWT_SESSION_CLAIM] as? UUID
-            ?: throw InvalidTokenException("JWT does not contain session id")
+        val sessionId = (jwt.claims[Constants.JWT_SESSION_CLAIM] as? String)
+            ?.let { UUID.fromString(it) }
+            ?: throw InvalidTokenException("AccessToken does not contain session id")
 
         val tokenId = jwt.id
-            ?: throw InvalidTokenException("JWT does not contain token id")
+            ?: throw InvalidTokenException("AccessToken does not contain token id")
 
         if (sessionId != sessionToken.id)
-            throw InvalidTokenException("Access token does not correspond to current session")
+            throw InvalidTokenException("AccessToken does not correspond to current session")
 
         val user = userService.findByIdOrNull(userId)
-            ?: throw InvalidTokenException("Access token does not belong to existing user")
+            ?: throw InvalidTokenException("AccessToken does not belong to existing user")
 
         if (!user.sensitive.sessions.containsKey(sessionId))
-            throw InvalidTokenException("Access token belongs to invalid session")
+            throw InvalidTokenException("AccessToken belongs to invalid session")
 
         val isValid = accessTokenCache.isTokenIdValid(userId, tokenId)
 
         if (!isValid) {
-            throw InvalidTokenException("Access token is not valid")
+            throw InvalidTokenException("AccessToken is not valid")
         }
 
         return AccessToken(userId, sessionId, tokenId, jwt)

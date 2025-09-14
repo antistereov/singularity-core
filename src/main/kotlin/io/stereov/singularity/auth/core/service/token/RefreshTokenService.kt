@@ -117,7 +117,8 @@ class RefreshTokenService(
         val userId = jwt.subject?.let { ObjectId(it) }
             ?: throw InvalidTokenException("Refresh token does not contain user id")
 
-        val sessionId = jwt.claims[Constants.JWT_SESSION_CLAIM] as? UUID
+        val sessionId = (jwt.claims[Constants.JWT_SESSION_CLAIM] as? String)
+            ?.let { UUID.fromString(it) }
             ?: throw InvalidTokenException("Refresh token does not contain session id")
 
         val tokenId = jwt.id
