@@ -9,7 +9,7 @@ import io.stereov.singularity.auth.core.dto.request.StepUpRequest
 import io.stereov.singularity.auth.core.exception.AuthException
 import io.stereov.singularity.auth.core.exception.model.InvalidCredentialsException
 import io.stereov.singularity.auth.core.exception.model.UserAlreadyAuthenticatedException
-import io.stereov.singularity.auth.twofactor.properties.TwoFactorAuthProperties
+import io.stereov.singularity.auth.twofactor.properties.TwoFactorMailCodeProperties
 import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.global.properties.AppProperties
@@ -27,7 +27,7 @@ class AuthenticationService(
     private val accessTokenCache: AccessTokenCache,
     private val emailVerificationService: EmailVerificationService,
     private val appProperties: AppProperties,
-    private val twoFactorProperties: TwoFactorAuthProperties
+    private val factorMailCodeProperties: TwoFactorMailCodeProperties
 ) {
 
     private val logger: KLogger
@@ -86,7 +86,7 @@ class AuthenticationService(
             password = hashService.hashBcrypt(payload.password),
             name = payload.name,
             mailEnabled = appProperties.enableMail,
-            mailTwoFactorCodeExpiresIn = twoFactorProperties.mailTwoFactorCodeExpiresIn
+            mailTwoFactorCodeExpiresIn = factorMailCodeProperties.expiresIn
         )
 
         val savedUserDocument = userService.save(userDocument)
@@ -96,13 +96,6 @@ class AuthenticationService(
         return savedUserDocument
     }
 
-    /**
-     * Logs out the user from the specified session and returns the updated user document.
-     *
-     * @param sessionId The ID of the session to log out from.
-     *
-     * @return The [UserDocument] of the logged-out user.
-     */
     suspend fun logout(): UserDocument {
         logger.debug { "Logging out user" }
 

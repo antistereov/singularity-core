@@ -3,7 +3,7 @@ package io.stereov.singularity.auth.oauth2.service
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.oauth2.exception.model.OAuth2FlowException
-import io.stereov.singularity.auth.twofactor.properties.TwoFactorAuthProperties
+import io.stereov.singularity.auth.twofactor.properties.TwoFactorMailCodeProperties
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.service.UserService
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service
 class OAuth2AuthenticationService(
     private val userService: UserService,
     private val appProperties: AppProperties,
-    private val twoFactorAuthProperties: TwoFactorAuthProperties,
+    private val twoFactorMailCodeProperties: TwoFactorMailCodeProperties,
     private val identityProviderService: IdentityProviderService,
     private val authorizationService: AuthorizationService
 ) {
@@ -69,7 +69,7 @@ class OAuth2AuthenticationService(
             provider = provider,
             principalId = principalId,
             mailEnabled = appProperties.enableMail,
-            mailTwoFactorCodeExpiresIn = twoFactorAuthProperties.mailTwoFactorCodeExpiresIn
+            mailTwoFactorCodeExpiresIn = twoFactorMailCodeProperties.expiresIn
         )
 
         return userService.save(user)

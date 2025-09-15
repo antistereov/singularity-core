@@ -72,8 +72,8 @@
     },
     {
       "name": "singularity.security.two-factor",
-      "type": "io.stereov.singularity.auth.twofactor.properties.TwoFactorAuthProperties",
-      "sourceType": "io.stereov.singularity.auth.twofactor.properties.TwoFactorAuthProperties"
+      "type": "io.stereov.singularity.auth.twofactor.properties.TotpRecoveryCodeProperties",
+      "sourceType": "io.stereov.singularity.auth.twofactor.properties.TotpRecoveryCodeProperties"
     },
     {
       "name": "singularity.ui",
@@ -500,23 +500,23 @@
       "description": "Time window in minutes for the IP limit."
     },
     {
-      "name": "singularity.security.two-factor.recovery-code-length",
+      "name": "singularity.security.two-factor.totp.recovery-code.length",
       "type": "java.lang.Integer",
-      "sourceType": "io.stereov.singularity.auth.twofactor.properties.TwoFactorAuthProperties",
+      "sourceType": "io.stereov.singularity.auth.twofactor.properties.TotpRecoveryCodeProperties",
       "defaultValue": 10,
       "description": "Length of the recovery code that can be used to log in if a user lost access to their second factor. Default is 10 characters."
     },
     {
-      "name": "singularity.auth.two-factor.recovery-code-count",
+      "name": "singularity.auth.two-factor.totp.recovery-code.count",
       "type": "java.lang.Integer",
-      "sourceType": "io.stereov.singularity.auth.twofactor.properties.TwoFactorAuthProperties",
+      "sourceType": "io.stereov.singularity.auth.twofactor.properties.TotpRecoveryCodeProperties",
       "defaultValue": 6,
       "description": "The number of recovery codes to generate. Every code can only be used once. Default is 6."
     },
     {
-      "name": "singularity.auth.two-factor.mail-two-factor-code-expires-in",
+      "name": "singularity.auth.two-factor.mail.code.expires-in",
       "type": "java.lang.Long",
-      "sourceType": "io.stereov.singularity.auth.twofactor.properties.TwoFactorAuthProperties",
+      "sourceType": "io.stereov.singularity.auth.twofactor.properties.TwoFactorMailCodeProperties",
       "defaultValue": 900,
       "description": "The number of seconds the 2FA code sent by email is valid."
     },

@@ -1,10 +1,12 @@
 package io.stereov.singularity.auth.twofactor.controller
 
+import io.stereov.singularity.auth.core.dto.response.MailCooldownResponse
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.twofactor.dto.request.EnableMailTwoFactorMethodRequest
 import io.stereov.singularity.auth.twofactor.service.MailAuthenticationService
 import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.global.model.ErrorResponse
+import io.stereov.singularity.global.model.MailSendResponse
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.global.model.SuccessResponse
 import io.stereov.singularity.user.core.dto.response.UserResponse
@@ -55,12 +57,12 @@ class MailAuthenticationController(
     )
     suspend fun sendAuthenticationMail(
         @RequestParam lang: Language = Language.EN
-    ): ResponseEntity<SuccessResponse> {
+    ): ResponseEntity<MailSendResponse> {
         val user = authorizationService.getCurrentUser()
 
         mailAuthenticationService.sendMail(user, lang)
 
-        return ResponseEntity.ok(SuccessResponse())
+        return ResponseEntity.ok(MailSendResponse(mailAuthenticationService.getRemainingCooldown(user.id)))
     }
 
     @PostMapping("/enable")
@@ -131,5 +133,33 @@ class MailAuthenticationController(
         return ResponseEntity.ok(
             userMapper.toResponse(mailAuthenticationService.disable())
         )
+    }
+
+    @GetMapping("/cooldown")
+    @Operation(
+        summary = "Get remaining 2FA code email cooldown",
+        description = "Get the remaining time in seconds until you can send another email containing a 2FA code.",
+        security = [
+            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER),
+            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE)
+        ],
+        responses = [
+            ApiResponse(
+                responseCode = "200",
+                description = "The remaining cooldown.",
+                content = [Content(schema = Schema(implementation = MailCooldownResponse::class))]
+            ),
+            ApiResponse(
+                responseCode = "401",
+                description = "Unauthorized.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
+        ]
+    )
+    suspend fun getRemainingCooldown(): ResponseEntity<MailCooldownResponse> {
+        val userId = authorizationService.getCurrentUserId()
+        val remainingCooldown = mailAuthenticationService.getRemainingCooldown(userId)
+
+        return ResponseEntity.ok().body(MailCooldownResponse(remainingCooldown))
     }
 }

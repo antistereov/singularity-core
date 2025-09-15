@@ -10,7 +10,7 @@ import io.stereov.singularity.auth.twofactor.exception.model.CannotDisableOnly2F
 import io.stereov.singularity.auth.twofactor.exception.model.InvalidTwoFactorCodeException
 import io.stereov.singularity.auth.twofactor.exception.model.TwoFactorMethodSetupException
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
-import io.stereov.singularity.auth.twofactor.properties.TwoFactorAuthProperties
+import io.stereov.singularity.auth.twofactor.properties.TotpRecoveryCodeProperties
 import io.stereov.singularity.auth.twofactor.service.token.TotpSetupTokenService
 import io.stereov.singularity.auth.twofactor.service.token.TwoFactorAuthenticationTokenService
 import io.stereov.singularity.database.hash.service.HashService
@@ -27,7 +27,7 @@ import org.springframework.web.server.ServerWebExchange
 class TotpAuthenticationService(
     private val totpService: TotpService,
     private val authorizationService: AuthorizationService,
-    private val twoFactorAuthProperties: TwoFactorAuthProperties,
+    private val totpRecoveryCodeProperties: TotpRecoveryCodeProperties,
     private val setupTokenService: TotpSetupTokenService,
     private val hashService: HashService,
     private val userService: UserService,
@@ -56,8 +56,8 @@ class TotpAuthenticationService(
 
         val secret = totpService.generateSecretKey()
         val otpAuthUrl = totpService.getOtpAuthUrl(user.sensitive.email, secret)
-        val recoveryCodes = List(twoFactorAuthProperties.recoveryCodeCount) {
-            Random.generateString(twoFactorAuthProperties.recoveryCodeLength)
+        val recoveryCodes = List(totpRecoveryCodeProperties.count) {
+            Random.generateString(totpRecoveryCodeProperties.length)
         }
 
         val setupToken = setupTokenService.create(user.id, secret, recoveryCodes)

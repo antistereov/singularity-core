@@ -10,7 +10,7 @@ import io.stereov.singularity.auth.twofactor.exception.model.InvalidTwoFactorCod
 import io.stereov.singularity.auth.twofactor.exception.model.TwoFactorCodeExpiredException
 import io.stereov.singularity.auth.twofactor.exception.model.TwoFactorMethodSetupException
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
-import io.stereov.singularity.auth.twofactor.properties.TwoFactorAuthProperties
+import io.stereov.singularity.auth.twofactor.properties.TwoFactorMailCodeProperties
 import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.content.translate.model.TranslateKey
 import io.stereov.singularity.content.translate.service.TranslateService
@@ -32,7 +32,7 @@ import java.time.Instant
 
 @Service
 class MailAuthenticationService(
-    private val twoFactorAuthProperties: TwoFactorAuthProperties,
+    private val twoFactorMailCodeProperties: TwoFactorMailCodeProperties,
     private val userService: UserService,
     private val translateService: TranslateService,
     private val templateService: TemplateService,
@@ -50,7 +50,7 @@ class MailAuthenticationService(
 
         val code = Random.generateInt()
         user.sensitive.security.twoFactor.mail.code = code
-        user.sensitive.security.twoFactor.mail.expiresAt = Instant.now().plusSeconds(twoFactorAuthProperties.mailTwoFactorCodeExpiresIn)
+        user.sensitive.security.twoFactor.mail.expiresAt = Instant.now().plusSeconds(twoFactorMailCodeProperties.expiresIn)
 
         userService.save(user)
 
