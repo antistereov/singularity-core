@@ -12,7 +12,7 @@ object SessionTokenType {
         override val cookieName = COOKIE_NAME
     }
     object Refresh : SecurityTokenType {
-        const val HEADER = "X-Refresh-Token"
+        const val HEADER = HttpHeaders.AUTHORIZATION
         const val COOKIE_NAME = "refresh_token"
 
         override val header = HEADER

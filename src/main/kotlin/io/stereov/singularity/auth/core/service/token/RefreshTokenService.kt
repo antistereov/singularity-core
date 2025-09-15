@@ -105,7 +105,7 @@ class RefreshTokenService(
     suspend fun extract(exchange: ServerWebExchange): RefreshToken {
         logger.debug { "Extracting refresh token" }
 
-        val tokenValue = tokenValueExtractor.extractValue(exchange, tokenType)
+        val tokenValue = tokenValueExtractor.extractValue(exchange, tokenType, true)
 
         val jwt = try {
             jwtService.decodeJwt(tokenValue, true)
