@@ -84,7 +84,7 @@ class PasswordResetController(
             ),
         ]
     )
-    suspend fun getRemainingCooldown(): ResponseEntity<MailCooldownResponse> {
+    suspend fun getRemainingPasswordResetCooldown(): ResponseEntity<MailCooldownResponse> {
         val remainingCooldown = passwordResetService.getRemainingCooldown()
 
         return ResponseEntity.ok().body(remainingCooldown)

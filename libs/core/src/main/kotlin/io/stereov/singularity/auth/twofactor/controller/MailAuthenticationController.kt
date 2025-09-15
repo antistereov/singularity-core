@@ -156,7 +156,7 @@ class MailAuthenticationController(
             ),
         ]
     )
-    suspend fun getRemainingCooldown(): ResponseEntity<MailCooldownResponse> {
+    suspend fun getRemainingMailTwoFactorCooldown(): ResponseEntity<MailCooldownResponse> {
         val userId = authorizationService.getCurrentUserId()
         val remainingCooldown = mailAuthenticationService.getRemainingCooldown(userId)
 

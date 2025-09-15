@@ -12,6 +12,8 @@ import io.stereov.singularity.auth.core.controller.SessionController
 import io.stereov.singularity.auth.core.exception.handler.AuthExceptionHandler
 import io.stereov.singularity.auth.core.mapper.SessionMapper
 import io.stereov.singularity.auth.core.properties.AuthProperties
+import io.stereov.singularity.auth.core.properties.EmailVerificationProperties
+import io.stereov.singularity.auth.core.properties.PasswordResetProperties
 import io.stereov.singularity.auth.core.service.*
 import io.stereov.singularity.auth.core.service.token.*
 import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
@@ -27,7 +29,6 @@ import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.file.s3.config.S3Configuration
 import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.global.properties.AppProperties
-import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.mail.core.properties.MailProperties
 import io.stereov.singularity.mail.core.service.MailService
 import io.stereov.singularity.mail.template.service.TemplateService
@@ -47,7 +48,11 @@ import org.springframework.data.redis.core.ReactiveRedisTemplate
         S3Configuration::class,
     ]
 )
-@EnableConfigurationProperties(AuthProperties::class)
+@EnableConfigurationProperties(
+    AuthProperties::class,
+    EmailVerificationProperties::class,
+    PasswordResetProperties::class
+)
 class AuthenticationConfiguration {
 
     // Cache
@@ -168,21 +173,21 @@ class AuthenticationConfiguration {
     @Bean
     @ConditionalOnMissingBean
     fun emailVerificationTokenService(
-        mailProperties: MailProperties,
+        jwtProperties: JwtProperties,
         jwtService: JwtService
     ) = EmailVerificationTokenService(
-        mailProperties,
+        jwtProperties,
         jwtService
     )
 
     @Bean
     @ConditionalOnMissingBean
     fun passwordResetTokenService(
-        mailProperties: MailProperties,
+        jwtProperties: JwtProperties,
         jwtService: JwtService,
         encryptionService: EncryptionService,
     ) = PasswordResetTokenService(
-        mailProperties, jwtService, encryptionService
+        jwtProperties, jwtService, encryptionService
     )
 
     @Bean
@@ -271,7 +276,7 @@ class AuthenticationConfiguration {
         userMapper: UserMapper,
         redisTemplate: ReactiveRedisTemplate<String, String>,
         mailProperties: MailProperties,
-        uiProperties: UiProperties,
+        emailVerificationProperties: EmailVerificationProperties,
         translateService: TranslateService,
         mailService: MailService,
         templateService: TemplateService
@@ -281,8 +286,8 @@ class AuthenticationConfiguration {
         emailVerificationTokenService, 
         userMapper, 
         redisTemplate, 
-        mailProperties, 
-        uiProperties,
+        mailProperties,
+        emailVerificationProperties,
         translateService,
         mailService,
         templateService
@@ -297,10 +302,11 @@ class AuthenticationConfiguration {
         authorizationService: AuthorizationService,
         redisTemplate: ReactiveRedisTemplate<String, String>,
         mailProperties: MailProperties,
-        uiProperties: UiProperties,
+        passwordResetProperties: PasswordResetProperties,
         translateService: TranslateService,
         mailService: MailService,
-        templateService: TemplateService
+        templateService: TemplateService,
+        accessTokenCache: AccessTokenCache
     ) = PasswordResetService(
         userService,
         passwordResetTokenService,
@@ -308,10 +314,11 @@ class AuthenticationConfiguration {
         authorizationService,
         redisTemplate,
         mailProperties,
-        uiProperties,
+        passwordResetProperties,
         translateService,
         mailService,
-        templateService
+        templateService,
+        accessTokenCache
     )
 
     @Bean

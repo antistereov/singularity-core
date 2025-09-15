@@ -4,10 +4,10 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.model.token.PasswordResetToken
 import io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException
 import io.stereov.singularity.auth.jwt.exception.model.TokenExpiredException
+import io.stereov.singularity.auth.jwt.properties.JwtProperties
 import io.stereov.singularity.auth.jwt.service.JwtService
 import io.stereov.singularity.database.encryption.model.Encrypted
 import io.stereov.singularity.database.encryption.service.EncryptionService
-import io.stereov.singularity.mail.core.properties.MailProperties
 import org.bson.types.ObjectId
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
 import org.springframework.stereotype.Service
@@ -15,7 +15,7 @@ import java.time.Instant
 
 @Service
 class PasswordResetTokenService(
-    private val mailProperties: MailProperties,
+    private val jwtProperties: JwtProperties,
     private val jwtService: JwtService,
     private val encryptionService: EncryptionService,
 ) {
@@ -40,7 +40,7 @@ class PasswordResetTokenService(
 
         val claims = JwtClaimsSet.builder()
             .issuedAt(issuedAt)
-            .expiresAt(issuedAt.plusSeconds(mailProperties.passwordResetExpiration))
+            .expiresAt(issuedAt.plusSeconds(jwtProperties.expiresIn))
             .subject(userId.toHexString())
             .claim("secret", encryptedSecret.ciphertext)
             .claim("encryption-key-id", encryptedSecret.secretKey)

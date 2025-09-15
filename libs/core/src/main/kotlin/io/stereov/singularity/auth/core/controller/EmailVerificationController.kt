@@ -71,7 +71,7 @@ class EmailVerificationController(
             ),
         ]
     )
-    suspend fun getRemainingCooldown(): ResponseEntity<MailCooldownResponse> {
+    suspend fun getRemainingVerificationCooldown(): ResponseEntity<MailCooldownResponse> {
         val remainingCooldown = emailVerificationService.getRemainingCooldown()
 
         return ResponseEntity.ok().body(remainingCooldown)

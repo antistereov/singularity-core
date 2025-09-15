@@ -3,8 +3,8 @@ package io.stereov.singularity.auth.core.service.token
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.model.token.EmailVerificationToken
 import io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException
+import io.stereov.singularity.auth.jwt.properties.JwtProperties
 import io.stereov.singularity.auth.jwt.service.JwtService
-import io.stereov.singularity.mail.core.properties.MailProperties
 import org.bson.types.ObjectId
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
 import org.springframework.stereotype.Service
@@ -12,7 +12,7 @@ import java.time.Instant
 
 @Service
 class EmailVerificationTokenService(
-    private val mailProperties: MailProperties,
+    private val jwtProperties: JwtProperties,
     private val jwtService: JwtService,
 ) {
 
@@ -34,7 +34,7 @@ class EmailVerificationTokenService(
 
         val claims = JwtClaimsSet.builder()
             .issuedAt(issuedAt)
-            .expiresAt(issuedAt.plusSeconds(mailProperties.verificationExpiration))
+            .expiresAt(issuedAt.plusSeconds(jwtProperties.expiresIn))
             .subject(userId.toHexString())
             .claim("email", email)
             .id(secret)

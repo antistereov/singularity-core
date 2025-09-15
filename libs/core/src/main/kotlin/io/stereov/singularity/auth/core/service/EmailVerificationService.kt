@@ -3,11 +3,11 @@ package io.stereov.singularity.auth.core.service
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.dto.response.MailCooldownResponse
 import io.stereov.singularity.auth.core.exception.AuthException
+import io.stereov.singularity.auth.core.properties.EmailVerificationProperties
 import io.stereov.singularity.auth.core.service.token.EmailVerificationTokenService
 import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.content.translate.model.TranslateKey
 import io.stereov.singularity.content.translate.service.TranslateService
-import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.mail.core.exception.model.MailCooldownException
 import io.stereov.singularity.mail.core.properties.MailProperties
 import io.stereov.singularity.mail.core.service.MailService
@@ -32,7 +32,7 @@ class EmailVerificationService(
     private val userMapper: UserMapper,
     private val redisTemplate: ReactiveRedisTemplate<String, String>,
     private val mailProperties: MailProperties,
-    private val uiProperties: UiProperties,
+    private val emailVerificationProperties: EmailVerificationProperties,
     private val translateService: TranslateService,
     private val mailService: MailService,
     private val templateService: TemplateService
@@ -143,7 +143,7 @@ class EmailVerificationService(
      * @return The generated verification URL.
      */
     private fun generateVerificationUrl(token: String): String {
-        return "${uiProperties.baseUrl}${uiProperties.emailVerificationPath}?token=$token"
+        return "${emailVerificationProperties.uri}?token=$token"
     }
 
     /**
