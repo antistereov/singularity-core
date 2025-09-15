@@ -14,7 +14,6 @@ import io.stereov.singularity.auth.core.service.AuthenticationService
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.core.service.token.AccessTokenService
 import io.stereov.singularity.auth.core.service.token.RefreshTokenService
-import io.stereov.singularity.auth.core.service.token.SessionTokenService
 import io.stereov.singularity.auth.core.service.token.StepUpTokenService
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
 import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthenticationService
@@ -35,6 +34,7 @@ import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ServerWebExchange
+import java.util.*
 
 @RestController
 @RequestMapping("/api/auth")
@@ -54,7 +54,6 @@ class AuthenticationController(
     private val userService: UserService,
     private val stepUpTokenService: StepUpTokenService,
     private val twoFactorAuthenticationService: TwoFactorAuthenticationService,
-    private val sessionTokenService: SessionTokenService,
     private val authorizationService: AuthorizationService,
 ) {
 
@@ -79,6 +78,11 @@ class AuthenticationController(
                 responseCode = "401",
                 description = "Invalid credentials.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
+            ApiResponse(
+                responseCode = "403",
+                description = "User is already authenticated.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
     )
@@ -90,7 +94,6 @@ class AuthenticationController(
         logger.info { "Executing login" }
 
         val user = authenticationService.login(payload)
-        val sessionToken = sessionTokenService.create(sessionInfo = payload.session)
 
         if (user.twoFactorEnabled) {
             twoFactorAuthenticationService.handleTwoFactor(user, lang)
@@ -98,7 +101,6 @@ class AuthenticationController(
 
             return ResponseEntity.ok()
                 .header("Set-Cookie", cookieCreator.createCookie(twoFactorAuthenticationToken).toString())
-                .header("Set-Cookie", cookieCreator.createCookie(sessionToken).toString())
                 .body(
                     LoginResponse(
                         user = userMapper.toResponse(user),
@@ -107,20 +109,19 @@ class AuthenticationController(
                         twoFactorAuthenticationToken = if (authProperties.allowHeaderAuthentication) twoFactorAuthenticationToken.value else null,
                         accessToken = null,
                         refreshToken = null,
-                        sessionToken = if (authProperties.allowHeaderAuthentication) sessionToken.value else null,
                         location = geoLocationService.getLocationOrNull(exchange.request)
                     )
                 )
         }
 
-        val accessToken = accessTokenService.create(user.id, sessionToken.id)
-        val refreshToken = refreshTokenService.create(user.id, sessionToken.id, payload.session, exchange)
+        val sessionId = UUID.randomUUID()
+        val accessToken = accessTokenService.create(user, sessionId)
+        val refreshToken = refreshTokenService.create(user.id, sessionId, payload.session, exchange)
 
         val res = LoginResponse(
             user = userMapper.toResponse(user),
             accessToken = if (authProperties.allowHeaderAuthentication) accessToken.value else null,
             refreshToken = if (authProperties.allowHeaderAuthentication) refreshToken.value else null,
-            sessionToken = if (authProperties.allowHeaderAuthentication) sessionToken.value else null,
             twoFactorRequired = false,
             allowedTwoFactorMethods = null,
             twoFactorAuthenticationToken = null,
@@ -130,7 +131,6 @@ class AuthenticationController(
         return ResponseEntity.ok()
             .header("Set-Cookie", cookieCreator.createCookie(accessToken).toString())
             .header("Set-Cookie", cookieCreator.createCookie(refreshToken).toString())
-            .header("Set-Cookie", cookieCreator.createCookie(sessionToken).toString())
             .body(res)
     }
 
@@ -148,6 +148,11 @@ class AuthenticationController(
                 responseCode = "409",
                 description = "Email already exists.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
+            ApiResponse(
+                responseCode = "403",
+                description = "User is already authenticated.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
     )
@@ -160,23 +165,21 @@ class AuthenticationController(
         logger.info { "Executing register" }
 
         val user = authenticationService.register(payload, sendEmail, lang)
+        val sessionId = UUID.randomUUID()
 
-        val sessionToken = sessionTokenService.create(sessionInfo = payload.session)
-        val accessToken = accessTokenService.create(user.id, sessionToken.id)
-        val refreshToken = refreshTokenService.create(user.id, sessionToken.id, payload.session, exchange)
+        val accessToken = accessTokenService.create(user, sessionId)
+        val refreshToken = refreshTokenService.create(user.id, sessionId, payload.session, exchange)
 
         val res = RegisterResponse(
             userMapper.toResponse(user),
             if (authProperties.allowHeaderAuthentication) accessToken.value else null,
             if (authProperties.allowHeaderAuthentication) refreshToken.value else null,
-            if (authProperties.allowHeaderAuthentication) sessionToken.value else null,
             geoLocationService.getLocationOrNull(exchange.request)
         )
 
         return ResponseEntity.ok()
             .header("Set-Cookie", cookieCreator.createCookie(accessToken).toString())
             .header("Set-Cookie", cookieCreator.createCookie(refreshToken).toString())
-            .header("Set-Cookie", cookieCreator.createCookie(sessionToken).toString())
             .body(res)
     }
 
@@ -199,14 +202,12 @@ class AuthenticationController(
     suspend fun logout(): ResponseEntity<SuccessResponse> {
         logger.info { "Executing logout" }
 
-        val sessionId = authorizationService.getCurrentSessionId()
-
         val clearAccessToken = cookieCreator.clearCookie(SessionTokenType.Access)
         val clearRefreshToken = cookieCreator.clearCookie(SessionTokenType.Refresh)
         val clearStepUpToken = cookieCreator.clearCookie(SessionTokenType.StepUp)
         val clearSessionToken = cookieCreator.clearCookie(SessionTokenType.Session)
 
-        authenticationService.logout(sessionId)
+        authenticationService.logout()
 
         return ResponseEntity.ok()
             .header("Set-Cookie", clearAccessToken.toString())
@@ -243,25 +244,21 @@ class AuthenticationController(
     ): ResponseEntity<RefreshTokenResponse> {
         logger.debug { "Refreshing token" }
 
-        val sessionToken = sessionTokenService.extract(exchange)
-        val refreshToken = refreshTokenService.extract(exchange, sessionToken)
+        val refreshToken = refreshTokenService.extract(exchange)
         val user = userService.findById(refreshToken.userId)
 
-        val newAccessToken = accessTokenService.create(user.id, sessionToken.id)
-        val newRefreshToken = refreshTokenService.create(user.id, sessionToken.id, sessionInfo, exchange)
-        val newSessionToken = sessionTokenService.create(sessionToken.id, sessionInfo)
+        val newAccessToken = accessTokenService.create(user, refreshToken.sessionId)
+        val newRefreshToken = refreshTokenService.create(user.id, refreshToken.sessionId, sessionInfo, exchange)
 
         val res = RefreshTokenResponse(
             userMapper.toResponse(user),
             if (authProperties.allowHeaderAuthentication) newAccessToken.value else null,
             if (authProperties.allowHeaderAuthentication) newRefreshToken.value else null,
-            if (authProperties.allowHeaderAuthentication) newSessionToken.value else null,
         )
 
         return ResponseEntity.ok()
             .header("Set-Cookie", cookieCreator.createCookie(newAccessToken).toString())
             .header("Set-Cookie", cookieCreator.createCookie(newRefreshToken).toString())
-            .header("Set-Cookie", cookieCreator.createCookie(newSessionToken).toString())
             .body(res)
     }
 
@@ -354,16 +351,15 @@ class AuthenticationController(
         ]
     )
     suspend fun getStatus(exchange: ServerWebExchange): ResponseEntity<AuthenticationStatusResponse> {
-        val authorizedUser = authorizationService.getCurrentUserOrNull()
-        val sessionId = runCatching { sessionTokenService.extract(exchange) }.getOrNull()?.id
+        val authorizedUserId = authorizationService.getCurrentUserIdOrNull()
+        val currentSessionId = authorizationService.getCurrentSessionIdOrNull()
         val twoFactorToken = runCatching { twoFactorAuthenticationTokenService.extract(exchange) }.getOrNull()
 
-        val sessionSet = sessionId != null
-        val authorized = authorizedUser != null
+        val authorized = authorizedUserId != null
         val twoFactorRequired = twoFactorToken != null
 
-        val stepUpToken = if (authorized && sessionSet) {
-            runCatching { stepUpTokenService.extract(exchange, authorizedUser.id, sessionId) }
+        val stepUpToken = if (authorized && currentSessionId != null) {
+            runCatching { stepUpTokenService.extract(exchange, authorizedUserId, currentSessionId) }
                 .getOrNull()
         } else null
         val stepUp = stepUpToken != null
@@ -374,7 +370,6 @@ class AuthenticationController(
 
         return ResponseEntity.ok(
             AuthenticationStatusResponse(
-                sessionSet = sessionSet,
                 authorized = authorized,
                 stepUp = stepUp,
                 twoFactorRequired = twoFactorRequired,

@@ -5,6 +5,7 @@ import io.stereov.singularity.auth.core.component.CookieCreator
 import io.stereov.singularity.auth.core.config.AuthenticationConfiguration
 import io.stereov.singularity.auth.core.filter.AuthenticationFilter
 import io.stereov.singularity.auth.core.properties.AuthProperties
+import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.core.service.token.AccessTokenService
 import io.stereov.singularity.auth.core.service.token.RefreshTokenService
 import io.stereov.singularity.auth.core.service.token.SessionTokenService
@@ -93,7 +94,6 @@ class WebSecurityConfiguration {
         authProperties: AuthProperties,
         uiProperties: UiProperties,
         accessTokenService: AccessTokenService,
-        userService: UserService,
         rateLimitService: RateLimitService, geolocationProperties: GeolocationProperties,
         geoLocationService: GeolocationService,
         securityProperties: SecurityProperties,
@@ -104,7 +104,8 @@ class WebSecurityConfiguration {
         clientRegistrations: ReactiveClientRegistrationRepository,
         objectMapper: ObjectMapper,
         oAuth2Properties: OAuth2Properties,
-        stepUpTokenService: StepUpTokenService
+        stepUpTokenService: StepUpTokenService,
+        authorizationService: AuthorizationService
     ): SecurityWebFilterChain {
         return http
             .csrf { it.disable() }
@@ -128,12 +129,29 @@ class WebSecurityConfiguration {
                 it.anyExchange().permitAll()
             }
             .oauth2Login { oauth2 ->
-                oauth2.authorizationRequestResolver(CustomOAuth2AuthorizationRequestResolver(clientRegistrations, objectMapper))
-                oauth2.authenticationSuccessHandler(CustomOAuth2AuthenticationSuccessHandler(objectMapper, accessTokenService, refreshTokenService, sessionTokenService, oAuth2AuthenticationService, cookieCreator, oAuth2Properties, stepUpTokenService))
+                oauth2.authorizationRequestResolver(
+                    CustomOAuth2AuthorizationRequestResolver(
+                        clientRegistrations,
+                        objectMapper
+                    )
+                )
+                oauth2.authenticationSuccessHandler(
+                    CustomOAuth2AuthenticationSuccessHandler(
+                        objectMapper,
+                        accessTokenService,
+                        refreshTokenService,
+                        sessionTokenService,
+                        oAuth2AuthenticationService,
+                        cookieCreator,
+                        oAuth2Properties,
+                        stepUpTokenService,
+                        authorizationService
+                    )
+                )
             }
             .addFilterBefore(RateLimitFilter(rateLimitService, geolocationProperties), SecurityWebFiltersOrder.FIRST)
             .addFilterBefore(LoggingFilter(geolocationProperties, geoLocationService), SecurityWebFiltersOrder.AUTHENTICATION)
-            .addFilterAfter(AuthenticationFilter(accessTokenService, userService), SecurityWebFiltersOrder.AUTHENTICATION)
+            .addFilterAfter(AuthenticationFilter(accessTokenService), SecurityWebFiltersOrder.AUTHENTICATION)
             .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())
             .build()
     }

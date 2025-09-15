@@ -37,8 +37,9 @@ class UserConfiguration {
     fun userController(
         userService: UserService,
         authorizationService: AuthorizationService,
-        userMapper: UserMapper
-    ) = UserController(userService, authorizationService, userMapper)
+        userMapper: UserMapper,
+        fileStorage: FileStorage
+    ) = UserController(userService, authorizationService, userMapper, fileStorage)
 
     // Mapper
 
@@ -50,13 +51,17 @@ class UserConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun userService(userRepository: UserRepository, encryptionTransformer: EncryptionService, hashService: HashService, encryptionSecretService: EncryptionSecretService, fileStorage: FileStorage): UserService {
+    fun userService(
+        userRepository: UserRepository,
+        encryptionTransformer: EncryptionService,
+        hashService: HashService,
+        encryptionSecretService: EncryptionSecretService,
+    ): UserService {
         return UserService(
             userRepository,
             encryptionTransformer,
             hashService,
             encryptionSecretService,
-            fileStorage
         )
     }
 

@@ -5,9 +5,6 @@ import io.stereov.singularity.database.core.service.SensitiveCrudService
 import io.stereov.singularity.database.encryption.service.EncryptionSecretService
 import io.stereov.singularity.database.encryption.service.EncryptionService
 import io.stereov.singularity.database.hash.service.HashService
-import io.stereov.singularity.file.core.dto.FileMetadataResponse
-import io.stereov.singularity.file.core.exception.model.FileNotFoundException
-import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.user.core.exception.model.UserDoesNotExistException
 import io.stereov.singularity.user.core.model.EncryptedUserDocument
 import io.stereov.singularity.user.core.model.SensitiveUserData
@@ -16,7 +13,6 @@ import io.stereov.singularity.user.core.model.identity.HashedUserIdentity
 import io.stereov.singularity.user.core.repository.UserRepository
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
-import org.bson.types.ObjectId
 import org.springframework.stereotype.Service
 
 /**
@@ -33,7 +29,6 @@ class UserService(
     override val encryptionService: EncryptionService,
     private val hashService: HashService,
     override val encryptionSecretService: EncryptionSecretService,
-    private val fileStorage: FileStorage,
 ) : SensitiveCrudService<SensitiveUserData, UserDocument, EncryptedUserDocument> {
 
     override val logger = KotlinLogging.logger {}
@@ -119,14 +114,6 @@ class UserService(
 
         val hashedEmail = hashService.hashSearchableHmacSha256(email)
         return this.repository.existsByEmail(hashedEmail)
-    }
-
-    suspend fun getAvatar(userId: ObjectId): FileMetadataResponse {
-        logger.debug { "Finding avatar for user $userId" }
-
-        val user = findById(userId)
-        return user.sensitive.avatarFileKey?.let { fileStorage.metadataResponseByKey(it) }
-            ?: throw FileNotFoundException(file = null, "No avatar set for user")
     }
 
     suspend fun findByIdentityOrNull(provider: String, principalId: String): UserDocument? {

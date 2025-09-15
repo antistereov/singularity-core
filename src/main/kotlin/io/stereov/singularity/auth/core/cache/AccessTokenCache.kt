@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.map
 import org.bson.types.ObjectId
 import org.springframework.stereotype.Service
+import java.util.*
 
 /**
  * # AccessTokenCache
@@ -37,10 +38,10 @@ class AccessTokenCache(
      * @param userId The ID of the user.
      * @param tokenId The token ID to be added.
      */
-    suspend fun addTokenId(userId: ObjectId, tokenId: String) {
+    suspend fun addTokenId(userId: ObjectId, sessionId: UUID, tokenId: String) {
         logger.debug { "Adding token ID for user $userId" }
 
-        val key = "$activeTokenKey:${userId.toHexString()}:$tokenId"
+        val key = "$activeTokenKey:${userId.toHexString()}:${sessionId}:$tokenId"
         commands.sadd(key, tokenId.toByteArray())
         commands.expire(key, expiresIn)
     }
@@ -52,10 +53,10 @@ class AccessTokenCache(
      * @param tokenId The token ID to be checked.
      * @return True if the token ID is valid, false otherwise.
      */
-    suspend fun isTokenIdValid(userId: ObjectId, tokenId: String): Boolean {
+    suspend fun isTokenIdValid(userId: ObjectId, sessionId: UUID, tokenId: String): Boolean {
         logger.debug { "Checking validity of token for user $userId" }
 
-        val key = "$activeTokenKey:${userId.toHexString()}:$tokenId"
+        val key = "$activeTokenKey:${userId.toHexString()}:${sessionId}:$tokenId"
         return commands.exists(key) == 1L
     }
 
@@ -66,11 +67,21 @@ class AccessTokenCache(
      * @param tokenId The token ID to be checked.
      * @return True if the token ID is valid, false otherwise.
      */
-    suspend fun removeTokenId(userId: ObjectId, tokenId: String): Boolean {
+    suspend fun invalidateToken(userId: ObjectId, sessionId: UUID, tokenId: String): Boolean {
         logger.debug { "Removing token for user $userId" }
 
-        val key = "$activeTokenKey:${userId.toHexString()}:$tokenId"
+        val key = "$activeTokenKey:${userId.toHexString()}:${sessionId}:$tokenId"
         return commands.del(key) == 1L
+    }
+
+    suspend fun invalidateSessionTokens(userId: ObjectId, sessionId: UUID) {
+        logger.debug { "Invalidating all tokens for user $userId and session $sessionId" }
+
+        val keys = commands.keys("$activeTokenKey:$userId:${sessionId}:*")
+
+        keys.map { key ->
+            commands.del(key)
+        }.collect()
     }
 
     /**

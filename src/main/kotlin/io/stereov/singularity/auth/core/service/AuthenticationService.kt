@@ -8,6 +8,7 @@ import io.stereov.singularity.auth.core.dto.request.RegisterUserRequest
 import io.stereov.singularity.auth.core.dto.request.StepUpRequest
 import io.stereov.singularity.auth.core.exception.AuthException
 import io.stereov.singularity.auth.core.exception.model.InvalidCredentialsException
+import io.stereov.singularity.auth.core.exception.model.UserAlreadyAuthenticatedException
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorAuthProperties
 import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.database.hash.service.HashService
@@ -16,7 +17,6 @@ import io.stereov.singularity.user.core.exception.model.EmailAlreadyExistsExcept
 import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.service.UserService
 import org.springframework.stereotype.Service
-import java.util.*
 
 @Service
 class AuthenticationService(
@@ -46,6 +46,9 @@ class AuthenticationService(
     suspend fun login(payload: LoginRequest): UserDocument {
         logger.debug { "Logging in user ${payload.email}" }
 
+        if (authorizationService.isAuthenticated())
+            throw UserAlreadyAuthenticatedException("Login failed: user is already authenticated")
+
         val user = userService.findByEmailOrNull(payload.email)
             ?: throw InvalidCredentialsException()
 
@@ -70,6 +73,9 @@ class AuthenticationService(
      */
     suspend fun register(payload: RegisterUserRequest, sendEmail: Boolean, lang: Language): UserDocument {
         logger.debug { "Registering user ${payload.email}" }
+
+        if (authorizationService.isAuthenticated())
+            throw UserAlreadyAuthenticatedException("Register failed: user is already authenticated")
 
         if (userService.existsByEmail(payload.email)) {
             throw EmailAlreadyExistsException("Failed to register user ${payload.email}")
@@ -97,13 +103,14 @@ class AuthenticationService(
      *
      * @return The [UserDocument] of the logged-out user.
      */
-    suspend fun logout(sessionId: UUID): UserDocument {
+    suspend fun logout(): UserDocument {
         logger.debug { "Logging out user" }
 
         val userId = authorizationService.getCurrentUserId()
         val tokenId = authorizationService.getCurrentTokenId()
+        val sessionId = authorizationService.getCurrentSessionId()
 
-        accessTokenCache.removeTokenId(userId, tokenId)
+        accessTokenCache.invalidateToken(userId, sessionId, tokenId)
 
         return sessionService.deleteSession(sessionId)
     }

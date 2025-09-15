@@ -5,6 +5,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.component.CookieCreator
 import io.stereov.singularity.auth.core.model.token.SessionToken
 import io.stereov.singularity.auth.core.model.token.SessionTokenType
+import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.core.service.token.AccessTokenService
 import io.stereov.singularity.auth.core.service.token.RefreshTokenService
 import io.stereov.singularity.auth.core.service.token.SessionTokenService
@@ -25,6 +26,7 @@ import org.springframework.security.web.server.authentication.ServerAuthenticati
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
 import java.net.URI
+import java.util.*
 
 class CustomOAuth2AuthenticationSuccessHandler(
     private val objectMapper: ObjectMapper,
@@ -34,7 +36,8 @@ class CustomOAuth2AuthenticationSuccessHandler(
     private val oAuth2AuthenticationService: OAuth2AuthenticationService,
     private val cookieCreator: CookieCreator,
     private val oAuth2Properties: OAuth2Properties,
-    private val stepUpTokenService: StepUpTokenService
+    private val stepUpTokenService: StepUpTokenService,
+    private val authorizationService: AuthorizationService,
 ) : ServerAuthenticationSuccessHandler {
 
     private val logger = KotlinLogging.logger {}
@@ -81,13 +84,14 @@ class CustomOAuth2AuthenticationSuccessHandler(
         state: CustomState
     ) {
         val oauth2Authentication = authentication as OAuth2AuthenticationToken
+        val sessionId = authorizationService.getCurrentSessionIdOrNull() ?: UUID.randomUUID()
 
         val oauth2ProviderConnectionToken = state.oauth2ProviderConnectionTokenValue
             ?: exchange.request.cookies.getFirst(OAuth2TokenType.ProviderConnection.COOKIE_NAME)?.value
 
         val user = oAuth2AuthenticationService.findOrCreateUser(oauth2Authentication, oauth2ProviderConnectionToken)
-        val accessToken = accessTokenService.create(user.id, sessionToken.id)
-        val refreshToken = refreshTokenService.create(user.id, sessionToken.id, sessionToken.toSessionInfoRequest(), exchange)
+        val accessToken = accessTokenService.create(user, sessionId)
+        val refreshToken = refreshTokenService.create(user.id, sessionId, sessionToken.toSessionInfoRequest(), exchange)
 
 
         exchange.response.headers.add(SessionTokenType.Access.HEADER, accessToken.value)
@@ -96,7 +100,7 @@ class CustomOAuth2AuthenticationSuccessHandler(
         exchange.response.cookies.add(SessionTokenType.Refresh.COOKIE_NAME, cookieCreator.createCookie(refreshToken))
 
         if (state.stepUp) {
-            val stepUpToken = stepUpTokenService.create(user.id, sessionToken.id)
+            val stepUpToken = stepUpTokenService.create(user.id, sessionId)
             exchange.response.headers.add(SessionTokenType.StepUp.HEADER, stepUpToken.value)
             exchange.response.cookies.add(SessionTokenType.StepUp.COOKIE_NAME, cookieCreator.createCookie(stepUpToken))
         }

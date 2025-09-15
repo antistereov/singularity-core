@@ -7,6 +7,5 @@ data class RegisterResponse(
     val user: UserResponse,
     var accessToken: String? = null,
     val refreshToken: String? = null,
-    val sessionToken: String? = null,
     val location: CityResponse? = null,
 )

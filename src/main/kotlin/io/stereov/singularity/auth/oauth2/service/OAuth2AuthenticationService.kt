@@ -1,6 +1,7 @@
 package io.stereov.singularity.auth.oauth2.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.oauth2.exception.model.OAuth2FlowException
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorAuthProperties
 import io.stereov.singularity.global.properties.AppProperties
@@ -14,7 +15,8 @@ class OAuth2AuthenticationService(
     private val userService: UserService,
     private val appProperties: AppProperties,
     private val twoFactorAuthProperties: TwoFactorAuthProperties,
-    private val identityProviderService: IdentityProviderService
+    private val identityProviderService: IdentityProviderService,
+    private val authorizationService: AuthorizationService
 ) {
 
     private val logger = KotlinLogging.logger {}
@@ -40,7 +42,12 @@ class OAuth2AuthenticationService(
          val name = oauth2User.attributes["name"] as? String ?: "User"
 
          val existingUser = userService.findByIdentityOrNull(provider, principalId)
-         if (existingUser != null) return existingUser
+         if (existingUser != null) {
+             if (authorizationService.isAuthenticated())
+                 throw OAuth2FlowException("user_already_authenticated", "Login via OAuth2 provider failed: user is already authenticated")
+
+             return existingUser
+         }
 
          return when (userService.existsByEmail(email)) {
              true -> handleConnection(provider, principalId, oauth2ProviderConnectionTokenValue)

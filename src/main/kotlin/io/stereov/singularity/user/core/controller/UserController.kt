@@ -2,6 +2,8 @@ package io.stereov.singularity.user.core.controller
 
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.file.core.dto.FileMetadataResponse
+import io.stereov.singularity.file.core.exception.model.FileNotFoundException
+import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.user.core.dto.response.UserResponse
@@ -29,7 +31,8 @@ import org.springframework.web.bind.annotation.RestController
 class UserController(
     private val userService: UserService,
     private val authorizationService: AuthorizationService,
-    private val userMapper: UserMapper
+    private val userMapper: UserMapper,
+    private val fileStorage: FileStorage
 ) {
 
     @GetMapping("/me")
@@ -61,8 +64,14 @@ class UserController(
 
     @GetMapping("/{id}/avatar")
     suspend fun getAvatar(
-        @PathVariable id: String
+        @PathVariable id: ObjectId
     ): ResponseEntity<FileMetadataResponse> {
-        return ResponseEntity.ok().body(userService.getAvatar(ObjectId(id)))
+
+        val user = userService.findById(id)
+        val file = user.sensitive.avatarFileKey
+            ?.let { fileStorage.metadataResponseByKey(it) }
+            ?: throw FileNotFoundException(file = null, "No avatar set for user")
+
+        return ResponseEntity.ok().body(file)
     }
 }

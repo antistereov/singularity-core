@@ -45,10 +45,8 @@ class TotpAuthenticationService(
      *
      * @return A [TwoFactorSetupResponse] containing the secret, OTP auth URL, recovery code and setup token.
      */
-    suspend fun setUpTwoFactorAuth(): TwoFactorSetupResponse {
+    suspend fun getTotpDetails(): TwoFactorSetupResponse {
         logger.debug { "Setting up two factor authentication" }
-
-        authorizationService.requireStepUp()
 
         val user = authorizationService.getCurrentUser()
 
@@ -77,6 +75,8 @@ class TotpAuthenticationService(
     suspend fun validateSetup(token: String, code: Int): UserResponse {
         val user = authorizationService.getCurrentUser()
         val setupToken = setupTokenService.validate(token)
+
+        authorizationService.requireStepUp()
 
         if (!totpService.codeIsValid(setupToken.secret, code)) {
             throw AuthException("Invalid two-factor authentication code")

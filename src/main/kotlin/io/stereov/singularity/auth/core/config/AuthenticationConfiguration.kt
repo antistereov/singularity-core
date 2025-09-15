@@ -88,10 +88,9 @@ class AuthenticationConfiguration {
         userService: UserService,
         stepUpTokenService: StepUpTokenService,
         twoFactorAuthenticationService: TwoFactorAuthenticationService,
-        sessionTokenService: SessionTokenService,
         authorizationService: AuthorizationService,
 
-    ): AuthenticationController {
+        ): AuthenticationController {
         return AuthenticationController(
             authenticationService,
             userMapper,
@@ -104,7 +103,6 @@ class AuthenticationConfiguration {
             userService,
             stepUpTokenService,
             twoFactorAuthenticationService,
-            sessionTokenService,
             authorizationService
         )
     }
@@ -127,14 +125,12 @@ class AuthenticationConfiguration {
         sessionService: SessionService,
         cookieCreator: CookieCreator,
         sessionTokenService: SessionTokenService,
-        authorizationService: AuthorizationService,
         sessionMapper: SessionMapper
     ): SessionController {
         return SessionController(
             sessionService,
             cookieCreator,
             sessionTokenService,
-            authorizationService,
             sessionMapper
         )
     }
@@ -162,15 +158,11 @@ class AuthenticationConfiguration {
         accessTokenCache: AccessTokenCache,
         jwtProperties: JwtProperties,
         tokenValueExtractor: TokenValueExtractor,
-        sessionTokenService: SessionTokenService,
-        userService: UserService,
     ) = AccessTokenService(
         jwtService,
         accessTokenCache,
         jwtProperties,
         tokenValueExtractor,
-        sessionTokenService,
-        userService
     )
 
     @Bean
@@ -263,8 +255,11 @@ class AuthenticationConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun authorizationService(stepUpTokenService: StepUpTokenService): AuthorizationService {
-        return AuthorizationService(stepUpTokenService)
+    fun authorizationService(
+        stepUpTokenService: StepUpTokenService,
+        userService: UserService
+    ): AuthorizationService {
+        return AuthorizationService(stepUpTokenService, userService)
     }
     
     @Bean
