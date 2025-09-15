@@ -1,5 +1,7 @@
 package io.stereov.singularity.cache.service
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.lettuce.core.ExperimentalLettuceCoroutinesApi
@@ -17,12 +19,11 @@ import org.springframework.stereotype.Service
 @Service
 @OptIn(ExperimentalLettuceCoroutinesApi::class)
 class RedisService(
-    private val commands: RedisCoroutinesCommands<String, ByteArray>,
+    val commands: RedisCoroutinesCommands<String, ByteArray>,
+    val objectMapper: ObjectMapper
 ) {
-    private val logger: KLogger
+    val logger: KLogger
         get() = KotlinLogging.logger {}
-
-
 
     /**
      * Saves a value to Redis with the given key.
@@ -30,10 +31,11 @@ class RedisService(
      * @param key The key to save the value under.
      * @param value The value to save.
      */
-    suspend fun saveData(key: String, value: String) {
+    suspend fun <T: Any> saveData(key: String, value: T) {
         logger.debug { "Saving value: $value for key: $key to Redis" }
 
-        commands.set(key, value.toByteArray())
+        val string = objectMapper.writeValueAsString(value)
+        commands.set(key, string.toByteArray())
     }
 
     /**
@@ -45,10 +47,10 @@ class RedisService(
      *
      * @throws RedisKeyNotFoundException If the key is not found in Redis.
      */
-    suspend fun getData(key: String): String {
+    final suspend inline fun <reified T: Any> getData(key: String): T {
         logger.debug { "Getting value for key: $key" }
 
-        return commands.get(key)?.let { String(it) }
+        return getDataOrNull(key)
             ?: throw RedisKeyNotFoundException(key)
     }
 
@@ -59,10 +61,11 @@ class RedisService(
      *
      * @return The value associated with the key, or null if not found.
      */
-    suspend fun getDataOrNull(key: String): String? {
+    final suspend inline fun <reified T: Any>getDataOrNull(key: String): T? {
         logger.debug { "Getting value for key: $key" }
 
-        return commands.get(key)?.let { String(it) }
+        return commands.get(key)
+            ?.let { objectMapper.readValue<T>(it) }
     }
 
     /**

@@ -90,10 +90,4 @@ class RedisConfiguration {
     fun redisCoroutinesCommands(connection: StatefulRedisConnection<String, ByteArray>): RedisCoroutinesCommands<String, ByteArray> {
         return connection.coroutines()
     }
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun redisService(commands: RedisCoroutinesCommands<String, ByteArray>): RedisService {
-        return RedisService(commands)
-    }
 }
