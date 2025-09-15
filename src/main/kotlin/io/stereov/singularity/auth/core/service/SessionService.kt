@@ -36,6 +36,7 @@ class SessionService(
         logger.debug { "Deleting session $sessionId" }
 
         val user = authorizationService.getCurrentUser()
+        accessTokenCache.invalidateSessionTokens(user.id, sessionId)
 
         user.removeSession(sessionId)
 
