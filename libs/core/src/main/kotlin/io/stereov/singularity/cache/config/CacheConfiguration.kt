@@ -1,5 +1,6 @@
 package io.stereov.singularity.cache.config
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.lettuce.core.ExperimentalLettuceCoroutinesApi
 import io.lettuce.core.api.coroutines.RedisCoroutinesCommands
 import io.stereov.singularity.cache.exception.handler.RedisExceptionHandler
@@ -22,8 +23,11 @@ class CacheConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun redisService(redisCoroutinesCommands: RedisCoroutinesCommands<String, ByteArray>): RedisService {
-        return RedisService(redisCoroutinesCommands)
+    fun redisService(
+        redisCoroutinesCommands: RedisCoroutinesCommands<String, ByteArray>,
+        objectMapper: ObjectMapper
+    ): RedisService {
+        return RedisService(redisCoroutinesCommands, objectMapper)
     }
 
     // Exception Handler

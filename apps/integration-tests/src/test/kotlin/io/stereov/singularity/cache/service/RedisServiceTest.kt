@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.Instant
+import java.util.*
 
 class RedisServiceTest : BaseIntegrationTest() {
 
@@ -19,10 +21,22 @@ class RedisServiceTest : BaseIntegrationTest() {
         redisService.deleteAll()
     }
 
-    @Test fun `save and get works`() = runTest {
-        redisService.saveData("key", "value")
+    data class TestData(
+        val id: UUID = UUID.randomUUID(),
+        val createdAt: Instant = Instant.now(),
+        val extra: ExtraData = ExtraData(),
+        val name: String = "name"
+    )
+    data class ExtraData(
+        val age: Int = 12,
+        val favoriteFloat: Float = 12.0f,
+    )
 
-        assertEquals("value", redisService.getDataOrNull("key"))
+    @Test fun `save and get works`() = runTest {
+        val value = TestData()
+        redisService.saveData("key", value)
+
+        assertEquals(value, redisService.getDataOrNull<TestData>("key"))
     }
     @Test fun `save overrides key`() = runTest {
         redisService.saveData("key", "value")
