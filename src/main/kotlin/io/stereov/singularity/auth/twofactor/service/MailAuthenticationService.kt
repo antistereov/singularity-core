@@ -1,9 +1,14 @@
 package io.stereov.singularity.auth.twofactor.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.exception.model.TwoFactorMethodDisabledException
+import io.stereov.singularity.auth.core.service.AuthorizationService
+import io.stereov.singularity.auth.twofactor.dto.request.EnableMailTwoFactorMethodRequest
+import io.stereov.singularity.auth.twofactor.exception.model.CannotDisableOnly2FAMethodException
 import io.stereov.singularity.auth.twofactor.exception.model.InvalidTwoFactorCodeException
 import io.stereov.singularity.auth.twofactor.exception.model.TwoFactorCodeExpiredException
+import io.stereov.singularity.auth.twofactor.exception.model.TwoFactorMethodSetupException
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorAuthProperties
 import io.stereov.singularity.content.translate.model.Language
@@ -33,7 +38,9 @@ class MailAuthenticationService(
     private val templateService: TemplateService,
     private val redisTemplate: ReactiveRedisTemplate<String, String>,
     private val mailService: MailService,
-    private val mailProperties: MailProperties
+    private val mailProperties: MailProperties,
+    private val authorizationService: AuthorizationService,
+    private val accessTokenCache: AccessTokenCache
 ) {
 
     private val logger = KotlinLogging.logger {}
@@ -56,12 +63,7 @@ class MailAuthenticationService(
         if (!user.sensitive.security.twoFactor.mail.enabled)
             throw TwoFactorMethodDisabledException(TwoFactorMethod.MAIL)
 
-        val details = user.sensitive.security.twoFactor.mail
-
-       if (details.expiresAt.isAfter(Instant.now()))
-           throw TwoFactorCodeExpiredException("The code is expired. Please request a new email.")
-       if (details.code != code)
-           throw InvalidTwoFactorCodeException("Wrong code.")
+        doValidateCode(user, code)
 
         return user
     }
@@ -103,6 +105,15 @@ class MailAuthenticationService(
         return if (remainingTtl.seconds > 0) remainingTtl.seconds else 0
     }
 
+    private fun doValidateCode(user: UserDocument, code: String) {
+        val details = user.sensitive.security.twoFactor.mail
+
+        if (details.expiresAt.isAfter(Instant.now()))
+            throw TwoFactorCodeExpiredException("The code is expired. Please request a new email.")
+        if (details.code != code)
+            throw InvalidTwoFactorCodeException("Wrong code.")
+    }
+
     private suspend fun startCooldown(userId: ObjectId): Boolean {
         logger.debug { "Starting cooldown for email authentication" }
 
@@ -113,6 +124,39 @@ class MailAuthenticationService(
             ?: false
 
         return isNewKey
+    }
+
+    suspend fun enable(req: EnableMailTwoFactorMethodRequest): UserDocument {
+        logger.debug { "Enabling mail as 2FA method" }
+
+        val user = authorizationService.getCurrentUser()
+        authorizationService.requireStepUp()
+
+        if (user.sensitive.security.twoFactor.mail.enabled)
+            throw TwoFactorMethodSetupException("Mail is already enabled as 2FA method")
+
+        doValidateCode(user, req.code)
+
+        user.sensitive.security.twoFactor.mail.enabled = true
+
+        val savedUser = userService.save(user)
+        accessTokenCache.invalidateAllTokens(user.id)
+
+        return savedUser
+    }
+
+    suspend fun disable(): UserDocument {
+        logger.debug { "Disabling mail as 2FA method" }
+
+        val user = authorizationService.getCurrentUser()
+        authorizationService.requireStepUp()
+
+        if (user.twoFactorMethods.size == 1 && user.sensitive.security.twoFactor.mail.enabled)
+            throw CannotDisableOnly2FAMethodException("Failed to disable mail: it not allowed to disable the only configured 2FA method.")
+
+        user.sensitive.security.twoFactor.mail.enabled = false
+
+        return userService.save(user)
     }
 
 }

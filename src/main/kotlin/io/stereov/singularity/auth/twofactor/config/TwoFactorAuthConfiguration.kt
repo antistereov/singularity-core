@@ -52,8 +52,9 @@ class TwoFactorAuthConfiguration {
     @ConditionalOnMissingBean
     fun mailAuthenticationController(
         mailAuthenticationService: MailAuthenticationService,
-        authorizationService: AuthorizationService
-    ) = MailAuthenticationController(mailAuthenticationService, authorizationService)
+        authorizationService: AuthorizationService,
+        userMapper: UserMapper
+    ) = MailAuthenticationController(mailAuthenticationService, authorizationService, userMapper)
     
     @Bean
     @ConditionalOnMissingBean
@@ -145,7 +146,9 @@ class TwoFactorAuthConfiguration {
          templateService: TemplateService,
          redisTemplate: ReactiveRedisTemplate<String, String>,
          mailService: MailService,
-         mailProperties: MailProperties
+         mailProperties: MailProperties,
+         authorizationService: AuthorizationService,
+         accessTokenCache: AccessTokenCache
     ) = MailAuthenticationService(
         twoFactorAuthProperties,
         userService,
@@ -153,7 +156,9 @@ class TwoFactorAuthConfiguration {
         templateService,
         redisTemplate,
         mailService,
-        mailProperties
+        mailProperties,
+        authorizationService,
+        accessTokenCache
     )
     
     @Bean
@@ -192,13 +197,15 @@ class TwoFactorAuthConfiguration {
         userService: UserService,
         totpService: TotpAuthenticationService,
         mailAuthenticationService: MailAuthenticationService,
-        twoFactorAuthTokenService: TwoFactorAuthenticationTokenService
+        twoFactorAuthTokenService: TwoFactorAuthenticationTokenService,
+        authorizationService: AuthorizationService,
     ): TwoFactorAuthenticationService {
         return TwoFactorAuthenticationService(
             userService,
             totpService,
             twoFactorAuthTokenService,
             mailAuthenticationService,
+            authorizationService,
         )
     }
 }

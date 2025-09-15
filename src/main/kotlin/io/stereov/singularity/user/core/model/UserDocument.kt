@@ -60,6 +60,10 @@ data class UserDocument(
     val password: SecureHash?
         get() = sensitive.identities[IdentityProvider.PASSWORD]?.password
 
+    @get:Transient
+    val preferredTwoFactorMethod: TwoFactorMethod?
+        get() = if (twoFactorEnabled) sensitive.security.twoFactor.preferred else null
+
     /**
      * Check if user authenticated using password and return [SecureHash] if so.
      *

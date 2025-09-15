@@ -24,6 +24,7 @@ import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.global.model.SuccessResponse
 import io.stereov.singularity.user.core.mapper.UserMapper
 import io.stereov.singularity.user.core.service.UserService
+import io.swagger.v3.oas.annotations.ExternalDocumentation
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
@@ -64,6 +65,7 @@ class AuthenticationController(
     @Operation(
         summary = "User login",
         description = "Authenticates a user, returns an access and refresh token and sets those tokens as Http-Only Cookies.",
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/auth/authentication#login"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER),
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE)
@@ -138,6 +140,7 @@ class AuthenticationController(
     @Operation(
         summary = "Register a new user",
         description = "Creates a new user account and logs them in.",
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/auth/authentication#registering-users"),
         responses = [
             ApiResponse(
                 responseCode = "200",
@@ -187,6 +190,7 @@ class AuthenticationController(
     @Operation(
         summary = "Log out a user",
         description = "Invalidates the current session's access and refresh tokens.",
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/auth/authentication#logout"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER),
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE)
@@ -221,6 +225,7 @@ class AuthenticationController(
     @Operation(
         summary = "Refresh access token",
         description = "Refresh the access token. Returns a new access and refresh token and sets those tokens as Http-Only Cookies.",
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/auth/authentication#refresh"),
         security = [
             SecurityRequirement(OpenApiConstants.REFRESH_TOKEN_HEADER),
             SecurityRequirement(OpenApiConstants.REFRESH_TOKEN_COOKIE)
@@ -266,6 +271,7 @@ class AuthenticationController(
     @Operation(
         summary = "Request step-up",
         description = "Requests step-up authentification. This re-authentication is required by critical endpoints.",
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/auth/authentication#step-up"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER),
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE)
@@ -327,11 +333,10 @@ class AuthenticationController(
     @Operation(
         summary = "Get authentication status",
         description = "Get detailed information about the current status authentication status of the user.",
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/auth/authentication#status"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER),
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE),
-            SecurityRequirement(OpenApiConstants.REFRESH_TOKEN_HEADER),
-            SecurityRequirement(OpenApiConstants.REFRESH_TOKEN_HEADER),
             SecurityRequirement(OpenApiConstants.STEP_UP_TOKEN_HEADER),
             SecurityRequirement(OpenApiConstants.STEP_UP_TOKEN_COOKIE),
             SecurityRequirement(OpenApiConstants.TWO_FACTOR_AUTHENTICATION_TOKEN_HEADER),
@@ -367,12 +372,16 @@ class AuthenticationController(
         val twoFactorMethods = if (twoFactorRequired) {
             userService.findById(twoFactorToken.userId).twoFactorMethods
         } else null
+        val preferredTwoFactorMethod = if (twoFactorRequired) {
+            userService.findById(twoFactorToken.userId).preferredTwoFactorMethod
+        } else null
 
         return ResponseEntity.ok(
             AuthenticationStatusResponse(
                 authorized = authorized,
                 stepUp = stepUp,
                 twoFactorRequired = twoFactorRequired,
+                preferredTwoFactorMethod = preferredTwoFactorMethod,
                 twoFactorMethods = twoFactorMethods
             )
         )
