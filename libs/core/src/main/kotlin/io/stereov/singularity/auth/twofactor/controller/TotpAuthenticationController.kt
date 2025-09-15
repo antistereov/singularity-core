@@ -32,7 +32,7 @@ import java.util.*
 @RestController
 @RequestMapping("/api/auth/2fa/totp")
 @Tag(
-    name = "TOTP Authentication",
+    name = "TOTP Two-Factor Authentication",
     description = "Operations related to TOTP."
 )
 class TotpAuthenticationController(
@@ -47,6 +47,7 @@ class TotpAuthenticationController(
     private val authorizationService: AuthorizationService
 ) {
 
+    @GetMapping("/setup")
     @Operation(
         summary = "Get 2FA secret and recovery codes",
         description = "Get a 2FA secret, recovery codes and a TOTP URL. " +
@@ -66,10 +67,14 @@ class TotpAuthenticationController(
                 responseCode = "401",
                 description = "Not authenticated.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
+            ApiResponse(
+                responseCode = "403",
+                description = "The user already enabled TOTP.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
     )
-    @GetMapping("/setup")
     suspend fun getTotpDetails(): ResponseEntity<TwoFactorSetupResponse> {
         val res = totpAuthenticationService.getTotpDetails()
 
@@ -95,6 +100,11 @@ class TotpAuthenticationController(
             ApiResponse(
                 responseCode = "401",
                 description = "Wrong code or not authorized.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
+            ApiResponse(
+                responseCode = "403",
+                description = "The user already enabled TOTP.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]

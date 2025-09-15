@@ -53,11 +53,16 @@ class AccessTokenService(
     }
 
     suspend fun extract(exchange: ServerWebExchange): AccessToken {
+
+        val tokenValue = tokenValueExtractor.extractValue(exchange, tokenType, true)
+
+        return extract(tokenValue)
+    }
+
+    suspend fun extract(tokenValue: String): AccessToken {
         logger.debug { "Extracting and validating access token" }
 
-        val token = tokenValueExtractor.extractValue(exchange, tokenType, true)
-
-        val jwt = jwtService.decodeJwt(token, true)
+        val jwt = jwtService.decodeJwt(tokenValue, true)
 
         val userId = jwt.subject?.let { ObjectId(it) }
             ?: throw InvalidTokenException("AccessToken does not contain sub")

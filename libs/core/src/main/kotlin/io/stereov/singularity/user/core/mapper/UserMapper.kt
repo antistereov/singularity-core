@@ -37,6 +37,7 @@ class UserMapper(
             user.sensitive.security.mail.verified,
             user.lastActive.toString(),
             user.twoFactorEnabled,
+            user.preferredTwoFactorMethod,
             user.twoFactorMethods,
             avatarMetadata,
             user.created.toString(),

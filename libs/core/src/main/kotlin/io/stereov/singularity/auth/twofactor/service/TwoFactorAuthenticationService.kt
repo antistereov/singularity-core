@@ -3,8 +3,11 @@ package io.stereov.singularity.auth.twofactor.service
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.exception.AuthException
+import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorAuthenticationRequest
+import io.stereov.singularity.auth.twofactor.dto.request.UpdatePreferredTwoFactorMethodRequest
 import io.stereov.singularity.auth.twofactor.exception.model.InvalidTwoFactorRequestException
+import io.stereov.singularity.auth.twofactor.exception.model.TwoFactorMethodDisabledException
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
 import io.stereov.singularity.auth.twofactor.service.token.TwoFactorAuthenticationTokenService
 import io.stereov.singularity.content.translate.model.Language
@@ -19,6 +22,7 @@ class TwoFactorAuthenticationService(
     private val totpAuthenticationService: TotpAuthenticationService,
     private val twoFactorAuthTokenService: TwoFactorAuthenticationTokenService,
     private val mailAuthenticationService: MailAuthenticationService,
+    private val authorizationService: AuthorizationService,
 ) {
 
     private val logger: KLogger
@@ -54,6 +58,25 @@ class TwoFactorAuthenticationService(
         }
 
         throw InvalidTwoFactorRequestException("2FA failed: no valid code found in request, available methods: ${user.twoFactorMethods}")
+    }
+
+    suspend fun updatePreferredMethod(req: UpdatePreferredTwoFactorMethodRequest): UserDocument {
+        logger.debug { "Changing preferred 2FA method to ${req.method}" }
+
+        val user = authorizationService.getCurrentUser()
+        authorizationService.requireStepUp()
+
+        when (req.method) {
+            TwoFactorMethod.MAIL -> if (!user.sensitive.security.twoFactor.mail.enabled)
+                throw TwoFactorMethodDisabledException("Cannot set ${TwoFactorMethod.MAIL} as preferred method: method is disabled")
+
+            TwoFactorMethod.TOTP -> if (!user.sensitive.security.twoFactor.totp.enabled)
+                throw TwoFactorMethodDisabledException("Cannot set ${TwoFactorMethod.TOTP} as preferred method: method is disabled")
+        }
+
+        user.sensitive.security.twoFactor.preferred = req.method
+
+        return userService.save(user)
     }
 
 }

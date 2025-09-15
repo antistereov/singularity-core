@@ -6,5 +6,6 @@ data class AuthenticationStatusResponse(
     val authorized: Boolean,
     val stepUp: Boolean,
     val twoFactorRequired: Boolean,
+    val preferredTwoFactorMethod: TwoFactorMethod?,
     val twoFactorMethods: List<TwoFactorMethod>?
 )

@@ -6,7 +6,9 @@ import io.stereov.singularity.auth.core.exception.AuthException
 import io.stereov.singularity.auth.core.exception.model.TwoFactorMethodDisabledException
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.twofactor.dto.response.TwoFactorSetupResponse
+import io.stereov.singularity.auth.twofactor.exception.model.CannotDisableOnly2FAMethodException
 import io.stereov.singularity.auth.twofactor.exception.model.InvalidTwoFactorCodeException
+import io.stereov.singularity.auth.twofactor.exception.model.TwoFactorMethodSetupException
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorAuthProperties
 import io.stereov.singularity.auth.twofactor.service.token.TotpSetupTokenService
@@ -49,6 +51,8 @@ class TotpAuthenticationService(
         logger.debug { "Setting up two factor authentication" }
 
         val user = authorizationService.getCurrentUser()
+        if (user.sensitive.security.twoFactor.totp.enabled)
+            throw TwoFactorMethodSetupException("The user already set up TOTP")
 
         val secret = totpService.generateSecretKey()
         val otpAuthUrl = totpService.getOtpAuthUrl(user.sensitive.email, secret)
@@ -75,6 +79,9 @@ class TotpAuthenticationService(
     suspend fun validateSetup(token: String, code: Int): UserResponse {
         val user = authorizationService.getCurrentUser()
         val setupToken = setupTokenService.validate(token)
+
+        if (user.sensitive.security.twoFactor.totp.enabled)
+            throw TwoFactorMethodSetupException("The user already set up TOTP")
 
         authorizationService.requireStepUp()
 
@@ -151,6 +158,9 @@ class TotpAuthenticationService(
         authorizationService.requireStepUp()
 
         val user = authorizationService.getCurrentUser()
+
+        if (user.twoFactorMethods.size == 1 && user.sensitive.security.twoFactor.totp.enabled)
+            throw CannotDisableOnly2FAMethodException("Failed to disable TOTP: it not allowed to disable the only configured 2FA method.")
 
         user.disableTotp()
 
