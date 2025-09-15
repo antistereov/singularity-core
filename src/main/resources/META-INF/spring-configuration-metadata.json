@@ -11,6 +11,16 @@
       "sourceType": "io.stereov.singularity.auth.core.properties.AuthProperties"
     },
     {
+      "name": "singularity.auth.email-verification",
+      "type": "io.stereov.singularity.auth.core.properties.EmailVerificationProperties",
+      "sourceType": "io.stereov.singularity.auth.core.properties.EmailVerificationProperties"
+    },
+    {
+      "name": "singularity.auth.password-reset",
+      "type": "io.stereov.singularity.auth.core.properties.PasswordResetProperties",
+      "sourceType": "io.stereov.singularity.auth.core.properties.PasswordResetProperties"
+    },
+    {
       "name": "singularity.auth.geolocation",
       "type": "io.stereov.singularity.auth.geolocation.properties.GeolocationProperties",
       "sourceType": "io.stereov.singularity.auth.geolocation.properties.GeolocationProperties"
@@ -174,6 +184,20 @@
       "default": true
     },
     {
+      "name": "singularity.auth.email-verification.uri",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.auth.core.properties.EmailVerificationProperties",
+      "defaultValue": "http://localhost:8000/auth/verify-email",
+      "description": "The URI that will included in the verification email that leads to the email verification page in your frontend application."
+    },
+    {
+      "name": "singularity.auth.password-reset.uri",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.auth.core.properties.PasswordResetProperties",
+      "defaultValue": "http://localhost:8000/auth/reset-password",
+      "description": "The URI that will be included in the password reset email that leads to the password reset page in your frontend application."
+    },
+    {
       "name": "singularity.auth.geolocation.enabled",
       "type": "java.lang.Boolean",
       "sourceType": "io.stereov.singularity.auth.geolocation.properties.GeolocationProperties",
@@ -327,13 +351,6 @@
       "description": "The password for the email account used to send emails."
     },
     {
-      "name": "singularity.mail.password-reset-expiration",
-      "type": "java.lang.Long",
-      "sourceType": "io.stereov.singularity.mail.core.properties.MailProperties",
-      "defaultValue": 900,
-      "description": "Expiration time for the password reset token in seconds. Default is 15 minutes."
-    },
-    {
       "name": "singularity.mail.send-cooldown",
       "type": "java.lang.Long",
       "sourceType": "io.stereov.singularity.mail.core.properties.MailProperties",
@@ -373,13 +390,6 @@
       "type": "java.lang.String",
       "sourceType": "io.stereov.singularity.mail.core.properties.MailProperties",
       "description": "The username for the email account used to send emails."
-    },
-    {
-      "name": "singularity.mail.verification-expiration",
-      "type": "java.lang.Long",
-      "sourceType": "io.stereov.singularity.mail.core.properties.MailProperties",
-      "defaultValue": 900,
-      "description": "Expiration time for the verification token in seconds. Default is 15 minutes."
     },
     {
       "name": "singularity.secrets.store",
@@ -560,20 +570,6 @@
       "sourceType": "io.stereov.singularity.global.properties.AppProperties",
       "defaultValue": "/privacy-policy",
       "description": "Path to the privacy policy page."
-    },
-    {
-      "name": "singularity.ui.password-reset-path",
-      "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.mail.core.properties.MailProperties",
-      "defaultValue": "/auth/reset-password",
-      "description": "The path to the password reset page in your frontend application."
-    },
-    {
-      "name": "singularity.ui.email-verification-path",
-      "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.mail.core.properties.MailProperties",
-      "defaultValue": "/auth/verify-email",
-      "description": "The path to the verification page in your frontend application."
     }
   ],
   "hints": []

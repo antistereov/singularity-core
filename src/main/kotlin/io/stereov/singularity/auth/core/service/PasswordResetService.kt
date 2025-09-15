@@ -1,18 +1,19 @@
 package io.stereov.singularity.auth.core.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.dto.request.ResetPasswordRequest
 import io.stereov.singularity.auth.core.dto.request.SendPasswordResetRequest
 import io.stereov.singularity.auth.core.dto.response.MailCooldownResponse
 import io.stereov.singularity.auth.core.exception.AuthException
 import io.stereov.singularity.auth.core.exception.model.WrongIdentityProviderException
 import io.stereov.singularity.auth.core.model.IdentityProvider
+import io.stereov.singularity.auth.core.properties.PasswordResetProperties
 import io.stereov.singularity.auth.core.service.token.PasswordResetTokenService
 import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.content.translate.model.TranslateKey
 import io.stereov.singularity.content.translate.service.TranslateService
 import io.stereov.singularity.database.hash.service.HashService
-import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.mail.core.exception.model.MailCooldownException
 import io.stereov.singularity.mail.core.properties.MailProperties
@@ -37,10 +38,11 @@ class PasswordResetService(
     private val authorizationService: AuthorizationService,
     private val redisTemplate: ReactiveRedisTemplate<String, String>,
     private val mailProperties: MailProperties,
-    private val uiProperties: UiProperties,
+    private val passwordResetProperties: PasswordResetProperties,
     private val translateService: TranslateService,
     private val mailService: MailService,
-    private val templateService: TemplateService
+    private val templateService: TemplateService,
+    private val accessTokenCache: AccessTokenCache
 ) {
 
     private val logger = KotlinLogging.logger {}
@@ -82,6 +84,9 @@ class PasswordResetService(
             ?: throw WrongIdentityProviderException("No password authentication is set for user")
 
         passwordIdentity.password = hashService.hashBcrypt(req.newPassword)
+        user.clearSessions()
+        accessTokenCache.invalidateAllTokens(user.id)
+
         userService.save(user)
     }
 
@@ -183,6 +188,6 @@ class PasswordResetService(
      * @return The generated password reset URL.
      */
     private fun generatePasswordResetUrl(token: String): String {
-        return "${uiProperties.baseUrl}${uiProperties.passwordResetPath}?token=$token"
+        return "${passwordResetProperties.uri}?token=$token"
     }
 }
