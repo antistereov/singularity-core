@@ -1,22 +1,14 @@
 ---
-sidebar_position: 1
+sidebar_position: 2
 description: Learn how to secure an endpoint.
 ---
 
-# Basics
+# Securing Endpoints
 
 :::note
 This guide assumes familiarity with the [Spring Framework](https://spring.io).  
 If you are new to Spring, we recommend starting with their [official guides](https://spring.io/quickstart) to get up to speed.
 :::
-
-Authorization is one of the core features of *Singularity*.
-Every important endpoint for user registration, login and session control is already built-in.
-Useful features such as mail verification and two-factor authentication are included out of the box.
-
-Learn how you can use the predefined endpoints to authorize your users.
-
-## Securing Endpoints
 
 :::info
 All paths are public by default.
@@ -117,7 +109,7 @@ You can be more fine-grained in your requirements.
 Define and use custom groups and limit access to members of this group only.
 
 :::note
-Everything about creating and using groups is covered here: [Groups](/docs/usage/groups).
+Everything about creating and using groups is covered here: [Groups](../../docs/auth/groups).
 :::
 
 ```kotlin
@@ -243,11 +235,11 @@ If you decide to secure endpoints by path, you can define them using the followi
 
 ### Properties
 
-| Property                        | Type           | Description                                                                | Default value |
-|---------------------------------|----------------|----------------------------------------------------------------------------|---------------|
-| `singularity.auth.public-paths` | `List<String>` | Paths that do not require authentication.                                  |               |
-| `singularity.auth.user-paths`   | `List<String>` | Paths that require users to be authenticated and to have the `USER` role.  |               |
-| `singularity.auth.admin-paths`  | `List<String>` | Paths that require users to be authenticated and to have the `ADMIN` role. |               |
+| Property                      | Type           | Description                                                                | Default value |
+|-------------------------------|----------------|----------------------------------------------------------------------------|---------------|
+| singularity.auth.public-paths | `List<String>` | Paths that do not require authentication.                                  |               |
+| singularity.auth.user-paths   | `List<String>` | Paths that require users to be authenticated and to have the `USER` role.  |               |
+| singularity.auth.admin-paths  | `List<String>` | Paths that require users to be authenticated and to have the `ADMIN` role. |               |
 
 #### Example
 
@@ -280,10 +272,10 @@ If you don't need header authentication, you can disable it here.
 
 ### Properties
 
-| Property                                        | Type      | Description                                                                                                                                           | Default value |
-|-------------------------------------------------|-----------|-------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
-| `singularity.auth.allow-header-authentication`  | `Boolean` | Allow authentication using a bearer token placed in the header along HTTP-only Cookies. Allowed by default.                                           | `true`        |
-| `singularity.auth.prefer-header-authentication` | `Boolean` | "If header authentication is allowed, this property controls the precedence: if true, the Authorization header is preferred over HTTP-only cookies.", | `true`        |
+| Property                                      | Type      | Description                                                                                                                                           | Default value |
+|-----------------------------------------------|-----------|-------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
+| singularity.auth.allow-header-authentication  | `Boolean` | Allow authentication using a bearer token placed in the header along HTTP-only Cookies. Allowed by default.                                           | `true`        |
+| singularity.auth.prefer-header-authentication | `Boolean` | "If header authentication is allowed, this property controls the precedence: if true, the Authorization header is preferred over HTTP-only cookies.", | `true`        |
 
 
 #### Example

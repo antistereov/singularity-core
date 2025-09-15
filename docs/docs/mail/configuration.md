@@ -21,4 +21,4 @@ You can choose to enable it any time. But make sure to configure it correctly.
 
 | Property                      | Type      | Description                                                                                                   | Default |
 |-------------------------------|-----------|---------------------------------------------------------------------------------------------------------------|---------|
-| `singularity.app.enable-mail` | `Boolean` | Enable mails for email verification, password resets and much more. Make sure to configure your email server. | `false` |
+| singularity.app.enable-mail` | `Boolean` | Enable mails for email verification, password resets and much more. Make sure to configure your email server. | `false`  |

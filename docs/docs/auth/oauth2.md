@@ -5,7 +5,7 @@ description: Learn how to authenticate users using OAuth2 clients.
 
 # OAuth2
 
-:::info
+:::note
 This guide assumes familiarity with the [Spring Framework](https://spring.io).  
 If you are new to Spring, we recommend starting with their [official guides](https://spring.io/quickstart) to get up to speed.
 :::
@@ -29,10 +29,10 @@ Copy the `client-id` and `client-secret` for the next step.
 Please make sure that the **email** is in scope for your OAuth2 client. Check out their official documentation.
 :::
 
-| Property                                     | Type      | Description                                                                       | Default value                             |
-|----------------------------------------------|-----------|-----------------------------------------------------------------------------------|-------------------------------------------|
-| `singularity.auth.oauth2.enable`             | `Boolean` | Allow authentication using OAuth2 identity providers. Disabled by default.        | `false`                                   |
-| `singularity.auth.oauth2.error-redirect-uri` | `String`  | The path the user will be redirected to if there was an error in the OAuth2 flow. | `http://localhost:8000/auth/oauth2/error` |
+| Property                                   | Type      | Description                                                                       | Default value                             |
+|--------------------------------------------|-----------|-----------------------------------------------------------------------------------|-------------------------------------------|
+| singularity.auth.oauth2.enable             | `Boolean` | Allow authentication using OAuth2 identity providers. Disabled by default.        | `false`                                   |
+| singularity.auth.oauth2.error-redirect-uri | `String`  | The path the user will be redirected to if there was an error in the OAuth2 flow. | `http://localhost:8000/auth/oauth2/error` |
 
 Make sure to set `singularity.auth.oauth2.enable` to `true`.
 
@@ -91,10 +91,10 @@ You only have the possibility to override certain tokens in the request header.
 Authentication in *Singularity* strongly relies on sessions.
 Access tokens and refresh tokens are bound to a specific session for example. 
 If you try to perform a request with a session ID that does not belong to your current session, you will get an unauthorized response.
-You can learn more about that [here](/docs/authorization/sessions).
+You can learn more about that [here](../../docs/auth/sessions).
 
 Therefore, before authenticating via an OAuth2 client, you need to retrieve a `SessionToken` using [`POST /api/auth/sessions/token`](/swagger#/Sessions/generateTokenForCurrentSession).
-This sets the `SessionToken` as an HTTP-only cookie and returns the value in the response body if [header authentication](/docs/authorization/basics#header-authentication) is enabled.
+This sets the `SessionToken` as an HTTP-only cookie and returns the value in the response body if [header authentication](../../docs/auth/securing-endpoints#header-authentication) is enabled.
 
 ### 2. Calling the Spring OAuth2 Authorization Endpoint
 
@@ -136,7 +136,7 @@ Placing them in the header will not lead to a successful connection since they w
 ### 2. Creating an OAuth2 Provider Connection Token
 
 Call [`POST /api/auth/providers/oauth2/token`](/swagger#/OAuth2%20Identity%20Provider/generateOAuth2ProviderConnectionToken) authenticated as the user to create an `OAuth2ProviderConnectionToken`.
-This token will be set as an HTTP-only cookie and returned in the response if [header-authentication](/docs/authorization/basics#header-authentication) is enabled.
+This token will be set as an HTTP-only cookie and returned in the response if [header-authentication](../../docs/auth/securing-endpoints#header-authentication) is enabled.
 
 ### 3. Follow the Steps For Registration
 
@@ -166,7 +166,7 @@ You can request a `StepUpToken` by adding the parameter `step_up=true` to the in
 
 This will set the `StepUpToken` as an HTTP-only cookie.
 
-You can learn more about step-up authentication [here](/docs/authorization/authentication-flow#step-up).
+You can learn more about step-up authentication [here](../../docs/auth/authentication#step-up).
 
 ## Error Handling
 

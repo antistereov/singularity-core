@@ -1,5 +1,5 @@
 ---
-sidebar_position: 2
+sidebar_position: 4
 description: Learn how to enable and configure two-factor authentication.
 ---
 
@@ -12,11 +12,17 @@ If you are new to Spring, we recommend starting with their [official guides](htt
 
 ## Configuration
 
-| Property                                                      | Type      | Description                                                                                                                    | Default value |
-|---------------------------------------------------------------|-----------|--------------------------------------------------------------------------------------------------------------------------------|---------------|
-| `singularity.security.two-factor.recovery-code-length`        | `Integer` | Length of the recovery code that can be used to log in if a user lost access to their second factor. Default is 10 characters. | `10`          |
-| `singularity.auth.two-factor.recovery-code-count`             | `Integer` | The number of recovery codes to generate. Every code can only be used once. Default is 6.                                      | `6`           |
-| `singularity.auth.two-factor.mail-two-factor-code-expires-in` | `Long`    | The number of seconds the 2FA code sent by email is valid.                                                                     | `900`         |
+| Property                                                    | Type      | Description                                                                                                                    | Default value |
+|-------------------------------------------------------------|-----------|--------------------------------------------------------------------------------------------------------------------------------|---------------|
+| singularity.auth.two-factor.recovery-code-length            | `Integer` | Length of the recovery code that can be used to log in if a user lost access to their second factor. Default is 10 characters. | `10`          |
+| singularity.auth.two-factor.recovery-code-count             | `Integer` | The number of recovery codes to generate. Every code can only be used once. Default is 6.                                      | `6`           |
+| singularity.auth.two-factor.mail-two-factor-code-expires-in | `Long`    | The number of seconds the 2FA code sent by email is valid.                                                                     | `900`         |
+
+## Methods
+
+### TOTP
+
+
 
 ## Usage
 
@@ -29,7 +35,7 @@ Before enabling 2FA, entering the password is required.
 Use [`POST /api/auth/2fa/setup/init`](/swagger#/User%20Session/register) TODO
 When successful, you will an HTTP-only cookie with a `Two-Factor-Setup-Init-Token` is set.
 
-If [header authentication](/docs/authorization/basics#header-authentication) is enabled, you will get the token in the response body.
+If [header authentication](../../docs/auth/securing-endpoints#header-authentication) is enabled, you will get the token in the response body.
 
 #### 2. Setup
 
@@ -56,7 +62,7 @@ Use this token to send a request to [`POST /api/auth/2fa/login`](/swagger#/User%
 If the token is valid and the code is correct, access token and refresh token will be set as HTTP-only cookies. 
 The user is logged in.
 
-If [header authentication](/docs/authorization/basics#header-authentication) is enabled, you will receive both access token and refresh token in the response body.
+If [header authentication](../../docs/auth/securing-endpoints#header-authentication) is enabled, you will receive both access token and refresh token in the response body.
 
 ### Disabling
 

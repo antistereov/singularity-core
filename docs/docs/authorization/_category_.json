@@ -1,9 +1,0 @@
-{
-  "label": "Authorization",
-  "position": 4,
-  "link": {
-    "type": "generated-index"
-  },
-  "description":
-          "Configure authentication and authentication"
-}

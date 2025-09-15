@@ -1,0 +1,9 @@
+{
+  "label": "Auth",
+  "position": 4,
+  "link": {
+    "type": "generated-index"
+  },
+  "description":
+    "Authentication and Authorization are core features of *Singularity*.\nEvery important endpoint for user registration, login and session control is already built-in.\nUseful features such as mail verification and two-factor authentication are included out of the box.\n\nLearn how you can use the predefined endpoints to authorize your users."
+}

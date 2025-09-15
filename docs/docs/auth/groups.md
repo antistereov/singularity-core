@@ -16,6 +16,6 @@ If you are new to Spring, we recommend starting with their [official guides](htt
 
 You can configure groups to be available after the first application startup.
 
-| Property                 | Type           | Description                                         | Default |
-|--------------------------|----------------|-----------------------------------------------------|---------|
-| `singularity.app.groups` | `List<String>` | Groups that will be created on application startup. |         |
+| Property               | Type           | Description                                         | Default |
+|------------------------|----------------|-----------------------------------------------------|---------|
+| singularity.app.groups | `List<String>` | Groups that will be created on application startup. |         |
