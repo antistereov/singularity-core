@@ -52,5 +52,3 @@ For both secure and easy integration, you can set the following parameters:
 | singularity.ui.contact-path            | `String` | Path to the contact page in your frontend application.                                                         | `/contact`              |
 | singularity.ui.legal-notice-path       | `String` | Path to the legal notice page.                                                                                 | `/legal-notice`         |
 | singularity.ui.privacy-policy-path     | `String` | Path to the privacy policy page.                                                                               | `/privacy-policy`       |
-| singularity.ui.password-reset-path     | `String` | Path to the password reset page in your frontend application.                                                  | `/auth/reset-password`  |
-| singularity.ui.email-verification-path | `String` | Path to the email verification page in your frontend application.                                              | `/auth/verify-email`    |

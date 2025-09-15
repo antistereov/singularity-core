@@ -65,7 +65,37 @@ If [header authentication](../../docs/auth/securing-endpoints#header-authenticat
 
 ### Email Verification
 
+If [mail is enabled](../mail/configuration), 
+an email with a link to verify the email address will be sent to the user automatically after successful registration. 
 
+The link will be generated based on the URI you configure here:
+
+| Property                                | Type     | Description                                                                                                                  | Default value                             |
+|-----------------------------------------|----------|------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------|
+| singularity.auth.email-verification.uri | `String` | The URI that will included in the verification email that leads to the email verification page in your frontend application. | `http://localhost:8000/auth/verify-email` |
+
+This URI should lead to the email verification page of your frontend application.
+
+This generated link will look like this: `<your-uri>?token=<generated-token>`.
+For example, if you set the property to `https://example.com/auth/verify-email`, 
+the generated link will look like this `https://example.com/auth/verify-email?token=ey27308dh7a7...`.
+
+The link will include the query parameter `token` containing the token you need to verify the email.
+Your frontend application should then request [`POST /api/auth/email/verify`](/swagger#/Email%20Verification/verifyEmail)
+attaching the token.
+
+If successful, the user's email address is verified.
+
+#### Resending the Verification Email
+
+You can resend the verification email using [`POST /api/auth/email/verify/send`](/swagger#/Email%20Verification/sendVerificationEmail).
+After sending the email, a cooldown will be started.
+The number of seconds the cooldown will take will be returned in the response body.
+
+You are not allowed to send another email while the cooldown is active.
+The cooldown can be configured [here](../mail/configuration).
+
+You can check the state of the cooldown here [`GET /api/auth/email/verify/cooldown`](/swagger#/Email%20Verification/getRemainingVerificationCooldown).
 
 ### OAuth2
 
@@ -91,11 +121,50 @@ you can use the code you obtained from one of those methods to perform a second 
 
 If verification was successful, an HTTP-only cookie containing an [`AccessToken`](../../docs/auth/tokens#access-token) and one containing a [`RefreshToken`](../../docs/auth/tokens#refresh-token) will be set automatically.
 If [header authentication](../../docs/auth/securing-endpoints#header-authentication) is enabled, access token and refresh token will be returned in the response body.
-The `TwoFactorAuthenticationCookie` will also be deleted.
+The [`TwoFactorAuthenticationToken`](./tokens#two-factor-authentication-token) will also be deleted.
 
 ### Password Reset
 
+:::warning
+You need to [enable mail](../mail/configuration).
+Otherwise, the password reset will not be possible.
+:::
 
+You can request a password reset using [`POST /api/auth/password/reset-request`](/swagger#/Password%20Reset/sendPasswordResetEmail).
+An email with a link to reset the password will be sent to the user.
+
+The link will be generated based on the URI you configure here:
+
+| Property                            | Type     | Description                                                                                                                   | Default value                               |
+|-------------------------------------|----------|-------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------|
+| singularity.auth.password-reset.uri | `String` | The URI that will be included in the password reset email that leads to the password reset page in your frontend application. | `http://localhost:8000/auth/reset-password` |
+
+This URI should lead to the password reset page of your frontend application.
+
+This generated link will look like this: `<your-uri>?token=<generated-token>`.
+For example, if you set the property to `https://example.com/auth/reset-password`,
+the generated link will look like this `https://example.com/auth/reset-password?token=ey27308dh7a7...`.
+
+The link will include the query parameter `token` containing the token you need to reset the password.
+Your frontend application should then request [`POST /api/auth/password/reset](/swagger#/Password%20Reset/resetPassword)
+attaching the token and specifying the new password.
+
+If successful, the new password is set and the user can log in again.
+
+:::info
+All active sessions will be deleted after resetting the password.
+:::
+
+#### Resending the Reset Password
+
+You can resend the password reset request using [`POST /api/auth/password/reset-request`](/swagger#/Password%20Reset/sendPasswordResetEmail).
+After sending each email, a cooldown will be started.
+The number of seconds the cooldown will take will be returned in the response body.
+
+You are not allowed to send another email while the cooldown is active.
+The cooldown can be configured [here](../mail/configuration).
+
+You can check the state of the cooldown here [`GET /api/auth/password/reset/cooldown`](/swagger#/Password%20Reset/getRemainingPasswordResetCooldown).
 
 ### OAuth2
 

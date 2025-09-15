@@ -27,18 +27,6 @@ This can enhance security since users can revoke access to sessions that they do
 * Built-in integration with login/registration flows
 * Useful for detecting unusual login locations and improving account security
 
-## Configuration
-
-| Property                                        | Type      | Description                                                                                                                                                          | Default value         |
-|-------------------------------------------------|-----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------|
-| singularity.auth.geolocation.enabled            | `Boolean` | Enable resolving IP addresses to geolocations. This will download the GeoLite2-City database from maxmind. Account ID and license key are required for the download. | `false`               |
-| singularity.auth.geolocation.real-ip-header     | `String`  | The preferred header used for identification of the real IP address of the client.                                                                                   | `X-Real-IP`           |
-| singularity.auth.geolocation.database-directory | `String`  | The directory where the GeoLite2-City database will be saved to.                                                                                                     | `./.data/geolocation` |
-| singularity.auth.geolocation.database-filename  | `String`  | The filename of the GeoLite2-City database. Defaults to GeoLite2-City.mmdb.                                                                                          | `GeoLite2-City.mmdb`  |
-| singularity.auth.geolocation.download           | `Boolean` | Enable automated downloads and updates of the database. You can also provide this file yourself.                                                                     | `true`                |
-| singularity.auth.geolocation.account-id         | `String`  | The account ID of your maxmind account. Required to download the GeoLite2-City database to resolve your geolocation.                                                 |                       |
-| singularity.auth.geolocation.license-key        | `String`  | The license key of your maxmind account. Required to download the GeoLite2-City database to resolve your geolocation.                                                |                       |
-
 ## Usage
 
 :::info
@@ -94,3 +82,15 @@ class CoolController(private val service: CoolService) {
     }
 }
 ```
+## Configuration
+
+| Property                                        | Type      | Description                                                                                                                                                          | Default value         |
+|-------------------------------------------------|-----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------|
+| singularity.auth.geolocation.enabled            | `Boolean` | Enable resolving IP addresses to geolocations. This will download the GeoLite2-City database from maxmind. Account ID and license key are required for the download. | `false`               |
+| singularity.auth.geolocation.real-ip-header     | `String`  | The preferred header used for identification of the real IP address of the client.                                                                                   | `X-Real-IP`           |
+| singularity.auth.geolocation.database-directory | `String`  | The directory where the GeoLite2-City database will be saved to.                                                                                                     | `./.data/geolocation` |
+| singularity.auth.geolocation.database-filename  | `String`  | The filename of the GeoLite2-City database. Defaults to GeoLite2-City.mmdb.                                                                                          | `GeoLite2-City.mmdb`  |
+| singularity.auth.geolocation.download           | `Boolean` | Enable automated downloads and updates of the database. You can also provide this file yourself.                                                                     | `true`                |
+| singularity.auth.geolocation.account-id         | `String`  | The account ID of your maxmind account. Required to download the GeoLite2-City database to resolve your geolocation.                                                 |                       |
+| singularity.auth.geolocation.license-key        | `String`  | The license key of your maxmind account. Required to download the GeoLite2-City database to resolve your geolocation.                                                |                       |
+
