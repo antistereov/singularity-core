@@ -5,15 +5,17 @@ import io.mockk.every
 import io.stereov.singularity.auth.core.component.CookieCreator
 import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.auth.core.dto.request.RegisterUserRequest
+import io.stereov.singularity.auth.core.model.token.AccessToken
 import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.auth.core.service.token.*
 import io.stereov.singularity.auth.group.model.GroupDocument
 import io.stereov.singularity.auth.group.model.GroupTranslation
 import io.stereov.singularity.auth.group.service.GroupService
-import io.stereov.singularity.auth.core.service.token.SessionTokenService
+import io.stereov.singularity.auth.jwt.exception.TokenException
 import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorAuthenticationRequest
 import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorVerifySetupRequest
 import io.stereov.singularity.auth.twofactor.dto.response.TwoFactorSetupResponse
+import io.stereov.singularity.auth.twofactor.model.token.TwoFactorAuthenticationToken
 import io.stereov.singularity.auth.twofactor.model.token.TwoFactorTokenType
 import io.stereov.singularity.auth.twofactor.service.TotpService
 import io.stereov.singularity.auth.twofactor.service.token.TwoFactorAuthenticationTokenService
@@ -32,6 +34,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Import
 import org.springframework.http.HttpHeaders
+import org.springframework.test.web.reactive.server.EntityExchangeResult
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.returnResult
 import java.util.*
@@ -141,11 +144,9 @@ class BaseSpringBootTest {
 
         var accessToken = responseCookies[SessionTokenType.Access.cookieName]?.firstOrNull()?.value
         var refreshToken = responseCookies[SessionTokenType.Refresh.cookieName]?.firstOrNull()?.value
-        val sessionToken = responseCookies[SessionTokenType.Session.cookieName]?.firstOrNull()?.value
 
         requireNotNull(accessToken) { "No access token contained in response" }
         requireNotNull(refreshToken) { "No refresh token contained in response" }
-        requireNotNull(sessionToken) { "No SessionToken contained in response" }
 
         var twoFactorToken: String? = null
         var twoFactorRecovery: String? = null
@@ -158,9 +159,7 @@ class BaseSpringBootTest {
 
             val twoFactorRes = webTestClient.get()
                 .uri("/api/auth/2fa/totp/setup")
-                .cookie(SessionTokenType.StepUp.cookieName, cookieCreator.createCookie(stepUpToken).value)
                 .cookie(SessionTokenType.Access.cookieName, accessToken)
-                .cookie(SessionTokenType.Session.cookieName, sessionToken)
                 .exchange()
                 .expectStatus().isOk
                 .expectBody(TwoFactorSetupResponse::class.java)
@@ -181,8 +180,7 @@ class BaseSpringBootTest {
             webTestClient.post()
                 .uri("/api/auth/2fa/totp/setup")
                 .cookie(SessionTokenType.Access.cookieName, accessToken)
-                .cookie(SessionTokenType.Session.cookieName, sessionToken)
-                .cookie(SessionTokenType.Session.cookieName, stepUpToken.value)
+                .cookie(SessionTokenType.StepUp.cookieName, stepUpToken.value)
                 .bodyValue(twoFactorSetupReq)
                 .exchange()
                 .expectStatus().isOk
@@ -201,7 +199,6 @@ class BaseSpringBootTest {
                 .uri("/api/auth/2fa/login")
                 .bodyValue(TwoFactorAuthenticationRequest(totp = gAuth.getTotpPassword(twoFactorSecret)))
                 .cookie(TwoFactorTokenType.Authentication.cookieName, twoFactorToken!!)
-                .cookie(SessionTokenType.Session.cookieName, sessionToken)
                 .exchange()
                 .expectStatus().isOk
                 .returnResult<Void>()
@@ -246,5 +243,18 @@ class BaseSpringBootTest {
             .header(HttpHeaders.COOKIE, "${SessionTokenType.Access.cookieName}=${response.accessToken}")
             .exchange()
             .expectStatus().isOk
+    }
+
+    suspend fun EntityExchangeResult<*>.extractAccessToken(): AccessToken {
+        return this.responseCookies[SessionTokenType.Access.cookieName]?.firstOrNull()?.value
+            ?.let { accessTokenService.extract(it) }
+            ?: throw TokenException("No AccessToken found in response")
+    }
+
+    suspend fun EntityExchangeResult<*>.extractTwoFactorAuthenticationToken(): TwoFactorAuthenticationToken {
+        return this.responseCookies[TwoFactorTokenType.Authentication.cookieName]
+            ?.firstOrNull()?.value
+            ?.let { twoFactorAuthenticationTokenService.extract(it) }
+            ?: throw TokenException("No TwoFactorAuthenticationToken found in response")
     }
 }

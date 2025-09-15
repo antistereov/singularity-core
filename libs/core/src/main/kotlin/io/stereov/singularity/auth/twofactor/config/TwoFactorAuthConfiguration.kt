@@ -17,7 +17,8 @@ import io.stereov.singularity.auth.twofactor.controller.MailAuthenticationContro
 import io.stereov.singularity.auth.twofactor.controller.TotpAuthenticationController
 import io.stereov.singularity.auth.twofactor.controller.TwoFactorAuthenticationController
 import io.stereov.singularity.auth.twofactor.exception.handler.TwoFactorAuthExceptionHandler
-import io.stereov.singularity.auth.twofactor.properties.TwoFactorAuthProperties
+import io.stereov.singularity.auth.twofactor.properties.TotpRecoveryCodeProperties
+import io.stereov.singularity.auth.twofactor.properties.TwoFactorMailCodeProperties
 import io.stereov.singularity.auth.twofactor.service.MailAuthenticationService
 import io.stereov.singularity.auth.twofactor.service.TotpAuthenticationService
 import io.stereov.singularity.auth.twofactor.service.TotpService
@@ -43,7 +44,7 @@ import org.springframework.data.redis.core.ReactiveRedisTemplate
         ApplicationConfiguration::class
     ]
 )
-@EnableConfigurationProperties(TwoFactorAuthProperties::class)
+@EnableConfigurationProperties(TotpRecoveryCodeProperties::class, TwoFactorMailCodeProperties::class)
 class TwoFactorAuthConfiguration {
 
     // Controller
@@ -140,17 +141,17 @@ class TwoFactorAuthConfiguration {
     @Bean
     @ConditionalOnMissingBean
     fun mailAuthenticationService(
-         twoFactorAuthProperties: TwoFactorAuthProperties,
-         userService: UserService,
-         translateService: TranslateService,
-         templateService: TemplateService,
-         redisTemplate: ReactiveRedisTemplate<String, String>,
-         mailService: MailService,
-         mailProperties: MailProperties,
-         authorizationService: AuthorizationService,
-         accessTokenCache: AccessTokenCache
+        twoFactorMailCodeProperties: TwoFactorMailCodeProperties,
+        userService: UserService,
+        translateService: TranslateService,
+        templateService: TemplateService,
+        redisTemplate: ReactiveRedisTemplate<String, String>,
+        mailService: MailService,
+        mailProperties: MailProperties,
+        authorizationService: AuthorizationService,
+        accessTokenCache: AccessTokenCache
     ) = MailAuthenticationService(
-        twoFactorAuthProperties,
+        twoFactorMailCodeProperties,
         userService,
         translateService,
         templateService,
@@ -166,7 +167,7 @@ class TwoFactorAuthConfiguration {
     fun totpAuthenticationService(
         totpService: TotpService,
         authorizationService: AuthorizationService,
-        twoFactorAuthProperties: TwoFactorAuthProperties,
+        totpRecoveryCodeProperties: TotpRecoveryCodeProperties,
         setupTokenService: TotpSetupTokenService,
         hashService: HashService,
         userService: UserService,
@@ -176,7 +177,7 @@ class TwoFactorAuthConfiguration {
     ) = TotpAuthenticationService(
         totpService,
         authorizationService,
-        twoFactorAuthProperties,
+        totpRecoveryCodeProperties,
         setupTokenService,
         hashService,
         userService,

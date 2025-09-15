@@ -49,7 +49,7 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
     }
     @Test fun `unexpired token required`() = runTest {
         val user = registerUser()
-        val token = accessTokenService.create(user.info.id, user.sessionId, Instant.ofEpochSecond(0))
+        val token = accessTokenService.create(user.info, user.sessionId, Instant.ofEpochSecond(0))
 
         webTestClient.get()
             .uri("/api/users/me")
@@ -89,7 +89,7 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
     }
     @Test fun `invalid session will not be authorized`() = runTest {
         val user = registerUser()
-        val accessToken = accessTokenService.create(user.info.id, user.sessionId)
+        val accessToken = accessTokenService.create(user.info, user.sessionId)
 
         webTestClient.get()
             .uri("/api/users/me")
@@ -219,7 +219,7 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
     }
     @Test fun `refresh invalid session will not be authorized`() = runTest {
         val user = registerUser()
-        val accessToken = accessTokenService.create(user.info.id, user.sessionId)
+        val accessToken = accessTokenService.create(user.info, user.sessionId)
 
         webTestClient.get()
             .uri("/api/users/me")

@@ -12,7 +12,7 @@ import io.stereov.singularity.auth.oauth2.properties.OAuth2Properties
 import io.stereov.singularity.auth.oauth2.service.IdentityProviderService
 import io.stereov.singularity.auth.oauth2.service.OAuth2AuthenticationService
 import io.stereov.singularity.auth.oauth2.service.token.OAuth2ProviderConnectionTokenService
-import io.stereov.singularity.auth.twofactor.properties.TwoFactorAuthProperties
+import io.stereov.singularity.auth.twofactor.properties.TwoFactorMailCodeProperties
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.global.properties.AppProperties
@@ -100,13 +100,13 @@ class OAuth2Configuration {
     fun oAuth2AuthenticationService(
         userService: UserService,
         appProperties: AppProperties,
-        twoFactorAuthProperties: TwoFactorAuthProperties,
+        twoFactorMailCodeProperties: TwoFactorMailCodeProperties,
         identityProviderService: IdentityProviderService,
         authorizationService: AuthorizationService
     ) = OAuth2AuthenticationService(
         userService,
         appProperties,
-        twoFactorAuthProperties,
+        twoFactorMailCodeProperties,
         identityProviderService,
         authorizationService
     )

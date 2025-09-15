@@ -8,7 +8,6 @@ import io.stereov.singularity.auth.core.dto.response.LoginResponse
 import io.stereov.singularity.auth.core.dto.response.RefreshTokenResponse
 import io.stereov.singularity.auth.core.dto.response.RegisterResponse
 import io.stereov.singularity.auth.core.model.token.SessionTokenType
-import io.stereov.singularity.auth.twofactor.model.token.TwoFactorTokenType
 import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.test.BaseIntegrationTest
 import io.stereov.singularity.user.core.dto.response.UserResponse
@@ -38,8 +37,6 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
             ?.firstOrNull()?.value
         val refreshToken = response.responseCookies[SessionTokenType.Refresh.cookieName]
             ?.firstOrNull()?.value
-        val sessionToken = response.responseCookies[SessionTokenType.Session.cookieName]
-            ?.firstOrNull()?.value
         val account = response.responseBody?.user
 
         requireNotNull(accessToken) { "No access token provided in response" }
@@ -53,7 +50,6 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
         val userResponse = webTestClient.get()
             .uri("/api/users/me")
             .cookie(SessionTokenType.Access.cookieName, accessToken)
-            .cookie(SessionTokenType.Session.cookieName, sessionToken!!)
             .exchange()
             .expectStatus().isOk
             .expectBody(UserResponse::class.java)
@@ -117,17 +113,11 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
             .expectStatus().isOk
             .expectBody(LoginResponse::class.java)
             .returnResult()
-        val accessToken = res
-            .responseCookies[SessionTokenType.Access.cookieName]?.firstOrNull()?.value
-        val sessionToken = res.responseCookies[SessionTokenType.Session.cookieName]?.firstOrNull()?.value
-        val sessionId = sessionTokenService.extract(sessionToken!!).id
-
-        requireNotNull(accessToken) { "No access token provided in response" }
+        val accessToken = res.extractAccessToken()
 
         val userInfo = webTestClient.get()
             .uri("/api/users/me")
-            .cookie(SessionTokenType.Access.cookieName, accessToken)
-            .cookie(SessionTokenType.Session.cookieName, sessionToken)
+            .cookie(SessionTokenType.Access.cookieName, accessToken.value)
             .exchange()
             .expectStatus().isOk
             .expectBody(UserResponse::class.java)
@@ -140,7 +130,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
 
         Assertions.assertEquals(2, sessions.size)
         Assertions.assertTrue(sessions.keys.any { it == user.sessionId })
-        Assertions.assertTrue(sessions.keys.any { it == sessionId })
+        Assertions.assertTrue { sessions.containsKey(accessToken.sessionId)}
     }
     @Test fun `login with two factor works as expected`() = runTest {
         val email = "test@email.com"
@@ -158,11 +148,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
             .expectBody(LoginResponse::class.java)
             .returnResult()
 
-        val twoFactorToken = response.responseCookies[TwoFactorTokenType.Authentication.cookieName]
-            ?.firstOrNull()?.value
-            ?.let { twoFactorAuthenticationTokenService.extract(it) }
-
-        requireNotNull(twoFactorToken)
+        val twoFactorToken = response.extractTwoFactorAuthenticationToken()
 
         val body = response.responseBody
         requireNotNull(body)
@@ -189,13 +175,9 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
         val refreshToken = response.responseCookies[SessionTokenType.Refresh.cookieName]
             ?.firstOrNull()?.value
         val userDto = response.responseBody!!.user
-        val sessionToken = response.responseCookies[SessionTokenType.Session.cookieName]
-            ?.firstOrNull()?.value
-            ?.let { sessionTokenService.extract(it) }
 
         requireNotNull(accessToken) { "No access token provided in response" }
         requireNotNull(refreshToken) { "No refresh token provided in response" }
-        requireNotNull(userDto) { "No user info provided in response" }
 
         Assertions.assertTrue(accessToken.isNotBlank())
         Assertions.assertTrue(refreshToken.isNotBlank())
@@ -215,7 +197,6 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
 
         Assertions.assertEquals(userDto.id, userDetails.id)
         Assertions.assertEquals(1, sessions.size)
-        Assertions.assertEquals(sessionToken?.id, sessions.keys.first())
 
         Assertions.assertEquals(1, userService.findAll().count())
     }
@@ -435,7 +416,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
             .returnResult()
             .responseCookies[SessionTokenType.Session.cookieName]
             ?.firstOrNull()?.value
-            ?.let { sessionTokenService.extract(it) }?.id
+            ?.let { accessTokenService.extract(it) }?.sessionId
 
         val sessionId2 = webTestClient.post()
             .uri("/api/auth/login")
@@ -446,7 +427,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
             .returnResult()
             .responseCookies[SessionTokenType.Session.cookieName]
             ?.firstOrNull()?.value
-            ?.let { sessionTokenService.extract(it) }?.id
+            ?.let { accessTokenService.extract(it) }?.sessionId
 
         var user = userService.findByEmail(email)
 

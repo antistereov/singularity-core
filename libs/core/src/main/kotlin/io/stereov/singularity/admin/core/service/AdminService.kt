@@ -3,7 +3,7 @@ package io.stereov.singularity.admin.core.service
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.admin.core.dto.RotationStatusResponse
-import io.stereov.singularity.auth.twofactor.properties.TwoFactorAuthProperties
+import io.stereov.singularity.auth.twofactor.properties.TwoFactorMailCodeProperties
 import io.stereov.singularity.database.core.service.SensitiveCrudService
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.global.properties.AppProperties
@@ -28,7 +28,7 @@ class AdminService(
     private val userService: UserService,
     private val appProperties: AppProperties,
     private val hashService: HashService,
-    private val twoFactorProperties: TwoFactorAuthProperties
+    private val twoFactorMailCodeProperties: TwoFactorMailCodeProperties
 ) {
 
     private val logger: KLogger
@@ -53,7 +53,7 @@ class AdminService(
                 password = hashService.hashBcrypt(appProperties.rootPassword),
                 name = "Root",
                 mailEnabled = appProperties.enableMail,
-                mailTwoFactorCodeExpiresIn = twoFactorProperties.mailTwoFactorCodeExpiresIn
+                mailTwoFactorCodeExpiresIn = twoFactorMailCodeProperties.expiresIn
             ).addRole(Role.ADMIN)
 
             this.userService.save(rootUser)
