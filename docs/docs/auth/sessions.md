@@ -5,6 +5,8 @@ description: Learn how a user can manage their sessions.
 
 # Sessions
 
+## Active Sessions
+
 ## Getting All Current Sessions
 
 ## Invalidating Sessions

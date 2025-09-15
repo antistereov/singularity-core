@@ -63,6 +63,10 @@ An error response will be returned if a register request is send with an email t
 After the registration succeeded, an HTTP-only cookie with [`AccessToken`](../../docs/auth/tokens#access-token) and [`RefreshToken`](../../docs/auth/tokens#refresh-token) will be set automatically.
 If [header authentication](../../docs/auth/securing-endpoints#header-authentication) is enabled, access token and refresh token will be returned in the response body.
 
+### Email Verification
+
+
+
 ### OAuth2
 
 If [authentication via OAuth2 providers](../../docs/auth/oauth2) is enabled, 
@@ -83,11 +87,15 @@ if [header authentication](../../docs/auth/securing-endpoints#header-authenticat
 This token is necessary to perform the second step in the login process.
 
 Depending on the [methods](../../docs/auth/two-factor#methods) the user configured, 
-you can use one of those methods to perform a second request to [`POST /api/auth/2fa/login`](/swagger#/Two%20Factor%20Authentication/verifyLogin).
+you can use the code you obtained from one of those methods to perform a second request to [`POST /api/auth/2fa/login`](/swagger#/Two%20Factor%20Authentication/verifyLogin).
 
 If verification was successful, an HTTP-only cookie containing an [`AccessToken`](../../docs/auth/tokens#access-token) and one containing a [`RefreshToken`](../../docs/auth/tokens#refresh-token) will be set automatically.
 If [header authentication](../../docs/auth/securing-endpoints#header-authentication) is enabled, access token and refresh token will be returned in the response body.
 The `TwoFactorAuthenticationCookie` will also be deleted.
+
+### Password Reset
+
+
 
 ### OAuth2
 

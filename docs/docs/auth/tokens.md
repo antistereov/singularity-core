@@ -19,14 +19,6 @@ If [header authentication](../../docs/auth/securing-endpoints#header-authenticat
 all tokens will be included in the response body of the corresponding request.
 :::
 
-## Configuration
-
-| Property                                    | Type   | Description                                                                   | Default value |
-|---------------------------------------------|--------|-------------------------------------------------------------------------------|---------------|
-| singularity.security.jwt.expires-in         | `Long` | Expiration time for JWT tokens in seconds. Default is 15 minutes.             | `900`         |
-| singularity.security.jwt.refresh-expires-in | `Long` | Expiration time for refresh tokens in seconds. Default is about three months. | `7884000`     |
-
-
 ## Access Token
 
 The `AccessToken` serves as the user's **short-lived, digital identity**.
@@ -190,4 +182,12 @@ The `StepUpToken` is required to authorize requests to sensitive API endpoints. 
       -H 'Authorization: Bearer <your-access-token>' \
       -H 'X-Step-Up-Token: <your-step-up-token>'
     ```
+
+## Configuration
+
+| Property                                    | Type   | Description                                                                   | Default value |
+|---------------------------------------------|--------|-------------------------------------------------------------------------------|---------------|
+| singularity.security.jwt.expires-in         | `Long` | Expiration time for JWT tokens in seconds. Default is 15 minutes.             | `900`         |
+| singularity.security.jwt.refresh-expires-in | `Long` | Expiration time for refresh tokens in seconds. Default is about three months. | `7884000`     |
+
 
