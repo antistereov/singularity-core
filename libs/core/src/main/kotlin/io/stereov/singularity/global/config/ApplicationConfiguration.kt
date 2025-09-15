@@ -1,13 +1,8 @@
 package io.stereov.singularity.global.config
 
-import io.stereov.singularity.auth.core.properties.AuthProperties
 import io.stereov.singularity.global.exception.handler.GlobalBaseWebExceptionHandler
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.global.properties.UiProperties
-import io.stereov.singularity.auth.jwt.properties.JwtProperties
-import io.stereov.singularity.ratelimit.properties.LoginAttemptLimitProperties
-import io.stereov.singularity.ratelimit.properties.RateLimitProperties
-import io.stereov.singularity.auth.twofactor.properties.TotpRecoveryCodeProperties
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
