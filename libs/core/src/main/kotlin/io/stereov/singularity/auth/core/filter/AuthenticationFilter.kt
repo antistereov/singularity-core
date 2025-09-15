@@ -1,12 +1,9 @@
 package io.stereov.singularity.auth.core.filter
 
-import io.stereov.singularity.auth.core.exception.AuthException
 import io.stereov.singularity.auth.core.model.token.CustomAuthenticationToken
 import io.stereov.singularity.auth.core.model.token.ErrorAuthenticationToken
 import io.stereov.singularity.auth.core.service.token.AccessTokenService
 import io.stereov.singularity.auth.jwt.exception.TokenException
-import io.stereov.singularity.global.exception.model.DocumentNotFoundException
-import io.stereov.singularity.user.core.service.UserService
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.mono
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
@@ -18,7 +15,6 @@ import reactor.core.publisher.Mono
 
 class AuthenticationFilter(
     private val accessTokenService: AccessTokenService,
-    private val userService: UserService,
 ) : WebFilter {
 
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain) = mono {
@@ -28,14 +24,14 @@ class AuthenticationFilter(
             return@mono setSecurityContext(chain, exchange, e)
         }
 
-        val user = try {
-            userService.findById(accessToken.userId)
-        } catch (_: DocumentNotFoundException) {
-            val authException = AuthException("Invalid access token: user does not exist")
-            return@mono setSecurityContext(chain, exchange, authException)
-        }
-
-        val authentication = CustomAuthenticationToken(user, accessToken.sessionId, accessToken.tokenId, exchange)
+        val authentication = CustomAuthenticationToken(
+            accessToken.userId,
+            accessToken.roles,
+            accessToken.groups,
+            accessToken.sessionId,
+            accessToken.tokenId,
+            exchange
+        )
 
         val securityContext = SecurityContextImpl(authentication)
         return@mono chain.filter(exchange)

@@ -1,6 +1,8 @@
 package io.stereov.singularity.global.util
 
 object Constants {
+    const val JWT_ROLES_CLAIM = "roles"
+    const val JWT_GROUPS_CLAIM = "groups"
     const val JWT_SESSION_CLAIM = "session"
     const val JWT_BROWSER_CLAIM = "browser"
     const val JWT_OS_CLAIM = "os"

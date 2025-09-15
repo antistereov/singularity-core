@@ -180,6 +180,7 @@ The following error types exist:
 | Code                                 | Description                                                                                                                   |
 |--------------------------------------|-------------------------------------------------------------------------------------------------------------------------------|
 | `state_parameter_missing`            | No state parameter found in callback.                                                                                         |
+| `user_already_authenticated`         | Login with an existing account connected to the provider failed because the user already authenticated.                       |
 | `session_token_missing`              | No session token provided as query parameter or cookie.                                                                       |
 | `session_token_expired`              | The provided session token is expired.                                                                                        |
 | `invalid_session_token`              | The provided session token cannot be decoded.                                                                                 |

@@ -7,7 +7,6 @@ import io.stereov.singularity.auth.core.dto.response.GenerateSessionTokenRespons
 import io.stereov.singularity.auth.core.dto.response.SessionInfoResponse
 import io.stereov.singularity.auth.core.mapper.SessionMapper
 import io.stereov.singularity.auth.core.model.token.SessionTokenType
-import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.core.service.SessionService
 import io.stereov.singularity.auth.core.service.token.SessionTokenService
 import io.stereov.singularity.global.model.ErrorResponse
@@ -32,7 +31,6 @@ class SessionController(
     private val sessionService: SessionService,
     private val cookieCreator: CookieCreator,
     private val sessionTokenService: SessionTokenService,
-    private val authorizationService: AuthorizationService,
     private val sessionMapper: SessionMapper
 ) {
 
@@ -79,8 +77,7 @@ class SessionController(
     suspend fun generateSessionToken(
         @RequestBody sessionInfo: SessionInfoRequest?
     ): ResponseEntity<GenerateSessionTokenResponse> {
-        val sessionId = authorizationService.getCurrentSessionIdOrNull()
-        val token = sessionTokenService.create(sessionId, sessionInfo)
+        val token = sessionTokenService.create(sessionInfo)
 
         return ResponseEntity.ok()
             .header("Set-Cookie", cookieCreator.createCookie(token).toString())
@@ -129,7 +126,6 @@ class SessionController(
         val clearAccessToken = cookieCreator.clearCookie(SessionTokenType.Access)
         val clearRefreshToken = cookieCreator.clearCookie(SessionTokenType.Refresh)
         val clearStepUpToken = cookieCreator.clearCookie(SessionTokenType.StepUp)
-        val clearSessionCookie = cookieCreator.clearCookie(SessionTokenType.Session)
 
         sessionService.deleteAllSessions()
 
@@ -137,7 +133,6 @@ class SessionController(
             .header("Set-Cookie", clearAccessToken.toString())
             .header("Set-Cookie", clearRefreshToken.toString())
             .header("Set-Cookie", clearStepUpToken.toString())
-            .header("Set-Cookie", clearSessionCookie.toString())
             .body(SuccessResponse(true))
     }
 }

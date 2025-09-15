@@ -6,7 +6,6 @@ import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
 import io.stereov.singularity.auth.core.exception.AuthException
 import io.stereov.singularity.auth.core.model.SessionInfo
 import io.stereov.singularity.auth.core.model.token.RefreshToken
-import io.stereov.singularity.auth.core.model.token.SessionToken
 import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
@@ -103,7 +102,7 @@ class RefreshTokenService(
         return refreshToken
     }
 
-    suspend fun extract(exchange: ServerWebExchange, sessionToken: SessionToken): RefreshToken {
+    suspend fun extract(exchange: ServerWebExchange): RefreshToken {
         logger.debug { "Extracting refresh token" }
 
         val tokenValue = tokenValueExtractor.extractValue(exchange, tokenType)
@@ -126,10 +125,6 @@ class RefreshTokenService(
 
         val user = userService.findByIdOrNull(userId)
             ?: throw AuthException("Invalid refresh token: user does not exist")
-
-        if (sessionId != sessionToken.id)
-            throw InvalidTokenException("The session this token belongs to is not valid.")
-
 
         if (user.sensitive.sessions[sessionId]?.refreshTokenId != tokenId)
             throw InvalidTokenException("Refresh token does not correspond to an existing session")

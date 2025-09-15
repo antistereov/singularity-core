@@ -10,6 +10,7 @@ import io.stereov.singularity.auth.core.service.token.*
 import io.stereov.singularity.auth.group.model.GroupDocument
 import io.stereov.singularity.auth.group.model.GroupTranslation
 import io.stereov.singularity.auth.group.service.GroupService
+import io.stereov.singularity.auth.core.service.token.SessionTokenService
 import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorAuthenticationRequest
 import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorVerifySetupRequest
 import io.stereov.singularity.auth.twofactor.dto.response.TwoFactorSetupResponse

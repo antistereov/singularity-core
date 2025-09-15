@@ -6,7 +6,6 @@ import io.stereov.singularity.auth.core.properties.AuthProperties
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.core.service.token.AccessTokenService
 import io.stereov.singularity.auth.core.service.token.RefreshTokenService
-import io.stereov.singularity.auth.core.service.token.SessionTokenService
 import io.stereov.singularity.auth.core.service.token.StepUpTokenService
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
 import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorAuthenticationRequest
@@ -21,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ServerWebExchange
+import java.util.*
 
 @RestController
 @RequestMapping("/api/auth/2fa")
@@ -38,7 +38,6 @@ class TwoFactorAuthenticationController(
     private val stepUpTokenService: StepUpTokenService,
     private val cookieCreator: CookieCreator,
     private val authorizationService: AuthorizationService,
-    private val sessionTokenService: SessionTokenService,
 ) {
 
     @PostMapping("/login")
@@ -47,10 +46,10 @@ class TwoFactorAuthenticationController(
         @RequestBody req: TwoFactorAuthenticationRequest
     ): ResponseEntity<LoginResponse> {
         val user = twoFactorAuthService.validateTwoFactor(exchange, req)
+        val sessionId = UUID.randomUUID()
 
-        val sessionToken = sessionTokenService.create(sessionInfo = req.session)
-        val accessToken = accessTokenService.create(user.id, sessionToken.id)
-        val refreshToken = refreshTokenService.create(user.id, sessionToken.id, req.session, exchange)
+        val accessToken = accessTokenService.create(user, sessionId)
+        val refreshToken = refreshTokenService.create(user.id, sessionId, req.session, exchange)
 
         val clearTwoFactorCookie = cookieCreator.clearCookie(TwoFactorTokenType.Authentication)
 
@@ -59,7 +58,6 @@ class TwoFactorAuthenticationController(
             user = userMapper.toResponse(user),
             accessToken = if (authProperties.allowHeaderAuthentication) accessToken.value else null,
             refreshToken = if (authProperties.allowHeaderAuthentication) refreshToken.value else null,
-            sessionToken = if (authProperties.allowHeaderAuthentication) sessionToken.value else null,
             allowedTwoFactorMethods = null,
             twoFactorAuthenticationToken = null,
             location = geolocationService.getLocationOrNull(exchange.request)
@@ -69,7 +67,6 @@ class TwoFactorAuthenticationController(
             .header("Set-Cookie", clearTwoFactorCookie.toString())
             .header("Set-Cookie", cookieCreator.createCookie(accessToken).toString())
             .header("Set-Cookie", cookieCreator.createCookie(refreshToken).toString())
-            .header("Set-Cookie", cookieCreator.createCookie(sessionToken).toString())
             .body(res)
     }
 

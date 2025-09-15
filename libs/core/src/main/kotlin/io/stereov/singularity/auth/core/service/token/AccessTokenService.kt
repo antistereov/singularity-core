@@ -10,7 +10,8 @@ import io.stereov.singularity.auth.jwt.properties.JwtProperties
 import io.stereov.singularity.auth.jwt.service.JwtService
 import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.global.util.Random
-import io.stereov.singularity.user.core.service.UserService
+import io.stereov.singularity.user.core.model.Role
+import io.stereov.singularity.user.core.model.UserDocument
 import org.bson.types.ObjectId
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
 import org.springframework.stereotype.Service
@@ -24,38 +25,37 @@ class AccessTokenService(
     private val accessTokenCache: AccessTokenCache,
     private val jwtProperties: JwtProperties,
     private val tokenValueExtractor: TokenValueExtractor,
-    private val sessionTokenService: SessionTokenService,
-    private val userService: UserService,
 ) {
 
     private val logger = KotlinLogging.logger {}
     private val tokenType = SessionTokenType.Access
 
-    suspend fun create(userId: ObjectId, sessionId: UUID, issuedAt: Instant = Instant.now()): AccessToken {
-        logger.debug { "Creating access token for user $userId and session $sessionId" }
+    suspend fun create(user: UserDocument, sessionId: UUID, issuedAt: Instant = Instant.now()): AccessToken {
+        logger.debug { "Creating access token for user ${user.id} and session $sessionId" }
 
         val tokenId = Random.generateString(20)
 
-        accessTokenCache.addTokenId(userId, tokenId)
+        accessTokenCache.addTokenId(user.id, sessionId, tokenId)
 
         val claims = JwtClaimsSet.builder()
             .issuedAt(issuedAt)
             .expiresAt(issuedAt.plusSeconds(jwtProperties.expiresIn))
-            .subject(userId.toHexString())
+            .subject(user.id.toHexString())
+            .claim(Constants.JWT_ROLES_CLAIM, user.sensitive.roles)
             .claim(Constants.JWT_SESSION_CLAIM, sessionId)
+            .claim(Constants.JWT_GROUPS_CLAIM, user.sensitive.groups)
             .id(tokenId)
             .build()
 
         val jwt = jwtService.encodeJwt(claims)
 
-        return AccessToken(userId, sessionId, tokenId, jwt)
+        return AccessToken(user.id, sessionId, tokenId, user.sensitive.roles, user.sensitive.groups, jwt)
     }
 
     suspend fun extract(exchange: ServerWebExchange): AccessToken {
         logger.debug { "Extracting and validating access token" }
 
         val token = tokenValueExtractor.extractValue(exchange, tokenType, true)
-        val sessionToken = sessionTokenService.extract(exchange)
 
         val jwt = jwtService.decodeJwt(token, true)
 
@@ -69,21 +69,25 @@ class AccessTokenService(
         val tokenId = jwt.id
             ?: throw InvalidTokenException("AccessToken does not contain token id")
 
-        if (sessionId != sessionToken.id)
-            throw InvalidTokenException("AccessToken does not correspond to current session")
+        val isValid = accessTokenCache.isTokenIdValid(userId, sessionId, tokenId)
 
-        val user = userService.findByIdOrNull(userId)
-            ?: throw InvalidTokenException("AccessToken does not belong to existing user")
+        val roles = (jwt.claims[Constants.JWT_ROLES_CLAIM] as? List<*>)
+            ?.map { role ->
+                (role as? String)?.let { Role.fromString(it)}
+                    ?: throw InvalidTokenException("Cannot decode role $role")
+            }
+            ?.toSet()
+            ?: throw InvalidTokenException("AccessToken does not contain roles")
 
-        if (!user.sensitive.sessions.containsKey(sessionId))
-            throw InvalidTokenException("AccessToken belongs to invalid session")
-
-        val isValid = accessTokenCache.isTokenIdValid(userId, tokenId)
+        val groups = (jwt.claims[Constants.JWT_GROUPS_CLAIM] as? List<*>)
+            ?.map { it as? String ?: throw InvalidTokenException("Cannot decode group $it") }
+            ?.toSet()
+            ?: throw InvalidTokenException("AccessToken does not contain groups")
 
         if (!isValid) {
             throw InvalidTokenException("AccessToken is not valid")
         }
 
-        return AccessToken(userId, sessionId, tokenId, jwt)
+        return AccessToken(userId, sessionId, tokenId, roles, groups, jwt)
     }
 }
