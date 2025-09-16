@@ -15,7 +15,7 @@ These tokens include claims that will be used for authentication and authorizati
 This way, the tokens are signed and can therefore verify their integrity.
 
 :::info
-If [header authentication](../../docs/auth/securing-endpoints#header-authentication) is enabled,
+If [header authentication](/securing-endpoints#header-authentication) is enabled,
 all tokens will be included in the response body of the corresponding request.
 :::
 
@@ -43,7 +43,7 @@ The `AccessToken` can be attached to your API requests in two ways:
     curl -X GET https://example.com/api/users/me \
       --cookie 'access_token=<your-token>'
     ```
-* **As a Bearer Token in the Header**: This is an alternative if [header authentication](../../docs/auth/securing-endpoints#header-authentication) is enabled.
+* **As a Bearer Token in the Header**: This is an alternative if [header authentication](/securing-endpoints#header-authentication) is enabled.
     ```shell
     curl -X GET https://example.com/api/users/me \
       -H 'Authorization: Bearer <your-token>'
@@ -75,7 +75,7 @@ The `RefreshToken` is used to request a new `AccessToken`:
     curl -X GET https://example.com/api/auth/refresh \
       --cookie 'refresh_token=<your-token>'
     ```
-* **As a Bearer Token in the Header**: This is an alternative if [header authentication](../../docs/auth/securing-endpoints#header-authentication) is enabled.
+* **As a Bearer Token in the Header**: This is an alternative if [header authentication](/securing-endpoints#header-authentication) is enabled.
     ```shell
     curl -X GET https://example.com/api/auth/refresh \
       -H 'Authorization: Bearer <your-token>'
@@ -117,7 +117,7 @@ if successful, issues the [`AccessToken`](#access-token) and [`RefreshToken`](#r
     -H 'Content-Type: application/json' \
     -d <request-body>
   ```
-* **In the Header**: This is an alternative if [header authentication](../../docs/auth/securing-endpoints#header-authentication) is enabled.  
+* **In the Header**: This is an alternative if [header authentication](/securing-endpoints#header-authentication) is enabled.  
   ```shell
   curl -X POST https://example.com/api/auth/2fa/login \
     -H 'X-Two-Factor-Authentication-Token: <your-token>' \
@@ -139,7 +139,7 @@ The endpoint [`POST /api/auth/2fa/step-up`](/swagger#/Two%20Factor%20Authenticat
       -H 'Content-Type: application/json' \
       -d <request-body>
     ```
-* **In the Header**: This is an alternative if [header authentication](../../docs/auth/securing-endpoints#header-authentication) is enabled.
+* **In the Header**: This is an alternative if [header authentication](/securing-endpoints#header-authentication) is enabled.
     ```shell
     curl -X POST https://example.com/api/auth/2fa/step-up \
     -H 'X-Two-Factor-Authentication-Token: <your-token>' \
@@ -185,7 +185,7 @@ The `StepUpToken` is required to authorize requests to sensitive API endpoints. 
 
 ## OAuth2 Provider Connection Token
 
-The `OAuth2ProviderConnection` is a temporary security token that authorizes a user 
+The `OAuth2ProviderConnectionToken` is a temporary security token that authorizes a user 
 to connect a new OAuth2 provider to his account.
 
 It has a **short lifespan** and is required in addition to a valid [`AccessToken`](#access-token).
@@ -203,6 +203,34 @@ This token is issued after a user successfully requests a token through the dedi
 ### Usage
 
 Check [this](./oauth2#connecting-an-oauth2-provider-to-an-existing-account) guide on how to use it.
+
+## Session Token
+
+The `SessionToken` is a temporary security token stores information 
+about the current browser context, such as the browser and OS.
+For security reasons it is necessary to save this information
+in case the login details are stolen.
+
+It has a **short lifespan** and its only usage is to successfully register or log in a user 
+via an OAuth2 provider.
+
+Authentication via OAuth2 providers requires a redirect to the provider's site.
+Therefore, no session information can be sent on this callback.
+
+:::note
+You can learn more about login or registration via OAuth2 providers [here](./oauth2#registration-and-login).
+:::
+
+### How to Obtain It
+
+This token can be obtained here:
+
+* [`POST /api/auth/sessions/token`](/swagger#/Sessions/generateSessionToken)
+
+### Usage
+
+Check [this](./oauth2#registration-and-login) guide on how to use it.
+
 
 ## Configuration
 

@@ -12,6 +12,20 @@ If you are new to Spring, we recommend starting with their [official guides](htt
 
 *Groups* allow fine-grained control on which information each user is allowed to see.
 
+## Managing Groups
+
+### Creating Groups
+
+### Updating Groups
+
+### Deleting Groups
+
+## Managing Members
+
+### Adding Users to Groups
+
+### Removing User from Groups
+
 ## Configuration
 
 You can configure groups to be available after the first application startup.

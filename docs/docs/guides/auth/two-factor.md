@@ -74,7 +74,7 @@ Learn more about the login flow [here](./authentication#login).
 When TOTP is enabled,
 a successful login with email and password through [`POST /api/auth/login`](/swagger#/Authentication/login) 
 will set a [`TwoFactorAuthenticationToken`](./tokens#two-factor-authentication-token)
-as an HTTP-only cookie and returned in the response body if [header authentication](../../docs/auth/securing-endpoints#header-authentication) is enabled.
+as an HTTP-only cookie and returned in the response body if [header authentication](/securing-endpoints#header-authentication) is enabled.
 
 #### 2. Authenticate with TOTP
 
@@ -84,7 +84,7 @@ Enter the TOTP code with the parameter `totp` in the request body.
 If the token is valid and the code is correct, [`AccessToken`](./tokens#access-token) 
 and [`RefreshToken`](./tokens#refresh-token) will be set as HTTP-only cookies.
 The user is successfully authenticated.
-If [header authentication](../../docs/auth/securing-endpoints#header-authentication) is enabled, 
+If [header authentication](/securing-endpoints#header-authentication) is enabled, 
 you will receive both tokens in the response body.
 
 ### Step-Up
@@ -98,7 +98,7 @@ Learn more about the step-up flow [here](./authentication#step-up).
 When TOTP is enabled,
 a successful step-up request with email and password through [`POST /api/auth/step-up`](/swagger#/Authentication/stepUp) 
 will set a [`TwoFactorAuthenticationToken`](./tokens#two-factor-authentication-token)
-as an HTTP-only cookie and returned in the response body if [header authentication](../../docs/auth/securing-endpoints#header-authentication) is enabled.
+as an HTTP-only cookie and returned in the response body if [header authentication](/securing-endpoints#header-authentication) is enabled.
 
 #### 2. Authenticate with TOTP
 
@@ -108,7 +108,7 @@ Enter the TOTP code with the parameter `totp` in the request body.
 If the [`TwoFactorAuthenticationToken`](./tokens#two-factor-authentication-token) is valid and the code is correct, [`AccessToken`](./tokens#access-token)
 and [`RefreshToken`](./tokens#refresh-token) will be set as HTTP-only cookies.
 The user is successfully authenticated.
-If [header authentication](../../docs/auth/securing-endpoints#header-authentication) is enabled,
+If [header authentication](/securing-endpoints#header-authentication) is enabled,
 you will receive both tokens in the response body.
 
 ### Disable
@@ -206,7 +206,7 @@ Learn more about the login flow [here](./authentication#login).
 When mail as 2FA method is enabled,
 a successful login with email and password through [`POST /api/auth/login`](/swagger#/Authentication/login)
 will set a [`TwoFactorAuthenticationToken`](./tokens#two-factor-authentication-token)
-as an HTTP-only cookie and returned in the response body if [header authentication](../../docs/auth/securing-endpoints#header-authentication) is enabled.
+as an HTTP-only cookie and returned in the response body if [header authentication](/securing-endpoints#header-authentication) is enabled.
 
 #### 2. Sending an Email with the 2FA Code
 
@@ -226,7 +226,7 @@ Enter the 2FA code with the parameter `mail` in the request body.
 If the token is valid and the code is correct, [`AccessToken`](./tokens#access-token)
 and [`RefreshToken`](./tokens#refresh-token) will be set as HTTP-only cookies.
 The user is successfully authenticated.
-If [header authentication](../../docs/auth/securing-endpoints#header-authentication) is enabled,
+If [header authentication](/securing-endpoints#header-authentication) is enabled,
 you will receive both tokens in the response body.
 
 ### Step-Up
@@ -240,7 +240,7 @@ Learn more about the login flow [here](./authentication#login).
 When mail as 2FA method is enabled,
 a successful step-up with email and password through [`POST /api/auth/step-up`](/swagger#/Authentication/stepUp)
 will set a [`TwoFactorAuthenticationToken`](./tokens#two-factor-authentication-token)
-as an HTTP-only cookie and returned in the response body if [header authentication](../../docs/auth/securing-endpoints#header-authentication) is enabled.
+as an HTTP-only cookie and returned in the response body if [header authentication](/securing-endpoints#header-authentication) is enabled.
 
 #### 2. Sending an Email with the 2FA Code
 
@@ -260,7 +260,7 @@ Enter the 2FA code with the parameter `mail` in the request body.
 If the token is valid and the code is correct, [`AccessToken`](./tokens#access-token)
 and [`RefreshToken`](./tokens#refresh-token) will be set as HTTP-only cookies.
 The user is successfully authenticated.
-If [header authentication](../../docs/auth/securing-endpoints#header-authentication) is enabled,
+If [header authentication](/securing-endpoints#header-authentication) is enabled,
 you will receive both tokens in the response body.
 
 ### Disable

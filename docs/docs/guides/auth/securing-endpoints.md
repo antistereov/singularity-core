@@ -34,7 +34,7 @@ Therefore,
 you don't need to think about each method that is called at one endpoint to secure this endpoint from the top.
 You can rely on your methods at the service level to do this for you.
 
-### Require a Role
+### Requiring a Role
 
 Let's say you have two endpoints: 
 * `/api/cool-stuff` that should return cool stuff everybody should see.
@@ -103,13 +103,13 @@ If you call `/api/cool-stuff/for-admins` now, you get:
 * `401` if you didn't provide a valid token.
 * `403` if you provided a valid token but the user doesn't have the `ADMIN` role.
 
-### Require Group Membership
+### Requiring Group Membership
 
 You can be more fine-grained in your requirements.
 Define and use custom groups and limit access to members of this group only.
 
 :::note
-Everything about creating and using groups is covered here: [Groups](../../docs/auth/groups).
+Everything about creating and using groups is covered here: [Groups](/groups).
 :::
 
 ```kotlin

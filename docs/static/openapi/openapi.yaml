@@ -1,0 +1,5254 @@
+openapi: 3.1.0
+info:
+  title: Singularity Core API
+  version: 1.0.0
+servers:
+- url: https://singularity.stereov.io
+  description: Demo server
+- url: http://localhost:8000
+  description: Local development server
+tags:
+- name: Authentication
+  description: Operations related to user authentication.
+- name: Email Verification
+  description: Operations related to email verification.
+- name: Identity Provider
+  description: Operations related to connecting and disconnecting identity providers
+    to existing accounts.
+- name: Mail Two-Factor Authentication
+  description: Operations related to 2FA using mail
+- name: OAuth2 Identity Provider
+  description: Operations related to OAuth2 identity providers
+- name: Password Reset
+  description: Operations related to password reset.
+- name: Sessions
+  description: Operations related to session management.
+- name: TOTP Two-Factor Authentication
+  description: Operations related to TOTP.
+- name: Two Factor Authentication
+  description: Operations related to two-factor authentication
+- name: User Settings
+  description: Operations related to user settings.
+- name: Users
+  description: Operations related to user information.
+paths:
+  /api/users/me:
+    get:
+      tags:
+      - Users
+      summary: Get currently authenticated user
+      description: Retrieves the user profile information of the currently authenticated
+        user.
+      operationId: getUser
+      responses:
+        "200":
+          description: User found.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "401":
+          description: Unauthorized. No valid token provided.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+      - accessTokenCookie: []
+    put:
+      tags:
+      - User Settings
+      operationId: changeUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangeUserRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+      security:
+      - {}
+      - {}
+    delete:
+      tags:
+      - User Settings
+      operationId: delete
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+      security:
+      - {}
+      - {}
+  /api/users/me/password:
+    put:
+      tags:
+      - User Settings
+      operationId: changePassword
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangePasswordRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+      security:
+      - {}
+      - {}
+  /api/users/me/email:
+    put:
+      tags:
+      - User Settings
+      operationId: changeEmail
+      parameters:
+      - name: lang
+        in: query
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangeEmailRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+      security:
+      - {}
+      - {}
+  /api/users/me/avatar:
+    put:
+      tags:
+      - User Settings
+      operationId: setAvatar
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required:
+              - file
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+      security:
+      - {}
+      - {}
+    delete:
+      tags:
+      - User Settings
+      operationId: deleteAvatar
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+      security:
+      - {}
+      - {}
+  /api/groups/{key}:
+    get:
+      tags:
+      - group-controller
+      operationId: findByKey
+      parameters:
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: lang
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/GroupResponse"
+      security:
+      - {}
+      - {}
+    put:
+      tags:
+      - group-controller
+      operationId: updateGroup
+      parameters:
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: lang
+        in: query
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateGroupRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/GroupResponse"
+      security:
+      - {}
+      - {}
+    delete:
+      tags:
+      - group-controller
+      operationId: deleteGroup
+      parameters:
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+      security:
+      - {}
+      - {}
+  /api/content/tags/{key}:
+    get:
+      tags:
+      - tag-controller
+      operationId: findByKey_1
+      parameters:
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: lang
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TagResponse"
+      security:
+      - {}
+      - {}
+    put:
+      tags:
+      - tag-controller
+      operationId: updateTag
+      parameters:
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: lang
+        in: query
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTagRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TagResponse"
+      security:
+      - {}
+      - {}
+    delete:
+      tags:
+      - tag-controller
+      operationId: deleteTag
+      parameters:
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+      security:
+      - {}
+      - {}
+  /api/content/articles/{key}/visibility:
+    put:
+      tags:
+      - article-management-controller
+      operationId: changeVisibility
+      parameters:
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: lang
+        in: query
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangeContentVisibilityRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/FullArticleResponse"
+      security:
+      - {}
+      - {}
+  /api/content/articles/{key}/trusted:
+    put:
+      tags:
+      - article-management-controller
+      operationId: setTrustedState
+      parameters:
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: trusted
+        in: query
+        required: true
+        schema:
+          type: boolean
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ArticleTrustedResponse"
+      security:
+      - {}
+      - {}
+  /api/content/articles/{key}/tags:
+    put:
+      tags:
+      - article-management-controller
+      operationId: changeTags
+      parameters:
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: lang
+        in: query
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangeContentTagsRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/FullArticleResponse"
+      security:
+      - {}
+      - {}
+  /api/content/articles/{key}/summary:
+    put:
+      tags:
+      - article-management-controller
+      operationId: changeSummary
+      parameters:
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: lang
+        in: query
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangeArticleSummaryRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/FullArticleResponse"
+      security:
+      - {}
+      - {}
+  /api/content/articles/{key}/state:
+    put:
+      tags:
+      - article-management-controller
+      operationId: changeState
+      parameters:
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: lang
+        in: query
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangeArticleStateRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/FullArticleResponse"
+      security:
+      - {}
+      - {}
+  /api/content/articles/{key}/image:
+    put:
+      tags:
+      - article-management-controller
+      operationId: changeImage
+      parameters:
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: lang
+        in: query
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required:
+              - file
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/FullArticleResponse"
+      security:
+      - {}
+      - {}
+  /api/content/articles/{key}/header:
+    put:
+      tags:
+      - article-management-controller
+      operationId: changeHeader
+      parameters:
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: lang
+        in: query
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangeArticleHeaderRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/FullArticleResponse"
+      security:
+      - {}
+      - {}
+  /api/content/articles/{key}/content:
+    put:
+      tags:
+      - article-management-controller
+      operationId: changeContent
+      parameters:
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: lang
+        in: query
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangeArticleContentRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/FullArticleResponse"
+      security:
+      - {}
+      - {}
+  /api/groups:
+    get:
+      tags:
+      - group-controller
+      summary: Get all groups
+      description: Get all configured groups.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/auth/groups#creating-groups
+      operationId: findGroups
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+      - name: lang
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Information about newly created group.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageGroupResponse"
+        "401":
+          description: Invalid token.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: User does not have ADMIN role.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader:
+        - adminScope
+      - accessTokenCookie:
+        - adminScope
+    post:
+      tags:
+      - group-controller
+      summary: Create a group
+      description: "Authenticates a user, returns an access and refresh token and\
+        \ sets those tokens as Http-Only Cookies."
+      externalDocs:
+        url: https://singularity.stereov.io/docs/auth/groups#creating-groups
+      operationId: create
+      parameters:
+      - name: lang
+        in: query
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateGroupRequest"
+        required: true
+      responses:
+        "200":
+          description: Information about newly created group.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/GroupResponse"
+        "401":
+          description: Invalid token.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: User does not have ADMIN role.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader:
+        - adminScope
+      - accessTokenCookie:
+        - adminScope
+  /api/groups/{groupKey}/members:
+    post:
+      tags:
+      - group-member-controller
+      operationId: addUser
+      parameters:
+      - name: groupKey
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddGroupMemberRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+      security:
+      - {}
+      - {}
+  /api/content/tags:
+    get:
+      tags:
+      - tag-controller
+      operationId: findByKeyContains
+      parameters:
+      - name: substring
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: lang
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/KeyContainsResponse"
+      security:
+      - {}
+      - {}
+    post:
+      tags:
+      - tag-controller
+      operationId: create_1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTagRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TagResponse"
+      security:
+      - {}
+      - {}
+  /api/content/articles/{key}/invite:
+    post:
+      tags:
+      - article-management-controller
+      operationId: inviteUser
+      parameters:
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: lang
+        in: query
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InviteUserToContentRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ExtendedContentAccessDetailsResponse"
+      security:
+      - {}
+      - {}
+  /api/content/articles/invite/accept:
+    post:
+      tags:
+      - article-management-controller
+      operationId: acceptInvitation
+      parameters:
+      - name: lang
+        in: query
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AcceptInvitationToContentRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/FullArticleResponse"
+      security:
+      - {}
+      - {}
+  /api/content/articles/create:
+    post:
+      tags:
+      - article-management-controller
+      operationId: createArticle
+      parameters:
+      - name: lang
+        in: query
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateArticleRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/FullArticleResponse"
+      security:
+      - {}
+      - {}
+  /api/auth/step-up:
+    post:
+      tags:
+      - Authentication
+      summary: Request step-up
+      description: Requests step-up authentification. This re-authentication is required
+        by critical endpoints.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/auth/authentication#step-up
+      operationId: stepUp
+      parameters:
+      - name: lang
+        in: query
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StepUpRequest"
+        required: true
+      responses:
+        "200":
+          description: Logout successful.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/StepUpResponse"
+        "401":
+          description: Unauthorized.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+      - accessTokenCookie: []
+  /api/auth/sessions/token:
+    post:
+      tags:
+      - Sessions
+      summary: Generate SessionToken
+      description: "Generate a SessionToken for the current session, if the user is\
+        \ authenticated or a new SessionToken instead. It will be set as an HTTP-only\
+        \ cookie and returned in the response body if header authentication is enabled."
+      externalDocs:
+        url: https://singularity.stereov.io/docs/auth/oauth2#1-retrieving-a-session-token
+      operationId: generateSessionToken
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SessionInfoRequest"
+      responses:
+        "200":
+          description: Token generated. The token will be returned if header authentication
+            is enabled
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/GenerateSessionTokenResponse"
+      security:
+      - {}
+      - {}
+  /api/auth/register:
+    post:
+      tags:
+      - Authentication
+      summary: Register a new user
+      description: Creates a new user account and logs them in.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/auth/authentication#registering-users
+      operationId: register
+      parameters:
+      - name: send-email
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: lang
+        in: query
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterUserRequest"
+        required: true
+      responses:
+        "200":
+          description: Registration successful. Returns user details and tokens.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/RegisterResponse"
+        "409":
+          description: Email already exists.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: User is already authenticated.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - {}
+      - {}
+  /api/auth/refresh:
+    post:
+      tags:
+      - Authentication
+      summary: Refresh access token
+      description: Refresh the access token. Returns a new access and refresh token
+        and sets those tokens as Http-Only Cookies.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/auth/authentication#refresh
+      operationId: refreshToken
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SessionInfoRequest"
+      responses:
+        "200":
+          description: Authentication successful. Returns tokens and user details.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/RefreshTokenResponse"
+        "401":
+          description: Invalid credentials.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - refreshTokenHeader: []
+      - refreshTokenCookie: []
+  /api/auth/providers/password:
+    post:
+      tags:
+      - Identity Provider
+      summary: Add a password identity to the current user
+      description: Create a new identity provider for the current user that allows
+        the user to login with a password
+      externalDocs:
+        url: https://singularity.stereov.io/docs/auth/oauth2#adding-password-authentication
+      operationId: connectPasswordIdentity
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConnectPasswordIdentityRequest"
+        required: true
+      responses:
+        "200":
+          description: Success.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "400":
+          description: Bad request. User already created a password identity
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+        stepUpTokenHeader: []
+      - accessTokenCookie: []
+        stepUpTokenCookie: []
+  /api/auth/providers/oauth2/token:
+    post:
+      tags:
+      - OAuth2 Identity Provider
+      summary: Generate an OAuth2ProviderConnectionToken
+      description: Generate an OAuth2ProviderConnectionToken that enables the user
+        to connect new OAuth2 providers.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/auth/oauth2#connecting-an-oauth2-provider-to-an-existing-account
+      operationId: generateOAuth2ProviderConnectionToken
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OAuth2ProviderConnectionRequest"
+        required: true
+      responses:
+        "200":
+          description: Returns the token if header authentication is enabled.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OAuth2ProviderConnectionTokenResponse"
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+        stepUpTokenHeader: []
+      - accessTokenCookie: []
+        stepUpTokenCookie: []
+  /api/auth/password/reset:
+    post:
+      tags:
+      - Password Reset
+      summary: Reset password
+      description: "Perform a password reset using a PasswordResetToken you obtained\
+        \ from an email. If successful, the user can log in using the new password\
+        \ afterwards."
+      externalDocs:
+        url: https://singularity.stereov.io/docs/auth/authentication#password-reset
+      operationId: resetPassword
+      parameters:
+      - name: token
+        in: query
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResetPasswordRequest"
+        required: true
+      responses:
+        "200":
+          description: Updated user information.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "401":
+          description: Token is invalid.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: No password identity is set up for the user.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - {}
+      - {}
+  /api/auth/password/reset-request:
+    post:
+      tags:
+      - Password Reset
+      summary: Send a password reset request email
+      description: "Send a password reset request email to the user's email. After\
+        \ sending an email, a cooldown is triggered during which no new passwort reset\
+        \ request email can be sent."
+      externalDocs:
+        url: https://singularity.stereov.io/docs/auth/authentication#password-reset
+      operationId: sendPasswordResetEmail
+      parameters:
+      - name: lang
+        in: query
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendPasswordResetRequest"
+        required: true
+      responses:
+        "200":
+          description: The number of seconds the user needs to wait to send a new
+            email.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/MailSendResponse"
+        "401":
+          description: Unauthorized.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: Failed to send another email. Wait until the cooldown is done.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - {}
+      - {}
+  /api/auth/logout:
+    post:
+      tags:
+      - Authentication
+      summary: Log out a user
+      description: Invalidates the current session's access and refresh tokens.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/auth/authentication#logout
+      operationId: logout
+      responses:
+        "200":
+          description: Logout successful.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+      security:
+      - accessTokenHeader: []
+      - accessTokenCookie: []
+  /api/auth/login:
+    post:
+      tags:
+      - Authentication
+      summary: User login
+      description: "Authenticates a user, returns an access and refresh token and\
+        \ sets those tokens as Http-Only Cookies."
+      externalDocs:
+        url: https://singularity.stereov.io/docs/auth/authentication#login
+      operationId: login
+      parameters:
+      - name: lang
+        in: query
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+        required: true
+      responses:
+        "200":
+          description: Authentication successful. Returns tokens and user details.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "401":
+          description: Invalid credentials.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: User is already authenticated.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+      - accessTokenCookie: []
+  /api/auth/email/verify:
+    post:
+      tags:
+      - Email Verification
+      summary: Verify email
+      description: Verify the user's email by validating the token.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/docs/auth/authentication#email-verification
+      operationId: verifyEmail
+      parameters:
+      - name: token
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Updated user information.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "401":
+          description: Token is invalid.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - {}
+      - {}
+  /api/auth/email/verify/send:
+    post:
+      tags:
+      - Email Verification
+      summary: Send a new verification email
+      description: "Send a new verification email to the user's email. After sending\
+        \ an email, a cooldown is triggered during which no new verification email\
+        \ can be sent."
+      externalDocs:
+        url: https://singularity.stereov.io/docs/docs/auth/authentication#email-verification
+      operationId: sendVerificationEmail
+      parameters:
+      - name: lang
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: The number of seconds the user needs to wait before sending
+            a new email.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/MailSendResponse"
+        "401":
+          description: Unauthorized.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: Failed to send another email. Wait until the cooldown is done.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+      - accessTokenCookie: []
+  /api/auth/2fa/totp/setup:
+    get:
+      tags:
+      - TOTP Two-Factor Authentication
+      summary: Get 2FA secret and recovery codes
+      description: "Get a 2FA secret, recovery codes and a TOTP URL. This information\
+        \ will be stored inside a token that you will get in the response. Use this\
+        \ token to perform the validation."
+      externalDocs:
+        url: https://singularity.stereov.io/docs/auth/two-factor#setup
+      operationId: getTotpDetails
+      responses:
+        "200":
+          description: Success.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TwoFactorSetupResponse"
+        "401":
+          description: Not authenticated.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: The did not configure authentication using password or the
+            user already enabled TOTP.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+      - accessTokenCookie: []
+    post:
+      tags:
+      - TOTP Two-Factor Authentication
+      summary: Set up TOTP
+      description: Set up TOTP for a user using a TOTPSetupToken and the TOTP code.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/auth/two-factor#setup
+      operationId: setUpTotp
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TwoFactorVerifySetupRequest"
+        required: true
+      responses:
+        "200":
+          description: Success.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TwoFactorSetupResponse"
+        "401":
+          description: Wrong code or not authorized.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: The user already enabled TOTP.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+        stepUpTokenHeader: []
+      - accessTokenCookie: []
+        stepUpTokenCookie: []
+  /api/auth/2fa/totp/recover:
+    post:
+      tags:
+      - TOTP Two-Factor Authentication
+      summary: User recovery
+      description: "Recover the user if they lost access to their 2FA device. After\
+        \ successful recovery, an AccessToken, RefreshToken and StepUpToken will be\
+        \ set as HTTP-only cookies and returned in the response body if header authentication\
+        \ is enabled."
+      externalDocs:
+        url: https://singularity.stereov.io/docs/auth/two-factor#recovery
+      operationId: recoverUser
+      parameters:
+      - name: code
+        in: query
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SessionInfoRequest"
+      responses:
+        "200":
+          description: "Recovery successful. If header authentication is enabled,\
+            \ the response will contain all tokens."
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TwoFactorRecoveryResponse"
+        "401":
+          description: Wrong code.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: User is already authenticated.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - twoFactorAuthenticationTokenHeader: []
+      - twoFactorAuthenticationTokenCookie: []
+  /api/auth/2fa/step-up:
+    post:
+      tags:
+      - Two Factor Authentication
+      summary: Perform second factor for step-up
+      description: "Perform second factor for step-up. A TwoFactorAuthenticationToken\
+        \ is required. This token can be obtained by calling POST /api/auth/step-up.\
+        \ If successful, a StepUpToken will be set as HTTP-only cookie and returned\
+        \ in the response body if header authentication is enabled."
+      externalDocs:
+        url: https://singularity.stereov.io/docs/auth/two-factor
+      operationId: verifyStepUp
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TwoFactorAuthenticationRequest"
+        required: true
+      responses:
+        "200":
+          description: The token if header authentication is enabled.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/StepUpResponse"
+        "401":
+          description: Not authorized.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: This 2FA method is disabled.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+        twoFactorAuthenticationTokenHeader: []
+      - accessTokenCookie: []
+        twoFactorAuthenticationTokenCookie: []
+  /api/auth/2fa/preferred-method:
+    post:
+      tags:
+      - Two Factor Authentication
+      summary: Change the preferred 2FA method
+      description: Change the preferred 2FA method. Step-up is required.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/auth/two-factor#changing-the-preferred-method
+      operationId: updatePreferredMethod
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePreferredTwoFactorMethodRequest"
+        required: true
+      responses:
+        "200":
+          description: Updated user information.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "401":
+          description: Not authorized.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: This 2FA method is disabled.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+        stepUpTokenHeader: []
+      - accessTokenCookie: []
+        stepUpTokenCookie: []
+  /api/auth/2fa/mail/send:
+    post:
+      tags:
+      - Mail Two-Factor Authentication
+      summary: Send a 2FA mail code
+      description: Send an email containing a 2FA code to the user. It will update
+        the code in the database. Needs to be called before enabling this method for
+        the user.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/auth/two-factor#sending-a-2fa-code-via-email
+      operationId: sendAuthenticationMail
+      parameters:
+      - name: lang
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Success.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "401":
+          description: Not authorized.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+      - accessTokenCookie: []
+  /api/auth/2fa/mail/enable:
+    post:
+      tags:
+      - Mail Two-Factor Authentication
+      summary: Enable mail as 2FA method
+      description: Enable mail as 2FA method. Step-up is required.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/auth/two-factor#setup-1
+      operationId: enableMail
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EnableMailTwoFactorMethodRequest"
+        required: true
+      responses:
+        "200":
+          description: Updated user information.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "401":
+          description: Not authorized.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: This method is already enabled for the user.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+        stepUpTokenHeader: []
+      - accessTokenCookie: []
+        stepUpTokenCookie: []
+  /api/auth/2fa/login:
+    post:
+      tags:
+      - Two Factor Authentication
+      summary: Perform second factor for login
+      description: "Perform second factor for login. A TwoFactorAuthenticationToken\
+        \ is required. This token can be obtained by calling POST /api/auth/login.\
+        \ If successful, an AccessToken and RefreshToken will be set as HTTP-only\
+        \ cookies and returned in the response body if header authentication is enabled."
+      externalDocs:
+        url: https://singularity.stereov.io/docs/auth/two-factor
+      operationId: verifyLogin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TwoFactorAuthenticationRequest"
+        required: true
+      responses:
+        "200":
+          description: Information about the user and the tokens if header authentication
+            is enabled.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "401":
+          description: Not authorized.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: This 2FA method is disabled.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - twoFactorAuthenticationTokenHeader: []
+      - twoFactorAuthenticationTokenCookie: []
+  /api/admin/rotate-keys:
+    post:
+      tags:
+      - admin-controller
+      operationId: rotateKeys
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+      security:
+      - {}
+      - {}
+  /api/users/{id}/avatar:
+    get:
+      tags:
+      - Users
+      operationId: getAvatar
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/ObjectId"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/FileMetadataResponse"
+      security:
+      - {}
+      - {}
+  /api/content/articles:
+    get:
+      tags:
+      - article-controller
+      operationId: getArticles
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+      - name: tags
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+      - name: lang
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageArticleOverviewResponse"
+      security:
+      - {}
+      - {}
+  /api/content/articles/{key}:
+    get:
+      tags:
+      - article-controller
+      operationId: getArticleByKey
+      parameters:
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: lang
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/FullArticleResponse"
+      security:
+      - {}
+      - {}
+  /api/content/articles/{key}/access:
+    get:
+      tags:
+      - article-management-controller
+      operationId: getExtendedAccessDetails
+      parameters:
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ExtendedContentAccessDetailsResponse"
+      security:
+      - {}
+      - {}
+  /api/content/articles/scroll:
+    get:
+      tags:
+      - article-controller
+      operationId: getLatestArticles
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+      - name: after
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: lang
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ArticleResponse"
+      security:
+      - {}
+      - {}
+  /api/auth/status:
+    get:
+      tags:
+      - Authentication
+      summary: Get authentication status
+      description: Get detailed information about the current status authentication
+        status of the user.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/auth/authentication#status
+      operationId: getStatus
+      responses:
+        "200":
+          description: The current user's authentication status.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AuthenticationStatusResponse"
+        "404":
+          description: The user contained in the TwoFactorAuthenticationToken does
+            not exist.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+        stepUpTokenHeader: []
+        twoFactorAuthenticationTokenHeader: []
+      - accessTokenCookie: []
+        stepUpTokenCookie: []
+        twoFactorAuthenticationTokenCookie: []
+  /api/auth/sessions:
+    get:
+      tags:
+      - Sessions
+      summary: Get active sessions
+      description: Get all active sessions of the currently authenticated user.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/auth/sessions#active-sessions
+      operationId: getSessions
+      responses:
+        "200":
+          description: The list of active sessions.
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SessionInfoResponse"
+        "401":
+          description: Unauthorized.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+      - accessTokenCookie: []
+    delete:
+      tags:
+      - Sessions
+      summary: Log out a user from all sessions
+      description: Invalidates all the current session's access and refresh tokens
+        from all sessions.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/auth/sessions#invalidating-all-session
+      operationId: deleteAllSessions
+      responses:
+        "200":
+          description: Logout successful.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+      security:
+      - accessTokenHeader: []
+      - accessTokenCookie: []
+  /api/auth/providers:
+    get:
+      tags:
+      - Identity Provider
+      summary: Get identity providers
+      description: Get a list of connected identity providers for the current user.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/auth/oauth2#getting-connected-providers
+      operationId: getProviders
+      responses:
+        "200":
+          description: The list of identity providers.
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/IdentityProviderResponse"
+        "401":
+          description: Unauthorized.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+      - accessTokenCookie: []
+  /api/auth/password/reset/cooldown:
+    get:
+      tags:
+      - Password Reset
+      summary: Get remaining password reset cooldown
+      description: Get the remaining time in seconds until you can send another password
+        reset request.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/auth/authentication#password-reset
+      operationId: getRemainingPasswordResetCooldown
+      responses:
+        "200":
+          description: The remaining cooldown.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/MailCooldownResponse"
+        "401":
+          description: Unauthorized.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+      - accessTokenCookie: []
+  /api/auth/email/verify/cooldown:
+    get:
+      tags:
+      - Email Verification
+      summary: Get remaining email verification cooldown
+      description: Get the remaining time in seconds until you can send another verification
+        request.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/docs/auth/authentication#email-verification
+      operationId: getRemainingVerificationCooldown
+      responses:
+        "200":
+          description: The remaining cooldown.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/MailCooldownResponse"
+        "401":
+          description: Unauthorized.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+      - accessTokenCookie: []
+  /api/auth/2fa/mail/cooldown:
+    get:
+      tags:
+      - Mail Two-Factor Authentication
+      summary: Get remaining 2FA code email cooldown
+      description: Get the remaining time in seconds until you can send another email
+        containing a 2FA code.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/auth/two-factor#sending-a-2fa-code-via-email
+      operationId: getRemainingMailTwoFactorCooldown
+      responses:
+        "200":
+          description: The remaining cooldown.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/MailCooldownResponse"
+        "401":
+          description: Unauthorized.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+      - accessTokenCookie: []
+  /api/assets/**:
+    get:
+      tags:
+      - local-file-storage-controller
+      operationId: serveFile
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DataBuffer"
+      security:
+      - {}
+      - {}
+  /api/admin/users:
+    get:
+      tags:
+      - admin-controller
+      operationId: getAllUsers
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserResponse"
+      security:
+      - {}
+      - {}
+  /api/admin/rotate-keys/status:
+    get:
+      tags:
+      - admin-controller
+      operationId: rotationOngoing
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/RotationStatusResponse"
+      security:
+      - {}
+      - {}
+  /api/invite/{id}:
+    delete:
+      tags:
+      - invitation-controller
+      operationId: deleteInvitation
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/ObjectId"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+      security:
+      - {}
+      - {}
+  /api/groups/{groupKey}/members/{userId}:
+    delete:
+      tags:
+      - group-member-controller
+      operationId: removeUser
+      parameters:
+      - name: groupKey
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: userId
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/ObjectId"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+      security:
+      - {}
+      - {}
+  /api/auth/sessions/{sessionId}:
+    delete:
+      tags:
+      - Sessions
+      summary: Delete a session of the current user
+      description: Delete a session of the current user and invalidate all tokens
+        related to this session.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/auth/sessions#invalidating-a-specific-session
+      operationId: deleteSession
+      parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: The list of active sessions.
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SessionInfoResponse"
+        "401":
+          description: Unauthorized.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+      - accessTokenCookie: []
+  /api/auth/providers/{provider}:
+    delete:
+      tags:
+      - Identity Provider
+      summary: Delete an identity provider
+      description: Delete an identity provider from the connected identity providers
+        of the current user.You are not allowed to delete the password identity or
+        the only existing identity.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/auth/oauth2#disconnecting-an-oauth2-provider
+      operationId: deleteProvider
+      parameters:
+      - name: provider
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Success.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "400":
+          description: "Bad request: deleting the password identity or the only registered\
+            \ identity is forbidden."
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+        stepUpTokenHeader: []
+      - accessTokenCookie: []
+        stepUpTokenCookie: []
+  /api/auth/2fa/totp:
+    delete:
+      tags:
+      - TOTP Two-Factor Authentication
+      summary: Disable TOTP
+      description: Disable TOTP for the current user.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/auth/two-factor#disable
+      operationId: disableTwoFactorAuth
+      responses:
+        "200":
+          description: Success.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "401":
+          description: Not authorized.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+        stepUpTokenHeader: []
+      - accessTokenCookie: []
+        stepUpTokenCookie: []
+  /api/auth/2fa/mail:
+    delete:
+      tags:
+      - Mail Two-Factor Authentication
+      summary: Disable mail as 2FA method
+      description: Disable mail as 2FA method. Step-up is required.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/auth/two-factor#disable-1
+      operationId: disableMail
+      responses:
+        "200":
+          description: Updated user information.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "401":
+          description: Not authorized.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: This method is already enabled for the user.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+        stepUpTokenHeader: []
+      - accessTokenCookie: []
+        stepUpTokenCookie: []
+components:
+  schemas:
+    ChangeUserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+    ContentAccessDetails:
+      type: object
+      properties:
+        ownerId:
+          $ref: "#/components/schemas/ObjectId"
+        visibility:
+          type: string
+          enum:
+          - PRIVATE
+          - PUBLIC
+          - SHARED
+        users:
+          $ref: "#/components/schemas/ContentAccessPermissions"
+        groups:
+          $ref: "#/components/schemas/ContentAccessPermissions"
+        invitations:
+          type: array
+          items:
+            $ref: "#/components/schemas/ObjectId"
+          uniqueItems: true
+      required:
+      - groups
+      - invitations
+      - ownerId
+      - users
+      - visibility
+    ContentAccessPermissions:
+      type: object
+      properties:
+        admin:
+          type: array
+          items:
+            type: string
+          uniqueItems: true
+        editor:
+          type: array
+          items:
+            type: string
+          uniqueItems: true
+        viewer:
+          type: array
+          items:
+            type: string
+          uniqueItems: true
+        isEmpty:
+          type: boolean
+      required:
+      - admin
+      - editor
+      - isEmpty
+      - viewer
+    FileMetadataResponse:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/ObjectId"
+        key:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        access:
+          $ref: "#/components/schemas/ContentAccessDetails"
+        contentType:
+          type: string
+        url:
+          type: string
+        size:
+          type: integer
+          format: int64
+        trusted:
+          type: boolean
+        tags:
+          type: array
+          items:
+            type: string
+          uniqueItems: true
+      required:
+      - access
+      - contentType
+      - createdAt
+      - id
+      - key
+      - size
+      - tags
+      - trusted
+      - updatedAt
+      - url
+    ObjectId:
+      type: object
+      properties:
+        timestamp:
+          type: integer
+          format: int32
+        date:
+          type: string
+          format: date-time
+    UserResponse:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/ObjectId"
+        name:
+          type: string
+        email:
+          type: string
+        identityProviders:
+          type: array
+          items:
+            type: string
+        roles:
+          type: array
+          items:
+            type: string
+            enum:
+            - USER
+            - ADMIN
+            - GUEST
+          uniqueItems: true
+        emailVerified:
+          type: boolean
+        lastActive:
+          type: string
+        twoFactorAuthEnabled:
+          type: boolean
+        preferredTwoFactorMethod:
+          type: string
+          enum:
+          - totp
+          - mail
+        twoFactorAuthMethods:
+          type: array
+          items:
+            type: string
+            enum:
+            - totp
+            - mail
+        avatar:
+          $ref: "#/components/schemas/FileMetadataResponse"
+        created:
+          type: string
+        groups:
+          type: array
+          items:
+            type: string
+          uniqueItems: true
+      required:
+      - created
+      - email
+      - emailVerified
+      - groups
+      - id
+      - identityProviders
+      - lastActive
+      - name
+      - roles
+      - twoFactorAuthEnabled
+      - twoFactorAuthMethods
+    ChangePasswordRequest:
+      type: object
+      properties:
+        oldPassword:
+          type: string
+        newPassword:
+          type: string
+          minLength: 1
+      required:
+      - newPassword
+      - oldPassword
+    ChangeEmailRequest:
+      type: object
+      properties:
+        newEmail:
+          type: string
+          minLength: 1
+      required:
+      - newEmail
+    GroupTranslation:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+      required:
+      - description
+      - name
+    UpdateGroupRequest:
+      type: object
+      properties:
+        translations:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/GroupTranslation"
+      required:
+      - translations
+    GroupResponse:
+      type: object
+      properties:
+        key:
+          type: string
+        lang:
+          type: string
+          enum:
+          - aa
+          - ab
+          - ae
+          - af
+          - ak
+          - am
+          - an
+          - ar
+          - as
+          - av
+          - ay
+          - az
+          - ba
+          - be
+          - bg
+          - bh
+          - bi
+          - bm
+          - bn
+          - bo
+          - br
+          - bs
+          - ca
+          - ce
+          - ch
+          - co
+          - cr
+          - cs
+          - cu
+          - cv
+          - cy
+          - da
+          - de
+          - dv
+          - dz
+          - ee
+          - el
+          - en
+          - eo
+          - es
+          - et
+          - eu
+          - fa
+          - ff
+          - fi
+          - fj
+          - fo
+          - fr
+          - fy
+          - ga
+          - gd
+          - gl
+          - gn
+          - gu
+          - gv
+          - ha
+          - he
+          - hi
+          - ho
+          - hr
+          - ht
+          - hu
+          - hy
+          - hz
+          - ia
+          - id
+          - ie
+          - ig
+          - ii
+          - ik
+          - in
+          - io
+          - is
+          - it
+          - iu
+          - iw
+          - ja
+          - ji
+          - jv
+          - ka
+          - kg
+          - ki
+          - kj
+          - kk
+          - kl
+          - km
+          - kn
+          - ko
+          - kr
+          - ks
+          - ku
+          - kv
+          - kw
+          - ky
+          - la
+          - lb
+          - lg
+          - li
+          - ln
+          - lo
+          - lt
+          - lu
+          - lv
+          - mg
+          - mh
+          - mi
+          - mk
+          - ml
+          - mn
+          - mo
+          - mr
+          - ms
+          - mt
+          - my
+          - na
+          - nb
+          - nd
+          - ne
+          - ng
+          - nl
+          - nn
+          - "no"
+          - nr
+          - nv
+          - ny
+          - oc
+          - oj
+          - om
+          - or
+          - os
+          - pa
+          - pi
+          - pl
+          - ps
+          - pt
+          - qu
+          - rm
+          - rn
+          - ro
+          - ru
+          - rw
+          - sa
+          - sc
+          - sd
+          - se
+          - sg
+          - si
+          - sk
+          - sl
+          - sm
+          - sn
+          - so
+          - sq
+          - sr
+          - ss
+          - st
+          - su
+          - sv
+          - sw
+          - ta
+          - te
+          - tg
+          - th
+          - ti
+          - tk
+          - tl
+          - tn
+          - to
+          - tr
+          - ts
+          - tt
+          - tw
+          - ty
+          - ug
+          - uk
+          - ur
+          - uz
+          - ve
+          - vi
+          - vo
+          - wa
+          - wo
+          - xh
+          - yi
+          - yo
+          - za
+          - zh
+          - zu
+        name:
+          type: string
+        description:
+          type: string
+      required:
+      - description
+      - key
+      - lang
+      - name
+    TagTranslationUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+    UpdateTagRequest:
+      type: object
+      properties:
+        key:
+          type: string
+        translations:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/TagTranslationUpdateRequest"
+      required:
+      - translations
+    TagResponse:
+      type: object
+      properties:
+        key:
+          type: string
+        lang:
+          type: string
+          enum:
+          - aa
+          - ab
+          - ae
+          - af
+          - ak
+          - am
+          - an
+          - ar
+          - as
+          - av
+          - ay
+          - az
+          - ba
+          - be
+          - bg
+          - bh
+          - bi
+          - bm
+          - bn
+          - bo
+          - br
+          - bs
+          - ca
+          - ce
+          - ch
+          - co
+          - cr
+          - cs
+          - cu
+          - cv
+          - cy
+          - da
+          - de
+          - dv
+          - dz
+          - ee
+          - el
+          - en
+          - eo
+          - es
+          - et
+          - eu
+          - fa
+          - ff
+          - fi
+          - fj
+          - fo
+          - fr
+          - fy
+          - ga
+          - gd
+          - gl
+          - gn
+          - gu
+          - gv
+          - ha
+          - he
+          - hi
+          - ho
+          - hr
+          - ht
+          - hu
+          - hy
+          - hz
+          - ia
+          - id
+          - ie
+          - ig
+          - ii
+          - ik
+          - in
+          - io
+          - is
+          - it
+          - iu
+          - iw
+          - ja
+          - ji
+          - jv
+          - ka
+          - kg
+          - ki
+          - kj
+          - kk
+          - kl
+          - km
+          - kn
+          - ko
+          - kr
+          - ks
+          - ku
+          - kv
+          - kw
+          - ky
+          - la
+          - lb
+          - lg
+          - li
+          - ln
+          - lo
+          - lt
+          - lu
+          - lv
+          - mg
+          - mh
+          - mi
+          - mk
+          - ml
+          - mn
+          - mo
+          - mr
+          - ms
+          - mt
+          - my
+          - na
+          - nb
+          - nd
+          - ne
+          - ng
+          - nl
+          - nn
+          - "no"
+          - nr
+          - nv
+          - ny
+          - oc
+          - oj
+          - om
+          - or
+          - os
+          - pa
+          - pi
+          - pl
+          - ps
+          - pt
+          - qu
+          - rm
+          - rn
+          - ro
+          - ru
+          - rw
+          - sa
+          - sc
+          - sd
+          - se
+          - sg
+          - si
+          - sk
+          - sl
+          - sm
+          - sn
+          - so
+          - sq
+          - sr
+          - ss
+          - st
+          - su
+          - sv
+          - sw
+          - ta
+          - te
+          - tg
+          - th
+          - ti
+          - tk
+          - tl
+          - tn
+          - to
+          - tr
+          - ts
+          - tt
+          - tw
+          - ty
+          - ug
+          - uk
+          - ur
+          - uz
+          - ve
+          - vi
+          - vo
+          - wa
+          - wo
+          - xh
+          - yi
+          - yo
+          - za
+          - zh
+          - zu
+        name:
+          type: string
+        description:
+          type: string
+      required:
+      - description
+      - key
+      - lang
+      - name
+    ChangeContentVisibilityRequest:
+      type: object
+      properties:
+        visibility:
+          type: string
+          enum:
+          - PRIVATE
+          - PUBLIC
+          - SHARED
+        sharedUsers:
+          type: object
+          additionalProperties:
+            type: string
+            enum:
+            - VIEWER
+            - EDITOR
+            - ADMIN
+        sharedGroups:
+          type: object
+          additionalProperties:
+            type: string
+            enum:
+            - VIEWER
+            - EDITOR
+            - ADMIN
+      required:
+      - sharedGroups
+      - sharedUsers
+      - visibility
+    ArticleColors:
+      type: object
+      properties:
+        text:
+          type: string
+        background:
+          type: string
+      required:
+      - background
+      - text
+    ContentAccessDetailsResponse:
+      type: object
+      properties:
+        ownerId:
+          $ref: "#/components/schemas/ObjectId"
+        visibility:
+          type: string
+          enum:
+          - PRIVATE
+          - PUBLIC
+          - SHARED
+        canEdit:
+          type: boolean
+        canDelete:
+          type: boolean
+      required:
+      - canDelete
+      - canEdit
+      - ownerId
+      - visibility
+    FullArticleResponse:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/ObjectId"
+        key:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        publishedAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        owner:
+          $ref: "#/components/schemas/UserOverviewResponse"
+        path:
+          type: string
+        state:
+          type: string
+          enum:
+          - PUBLISHED
+          - DRAFT
+          - ARCHIVED
+        colors:
+          $ref: "#/components/schemas/ArticleColors"
+        image:
+          $ref: "#/components/schemas/FileMetadataResponse"
+        lang:
+          type: string
+          enum:
+          - aa
+          - ab
+          - ae
+          - af
+          - ak
+          - am
+          - an
+          - ar
+          - as
+          - av
+          - ay
+          - az
+          - ba
+          - be
+          - bg
+          - bh
+          - bi
+          - bm
+          - bn
+          - bo
+          - br
+          - bs
+          - ca
+          - ce
+          - ch
+          - co
+          - cr
+          - cs
+          - cu
+          - cv
+          - cy
+          - da
+          - de
+          - dv
+          - dz
+          - ee
+          - el
+          - en
+          - eo
+          - es
+          - et
+          - eu
+          - fa
+          - ff
+          - fi
+          - fj
+          - fo
+          - fr
+          - fy
+          - ga
+          - gd
+          - gl
+          - gn
+          - gu
+          - gv
+          - ha
+          - he
+          - hi
+          - ho
+          - hr
+          - ht
+          - hu
+          - hy
+          - hz
+          - ia
+          - id
+          - ie
+          - ig
+          - ii
+          - ik
+          - in
+          - io
+          - is
+          - it
+          - iu
+          - iw
+          - ja
+          - ji
+          - jv
+          - ka
+          - kg
+          - ki
+          - kj
+          - kk
+          - kl
+          - km
+          - kn
+          - ko
+          - kr
+          - ks
+          - ku
+          - kv
+          - kw
+          - ky
+          - la
+          - lb
+          - lg
+          - li
+          - ln
+          - lo
+          - lt
+          - lu
+          - lv
+          - mg
+          - mh
+          - mi
+          - mk
+          - ml
+          - mn
+          - mo
+          - mr
+          - ms
+          - mt
+          - my
+          - na
+          - nb
+          - nd
+          - ne
+          - ng
+          - nl
+          - nn
+          - "no"
+          - nr
+          - nv
+          - ny
+          - oc
+          - oj
+          - om
+          - or
+          - os
+          - pa
+          - pi
+          - pl
+          - ps
+          - pt
+          - qu
+          - rm
+          - rn
+          - ro
+          - ru
+          - rw
+          - sa
+          - sc
+          - sd
+          - se
+          - sg
+          - si
+          - sk
+          - sl
+          - sm
+          - sn
+          - so
+          - sq
+          - sr
+          - ss
+          - st
+          - su
+          - sv
+          - sw
+          - ta
+          - te
+          - tg
+          - th
+          - ti
+          - tk
+          - tl
+          - tn
+          - to
+          - tr
+          - ts
+          - tt
+          - tw
+          - ty
+          - ug
+          - uk
+          - ur
+          - uz
+          - ve
+          - vi
+          - vo
+          - wa
+          - wo
+          - xh
+          - yi
+          - yo
+          - za
+          - zh
+          - zu
+        title:
+          type: string
+        summary:
+          type: string
+        content:
+          type: string
+        trusted:
+          type: boolean
+        access:
+          $ref: "#/components/schemas/ContentAccessDetailsResponse"
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/TagResponse"
+      required:
+      - access
+      - colors
+      - content
+      - createdAt
+      - id
+      - key
+      - lang
+      - owner
+      - path
+      - state
+      - summary
+      - tags
+      - title
+      - trusted
+      - updatedAt
+    UserOverviewResponse:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/ObjectId"
+        name:
+          type: string
+        email:
+          type: string
+        avatar:
+          $ref: "#/components/schemas/FileMetadataResponse"
+      required:
+      - email
+      - id
+      - name
+    ArticleTrustedResponse:
+      type: object
+      properties:
+        trusted:
+          type: boolean
+      required:
+      - trusted
+    ChangeContentTagsRequest:
+      type: object
+      properties:
+        tags:
+          type: array
+          items:
+            type: string
+          uniqueItems: true
+      required:
+      - tags
+    ChangeArticleSummaryRequest:
+      type: object
+      properties:
+        lang:
+          type: string
+          enum:
+          - aa
+          - ab
+          - ae
+          - af
+          - ak
+          - am
+          - an
+          - ar
+          - as
+          - av
+          - ay
+          - az
+          - ba
+          - be
+          - bg
+          - bh
+          - bi
+          - bm
+          - bn
+          - bo
+          - br
+          - bs
+          - ca
+          - ce
+          - ch
+          - co
+          - cr
+          - cs
+          - cu
+          - cv
+          - cy
+          - da
+          - de
+          - dv
+          - dz
+          - ee
+          - el
+          - en
+          - eo
+          - es
+          - et
+          - eu
+          - fa
+          - ff
+          - fi
+          - fj
+          - fo
+          - fr
+          - fy
+          - ga
+          - gd
+          - gl
+          - gn
+          - gu
+          - gv
+          - ha
+          - he
+          - hi
+          - ho
+          - hr
+          - ht
+          - hu
+          - hy
+          - hz
+          - ia
+          - id
+          - ie
+          - ig
+          - ii
+          - ik
+          - in
+          - io
+          - is
+          - it
+          - iu
+          - iw
+          - ja
+          - ji
+          - jv
+          - ka
+          - kg
+          - ki
+          - kj
+          - kk
+          - kl
+          - km
+          - kn
+          - ko
+          - kr
+          - ks
+          - ku
+          - kv
+          - kw
+          - ky
+          - la
+          - lb
+          - lg
+          - li
+          - ln
+          - lo
+          - lt
+          - lu
+          - lv
+          - mg
+          - mh
+          - mi
+          - mk
+          - ml
+          - mn
+          - mo
+          - mr
+          - ms
+          - mt
+          - my
+          - na
+          - nb
+          - nd
+          - ne
+          - ng
+          - nl
+          - nn
+          - "no"
+          - nr
+          - nv
+          - ny
+          - oc
+          - oj
+          - om
+          - or
+          - os
+          - pa
+          - pi
+          - pl
+          - ps
+          - pt
+          - qu
+          - rm
+          - rn
+          - ro
+          - ru
+          - rw
+          - sa
+          - sc
+          - sd
+          - se
+          - sg
+          - si
+          - sk
+          - sl
+          - sm
+          - sn
+          - so
+          - sq
+          - sr
+          - ss
+          - st
+          - su
+          - sv
+          - sw
+          - ta
+          - te
+          - tg
+          - th
+          - ti
+          - tk
+          - tl
+          - tn
+          - to
+          - tr
+          - ts
+          - tt
+          - tw
+          - ty
+          - ug
+          - uk
+          - ur
+          - uz
+          - ve
+          - vi
+          - vo
+          - wa
+          - wo
+          - xh
+          - yi
+          - yo
+          - za
+          - zh
+          - zu
+        summary:
+          type: string
+      required:
+      - lang
+      - summary
+    ChangeArticleStateRequest:
+      type: object
+      properties:
+        state:
+          type: string
+          enum:
+          - PUBLISHED
+          - DRAFT
+          - ARCHIVED
+      required:
+      - state
+    ChangeArticleHeaderRequest:
+      type: object
+      properties:
+        lang:
+          type: string
+          enum:
+          - aa
+          - ab
+          - ae
+          - af
+          - ak
+          - am
+          - an
+          - ar
+          - as
+          - av
+          - ay
+          - az
+          - ba
+          - be
+          - bg
+          - bh
+          - bi
+          - bm
+          - bn
+          - bo
+          - br
+          - bs
+          - ca
+          - ce
+          - ch
+          - co
+          - cr
+          - cs
+          - cu
+          - cv
+          - cy
+          - da
+          - de
+          - dv
+          - dz
+          - ee
+          - el
+          - en
+          - eo
+          - es
+          - et
+          - eu
+          - fa
+          - ff
+          - fi
+          - fj
+          - fo
+          - fr
+          - fy
+          - ga
+          - gd
+          - gl
+          - gn
+          - gu
+          - gv
+          - ha
+          - he
+          - hi
+          - ho
+          - hr
+          - ht
+          - hu
+          - hy
+          - hz
+          - ia
+          - id
+          - ie
+          - ig
+          - ii
+          - ik
+          - in
+          - io
+          - is
+          - it
+          - iu
+          - iw
+          - ja
+          - ji
+          - jv
+          - ka
+          - kg
+          - ki
+          - kj
+          - kk
+          - kl
+          - km
+          - kn
+          - ko
+          - kr
+          - ks
+          - ku
+          - kv
+          - kw
+          - ky
+          - la
+          - lb
+          - lg
+          - li
+          - ln
+          - lo
+          - lt
+          - lu
+          - lv
+          - mg
+          - mh
+          - mi
+          - mk
+          - ml
+          - mn
+          - mo
+          - mr
+          - ms
+          - mt
+          - my
+          - na
+          - nb
+          - nd
+          - ne
+          - ng
+          - nl
+          - nn
+          - "no"
+          - nr
+          - nv
+          - ny
+          - oc
+          - oj
+          - om
+          - or
+          - os
+          - pa
+          - pi
+          - pl
+          - ps
+          - pt
+          - qu
+          - rm
+          - rn
+          - ro
+          - ru
+          - rw
+          - sa
+          - sc
+          - sd
+          - se
+          - sg
+          - si
+          - sk
+          - sl
+          - sm
+          - sn
+          - so
+          - sq
+          - sr
+          - ss
+          - st
+          - su
+          - sv
+          - sw
+          - ta
+          - te
+          - tg
+          - th
+          - ti
+          - tk
+          - tl
+          - tn
+          - to
+          - tr
+          - ts
+          - tt
+          - tw
+          - ty
+          - ug
+          - uk
+          - ur
+          - uz
+          - ve
+          - vi
+          - vo
+          - wa
+          - wo
+          - xh
+          - yi
+          - yo
+          - za
+          - zh
+          - zu
+        title:
+          type: string
+        colors:
+          $ref: "#/components/schemas/ArticleColors"
+      required:
+      - colors
+      - lang
+      - title
+    ChangeArticleContentRequest:
+      type: object
+      properties:
+        lang:
+          type: string
+          enum:
+          - aa
+          - ab
+          - ae
+          - af
+          - ak
+          - am
+          - an
+          - ar
+          - as
+          - av
+          - ay
+          - az
+          - ba
+          - be
+          - bg
+          - bh
+          - bi
+          - bm
+          - bn
+          - bo
+          - br
+          - bs
+          - ca
+          - ce
+          - ch
+          - co
+          - cr
+          - cs
+          - cu
+          - cv
+          - cy
+          - da
+          - de
+          - dv
+          - dz
+          - ee
+          - el
+          - en
+          - eo
+          - es
+          - et
+          - eu
+          - fa
+          - ff
+          - fi
+          - fj
+          - fo
+          - fr
+          - fy
+          - ga
+          - gd
+          - gl
+          - gn
+          - gu
+          - gv
+          - ha
+          - he
+          - hi
+          - ho
+          - hr
+          - ht
+          - hu
+          - hy
+          - hz
+          - ia
+          - id
+          - ie
+          - ig
+          - ii
+          - ik
+          - in
+          - io
+          - is
+          - it
+          - iu
+          - iw
+          - ja
+          - ji
+          - jv
+          - ka
+          - kg
+          - ki
+          - kj
+          - kk
+          - kl
+          - km
+          - kn
+          - ko
+          - kr
+          - ks
+          - ku
+          - kv
+          - kw
+          - ky
+          - la
+          - lb
+          - lg
+          - li
+          - ln
+          - lo
+          - lt
+          - lu
+          - lv
+          - mg
+          - mh
+          - mi
+          - mk
+          - ml
+          - mn
+          - mo
+          - mr
+          - ms
+          - mt
+          - my
+          - na
+          - nb
+          - nd
+          - ne
+          - ng
+          - nl
+          - nn
+          - "no"
+          - nr
+          - nv
+          - ny
+          - oc
+          - oj
+          - om
+          - or
+          - os
+          - pa
+          - pi
+          - pl
+          - ps
+          - pt
+          - qu
+          - rm
+          - rn
+          - ro
+          - ru
+          - rw
+          - sa
+          - sc
+          - sd
+          - se
+          - sg
+          - si
+          - sk
+          - sl
+          - sm
+          - sn
+          - so
+          - sq
+          - sr
+          - ss
+          - st
+          - su
+          - sv
+          - sw
+          - ta
+          - te
+          - tg
+          - th
+          - ti
+          - tk
+          - tl
+          - tn
+          - to
+          - tr
+          - ts
+          - tt
+          - tw
+          - ty
+          - ug
+          - uk
+          - ur
+          - uz
+          - ve
+          - vi
+          - vo
+          - wa
+          - wo
+          - xh
+          - yi
+          - yo
+          - za
+          - zh
+          - zu
+        content:
+          type: string
+      required:
+      - content
+      - lang
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+          format: int32
+        error:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+      required:
+      - error
+      - status
+      - timestamp
+    CreateGroupRequest:
+      type: object
+      properties:
+        key:
+          type: string
+        translations:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/GroupTranslation"
+      required:
+      - key
+      - translations
+    AddGroupMemberRequest:
+      type: object
+      properties:
+        userId:
+          $ref: "#/components/schemas/ObjectId"
+      required:
+      - userId
+    CreateTagRequest:
+      type: object
+      properties:
+        key:
+          type: string
+        lang:
+          type: string
+          enum:
+          - aa
+          - ab
+          - ae
+          - af
+          - ak
+          - am
+          - an
+          - ar
+          - as
+          - av
+          - ay
+          - az
+          - ba
+          - be
+          - bg
+          - bh
+          - bi
+          - bm
+          - bn
+          - bo
+          - br
+          - bs
+          - ca
+          - ce
+          - ch
+          - co
+          - cr
+          - cs
+          - cu
+          - cv
+          - cy
+          - da
+          - de
+          - dv
+          - dz
+          - ee
+          - el
+          - en
+          - eo
+          - es
+          - et
+          - eu
+          - fa
+          - ff
+          - fi
+          - fj
+          - fo
+          - fr
+          - fy
+          - ga
+          - gd
+          - gl
+          - gn
+          - gu
+          - gv
+          - ha
+          - he
+          - hi
+          - ho
+          - hr
+          - ht
+          - hu
+          - hy
+          - hz
+          - ia
+          - id
+          - ie
+          - ig
+          - ii
+          - ik
+          - in
+          - io
+          - is
+          - it
+          - iu
+          - iw
+          - ja
+          - ji
+          - jv
+          - ka
+          - kg
+          - ki
+          - kj
+          - kk
+          - kl
+          - km
+          - kn
+          - ko
+          - kr
+          - ks
+          - ku
+          - kv
+          - kw
+          - ky
+          - la
+          - lb
+          - lg
+          - li
+          - ln
+          - lo
+          - lt
+          - lu
+          - lv
+          - mg
+          - mh
+          - mi
+          - mk
+          - ml
+          - mn
+          - mo
+          - mr
+          - ms
+          - mt
+          - my
+          - na
+          - nb
+          - nd
+          - ne
+          - ng
+          - nl
+          - nn
+          - "no"
+          - nr
+          - nv
+          - ny
+          - oc
+          - oj
+          - om
+          - or
+          - os
+          - pa
+          - pi
+          - pl
+          - ps
+          - pt
+          - qu
+          - rm
+          - rn
+          - ro
+          - ru
+          - rw
+          - sa
+          - sc
+          - sd
+          - se
+          - sg
+          - si
+          - sk
+          - sl
+          - sm
+          - sn
+          - so
+          - sq
+          - sr
+          - ss
+          - st
+          - su
+          - sv
+          - sw
+          - ta
+          - te
+          - tg
+          - th
+          - ti
+          - tk
+          - tl
+          - tn
+          - to
+          - tr
+          - ts
+          - tt
+          - tw
+          - ty
+          - ug
+          - uk
+          - ur
+          - uz
+          - ve
+          - vi
+          - vo
+          - wa
+          - wo
+          - xh
+          - yi
+          - yo
+          - za
+          - zh
+          - zu
+        name:
+          type: string
+        description:
+          type: string
+      required:
+      - key
+      - lang
+      - name
+    InviteUserToContentRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        role:
+          type: string
+          enum:
+          - VIEWER
+          - EDITOR
+          - ADMIN
+      required:
+      - email
+      - role
+    ExtendedContentAccessDetailsResponse:
+      type: object
+      properties:
+        ownerId:
+          $ref: "#/components/schemas/ObjectId"
+        visibility:
+          type: string
+          enum:
+          - PRIVATE
+          - PUBLIC
+          - SHARED
+        users:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserContentAccessDetails"
+        groups:
+          type: object
+          additionalProperties:
+            type: string
+            enum:
+            - VIEWER
+            - EDITOR
+            - ADMIN
+        invitations:
+          type: array
+          items:
+            $ref: "#/components/schemas/InvitationResponse"
+      required:
+      - groups
+      - invitations
+      - ownerId
+      - users
+      - visibility
+    InvitationResponse:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/ObjectId"
+        issuedAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
+        email:
+          type: string
+        claims:
+          type: object
+          additionalProperties: {}
+      required:
+      - claims
+      - email
+      - expiresAt
+      - id
+      - issuedAt
+    UserContentAccessDetails:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/UserOverviewResponse"
+        role:
+          type: string
+          enum:
+          - VIEWER
+          - EDITOR
+          - ADMIN
+      required:
+      - role
+      - user
+    AcceptInvitationToContentRequest:
+      type: object
+      properties:
+        token:
+          type: string
+      required:
+      - token
+    CreateArticleRequest:
+      type: object
+      properties:
+        lang:
+          type: string
+          enum:
+          - aa
+          - ab
+          - ae
+          - af
+          - ak
+          - am
+          - an
+          - ar
+          - as
+          - av
+          - ay
+          - az
+          - ba
+          - be
+          - bg
+          - bh
+          - bi
+          - bm
+          - bn
+          - bo
+          - br
+          - bs
+          - ca
+          - ce
+          - ch
+          - co
+          - cr
+          - cs
+          - cu
+          - cv
+          - cy
+          - da
+          - de
+          - dv
+          - dz
+          - ee
+          - el
+          - en
+          - eo
+          - es
+          - et
+          - eu
+          - fa
+          - ff
+          - fi
+          - fj
+          - fo
+          - fr
+          - fy
+          - ga
+          - gd
+          - gl
+          - gn
+          - gu
+          - gv
+          - ha
+          - he
+          - hi
+          - ho
+          - hr
+          - ht
+          - hu
+          - hy
+          - hz
+          - ia
+          - id
+          - ie
+          - ig
+          - ii
+          - ik
+          - in
+          - io
+          - is
+          - it
+          - iu
+          - iw
+          - ja
+          - ji
+          - jv
+          - ka
+          - kg
+          - ki
+          - kj
+          - kk
+          - kl
+          - km
+          - kn
+          - ko
+          - kr
+          - ks
+          - ku
+          - kv
+          - kw
+          - ky
+          - la
+          - lb
+          - lg
+          - li
+          - ln
+          - lo
+          - lt
+          - lu
+          - lv
+          - mg
+          - mh
+          - mi
+          - mk
+          - ml
+          - mn
+          - mo
+          - mr
+          - ms
+          - mt
+          - my
+          - na
+          - nb
+          - nd
+          - ne
+          - ng
+          - nl
+          - nn
+          - "no"
+          - nr
+          - nv
+          - ny
+          - oc
+          - oj
+          - om
+          - or
+          - os
+          - pa
+          - pi
+          - pl
+          - ps
+          - pt
+          - qu
+          - rm
+          - rn
+          - ro
+          - ru
+          - rw
+          - sa
+          - sc
+          - sd
+          - se
+          - sg
+          - si
+          - sk
+          - sl
+          - sm
+          - sn
+          - so
+          - sq
+          - sr
+          - ss
+          - st
+          - su
+          - sv
+          - sw
+          - ta
+          - te
+          - tg
+          - th
+          - ti
+          - tk
+          - tl
+          - tn
+          - to
+          - tr
+          - ts
+          - tt
+          - tw
+          - ty
+          - ug
+          - uk
+          - ur
+          - uz
+          - ve
+          - vi
+          - vo
+          - wa
+          - wo
+          - xh
+          - yi
+          - yo
+          - za
+          - zh
+          - zu
+        title:
+          type: string
+        summary:
+          type: string
+        content:
+          type: string
+      required:
+      - content
+      - lang
+      - summary
+      - title
+    StepUpRequest:
+      type: object
+      properties:
+        password:
+          type: string
+      required:
+      - password
+    StepUpResponse:
+      type: object
+      properties:
+        token:
+          type: string
+    SessionInfoRequest:
+      type: object
+      properties:
+        browser:
+          type: string
+        os:
+          type: string
+    GenerateSessionTokenResponse:
+      type: object
+      properties:
+        token:
+          type: string
+      required:
+      - token
+    RegisterUserRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          minLength: 1
+        password:
+          type: string
+          minLength: 1
+        name:
+          type: string
+          minLength: 1
+        session:
+          $ref: "#/components/schemas/SessionInfoRequest"
+      required:
+      - email
+      - name
+      - password
+    City:
+      type: object
+      properties:
+        confidence:
+          type: integer
+          format: int32
+        geoname_id:
+          type: integer
+          format: int64
+        names:
+          type: object
+          additionalProperties:
+            type: string
+    CityResponse:
+      type: object
+      properties:
+        city:
+          $ref: "#/components/schemas/City"
+        continent:
+          $ref: "#/components/schemas/Continent"
+        country:
+          $ref: "#/components/schemas/Country"
+        location:
+          $ref: "#/components/schemas/Location"
+        maxmind:
+          $ref: "#/components/schemas/MaxMind"
+        postal:
+          $ref: "#/components/schemas/Postal"
+        registered_country:
+          $ref: "#/components/schemas/Country"
+        represented_country:
+          $ref: "#/components/schemas/RepresentedCountry"
+        subdivisions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Subdivision"
+        traits:
+          $ref: "#/components/schemas/Traits"
+    Continent:
+      type: object
+      properties:
+        code:
+          type: string
+        geoname_id:
+          type: integer
+          format: int64
+        names:
+          type: object
+          additionalProperties:
+            type: string
+    Country:
+      type: object
+      properties:
+        confidence:
+          type: integer
+          format: int32
+        geoname_id:
+          type: integer
+          format: int64
+        is_in_european_union:
+          type: boolean
+        iso_code:
+          type: string
+        names:
+          type: object
+          additionalProperties:
+            type: string
+    Location:
+      type: object
+      properties:
+        accuracy_radius:
+          type: integer
+          format: int32
+        average_income:
+          type: integer
+          format: int32
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        metro_code:
+          type: integer
+          format: int32
+          deprecated: true
+        population_density:
+          type: integer
+          format: int32
+        time_zone:
+          type: string
+    MaxMind:
+      type: object
+      properties:
+        queries_remaining:
+          type: integer
+          format: int32
+    Network:
+      type: object
+      properties:
+        prefixLength:
+          type: integer
+          format: int32
+        networkAddress:
+          type: object
+          properties:
+            hostAddress:
+              type: string
+            address:
+              type: string
+              format: byte
+            hostName:
+              type: string
+            linkLocalAddress:
+              type: boolean
+            anyLocalAddress:
+              type: boolean
+            multicastAddress:
+              type: boolean
+            loopbackAddress:
+              type: boolean
+            siteLocalAddress:
+              type: boolean
+            mcglobal:
+              type: boolean
+            mcnodeLocal:
+              type: boolean
+            mclinkLocal:
+              type: boolean
+            mcsiteLocal:
+              type: boolean
+            mcorgLocal:
+              type: boolean
+            canonicalHostName:
+              type: string
+    Postal:
+      type: object
+      properties:
+        code:
+          type: string
+        confidence:
+          type: integer
+          format: int32
+    RegisterResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/UserResponse"
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        location:
+          $ref: "#/components/schemas/CityResponse"
+      required:
+      - user
+    RepresentedCountry:
+      type: object
+      properties:
+        confidence:
+          type: integer
+          format: int32
+        geoname_id:
+          type: integer
+          format: int64
+        is_in_european_union:
+          type: boolean
+        iso_code:
+          type: string
+        names:
+          type: object
+          additionalProperties:
+            type: string
+        type:
+          type: string
+    Subdivision:
+      type: object
+      properties:
+        confidence:
+          type: integer
+          format: int32
+        geoname_id:
+          type: integer
+          format: int64
+        iso_code:
+          type: string
+        names:
+          type: object
+          additionalProperties:
+            type: string
+    Traits:
+      type: object
+      properties:
+        autonomous_system_number:
+          type: integer
+          format: int64
+        autonomous_system_organization:
+          type: string
+        connection_type:
+          type: string
+          enum:
+          - Dialup
+          - Cable/DSL
+          - Corporate
+          - Cellular
+          - Satellite
+        domain:
+          type: string
+        ip_address:
+          type: string
+        is_anonymous:
+          type: boolean
+        is_anonymous_proxy:
+          type: boolean
+          deprecated: true
+        is_anonymous_vpn:
+          type: boolean
+        is_anycast:
+          type: boolean
+        is_hosting_provider:
+          type: boolean
+        is_legitimate_proxy:
+          type: boolean
+        is_public_proxy:
+          type: boolean
+        is_residential_proxy:
+          type: boolean
+        is_satellite_provider:
+          type: boolean
+          deprecated: true
+        is_tor_exit_node:
+          type: boolean
+        isp:
+          type: string
+        mobile_country_code:
+          type: string
+        mobile_network_code:
+          type: string
+        network:
+          $ref: "#/components/schemas/Network"
+        organization:
+          type: string
+        user_type:
+          type: string
+        user_count:
+          type: integer
+          format: int32
+        static_ip_score:
+          type: number
+          format: double
+    RefreshTokenResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/UserResponse"
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+      required:
+      - user
+    ConnectPasswordIdentityRequest:
+      type: object
+      properties:
+        password:
+          type: string
+      required:
+      - password
+    OAuth2ProviderConnectionTokenResponse:
+      type: object
+      properties:
+        token:
+          type: string
+    OAuth2ProviderConnectionRequest:
+      type: object
+      properties:
+        provider:
+          type: string
+      required:
+      - provider
+    ResetPasswordRequest:
+      type: object
+      properties:
+        newPassword:
+          type: string
+      required:
+      - newPassword
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+      required:
+      - success
+    SendPasswordResetRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          minLength: 1
+      required:
+      - email
+    MailSendResponse:
+      type: object
+      properties:
+        cooldown:
+          type: integer
+          format: int64
+      required:
+      - cooldown
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        session:
+          $ref: "#/components/schemas/SessionInfoRequest"
+      required:
+      - email
+      - password
+    LoginResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/UserResponse"
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        twoFactorRequired:
+          type: boolean
+        allowedTwoFactorMethods:
+          type: array
+          items:
+            type: string
+            enum:
+            - totp
+            - mail
+        twoFactorAuthenticationToken:
+          type: string
+        location:
+          $ref: "#/components/schemas/CityResponse"
+      required:
+      - twoFactorRequired
+      - user
+    TwoFactorSetupResponse:
+      type: object
+      properties:
+        secret:
+          type: string
+        optAuthUrl:
+          type: string
+        recoveryCodes:
+          type: array
+          items:
+            type: string
+        token:
+          type: string
+      required:
+      - optAuthUrl
+      - recoveryCodes
+      - secret
+      - token
+    TwoFactorVerifySetupRequest:
+      type: object
+      properties:
+        token:
+          type: string
+        code:
+          type: integer
+          format: int32
+      required:
+      - code
+      - token
+    TwoFactorRecoveryResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/UserResponse"
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        stepUpToken:
+          type: string
+        sessionToken:
+          type: string
+      required:
+      - user
+    TwoFactorAuthenticationRequest:
+      type: object
+      properties:
+        mail:
+          type: string
+        totp:
+          type: integer
+          format: int32
+        session:
+          $ref: "#/components/schemas/SessionInfoRequest"
+    UpdatePreferredTwoFactorMethodRequest:
+      type: object
+      properties:
+        method:
+          type: string
+          enum:
+          - totp
+          - mail
+      required:
+      - method
+    EnableMailTwoFactorMethodRequest:
+      type: object
+      properties:
+        code:
+          type: string
+      required:
+      - code
+    PageGroupResponse:
+      type: object
+      properties:
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
+        size:
+          type: integer
+          format: int32
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/GroupResponse"
+        number:
+          type: integer
+          format: int32
+        sort:
+          $ref: "#/components/schemas/SortObject"
+        numberOfElements:
+          type: integer
+          format: int32
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
+        empty:
+          type: boolean
+    PageableObject:
+      type: object
+      properties:
+        offset:
+          type: integer
+          format: int64
+        sort:
+          $ref: "#/components/schemas/SortObject"
+        unpaged:
+          type: boolean
+        paged:
+          type: boolean
+        pageNumber:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+    SortObject:
+      type: object
+      properties:
+        empty:
+          type: boolean
+        sorted:
+          type: boolean
+        unsorted:
+          type: boolean
+    KeyContainsResponse:
+      type: object
+      properties:
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/TagResponse"
+        size:
+          type: integer
+          format: int32
+      required:
+      - size
+      - tags
+    ArticleOverviewResponse:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/ObjectId"
+        key:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        publishedAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        path:
+          type: string
+        state:
+          type: string
+          enum:
+          - PUBLISHED
+          - DRAFT
+          - ARCHIVED
+        title:
+          type: string
+        colors:
+          $ref: "#/components/schemas/ArticleColors"
+        lang:
+          type: string
+          enum:
+          - aa
+          - ab
+          - ae
+          - af
+          - ak
+          - am
+          - an
+          - ar
+          - as
+          - av
+          - ay
+          - az
+          - ba
+          - be
+          - bg
+          - bh
+          - bi
+          - bm
+          - bn
+          - bo
+          - br
+          - bs
+          - ca
+          - ce
+          - ch
+          - co
+          - cr
+          - cs
+          - cu
+          - cv
+          - cy
+          - da
+          - de
+          - dv
+          - dz
+          - ee
+          - el
+          - en
+          - eo
+          - es
+          - et
+          - eu
+          - fa
+          - ff
+          - fi
+          - fj
+          - fo
+          - fr
+          - fy
+          - ga
+          - gd
+          - gl
+          - gn
+          - gu
+          - gv
+          - ha
+          - he
+          - hi
+          - ho
+          - hr
+          - ht
+          - hu
+          - hy
+          - hz
+          - ia
+          - id
+          - ie
+          - ig
+          - ii
+          - ik
+          - in
+          - io
+          - is
+          - it
+          - iu
+          - iw
+          - ja
+          - ji
+          - jv
+          - ka
+          - kg
+          - ki
+          - kj
+          - kk
+          - kl
+          - km
+          - kn
+          - ko
+          - kr
+          - ks
+          - ku
+          - kv
+          - kw
+          - ky
+          - la
+          - lb
+          - lg
+          - li
+          - ln
+          - lo
+          - lt
+          - lu
+          - lv
+          - mg
+          - mh
+          - mi
+          - mk
+          - ml
+          - mn
+          - mo
+          - mr
+          - ms
+          - mt
+          - my
+          - na
+          - nb
+          - nd
+          - ne
+          - ng
+          - nl
+          - nn
+          - "no"
+          - nr
+          - nv
+          - ny
+          - oc
+          - oj
+          - om
+          - or
+          - os
+          - pa
+          - pi
+          - pl
+          - ps
+          - pt
+          - qu
+          - rm
+          - rn
+          - ro
+          - ru
+          - rw
+          - sa
+          - sc
+          - sd
+          - se
+          - sg
+          - si
+          - sk
+          - sl
+          - sm
+          - sn
+          - so
+          - sq
+          - sr
+          - ss
+          - st
+          - su
+          - sv
+          - sw
+          - ta
+          - te
+          - tg
+          - th
+          - ti
+          - tk
+          - tl
+          - tn
+          - to
+          - tr
+          - ts
+          - tt
+          - tw
+          - ty
+          - ug
+          - uk
+          - ur
+          - uz
+          - ve
+          - vi
+          - vo
+          - wa
+          - wo
+          - xh
+          - yi
+          - yo
+          - za
+          - zh
+          - zu
+        summary:
+          type: string
+        image:
+          $ref: "#/components/schemas/FileMetadataResponse"
+        access:
+          $ref: "#/components/schemas/ContentAccessDetailsResponse"
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/TagResponse"
+      required:
+      - access
+      - colors
+      - createdAt
+      - id
+      - key
+      - lang
+      - path
+      - state
+      - summary
+      - tags
+      - title
+      - updatedAt
+    PageArticleOverviewResponse:
+      type: object
+      properties:
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
+        size:
+          type: integer
+          format: int32
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/ArticleOverviewResponse"
+        number:
+          type: integer
+          format: int32
+        sort:
+          $ref: "#/components/schemas/SortObject"
+        numberOfElements:
+          type: integer
+          format: int32
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
+        empty:
+          type: boolean
+    ArticleResponse:
+      type: object
+      properties:
+        articles:
+          type: array
+          items:
+            $ref: "#/components/schemas/ArticleOverviewResponse"
+        remainingCount:
+          type: integer
+          format: int64
+      required:
+      - articles
+      - remainingCount
+    AuthenticationStatusResponse:
+      type: object
+      properties:
+        authorized:
+          type: boolean
+        stepUp:
+          type: boolean
+        twoFactorRequired:
+          type: boolean
+        preferredTwoFactorMethod:
+          type: string
+          enum:
+          - totp
+          - mail
+        twoFactorMethods:
+          type: array
+          items:
+            type: string
+            enum:
+            - totp
+            - mail
+      required:
+      - authorized
+      - stepUp
+      - twoFactorRequired
+    LocationInfo:
+      type: object
+      properties:
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        cityName:
+          type: string
+        countryCode:
+          type: string
+      required:
+      - countryCode
+      - latitude
+      - longitude
+    SessionInfoResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        browser:
+          type: string
+        os:
+          type: string
+        ipAddress:
+          type: string
+        location:
+          $ref: "#/components/schemas/LocationInfo"
+        lastActive:
+          type: string
+          format: date-time
+      required:
+      - id
+      - lastActive
+    IdentityProviderResponse:
+      type: object
+      properties:
+        provider:
+          type: string
+      required:
+      - provider
+    MailCooldownResponse:
+      type: object
+      properties:
+        remaining:
+          type: integer
+          format: int64
+      required:
+      - remaining
+    DataBuffer: {}
+    RotationStatusResponse:
+      type: object
+      properties:
+        isOngoing:
+          type: boolean
+        lastRotation:
+          type: string
+          format: date-time
+      required:
+      - isOngoing
+  securitySchemes:
+    twoFactorAuthenticationTokenCookie:
+      type: apiKey
+      description: "Token for successful authentication with email and password, indicating\
+        \ 2FA is required."
+      name: two_factor_authentication_token
+      in: cookie
+    accessTokenHeader:
+      type: http
+      description: Access token for user authentication.
+      scheme: bearer
+      bearerFormat: JWT
+    accessTokenCookie:
+      type: apiKey
+      description: Access token for user authentication.
+      name: access_token
+      in: cookie
+    stepUpTokenCookie:
+      type: apiKey
+      description: Token for step up authentication allowing access of secure resources.
+      name: step_up_token
+      in: cookie
+    twoFactorAuthenticationTokenHeader:
+      type: apiKey
+      description: "Token for successful authentication with email and password, indicating\
+        \ 2FA is required."
+      name: X-Two-Factor-Authentication-Token
+      in: header
+    refreshTokenHeader:
+      type: http
+      description: Refresh token to request new access tokens.
+      scheme: bearer
+      bearerFormat: JWT
+    stepUpTokenHeader:
+      type: apiKey
+      description: Token for step up authentication allowing access of secure resources.
+      name: X-Step-Up-Token
+      in: header
+    refreshTokenCookie:
+      type: apiKey
+      description: Refresh token to request new access tokens.
+      name: refresh_token
+      in: cookie

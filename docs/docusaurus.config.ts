@@ -1,6 +1,7 @@
 import {themes as prismThemes} from 'prism-react-renderer';
 import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
+import type * as OpenApiPlugin from "docusaurus-plugin-openapi-docs";
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
@@ -49,12 +50,34 @@ const config: Config = {
                 },
                 docs: {
                     sidebarPath: './sidebars.ts',
+                    docItemComponent: "@theme/ApiItem"
                 },
                 blog: false,
-            }
+            } satisfies Preset.Options
         ]
     ],
-
+    plugins: [
+        [
+            'docusaurus-plugin-openapi-docs',
+            {
+                id: "api", // plugin id
+                docsPluginId: "classic", // configured for preset-classic
+                config: {
+                    singularity: {
+                        specPath: "static/openapi/openapi.yaml",
+                        outputDir: "docs/api",
+                        sidebarOptions: {
+                            groupPathsBy: "tag",
+                            categoryLinkSource: "auto",
+                        },
+                    } satisfies OpenApiPlugin.Options,
+                }
+            },
+        ],
+    ],
+    themes: [
+        "docusaurus-theme-openapi-docs"
+    ],
     themeConfig: {
         // Replace with your project's social card
         image: 'img/social-card.png',
@@ -70,14 +93,9 @@ const config: Config = {
             items: [
                 {
                     type: 'docSidebar',
-                    sidebarId: 'tutorialSidebar',
+                    sidebarId: 'guideSidebar',
                     position: 'left',
                     label: 'Docs',
-                },
-                {
-                    position: 'left',
-                    label: 'API',
-                    to: '/swagger'
                 },
                 {
                     href: 'https://github.com/antistereov/singularity-core',

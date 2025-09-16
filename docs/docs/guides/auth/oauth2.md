@@ -77,9 +77,10 @@ For known providers like *GitHub* you don't need to specify the `provider` part:
 
 For more information, check out the [Spring Docs](https://docs.spring.io/spring-security/reference/servlet/oauth2/client/authorization-grants.html#oauth2-client-authorization-code).
 
-## Register a New User
+## Registration and Login
 
-If a user wants to register to your application using an OAuth2 provider, 
+If a user wants to register to your application 
+or authenticate to an existing account using an OAuth2 provider, 
 you have to perform the following steps:
 
 :::info
@@ -94,12 +95,12 @@ You only have the possibility to override certain tokens in the request header.
 
 Authentication in *Singularity* strongly relies on sessions.
 Access tokens and refresh tokens are bound to a specific session for example. 
-You can learn more about that [here](../../docs/auth/sessions).
+You can learn more about that [here](/sessions).
 
 Therefore, before authenticating via an OAuth2 client, 
-you need to retrieve a `SessionToken` using [`POST /api/auth/sessions/token`](/swagger#/Sessions/generateTokenForCurrentSession).
-This sets the `SessionToken` as an HTTP-only cookie and returns the value in the response body 
-if [header authentication](../../docs/auth/securing-endpoints#header-authentication) is enabled.
+you need to retrieve a [`SessionToken`](./tokens#session-token) using [`POST /api/auth/sessions/token`](/swagger#/Sessions/generateTokenForCurrentSession).
+This sets the [`SessionToken`](./tokens#session-token) as an HTTP-only cookie and returns the value in the response body 
+if [header authentication](/securing-endpoints#header-authentication) is enabled.
 
 ### 2. Calling the Spring OAuth2 Authorization Endpoint
 
@@ -130,19 +131,19 @@ Connecting a new provider to an existing user needs an [`AccessToken`](./tokens#
 Placing them in the header will not lead to a successful connection since they will be lost after the callback.
 :::
 
-### 1. Authorize the User
+### 1. Authenticate the User
 
-Log in the user by calling [`POST /api/auth/login`](/swagger#/Authentication/login).
+Authenticate the user by calling [`POST /api/auth/login`](/swagger#/Authentication/login).
 This will set the [`AccessToken`](./tokens#access-token) as an HTTP-only cookie.
 
-### 2. Requesting the Step-Up
+### 2. Request the Step-Up
 
 You can request a [`StepUpToken`](./tokens#step-up-token) by adding the parameter `step_up=true` to the initial authorization request 
 (for example `https://example.com/oauth2/authorization/{registration_id}?step_up=true`).
 
 This will set the [`StepUpToken`](./tokens#step-up-token) as an HTTP-only cookie.
 
-You can learn more about step-up authentication [here](../../docs/auth/authentication#step-up).
+You can learn more about step-up authentication [here](/authentication#step-up).
 
 ## Managing Providers
 
@@ -162,7 +163,7 @@ Connecting a new provider to an existing user needs an [`AccessToken`](./tokens#
 Placing them in the header will not lead to a successful connection since they will be lost after the callback.
 :::
 
-#### 1. Authorizing the User
+#### 1. Authenticate the User
 
 1. Log in the user by calling [`POST /api/auth/login`](/swagger#/Authentication/login).
    This will set the [`AccessToken`](./tokens#access-token) as an HTTP-only cookie.
@@ -170,10 +171,10 @@ Placing them in the header will not lead to a successful connection since they w
    This will set a [`StepUpToken`](./tokens#step-up-token) as an HTTP-only cookie.
    You can learn more about step-up authentication [here](./authentication#step-up).
 
-#### 2. Creating an OAuth2 Provider Connection Token
+#### 2. Create an OAuth2 Provider Connection Token
 
 Call [`POST /api/auth/providers/oauth2/token`](/swagger#/OAuth2%20Identity%20Provider/generateOAuth2ProviderConnectionToken) authenticated as the user to create an [`OAuth2ProviderConnectionToken`](./tokens#oauth2-provider-connection-token).
-This token will be set as an HTTP-only cookie and returned in the response if [header-authentication](../../docs/auth/securing-endpoints#header-authentication) is enabled.
+This token will be set as an HTTP-only cookie and returned in the response if [header-authentication](/securing-endpoints#header-authentication) is enabled.
 
 #### 3. Follow the Steps For Registration
 
