@@ -6,7 +6,10 @@ import io.stereov.singularity.global.model.OpenApiConstants
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType
 import io.swagger.v3.oas.annotations.security.SecurityScheme
+import io.swagger.v3.oas.models.security.SecurityRequirement
+import org.springdoc.core.customizers.OpenApiCustomizer
 import org.springframework.boot.autoconfigure.AutoConfiguration
+import org.springframework.context.annotation.Bean
 
 @AutoConfiguration
 @SecurityScheme(
@@ -69,4 +72,31 @@ import org.springframework.boot.autoconfigure.AutoConfiguration
     description = "Token for successful authentication with email and password, indicating 2FA is required."
 )
 
-class OpenApiConfig
+class OpenApiConfig {
+
+    @Bean
+    fun groupSecurityRequirements(): OpenApiCustomizer = OpenApiCustomizer { openApi ->
+        openApi.tags = openApi.tags?.sortedBy { it.name }
+
+        openApi.paths.values.forEach { pathItem ->
+            pathItem.readOperations().forEach { op ->
+                val headers = mutableMapOf<String, List<String>>()
+                val cookies = mutableMapOf<String, List<String>>()
+
+                op.security?.forEach { secRec ->
+                    secRec.forEach { (name, scopes) ->
+                        when {
+                            name.contains("Header", ignoreCase = true) -> headers[name] = scopes
+                            name.contains("Cookie", ignoreCase = true) -> cookies[name] = scopes
+                        }
+                    }
+                }
+
+                op.security = listOf(
+                    SecurityRequirement().apply { headers.forEach { (k, v) -> addList(k, v)} },
+                    SecurityRequirement().apply { cookies.forEach { (k, v) -> addList(k, v) }}
+                )
+            }
+        }
+    }
+}
