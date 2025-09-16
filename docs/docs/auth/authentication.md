@@ -155,7 +155,7 @@ If successful, the new password is set and the user can log in again.
 All active sessions will be deleted after resetting the password.
 :::
 
-#### Resending the Reset Password
+#### Resending the Reset Password Request
 
 You can resend the password reset request using [`POST /api/auth/password/reset-request`](/swagger#/Password%20Reset/sendPasswordResetEmail).
 After sending each email, a cooldown will be started.
@@ -168,7 +168,7 @@ You can check the state of the cooldown here [`GET /api/auth/password/reset/cool
 
 ### OAuth2
 
-If [authentication via OAuth2 providers](../../docs/auth/oauth2) is enabled and the user [connected a provider](../../docs/auth/oauth2#connecting-an-oauth2-client-to-an-existing-account),
+If [authentication via OAuth2 providers](../../docs/auth/oauth2) is enabled and the user [connected a provider](../../docs/auth/oauth2#connecting-an-oauth2-provider-to-an-existing-account),
 users can log in using their connected providers. 
 You can find more information [here](../../docs/auth/oauth2#register-a-new-user).
 
@@ -246,7 +246,7 @@ The [`TwoFactorAuthenticationToken`](../../docs/auth/tokens#two-factor-authentic
 
 ### OAuth2
 
-If [authentication via OAuth2 providers](../../docs/auth/oauth2) is enabled and the user [connected a provider](../../docs/auth/oauth2#connecting-an-oauth2-client-to-an-existing-account),
+If [authentication via OAuth2 providers](../../docs/auth/oauth2) is enabled and the user [connected a provider](../../docs/auth/oauth2#connecting-an-oauth2-provider-to-an-existing-account),
 users can request a step-up using their connected providers.
 You can find more information [here](../../docs/auth/oauth2#step-up-authentication).
 

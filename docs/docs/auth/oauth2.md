@@ -13,20 +13,23 @@ If you are new to Spring, we recommend starting with their [official guides](htt
 To simplify the authentication process of your users, you can allow authentication using [OAuth2](https://auth0.com/intro-to-iam/what-is-oauth-2) clients.
 This implementation is based on [Spring OAuth 2.0 Client](https://docs.spring.io/spring-security/reference/servlet/oauth2/index.html#oauth2-client). Check out this guide if you need more information.
 
-## Set Up an OAuth2 Client
+## Set Up an OAuth2 Provider
 
-Create an application for your OAuth2 client with the following parameters:
+Create an application for your OAuth2 provider with the following parameters:
 
-* `Redirect URI`: Use the base URI of your application (for example `https://example.com`), an identifier for the client (for example `github`) you configured for the client and the path `login/oauth2/<client-id>/code` (for example `https://example.com/login/oauth2/github/code`)
+* `Redirect URI`: Use the base URI of your application (for example `https://example.com`), an identifier for the provider 
+  (for example `github`) you configured for the client and the path `login/oauth2/<client-id>/code` 
+  (for example `https://example.com/login/oauth2/github/code`)
 
 Copy the `client-id` and `client-secret` for the next step.
 
 ## Configuration
 
-[Spring OAuth 2.0 Client](https://docs.spring.io/spring-security/reference/servlet/oauth2/client) provides an easy method to configure your OAuth2 clients.
+[Spring OAuth 2.0](https://docs.spring.io/spring-security/reference/servlet/oauth2/client) provides an easy method to configure your OAuth2 providers.
 
 :::warning
-Please make sure that the **email** is in scope for your OAuth2 client. Check out their official documentation.
+Please make sure that the **email** is in scope for your OAuth2 provider. 
+Check out their official documentation.
 :::
 
 | Property                                   | Type      | Description                                                                       | Default value                             |
@@ -57,7 +60,7 @@ spring:
             token-uri: https://<your-subdomain>.oktapreview.com/oauth2/v1/token
 ```
 
-For known clients like *GitHub* you don't need to specify the provider:
+For known providers like *GitHub* you don't need to specify the `provider` part:
 
 ```yaml
   security:
@@ -76,7 +79,8 @@ For more information, check out the [Spring Docs](https://docs.spring.io/spring-
 
 ## Register a New User
 
-If a user wants to register to your application using an OAuth2 client, you have to perform the following steps:
+If a user wants to register to your application using an OAuth2 provider, 
+you have to perform the following steps:
 
 :::info
 This section strongly relies on **cookies**.
@@ -90,15 +94,17 @@ You only have the possibility to override certain tokens in the request header.
 
 Authentication in *Singularity* strongly relies on sessions.
 Access tokens and refresh tokens are bound to a specific session for example. 
-If you try to perform a request with a session ID that does not belong to your current session, you will get an unauthorized response.
 You can learn more about that [here](../../docs/auth/sessions).
 
-Therefore, before authenticating via an OAuth2 client, you need to retrieve a `SessionToken` using [`POST /api/auth/sessions/token`](/swagger#/Sessions/generateTokenForCurrentSession).
-This sets the `SessionToken` as an HTTP-only cookie and returns the value in the response body if [header authentication](../../docs/auth/securing-endpoints#header-authentication) is enabled.
+Therefore, before authenticating via an OAuth2 client, 
+you need to retrieve a `SessionToken` using [`POST /api/auth/sessions/token`](/swagger#/Sessions/generateTokenForCurrentSession).
+This sets the `SessionToken` as an HTTP-only cookie and returns the value in the response body 
+if [header authentication](../../docs/auth/securing-endpoints#header-authentication) is enabled.
 
 ### 2. Calling the Spring OAuth2 Authorization Endpoint
 
-Spring automatically creates OAuth2 authorization endpoints for all of your clients on the path `/oauth2/authorization/{registrationId}`.
+Spring automatically creates OAuth2 authorization endpoints for all of your providers 
+on the path `/oauth2/authorization/{registrationId}`.
 
 #### Parameters
 
@@ -107,7 +113,7 @@ Spring automatically creates OAuth2 authorization endpoints for all of your clie
 | `redirect_uri`                     | The URI the user will be redirected to after the authentication was successful.                                                                                                                                                                                                                                                                                         | `false`  |
 | `step_up`                          | Should step-up authentication be requested? Boolean. Learn more [here](#step-up-authentication).                                                                                                                                                                                                                                                                        | `false`  |
 | `session_token`                    | The token specifying the current session you obtained from calling [`POST /api/auth/sessions/token`](/swagger#/Sessions/generateTokenForCurrentSession). It is not necessary to set this parameter since it will already be set as a HTTP-only cookie. You can override this value using this parameter or use it instead if for some reason cookies are not available. | `false`  |
-| `oauth2_provider_connection_token` | A token used to connect a new OAuth2 client to an existing account. It is not necessary to set this parameter since this token will already be set as an HTTP-only cookie. You can use this parameter to override the token. Go [here](#connecting-an-oauth2-client-to-an-existing-account) for more information.                                                       | `false`  |
+| `oauth2_provider_connection_token` | A token used to connect a new OAuth2 client to an existing account. It is not necessary to set this parameter since this token will already be set as an HTTP-only cookie. You can use this parameter to override the token. Go [here](#connecting-an-oauth2-provider-to-an-existing-account) for more information.                                                     | `false`  |
 
 ### 3. Redirect
 
@@ -116,61 +122,93 @@ If the authorization was successful, you will be redirected to `/login/oauth2/{r
 
 The user is now authenticated.
 
-## Connecting an OAuth2 Client to an Existing Account
-
-It is possible to connect multiple OAuth2 clients to an account.
-
-:::info
-This section strongly relies on **cookies**.
-Connecting a new provider to an existing user needs an `AccessToken` and a `StepUpToken` set as cookies.
-Placing them in the header will not lead to a successful connection since they will be lost after the callback.
-:::
-
-### 1. Authorizing the User
-
-1. Log in the user by calling [`POST /api/auth/login`](/swagger#/Authentication/login).
-    This will set the `AccessToken` as an HTTP-only cookie.
-2. Authorize a step-up by calling [POST /api/auth/step-up](/swagger#/Authentication/stepUp).
-    This will set a `StepUpToken` as an HTTP-only cookie.
-
-### 2. Creating an OAuth2 Provider Connection Token
-
-Call [`POST /api/auth/providers/oauth2/token`](/swagger#/OAuth2%20Identity%20Provider/generateOAuth2ProviderConnectionToken) authenticated as the user to create an `OAuth2ProviderConnectionToken`.
-This token will be set as an HTTP-only cookie and returned in the response if [header-authentication](../../docs/auth/securing-endpoints#header-authentication) is enabled.
-
-### 3. Follow the Steps For Registration
-
-With the `OAuth2ProviderConnectionToken` set and the user authenticated, you can follow the same steps.
-Because of the `AccessToken`, `StepUpToken` and `OAuth2ProviderConnectionToken`, 
-the server automatically tries to connect the new provider to the current user.
-
-If successful, the user will be connected to the new provider.
-
 ## Step-Up Authentication
 
 :::info
 This section strongly relies on **cookies**.
-Connecting a new provider to an existing user needs an `AccessToken` set a cookie.
+Connecting a new provider to an existing user needs an [`AccessToken`](./tokens#access-token) set a cookie.
 Placing them in the header will not lead to a successful connection since they will be lost after the callback.
 :::
 
 ### 1. Authorize the User
 
 Log in the user by calling [`POST /api/auth/login`](/swagger#/Authentication/login).
-This will set the `AccessToken` as an HTTP-only cookie.
+This will set the [`AccessToken`](./tokens#access-token) as an HTTP-only cookie.
 
 ### 2. Requesting the Step-Up
 
-You can request a `StepUpToken` by adding the parameter `step_up=true` to the initial authorization request 
+You can request a [`StepUpToken`](./tokens#step-up-token) by adding the parameter `step_up=true` to the initial authorization request 
 (for example `https://example.com/oauth2/authorization/{registration_id}?step_up=true`).
 
-This will set the `StepUpToken` as an HTTP-only cookie.
+This will set the [`StepUpToken`](./tokens#step-up-token) as an HTTP-only cookie.
 
 You can learn more about step-up authentication [here](../../docs/auth/authentication#step-up).
 
+## Managing Providers
+
+### Getting Connected Providers
+
+You can request a list of connected providers using 
+[`GET /api/auth/providers`](/swagger#/Identity%20Provider/getProviders)
+with a valid [`AccessToken`](./tokens#access-token).
+
+### Connecting an OAuth2 Provider to an Existing Account
+
+It is possible to connect multiple OAuth2 clients to an account.
+
+:::info
+This section strongly relies on **cookies**.
+Connecting a new provider to an existing user needs an [`AccessToken`](./tokens#access-token) and a `StepUpToken` set as cookies.
+Placing them in the header will not lead to a successful connection since they will be lost after the callback.
+:::
+
+#### 1. Authorizing the User
+
+1. Log in the user by calling [`POST /api/auth/login`](/swagger#/Authentication/login).
+   This will set the [`AccessToken`](./tokens#access-token) as an HTTP-only cookie.
+2. Authorize a step-up by calling [POST /api/auth/step-up](/swagger#/Authentication/stepUp).
+   This will set a [`StepUpToken`](./tokens#step-up-token) as an HTTP-only cookie.
+   You can learn more about step-up authentication [here](./authentication#step-up).
+
+#### 2. Creating an OAuth2 Provider Connection Token
+
+Call [`POST /api/auth/providers/oauth2/token`](/swagger#/OAuth2%20Identity%20Provider/generateOAuth2ProviderConnectionToken) authenticated as the user to create an [`OAuth2ProviderConnectionToken`](./tokens#oauth2-provider-connection-token).
+This token will be set as an HTTP-only cookie and returned in the response if [header-authentication](../../docs/auth/securing-endpoints#header-authentication) is enabled.
+
+#### 3. Follow the Steps For Registration
+
+With the [`OAuth2ProviderConnectionToken`](./tokens#oauth2-provider-connection-token) set and the user authenticated, you can follow the same steps.
+Because of the [`AccessToken`](./tokens#access-token), 
+[`StepUpToken`](./tokens#step-up-token) and [`OAuth2ProviderConnectionToken`](./tokens#oauth2-provider-connection-token),
+the server automatically tries to connect the new provider to the current user.
+
+If successful, the user will be connected to the new provider.
+
+### Adding Password Authentication
+
+If a user registered using an OAuth2 provider,
+it is possible to add the option to authenticate using a password.
+
+Call [`POST /api/auth/providers/password`](/swagger#/Identity%20Provider/connectPasswordIdentity)
+with a valid [`AccessToken`](./tokens#access-token) and [`StepUpToken`](./tokens#step-up-token).
+
+If successful, the user can now log in using his new password.
+
+### Disconnecting an OAuth2 Provider
+
+If a user connected multiple provider,
+it is possible to disconnect providers through the endpoint
+[`DELETE /api/auth/providers/<provider-name>`](/swagger#/Identity%20Provider/deleteProvider).
+
+:::warning
+You are not allowed to disconnect the password identity.
+Furthermore, if the only identity is an OAuth2 identity, 
+you are not allowed to disconnect this identity.
+:::
+
 ## Error Handling
 
-If authentication failed, 
+If authentication failed,
 the user will be redirected to the URI you specify in `singularity.auth.oauth2.error-redirect-uri`.
 This allows you to specifically handle these scenarios in your frontend.
 

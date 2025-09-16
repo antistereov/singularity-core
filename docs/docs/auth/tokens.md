@@ -183,11 +183,30 @@ The `StepUpToken` is required to authorize requests to sensitive API endpoints. 
       -H 'X-Step-Up-Token: <your-step-up-token>'
     ```
 
+## OAuth2 Provider Connection Token
+
+The `OAuth2ProviderConnection` is a temporary security token that authorizes a user 
+to connect a new OAuth2 provider to his account.
+
+It has a **short lifespan** and is required in addition to a valid [`AccessToken`](#access-token).
+
+:::note
+You can learn more about connecting OAuth2 providers to an existing account [here](./oauth2#connecting-an-oauth2-provider-to-an-existing-account).
+:::
+
+### How to Obtain It
+
+This token is issued after a user successfully requests a token through the dedicated endpoint:
+
+* [`POST /api/auth/providers/oauth2/token`](/swagger#/OAuth2%20Identity%20Provider/generateOAuth2ProviderConnectionToken)
+
+### Usage
+
+Check [this](./oauth2#connecting-an-oauth2-provider-to-an-existing-account) guide on how to use it.
+
 ## Configuration
 
 | Property                                    | Type   | Description                                                                   | Default value |
 |---------------------------------------------|--------|-------------------------------------------------------------------------------|---------------|
 | singularity.security.jwt.expires-in         | `Long` | Expiration time for JWT tokens in seconds. Default is 15 minutes.             | `900`         |
 | singularity.security.jwt.refresh-expires-in | `Long` | Expiration time for refresh tokens in seconds. Default is about three months. | `7884000`     |
-
-
