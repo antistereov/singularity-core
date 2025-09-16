@@ -13,4 +13,6 @@ object OpenApiConstants {
 
     const val STEP_UP_TOKEN_HEADER = "stepUpTokenHeader"
     const val STEP_UP_TOKEN_COOKIE = "stepUpTokenCookie"
+
+    const val ADMIN_SCOPE = "adminScope"
 }
