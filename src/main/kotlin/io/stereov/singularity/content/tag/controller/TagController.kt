@@ -21,7 +21,7 @@ class TagController(
     @PostMapping
     suspend fun createTag(@RequestBody req: CreateTagRequest): ResponseEntity<TagResponse> {
         return ResponseEntity.ok(
-            tagMapper.createTagResponse(service.create(req), req.languageTag)
+            tagMapper.createTagResponse(service.create(req), req.locale)
         )
     }
 
