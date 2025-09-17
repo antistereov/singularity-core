@@ -26,13 +26,8 @@ class TagMapper(
         )
     }
 
-    suspend fun createTagResponse(tag: TagDocument, languageTag: String): TagResponse {
-
-        return createTagResponse(tag, Locale.forLanguageTag(languageTag))
-    }
-
     fun createTag(req: CreateTagRequest): TagDocument {
-        val locale = Locale.forLanguageTag(req.languageTag)
+        val locale = req.locale ?: translationService.defaultLocale
 
         return TagDocument(
             _id = null,
