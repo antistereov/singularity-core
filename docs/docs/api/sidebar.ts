@@ -136,6 +136,12 @@ const sidebar: SidebarsConfig = {
         },
         {
           type: "doc",
+          id: "api/recover-from-totp",
+          label: "Recover From TOTP",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
           id: "api/send-email-two-factor-code",
           label: "Send Email 2FA Code",
           className: "api-method post",
@@ -157,12 +163,6 @@ const sidebar: SidebarsConfig = {
           id: "api/get-remaining-email-two-factor-cooldown",
           label: "Get Remaining Email 2FA Code Cooldown",
           className: "api-method get",
-        },
-        {
-          type: "doc",
-          id: "api/recover-from-totp",
-          label: "Recover From TOTP",
-          className: "api-method post",
         },
       ],
     },

@@ -152,6 +152,7 @@ class OpenApiConfig() {
             TotpAuthenticationController::enableTotpAsTwoFactorMethod.name,
             TotpAuthenticationController::disableTotpAsTwoFactorMethod.name,
             TotpAuthenticationController::enableTotpAsTwoFactorMethod.name,
+            TotpAuthenticationController::recoverFromTotp.name,
 
             EmailAuthenticationController::sendEmailTwoFactorCode.name,
             EmailAuthenticationController::enableEmailAsTwoFactorMethod.name,
@@ -198,7 +199,7 @@ class OpenApiConfig() {
             }
         }
 
-        allOperations.sortWith(compareBy { (path, method, operation) ->
+        allOperations.sortWith(compareBy { (_, _, operation) ->
             val operationIdIndex = sortedOperationIds.indexOf(operation.operationId)
             if (operationIdIndex != -1) {
                 operationIdIndex

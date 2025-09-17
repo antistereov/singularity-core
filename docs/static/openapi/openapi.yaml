@@ -693,6 +693,52 @@ paths:
         stepUpTokenHeader: []
       - accessTokenCookie: []
         stepUpTokenCookie: []
+  /api/auth/2fa/totp/recover:
+    post:
+      tags:
+      - Two-Factor Authentication
+      summary: Recover From TOTP
+      description: "Recover the user if they lost access to their 2FA device. After\
+        \ successful recovery, an AccessToken, RefreshToken and StepUpToken will be\
+        \ set as HTTP-only cookies and returned in the response body if header authentication\
+        \ is enabled."
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/auth/two-factor#recovery
+      operationId: recoverFromTotp
+      parameters:
+      - name: code
+        in: query
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SessionInfoRequest"
+      responses:
+        "200":
+          description: "Recovery successful. If header authentication is enabled,\
+            \ the response will contain all tokens."
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TwoFactorRecoveryResponse"
+        "401":
+          description: Wrong code.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: User is already authenticated.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - twoFactorAuthenticationTokenHeader: []
+      - twoFactorAuthenticationTokenCookie: []
   /api/auth/2fa/email/send:
     post:
       tags:
@@ -2009,52 +2055,6 @@ paths:
       security:
       - {}
       - {}
-  /api/auth/2fa/totp/recover:
-    post:
-      tags:
-      - Two-Factor Authentication
-      summary: Recover From TOTP
-      description: "Recover the user if they lost access to their 2FA device. After\
-        \ successful recovery, an AccessToken, RefreshToken and StepUpToken will be\
-        \ set as HTTP-only cookies and returned in the response body if header authentication\
-        \ is enabled."
-      externalDocs:
-        url: https://singularity.stereov.io/docs/guides/auth/two-factor#recovery
-      operationId: recoverFromTotp
-      parameters:
-      - name: code
-        in: query
-        required: true
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SessionInfoRequest"
-      responses:
-        "200":
-          description: "Recovery successful. If header authentication is enabled,\
-            \ the response will contain all tokens."
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/TwoFactorRecoveryResponse"
-        "401":
-          description: Wrong code.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "403":
-          description: User is already authenticated.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-      security:
-      - twoFactorAuthenticationTokenHeader: []
-      - twoFactorAuthenticationTokenCookie: []
   /api/admin/rotate-keys:
     post:
       tags:
@@ -3408,9 +3408,9 @@ components:
     SortObject:
       type: object
       properties:
-        unsorted:
-          type: boolean
         sorted:
+          type: boolean
+        unsorted:
           type: boolean
         empty:
           type: boolean
