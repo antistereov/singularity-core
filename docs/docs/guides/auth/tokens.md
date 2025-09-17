@@ -30,9 +30,9 @@ This token is required for authentication with **every API request**.
 
 The token is generated and provided upon successful authentication, specifically through these endpoints:
 
-* [`POST /api/auth/login`](/swagger#/Authentication/login): After a successful login.
-* [`POST /api/auth/register`](/swagger#/Authentication/register): After a successful registration.
-* [`POST /api/auth/refresh`](/swagger#/Authentication/refreshToken): When requesting a new token.
+* [`POST /api/auth/login`](../../api/login.api.mdx): After a successful login.
+* [`POST /api/auth/register`](../../api/register.api.mdx): After a successful registration.
+* [`POST /api/auth/refresh`](../../api/refresh-access-token.api.mdx): When requesting a new token.
 
 ### Usage
 
@@ -62,9 +62,9 @@ It serves as the *key* to renew the user's session if the [`AccessToken`](#acces
 
 The token is generated and provided upon successful authentication, specifically through these endpoints:
 
-* [`POST /api/auth/login`](/swagger#/Authentication/login): After a successful login.
-* [`POST /api/auth/register`](/swagger#/Authentication/register): After a successful registration.
-* [`POST /api/auth/refresh`](/swagger#/Authentication/refreshToken): When requesting a new token.
+* [`POST /api/auth/login`](../../api/login.api.mdx): After a successful login.
+* [`POST /api/auth/register`](../../api/register.api.mdx): After a successful registration.
+* [`POST /api/auth/refresh`](../../api/refresh-access-token.api.mdx): When requesting a new token.
 
 ### Usage
 
@@ -95,8 +95,8 @@ as the authentication flow is incomplete.
 
 This token is issued after a successful first-step authentication and is required to proceed with the second factor:
 
-* [`POST /api/auth/login`](/swagger#/Authentication/login): When logging in to an account that has 2FA enabled.
-* [`POST /api/auth/step-up`](/swagger#/Authentication/stepUp): When initiating a step-up authentication for an account that has 2FA enabled.
+* [`POST /api/auth/login`](../../api/login.api.mdx): When logging in to an account that has 2FA enabled.
+* [`POST /api/auth/step-up`](../../api/step-up.api.mdx): When initiating a step-up authentication for an account that has 2FA enabled.
 
 ### Usage
 
@@ -108,7 +108,7 @@ The `TwoFactorAuthenticationToken` is used to complete the 2FA process by valida
 You can find more information about the login flow [here](./authentication#login).
 :::
 
-The  endpoint [`POST /api/auth/2fa/login`](/swagger#/Two%20Factor%20Authentication/verifyLogin) verifies the user's second factor and, 
+The  endpoint [`POST /api/auth/2fa/login`](../../api/complete-login.api.mdx) verifies the user's second factor and, 
 if successful, issues the [`AccessToken`](#access-token) and [`RefreshToken`](#refresh-token).
 * **As an HTTP-only Cookie**: This is set and sent automatically by the browser.
   ```shell
@@ -131,7 +131,8 @@ if successful, issues the [`AccessToken`](#access-token) and [`RefreshToken`](#r
 You can find more information about step-up flow [here](./authentication#step-up).
 :::
 
-The endpoint [`POST /api/auth/2fa/step-up`](/swagger#/Two%20Factor%20Authentication/verifyStepUp) verifies the second factor and, if successful, issues the [`StepUpToken`](#step-up-token) required for critical operations.
+The endpoint [`POST /api/auth/2fa/step-up`](../../api/complete-step-up.api.mdx) verifies the second factor and,
+if successful, issues the [`StepUpToken`](#step-up-token) required for critical operations.
 * **As an HTTP-only Cookie**: This is set and sent automatically by the browser.
     ```shell
     curl -X POST https://example.com/api/auth/2fa/step-up \
@@ -165,7 +166,7 @@ You can find more information about the step-up flow [here](./authentication#ste
 
 This token is issued after a user successfully reauthenticates their session through the dedicated endpoint:
 
-* [`POST /api/auth/step-up`](/swagger#/Authentication/stepUp): When reauthenticating a user to perform a sensitive action.
+* [`POST /api/auth/step-up`](../../api/step-up.api.mdx): When reauthenticating a user to perform a sensitive action.
 
 ### Usage
 
@@ -198,7 +199,7 @@ You can learn more about connecting OAuth2 providers to an existing account [her
 
 This token is issued after a user successfully requests a token through the dedicated endpoint:
 
-* [`POST /api/auth/providers/oauth2/token`](/swagger#/OAuth2%20Identity%20Provider/generateOAuth2ProviderConnectionToken)
+* [`POST /api/auth/providers/oauth2/token`](../../api/generate-o-auth-2-provider-connection-token.api.mdx)
 
 ### Usage
 
@@ -225,7 +226,7 @@ You can learn more about login or registration via OAuth2 providers [here](./oau
 
 This token can be obtained here:
 
-* [`POST /api/auth/sessions/token`](/swagger#/Sessions/generateSessionToken)
+* [`POST /api/auth/sessions/token`](../../api/generate-session-token.api.mdx)
 
 ### Usage
 

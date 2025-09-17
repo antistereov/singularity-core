@@ -14,7 +14,7 @@ Every new device or browser a user logs into creates a new **session**.
 Each session is uniquely identified by a [`RefreshToken`](./tokens#refresh-token).
 
 The [`RefreshToken`](./tokens#refresh-token) is a long-lived credential stored securely on the user's device. 
-Its primary purpose is to obtain new [`AccesstToken`](./tokens#access-token) without requiring the user to re-enter their credentials every time.
+Its primary purpose is to obtain new [`AccessToken`](./tokens#access-token) without requiring the user to re-enter their credentials every time.
 
 An [`AccesstToken`](./tokens#access-token) is a short-lived token used to authenticate API requests. 
 It has a short expiration time (e.g., minutes or hours), 
@@ -26,7 +26,7 @@ This process is seamless to the user.
 ## Active Sessions
 
 You can retrieve the user's current active sessions through
-[`GET /api/auth/session`](/swagger#/Sessions/getSessions) using a valid [`AccesstToken`](./tokens#access-token).
+[`GET /api/auth/session`](../../api/get-active-sessions.api.mdx) using a valid [`AccesstToken`](./tokens#access-token).
 
 Each session has a unique ID.
 
@@ -46,10 +46,10 @@ allowing users to remotely log out of specific devices without having to change 
 ### Invalidating a Specific Session
 
 You can invalidate a specific session using the session's ID through the endpoint
-[`DELETE /api/auth/sessions/<session-id>`](/swagger#/Sessions/deleteSession)
+[`DELETE /api/auth/sessions/<session-id>`](../../api/delete-session.api.mdx)
 with a valid [`AccesstToken`](./tokens#access-token).
 
 ### Invalidating all Session
 
-You can invalidate all sessions through [`DELETE /api/auth/sessions`](/swagger#/Sessions/deleteAllSessions)
+You can invalidate all sessions through [`DELETE /api/auth/sessions`](../../api/delete-all-sessions.api.mdx)
 with a valid [`AccesstToken`](./tokens#access-token).

@@ -1,6 +1,29 @@
 openapi: 3.1.0
 info:
-  title: Singularity Core API
+  title: Singularity API
+  description: "\n            Welcome to the Singularity! \n            \n       \
+    \     This documentation covers the ready-to-use endpoints \n            for authentication,\
+    \ user management, and content management that come pre-configured with \n   \
+    \         Singularity.\n\n            Features at a Glance:\n            \n  \
+    \          - Authentication & User Management: Includes JWT auth with refresh\
+    \ tokens, 2FA, \n              email verification, and role-based access control.\n\
+    \              \n            - Data & Content Management: Endpoints for interacting\
+    \ with a content management \n              system that supports multi-language\
+    \ content, configurable tagging, and built-in \n              access control.\
+    \ A prebuilt Article class is also provided.\n              \n            - Performance\
+    \ & Security: The API is built with a focus on production-readiness, \n      \
+    \        including rate limiting and secret manager integration with automated\
+    \ key rotation.\n            \n            This API is a foundation for building\
+    \ robust backend services, microservices, or \n            full-stack applications.\n\
+    \            \n            Note: Some endpoints require explicit configuration\
+    \ to be enabled.\n            "
+  contact:
+    name: Stereov
+    url: https://stereov.io
+    email: contact@stereov.io
+  license:
+    name: GPLv3 License
+    url: https://www.gnu.org/licenses/gpl-3.0.en.html
   version: 1.0.0
 servers:
 - url: https://singularity.stereov.io
@@ -10,28 +33,1370 @@ servers:
 tags:
 - name: Authentication
   description: Operations related to user authentication.
-- name: Email Verification
-  description: Operations related to email verification.
-- name: Identity Provider
+- name: Two-Factor Authentication
+  description: Operations related to two-factor authentication
+- name: OAuth2
   description: Operations related to connecting and disconnecting identity providers
     to existing accounts.
-- name: Mail Two-Factor Authentication
-  description: Operations related to 2FA using mail
-- name: OAuth2 Identity Provider
-  description: Operations related to OAuth2 identity providers
-- name: Password Reset
-  description: Operations related to password reset.
 - name: Sessions
   description: Operations related to session management.
-- name: TOTP Two-Factor Authentication
-  description: Operations related to TOTP.
-- name: Two Factor Authentication
-  description: Operations related to two-factor authentication
+- name: Groups
+  description: Operation related to group and member management.
 - name: User Settings
   description: Operations related to user settings.
 - name: Users
   description: Operations related to user information.
 paths:
+  /api/auth/register:
+    post:
+      tags:
+      - Authentication
+      summary: Register
+      description: Creates a new user account and logs them in.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/auth/authentication#registering-users
+      operationId: register
+      parameters:
+      - name: send-email
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: locale
+        in: query
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterUserRequest"
+        required: true
+      responses:
+        "200":
+          description: Registration successful. Returns user details and tokens.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/RegisterResponse"
+        "409":
+          description: Email already exists.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: User is already authenticated.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - {}
+      - {}
+  /api/auth/login:
+    post:
+      tags:
+      - Authentication
+      summary: Login
+      description: "Authenticates a user, returns an access and refresh token and\
+        \ sets those tokens as HTTP-Only Cookies."
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/auth/authentication#login
+      operationId: login
+      parameters:
+      - name: locale
+        in: query
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+        required: true
+      responses:
+        "200":
+          description: Authentication successful. Returns tokens and user details.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "401":
+          description: Invalid credentials.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: User is already authenticated.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+      - accessTokenCookie: []
+  /api/auth/logout:
+    post:
+      tags:
+      - Authentication
+      summary: Logout
+      description: Invalidates the current session's access and refresh tokens.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/auth/authentication#logout
+      operationId: logout
+      responses:
+        "200":
+          description: Logout successful.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+      security:
+      - accessTokenHeader: []
+      - accessTokenCookie: []
+  /api/auth/refresh:
+    post:
+      tags:
+      - Authentication
+      summary: Refresh Access Token
+      description: Refresh the access token. Returns a new access and refresh token
+        and sets those tokens as Http-Only Cookies.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/auth/authentication#refresh
+      operationId: refreshAccessToken
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SessionInfoRequest"
+      responses:
+        "200":
+          description: Authentication successful. Returns tokens and user details.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/RefreshTokenResponse"
+        "401":
+          description: Invalid credentials.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - refreshTokenHeader: []
+      - refreshTokenCookie: []
+  /api/auth/step-up:
+    post:
+      tags:
+      - Authentication
+      summary: Step-Up
+      description: Requests step-up authentification. This re-authentication is required
+        by critical endpoints.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/auth/authentication#step-up
+      operationId: stepUp
+      parameters:
+      - name: locale
+        in: query
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StepUpRequest"
+        required: true
+      responses:
+        "200":
+          description: Logout successful.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/StepUpResponse"
+        "401":
+          description: Unauthorized.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+      - accessTokenCookie: []
+  /api/auth/status:
+    get:
+      tags:
+      - Authentication
+      summary: Get Authentication Status
+      description: Get detailed information about the current status authentication
+        status of the user.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/auth/authentication#status
+      operationId: getAuthenticationStatus
+      responses:
+        "200":
+          description: The current user's authentication status.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AuthenticationStatusResponse"
+        "404":
+          description: The user contained in the TwoFactorAuthenticationToken does
+            not exist.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+        stepUpTokenHeader: []
+        twoFactorAuthenticationTokenHeader: []
+      - accessTokenCookie: []
+        stepUpTokenCookie: []
+        twoFactorAuthenticationTokenCookie: []
+  /api/auth/password/reset-request:
+    post:
+      tags:
+      - Authentication
+      summary: Send Password Reset Email
+      description: "Send a password reset request email to the user's email. After\
+        \ sending an email, a cooldown is triggered during which no new passwort reset\
+        \ request email can be sent."
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/auth/authentication#password-reset
+      operationId: sendPasswordResetEmail
+      parameters:
+      - name: locale
+        in: query
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendPasswordResetRequest"
+        required: true
+      responses:
+        "200":
+          description: The number of seconds the user needs to wait to send a new
+            email.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/MailSendResponse"
+        "401":
+          description: Unauthorized.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: Failed to send another email. Wait until the cooldown is done.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - {}
+      - {}
+  /api/auth/password/reset:
+    post:
+      tags:
+      - Authentication
+      summary: Reset Password
+      description: "Perform a password reset using a PasswordResetToken you obtained\
+        \ from an email. If successful, the user can log in using the new password\
+        \ afterwards."
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/auth/authentication#password-reset
+      operationId: resetPassword
+      parameters:
+      - name: token
+        in: query
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResetPasswordRequest"
+        required: true
+      responses:
+        "200":
+          description: Updated user information.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "401":
+          description: Token is invalid.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: No password identity is set up for the user.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - {}
+      - {}
+  /api/auth/password/reset/cooldown:
+    get:
+      tags:
+      - Authentication
+      summary: Get Remaining Password Reset Cooldown
+      description: Get the remaining time in seconds until you can send another password
+        reset request.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/auth/authentication#password-reset
+      operationId: getRemainingPasswordResetCooldown
+      responses:
+        "200":
+          description: The remaining cooldown.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/MailCooldownResponse"
+        "401":
+          description: Unauthorized.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+      - accessTokenCookie: []
+  /api/auth/email/verify/send:
+    post:
+      tags:
+      - Authentication
+      summary: Send Email Verification Email
+      description: "Send a new verification email to the user's email. After sending\
+        \ an email, a cooldown is triggered during which no new verification email\
+        \ can be sent."
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/docs/auth/authentication#email-verification
+      operationId: sendEmailVerificationEmail
+      parameters:
+      - name: locale
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: The number of seconds the user needs to wait before sending
+            a new email.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/MailSendResponse"
+        "401":
+          description: Unauthorized.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: Failed to send another email. Wait until the cooldown is done.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+      - accessTokenCookie: []
+  /api/auth/email/verify:
+    post:
+      tags:
+      - Authentication
+      summary: Verify Email
+      description: Verify the user's email by validating the token.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/docs/auth/authentication#email-verification
+      operationId: verifyEmail
+      parameters:
+      - name: token
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Updated user information.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "401":
+          description: Token is invalid.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - {}
+      - {}
+  /api/auth/email/verify/cooldown:
+    get:
+      tags:
+      - Authentication
+      summary: Get Remaining Email Verification Cooldown
+      description: Get the remaining time in seconds until you can send another verification
+        request.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/docs/auth/authentication#email-verification
+      operationId: getRemainingEmailVerificationCooldown
+      responses:
+        "200":
+          description: The remaining cooldown.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/MailCooldownResponse"
+        "401":
+          description: Unauthorized.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+      - accessTokenCookie: []
+  /api/auth/2fa/login:
+    post:
+      tags:
+      - Two-Factor Authentication
+      summary: Complete Login
+      description: "Perform second factor for login. A TwoFactorAuthenticationToken\
+        \ is required. This token can be obtained by calling POST /api/auth/login.\
+        \ If successful, an AccessToken and RefreshToken will be set as HTTP-only\
+        \ cookies and returned in the response body if header authentication is enabled."
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/auth/two-factor
+      operationId: completeLogin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TwoFactorAuthenticationRequest"
+        required: true
+      responses:
+        "200":
+          description: Information about the user and the tokens if header authentication
+            is enabled.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "401":
+          description: Not authorized.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: This 2FA method is disabled.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - twoFactorAuthenticationTokenHeader: []
+      - twoFactorAuthenticationTokenCookie: []
+  /api/auth/2fa/step-up:
+    post:
+      tags:
+      - Two-Factor Authentication
+      summary: Complete Step-Up
+      description: "Perform second factor for step-up. A TwoFactorAuthenticationToken\
+        \ is required. This token can be obtained by calling POST /api/auth/step-up.\
+        \ If successful, a StepUpToken will be set as HTTP-only cookie and returned\
+        \ in the response body if header authentication is enabled."
+      externalDocs:
+        url: https://singularity.stereov.io/docs/auth/two-factor
+      operationId: completeStepUp
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TwoFactorAuthenticationRequest"
+        required: true
+      responses:
+        "200":
+          description: The token if header authentication is enabled.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/StepUpResponse"
+        "401":
+          description: Not authorized.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: This 2FA method is disabled.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+        twoFactorAuthenticationTokenHeader: []
+      - accessTokenCookie: []
+        twoFactorAuthenticationTokenCookie: []
+  /api/auth/2fa/preferred-method:
+    post:
+      tags:
+      - Two-Factor Authentication
+      summary: Change Preferred 2FA Method
+      description: Change the preferred 2FA method. Step-up is required.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/auth/two-factor#changing-the-preferred-method
+      operationId: changePreferredMethod
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePreferredTwoFactorMethodRequest"
+        required: true
+      responses:
+        "200":
+          description: Updated user information.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "401":
+          description: Not authorized.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: This 2FA method is disabled.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+        stepUpTokenHeader: []
+      - accessTokenCookie: []
+        stepUpTokenCookie: []
+  /api/auth/2fa/totp/setup:
+    get:
+      tags:
+      - Two-Factor Authentication
+      summary: Get TOTP Setup Details
+      description: "Get a 2FA secret, recovery codes and a TOTP URL. This information\
+        \ will be stored inside a token that you will get in the response. Use this\
+        \ token to perform the validation."
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/auth/two-factor#setup
+      operationId: getTotpSetupDetails
+      responses:
+        "200":
+          description: Success.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TwoFactorSetupResponse"
+        "401":
+          description: Not authenticated.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: The did not configure authentication using password or the
+            user already enabled TOTP.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+      - accessTokenCookie: []
+    post:
+      tags:
+      - Two-Factor Authentication
+      summary: Enable TOTP as 2FA Method
+      description: Set up TOTP for a user using a TOTPSetupToken and the TOTP code.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/auth/two-factor#setup
+      operationId: enableTotpAsTwoFactorMethod
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TwoFactorVerifySetupRequest"
+        required: true
+      responses:
+        "200":
+          description: Success.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TwoFactorSetupResponse"
+        "401":
+          description: Wrong code or not authorized.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: The user already enabled TOTP.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+        stepUpTokenHeader: []
+      - accessTokenCookie: []
+        stepUpTokenCookie: []
+  /api/auth/2fa/totp:
+    delete:
+      tags:
+      - Two-Factor Authentication
+      summary: Disable TOTP as 2FA Method
+      description: Disable TOTP for the current user.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/auth/two-factor#disable
+      operationId: disableTotpAsTwoFactorMethod
+      responses:
+        "200":
+          description: Success.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "401":
+          description: Not authorized.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+        stepUpTokenHeader: []
+      - accessTokenCookie: []
+        stepUpTokenCookie: []
+  /api/auth/2fa/email/send:
+    post:
+      tags:
+      - Two-Factor Authentication
+      summary: Send Email 2FA Code
+      description: Send an email containing a 2FA code to the user. It will update
+        the code in the database. Needs to be called before enabling this method for
+        the user.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/auth/two-factor#sending-a-2fa-code-via-email
+      operationId: sendEmailTwoFactorCode
+      parameters:
+      - name: locale
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Success.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "401":
+          description: Not authorized.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+      - accessTokenCookie: []
+  /api/auth/2fa/email/enable:
+    post:
+      tags:
+      - Two-Factor Authentication
+      summary: Enable Email as 2FA Method
+      description: Enable email as 2FA method. Step-up is required.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/auth/two-factor#setup-1
+      operationId: enableEmailAsTwoFactorMethod
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EnableEmailTwoFactorMethodRequest"
+        required: true
+      responses:
+        "200":
+          description: Updated user information.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "401":
+          description: Not authorized.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: This method is already enabled for the user.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+        stepUpTokenHeader: []
+      - accessTokenCookie: []
+        stepUpTokenCookie: []
+  /api/auth/2fa/email:
+    delete:
+      tags:
+      - Two-Factor Authentication
+      summary: Disable Email as 2FA Method
+      description: Disable email as 2FA method. Step-up is required.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/auth/two-factor#disable-1
+      operationId: disableEmailAsTwoFactorMethod
+      responses:
+        "200":
+          description: Updated user information.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "401":
+          description: Not authorized.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: This method is already enabled for the user.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+        stepUpTokenHeader: []
+      - accessTokenCookie: []
+        stepUpTokenCookie: []
+  /api/auth/2fa/email/cooldown:
+    get:
+      tags:
+      - Two-Factor Authentication
+      summary: Get Remaining Email 2FA Code Cooldown
+      description: Get the remaining time in seconds until you can send another email
+        containing a 2FA code.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/auth/two-factor#sending-a-2fa-code-via-email
+      operationId: getRemainingEmailTwoFactorCooldown
+      responses:
+        "200":
+          description: The remaining cooldown.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/MailCooldownResponse"
+        "401":
+          description: Unauthorized.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+      - accessTokenCookie: []
+  /api/auth/providers:
+    get:
+      tags:
+      - OAuth2
+      summary: Get Identity Providers
+      description: Get a list of connected identity providers for the current user.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/auth/oauth2#getting-connected-providers
+      operationId: getIdentityProviders
+      responses:
+        "200":
+          description: The list of identity providers.
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/IdentityProviderResponse"
+        "401":
+          description: Unauthorized.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+      - accessTokenCookie: []
+  /api/auth/providers/{provider}:
+    delete:
+      tags:
+      - OAuth2
+      summary: Delete Identity Provider
+      description: Delete an identity provider from the connected identity providers
+        of the current user.You are not allowed to delete the password identity or
+        the only existing identity.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/auth/oauth2#disconnecting-an-oauth2-provider
+      operationId: deleteIdentityProvider
+      parameters:
+      - name: provider
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Success.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "400":
+          description: "Bad request: deleting the password identity or the only registered\
+            \ identity is forbidden."
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+        stepUpTokenHeader: []
+      - accessTokenCookie: []
+        stepUpTokenCookie: []
+  /api/auth/providers/password:
+    post:
+      tags:
+      - OAuth2
+      summary: Add Password Authentication
+      description: Create a new identity provider for the current user that allows
+        the user to login with a password
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/auth/oauth2#adding-password-authentication
+      operationId: addPasswordAuthentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConnectPasswordIdentityRequest"
+        required: true
+      responses:
+        "200":
+          description: Success.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "400":
+          description: Bad request. User already created a password identity
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+        stepUpTokenHeader: []
+      - accessTokenCookie: []
+        stepUpTokenCookie: []
+  /api/auth/providers/oauth2/token:
+    post:
+      tags:
+      - OAuth2
+      summary: Generate OAuth2ProviderConnectionToken
+      description: Generate an OAuth2ProviderConnectionToken that enables the user
+        to connect new OAuth2 providers.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/auth/oauth2#connecting-an-oauth2-provider-to-an-existing-account
+      operationId: generateOAuth2ProviderConnectionToken
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OAuth2ProviderConnectionRequest"
+        required: true
+      responses:
+        "200":
+          description: Returns the token if header authentication is enabled.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OAuth2ProviderConnectionTokenResponse"
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+        stepUpTokenHeader: []
+      - accessTokenCookie: []
+        stepUpTokenCookie: []
+  /api/auth/sessions:
+    get:
+      tags:
+      - Sessions
+      summary: Get Active Sessions
+      description: Get all active sessions of the currently authenticated user.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/auth/sessions#active-sessions
+      operationId: getActiveSessions
+      responses:
+        "200":
+          description: The list of active sessions.
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SessionInfoResponse"
+        "401":
+          description: Unauthorized.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+      - accessTokenCookie: []
+    delete:
+      tags:
+      - Sessions
+      summary: Delete All Sessions
+      description: Invalidates all the current session's access and refresh tokens
+        from all sessions.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/auth/sessions#invalidating-all-session
+      operationId: deleteAllSessions
+      responses:
+        "200":
+          description: Logout successful.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+      security:
+      - accessTokenHeader: []
+      - accessTokenCookie: []
+  /api/auth/sessions/{sessionId}:
+    delete:
+      tags:
+      - Sessions
+      summary: Delete Session
+      description: Delete a session of the current user and invalidate all tokens
+        related to this session.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/auth/sessions#invalidating-a-specific-session
+      operationId: deleteSession
+      parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: The list of active sessions.
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SessionInfoResponse"
+        "401":
+          description: Unauthorized.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+      - accessTokenCookie: []
+  /api/auth/sessions/token:
+    post:
+      tags:
+      - Sessions
+      summary: Generate SessionToken
+      description: "Generate a SessionToken for the current session, if the user is\
+        \ authenticated or a new SessionToken instead. It will be set as an HTTP-only\
+        \ cookie and returned in the response body if header authentication is enabled."
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/auth/oauth2#1-retrieving-a-session-token
+      operationId: generateSessionToken
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SessionInfoRequest"
+      responses:
+        "200":
+          description: Token generated. The token will be returned if header authentication
+            is enabled
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/GenerateSessionTokenResponse"
+      security:
+      - {}
+      - {}
+  /api/groups:
+    get:
+      tags:
+      - Groups
+      summary: Get Groups
+      description: Get all configured groups.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/auth/groups#getting-groups
+      operationId: getGroups
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+      - name: locale
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Paginated groups.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageGroupResponse"
+        "401":
+          description: Invalid token.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: User does not have ADMIN role.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader:
+        - adminScope
+      - accessTokenCookie:
+        - adminScope
+    post:
+      tags:
+      - Groups
+      summary: Create Group
+      description: Creates a new group.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/auth/groups#creating-groups
+      operationId: createGroup
+      parameters:
+      - name: locale
+        in: query
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateGroupRequest"
+        required: true
+      responses:
+        "200":
+          description: Information about newly created group.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/GroupResponse"
+        "401":
+          description: Invalid token.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: User does not have ADMIN role.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader:
+        - adminScope
+      - accessTokenCookie:
+        - adminScope
+  /api/groups/{key}:
+    get:
+      tags:
+      - Groups
+      summary: Get Group By Key
+      description: Get all a groups by key.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/auth/groups#getting-groups
+      operationId: getGroupByKey
+      parameters:
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: locale
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Group information.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/GroupResponse"
+        "401":
+          description: Invalid token.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: User does not have ADMIN role.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader:
+        - adminScope
+      - accessTokenCookie:
+        - adminScope
+    put:
+      tags:
+      - Groups
+      summary: Update Group
+      description: Update a group.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/auth/groups#updating-groups
+      operationId: updateGroup
+      parameters:
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: locale
+        in: query
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateGroupRequest"
+        required: true
+      responses:
+        "200":
+          description: Updated group information.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/GroupResponse"
+        "401":
+          description: Invalid token.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: User does not have ADMIN role.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader:
+        - adminScope
+      - accessTokenCookie:
+        - adminScope
+    delete:
+      tags:
+      - Groups
+      summary: Delete Group
+      description: Delete a group.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/auth/groups#deleting-groups
+      operationId: deleteGroup
+      parameters:
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Success.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "401":
+          description: Invalid token.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: User does not have ADMIN role.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader:
+        - adminScope
+      - accessTokenCookie:
+        - adminScope
+  /api/groups/{groupKey}/members:
+    post:
+      tags:
+      - Groups
+      summary: Add Member to Group
+      description: Add a member to a group.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/auth/groups#adding-members-to-groups
+      operationId: addMemberToGroup
+      parameters:
+      - name: groupKey
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddGroupMemberRequest"
+        required: true
+      responses:
+        "200":
+          description: Updated user information.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "401":
+          description: Invalid token.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: User does not have ADMIN role.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader:
+        - adminScope
+      - accessTokenCookie:
+        - adminScope
+  /api/groups/{groupKey}/members/{userId}:
+    delete:
+      tags:
+      - Groups
+      summary: Remove Member from Group
+      description: Remove a member from a group.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/auth/groups#removing-members-from-groups
+      operationId: removeMemberFromGroup
+      parameters:
+      - name: groupKey
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: userId
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/ObjectId"
+      responses:
+        "200":
+          description: Updated user information.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "401":
+          description: Invalid token.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: User does not have ADMIN role.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader:
+        - adminScope
+      - accessTokenCookie:
+        - adminScope
   /api/users/me:
     get:
       tags:
@@ -119,7 +1484,7 @@ paths:
       - User Settings
       operationId: changeEmail
       parameters:
-      - name: lang
+      - name: locale
         in: query
         required: false
         schema:
@@ -180,95 +1545,18 @@ paths:
       security:
       - {}
       - {}
-  /api/groups/{key}:
-    get:
-      tags:
-      - group-controller
-      operationId: findByKey
-      parameters:
-      - name: key
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: lang
-        in: query
-        required: false
-        schema:
-          type: string
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/GroupResponse"
-      security:
-      - {}
-      - {}
-    put:
-      tags:
-      - group-controller
-      operationId: updateGroup
-      parameters:
-      - name: key
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: lang
-        in: query
-        required: false
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UpdateGroupRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/GroupResponse"
-      security:
-      - {}
-      - {}
-    delete:
-      tags:
-      - group-controller
-      operationId: deleteGroup
-      parameters:
-      - name: key
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/SuccessResponse"
-      security:
-      - {}
-      - {}
   /api/content/tags/{key}:
     get:
       tags:
       - tag-controller
-      operationId: findByKey_1
+      operationId: findTagByKey
       parameters:
       - name: key
         in: path
         required: true
         schema:
           type: string
-      - name: lang
+      - name: locale
         in: query
         required: false
         schema:
@@ -293,7 +1581,7 @@ paths:
         required: true
         schema:
           type: string
-      - name: lang
+      - name: locale
         in: query
         required: false
         schema:
@@ -345,7 +1633,7 @@ paths:
         required: true
         schema:
           type: string
-      - name: lang
+      - name: locale
         in: query
         required: false
         schema:
@@ -403,7 +1691,7 @@ paths:
         required: true
         schema:
           type: string
-      - name: lang
+      - name: locale
         in: query
         required: false
         schema:
@@ -435,7 +1723,7 @@ paths:
         required: true
         schema:
           type: string
-      - name: lang
+      - name: locale
         in: query
         required: false
         schema:
@@ -467,7 +1755,7 @@ paths:
         required: true
         schema:
           type: string
-      - name: lang
+      - name: locale
         in: query
         required: false
         schema:
@@ -499,7 +1787,7 @@ paths:
         required: true
         schema:
           type: string
-      - name: lang
+      - name: locale
         in: query
         required: false
         schema:
@@ -536,7 +1824,7 @@ paths:
         required: true
         schema:
           type: string
-      - name: lang
+      - name: locale
         in: query
         required: false
         schema:
@@ -568,7 +1856,7 @@ paths:
         required: true
         schema:
           type: string
-      - name: lang
+      - name: locale
         in: query
         required: false
         schema:
@@ -589,148 +1877,18 @@ paths:
       security:
       - {}
       - {}
-  /api/groups:
-    get:
-      tags:
-      - group-controller
-      summary: Get all groups
-      description: Get all configured groups.
-      externalDocs:
-        url: https://singularity.stereov.io/docs/auth/groups#creating-groups
-      operationId: findGroups
-      parameters:
-      - name: page
-        in: query
-        required: false
-        schema:
-          type: integer
-          format: int32
-      - name: size
-        in: query
-        required: false
-        schema:
-          type: integer
-          format: int32
-      - name: sort
-        in: query
-        required: false
-        schema:
-          type: array
-          items:
-            type: string
-      - name: lang
-        in: query
-        required: false
-        schema:
-          type: string
-      responses:
-        "200":
-          description: Information about newly created group.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/PageGroupResponse"
-        "401":
-          description: Invalid token.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "403":
-          description: User does not have ADMIN role.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-      security:
-      - accessTokenHeader:
-        - adminScope
-      - accessTokenCookie:
-        - adminScope
-    post:
-      tags:
-      - group-controller
-      summary: Create a group
-      description: "Authenticates a user, returns an access and refresh token and\
-        \ sets those tokens as Http-Only Cookies."
-      externalDocs:
-        url: https://singularity.stereov.io/docs/auth/groups#creating-groups
-      operationId: create
-      parameters:
-      - name: lang
-        in: query
-        required: false
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateGroupRequest"
-        required: true
-      responses:
-        "200":
-          description: Information about newly created group.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/GroupResponse"
-        "401":
-          description: Invalid token.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "403":
-          description: User does not have ADMIN role.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-      security:
-      - accessTokenHeader:
-        - adminScope
-      - accessTokenCookie:
-        - adminScope
-  /api/groups/{groupKey}/members:
-    post:
-      tags:
-      - group-member-controller
-      operationId: addUser
-      parameters:
-      - name: groupKey
-        in: path
-        required: true
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/AddGroupMemberRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/UserResponse"
-      security:
-      - {}
-      - {}
   /api/content/tags:
     get:
       tags:
       - tag-controller
-      operationId: findByKeyContains
+      operationId: findTagByKeyContains
       parameters:
       - name: substring
         in: query
         required: true
         schema:
           type: string
-      - name: lang
+      - name: locale
         in: query
         required: false
         schema:
@@ -748,7 +1906,7 @@ paths:
     post:
       tags:
       - tag-controller
-      operationId: create_1
+      operationId: createTag
       requestBody:
         content:
           application/json:
@@ -776,7 +1934,7 @@ paths:
         required: true
         schema:
           type: string
-      - name: lang
+      - name: locale
         in: query
         required: false
         schema:
@@ -803,7 +1961,7 @@ paths:
       - article-management-controller
       operationId: acceptInvitation
       parameters:
-      - name: lang
+      - name: locale
         in: query
         required: false
         schema:
@@ -830,7 +1988,7 @@ paths:
       - article-management-controller
       operationId: createArticle
       parameters:
-      - name: lang
+      - name: locale
         in: query
         required: false
         schema:
@@ -851,533 +2009,18 @@ paths:
       security:
       - {}
       - {}
-  /api/auth/step-up:
-    post:
-      tags:
-      - Authentication
-      summary: Request step-up
-      description: Requests step-up authentification. This re-authentication is required
-        by critical endpoints.
-      externalDocs:
-        url: https://singularity.stereov.io/docs/auth/authentication#step-up
-      operationId: stepUp
-      parameters:
-      - name: lang
-        in: query
-        required: false
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/StepUpRequest"
-        required: true
-      responses:
-        "200":
-          description: Logout successful.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/StepUpResponse"
-        "401":
-          description: Unauthorized.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-      security:
-      - accessTokenHeader: []
-      - accessTokenCookie: []
-  /api/auth/sessions/token:
-    post:
-      tags:
-      - Sessions
-      summary: Generate SessionToken
-      description: "Generate a SessionToken for the current session, if the user is\
-        \ authenticated or a new SessionToken instead. It will be set as an HTTP-only\
-        \ cookie and returned in the response body if header authentication is enabled."
-      externalDocs:
-        url: https://singularity.stereov.io/docs/auth/oauth2#1-retrieving-a-session-token
-      operationId: generateSessionToken
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SessionInfoRequest"
-      responses:
-        "200":
-          description: Token generated. The token will be returned if header authentication
-            is enabled
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/GenerateSessionTokenResponse"
-      security:
-      - {}
-      - {}
-  /api/auth/register:
-    post:
-      tags:
-      - Authentication
-      summary: Register a new user
-      description: Creates a new user account and logs them in.
-      externalDocs:
-        url: https://singularity.stereov.io/docs/auth/authentication#registering-users
-      operationId: register
-      parameters:
-      - name: send-email
-        in: query
-        required: false
-        schema:
-          type: boolean
-      - name: lang
-        in: query
-        required: false
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/RegisterUserRequest"
-        required: true
-      responses:
-        "200":
-          description: Registration successful. Returns user details and tokens.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/RegisterResponse"
-        "409":
-          description: Email already exists.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "403":
-          description: User is already authenticated.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-      security:
-      - {}
-      - {}
-  /api/auth/refresh:
-    post:
-      tags:
-      - Authentication
-      summary: Refresh access token
-      description: Refresh the access token. Returns a new access and refresh token
-        and sets those tokens as Http-Only Cookies.
-      externalDocs:
-        url: https://singularity.stereov.io/docs/auth/authentication#refresh
-      operationId: refreshToken
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SessionInfoRequest"
-      responses:
-        "200":
-          description: Authentication successful. Returns tokens and user details.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/RefreshTokenResponse"
-        "401":
-          description: Invalid credentials.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-      security:
-      - refreshTokenHeader: []
-      - refreshTokenCookie: []
-  /api/auth/providers/password:
-    post:
-      tags:
-      - Identity Provider
-      summary: Add a password identity to the current user
-      description: Create a new identity provider for the current user that allows
-        the user to login with a password
-      externalDocs:
-        url: https://singularity.stereov.io/docs/auth/oauth2#adding-password-authentication
-      operationId: connectPasswordIdentity
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ConnectPasswordIdentityRequest"
-        required: true
-      responses:
-        "200":
-          description: Success.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/UserResponse"
-        "401":
-          description: Unauthorized
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "400":
-          description: Bad request. User already created a password identity
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-      security:
-      - accessTokenHeader: []
-        stepUpTokenHeader: []
-      - accessTokenCookie: []
-        stepUpTokenCookie: []
-  /api/auth/providers/oauth2/token:
-    post:
-      tags:
-      - OAuth2 Identity Provider
-      summary: Generate an OAuth2ProviderConnectionToken
-      description: Generate an OAuth2ProviderConnectionToken that enables the user
-        to connect new OAuth2 providers.
-      externalDocs:
-        url: https://singularity.stereov.io/docs/auth/oauth2#connecting-an-oauth2-provider-to-an-existing-account
-      operationId: generateOAuth2ProviderConnectionToken
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/OAuth2ProviderConnectionRequest"
-        required: true
-      responses:
-        "200":
-          description: Returns the token if header authentication is enabled.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/OAuth2ProviderConnectionTokenResponse"
-        "401":
-          description: Unauthorized
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-      security:
-      - accessTokenHeader: []
-        stepUpTokenHeader: []
-      - accessTokenCookie: []
-        stepUpTokenCookie: []
-  /api/auth/password/reset:
-    post:
-      tags:
-      - Password Reset
-      summary: Reset password
-      description: "Perform a password reset using a PasswordResetToken you obtained\
-        \ from an email. If successful, the user can log in using the new password\
-        \ afterwards."
-      externalDocs:
-        url: https://singularity.stereov.io/docs/auth/authentication#password-reset
-      operationId: resetPassword
-      parameters:
-      - name: token
-        in: query
-        required: true
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ResetPasswordRequest"
-        required: true
-      responses:
-        "200":
-          description: Updated user information.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/SuccessResponse"
-        "401":
-          description: Token is invalid.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "403":
-          description: No password identity is set up for the user.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-      security:
-      - {}
-      - {}
-  /api/auth/password/reset-request:
-    post:
-      tags:
-      - Password Reset
-      summary: Send a password reset request email
-      description: "Send a password reset request email to the user's email. After\
-        \ sending an email, a cooldown is triggered during which no new passwort reset\
-        \ request email can be sent."
-      externalDocs:
-        url: https://singularity.stereov.io/docs/auth/authentication#password-reset
-      operationId: sendPasswordResetEmail
-      parameters:
-      - name: lang
-        in: query
-        required: false
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SendPasswordResetRequest"
-        required: true
-      responses:
-        "200":
-          description: The number of seconds the user needs to wait to send a new
-            email.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/MailSendResponse"
-        "401":
-          description: Unauthorized.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "429":
-          description: Failed to send another email. Wait until the cooldown is done.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-      security:
-      - {}
-      - {}
-  /api/auth/logout:
-    post:
-      tags:
-      - Authentication
-      summary: Log out a user
-      description: Invalidates the current session's access and refresh tokens.
-      externalDocs:
-        url: https://singularity.stereov.io/docs/auth/authentication#logout
-      operationId: logout
-      responses:
-        "200":
-          description: Logout successful.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/SuccessResponse"
-      security:
-      - accessTokenHeader: []
-      - accessTokenCookie: []
-  /api/auth/login:
-    post:
-      tags:
-      - Authentication
-      summary: User login
-      description: "Authenticates a user, returns an access and refresh token and\
-        \ sets those tokens as Http-Only Cookies."
-      externalDocs:
-        url: https://singularity.stereov.io/docs/auth/authentication#login
-      operationId: login
-      parameters:
-      - name: lang
-        in: query
-        required: false
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/LoginRequest"
-        required: true
-      responses:
-        "200":
-          description: Authentication successful. Returns tokens and user details.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/LoginResponse"
-        "401":
-          description: Invalid credentials.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "403":
-          description: User is already authenticated.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-      security:
-      - accessTokenHeader: []
-      - accessTokenCookie: []
-  /api/auth/email/verify:
-    post:
-      tags:
-      - Email Verification
-      summary: Verify email
-      description: Verify the user's email by validating the token.
-      externalDocs:
-        url: https://singularity.stereov.io/docs/docs/auth/authentication#email-verification
-      operationId: verifyEmail
-      parameters:
-      - name: token
-        in: query
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: Updated user information.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/UserResponse"
-        "401":
-          description: Token is invalid.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-      security:
-      - {}
-      - {}
-  /api/auth/email/verify/send:
-    post:
-      tags:
-      - Email Verification
-      summary: Send a new verification email
-      description: "Send a new verification email to the user's email. After sending\
-        \ an email, a cooldown is triggered during which no new verification email\
-        \ can be sent."
-      externalDocs:
-        url: https://singularity.stereov.io/docs/docs/auth/authentication#email-verification
-      operationId: sendVerificationEmail
-      parameters:
-      - name: lang
-        in: query
-        required: false
-        schema:
-          type: string
-      responses:
-        "200":
-          description: The number of seconds the user needs to wait before sending
-            a new email.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/MailSendResponse"
-        "401":
-          description: Unauthorized.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "429":
-          description: Failed to send another email. Wait until the cooldown is done.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-      security:
-      - accessTokenHeader: []
-      - accessTokenCookie: []
-  /api/auth/2fa/totp/setup:
-    get:
-      tags:
-      - TOTP Two-Factor Authentication
-      summary: Get 2FA secret and recovery codes
-      description: "Get a 2FA secret, recovery codes and a TOTP URL. This information\
-        \ will be stored inside a token that you will get in the response. Use this\
-        \ token to perform the validation."
-      externalDocs:
-        url: https://singularity.stereov.io/docs/auth/two-factor#setup
-      operationId: getTotpDetails
-      responses:
-        "200":
-          description: Success.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/TwoFactorSetupResponse"
-        "401":
-          description: Not authenticated.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "403":
-          description: The did not configure authentication using password or the
-            user already enabled TOTP.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-      security:
-      - accessTokenHeader: []
-      - accessTokenCookie: []
-    post:
-      tags:
-      - TOTP Two-Factor Authentication
-      summary: Set up TOTP
-      description: Set up TOTP for a user using a TOTPSetupToken and the TOTP code.
-      externalDocs:
-        url: https://singularity.stereov.io/docs/auth/two-factor#setup
-      operationId: setUpTotp
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/TwoFactorVerifySetupRequest"
-        required: true
-      responses:
-        "200":
-          description: Success.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/TwoFactorSetupResponse"
-        "401":
-          description: Wrong code or not authorized.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "403":
-          description: The user already enabled TOTP.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-      security:
-      - accessTokenHeader: []
-        stepUpTokenHeader: []
-      - accessTokenCookie: []
-        stepUpTokenCookie: []
   /api/auth/2fa/totp/recover:
     post:
       tags:
-      - TOTP Two-Factor Authentication
-      summary: User recovery
+      - Two-Factor Authentication
+      summary: Recover From TOTP
       description: "Recover the user if they lost access to their 2FA device. After\
         \ successful recovery, an AccessToken, RefreshToken and StepUpToken will be\
         \ set as HTTP-only cookies and returned in the response body if header authentication\
         \ is enabled."
       externalDocs:
-        url: https://singularity.stereov.io/docs/auth/two-factor#recovery
-      operationId: recoverUser
+        url: https://singularity.stereov.io/docs/guides/auth/two-factor#recovery
+      operationId: recoverFromTotp
       parameters:
       - name: code
         in: query
@@ -1405,200 +2048,6 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
         "403":
           description: User is already authenticated.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-      security:
-      - twoFactorAuthenticationTokenHeader: []
-      - twoFactorAuthenticationTokenCookie: []
-  /api/auth/2fa/step-up:
-    post:
-      tags:
-      - Two Factor Authentication
-      summary: Perform second factor for step-up
-      description: "Perform second factor for step-up. A TwoFactorAuthenticationToken\
-        \ is required. This token can be obtained by calling POST /api/auth/step-up.\
-        \ If successful, a StepUpToken will be set as HTTP-only cookie and returned\
-        \ in the response body if header authentication is enabled."
-      externalDocs:
-        url: https://singularity.stereov.io/docs/auth/two-factor
-      operationId: verifyStepUp
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/TwoFactorAuthenticationRequest"
-        required: true
-      responses:
-        "200":
-          description: The token if header authentication is enabled.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/StepUpResponse"
-        "401":
-          description: Not authorized.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "403":
-          description: This 2FA method is disabled.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-      security:
-      - accessTokenHeader: []
-        twoFactorAuthenticationTokenHeader: []
-      - accessTokenCookie: []
-        twoFactorAuthenticationTokenCookie: []
-  /api/auth/2fa/preferred-method:
-    post:
-      tags:
-      - Two Factor Authentication
-      summary: Change the preferred 2FA method
-      description: Change the preferred 2FA method. Step-up is required.
-      externalDocs:
-        url: https://singularity.stereov.io/docs/auth/two-factor#changing-the-preferred-method
-      operationId: updatePreferredMethod
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UpdatePreferredTwoFactorMethodRequest"
-        required: true
-      responses:
-        "200":
-          description: Updated user information.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/UserResponse"
-        "401":
-          description: Not authorized.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "403":
-          description: This 2FA method is disabled.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-      security:
-      - accessTokenHeader: []
-        stepUpTokenHeader: []
-      - accessTokenCookie: []
-        stepUpTokenCookie: []
-  /api/auth/2fa/mail/send:
-    post:
-      tags:
-      - Mail Two-Factor Authentication
-      summary: Send a 2FA mail code
-      description: Send an email containing a 2FA code to the user. It will update
-        the code in the database. Needs to be called before enabling this method for
-        the user.
-      externalDocs:
-        url: https://singularity.stereov.io/docs/auth/two-factor#sending-a-2fa-code-via-email
-      operationId: sendAuthenticationMail
-      parameters:
-      - name: lang
-        in: query
-        required: false
-        schema:
-          type: string
-      responses:
-        "200":
-          description: Success.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/SuccessResponse"
-        "401":
-          description: Not authorized.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-      security:
-      - accessTokenHeader: []
-      - accessTokenCookie: []
-  /api/auth/2fa/mail/enable:
-    post:
-      tags:
-      - Mail Two-Factor Authentication
-      summary: Enable mail as 2FA method
-      description: Enable mail as 2FA method. Step-up is required.
-      externalDocs:
-        url: https://singularity.stereov.io/docs/auth/two-factor#setup-1
-      operationId: enableMail
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/EnableMailTwoFactorMethodRequest"
-        required: true
-      responses:
-        "200":
-          description: Updated user information.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/UserResponse"
-        "401":
-          description: Not authorized.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "403":
-          description: This method is already enabled for the user.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-      security:
-      - accessTokenHeader: []
-        stepUpTokenHeader: []
-      - accessTokenCookie: []
-        stepUpTokenCookie: []
-  /api/auth/2fa/login:
-    post:
-      tags:
-      - Two Factor Authentication
-      summary: Perform second factor for login
-      description: "Perform second factor for login. A TwoFactorAuthenticationToken\
-        \ is required. This token can be obtained by calling POST /api/auth/login.\
-        \ If successful, an AccessToken and RefreshToken will be set as HTTP-only\
-        \ cookies and returned in the response body if header authentication is enabled."
-      externalDocs:
-        url: https://singularity.stereov.io/docs/auth/two-factor
-      operationId: verifyLogin
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/TwoFactorAuthenticationRequest"
-        required: true
-      responses:
-        "200":
-          description: Information about the user and the tokens if header authentication
-            is enabled.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/LoginResponse"
-        "401":
-          description: Not authorized.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "403":
-          description: This 2FA method is disabled.
           content:
             '*/*':
               schema:
@@ -1667,7 +2116,7 @@ paths:
           type: array
           items:
             type: string
-      - name: lang
+      - name: locale
         in: query
         required: false
         schema:
@@ -1693,7 +2142,7 @@ paths:
         required: true
         schema:
           type: string
-      - name: lang
+      - name: locale
         in: query
         required: false
         schema:
@@ -1746,7 +2195,7 @@ paths:
         required: false
         schema:
           type: string
-      - name: lang
+      - name: locale
         in: query
         required: false
         schema:
@@ -1761,188 +2210,6 @@ paths:
       security:
       - {}
       - {}
-  /api/auth/status:
-    get:
-      tags:
-      - Authentication
-      summary: Get authentication status
-      description: Get detailed information about the current status authentication
-        status of the user.
-      externalDocs:
-        url: https://singularity.stereov.io/docs/auth/authentication#status
-      operationId: getStatus
-      responses:
-        "200":
-          description: The current user's authentication status.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/AuthenticationStatusResponse"
-        "404":
-          description: The user contained in the TwoFactorAuthenticationToken does
-            not exist.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-      security:
-      - accessTokenHeader: []
-        stepUpTokenHeader: []
-        twoFactorAuthenticationTokenHeader: []
-      - accessTokenCookie: []
-        stepUpTokenCookie: []
-        twoFactorAuthenticationTokenCookie: []
-  /api/auth/sessions:
-    get:
-      tags:
-      - Sessions
-      summary: Get active sessions
-      description: Get all active sessions of the currently authenticated user.
-      externalDocs:
-        url: https://singularity.stereov.io/docs/auth/sessions#active-sessions
-      operationId: getSessions
-      responses:
-        "200":
-          description: The list of active sessions.
-          content:
-            '*/*':
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/SessionInfoResponse"
-        "401":
-          description: Unauthorized.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-      security:
-      - accessTokenHeader: []
-      - accessTokenCookie: []
-    delete:
-      tags:
-      - Sessions
-      summary: Log out a user from all sessions
-      description: Invalidates all the current session's access and refresh tokens
-        from all sessions.
-      externalDocs:
-        url: https://singularity.stereov.io/docs/auth/sessions#invalidating-all-session
-      operationId: deleteAllSessions
-      responses:
-        "200":
-          description: Logout successful.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/SuccessResponse"
-      security:
-      - accessTokenHeader: []
-      - accessTokenCookie: []
-  /api/auth/providers:
-    get:
-      tags:
-      - Identity Provider
-      summary: Get identity providers
-      description: Get a list of connected identity providers for the current user.
-      externalDocs:
-        url: https://singularity.stereov.io/docs/auth/oauth2#getting-connected-providers
-      operationId: getProviders
-      responses:
-        "200":
-          description: The list of identity providers.
-          content:
-            '*/*':
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/IdentityProviderResponse"
-        "401":
-          description: Unauthorized.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-      security:
-      - accessTokenHeader: []
-      - accessTokenCookie: []
-  /api/auth/password/reset/cooldown:
-    get:
-      tags:
-      - Password Reset
-      summary: Get remaining password reset cooldown
-      description: Get the remaining time in seconds until you can send another password
-        reset request.
-      externalDocs:
-        url: https://singularity.stereov.io/docs/auth/authentication#password-reset
-      operationId: getRemainingPasswordResetCooldown
-      responses:
-        "200":
-          description: The remaining cooldown.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/MailCooldownResponse"
-        "401":
-          description: Unauthorized.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-      security:
-      - accessTokenHeader: []
-      - accessTokenCookie: []
-  /api/auth/email/verify/cooldown:
-    get:
-      tags:
-      - Email Verification
-      summary: Get remaining email verification cooldown
-      description: Get the remaining time in seconds until you can send another verification
-        request.
-      externalDocs:
-        url: https://singularity.stereov.io/docs/docs/auth/authentication#email-verification
-      operationId: getRemainingVerificationCooldown
-      responses:
-        "200":
-          description: The remaining cooldown.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/MailCooldownResponse"
-        "401":
-          description: Unauthorized.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-      security:
-      - accessTokenHeader: []
-      - accessTokenCookie: []
-  /api/auth/2fa/mail/cooldown:
-    get:
-      tags:
-      - Mail Two-Factor Authentication
-      summary: Get remaining 2FA code email cooldown
-      description: Get the remaining time in seconds until you can send another email
-        containing a 2FA code.
-      externalDocs:
-        url: https://singularity.stereov.io/docs/auth/two-factor#sending-a-2fa-code-via-email
-      operationId: getRemainingMailTwoFactorCooldown
-      responses:
-        "200":
-          description: The remaining cooldown.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/MailCooldownResponse"
-        "401":
-          description: Unauthorized.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-      security:
-      - accessTokenHeader: []
-      - accessTokenCookie: []
   /api/assets/**:
     get:
       tags:
@@ -2013,169 +2280,6 @@ paths:
       security:
       - {}
       - {}
-  /api/groups/{groupKey}/members/{userId}:
-    delete:
-      tags:
-      - group-member-controller
-      operationId: removeUser
-      parameters:
-      - name: groupKey
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: userId
-        in: path
-        required: true
-        schema:
-          $ref: "#/components/schemas/ObjectId"
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/UserResponse"
-      security:
-      - {}
-      - {}
-  /api/auth/sessions/{sessionId}:
-    delete:
-      tags:
-      - Sessions
-      summary: Delete a session of the current user
-      description: Delete a session of the current user and invalidate all tokens
-        related to this session.
-      externalDocs:
-        url: https://singularity.stereov.io/docs/auth/sessions#invalidating-a-specific-session
-      operationId: deleteSession
-      parameters:
-      - name: sessionId
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-      responses:
-        "200":
-          description: The list of active sessions.
-          content:
-            '*/*':
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/SessionInfoResponse"
-        "401":
-          description: Unauthorized.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-      security:
-      - accessTokenHeader: []
-      - accessTokenCookie: []
-  /api/auth/providers/{provider}:
-    delete:
-      tags:
-      - Identity Provider
-      summary: Delete an identity provider
-      description: Delete an identity provider from the connected identity providers
-        of the current user.You are not allowed to delete the password identity or
-        the only existing identity.
-      externalDocs:
-        url: https://singularity.stereov.io/docs/auth/oauth2#disconnecting-an-oauth2-provider
-      operationId: deleteProvider
-      parameters:
-      - name: provider
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: Success.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/UserResponse"
-        "401":
-          description: Unauthorized
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "400":
-          description: "Bad request: deleting the password identity or the only registered\
-            \ identity is forbidden."
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-      security:
-      - accessTokenHeader: []
-        stepUpTokenHeader: []
-      - accessTokenCookie: []
-        stepUpTokenCookie: []
-  /api/auth/2fa/totp:
-    delete:
-      tags:
-      - TOTP Two-Factor Authentication
-      summary: Disable TOTP
-      description: Disable TOTP for the current user.
-      externalDocs:
-        url: https://singularity.stereov.io/docs/auth/two-factor#disable
-      operationId: disableTwoFactorAuth
-      responses:
-        "200":
-          description: Success.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/UserResponse"
-        "401":
-          description: Not authorized.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-      security:
-      - accessTokenHeader: []
-        stepUpTokenHeader: []
-      - accessTokenCookie: []
-        stepUpTokenCookie: []
-  /api/auth/2fa/mail:
-    delete:
-      tags:
-      - Mail Two-Factor Authentication
-      summary: Disable mail as 2FA method
-      description: Disable mail as 2FA method. Step-up is required.
-      externalDocs:
-        url: https://singularity.stereov.io/docs/auth/two-factor#disable-1
-      operationId: disableMail
-      responses:
-        "200":
-          description: Updated user information.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/UserResponse"
-        "401":
-          description: Not authorized.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "403":
-          description: This method is already enabled for the user.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-      security:
-      - accessTokenHeader: []
-        stepUpTokenHeader: []
-      - accessTokenCookie: []
-        stepUpTokenCookie: []
 components:
   schemas:
     ChangeUserRequest:
@@ -2363,6 +2467,25 @@ components:
           minLength: 1
       required:
       - newEmail
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+          format: int32
+        error:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+      required:
+      - error
+      - status
+      - timestamp
     GroupTranslation:
       type: object
       properties:
@@ -2387,197 +2510,8 @@ components:
       properties:
         key:
           type: string
-        lang:
+        locale:
           type: string
-          enum:
-          - aa
-          - ab
-          - ae
-          - af
-          - ak
-          - am
-          - an
-          - ar
-          - as
-          - av
-          - ay
-          - az
-          - ba
-          - be
-          - bg
-          - bh
-          - bi
-          - bm
-          - bn
-          - bo
-          - br
-          - bs
-          - ca
-          - ce
-          - ch
-          - co
-          - cr
-          - cs
-          - cu
-          - cv
-          - cy
-          - da
-          - de
-          - dv
-          - dz
-          - ee
-          - el
-          - en
-          - eo
-          - es
-          - et
-          - eu
-          - fa
-          - ff
-          - fi
-          - fj
-          - fo
-          - fr
-          - fy
-          - ga
-          - gd
-          - gl
-          - gn
-          - gu
-          - gv
-          - ha
-          - he
-          - hi
-          - ho
-          - hr
-          - ht
-          - hu
-          - hy
-          - hz
-          - ia
-          - id
-          - ie
-          - ig
-          - ii
-          - ik
-          - in
-          - io
-          - is
-          - it
-          - iu
-          - iw
-          - ja
-          - ji
-          - jv
-          - ka
-          - kg
-          - ki
-          - kj
-          - kk
-          - kl
-          - km
-          - kn
-          - ko
-          - kr
-          - ks
-          - ku
-          - kv
-          - kw
-          - ky
-          - la
-          - lb
-          - lg
-          - li
-          - ln
-          - lo
-          - lt
-          - lu
-          - lv
-          - mg
-          - mh
-          - mi
-          - mk
-          - ml
-          - mn
-          - mo
-          - mr
-          - ms
-          - mt
-          - my
-          - na
-          - nb
-          - nd
-          - ne
-          - ng
-          - nl
-          - nn
-          - "no"
-          - nr
-          - nv
-          - ny
-          - oc
-          - oj
-          - om
-          - or
-          - os
-          - pa
-          - pi
-          - pl
-          - ps
-          - pt
-          - qu
-          - rm
-          - rn
-          - ro
-          - ru
-          - rw
-          - sa
-          - sc
-          - sd
-          - se
-          - sg
-          - si
-          - sk
-          - sl
-          - sm
-          - sn
-          - so
-          - sq
-          - sr
-          - ss
-          - st
-          - su
-          - sv
-          - sw
-          - ta
-          - te
-          - tg
-          - th
-          - ti
-          - tk
-          - tl
-          - tn
-          - to
-          - tr
-          - ts
-          - tt
-          - tw
-          - ty
-          - ug
-          - uk
-          - ur
-          - uz
-          - ve
-          - vi
-          - vo
-          - wa
-          - wo
-          - xh
-          - yi
-          - yo
-          - za
-          - zh
-          - zu
         name:
           type: string
         description:
@@ -2585,7 +2519,7 @@ components:
       required:
       - description
       - key
-      - lang
+      - locale
       - name
     TagTranslationUpdateRequest:
       type: object
@@ -2610,197 +2544,8 @@ components:
       properties:
         key:
           type: string
-        lang:
+        locale:
           type: string
-          enum:
-          - aa
-          - ab
-          - ae
-          - af
-          - ak
-          - am
-          - an
-          - ar
-          - as
-          - av
-          - ay
-          - az
-          - ba
-          - be
-          - bg
-          - bh
-          - bi
-          - bm
-          - bn
-          - bo
-          - br
-          - bs
-          - ca
-          - ce
-          - ch
-          - co
-          - cr
-          - cs
-          - cu
-          - cv
-          - cy
-          - da
-          - de
-          - dv
-          - dz
-          - ee
-          - el
-          - en
-          - eo
-          - es
-          - et
-          - eu
-          - fa
-          - ff
-          - fi
-          - fj
-          - fo
-          - fr
-          - fy
-          - ga
-          - gd
-          - gl
-          - gn
-          - gu
-          - gv
-          - ha
-          - he
-          - hi
-          - ho
-          - hr
-          - ht
-          - hu
-          - hy
-          - hz
-          - ia
-          - id
-          - ie
-          - ig
-          - ii
-          - ik
-          - in
-          - io
-          - is
-          - it
-          - iu
-          - iw
-          - ja
-          - ji
-          - jv
-          - ka
-          - kg
-          - ki
-          - kj
-          - kk
-          - kl
-          - km
-          - kn
-          - ko
-          - kr
-          - ks
-          - ku
-          - kv
-          - kw
-          - ky
-          - la
-          - lb
-          - lg
-          - li
-          - ln
-          - lo
-          - lt
-          - lu
-          - lv
-          - mg
-          - mh
-          - mi
-          - mk
-          - ml
-          - mn
-          - mo
-          - mr
-          - ms
-          - mt
-          - my
-          - na
-          - nb
-          - nd
-          - ne
-          - ng
-          - nl
-          - nn
-          - "no"
-          - nr
-          - nv
-          - ny
-          - oc
-          - oj
-          - om
-          - or
-          - os
-          - pa
-          - pi
-          - pl
-          - ps
-          - pt
-          - qu
-          - rm
-          - rn
-          - ro
-          - ru
-          - rw
-          - sa
-          - sc
-          - sd
-          - se
-          - sg
-          - si
-          - sk
-          - sl
-          - sm
-          - sn
-          - so
-          - sq
-          - sr
-          - ss
-          - st
-          - su
-          - sv
-          - sw
-          - ta
-          - te
-          - tg
-          - th
-          - ti
-          - tk
-          - tl
-          - tn
-          - to
-          - tr
-          - ts
-          - tt
-          - tw
-          - ty
-          - ug
-          - uk
-          - ur
-          - uz
-          - ve
-          - vi
-          - vo
-          - wa
-          - wo
-          - xh
-          - yi
-          - yo
-          - za
-          - zh
-          - zu
         name:
           type: string
         description:
@@ -2808,7 +2553,7 @@ components:
       required:
       - description
       - key
-      - lang
+      - locale
       - name
     ChangeContentVisibilityRequest:
       type: object
@@ -2899,197 +2644,8 @@ components:
           $ref: "#/components/schemas/ArticleColors"
         image:
           $ref: "#/components/schemas/FileMetadataResponse"
-        lang:
+        locale:
           type: string
-          enum:
-          - aa
-          - ab
-          - ae
-          - af
-          - ak
-          - am
-          - an
-          - ar
-          - as
-          - av
-          - ay
-          - az
-          - ba
-          - be
-          - bg
-          - bh
-          - bi
-          - bm
-          - bn
-          - bo
-          - br
-          - bs
-          - ca
-          - ce
-          - ch
-          - co
-          - cr
-          - cs
-          - cu
-          - cv
-          - cy
-          - da
-          - de
-          - dv
-          - dz
-          - ee
-          - el
-          - en
-          - eo
-          - es
-          - et
-          - eu
-          - fa
-          - ff
-          - fi
-          - fj
-          - fo
-          - fr
-          - fy
-          - ga
-          - gd
-          - gl
-          - gn
-          - gu
-          - gv
-          - ha
-          - he
-          - hi
-          - ho
-          - hr
-          - ht
-          - hu
-          - hy
-          - hz
-          - ia
-          - id
-          - ie
-          - ig
-          - ii
-          - ik
-          - in
-          - io
-          - is
-          - it
-          - iu
-          - iw
-          - ja
-          - ji
-          - jv
-          - ka
-          - kg
-          - ki
-          - kj
-          - kk
-          - kl
-          - km
-          - kn
-          - ko
-          - kr
-          - ks
-          - ku
-          - kv
-          - kw
-          - ky
-          - la
-          - lb
-          - lg
-          - li
-          - ln
-          - lo
-          - lt
-          - lu
-          - lv
-          - mg
-          - mh
-          - mi
-          - mk
-          - ml
-          - mn
-          - mo
-          - mr
-          - ms
-          - mt
-          - my
-          - na
-          - nb
-          - nd
-          - ne
-          - ng
-          - nl
-          - nn
-          - "no"
-          - nr
-          - nv
-          - ny
-          - oc
-          - oj
-          - om
-          - or
-          - os
-          - pa
-          - pi
-          - pl
-          - ps
-          - pt
-          - qu
-          - rm
-          - rn
-          - ro
-          - ru
-          - rw
-          - sa
-          - sc
-          - sd
-          - se
-          - sg
-          - si
-          - sk
-          - sl
-          - sm
-          - sn
-          - so
-          - sq
-          - sr
-          - ss
-          - st
-          - su
-          - sv
-          - sw
-          - ta
-          - te
-          - tg
-          - th
-          - ti
-          - tk
-          - tl
-          - tn
-          - to
-          - tr
-          - ts
-          - tt
-          - tw
-          - ty
-          - ug
-          - uk
-          - ur
-          - uz
-          - ve
-          - vi
-          - vo
-          - wa
-          - wo
-          - xh
-          - yi
-          - yo
-          - za
-          - zh
-          - zu
         title:
           type: string
         summary:
@@ -3111,7 +2667,7 @@ components:
       - createdAt
       - id
       - key
-      - lang
+      - locale
       - owner
       - path
       - state
@@ -3155,201 +2711,12 @@ components:
     ChangeArticleSummaryRequest:
       type: object
       properties:
-        lang:
+        locale:
           type: string
-          enum:
-          - aa
-          - ab
-          - ae
-          - af
-          - ak
-          - am
-          - an
-          - ar
-          - as
-          - av
-          - ay
-          - az
-          - ba
-          - be
-          - bg
-          - bh
-          - bi
-          - bm
-          - bn
-          - bo
-          - br
-          - bs
-          - ca
-          - ce
-          - ch
-          - co
-          - cr
-          - cs
-          - cu
-          - cv
-          - cy
-          - da
-          - de
-          - dv
-          - dz
-          - ee
-          - el
-          - en
-          - eo
-          - es
-          - et
-          - eu
-          - fa
-          - ff
-          - fi
-          - fj
-          - fo
-          - fr
-          - fy
-          - ga
-          - gd
-          - gl
-          - gn
-          - gu
-          - gv
-          - ha
-          - he
-          - hi
-          - ho
-          - hr
-          - ht
-          - hu
-          - hy
-          - hz
-          - ia
-          - id
-          - ie
-          - ig
-          - ii
-          - ik
-          - in
-          - io
-          - is
-          - it
-          - iu
-          - iw
-          - ja
-          - ji
-          - jv
-          - ka
-          - kg
-          - ki
-          - kj
-          - kk
-          - kl
-          - km
-          - kn
-          - ko
-          - kr
-          - ks
-          - ku
-          - kv
-          - kw
-          - ky
-          - la
-          - lb
-          - lg
-          - li
-          - ln
-          - lo
-          - lt
-          - lu
-          - lv
-          - mg
-          - mh
-          - mi
-          - mk
-          - ml
-          - mn
-          - mo
-          - mr
-          - ms
-          - mt
-          - my
-          - na
-          - nb
-          - nd
-          - ne
-          - ng
-          - nl
-          - nn
-          - "no"
-          - nr
-          - nv
-          - ny
-          - oc
-          - oj
-          - om
-          - or
-          - os
-          - pa
-          - pi
-          - pl
-          - ps
-          - pt
-          - qu
-          - rm
-          - rn
-          - ro
-          - ru
-          - rw
-          - sa
-          - sc
-          - sd
-          - se
-          - sg
-          - si
-          - sk
-          - sl
-          - sm
-          - sn
-          - so
-          - sq
-          - sr
-          - ss
-          - st
-          - su
-          - sv
-          - sw
-          - ta
-          - te
-          - tg
-          - th
-          - ti
-          - tk
-          - tl
-          - tn
-          - to
-          - tr
-          - ts
-          - tt
-          - tw
-          - ty
-          - ug
-          - uk
-          - ur
-          - uz
-          - ve
-          - vi
-          - vo
-          - wa
-          - wo
-          - xh
-          - yi
-          - yo
-          - za
-          - zh
-          - zu
         summary:
           type: string
       required:
-      - lang
+      - locale
       - summary
     ChangeArticleStateRequest:
       type: object
@@ -3365,423 +2732,26 @@ components:
     ChangeArticleHeaderRequest:
       type: object
       properties:
-        lang:
+        locale:
           type: string
-          enum:
-          - aa
-          - ab
-          - ae
-          - af
-          - ak
-          - am
-          - an
-          - ar
-          - as
-          - av
-          - ay
-          - az
-          - ba
-          - be
-          - bg
-          - bh
-          - bi
-          - bm
-          - bn
-          - bo
-          - br
-          - bs
-          - ca
-          - ce
-          - ch
-          - co
-          - cr
-          - cs
-          - cu
-          - cv
-          - cy
-          - da
-          - de
-          - dv
-          - dz
-          - ee
-          - el
-          - en
-          - eo
-          - es
-          - et
-          - eu
-          - fa
-          - ff
-          - fi
-          - fj
-          - fo
-          - fr
-          - fy
-          - ga
-          - gd
-          - gl
-          - gn
-          - gu
-          - gv
-          - ha
-          - he
-          - hi
-          - ho
-          - hr
-          - ht
-          - hu
-          - hy
-          - hz
-          - ia
-          - id
-          - ie
-          - ig
-          - ii
-          - ik
-          - in
-          - io
-          - is
-          - it
-          - iu
-          - iw
-          - ja
-          - ji
-          - jv
-          - ka
-          - kg
-          - ki
-          - kj
-          - kk
-          - kl
-          - km
-          - kn
-          - ko
-          - kr
-          - ks
-          - ku
-          - kv
-          - kw
-          - ky
-          - la
-          - lb
-          - lg
-          - li
-          - ln
-          - lo
-          - lt
-          - lu
-          - lv
-          - mg
-          - mh
-          - mi
-          - mk
-          - ml
-          - mn
-          - mo
-          - mr
-          - ms
-          - mt
-          - my
-          - na
-          - nb
-          - nd
-          - ne
-          - ng
-          - nl
-          - nn
-          - "no"
-          - nr
-          - nv
-          - ny
-          - oc
-          - oj
-          - om
-          - or
-          - os
-          - pa
-          - pi
-          - pl
-          - ps
-          - pt
-          - qu
-          - rm
-          - rn
-          - ro
-          - ru
-          - rw
-          - sa
-          - sc
-          - sd
-          - se
-          - sg
-          - si
-          - sk
-          - sl
-          - sm
-          - sn
-          - so
-          - sq
-          - sr
-          - ss
-          - st
-          - su
-          - sv
-          - sw
-          - ta
-          - te
-          - tg
-          - th
-          - ti
-          - tk
-          - tl
-          - tn
-          - to
-          - tr
-          - ts
-          - tt
-          - tw
-          - ty
-          - ug
-          - uk
-          - ur
-          - uz
-          - ve
-          - vi
-          - vo
-          - wa
-          - wo
-          - xh
-          - yi
-          - yo
-          - za
-          - zh
-          - zu
         title:
           type: string
         colors:
           $ref: "#/components/schemas/ArticleColors"
       required:
       - colors
-      - lang
+      - locale
       - title
     ChangeArticleContentRequest:
       type: object
       properties:
-        lang:
+        locale:
           type: string
-          enum:
-          - aa
-          - ab
-          - ae
-          - af
-          - ak
-          - am
-          - an
-          - ar
-          - as
-          - av
-          - ay
-          - az
-          - ba
-          - be
-          - bg
-          - bh
-          - bi
-          - bm
-          - bn
-          - bo
-          - br
-          - bs
-          - ca
-          - ce
-          - ch
-          - co
-          - cr
-          - cs
-          - cu
-          - cv
-          - cy
-          - da
-          - de
-          - dv
-          - dz
-          - ee
-          - el
-          - en
-          - eo
-          - es
-          - et
-          - eu
-          - fa
-          - ff
-          - fi
-          - fj
-          - fo
-          - fr
-          - fy
-          - ga
-          - gd
-          - gl
-          - gn
-          - gu
-          - gv
-          - ha
-          - he
-          - hi
-          - ho
-          - hr
-          - ht
-          - hu
-          - hy
-          - hz
-          - ia
-          - id
-          - ie
-          - ig
-          - ii
-          - ik
-          - in
-          - io
-          - is
-          - it
-          - iu
-          - iw
-          - ja
-          - ji
-          - jv
-          - ka
-          - kg
-          - ki
-          - kj
-          - kk
-          - kl
-          - km
-          - kn
-          - ko
-          - kr
-          - ks
-          - ku
-          - kv
-          - kw
-          - ky
-          - la
-          - lb
-          - lg
-          - li
-          - ln
-          - lo
-          - lt
-          - lu
-          - lv
-          - mg
-          - mh
-          - mi
-          - mk
-          - ml
-          - mn
-          - mo
-          - mr
-          - ms
-          - mt
-          - my
-          - na
-          - nb
-          - nd
-          - ne
-          - ng
-          - nl
-          - nn
-          - "no"
-          - nr
-          - nv
-          - ny
-          - oc
-          - oj
-          - om
-          - or
-          - os
-          - pa
-          - pi
-          - pl
-          - ps
-          - pt
-          - qu
-          - rm
-          - rn
-          - ro
-          - ru
-          - rw
-          - sa
-          - sc
-          - sd
-          - se
-          - sg
-          - si
-          - sk
-          - sl
-          - sm
-          - sn
-          - so
-          - sq
-          - sr
-          - ss
-          - st
-          - su
-          - sv
-          - sw
-          - ta
-          - te
-          - tg
-          - th
-          - ti
-          - tk
-          - tl
-          - tn
-          - to
-          - tr
-          - ts
-          - tt
-          - tw
-          - ty
-          - ug
-          - uk
-          - ur
-          - uz
-          - ve
-          - vi
-          - vo
-          - wa
-          - wo
-          - xh
-          - yi
-          - yo
-          - za
-          - zh
-          - zu
         content:
           type: string
       required:
       - content
-      - lang
-    ErrorResponse:
-      type: object
-      properties:
-        timestamp:
-          type: string
-          format: date-time
-        status:
-          type: integer
-          format: int32
-        error:
-          type: string
-        message:
-          type: string
-        path:
-          type: string
-      required:
-      - error
-      - status
-      - timestamp
+      - locale
     CreateGroupRequest:
       type: object
       properties:
@@ -3791,6 +2761,8 @@ components:
           type: object
           additionalProperties:
             $ref: "#/components/schemas/GroupTranslation"
+        primaryLocale:
+          type: string
       required:
       - key
       - translations
@@ -3806,204 +2778,15 @@ components:
       properties:
         key:
           type: string
-        lang:
+        languageTag:
           type: string
-          enum:
-          - aa
-          - ab
-          - ae
-          - af
-          - ak
-          - am
-          - an
-          - ar
-          - as
-          - av
-          - ay
-          - az
-          - ba
-          - be
-          - bg
-          - bh
-          - bi
-          - bm
-          - bn
-          - bo
-          - br
-          - bs
-          - ca
-          - ce
-          - ch
-          - co
-          - cr
-          - cs
-          - cu
-          - cv
-          - cy
-          - da
-          - de
-          - dv
-          - dz
-          - ee
-          - el
-          - en
-          - eo
-          - es
-          - et
-          - eu
-          - fa
-          - ff
-          - fi
-          - fj
-          - fo
-          - fr
-          - fy
-          - ga
-          - gd
-          - gl
-          - gn
-          - gu
-          - gv
-          - ha
-          - he
-          - hi
-          - ho
-          - hr
-          - ht
-          - hu
-          - hy
-          - hz
-          - ia
-          - id
-          - ie
-          - ig
-          - ii
-          - ik
-          - in
-          - io
-          - is
-          - it
-          - iu
-          - iw
-          - ja
-          - ji
-          - jv
-          - ka
-          - kg
-          - ki
-          - kj
-          - kk
-          - kl
-          - km
-          - kn
-          - ko
-          - kr
-          - ks
-          - ku
-          - kv
-          - kw
-          - ky
-          - la
-          - lb
-          - lg
-          - li
-          - ln
-          - lo
-          - lt
-          - lu
-          - lv
-          - mg
-          - mh
-          - mi
-          - mk
-          - ml
-          - mn
-          - mo
-          - mr
-          - ms
-          - mt
-          - my
-          - na
-          - nb
-          - nd
-          - ne
-          - ng
-          - nl
-          - nn
-          - "no"
-          - nr
-          - nv
-          - ny
-          - oc
-          - oj
-          - om
-          - or
-          - os
-          - pa
-          - pi
-          - pl
-          - ps
-          - pt
-          - qu
-          - rm
-          - rn
-          - ro
-          - ru
-          - rw
-          - sa
-          - sc
-          - sd
-          - se
-          - sg
-          - si
-          - sk
-          - sl
-          - sm
-          - sn
-          - so
-          - sq
-          - sr
-          - ss
-          - st
-          - su
-          - sv
-          - sw
-          - ta
-          - te
-          - tg
-          - th
-          - ti
-          - tk
-          - tl
-          - tn
-          - to
-          - tr
-          - ts
-          - tt
-          - tw
-          - ty
-          - ug
-          - uk
-          - ur
-          - uz
-          - ve
-          - vi
-          - vo
-          - wa
-          - wo
-          - xh
-          - yi
-          - yo
-          - za
-          - zh
-          - zu
         name:
           type: string
         description:
           type: string
       required:
       - key
-      - lang
+      - languageTag
       - name
     InviteUserToContentRequest:
       type: object
@@ -4098,197 +2881,8 @@ components:
     CreateArticleRequest:
       type: object
       properties:
-        lang:
+        locale:
           type: string
-          enum:
-          - aa
-          - ab
-          - ae
-          - af
-          - ak
-          - am
-          - an
-          - ar
-          - as
-          - av
-          - ay
-          - az
-          - ba
-          - be
-          - bg
-          - bh
-          - bi
-          - bm
-          - bn
-          - bo
-          - br
-          - bs
-          - ca
-          - ce
-          - ch
-          - co
-          - cr
-          - cs
-          - cu
-          - cv
-          - cy
-          - da
-          - de
-          - dv
-          - dz
-          - ee
-          - el
-          - en
-          - eo
-          - es
-          - et
-          - eu
-          - fa
-          - ff
-          - fi
-          - fj
-          - fo
-          - fr
-          - fy
-          - ga
-          - gd
-          - gl
-          - gn
-          - gu
-          - gv
-          - ha
-          - he
-          - hi
-          - ho
-          - hr
-          - ht
-          - hu
-          - hy
-          - hz
-          - ia
-          - id
-          - ie
-          - ig
-          - ii
-          - ik
-          - in
-          - io
-          - is
-          - it
-          - iu
-          - iw
-          - ja
-          - ji
-          - jv
-          - ka
-          - kg
-          - ki
-          - kj
-          - kk
-          - kl
-          - km
-          - kn
-          - ko
-          - kr
-          - ks
-          - ku
-          - kv
-          - kw
-          - ky
-          - la
-          - lb
-          - lg
-          - li
-          - ln
-          - lo
-          - lt
-          - lu
-          - lv
-          - mg
-          - mh
-          - mi
-          - mk
-          - ml
-          - mn
-          - mo
-          - mr
-          - ms
-          - mt
-          - my
-          - na
-          - nb
-          - nd
-          - ne
-          - ng
-          - nl
-          - nn
-          - "no"
-          - nr
-          - nv
-          - ny
-          - oc
-          - oj
-          - om
-          - or
-          - os
-          - pa
-          - pi
-          - pl
-          - ps
-          - pt
-          - qu
-          - rm
-          - rn
-          - ro
-          - ru
-          - rw
-          - sa
-          - sc
-          - sd
-          - se
-          - sg
-          - si
-          - sk
-          - sl
-          - sm
-          - sn
-          - so
-          - sq
-          - sr
-          - ss
-          - st
-          - su
-          - sv
-          - sw
-          - ta
-          - te
-          - tg
-          - th
-          - ti
-          - tk
-          - tl
-          - tn
-          - to
-          - tr
-          - ts
-          - tt
-          - tw
-          - ty
-          - ug
-          - uk
-          - ur
-          - uz
-          - ve
-          - vi
-          - vo
-          - wa
-          - wo
-          - xh
-          - yi
-          - yo
-          - za
-          - zh
-          - zu
         title:
           type: string
         summary:
@@ -4297,7 +2891,7 @@ components:
           type: string
       required:
       - content
-      - lang
+      - locale
       - summary
       - title
     StepUpRequest:
@@ -4738,7 +3332,7 @@ components:
     TwoFactorAuthenticationRequest:
       type: object
       properties:
-        mail:
+        email:
           type: string
         totp:
           type: integer
@@ -4755,7 +3349,7 @@ components:
           - mail
       required:
       - method
-    EnableMailTwoFactorMethodRequest:
+    EnableEmailTwoFactorMethodRequest:
       type: object
       properties:
         code:
@@ -4775,6 +3369,11 @@ components:
           type: boolean
         last:
           type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
         size:
           type: integer
           format: int32
@@ -4787,23 +3386,11 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
-        numberOfElements:
-          type: integer
-          format: int32
-        pageable:
-          $ref: "#/components/schemas/PageableObject"
         empty:
           type: boolean
     PageableObject:
       type: object
       properties:
-        offset:
-          type: integer
-          format: int64
-        sort:
-          $ref: "#/components/schemas/SortObject"
-        unpaged:
-          type: boolean
         paged:
           type: boolean
         pageNumber:
@@ -4812,14 +3399,21 @@ components:
         pageSize:
           type: integer
           format: int32
+        unpaged:
+          type: boolean
+        offset:
+          type: integer
+          format: int64
+        sort:
+          $ref: "#/components/schemas/SortObject"
     SortObject:
       type: object
       properties:
-        empty:
-          type: boolean
         sorted:
           type: boolean
         unsorted:
+          type: boolean
+        empty:
           type: boolean
     KeyContainsResponse:
       type: object
@@ -4862,197 +3456,8 @@ components:
           type: string
         colors:
           $ref: "#/components/schemas/ArticleColors"
-        lang:
+        locale:
           type: string
-          enum:
-          - aa
-          - ab
-          - ae
-          - af
-          - ak
-          - am
-          - an
-          - ar
-          - as
-          - av
-          - ay
-          - az
-          - ba
-          - be
-          - bg
-          - bh
-          - bi
-          - bm
-          - bn
-          - bo
-          - br
-          - bs
-          - ca
-          - ce
-          - ch
-          - co
-          - cr
-          - cs
-          - cu
-          - cv
-          - cy
-          - da
-          - de
-          - dv
-          - dz
-          - ee
-          - el
-          - en
-          - eo
-          - es
-          - et
-          - eu
-          - fa
-          - ff
-          - fi
-          - fj
-          - fo
-          - fr
-          - fy
-          - ga
-          - gd
-          - gl
-          - gn
-          - gu
-          - gv
-          - ha
-          - he
-          - hi
-          - ho
-          - hr
-          - ht
-          - hu
-          - hy
-          - hz
-          - ia
-          - id
-          - ie
-          - ig
-          - ii
-          - ik
-          - in
-          - io
-          - is
-          - it
-          - iu
-          - iw
-          - ja
-          - ji
-          - jv
-          - ka
-          - kg
-          - ki
-          - kj
-          - kk
-          - kl
-          - km
-          - kn
-          - ko
-          - kr
-          - ks
-          - ku
-          - kv
-          - kw
-          - ky
-          - la
-          - lb
-          - lg
-          - li
-          - ln
-          - lo
-          - lt
-          - lu
-          - lv
-          - mg
-          - mh
-          - mi
-          - mk
-          - ml
-          - mn
-          - mo
-          - mr
-          - ms
-          - mt
-          - my
-          - na
-          - nb
-          - nd
-          - ne
-          - ng
-          - nl
-          - nn
-          - "no"
-          - nr
-          - nv
-          - ny
-          - oc
-          - oj
-          - om
-          - or
-          - os
-          - pa
-          - pi
-          - pl
-          - ps
-          - pt
-          - qu
-          - rm
-          - rn
-          - ro
-          - ru
-          - rw
-          - sa
-          - sc
-          - sd
-          - se
-          - sg
-          - si
-          - sk
-          - sl
-          - sm
-          - sn
-          - so
-          - sq
-          - sr
-          - ss
-          - st
-          - su
-          - sv
-          - sw
-          - ta
-          - te
-          - tg
-          - th
-          - ti
-          - tk
-          - tl
-          - tn
-          - to
-          - tr
-          - ts
-          - tt
-          - tw
-          - ty
-          - ug
-          - uk
-          - ur
-          - uz
-          - ve
-          - vi
-          - vo
-          - wa
-          - wo
-          - xh
-          - yi
-          - yo
-          - za
-          - zh
-          - zu
         summary:
           type: string
         image:
@@ -5069,7 +3474,7 @@ components:
       - createdAt
       - id
       - key
-      - lang
+      - locale
       - path
       - state
       - summary
@@ -5089,6 +3494,11 @@ components:
           type: boolean
         last:
           type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
         size:
           type: integer
           format: int32
@@ -5101,11 +3511,6 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
-        numberOfElements:
-          type: integer
-          format: int32
-        pageable:
-          $ref: "#/components/schemas/PageableObject"
         empty:
           type: boolean
     ArticleResponse:

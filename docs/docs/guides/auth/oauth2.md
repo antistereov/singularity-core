@@ -98,7 +98,7 @@ Access tokens and refresh tokens are bound to a specific session for example.
 You can learn more about that [here](/sessions).
 
 Therefore, before authenticating via an OAuth2 client, 
-you need to retrieve a [`SessionToken`](./tokens#session-token) using [`POST /api/auth/sessions/token`](/swagger#/Sessions/generateTokenForCurrentSession).
+you need to retrieve a [`SessionToken`](./tokens#session-token) using [`POST /api/auth/sessions/token`](../../api/generate-session-token.api.mdx).
 This sets the [`SessionToken`](./tokens#session-token) as an HTTP-only cookie and returns the value in the response body 
 if [header authentication](/securing-endpoints#header-authentication) is enabled.
 
@@ -109,12 +109,12 @@ on the path `/oauth2/authorization/{registrationId}`.
 
 #### Parameters
 
-| Parameter                          | Description                                                                                                                                                                                                                                                                                                                                                             | Required |
-|------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|
-| `redirect_uri`                     | The URI the user will be redirected to after the authentication was successful.                                                                                                                                                                                                                                                                                         | `false`  |
-| `step_up`                          | Should step-up authentication be requested? Boolean. Learn more [here](#step-up-authentication).                                                                                                                                                                                                                                                                        | `false`  |
-| `session_token`                    | The token specifying the current session you obtained from calling [`POST /api/auth/sessions/token`](/swagger#/Sessions/generateTokenForCurrentSession). It is not necessary to set this parameter since it will already be set as a HTTP-only cookie. You can override this value using this parameter or use it instead if for some reason cookies are not available. | `false`  |
-| `oauth2_provider_connection_token` | A token used to connect a new OAuth2 client to an existing account. It is not necessary to set this parameter since this token will already be set as an HTTP-only cookie. You can use this parameter to override the token. Go [here](#connecting-an-oauth2-provider-to-an-existing-account) for more information.                                                     | `false`  |
+| Parameter                          | Description                                                                                                                                                                                                                                                                                                                                                    | Required |
+|------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|
+| `redirect_uri`                     | The URI the user will be redirected to after the authentication was successful.                                                                                                                                                                                                                                                                                | `false`  |
+| `step_up`                          | Should step-up authentication be requested? Boolean. Learn more [here](#step-up-authentication).                                                                                                                                                                                                                                                               | `false`  |
+| `session_token`                    | The token specifying the current session you obtained from calling [`POST /api/auth/sessions/token`](../../api/generate-session-token.api.mdx). It is not necessary to set this parameter since it will already be set as a HTTP-only cookie. You can override this value using this parameter or use it instead if for some reason cookies are not available. | `false`  |
+| `oauth2_provider_connection_token` | A token used to connect a new OAuth2 client to an existing account. It is not necessary to set this parameter since this token will already be set as an HTTP-only cookie. You can use this parameter to override the token. Go [here](#connecting-an-oauth2-provider-to-an-existing-account) for more information.                                            | `false`  |
 
 ### 3. Redirect
 
@@ -133,7 +133,7 @@ Placing them in the header will not lead to a successful connection since they w
 
 ### 1. Authenticate the User
 
-Authenticate the user by calling [`POST /api/auth/login`](/swagger#/Authentication/login).
+Authenticate the user by calling [`POST /api/auth/login`](../../api/login.api.mdx).
 This will set the [`AccessToken`](./tokens#access-token) as an HTTP-only cookie.
 
 ### 2. Request the Step-Up
@@ -150,7 +150,7 @@ You can learn more about step-up authentication [here](/authentication#step-up).
 ### Getting Connected Providers
 
 You can request a list of connected providers using 
-[`GET /api/auth/providers`](/swagger#/Identity%20Provider/getProviders)
+[`GET /api/auth/providers`](../../api/get-identity-providers.api.mdx)
 with a valid [`AccessToken`](./tokens#access-token).
 
 ### Connecting an OAuth2 Provider to an Existing Account
@@ -165,15 +165,15 @@ Placing them in the header will not lead to a successful connection since they w
 
 #### 1. Authenticate the User
 
-1. Log in the user by calling [`POST /api/auth/login`](/swagger#/Authentication/login).
+1. Log in the user by calling [`POST /api/auth/login`](../../api/login.api.mdx).
    This will set the [`AccessToken`](./tokens#access-token) as an HTTP-only cookie.
-2. Authorize a step-up by calling [POST /api/auth/step-up](/swagger#/Authentication/stepUp).
+2. Authorize a step-up by calling [POST /api/auth/step-up](../../api/step-up.api.mdx).
    This will set a [`StepUpToken`](./tokens#step-up-token) as an HTTP-only cookie.
    You can learn more about step-up authentication [here](./authentication#step-up).
 
 #### 2. Create an OAuth2 Provider Connection Token
 
-Call [`POST /api/auth/providers/oauth2/token`](/swagger#/OAuth2%20Identity%20Provider/generateOAuth2ProviderConnectionToken) authenticated as the user to create an [`OAuth2ProviderConnectionToken`](./tokens#oauth2-provider-connection-token).
+Call [`POST /api/auth/providers/oauth2/token`](../../api/generate-o-auth-2-provider-connection-token.api.mdx) authenticated as the user to create an [`OAuth2ProviderConnectionToken`](./tokens#oauth2-provider-connection-token).
 This token will be set as an HTTP-only cookie and returned in the response if [header-authentication](/securing-endpoints#header-authentication) is enabled.
 
 #### 3. Follow the Steps For Registration
@@ -190,7 +190,7 @@ If successful, the user will be connected to the new provider.
 If a user registered using an OAuth2 provider,
 it is possible to add the option to authenticate using a password.
 
-Call [`POST /api/auth/providers/password`](/swagger#/Identity%20Provider/connectPasswordIdentity)
+Call [`POST /api/auth/providers/password`](../../api/add-password-authentication.api.mdx)
 with a valid [`AccessToken`](./tokens#access-token) and [`StepUpToken`](./tokens#step-up-token).
 
 If successful, the user can now log in using his new password.
@@ -199,7 +199,7 @@ If successful, the user can now log in using his new password.
 
 If a user connected multiple provider,
 it is possible to disconnect providers through the endpoint
-[`DELETE /api/auth/providers/<provider-name>`](/swagger#/Identity%20Provider/deleteProvider).
+[`DELETE /api/auth/providers/<provider-name>`](../../api/delete-identity-provider.api.mdx).
 
 :::warning
 You are not allowed to disconnect the password identity.

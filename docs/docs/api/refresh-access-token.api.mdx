@@ -1,0 +1,71 @@
+---
+id: refresh-access-token
+title: "Refresh Access Token"
+description: "Refresh the access token. Returns a new access and refresh token and sets those tokens as Http-Only Cookies."
+sidebar_label: "Refresh Access Token"
+hide_title: true
+hide_table_of_contents: true
+api: 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
+sidebar_class_name: "post api-method"
+info_path: docs/api/singularity-api
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Refresh Access Token"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/api/auth/refresh"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Refresh the access token. Returns a new access and refresh token and sets those tokens as Http-Only Cookies.
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={undefined}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={{"content":{"application/json":{"schema":{"type":"object","properties":{"browser":{"type":"string"},"os":{"type":"string"}},"title":"SessionInfoRequest"}}}}}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"description":"Authentication successful. Returns tokens and user details.","content":{"*/*":{"schema":{"type":"object","properties":{"user":{"type":"object","properties":{"id":{"type":"object","properties":{"timestamp":{"type":"integer","format":"int32"},"date":{"type":"string","format":"date-time"}},"title":"ObjectId"},"name":{"type":"string"},"email":{"type":"string"},"identityProviders":{"type":"array","items":{"type":"string"}},"roles":{"type":"array","items":{"type":"string","enum":["USER","ADMIN","GUEST"]},"uniqueItems":true},"emailVerified":{"type":"boolean"},"lastActive":{"type":"string"},"twoFactorAuthEnabled":{"type":"boolean"},"preferredTwoFactorMethod":{"type":"string","enum":["totp","mail"]},"twoFactorAuthMethods":{"type":"array","items":{"type":"string","enum":["totp","mail"]}},"avatar":{"type":"object","properties":{"id":{"type":"object","properties":{"timestamp":{"type":"integer","format":"int32"},"date":{"type":"string","format":"date-time"}},"title":"ObjectId"},"key":{"type":"string"},"createdAt":{"type":"string","format":"date-time"},"updatedAt":{"type":"string","format":"date-time"},"access":{"type":"object","properties":{"ownerId":{"type":"object","properties":{"timestamp":{"type":"integer","format":"int32"},"date":{"type":"string","format":"date-time"}},"title":"ObjectId"},"visibility":{"type":"string","enum":["PRIVATE","PUBLIC","SHARED"]},"users":{"type":"object","properties":{"admin":{"type":"array","items":{"type":"string"},"uniqueItems":true},"editor":{"type":"array","items":{"type":"string"},"uniqueItems":true},"viewer":{"type":"array","items":{"type":"string"},"uniqueItems":true},"isEmpty":{"type":"boolean"}},"required":["admin","editor","isEmpty","viewer"],"title":"ContentAccessPermissions"},"groups":{"type":"object","properties":{"admin":{"type":"array","items":{"type":"string"},"uniqueItems":true},"editor":{"type":"array","items":{"type":"string"},"uniqueItems":true},"viewer":{"type":"array","items":{"type":"string"},"uniqueItems":true},"isEmpty":{"type":"boolean"}},"required":["admin","editor","isEmpty","viewer"],"title":"ContentAccessPermissions"},"invitations":{"type":"array","items":{"type":"object","properties":{"timestamp":{"type":"integer","format":"int32"},"date":{"type":"string","format":"date-time"}},"title":"ObjectId"},"uniqueItems":true}},"required":["groups","invitations","ownerId","users","visibility"],"title":"ContentAccessDetails"},"contentType":{"type":"string"},"url":{"type":"string"},"size":{"type":"integer","format":"int64"},"trusted":{"type":"boolean"},"tags":{"type":"array","items":{"type":"string"},"uniqueItems":true}},"required":["access","contentType","createdAt","id","key","size","tags","trusted","updatedAt","url"],"title":"FileMetadataResponse"},"created":{"type":"string"},"groups":{"type":"array","items":{"type":"string"},"uniqueItems":true}},"required":["created","email","emailVerified","groups","id","identityProviders","lastActive","name","roles","twoFactorAuthEnabled","twoFactorAuthMethods"],"title":"UserResponse"},"accessToken":{"type":"string"},"refreshToken":{"type":"string"}},"required":["user"],"title":"RefreshTokenResponse"}}}},"401":{"description":"Invalid credentials.","content":{"*/*":{"schema":{"type":"object","properties":{"timestamp":{"type":"string","format":"date-time"},"status":{"type":"integer","format":"int32"},"error":{"type":"string"},"message":{"type":"string"},"path":{"type":"string"}},"required":["error","status","timestamp"],"title":"ErrorResponse"}}}}}}
+>
+  
+</StatusCodes>
+
+
+      

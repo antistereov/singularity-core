@@ -1,0 +1,71 @@
+---
+id: recover-from-totp
+title: "Recover From TOTP"
+description: "Recover the user if they lost access to their 2FA device. After successful recovery, an AccessToken, RefreshToken and StepUpToken will be set as HTTP-only cookies and returned in the response body if header authentication is enabled."
+sidebar_label: "Recover From TOTP"
+hide_title: true
+hide_table_of_contents: true
+api: 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
+sidebar_class_name: "post api-method"
+info_path: docs/api/singularity-api
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Recover From TOTP"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/api/auth/2fa/totp/recover"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Recover the user if they lost access to their 2FA device. After successful recovery, an AccessToken, RefreshToken and StepUpToken will be set as HTTP-only cookies and returned in the response body if header authentication is enabled.
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"name":"code","in":"query","required":true,"schema":{"type":"string"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={{"content":{"application/json":{"schema":{"type":"object","properties":{"browser":{"type":"string"},"os":{"type":"string"}},"title":"SessionInfoRequest"}}}}}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"description":"Recovery successful. If header authentication is enabled, the response will contain all tokens.","content":{"*/*":{"schema":{"type":"object","properties":{"user":{"type":"object","properties":{"id":{"type":"object","properties":{"timestamp":{"type":"integer","format":"int32"},"date":{"type":"string","format":"date-time"}},"title":"ObjectId"},"name":{"type":"string"},"email":{"type":"string"},"identityProviders":{"type":"array","items":{"type":"string"}},"roles":{"type":"array","items":{"type":"string","enum":["USER","ADMIN","GUEST"]},"uniqueItems":true},"emailVerified":{"type":"boolean"},"lastActive":{"type":"string"},"twoFactorAuthEnabled":{"type":"boolean"},"preferredTwoFactorMethod":{"type":"string","enum":["totp","mail"]},"twoFactorAuthMethods":{"type":"array","items":{"type":"string","enum":["totp","mail"]}},"avatar":{"type":"object","properties":{"id":{"type":"object","properties":{"timestamp":{"type":"integer","format":"int32"},"date":{"type":"string","format":"date-time"}},"title":"ObjectId"},"key":{"type":"string"},"createdAt":{"type":"string","format":"date-time"},"updatedAt":{"type":"string","format":"date-time"},"access":{"type":"object","properties":{"ownerId":{"type":"object","properties":{"timestamp":{"type":"integer","format":"int32"},"date":{"type":"string","format":"date-time"}},"title":"ObjectId"},"visibility":{"type":"string","enum":["PRIVATE","PUBLIC","SHARED"]},"users":{"type":"object","properties":{"admin":{"type":"array","items":{"type":"string"},"uniqueItems":true},"editor":{"type":"array","items":{"type":"string"},"uniqueItems":true},"viewer":{"type":"array","items":{"type":"string"},"uniqueItems":true},"isEmpty":{"type":"boolean"}},"required":["admin","editor","isEmpty","viewer"],"title":"ContentAccessPermissions"},"groups":{"type":"object","properties":{"admin":{"type":"array","items":{"type":"string"},"uniqueItems":true},"editor":{"type":"array","items":{"type":"string"},"uniqueItems":true},"viewer":{"type":"array","items":{"type":"string"},"uniqueItems":true},"isEmpty":{"type":"boolean"}},"required":["admin","editor","isEmpty","viewer"],"title":"ContentAccessPermissions"},"invitations":{"type":"array","items":{"type":"object","properties":{"timestamp":{"type":"integer","format":"int32"},"date":{"type":"string","format":"date-time"}},"title":"ObjectId"},"uniqueItems":true}},"required":["groups","invitations","ownerId","users","visibility"],"title":"ContentAccessDetails"},"contentType":{"type":"string"},"url":{"type":"string"},"size":{"type":"integer","format":"int64"},"trusted":{"type":"boolean"},"tags":{"type":"array","items":{"type":"string"},"uniqueItems":true}},"required":["access","contentType","createdAt","id","key","size","tags","trusted","updatedAt","url"],"title":"FileMetadataResponse"},"created":{"type":"string"},"groups":{"type":"array","items":{"type":"string"},"uniqueItems":true}},"required":["created","email","emailVerified","groups","id","identityProviders","lastActive","name","roles","twoFactorAuthEnabled","twoFactorAuthMethods"],"title":"UserResponse"},"accessToken":{"type":"string"},"refreshToken":{"type":"string"},"stepUpToken":{"type":"string"},"sessionToken":{"type":"string"}},"required":["user"],"title":"TwoFactorRecoveryResponse"}}}},"401":{"description":"Wrong code.","content":{"*/*":{"schema":{"type":"object","properties":{"timestamp":{"type":"string","format":"date-time"},"status":{"type":"integer","format":"int32"},"error":{"type":"string"},"message":{"type":"string"},"path":{"type":"string"}},"required":["error","status","timestamp"],"title":"ErrorResponse"}}}},"403":{"description":"User is already authenticated.","content":{"*/*":{"schema":{"type":"object","properties":{"timestamp":{"type":"string","format":"date-time"},"status":{"type":"integer","format":"int32"},"error":{"type":"string"},"message":{"type":"string"},"path":{"type":"string"}},"required":["error","status","timestamp"],"title":"ErrorResponse"}}}}}}
+>
+  
+</StatusCodes>
+
+
+      

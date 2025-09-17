@@ -1,0 +1,71 @@
+---
+id: delete-invitation
+title: "deleteInvitation"
+description: "deleteInvitation"
+sidebar_label: "deleteInvitation"
+hide_title: true
+hide_table_of_contents: true
+api: eJzFV99v2zYQ/lc4PQxbIdlZ+zL4aUGTdFmztWgStEAbBLREy1woUiMpu4Hh/33fkbQty2mbFAPmF0vk8e67737wtMo8r102+ZhJvZCee2l0URrtrVFK2Owmz0wrbFg/r7JJVgklvDjfCmd51nLLGyxa0rPKNF4gKCtsSY2nlvs5nq34p5NWQIm3ncgzV85Fw7PJKvP3LZ0w079F6UmhJZteChd2ZSOc503bE5Xaixrw8mxmbMN9XHrxPFvnWcW96Ik6b6Wu+5IkUJDWbA1xL70iuTfBOnxcr28IrGuNdhHB86Mj+quEK61sg9eQfw2dxJTQnnafjZ/R32O9cl1ZCud6glNjlOA6gNpx9XErebPDehmX3iWQOLKmU06UnZX+nsKwzlfkxz7mB4KHwM3NLrAhnAjXJBvzVo5DUojxSlbrjPTbxSbKnVUQmnvfusl47EBxpzgZHzlkgjCLkTTZ0P6JaAyLWhCpvhLoUKbkam6cn/x6BMKHZy9om1ViIZRpG5C+VXSz8/yS2E9pszRnvPTGHnd+DnFZBpevzJ3QL425k/0kga+vxf2BzSDMkDgsBWHWKcb39LGl9HOGkEvs6Iq13LmlsVXOpK6CjK7Z87NjJh3bRHUEQ6lKgPJ2FmDe7uu99WR7U0JlBIwY84AjAPtd8Ar+77wgIg98OA4HmN+60oG3gRMEKCRuyEPBbSit+HC2KZs/3l8NADyWxsdCSJxEC18iAOnVXrffG0YcZl07jCFXyiwpUNE0MzMWMkogZM50Fos9fKTktmu/BPBriXcQsv8t8T4UV0tTRKDFPtLiqu/YPEIOTWkGOuZPyL138USKvDcBCJo502K54TrsuadkYC8DvoPP/yIDPhSXUFNct4+h6rFZ+jSyEpJk6OFcXNP7zMRLNN0cu0bNjt+eH4D4pFnv916o0jSCwIAt1jv8A9uX3H+7miPpKlN21KcjwaWhqyOosaDpvvCmQBtgQletwd3tBiooVvsxymPbaLjmtSDFecj7dAX31mGEexaAt1bQNDOTNUJZxZLZt9PzafRJ7++dCe5xzjGo4+yV4roUk6/5XbD9SmI/smvC/OcW24Sd61J1IJ0hm4OHEZXtR9/lVLn5QDtL1Q4i5WxLCnGAYU0UU+7gYkqUNMKNhhqGeE+450D5MpHYB3q6jQzFgiYui25BNRIA84eYH5pz96i3JgbEdW1rLNQ1nfKyAJt1h3MbNTnbBIpPFVKO1zVsRf+mnVS+kPpA/8BbdkwRD9LsGKNWCUWlQmOkJsiVM9g2C1mhE36LmLfChoERIQc/l2m+mCC1BRUOKYx2EhkzZDvahiYLVVeGPkqJLjUAHkZShiwgMjFbC6ZkIwO15C0ajxUbWiPzte31fCSNQUNEsO/EPWIfK2z0zYJMsAlrp6uokEJLfkQoZtqh30x5iRyswnwlwW/OGllas3vFmUGxdkoVmNHLO8bbVqXcdF+F9JfxYsIuqUp3PSBdVEx8Ji3S73IioEUfmpI4ZcgwhGkaR4pSv0vt8TLOotgbzKv9GTVUVWib4fhvvU10UOAQNGPvlL56e7F4wS7S+lD1crkc1bobGVuP01k3rltVvBgdjYQezX2jSC+1w9hzf8HGES21GH4R9Z6pOJSzvYl9r2FvLxUvPvtxqzgugHWCtEqj/Ee6ccLdQMM8Hib4NsPQTLM27a5W1DqurVqvaRmXjqVPCDwu0BeJ6zDxV9IF3rPJDKUkDoBsv4Wyn96leeNnisqDADdXoaZ7cMFVR294REbHb8f1DaTShUrW4wZNkq3vHaGvLvoA2H7GnJxenF6dQoJaa48fbcJCvnmAf/hm+hdy0Qqr
+sidebar_class_name: "delete api-method"
+info_path: docs/api/singularity-api
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"deleteInvitation"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"delete"}
+  path={"/api/invite/{id}"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+deleteInvitation
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"name":"id","in":"path","required":true,"schema":{"type":"object","properties":{"timestamp":{"type":"integer","format":"int32"},"date":{"type":"string","format":"date-time"}},"title":"ObjectId"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={undefined}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"description":"OK","content":{"*/*":{"schema":{"type":"object","properties":{"success":{"type":"boolean"}},"required":["success"],"title":"SuccessResponse"}}}}}}
+>
+  
+</StatusCodes>
+
+
+      
