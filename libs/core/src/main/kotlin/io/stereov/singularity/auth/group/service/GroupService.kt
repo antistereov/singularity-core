@@ -5,6 +5,7 @@ import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.group.dto.request.CreateGroupRequest
 import io.stereov.singularity.auth.group.dto.response.UpdateGroupRequest
 import io.stereov.singularity.auth.group.exception.model.GroupKeyExistsException
+import io.stereov.singularity.auth.group.mapper.GroupMapper
 import io.stereov.singularity.auth.group.model.GroupDocument
 import io.stereov.singularity.auth.group.model.GroupTranslation
 import io.stereov.singularity.auth.group.repository.GroupRepository
@@ -21,9 +22,10 @@ import org.springframework.stereotype.Service
 @Service
 class GroupService(
     private val repository: GroupRepository,
-    private val appProperties: AppProperties,
+    override val appProperties: AppProperties,
     private val authorizationService: AuthorizationService,
-    override val reactiveMongoTemplate: ReactiveMongoTemplate
+    override val reactiveMongoTemplate: ReactiveMongoTemplate,
+    private val groupMapper: GroupMapper
 ) : TranslatableCrudService<GroupTranslation, GroupDocument> {
 
     override val logger = KotlinLogging.logger {}
@@ -56,7 +58,7 @@ class GroupService(
 
         if (existsByKey(req.key)) throw GroupKeyExistsException(req.key)
 
-        return save(GroupDocument(req))
+        return save(groupMapper.createGroup(req))
     }
 
     suspend fun save(group: GroupDocument): GroupDocument {

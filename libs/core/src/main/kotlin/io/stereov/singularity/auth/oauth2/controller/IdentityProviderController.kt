@@ -8,6 +8,7 @@ import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.core.mapper.UserMapper
+import io.swagger.v3.oas.annotations.ExternalDocumentation
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Content
@@ -22,7 +23,7 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/api/auth/providers")
 @ConditionalOnProperty("singularity.auth.oauth2.enable", matchIfMissing = false)
-@Tag(name = "Identity Provider", description = "Operations related to connecting and disconnecting identity providers to existing accounts.")
+@Tag(name = "OAuth2", description = "Operations related to connecting and disconnecting identity providers to existing accounts.")
 class IdentityProviderController(
     private val identityProviderService: IdentityProviderService,
     private val authorizationService: AuthorizationService,
@@ -31,8 +32,9 @@ class IdentityProviderController(
 
     @GetMapping
     @Operation(
-        summary = "Get identity providers",
+        summary = "Get Identity Providers",
         description = "Get a list of connected identity providers for the current user.",
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/oauth2#getting-connected-providers"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER),
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE)
@@ -50,7 +52,7 @@ class IdentityProviderController(
             )
         ]
     )
-    suspend fun getProviders(): ResponseEntity<List<IdentityProviderResponse>> {
+    suspend fun getIdentityProviders(): ResponseEntity<List<IdentityProviderResponse>> {
         val identityProviders = authorizationService.getCurrentUser().sensitive.identities
             .map { IdentityProviderResponse(it.key) }
 
@@ -59,8 +61,9 @@ class IdentityProviderController(
 
     @PostMapping("password")
     @Operation(
-        summary = "Add a password identity to the current user",
+        summary = "Add Password Authentication",
         description = "Create a new identity provider for the current user that allows the user to login with a password",
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/oauth2#adding-password-authentication"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER),
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE),
@@ -85,7 +88,7 @@ class IdentityProviderController(
             )
         ]
     )
-    suspend fun connectPasswordIdentity(@RequestBody req: ConnectPasswordIdentityRequest): ResponseEntity<UserResponse> {
+    suspend fun addPasswordAuthentication(@RequestBody req: ConnectPasswordIdentityRequest): ResponseEntity<UserResponse> {
         val user = identityProviderService.connect(req)
 
         return ResponseEntity.ok(userMapper.toResponse(user))
@@ -93,9 +96,10 @@ class IdentityProviderController(
 
     @DeleteMapping("{provider}")
     @Operation(
-        summary = "Delete an identity provider",
+        summary = "Delete Identity Provider",
         description = "Delete an identity provider from the connected identity providers of the current user." +
                 "You are not allowed to delete the password identity or the only existing identity.",
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/oauth2#disconnecting-an-oauth2-provider"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER),
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE),
@@ -120,7 +124,7 @@ class IdentityProviderController(
             )
         ]
     )
-    suspend fun deleteProvider(@PathVariable provider: String): ResponseEntity<UserResponse> {
+    suspend fun deleteIdentityProvider(@PathVariable provider: String): ResponseEntity<UserResponse> {
         val user = identityProviderService.disconnect(provider)
 
         return ResponseEntity.ok(userMapper.toResponse(user))

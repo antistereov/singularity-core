@@ -1,10 +1,10 @@
 package io.stereov.singularity.content.tag.dto
 
-import io.stereov.singularity.content.translate.model.Language
+import java.util.Locale
 
 data class TagResponse(
     val key: String,
-    val lang: Language,
+    val locale: Locale,
     val name: String,
     val description: String
 )

@@ -22,7 +22,7 @@ class EmailVerificationTokenService(
      * Creates an email verification token.
      *
      * This method generates a JWT token with the email and secret as claims.
-     * The token is valid for the duration specified in the mail properties.
+     * The token is valid for the duration specified in the email properties.
      *
      * @param email The email address to be verified.
      * @param secret The secret associated with the email.

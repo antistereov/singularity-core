@@ -45,7 +45,7 @@ class StepUpTokenService(
         logger.debug { "Creating step up token" }
 
         if (exchange.request.path.toString() != "/api/auth/2fa/recover")
-            throw AuthException("Cannot create step up token. This function call is only allowed when it is called from /api/auth/2fa/recover")
+            throw AuthException("Cannot createGroup step up token. This function call is only allowed when it is called from /api/auth/2fa/recover")
 
         return create(userId, sessionId, issuedAt)
     }

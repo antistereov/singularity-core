@@ -1,19 +1,20 @@
 package io.stereov.singularity.content.invitation.config
 
+import io.stereov.singularity.auth.jwt.service.JwtService
 import io.stereov.singularity.content.invitation.controller.InvitationController
 import io.stereov.singularity.content.invitation.exception.handler.InvitationExceptionHandler
 import io.stereov.singularity.content.invitation.repository.InvitationRepository
 import io.stereov.singularity.content.invitation.service.InvitationService
 import io.stereov.singularity.content.invitation.service.InvitationTokenService
-import io.stereov.singularity.content.translate.service.TranslateService
 import io.stereov.singularity.database.encryption.service.EncryptionSecretService
 import io.stereov.singularity.database.encryption.service.EncryptionService
 import io.stereov.singularity.global.config.ApplicationConfiguration
+import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.global.properties.UiProperties
-import io.stereov.singularity.auth.jwt.service.JwtService
-import io.stereov.singularity.mail.core.config.MailConfiguration
-import io.stereov.singularity.mail.core.service.MailService
-import io.stereov.singularity.mail.template.service.TemplateService
+import io.stereov.singularity.email.core.config.EmailConfiguration
+import io.stereov.singularity.email.core.service.EmailService
+import io.stereov.singularity.email.template.service.TemplateService
+import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.user.core.service.UserService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
@@ -24,7 +25,7 @@ import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRep
 @AutoConfiguration(
     after = [
         ApplicationConfiguration::class,
-        MailConfiguration::class
+        EmailConfiguration::class
     ]
 )
 @EnableReactiveMongoRepositories(basePackageClasses = [InvitationRepository::class])
@@ -41,12 +42,25 @@ class InvitationConfiguration {
         reactiveMongoTemplate: ReactiveMongoTemplate,
         invitationTokenService: InvitationTokenService,
         templateService: TemplateService,
-        mailService: MailService,
+        emailService: EmailService,
         translateService: TranslateService,
         userService: UserService,
         uiProperties: UiProperties,
+        appProperties: AppProperties
     ): InvitationService {
-        return InvitationService(repository, encryptionService, encryptionSecretService, reactiveMongoTemplate, invitationTokenService, templateService, mailService, translateService, userService, uiProperties)
+        return InvitationService(
+            repository,
+            encryptionService,
+            encryptionSecretService,
+            reactiveMongoTemplate,
+            invitationTokenService,
+            templateService,
+            emailService,
+            translateService,
+            userService,
+            uiProperties,
+            appProperties
+        )
     }
 
     @Bean

@@ -2,9 +2,10 @@ package io.stereov.singularity.admin.core.config
 
 import io.stereov.singularity.admin.core.controller.AdminController
 import io.stereov.singularity.admin.core.service.AdminService
-import io.stereov.singularity.auth.twofactor.properties.TwoFactorMailCodeProperties
+import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties
 import io.stereov.singularity.database.hash.config.HashConfiguration
 import io.stereov.singularity.database.hash.service.HashService
+import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.user.core.mapper.UserMapper
@@ -33,9 +34,17 @@ class AdminConfiguration {
         userService: UserService,
         hashService: HashService,
         appProperties: AppProperties,
-        twoFactorMailCodeProperties: TwoFactorMailCodeProperties
+        twoFactorEmailCodeProperties: TwoFactorEmailCodeProperties,
+        emailProperties: EmailProperties
     ): AdminService {
-        return AdminService(context, userService, appProperties, hashService, twoFactorMailCodeProperties)
+        return AdminService(
+            context,
+            userService,
+            appProperties,
+            hashService,
+            twoFactorEmailCodeProperties,
+            emailProperties
+        )
     }
 
     // Controller

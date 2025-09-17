@@ -2,7 +2,6 @@ package io.stereov.singularity.user.settings.controller
 
 import io.stereov.singularity.auth.core.component.CookieCreator
 import io.stereov.singularity.auth.core.model.token.SessionTokenType
-import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.core.mapper.UserMapper
 import io.stereov.singularity.user.settings.dto.request.ChangeEmailRequest
@@ -13,6 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.ResponseEntity
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.web.bind.annotation.*
+import java.util.*
 
 @RestController
 @RequestMapping("/api/users/me")
@@ -29,9 +29,9 @@ class UserSettingsController(
     @PutMapping("/email")
     suspend fun changeEmail(
         @RequestBody payload: ChangeEmailRequest,
-        @RequestParam lang: Language = Language.EN,
+        @RequestParam locale: Locale?,
     ): ResponseEntity<UserResponse> {
-        val user = userSettingsService.changeEmail(payload, lang)
+        val user = userSettingsService.changeEmail(payload, locale)
         return ResponseEntity.ok().body(
             userMapper.toResponse(user)
         )

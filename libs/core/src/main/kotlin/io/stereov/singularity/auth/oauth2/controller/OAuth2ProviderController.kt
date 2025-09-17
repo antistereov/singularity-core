@@ -8,6 +8,7 @@ import io.stereov.singularity.auth.oauth2.dto.response.OAuth2ProviderConnectionT
 import io.stereov.singularity.auth.oauth2.service.token.OAuth2ProviderConnectionTokenService
 import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.model.OpenApiConstants
+import io.swagger.v3.oas.annotations.ExternalDocumentation
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
@@ -23,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/auth/providers/oauth2")
-@Tag(name = "OAuth2 Identity Provider", description = "Operations related to OAuth2 identity providers")
+@Tag(name = "OAuth2")
 @ConditionalOnProperty("singularity.auth.oauth2.enable", matchIfMissing = false)
 class OAuth2ProviderController(
     private val authorizationService: AuthorizationService,
@@ -34,8 +35,9 @@ class OAuth2ProviderController(
 
     @PostMapping("token")
     @Operation(
-        summary = "Generate an OAuth2ProviderConnectionToken",
+        summary = "Generate OAuth2ProviderConnectionToken",
         description = "Generate an OAuth2ProviderConnectionToken that enables the user to connect new OAuth2 providers.",
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/oauth2#connecting-an-oauth2-provider-to-an-existing-account"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER),
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE),

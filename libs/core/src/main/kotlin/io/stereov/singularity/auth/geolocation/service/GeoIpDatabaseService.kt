@@ -74,7 +74,8 @@ class GeoIpDatabaseService(
         cityDb = try {
             DatabaseReader.Builder(cityDbFile).withCache(CHMCache()).build()
         } catch(e: Exception) {
-            throw GeolocationException("GeoLite2-City database could not be initialized", e)
+            logger.warn(e) { "GeoLite2-City database could not be initialized" }
+            null
         }
 
         logger.info { "Successfully initialized GeoLite2-City database" }
@@ -95,8 +96,8 @@ class GeoIpDatabaseService(
                 .toBodilessEntity()
                 .awaitSingle()
                 .headers
-        } catch (e: TooManyRequestsException) {
-            logger.warn(e) { "Database download failed: too many requests" }
+        } catch (e: Exception) {
+            logger.warn(e) { "Database download failed: ${e.message}" }
             return false
         }
 

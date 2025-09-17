@@ -17,7 +17,7 @@ class UserMapper(
     /**
      * Convert this [UserDocument] to a [UserResponse].
      *
-     * This method is used to create a data transfer object (DTO) for the user.
+     * This method is used to createGroup a data transfer object (DTO) for the user.
      *
      * @return A [UserResponse] containing the user information.
      */

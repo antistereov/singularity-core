@@ -20,18 +20,18 @@ import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
 import io.stereov.singularity.auth.jwt.properties.JwtProperties
 import io.stereov.singularity.auth.jwt.service.JwtService
-import io.stereov.singularity.auth.twofactor.properties.TwoFactorMailCodeProperties
+import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties
 import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthenticationService
 import io.stereov.singularity.auth.twofactor.service.token.TwoFactorAuthenticationTokenService
-import io.stereov.singularity.content.translate.service.TranslateService
 import io.stereov.singularity.database.encryption.service.EncryptionService
 import io.stereov.singularity.database.hash.service.HashService
+import io.stereov.singularity.email.core.properties.EmailProperties
+import io.stereov.singularity.email.core.service.EmailService
+import io.stereov.singularity.email.template.service.TemplateService
 import io.stereov.singularity.file.s3.config.S3Configuration
 import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.global.properties.AppProperties
-import io.stereov.singularity.mail.core.properties.MailProperties
-import io.stereov.singularity.mail.core.service.MailService
-import io.stereov.singularity.mail.template.service.TemplateService
+import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.user.core.mapper.UserMapper
 import io.stereov.singularity.user.core.service.UserService
 import org.springframework.boot.autoconfigure.AutoConfiguration
@@ -244,7 +244,8 @@ class AuthenticationConfiguration {
         accessTokenCache: AccessTokenCache,
         emailVerificationService: EmailVerificationService,
         appProperties: AppProperties,
-        twoFactorMailCodeProperties: TwoFactorMailCodeProperties
+        twoFactorEmailCodeProperties: TwoFactorEmailCodeProperties,
+        emailProperties: EmailProperties
     ): AuthenticationService {
         return AuthenticationService(
             userService,
@@ -254,7 +255,8 @@ class AuthenticationConfiguration {
             accessTokenCache,
             emailVerificationService,
             appProperties,
-            twoFactorMailCodeProperties
+            twoFactorEmailCodeProperties,
+            emailProperties
         )
     }
 
@@ -275,22 +277,24 @@ class AuthenticationConfiguration {
         emailVerificationTokenService: EmailVerificationTokenService,
         userMapper: UserMapper,
         redisTemplate: ReactiveRedisTemplate<String, String>,
-        mailProperties: MailProperties,
+        emailProperties: EmailProperties,
         emailVerificationProperties: EmailVerificationProperties,
         translateService: TranslateService,
-        mailService: MailService,
-        templateService: TemplateService
+        emailService: EmailService,
+        templateService: TemplateService,
+        appProperties: AppProperties
     ) = EmailVerificationService(
-        userService, 
-        authorizationService, 
-        emailVerificationTokenService, 
-        userMapper, 
-        redisTemplate, 
-        mailProperties,
+        userService,
+        authorizationService,
+        emailVerificationTokenService,
+        userMapper,
+        redisTemplate,
+        emailProperties,
         emailVerificationProperties,
         translateService,
-        mailService,
-        templateService
+        emailService,
+        templateService,
+        appProperties
     )
     
     @Bean
@@ -301,24 +305,26 @@ class AuthenticationConfiguration {
         hashService: HashService,
         authorizationService: AuthorizationService,
         redisTemplate: ReactiveRedisTemplate<String, String>,
-        mailProperties: MailProperties,
+        emailProperties: EmailProperties,
         passwordResetProperties: PasswordResetProperties,
         translateService: TranslateService,
-        mailService: MailService,
+        emailService: EmailService,
         templateService: TemplateService,
-        accessTokenCache: AccessTokenCache
+        accessTokenCache: AccessTokenCache,
+        appProperties: AppProperties
     ) = PasswordResetService(
         userService,
         passwordResetTokenService,
         hashService,
         authorizationService,
         redisTemplate,
-        mailProperties,
+        emailProperties,
         passwordResetProperties,
         translateService,
-        mailService,
+        emailService,
         templateService,
-        accessTokenCache
+        accessTokenCache,
+        appProperties
     )
 
     @Bean

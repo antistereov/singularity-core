@@ -2,11 +2,11 @@ package io.stereov.singularity.auth.core.controller
 
 import io.stereov.singularity.auth.core.dto.response.MailCooldownResponse
 import io.stereov.singularity.auth.core.service.EmailVerificationService
-import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.model.MailSendResponse
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.user.core.dto.response.UserResponse
+import io.swagger.v3.oas.annotations.ExternalDocumentation
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
@@ -15,12 +15,12 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.util.*
 
 @RestController
 @RequestMapping("/api/auth/email/verify")
 @Tag(
-    name = "Email Verification",
-    description = "Operations related to email verification."
+    name = "Authentication",
 )
 class EmailVerificationController(
     private val emailVerificationService: EmailVerificationService,
@@ -28,13 +28,13 @@ class EmailVerificationController(
 
     @PostMapping
     @Operation(
-        summary = "Verify email",
+        summary = "Verify Email",
         description = "Verify the user's email by validating the token.",
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/docs/auth/authentication#email-verification"),
         responses = [
             ApiResponse(
                 responseCode = "200",
                 description = "Updated user information.",
-                content = [Content(schema = Schema(implementation = UserResponse::class))]
             ),
             ApiResponse(
                 responseCode = "401",
@@ -52,8 +52,9 @@ class EmailVerificationController(
 
     @GetMapping("/cooldown")
     @Operation(
-        summary = "Get remaining email verification cooldown",
+        summary = "Get Remaining Email Verification Cooldown",
         description = "Get the remaining time in seconds until you can send another verification request.",
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/docs/auth/authentication#email-verification"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER),
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE)
@@ -62,7 +63,6 @@ class EmailVerificationController(
             ApiResponse(
                 responseCode = "200",
                 description = "The remaining cooldown.",
-                content = [Content(schema = Schema(implementation = MailCooldownResponse::class))]
             ),
             ApiResponse(
                 responseCode = "401",
@@ -71,7 +71,7 @@ class EmailVerificationController(
             ),
         ]
     )
-    suspend fun getRemainingVerificationCooldown(): ResponseEntity<MailCooldownResponse> {
+    suspend fun getRemainingEmailVerificationCooldown(): ResponseEntity<MailCooldownResponse> {
         val remainingCooldown = emailVerificationService.getRemainingCooldown()
 
         return ResponseEntity.ok().body(remainingCooldown)
@@ -79,10 +79,11 @@ class EmailVerificationController(
 
     @PostMapping("/send")
     @Operation(
-        summary = "Send a new verification email",
+        summary = "Send Email Verification Email",
         description = "Send a new verification email to the user's email. " +
                 "After sending an email, a cooldown is triggered " +
                 "during which no new verification email can be sent.",
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/docs/auth/authentication#email-verification"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER),
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE)
@@ -91,7 +92,6 @@ class EmailVerificationController(
             ApiResponse(
                 responseCode = "200",
                 description = "The number of seconds the user needs to wait before sending a new email.",
-                content = [Content(schema = Schema(implementation = MailCooldownResponse::class))]
             ),
             ApiResponse(
                 responseCode = "401",
@@ -105,16 +105,14 @@ class EmailVerificationController(
             ),
         ]
     )
-    suspend fun sendVerificationEmail(
-        @RequestParam lang: Language = Language.EN
+    suspend fun sendEmailVerificationEmail(
+        @RequestParam locale: Locale?
     ): ResponseEntity<MailSendResponse> {
 
-        emailVerificationService.sendEmailVerificationToken(lang)
+        emailVerificationService.sendEmailVerificationToken(locale)
 
         return ResponseEntity.ok().body(
             MailSendResponse(emailVerificationService.getRemainingCooldown().remaining)
         )
     }
-
-
 }

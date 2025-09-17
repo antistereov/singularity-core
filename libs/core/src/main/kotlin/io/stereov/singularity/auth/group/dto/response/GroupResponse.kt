@@ -1,10 +1,10 @@
 package io.stereov.singularity.auth.group.dto.response
 
-import io.stereov.singularity.content.translate.model.Language
+import java.util.*
 
 data class GroupResponse (
     val key: String,
-    val lang: Language,
+    val locale: Locale,
     val name: String,
     val description: String
 )

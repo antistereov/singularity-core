@@ -9,10 +9,10 @@ import io.stereov.singularity.content.core.model.ContentDocument
 import io.stereov.singularity.content.invitation.exception.model.InvalidInvitationException
 import io.stereov.singularity.content.invitation.model.InvitationDocument
 import io.stereov.singularity.content.invitation.service.InvitationService
-import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.user.core.mapper.UserMapper
 import io.stereov.singularity.user.core.service.UserService
 import org.bson.types.ObjectId
+import java.util.*
 
 interface ContentManagementService<T: ContentDocument<T>> {
 
@@ -48,7 +48,7 @@ interface ContentManagementService<T: ContentDocument<T>> {
         key: String,
         req: InviteUserToContentRequest,
         invitedTo: String,
-        lang: Language,
+        locale: Locale?,
     ): ExtendedContentAccessDetailsResponse {
         logger.debug { "Inviting user with email \"${req.email}\" to content with key \"$key\" as ${req.role}" }
 
@@ -60,7 +60,7 @@ interface ContentManagementService<T: ContentDocument<T>> {
             invitedTo = invitedTo,
             acceptPath = acceptPath,
             claims = mapOf("key" to key, "role" to req.role),
-            lang = lang
+            locale = locale
         )
 
         content.addInvitation(invitation)
@@ -86,7 +86,7 @@ interface ContentManagementService<T: ContentDocument<T>> {
         val email = invitation.sensitive.email
 
         val user = userService.findByEmailOrNull(email)
-            ?: throw InvalidInvitationException("No user exists with mail from invitation")
+            ?: throw InvalidInvitationException("No user exists with email from invitation")
         val content = contentService.findByKeyOrNull(key)
             ?: throw InvalidInvitationException("No content matched key from invitation")
 

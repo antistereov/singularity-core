@@ -1,8 +1,9 @@
 package io.stereov.singularity.global.properties
 
-import io.stereov.singularity.global.util.toSlug
 import io.stereov.singularity.auth.group.dto.request.CreateGroupRequest
+import io.stereov.singularity.global.util.toSlug
 import org.springframework.boot.context.properties.ConfigurationProperties
+import java.util.*
 
 @ConfigurationProperties(prefix = "singularity.app")
 data class AppProperties(
@@ -11,6 +12,7 @@ data class AppProperties(
     val baseUrl: String = "http://localhost:8000",
     val supportMail: String = "support@example.com",
     val secure: Boolean = false,
+    private val defaultLocale: String = "en",
 
     // root user
     val createRootUser: Boolean = false,
@@ -19,11 +21,10 @@ data class AppProperties(
 
     // groups
     val groups: List<CreateGroupRequest> = emptyList(),
-
-    // mail
-    val enableMail: Boolean = false,
 ) {
 
     val slug: String
         get() = name.toSlug()
+
+    val locale: Locale = Locale.forLanguageTag(defaultLocale)
 }

@@ -6,6 +6,7 @@ import io.stereov.singularity.auth.core.config.AuthenticationConfiguration
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.core.service.EmailVerificationService
 import io.stereov.singularity.database.hash.service.HashService
+import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.user.core.mapper.UserMapper
@@ -40,16 +41,18 @@ class UserSettingsConfiguration {
         emailVerificationService: EmailVerificationService,
         userService: UserService,
         hashService: HashService,
-        appProperties: AppProperties,
         fileStorage: FileStorage,
         accessTokenCache: AccessTokenCache,
-        userMapper: UserMapper
+        userMapper: UserMapper,
+        emailProperties: EmailProperties
     ) = UserSettingsService(
         authService,
         emailVerificationService,
-        userService, hashService,
-        appProperties, fileStorage,
+        userService,
+        hashService,
+        fileStorage,
         accessTokenCache,
-        userMapper
+        userMapper,
+        emailProperties
     )
 }

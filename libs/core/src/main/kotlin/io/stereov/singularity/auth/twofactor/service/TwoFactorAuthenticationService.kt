@@ -10,28 +10,28 @@ import io.stereov.singularity.auth.twofactor.exception.model.InvalidTwoFactorReq
 import io.stereov.singularity.auth.twofactor.exception.model.TwoFactorMethodDisabledException
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
 import io.stereov.singularity.auth.twofactor.service.token.TwoFactorAuthenticationTokenService
-import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.service.UserService
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ServerWebExchange
+import java.util.*
 
 @Service
 class TwoFactorAuthenticationService(
     private val userService: UserService,
     private val totpAuthenticationService: TotpAuthenticationService,
     private val twoFactorAuthTokenService: TwoFactorAuthenticationTokenService,
-    private val mailAuthenticationService: MailAuthenticationService,
+    private val emailAuthenticationService: EmailAuthenticationService,
     private val authorizationService: AuthorizationService,
 ) {
 
     private val logger: KLogger
         get() = KotlinLogging.logger {}
 
-    suspend fun handleTwoFactor(user: UserDocument, lang: Language) {
+    suspend fun handleTwoFactor(user: UserDocument, locale: Locale?) {
 
         if (user.sensitive.security.twoFactor.preferred == TwoFactorMethod.MAIL) {
-            mailAuthenticationService.sendMail(user, lang)
+            emailAuthenticationService.sendMail(user, locale)
         }
     }
 
@@ -54,7 +54,7 @@ class TwoFactorAuthenticationService(
             req.totp?.let { return totpAuthenticationService.validateCode(user, it) }
         }
         if (user.sensitive.security.twoFactor.mail.enabled) {
-            req.mail?.let { return mailAuthenticationService.validateCode(user, it) }
+            req.email?.let { return emailAuthenticationService.validateCode(user, it) }
         }
 
         throw InvalidTwoFactorRequestException("2FA failed: no valid code found in request, available methods: ${user.twoFactorMethods}")
