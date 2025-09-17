@@ -35,4 +35,3 @@ openApi {
     outputDir.set(file("$rootDir/docs/static/openapi"))
     outputFileName.set("openapi.yaml")
 }
-

@@ -42,8 +42,10 @@ singularity:
       account-id: ${MAXMIND_ACCOUNT_ID}
       license-key: ${MAXMIND_LICENSE_KEY}
     two-factor:
-      recovery-code-length: 10
-      recovery-code-count: 6
+      totp:
+        recovery-code:
+          length: 10
+          count: 6
     oauth2:
       enable: true
   app:
@@ -54,7 +56,9 @@ singularity:
     create-root-user: false
     root-email: root@example.com
     root-password: very-secure-root-password
-    enable-mail: false
+    default-locale: en
+  email:
+    enable: false
   file:
     storage:
       type: local
