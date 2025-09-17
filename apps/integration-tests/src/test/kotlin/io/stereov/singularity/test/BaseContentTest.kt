@@ -1,16 +1,17 @@
 package io.stereov.singularity.test
 
-import io.stereov.singularity.auth.group.model.KnownGroups
 import io.stereov.singularity.auth.core.model.token.SessionTokenType
-import io.stereov.singularity.content.article.dto.CreateArticleRequest
-import io.stereov.singularity.content.article.dto.FullArticleResponse
+import io.stereov.singularity.auth.group.model.KnownGroups
+import io.stereov.singularity.content.article.dto.request.CreateArticleRequest
+import io.stereov.singularity.content.article.dto.response.FullArticleResponse
+import io.stereov.singularity.content.article.mapper.ArticleMapper
 import io.stereov.singularity.content.article.model.Article
 import io.stereov.singularity.content.article.service.ArticleService
 import io.stereov.singularity.content.tag.service.TagService
-import io.stereov.singularity.content.translate.model.Language
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach
 import org.springframework.beans.factory.annotation.Autowired
+import java.util.*
 
 class BaseContentTest : BaseIntegrationTest() {
 
@@ -18,6 +19,9 @@ class BaseContentTest : BaseIntegrationTest() {
     lateinit var tagService: TagService
     final val contentBasePath = "$basePath/content"
 
+    @Autowired
+    lateinit var articleMapper: ArticleMapper
+    
     @Autowired
     lateinit var articleService: ArticleService
 
@@ -29,7 +33,7 @@ class BaseContentTest : BaseIntegrationTest() {
 
     suspend fun save(creator: TestRegisterResponse? = null, title: String? = null): Article {
         val actualUser = creator ?: registerUser(groups = listOf(KnownGroups.EDITOR))
-        val req = CreateArticleRequest(Language.EN, title ?: "test", "", "")
+        val req = CreateArticleRequest(Locale.ENGLISH, title ?: "test", "", "")
         val res = webTestClient.post()
             .uri("/api/content/articles/create")
             .cookie(SessionTokenType.Access.cookieName, actualUser.accessToken)
@@ -42,6 +46,6 @@ class BaseContentTest : BaseIntegrationTest() {
 
         requireNotNull(res)
 
-        return Article.create(res, Language.EN)
+        return articleMapper.createArticle(res, null)
     }
 }

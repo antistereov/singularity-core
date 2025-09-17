@@ -19,7 +19,6 @@ import io.stereov.singularity.auth.twofactor.model.token.TwoFactorAuthentication
 import io.stereov.singularity.auth.twofactor.model.token.TwoFactorTokenType
 import io.stereov.singularity.auth.twofactor.service.TotpService
 import io.stereov.singularity.auth.twofactor.service.token.TwoFactorAuthenticationTokenService
-import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.database.encryption.service.EncryptionSecretService
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.test.config.MockConfig
@@ -121,7 +120,7 @@ class BaseSpringBootTest {
     )
 
     suspend fun createGroup(key: String = "test-group"): GroupDocument {
-        val group = GroupDocument(key = key, translations = mutableMapOf(Language.EN to GroupTranslation("Test")))
+        val group = GroupDocument(key = key, translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Test")), primaryLocale = Locale.ENGLISH)
         return groupService.save(group)
     }
 

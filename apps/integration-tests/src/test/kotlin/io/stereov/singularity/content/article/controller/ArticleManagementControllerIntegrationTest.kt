@@ -1,10 +1,10 @@
 package io.stereov.singularity.content.article.controller
 
 import io.stereov.singularity.auth.core.model.token.AccessType
-import io.stereov.singularity.auth.group.model.KnownGroups
 import io.stereov.singularity.auth.core.model.token.SessionTokenType
-import io.stereov.singularity.content.article.dto.ArticleOverviewResponse
-import io.stereov.singularity.content.article.dto.ArticleResponse
+import io.stereov.singularity.auth.group.model.KnownGroups
+import io.stereov.singularity.content.article.dto.response.ArticleOverviewResponse
+import io.stereov.singularity.content.article.dto.response.ArticleResponse
 import io.stereov.singularity.content.article.model.ArticleState
 import io.stereov.singularity.content.core.model.ContentAccessRole
 import io.stereov.singularity.content.core.model.ContentAccessSubject
@@ -221,7 +221,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
     @Test fun `getArticles correctly filters tags`() = runTest {
         val user = registerUser(groups = listOf(KnownGroups.EDITOR))
         val article = save(creator = user)
-        val tag = tagService.create(CreateTagRequest("test", name = "Test"))
+        val tag = tagService.create(CreateTagRequest("test", name = "Test", locale = null))
 
         article.tags.add(tag.key)
         articleService.save(article)
@@ -244,8 +244,8 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
     @Test fun `getArticles correctly filters when multiple tags`() = runTest {
         val user = registerUser(groups = listOf(KnownGroups.EDITOR))
         val article = save(creator = user)
-        val tag = tagService.create(CreateTagRequest("test", name = "Test"))
-        val anotherTag = tagService.create(CreateTagRequest("test2", name = "Another Test"))
+        val tag = tagService.create(CreateTagRequest("test", name = "Test", locale = null))
+        val anotherTag = tagService.create(CreateTagRequest("test2", name = "Another Test", locale = null))
 
         article.tags.add(tag.key)
         articleService.save(article)

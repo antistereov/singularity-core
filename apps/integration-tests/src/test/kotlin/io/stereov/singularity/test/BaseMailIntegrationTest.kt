@@ -43,7 +43,7 @@ class BaseMailIntegrationTest : BaseSpringBootTest() {
         @JvmStatic
         @Suppress("UNUSED")
         fun properties(registry: DynamicPropertyRegistry) {
-            registry.add("singularity.app.enable-mail") { true }
+            registry.add("singularity.app.enable-email") { true }
             registry.add("spring.data.mongodb.uri") { "${mongoDBContainer.connectionString}/test" }
             registry.add("spring.data.redis.host") { redisContainer.host }
             registry.add("spring.data.redis.port") { redisContainer.getMappedPort(6379) }
