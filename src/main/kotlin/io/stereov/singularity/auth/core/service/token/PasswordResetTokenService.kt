@@ -26,7 +26,7 @@ class PasswordResetTokenService(
      * Creates a password reset token.
      *
      * This method generates a JWT token with the user ID and secret as claims.
-     * The token is valid for the duration specified in the mail properties.
+     * The token is valid for the duration specified in the email properties.
      *
      * @param userId The ID of the user requesting the password reset.
      * @param secret The secret associated with the user.

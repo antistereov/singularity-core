@@ -18,7 +18,6 @@ import io.stereov.singularity.auth.core.service.token.StepUpTokenService
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
 import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthenticationService
 import io.stereov.singularity.auth.twofactor.service.token.TwoFactorAuthenticationTokenService
-import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.global.model.SuccessResponse
@@ -63,9 +62,9 @@ class AuthenticationController(
 
     @PostMapping("/login")
     @Operation(
-        summary = "User login",
-        description = "Authenticates a user, returns an access and refresh token and sets those tokens as Http-Only Cookies.",
-        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/auth/authentication#login"),
+        summary = "Login",
+        description = "Authenticates a user, returns an access and refresh token and sets those tokens as HTTP-Only Cookies.",
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/authentication#login"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER),
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE)
@@ -74,7 +73,6 @@ class AuthenticationController(
             ApiResponse(
                 responseCode = "200",
                 description = "Authentication successful. Returns tokens and user details.",
-                content = [Content(schema = Schema(implementation = LoginResponse::class))]
             ),
             ApiResponse(
                 responseCode = "401",
@@ -91,14 +89,14 @@ class AuthenticationController(
     suspend fun login(
         exchange: ServerWebExchange,
         @RequestBody payload: LoginRequest,
-        @RequestParam lang: Language = Language.EN
+        @RequestParam locale: Locale?
     ): ResponseEntity<LoginResponse> {
         logger.info { "Executing login" }
 
         val user = authenticationService.login(payload)
 
         if (user.twoFactorEnabled) {
-            twoFactorAuthenticationService.handleTwoFactor(user, lang)
+            twoFactorAuthenticationService.handleTwoFactor(user, locale)
             val twoFactorAuthenticationToken = twoFactorAuthenticationTokenService.create(user.id)
 
             return ResponseEntity.ok()
@@ -138,14 +136,13 @@ class AuthenticationController(
 
     @PostMapping("/register")
     @Operation(
-        summary = "Register a new user",
+        summary = "Register",
         description = "Creates a new user account and logs them in.",
-        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/auth/authentication#registering-users"),
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/authentication#registering-users"),
         responses = [
             ApiResponse(
                 responseCode = "200",
                 description = "Registration successful. Returns user details and tokens.",
-                content = [Content(schema = Schema(implementation = RegisterResponse::class))]
             ),
             ApiResponse(
                 responseCode = "409",
@@ -163,11 +160,11 @@ class AuthenticationController(
         exchange: ServerWebExchange,
         @RequestBody @Valid payload: RegisterUserRequest,
         @RequestParam("send-email") sendEmail: Boolean = true,
-        @RequestParam lang: Language = Language.EN
+        @RequestParam locale: Locale?
     ): ResponseEntity<RegisterResponse> {
         logger.info { "Executing register" }
 
-        val user = authenticationService.register(payload, sendEmail, lang)
+        val user = authenticationService.register(payload, sendEmail, locale)
         val sessionId = UUID.randomUUID()
 
         val accessToken = accessTokenService.create(user, sessionId)
@@ -188,9 +185,9 @@ class AuthenticationController(
 
     @PostMapping("/logout")
     @Operation(
-        summary = "Log out a user",
+        summary = "Logout",
         description = "Invalidates the current session's access and refresh tokens.",
-        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/auth/authentication#logout"),
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/authentication#logout"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER),
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE)
@@ -199,7 +196,6 @@ class AuthenticationController(
             ApiResponse(
                 responseCode = "200",
                 description = "Logout successful.",
-                content = [Content(schema = Schema(implementation = SuccessResponse::class))]
             )
         ]
     )
@@ -223,9 +219,9 @@ class AuthenticationController(
 
     @PostMapping("/refresh")
     @Operation(
-        summary = "Refresh access token",
+        summary = "Refresh Access Token",
         description = "Refresh the access token. Returns a new access and refresh token and sets those tokens as Http-Only Cookies.",
-        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/auth/authentication#refresh"),
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/authentication#refresh"),
         security = [
             SecurityRequirement(OpenApiConstants.REFRESH_TOKEN_HEADER),
             SecurityRequirement(OpenApiConstants.REFRESH_TOKEN_COOKIE)
@@ -234,7 +230,6 @@ class AuthenticationController(
             ApiResponse(
                 responseCode = "200",
                 description = "Authentication successful. Returns tokens and user details.",
-                content = [Content(schema = Schema(implementation = RefreshTokenResponse::class))]
             ),
             ApiResponse(
                 responseCode = "401",
@@ -243,7 +238,7 @@ class AuthenticationController(
             )
         ]
     )
-    suspend fun refreshToken(
+    suspend fun refreshAccessToken(
         exchange: ServerWebExchange,
         @RequestBody sessionInfo: SessionInfoRequest?
     ): ResponseEntity<RefreshTokenResponse> {
@@ -269,9 +264,9 @@ class AuthenticationController(
 
     @PostMapping("/step-up")
     @Operation(
-        summary = "Request step-up",
+        summary = "Step-Up",
         description = "Requests step-up authentification. This re-authentication is required by critical endpoints.",
-        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/auth/authentication#step-up"),
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/authentication#step-up"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER),
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE)
@@ -280,7 +275,6 @@ class AuthenticationController(
             ApiResponse(
                 responseCode = "200",
                 description = "Logout successful.",
-                content = [Content(schema = Schema(implementation = StepUpResponse::class))]
             ),
             ApiResponse(
                 responseCode = "401",
@@ -291,14 +285,14 @@ class AuthenticationController(
     )
     suspend fun stepUp(
         @RequestBody req: StepUpRequest,
-        @RequestParam lang: Language = Language.EN
+        @RequestParam locale: Locale?
     ): ResponseEntity<StepUpResponse> {
         logger.info { "Executing step up request" }
 
         val user = authenticationService.stepUp(req)
 
         if (user.twoFactorEnabled) {
-            twoFactorAuthenticationService.handleTwoFactor(user, lang)
+            twoFactorAuthenticationService.handleTwoFactor(user, locale)
             val twoFactorToken = twoFactorAuthenticationTokenService.create(user.id)
 
             return ResponseEntity.ok()
@@ -331,9 +325,9 @@ class AuthenticationController(
 
     @GetMapping("/status")
     @Operation(
-        summary = "Get authentication status",
+        summary = "Get Authentication Status",
         description = "Get detailed information about the current status authentication status of the user.",
-        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/auth/authentication#status"),
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/authentication#status"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER),
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE),
@@ -346,7 +340,6 @@ class AuthenticationController(
             ApiResponse(
                 responseCode = "200",
                 description = "The current user's authentication status.",
-                content = [Content(schema = Schema(AuthenticationStatusResponse::class))]
             ),
             ApiResponse(
                 responseCode = "404",
@@ -355,7 +348,7 @@ class AuthenticationController(
             )
         ]
     )
-    suspend fun getStatus(exchange: ServerWebExchange): ResponseEntity<AuthenticationStatusResponse> {
+    suspend fun getAuthenticationStatus(exchange: ServerWebExchange): ResponseEntity<AuthenticationStatusResponse> {
         val authorizedUserId = authorizationService.getCurrentUserIdOrNull()
         val currentSessionId = authorizationService.getCurrentSessionIdOrNull()
         val twoFactorToken = runCatching { twoFactorAuthenticationTokenService.extract(exchange) }.getOrNull()

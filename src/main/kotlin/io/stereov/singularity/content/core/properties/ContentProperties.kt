@@ -5,5 +5,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "singularity.content")
 data class ContentProperties(
+    val enable: Boolean = true,
+    val primaryLanguage: String = "en",
     val tags: List<CreateTagMultiLangRequest>?
 )

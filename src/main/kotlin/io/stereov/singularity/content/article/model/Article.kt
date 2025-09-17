@@ -1,17 +1,15 @@
 package io.stereov.singularity.content.article.model
 
-import io.stereov.singularity.content.article.dto.CreateArticleRequest
-import io.stereov.singularity.content.article.dto.FullArticleResponse
 import io.stereov.singularity.content.core.model.ContentAccessDetails
 import io.stereov.singularity.content.core.model.ContentDocument
 import io.stereov.singularity.global.exception.model.InvalidDocumentException
-import io.stereov.singularity.content.translate.model.Language
-import io.stereov.singularity.content.translate.model.Translatable
+import io.stereov.singularity.translate.model.Translatable
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
+import java.util.*
 
 @Document(collection = "articles")
 data class Article(
@@ -27,8 +25,8 @@ data class Article(
     var imageKey: String? = null,
     override var trusted: Boolean,
     override var tags: MutableSet<String> = mutableSetOf(),
-    override val translations: MutableMap<Language, ArticleTranslation> = mutableMapOf(),
-    override val primaryLanguage: Language
+    override val translations: MutableMap<Locale, ArticleTranslation> = mutableMapOf(),
+    override val primaryLocale: Locale
 ) : ContentDocument<Article>, Translatable<ArticleTranslation> {
 
     override val id: ObjectId
@@ -37,45 +35,5 @@ data class Article(
     companion object {
         val basePath: String
             get() = "/articles"
-
-        fun create(req: CreateArticleRequest, key: String, ownerId: ObjectId): Article {
-            val translations = mutableMapOf(req.lang to ArticleTranslation(req.title, req.summary, req.content))
-
-            return Article(
-                _id = null,
-                key = key,
-                createdAt = Instant.now(),
-                publishedAt = null,
-                updatedAt = Instant.now(),
-                path = "$basePath/$key",
-                state = ArticleState.DRAFT,
-                colors = ArticleColors(),
-                imageKey = null,
-                trusted = false,
-                access = ContentAccessDetails(ownerId),
-                translations = translations,
-                primaryLanguage = req.lang
-            )
-        }
-
-        fun create(dto: FullArticleResponse, language: Language): Article {
-            val translations = mutableMapOf(language to ArticleTranslation(dto.title, dto.summary, dto.content))
-
-            return Article(
-                _id = dto.id,
-                key = dto.key,
-                createdAt = dto.createdAt,
-                publishedAt = dto.publishedAt,
-                updatedAt = dto.updatedAt,
-                path = dto.path,
-                state = dto.state,
-                colors = dto.colors,
-                imageKey = dto.image?.key,
-                trusted = dto.trusted,
-                access = ContentAccessDetails.create(dto.access, dto.owner.id),
-                translations = translations,
-                primaryLanguage = language
-            )
-        }
     }
 }

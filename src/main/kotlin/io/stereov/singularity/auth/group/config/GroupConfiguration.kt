@@ -5,11 +5,13 @@ import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.group.controller.GroupController
 import io.stereov.singularity.auth.group.controller.GroupMemberController
 import io.stereov.singularity.auth.group.exception.handler.GroupExceptionHandler
+import io.stereov.singularity.auth.group.mapper.GroupMapper
 import io.stereov.singularity.auth.group.repository.GroupRepository
 import io.stereov.singularity.auth.group.service.GroupMemberService
 import io.stereov.singularity.auth.group.service.GroupService
 import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.global.properties.AppProperties
+import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.user.core.mapper.UserMapper
 import io.stereov.singularity.user.core.service.UserService
 import org.springframework.boot.autoconfigure.AutoConfiguration
@@ -27,32 +29,17 @@ import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRep
 @EnableReactiveMongoRepositories(basePackageClasses = [GroupRepository::class])
 class GroupConfiguration {
 
-    // Service
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun groupService(
-        groupRepository: GroupRepository,
-        appProperties: AppProperties,
-        authorizationService: AuthorizationService,
-        reactiveMongoTemplate: ReactiveMongoTemplate
-    ): GroupService {
-        return GroupService(groupRepository, appProperties, authorizationService, reactiveMongoTemplate)
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun groupMemberService(
-        userService: UserService,
-        groupService: GroupService,
-        authService: AuthorizationService
-    ) = GroupMemberService(userService, groupService, authService)
-
     // Controller
 
     @Bean
     @ConditionalOnMissingBean
-    fun groupController(service: GroupService) = GroupController(service)
+    fun groupController(
+        service: GroupService,
+        groupMapper: GroupMapper,
+    ) = GroupController(
+        service,
+        groupMapper,
+    )
 
     @Bean
     @ConditionalOnMissingBean
@@ -66,4 +53,40 @@ class GroupConfiguration {
     @Bean
     @ConditionalOnMissingBean
     fun groupExceptionHandler() = GroupExceptionHandler()
+
+    // Mapper
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun groupMapper(
+        translateService: TranslateService
+    ) = GroupMapper(translateService)
+
+    // Service
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun groupService(
+        groupRepository: GroupRepository,
+        appProperties: AppProperties,
+        authorizationService: AuthorizationService,
+        reactiveMongoTemplate: ReactiveMongoTemplate,
+        groupMapper: GroupMapper
+    ): GroupService {
+        return GroupService(
+            groupRepository,
+            appProperties,
+            authorizationService,
+            reactiveMongoTemplate,
+            groupMapper
+        )
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun groupMemberService(
+        userService: UserService,
+        groupService: GroupService,
+        authService: AuthorizationService
+    ) = GroupMemberService(userService, groupService, authService)
 }

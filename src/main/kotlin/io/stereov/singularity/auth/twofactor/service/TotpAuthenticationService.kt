@@ -4,6 +4,8 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.exception.AuthException
 import io.stereov.singularity.auth.core.exception.model.TwoFactorMethodDisabledException
+import io.stereov.singularity.auth.core.exception.model.UserAlreadyAuthenticatedException
+import io.stereov.singularity.auth.core.model.IdentityProvider
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.twofactor.dto.response.TwoFactorSetupResponse
 import io.stereov.singularity.auth.twofactor.exception.model.CannotDisableOnly2FAMethodException
@@ -51,6 +53,9 @@ class TotpAuthenticationService(
         logger.debug { "Setting up two factor authentication" }
 
         val user = authorizationService.getCurrentUser()
+        if (!user.sensitive.identities.containsKey(IdentityProvider.PASSWORD)) {
+            throw TwoFactorMethodSetupException("Cannot set up TOTP: user did not configured sign in using password.")
+        }
         if (user.sensitive.security.twoFactor.totp.enabled)
             throw TwoFactorMethodSetupException("The user already set up TOTP")
 
@@ -79,6 +84,10 @@ class TotpAuthenticationService(
     suspend fun validateSetup(token: String, code: Int): UserResponse {
         val user = authorizationService.getCurrentUser()
         val setupToken = setupTokenService.validate(token)
+
+        if (!user.sensitive.identities.containsKey(IdentityProvider.PASSWORD)) {
+            throw TwoFactorMethodSetupException("Cannot set up TOTP: user did not configured sign in using password.")
+        }
 
         if (user.sensitive.security.twoFactor.totp.enabled)
             throw TwoFactorMethodSetupException("The user already set up TOTP")
@@ -127,11 +136,10 @@ class TotpAuthenticationService(
     suspend fun recoverUser(exchange: ServerWebExchange, recoveryCode: String): UserDocument {
         logger.debug { "Recovering user" }
 
-        val userId = try {
-            authorizationService.getCurrentUserId()
-        } catch (_: Exception) {
-            twoFactorAuthTokenService.extract(exchange).userId
-        }
+        if (authorizationService.isAuthenticated())
+            throw UserAlreadyAuthenticatedException("Recovery failed: user is already authenticated")
+
+        val userId = twoFactorAuthTokenService.extract(exchange).userId
 
         val user = userService.findById(userId)
         val recoveryCodeHashes = user.sensitive.security.twoFactor.totp.recoveryCodes

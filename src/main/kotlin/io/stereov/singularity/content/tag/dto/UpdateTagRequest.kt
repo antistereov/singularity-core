@@ -1,10 +1,10 @@
 package io.stereov.singularity.content.tag.dto
 
-import io.stereov.singularity.content.translate.model.Language
+import java.util.*
 
 data class UpdateTagRequest(
     val key: String?,
-    val translations: Map<Language, TagTranslationUpdateRequest>
+    val translations: Map<Locale, TagTranslationUpdateRequest>
 ) {
 
     data class TagTranslationUpdateRequest(

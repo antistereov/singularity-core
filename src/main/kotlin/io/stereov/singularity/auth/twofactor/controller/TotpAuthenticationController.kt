@@ -2,9 +2,7 @@ package io.stereov.singularity.auth.twofactor.controller
 
 import io.stereov.singularity.auth.core.component.CookieCreator
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
-import io.stereov.singularity.auth.core.exception.model.UserAlreadyAuthenticatedException
 import io.stereov.singularity.auth.core.properties.AuthProperties
-import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.core.service.token.AccessTokenService
 import io.stereov.singularity.auth.core.service.token.RefreshTokenService
 import io.stereov.singularity.auth.core.service.token.SessionTokenService
@@ -18,6 +16,7 @@ import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.core.mapper.UserMapper
+import io.swagger.v3.oas.annotations.ExternalDocumentation
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
@@ -32,8 +31,7 @@ import java.util.*
 @RestController
 @RequestMapping("/api/auth/2fa/totp")
 @Tag(
-    name = "TOTP Two-Factor Authentication",
-    description = "Operations related to TOTP."
+    name = "Two-Factor Authentication"
 )
 class TotpAuthenticationController(
     private val totpAuthenticationService: TotpAuthenticationService,
@@ -44,15 +42,15 @@ class TotpAuthenticationController(
     private val userMapper: UserMapper,
     private val authProperties: AuthProperties,
     private val sessionTokenService: SessionTokenService,
-    private val authorizationService: AuthorizationService
 ) {
 
     @GetMapping("/setup")
     @Operation(
-        summary = "Get 2FA secret and recovery codes",
+        summary = "Get TOTP Setup Details",
         description = "Get a 2FA secret, recovery codes and a TOTP URL. " +
                 "This information will be stored inside a token that you will get in the response. " +
                 "Use this token to perform the validation.",
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/two-factor#setup"),
         security = [
             SecurityRequirement(name = OpenApiConstants.ACCESS_TOKEN_HEADER),
             SecurityRequirement(name = OpenApiConstants.ACCESS_TOKEN_COOKIE)
@@ -70,12 +68,12 @@ class TotpAuthenticationController(
             ),
             ApiResponse(
                 responseCode = "403",
-                description = "The user already enabled TOTP.",
+                description = "The did not configure authentication using password or the user already enabled TOTP.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
     )
-    suspend fun getTotpDetails(): ResponseEntity<TwoFactorSetupResponse> {
+    suspend fun getTotpSetupDetails(): ResponseEntity<TwoFactorSetupResponse> {
         val res = totpAuthenticationService.getTotpDetails()
 
         return ResponseEntity.ok().body(res)
@@ -83,8 +81,9 @@ class TotpAuthenticationController(
 
     @PostMapping("/setup")
     @Operation(
-        summary = "Set up TOTP",
+        summary = "Enable TOTP as 2FA Method",
         description = "Set up TOTP for a user using a TOTPSetupToken and the TOTP code.",
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/two-factor#setup"),
         security = [
             SecurityRequirement(name = OpenApiConstants.ACCESS_TOKEN_HEADER),
             SecurityRequirement(name = OpenApiConstants.ACCESS_TOKEN_COOKIE),
@@ -109,7 +108,7 @@ class TotpAuthenticationController(
             )
         ]
     )
-    suspend fun setUpTotp(
+    suspend fun enableTotpAsTwoFactorMethod(
         @RequestBody setupRequest: TwoFactorVerifySetupRequest
     ): ResponseEntity<UserResponse> {
         return ResponseEntity.ok(
@@ -119,8 +118,9 @@ class TotpAuthenticationController(
 
     @DeleteMapping
     @Operation(
-        summary = "Disable TOTP",
+        summary = "Disable TOTP as 2FA Method",
         description = "Disable TOTP for the current user.",
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/two-factor#disable"),
         security = [
             SecurityRequirement(name = OpenApiConstants.ACCESS_TOKEN_HEADER),
             SecurityRequirement(name = OpenApiConstants.ACCESS_TOKEN_COOKIE),
@@ -140,16 +140,21 @@ class TotpAuthenticationController(
             )
         ]
     )
-    suspend fun disableTwoFactorAuth(): ResponseEntity<UserResponse> {
+    suspend fun disableTotpAsTwoFactorMethod(): ResponseEntity<UserResponse> {
         return ResponseEntity.ok(totpAuthenticationService.disable())
     }
 
     @PostMapping("/recover")
     @Operation(
-        summary = "User recovery",
+        summary = "Recover From TOTP",
         description = "Recover the user if they lost access to their 2FA device. " +
                 "After successful recovery, an AccessToken, RefreshToken and StepUpToken will be set " +
                 "as HTTP-only cookies and returned in the response body if header authentication is enabled.",
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/two-factor#recovery"),
+        security = [
+            SecurityRequirement(name = OpenApiConstants.TWO_FACTOR_AUTHENTICATION_TOKEN_HEADER),
+            SecurityRequirement(name = OpenApiConstants.TWO_FACTOR_AUTHENTICATION_TOKEN_COOKIE)
+        ],
         responses = [
             ApiResponse(
                 responseCode = "200",
@@ -169,13 +174,11 @@ class TotpAuthenticationController(
             ),
         ]
     )
-    suspend fun recoverUser(
+    suspend fun recoverFromTotp(
         @RequestParam("code") code: String,
         exchange: ServerWebExchange,
         @RequestBody session: SessionInfoRequest?
     ): ResponseEntity<TwoFactorRecoveryResponse> {
-        if (authorizationService.isAuthenticated())
-            throw UserAlreadyAuthenticatedException("Recovery failed: user is already authenticated")
 
         val user = totpAuthenticationService.recoverUser(exchange, code)
         val sessionId = UUID.randomUUID()

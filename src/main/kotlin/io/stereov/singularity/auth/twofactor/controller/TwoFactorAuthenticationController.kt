@@ -17,6 +17,7 @@ import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.core.mapper.UserMapper
+import io.swagger.v3.oas.annotations.ExternalDocumentation
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
@@ -34,7 +35,7 @@ import java.util.*
 @RestController
 @RequestMapping("/api/auth/2fa")
 @Tag(
-    name = "Two Factor Authentication",
+    name = "Two-Factor Authentication",
     description = "Operations related to two-factor authentication"
 )
 class TwoFactorAuthenticationController(
@@ -51,12 +52,13 @@ class TwoFactorAuthenticationController(
 
     @PostMapping("/login")
     @Operation(
-        summary = "Perform second factor for login",
+        summary = "Complete Login",
         description = "Perform second factor for login. " +
                 "A TwoFactorAuthenticationToken is required. " +
                 "This token can be obtained by calling POST /api/auth/login. " +
                 "If successful, an AccessToken and RefreshToken will be set as HTTP-only cookies " +
                 "and returned in the response body if header authentication is enabled.",
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/two-factor"),
         security = [
             SecurityRequirement(name = OpenApiConstants.TWO_FACTOR_AUTHENTICATION_TOKEN_HEADER),
             SecurityRequirement(name = OpenApiConstants.TWO_FACTOR_AUTHENTICATION_TOKEN_COOKIE)
@@ -79,7 +81,7 @@ class TwoFactorAuthenticationController(
             )
         ]
     )
-    suspend fun verifyLogin(
+    suspend fun completeLogin(
         exchange: ServerWebExchange,
         @RequestBody req: TwoFactorAuthenticationRequest
     ): ResponseEntity<LoginResponse> {
@@ -110,12 +112,15 @@ class TwoFactorAuthenticationController(
 
     @PostMapping("/step-up")
     @Operation(
-        summary = "Perform second factor for step-up",
+        summary = "Complete Step-Up",
         description = "Perform second factor for step-up. " +
                 "A TwoFactorAuthenticationToken is required. " +
                 "This token can be obtained by calling POST /api/auth/step-up. " +
                 "If successful, a StepUpToken will be set as HTTP-only cookie " +
                 "and returned in the response body if header authentication is enabled.",
+        externalDocs = ExternalDocumentation(
+            url = "https://singularity.stereov.io/docs/auth/two-factor",
+        ),
         security = [
             SecurityRequirement(name = OpenApiConstants.ACCESS_TOKEN_HEADER),
             SecurityRequirement(name = OpenApiConstants.ACCESS_TOKEN_COOKIE),
@@ -140,7 +145,7 @@ class TwoFactorAuthenticationController(
             )
         ]
     )
-    suspend fun verifyStepUp(
+    suspend fun completeStepUp(
         @RequestBody req: TwoFactorAuthenticationRequest,
         exchange: ServerWebExchange
     ): ResponseEntity<StepUpResponse> {
@@ -156,8 +161,9 @@ class TwoFactorAuthenticationController(
 
     @PostMapping("/preferred-method")
     @Operation(
-        summary = "Change the preferred 2FA method",
+        summary = "Change Preferred 2FA Method",
         description = "Change the preferred 2FA method. Step-up is required.",
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/two-factor#changing-the-preferred-method"),
         security = [
             SecurityRequirement(name = OpenApiConstants.ACCESS_TOKEN_HEADER),
             SecurityRequirement(name = OpenApiConstants.ACCESS_TOKEN_COOKIE),
@@ -182,7 +188,7 @@ class TwoFactorAuthenticationController(
             )
         ]
     )
-    suspend fun updatePreferredMethod(
+    suspend fun changePreferredMethod(
         @RequestBody req: UpdatePreferredTwoFactorMethodRequest
     ): ResponseEntity<UserResponse> {
         return ResponseEntity.ok(

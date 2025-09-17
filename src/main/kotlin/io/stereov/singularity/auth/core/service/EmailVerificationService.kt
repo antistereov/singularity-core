@@ -5,15 +5,15 @@ import io.stereov.singularity.auth.core.dto.response.MailCooldownResponse
 import io.stereov.singularity.auth.core.exception.AuthException
 import io.stereov.singularity.auth.core.properties.EmailVerificationProperties
 import io.stereov.singularity.auth.core.service.token.EmailVerificationTokenService
-import io.stereov.singularity.content.translate.model.Language
-import io.stereov.singularity.content.translate.model.TranslateKey
-import io.stereov.singularity.content.translate.service.TranslateService
-import io.stereov.singularity.mail.core.exception.model.MailCooldownException
-import io.stereov.singularity.mail.core.properties.MailProperties
-import io.stereov.singularity.mail.core.service.MailService
-import io.stereov.singularity.mail.core.util.MailConstants
-import io.stereov.singularity.mail.template.service.TemplateService
-import io.stereov.singularity.mail.template.util.TemplateBuilder
+import io.stereov.singularity.global.properties.AppProperties
+import io.stereov.singularity.email.core.exception.model.EmailCooldownException
+import io.stereov.singularity.email.core.properties.EmailProperties
+import io.stereov.singularity.email.core.service.EmailService
+import io.stereov.singularity.email.core.util.EmailConstants
+import io.stereov.singularity.email.template.service.TemplateService
+import io.stereov.singularity.email.template.util.TemplateBuilder
+import io.stereov.singularity.translate.model.TranslateKey
+import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.core.mapper.UserMapper
 import io.stereov.singularity.user.core.model.UserDocument
@@ -23,6 +23,7 @@ import org.bson.types.ObjectId
 import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.stereotype.Service
 import java.time.Duration
+import java.util.*
 
 @Service
 class EmailVerificationService(
@@ -31,11 +32,12 @@ class EmailVerificationService(
     private val emailVerificationTokenService: EmailVerificationTokenService,
     private val userMapper: UserMapper,
     private val redisTemplate: ReactiveRedisTemplate<String, String>,
-    private val mailProperties: MailProperties,
+    private val emailProperties: EmailProperties,
     private val emailVerificationProperties: EmailVerificationProperties,
     private val translateService: TranslateService,
-    private val mailService: MailService,
-    private val templateService: TemplateService
+    private val emailService: EmailService,
+    private val templateService: TemplateService,
+    private val appProperties: AppProperties
 ) {
 
     private val logger = KotlinLogging.logger {}
@@ -90,11 +92,11 @@ class EmailVerificationService(
      *
      * This method generates a verification token and sends it to the user's email address.
      */
-    suspend fun sendEmailVerificationToken(lang: Language) {
+    suspend fun sendEmailVerificationToken(locale: Locale?) {
         logger.debug { "Sending email verification token" }
 
         val user = authorizationService.getCurrentUser()
-        return sendVerificationEmail(user, lang)
+        return sendVerificationEmail(user, locale)
     }
 
     /**
@@ -129,7 +131,7 @@ class EmailVerificationService(
 
         val key = "email-verification-cooldown:$userId"
         val isNewKey = redisTemplate.opsForValue()
-            .setIfAbsent(key, "1", Duration.ofSeconds(mailProperties.sendCooldown))
+            .setIfAbsent(key, "1", Duration.ofSeconds(emailProperties.sendCooldown))
             .awaitSingleOrNull()
             ?: false
 
@@ -151,14 +153,15 @@ class EmailVerificationService(
      *
      * @param user The user to send the verification email to.
      */
-    suspend fun sendVerificationEmail(user: UserDocument, lang: Language, newEmail: String? = null) {
+    suspend fun sendVerificationEmail(user: UserDocument, locale: Locale?, newEmail: String? = null) {
         logger.debug { "Sending verification email to ${newEmail ?: user.sensitive.email}" }
 
         val userId = user.id
+        val actualLocale = locale ?: appProperties.locale
 
         val remainingCooldown = getRemainingCooldown(userId)
         if (remainingCooldown > 0) {
-            throw MailCooldownException(remainingCooldown)
+            throw EmailCooldownException(remainingCooldown)
         }
 
         val secret = user.sensitive.security.mail.verificationSecret
@@ -168,18 +171,18 @@ class EmailVerificationService(
         val verificationUrl = generateVerificationUrl(token)
 
         val slug = "email_verification"
-        val templatePath = "${MailConstants.TEMPLATE_DIR}/$slug.html"
+        val templatePath = "${EmailConstants.TEMPLATE_DIR}/$slug.html"
 
-        val subject = translateService.translate(TranslateKey("$slug.subject"), MailConstants.RESOURCE_BUNDLE, lang)
+        val subject = translateService.translateResourceKey(TranslateKey("$slug.subject"), EmailConstants.RESOURCE_BUNDLE, actualLocale)
         val content = TemplateBuilder.fromResource(templatePath)
-            .translate(MailConstants.RESOURCE_BUNDLE, lang)
+            .translate(EmailConstants.RESOURCE_BUNDLE, actualLocale)
             .replacePlaceholders(templateService.getPlaceholders(mapOf(
                 "name" to user.sensitive.name,
                 "verification_url" to verificationUrl
             )))
             .build()
 
-        mailService.sendEmail(email, subject, content, lang)
+        emailService.sendEmail(email, subject, content, actualLocale)
         startCooldown(userId)
     }
 

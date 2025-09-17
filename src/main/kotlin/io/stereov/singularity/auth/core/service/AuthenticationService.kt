@@ -9,14 +9,15 @@ import io.stereov.singularity.auth.core.dto.request.StepUpRequest
 import io.stereov.singularity.auth.core.exception.AuthException
 import io.stereov.singularity.auth.core.exception.model.InvalidCredentialsException
 import io.stereov.singularity.auth.core.exception.model.UserAlreadyAuthenticatedException
-import io.stereov.singularity.auth.twofactor.properties.TwoFactorMailCodeProperties
-import io.stereov.singularity.content.translate.model.Language
+import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.global.properties.AppProperties
+import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.user.core.exception.model.EmailAlreadyExistsException
 import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.service.UserService
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 class AuthenticationService(
@@ -27,7 +28,8 @@ class AuthenticationService(
     private val accessTokenCache: AccessTokenCache,
     private val emailVerificationService: EmailVerificationService,
     private val appProperties: AppProperties,
-    private val factorMailCodeProperties: TwoFactorMailCodeProperties
+    private val factorMailCodeProperties: TwoFactorEmailCodeProperties,
+    private val emailProperties: EmailProperties
 ) {
 
     private val logger: KLogger
@@ -71,7 +73,7 @@ class AuthenticationService(
      * @throws EmailAlreadyExistsException If the email already exists in the system.
      * @throws io.stereov.singularity.auth.core.exception.AuthException If the user document does not contain an ID.
      */
-    suspend fun register(payload: RegisterUserRequest, sendEmail: Boolean, lang: Language): UserDocument {
+    suspend fun register(payload: RegisterUserRequest, sendEmail: Boolean, locale: Locale?): UserDocument {
         logger.debug { "Registering user ${payload.email}" }
 
         if (authorizationService.isAuthenticated())
@@ -85,13 +87,13 @@ class AuthenticationService(
             email = payload.email,
             password = hashService.hashBcrypt(payload.password),
             name = payload.name,
-            mailEnabled = appProperties.enableMail,
+            mailEnabled = emailProperties.enable,
             mailTwoFactorCodeExpiresIn = factorMailCodeProperties.expiresIn
         )
 
         val savedUserDocument = userService.save(userDocument)
 
-        if (sendEmail && appProperties.enableMail) emailVerificationService.sendVerificationEmail(savedUserDocument, lang)
+        if (sendEmail && emailProperties.enable) emailVerificationService.sendVerificationEmail(savedUserDocument, locale)
 
         return savedUserDocument
     }

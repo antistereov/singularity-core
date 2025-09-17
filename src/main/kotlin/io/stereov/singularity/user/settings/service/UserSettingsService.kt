@@ -6,11 +6,10 @@ import io.stereov.singularity.auth.core.exception.model.WrongIdentityProviderExc
 import io.stereov.singularity.auth.core.model.IdentityProvider
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.core.service.EmailVerificationService
-import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.file.core.exception.model.UnsupportedMediaTypeException
 import io.stereov.singularity.file.core.service.FileStorage
-import io.stereov.singularity.global.properties.AppProperties
+import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.core.exception.model.EmailAlreadyExistsException
 import io.stereov.singularity.user.core.mapper.UserMapper
@@ -22,6 +21,7 @@ import io.stereov.singularity.user.settings.dto.request.ChangeUserRequest
 import org.springframework.http.MediaType
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 class UserSettingsService(
@@ -29,15 +29,15 @@ class UserSettingsService(
     private val emailVerificationService: EmailVerificationService,
     private val userService: UserService,
     private val hashService: HashService,
-    private val appProperties: AppProperties,
     private val fileStorage: FileStorage,
     private val accessTokenCache: AccessTokenCache,
-    private val userMapper: UserMapper
+    private val userMapper: UserMapper,
+    private val emailProperties: EmailProperties
 ) {
 
     private val logger = KotlinLogging.logger {}
 
-    suspend fun changeEmail(payload: ChangeEmailRequest, lang: Language): UserDocument {
+    suspend fun changeEmail(payload: ChangeEmailRequest, locale: Locale?): UserDocument {
         logger.debug { "Changing email" }
 
         val user = authorizationService.getCurrentUser()
@@ -48,8 +48,8 @@ class UserSettingsService(
             throw EmailAlreadyExistsException("Failed to register user ${payload.newEmail}")
         }
 
-        if (appProperties.enableMail) {
-            emailVerificationService.sendVerificationEmail(user, lang, payload.newEmail)
+        if (emailProperties.enable) {
+            emailVerificationService.sendVerificationEmail(user, locale, payload.newEmail)
         } else {
             user.sensitive.email = payload.newEmail
             user.sensitive.security.mail.verified = true

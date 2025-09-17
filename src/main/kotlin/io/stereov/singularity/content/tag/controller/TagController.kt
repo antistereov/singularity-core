@@ -4,40 +4,46 @@ import io.stereov.singularity.content.tag.dto.CreateTagRequest
 import io.stereov.singularity.content.tag.dto.KeyContainsResponse
 import io.stereov.singularity.content.tag.dto.TagResponse
 import io.stereov.singularity.content.tag.dto.UpdateTagRequest
+import io.stereov.singularity.content.tag.mapper.TagMapper
 import io.stereov.singularity.content.tag.service.TagService
-import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.global.model.SuccessResponse
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.util.*
 
 @RestController
 @RequestMapping("/api/content/tags")
 class TagController(
-    private val service: TagService
+    private val service: TagService,
+    private val tagMapper: TagMapper
 ) {
 
     @PostMapping
-    suspend fun create(@RequestBody req: CreateTagRequest): ResponseEntity<TagResponse> {
-        return ResponseEntity.ok(service.create(req).toResponse(req.lang))
+    suspend fun createTag(@RequestBody req: CreateTagRequest): ResponseEntity<TagResponse> {
+        return ResponseEntity.ok(
+            tagMapper.createTagResponse(service.create(req), req.languageTag)
+        )
     }
 
     @GetMapping("/{key}")
-    suspend fun findByKey(
+    suspend fun findTagByKey(
         @PathVariable key: String,
-        @RequestParam lang: Language = Language.EN
+        @RequestParam locale: Locale?
     ): ResponseEntity<TagResponse> {
-        return ResponseEntity.ok(service.findByKey(key).toResponse(lang))
+        return ResponseEntity.ok(
+            tagMapper.createTagResponse(service.findByKey(key), locale)
+        )
     }
 
     @GetMapping
-    suspend fun findByKeyContains(
+    suspend fun findTagByKeyContains(
         @RequestParam substring: String,
-        @RequestParam lang: Language = Language.EN,
+        @RequestParam locale: Locale?,
     ): ResponseEntity<KeyContainsResponse> {
-        val tagList = service.findByNameContains(substring, lang)
+        val tagList = service.findByNameContains(substring, locale)
 
         return ResponseEntity.ok(
-            KeyContainsResponse(tagList.map { it.toResponse(lang) }, tagList.size)
+            KeyContainsResponse(tagList.map { tagMapper.createTagResponse(it, locale) }, tagList.size)
         )
     }
 
@@ -45,9 +51,9 @@ class TagController(
     suspend fun updateTag(
         @PathVariable key: String,
         @RequestBody req: UpdateTagRequest,
-        @RequestParam lang: Language = Language.EN
+        @RequestParam locale: Locale?
     ): ResponseEntity<TagResponse> {
-        return ResponseEntity.ok(service.updateTag(key, req).toResponse(lang))
+        return ResponseEntity.ok(tagMapper.createTagResponse(service.updateTag(key, req), locale))
     }
 
     @DeleteMapping("/{key}")

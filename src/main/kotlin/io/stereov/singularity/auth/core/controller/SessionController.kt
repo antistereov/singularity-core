@@ -10,12 +10,14 @@ import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.auth.core.service.SessionService
 import io.stereov.singularity.auth.core.service.token.SessionTokenService
 import io.stereov.singularity.global.model.ErrorResponse
+import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.global.model.SuccessResponse
+import io.swagger.v3.oas.annotations.ExternalDocumentation
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -38,13 +40,17 @@ class SessionController(
 
     @GetMapping
     @Operation(
-        summary = "Get active sessions",
+        summary = "Get Active Sessions",
         description = "Get all active sessions of the currently authenticated user.",
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/sessions#active-sessions"),
+        security = [
+            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER),
+            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE)
+        ],
         responses = [
             ApiResponse(
                 responseCode = "200",
                 description = "The list of active sessions.",
-                content = [Content(array = ArraySchema(schema = Schema(SessionInfoResponse::class)))]
             ),
             ApiResponse(
                 responseCode = "401",
@@ -53,7 +59,7 @@ class SessionController(
             )
         ]
     )
-    suspend fun getSessions(): ResponseEntity<List<SessionInfoResponse>> {
+    suspend fun getActiveSessions(): ResponseEntity<List<SessionInfoResponse>> {
         val sessions = sessionService.getSessions()
 
         return ResponseEntity.ok(sessionMapper.toSessionInfoResponse(sessions))
@@ -66,11 +72,11 @@ class SessionController(
                 "a new SessionToken instead. " +
                 "It will be set as an HTTP-only cookie and returned in the response body if header authentication " +
                 "is enabled.",
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/oauth2#1-retrieving-a-session-token"),
         responses = [
             ApiResponse(
                 responseCode = "200",
                 description = "Token generated. The token will be returned if header authentication is enabled",
-                content = [Content(schema = Schema(implementation = GenerateSessionTokenResponse::class))]
             )
         ]
     )
@@ -86,13 +92,17 @@ class SessionController(
 
     @DeleteMapping("/{sessionId}")
     @Operation(
-        summary = "Delete a session of the current user",
+        summary = "Delete Session",
         description = "Delete a session of the current user and invalidate all tokens related to this session.",
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/sessions#invalidating-a-specific-session"),
+        security = [
+            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER),
+            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE)
+        ],
         responses = [
             ApiResponse(
                 responseCode = "200",
                 description = "The list of active sessions.",
-                content = [Content(array = ArraySchema(schema = Schema(SessionInfoResponse::class)))]
             ),
             ApiResponse(
                 responseCode = "401",
@@ -110,13 +120,17 @@ class SessionController(
 
     @DeleteMapping
     @Operation(
-        summary = "Log out a user from all sessions",
+        summary = "Delete All Sessions",
         description = "Invalidates all the current session's access and refresh tokens from all sessions.",
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/sessions#invalidating-all-session"),
+        security = [
+            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER),
+            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE)
+        ],
         responses = [
             ApiResponse(
                 responseCode = "200",
                 description = "Logout successful.",
-                content = [Content(schema = Schema(implementation = SuccessResponse::class))]
             )
         ],
     )

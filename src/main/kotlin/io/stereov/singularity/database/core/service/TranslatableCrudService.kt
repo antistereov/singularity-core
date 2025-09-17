@@ -1,21 +1,23 @@
 package io.stereov.singularity.database.core.service
 
-import io.stereov.singularity.content.translate.model.Language
-import io.stereov.singularity.content.translate.model.Translatable
+import io.stereov.singularity.global.properties.AppProperties
+import io.stereov.singularity.translate.model.Translatable
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.query.Criteria
+import java.util.*
 import kotlin.reflect.full.memberProperties
 
 interface TranslatableCrudService<C: Any, T: Translatable<C>> : CrudService<T> {
 
     val contentClass: Class<C>
+    val appProperties: AppProperties
 
     private val fieldNames: List<String>
         get() = contentClass.kotlin.memberProperties.map { it.name }
 
-    suspend fun findAllPaginated(page: Int, size: Int, sort: List<String>, criteria: Criteria? = null, lang: Language): Page<T> {
+    suspend fun findAllPaginated(page: Int, size: Int, sort: List<String>, criteria: Criteria? = null, locale: Locale?): Page<T> {
 
         val pageable = if (sort.isEmpty()) {
             PageRequest.of(page, size)
@@ -23,7 +25,7 @@ interface TranslatableCrudService<C: Any, T: Translatable<C>> : CrudService<T> {
             val property = sort[0]
             val direction = sort.getOrNull(1)?.uppercase() ?: "ASC"
             val actualProperty = if (fieldNames.contains(property)) {
-                "${Translatable<*>::translations.name}.$lang.$property"
+                "${Translatable<*>::translations.name}.$locale.$property"
             } else {
                 property
             }

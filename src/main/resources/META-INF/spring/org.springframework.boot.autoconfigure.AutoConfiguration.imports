@@ -14,7 +14,7 @@ io.stereov.singularity.content.article.config.ArticleConfiguration
 io.stereov.singularity.content.core.config.ContentConfiguration
 io.stereov.singularity.content.invitation.config.InvitationConfiguration
 io.stereov.singularity.content.tag.config.TagConfiguration
-io.stereov.singularity.content.translate.config.TranslateConfiguration
+io.stereov.singularity.translate.config.TranslateConfiguration
 
 io.stereov.singularity.database.core.config.DatabaseConfiguration
 io.stereov.singularity.database.core.config.MongoConfiguration
@@ -32,8 +32,8 @@ io.stereov.singularity.global.config.WebClientConfiguration
 io.stereov.singularity.global.config.WebFluxConfiguration
 io.stereov.singularity.security.core.config.WebSecurityConfiguration
 
-io.stereov.singularity.mail.core.config.MailConfiguration
-io.stereov.singularity.mail.template.config.TemplateConfiguration
+io.stereov.singularity.email.core.config.EmailConfiguration
+io.stereov.singularity.email.template.config.TemplateConfiguration
 
 io.stereov.singularity.ratelimit.config.RateLimitConfiguration
 

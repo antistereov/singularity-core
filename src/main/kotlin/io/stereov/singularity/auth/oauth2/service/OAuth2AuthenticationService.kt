@@ -3,8 +3,8 @@ package io.stereov.singularity.auth.oauth2.service
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.oauth2.exception.model.OAuth2FlowException
-import io.stereov.singularity.auth.twofactor.properties.TwoFactorMailCodeProperties
-import io.stereov.singularity.global.properties.AppProperties
+import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties
+import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.service.UserService
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
@@ -13,10 +13,10 @@ import org.springframework.stereotype.Service
 @Service
 class OAuth2AuthenticationService(
     private val userService: UserService,
-    private val appProperties: AppProperties,
-    private val twoFactorMailCodeProperties: TwoFactorMailCodeProperties,
+    private val twoFactorEmailCodeProperties: TwoFactorEmailCodeProperties,
     private val identityProviderService: IdentityProviderService,
-    private val authorizationService: AuthorizationService
+    private val authorizationService: AuthorizationService,
+    private val emailProperties: EmailProperties
 ) {
 
     private val logger = KotlinLogging.logger {}
@@ -68,8 +68,8 @@ class OAuth2AuthenticationService(
             email = email,
             provider = provider,
             principalId = principalId,
-            mailEnabled = appProperties.enableMail,
-            mailTwoFactorCodeExpiresIn = twoFactorMailCodeProperties.expiresIn
+            mailEnabled = emailProperties.enable,
+            mailTwoFactorCodeExpiresIn = twoFactorEmailCodeProperties.expiresIn
         )
 
         return userService.save(user)

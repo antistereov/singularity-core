@@ -10,17 +10,17 @@ import io.stereov.singularity.auth.core.exception.model.WrongIdentityProviderExc
 import io.stereov.singularity.auth.core.model.IdentityProvider
 import io.stereov.singularity.auth.core.properties.PasswordResetProperties
 import io.stereov.singularity.auth.core.service.token.PasswordResetTokenService
-import io.stereov.singularity.content.translate.model.Language
-import io.stereov.singularity.content.translate.model.TranslateKey
-import io.stereov.singularity.content.translate.service.TranslateService
 import io.stereov.singularity.database.hash.service.HashService
+import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.global.util.Random
-import io.stereov.singularity.mail.core.exception.model.MailCooldownException
-import io.stereov.singularity.mail.core.properties.MailProperties
-import io.stereov.singularity.mail.core.service.MailService
-import io.stereov.singularity.mail.core.util.MailConstants
-import io.stereov.singularity.mail.template.service.TemplateService
-import io.stereov.singularity.mail.template.util.TemplateBuilder
+import io.stereov.singularity.email.core.exception.model.EmailCooldownException
+import io.stereov.singularity.email.core.properties.EmailProperties
+import io.stereov.singularity.email.core.service.EmailService
+import io.stereov.singularity.email.core.util.EmailConstants
+import io.stereov.singularity.email.template.service.TemplateService
+import io.stereov.singularity.email.template.util.TemplateBuilder
+import io.stereov.singularity.translate.model.TranslateKey
+import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.user.core.exception.model.UserDoesNotExistException
 import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.service.UserService
@@ -29,6 +29,7 @@ import org.bson.types.ObjectId
 import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.stereotype.Service
 import java.time.Duration
+import java.util.*
 
 @Service
 class PasswordResetService(
@@ -37,12 +38,13 @@ class PasswordResetService(
     private val hashService: HashService,
     private val authorizationService: AuthorizationService,
     private val redisTemplate: ReactiveRedisTemplate<String, String>,
-    private val mailProperties: MailProperties,
+    private val emailProperties: EmailProperties,
     private val passwordResetProperties: PasswordResetProperties,
     private val translateService: TranslateService,
-    private val mailService: MailService,
+    private val emailService: EmailService,
     private val templateService: TemplateService,
-    private val accessTokenCache: AccessTokenCache
+    private val accessTokenCache: AccessTokenCache,
+    private val appProperties: AppProperties
 ) {
 
     private val logger = KotlinLogging.logger {}
@@ -54,12 +56,12 @@ class PasswordResetService(
      *
      * @param req The email address of the user to send the password-reset email to.
      */
-    suspend fun sendPasswordReset(req: SendPasswordResetRequest, lang: Language) {
+    suspend fun sendPasswordReset(req: SendPasswordResetRequest, locale: Locale?) {
         logger.debug { "Sending password reset email" }
 
         try {
             val user = userService.findByEmail(req.email)
-            return sendPasswordResetEmail(user, lang)
+            return sendPasswordResetEmail(user, locale)
         } catch (_: UserDoesNotExistException) {
             return
         }
@@ -120,7 +122,7 @@ class PasswordResetService(
 
         val key = "password-reset-cooldown:$userId"
         val isNewKey = redisTemplate.opsForValue()
-            .setIfAbsent(key, "1", Duration.ofSeconds(mailProperties.sendCooldown))
+            .setIfAbsent(key, "1", Duration.ofSeconds(emailProperties.sendCooldown))
             .awaitSingleOrNull()
             ?: false
 
@@ -150,14 +152,15 @@ class PasswordResetService(
      *
      * @param user The user to send the password reset email to.
      */
-    private suspend fun sendPasswordResetEmail(user: UserDocument, lang: Language) {
+    private suspend fun sendPasswordResetEmail(user: UserDocument, locale: Locale?) {
         logger.debug { "Sending password reset email to ${user.sensitive.email}" }
 
         val userId = user.id
+        val actualLocale = locale ?: appProperties.locale
 
         val remainingCooldown = getRemainingCooldown(userId)
         if (remainingCooldown > 0) {
-            throw MailCooldownException(remainingCooldown)
+            throw EmailCooldownException(remainingCooldown)
         }
 
         val secret = user.sensitive.security.password.resetSecret
@@ -166,18 +169,18 @@ class PasswordResetService(
         val passwordResetUrl = generatePasswordResetUrl(token)
 
         val slug = "password_reset"
-        val templatePath = "${MailConstants.TEMPLATE_DIR}/$slug.html"
+        val templatePath = "${EmailConstants.TEMPLATE_DIR}/$slug.html"
 
-        val subject = translateService.translate(TranslateKey("$slug.subject"), MailConstants.RESOURCE_BUNDLE, lang)
+        val subject = translateService.translateResourceKey(TranslateKey("$slug.subject"), EmailConstants.RESOURCE_BUNDLE, actualLocale)
         val content = TemplateBuilder.fromResource(templatePath)
-            .translate(MailConstants.RESOURCE_BUNDLE, lang)
+            .translate(EmailConstants.RESOURCE_BUNDLE, actualLocale)
             .replacePlaceholders(templateService.getPlaceholders(mapOf(
                 "name" to user.sensitive.name,
                 "reset_url" to passwordResetUrl
             )))
             .build()
 
-        mailService.sendEmail(user.sensitive.email, subject, content, lang)
+        emailService.sendEmail(user.sensitive.email, subject, content, actualLocale)
         startCooldown(userId)
     }
 

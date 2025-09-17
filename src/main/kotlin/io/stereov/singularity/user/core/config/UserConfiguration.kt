@@ -7,7 +7,7 @@ import io.stereov.singularity.database.encryption.service.EncryptionService
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.global.config.ApplicationConfiguration
-import io.stereov.singularity.mail.core.config.MailConfiguration
+import io.stereov.singularity.email.core.config.EmailConfiguration
 import io.stereov.singularity.user.core.controller.UserController
 import io.stereov.singularity.user.core.exception.handler.UserExceptionHandler
 import io.stereov.singularity.user.core.mapper.UserMapper
@@ -24,7 +24,7 @@ import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRep
     after = [
         ApplicationConfiguration::class,
         AuthenticationConfiguration::class,
-        MailConfiguration:: class,
+        EmailConfiguration:: class,
     ]
 )
 @EnableReactiveMongoRepositories(basePackageClasses = [UserRepository::class])

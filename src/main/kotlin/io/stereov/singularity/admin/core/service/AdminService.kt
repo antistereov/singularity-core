@@ -3,10 +3,11 @@ package io.stereov.singularity.admin.core.service
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.admin.core.dto.RotationStatusResponse
-import io.stereov.singularity.auth.twofactor.properties.TwoFactorMailCodeProperties
+import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties
 import io.stereov.singularity.database.core.service.SensitiveCrudService
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.global.properties.AppProperties
+import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.secrets.core.service.SecretService
 import io.stereov.singularity.user.core.model.Role
 import io.stereov.singularity.user.core.model.UserDocument
@@ -28,7 +29,8 @@ class AdminService(
     private val userService: UserService,
     private val appProperties: AppProperties,
     private val hashService: HashService,
-    private val twoFactorMailCodeProperties: TwoFactorMailCodeProperties
+    private val twoFactorEmailCodeProperties: TwoFactorEmailCodeProperties,
+    private val emailProperties: EmailProperties
 ) {
 
     private val logger: KLogger
@@ -52,8 +54,8 @@ class AdminService(
                 email = appProperties.rootEmail,
                 password = hashService.hashBcrypt(appProperties.rootPassword),
                 name = "Root",
-                mailEnabled = appProperties.enableMail,
-                mailTwoFactorCodeExpiresIn = twoFactorMailCodeProperties.expiresIn
+                mailEnabled = emailProperties.enable,
+                mailTwoFactorCodeExpiresIn = twoFactorEmailCodeProperties.expiresIn
             ).addRole(Role.ADMIN)
 
             this.userService.save(rootUser)
