@@ -2778,7 +2778,7 @@ components:
       properties:
         key:
           type: string
-        languageTag:
+        locale:
           type: string
         name:
           type: string
@@ -2786,7 +2786,6 @@ components:
           type: string
       required:
       - key
-      - languageTag
       - name
     InviteUserToContentRequest:
       type: object
@@ -3409,9 +3408,9 @@ components:
     SortObject:
       type: object
       properties:
-        sorted:
-          type: boolean
         unsorted:
+          type: boolean
+        sorted:
           type: boolean
         empty:
           type: boolean
