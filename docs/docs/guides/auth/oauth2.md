@@ -95,12 +95,12 @@ You only have the possibility to override certain tokens in the request header.
 
 Authentication in *Singularity* strongly relies on sessions.
 Access tokens and refresh tokens are bound to a specific session for example. 
-You can learn more about that [here](/sessions).
+You can learn more about that [here](./sessions).
 
 Therefore, before authenticating via an OAuth2 client, 
 you need to retrieve a [`SessionToken`](./tokens#session-token) using [`POST /api/auth/sessions/token`](../../api/generate-session-token.api.mdx).
 This sets the [`SessionToken`](./tokens#session-token) as an HTTP-only cookie and returns the value in the response body 
-if [header authentication](/securing-endpoints#header-authentication) is enabled.
+if [header authentication](./securing-endpoints#header-authentication) is enabled.
 
 ### 2. Calling the Spring OAuth2 Authorization Endpoint
 
@@ -143,7 +143,7 @@ You can request a [`StepUpToken`](./tokens#step-up-token) by adding the paramete
 
 This will set the [`StepUpToken`](./tokens#step-up-token) as an HTTP-only cookie.
 
-You can learn more about step-up authentication [here](/authentication#step-up).
+You can learn more about step-up authentication [here](./authentication#step-up).
 
 ## Managing Providers
 
@@ -174,7 +174,7 @@ Placing them in the header will not lead to a successful connection since they w
 #### 2. Create an OAuth2 Provider Connection Token
 
 Call [`POST /api/auth/providers/oauth2/token`](../../api/generate-o-auth-2-provider-connection-token.api.mdx) authenticated as the user to create an [`OAuth2ProviderConnectionToken`](./tokens#oauth2-provider-connection-token).
-This token will be set as an HTTP-only cookie and returned in the response if [header-authentication](/securing-endpoints#header-authentication) is enabled.
+This token will be set as an HTTP-only cookie and returned in the response if [header-authentication](./securing-endpoints#header-authentication) is enabled.
 
 #### 3. Follow the Steps For Registration
 

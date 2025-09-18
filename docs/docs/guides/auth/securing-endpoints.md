@@ -109,7 +109,7 @@ You can be more fine-grained in your requirements.
 Define and use custom groups and limit access to members of this group only.
 
 :::note
-Everything about creating and using groups is covered here: [Groups](/groups).
+Everything about creating and using groups is covered here: [Groups](./groups).
 :::
 
 ```kotlin
