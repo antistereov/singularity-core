@@ -1,7 +1,6 @@
 package io.stereov.singularity.auth.core.config
 
 import io.lettuce.core.ExperimentalLettuceCoroutinesApi
-import io.lettuce.core.api.coroutines.RedisCoroutinesCommands
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.component.CookieCreator
 import io.stereov.singularity.auth.core.component.TokenValueExtractor
