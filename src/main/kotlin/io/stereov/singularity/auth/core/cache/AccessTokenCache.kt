@@ -3,10 +3,8 @@ package io.stereov.singularity.auth.core.cache
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.lettuce.core.ExperimentalLettuceCoroutinesApi
-import io.lettuce.core.api.coroutines.RedisCoroutinesCommands
 import io.stereov.singularity.auth.jwt.properties.JwtProperties
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.map
+import io.stereov.singularity.cache.service.CacheService
 import org.bson.types.ObjectId
 import org.springframework.stereotype.Service
 import java.util.*
@@ -22,7 +20,7 @@ import java.util.*
 @Service
 @OptIn(ExperimentalLettuceCoroutinesApi::class)
 class AccessTokenCache(
-    private val commands: RedisCoroutinesCommands<String, ByteArray>,
+    private val cacheService: CacheService,
     jwtProperties: JwtProperties,
 ) {
 
@@ -42,8 +40,7 @@ class AccessTokenCache(
         logger.debug { "Adding token ID for user $userId" }
 
         val key = "$activeTokenKey:${userId.toHexString()}:${sessionId}:$tokenId"
-        commands.sadd(key, tokenId.toByteArray())
-        commands.expire(key, expiresIn)
+        cacheService.put(key, tokenId, expiresIn)
     }
 
     /**
@@ -57,7 +54,7 @@ class AccessTokenCache(
         logger.debug { "Checking validity of token for user $userId" }
 
         val key = "$activeTokenKey:${userId.toHexString()}:${sessionId}:$tokenId"
-        return commands.exists(key) == 1L
+        return cacheService.exists(key)
     }
 
     /**
@@ -71,17 +68,13 @@ class AccessTokenCache(
         logger.debug { "Removing token for user $userId" }
 
         val key = "$activeTokenKey:${userId.toHexString()}:${sessionId}:$tokenId"
-        return commands.del(key) == 1L
+        return cacheService.delete(key) == 1L
     }
 
     suspend fun invalidateSessionTokens(userId: ObjectId, sessionId: UUID) {
         logger.debug { "Invalidating all tokens for user $userId and session $sessionId" }
 
-        val keys = commands.keys("$activeTokenKey:$userId:${sessionId}:*")
-
-        keys.map { key ->
-            commands.del(key)
-        }.collect()
+        cacheService.deleteAll("$activeTokenKey:$userId:${sessionId}:*")
     }
 
     /**
@@ -92,10 +85,6 @@ class AccessTokenCache(
     suspend fun invalidateAllTokens(userId: ObjectId) {
         logger.debug { "Invalidating all tokens for user $userId" }
 
-        val keys = commands.keys("$activeTokenKey:$userId:*")
-
-        keys.map { key ->
-            commands.del(key)
-        }.collect()
+        cacheService.deleteAll("$activeTokenKey:$userId:*")
     }
 }

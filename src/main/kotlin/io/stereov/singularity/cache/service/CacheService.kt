@@ -18,8 +18,8 @@ import org.springframework.stereotype.Service
  */
 @Service
 @OptIn(ExperimentalLettuceCoroutinesApi::class)
-class RedisService(
-    val commands: RedisCoroutinesCommands<String, ByteArray>,
+class CacheService(
+    val redisCommands: RedisCoroutinesCommands<String, ByteArray>,
     val objectMapper: ObjectMapper
 ) {
     val logger: KLogger
@@ -27,30 +27,52 @@ class RedisService(
 
     /**
      * Saves a value to Redis with the given key.
+     * If a value on this key already existed, it will be replaced.
      *
      * @param key The key to save the value under.
      * @param value The value to save.
+     * @param expiresIn The number of seconds until the key expires. If null, it will never expire.
      */
-    suspend fun <T: Any> saveData(key: String, value: T) {
+    suspend fun <T: Any> put(key: String, value: T, expiresIn: Long? = null): T {
         logger.debug { "Saving value: $value for key: $key to Redis" }
 
         val string = objectMapper.writeValueAsString(value)
-        commands.set(key, string.toByteArray())
+        if (expiresIn != null) {
+            redisCommands.setex(key, expiresIn, string.toByteArray())
+        } else {
+            redisCommands.set(key, string.toByteArray())
+        }
+
+        return value
+    }
+
+    /**
+     * Checks if a value saved on the given key exists.
+     *
+     * @param key The key.
+     *
+     * @return True if a value on this key exists, of false if not.
+     */
+    suspend fun exists(key: String): Boolean {
+        logger.debug { "Checking if value for key $key exists" }
+
+        return redisCommands.exists(key)?.let { it > 0 } ?: false
     }
 
     /**
      * Retrieves a value from Redis by its key.
      *
      * @param key The key to retrieve the value for.
+     * @param T The type of the value.
      *
      * @return The value associated with the key.
      *
      * @throws RedisKeyNotFoundException If the key is not found in Redis.
      */
-    final suspend inline fun <reified T: Any> getData(key: String): T {
+    final suspend inline fun <reified T: Any> get(key: String): T {
         logger.debug { "Getting value for key: $key" }
 
-        return getDataOrNull(key)
+        return getOrNull(key)
             ?: throw RedisKeyNotFoundException(key)
     }
 
@@ -58,35 +80,54 @@ class RedisService(
      * Retrieves a value from Redis by its key.
      *
      * @param key The key to retrieve the value for.
+     * @param T The type of the data.
      *
      * @return The value associated with the key, or null if not found.
      */
-    final suspend inline fun <reified T: Any>getDataOrNull(key: String): T? {
+    final suspend inline fun <reified T: Any>getOrNull(key: String): T? {
         logger.debug { "Getting value for key: $key" }
 
-        return commands.get(key)
+        return redisCommands.get(key)
             ?.let { objectMapper.readValue<T>(it) }
     }
 
     /**
-     * Deletes a value from Redis by its key.
+     * Deletes one or more keys.
      *
      * This method removes the specified key and its associated value from Redis.
      *
-     * @param key The key to delete.
+     * @param keys The keys to delete.
+     *
+     * @return The number of deleted keys.
      */
-    suspend fun deleteData(key: String) {
-        logger.debug { "Deleting data for key: $key" }
+    suspend fun delete(vararg keys: String): Long? {
+        logger.debug { "Deleting data for keys: $keys" }
 
-        commands.del(key)
+        return redisCommands.unlink(*keys)
     }
 
     /**
      * Deletes all data from Redis.
      *
      * This method clears all keys and values from the Redis database.
+     *
+     * @param pattern Delete only keys matching the pattern.
      */
-    suspend fun deleteAll() {
-        commands.flushall()
+    suspend fun deleteAll(pattern: String? = null) {
+        if (pattern == null) {
+            redisCommands.flushall()
+            return
+        }
+
+        val keys = mutableListOf<String>()
+        redisCommands.keys(pattern).collect { key ->
+            keys.add(key)
+            if (keys.size >= 1000) {
+                redisCommands.unlink(*keys.toTypedArray())
+                keys.clear()
+            }
+        }
+
+        if (keys.isNotEmpty()) redisCommands.unlink(*keys.toTypedArray())
     }
 }
