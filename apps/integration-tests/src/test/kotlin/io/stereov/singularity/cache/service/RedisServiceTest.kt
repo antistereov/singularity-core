@@ -14,11 +14,11 @@ import java.util.*
 class RedisServiceTest : BaseIntegrationTest() {
 
     @Autowired
-    private lateinit var redisService: RedisService
+    private lateinit var cacheService: CacheService
 
     @BeforeEach
     fun setup() = runBlocking {
-        redisService.deleteAll()
+        cacheService.deleteAll()
     }
 
     data class TestData(
@@ -34,51 +34,51 @@ class RedisServiceTest : BaseIntegrationTest() {
 
     @Test fun `save and get works`() = runTest {
         val value = TestData()
-        redisService.saveData("key", value)
+        cacheService.put("key", value)
 
-        assertEquals(value, redisService.getDataOrNull<TestData>("key"))
+        assertEquals(value, cacheService.getOrNull<TestData>("key"))
     }
     @Test fun `save overrides key`() = runTest {
-        redisService.saveData("key", "value")
-        assertEquals("value", redisService.getDataOrNull("key"))
+        cacheService.put("key", "value")
+        assertEquals("value", cacheService.getOrNull("key"))
 
-        redisService.saveData("key", "value2")
-        assertEquals("value2", redisService.getDataOrNull("key"))
+        cacheService.put("key", "value2")
+        assertEquals("value2", cacheService.getOrNull("key"))
     }
 
     @Test fun `delete works`() = runTest {
-        redisService.saveData("key", "value")
-        assertEquals("value", redisService.getDataOrNull("key"))
+        cacheService.put("key", "value")
+        assertEquals("value", cacheService.getOrNull("key"))
 
-        redisService.deleteData("key")
-        assertNull(redisService.getDataOrNull("key"))
+        cacheService.delete("key")
+        assertNull(cacheService.getOrNull("key"))
     }
     @Test fun `delete works if key does not exists`() = runTest {
-        redisService.deleteData("key")
+        cacheService.delete("key")
     }
 
     @Test fun `getDataOrNul returns null if no key exists`() = runTest {
-        assertNull(redisService.getDataOrNull("key"))
+        assertNull(cacheService.getOrNull("key"))
     }
     @Test fun `getData throws error if no key exists`() = runTest {
         assertThrowsExactly(RedisKeyNotFoundException::class.java) {
-            runBlocking { redisService.getData("key") }
+            runBlocking { cacheService.get("key") }
         }
     }
 
     @Test fun `deleteAll deletesAll`() = runTest {
-        redisService.saveData("key1", "value")
-        redisService.saveData("key2", "value")
+        cacheService.put("key1", "value")
+        cacheService.put("key2", "value")
 
-        assertEquals("value", redisService.getDataOrNull("key1"))
-        assertEquals("value", redisService.getDataOrNull("key2"))
+        assertEquals("value", cacheService.getOrNull("key1"))
+        assertEquals("value", cacheService.getOrNull("key2"))
 
-        redisService.deleteAll()
+        cacheService.deleteAll()
 
-        assertNull(redisService.getDataOrNull("key1"))
-        assertNull(redisService.getDataOrNull("key2"))
+        assertNull(cacheService.getOrNull("key1"))
+        assertNull(cacheService.getOrNull("key2"))
     }
     @Test fun `deleteAll works if no data exist`() = runTest {
-        redisService.deleteAll()
+        cacheService.deleteAll()
     }
 }

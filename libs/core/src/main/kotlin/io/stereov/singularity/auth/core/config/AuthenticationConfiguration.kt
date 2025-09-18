@@ -23,6 +23,7 @@ import io.stereov.singularity.auth.jwt.service.JwtService
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties
 import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthenticationService
 import io.stereov.singularity.auth.twofactor.service.token.TwoFactorAuthenticationTokenService
+import io.stereov.singularity.cache.service.CacheService
 import io.stereov.singularity.database.encryption.service.EncryptionService
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.email.core.properties.EmailProperties
@@ -61,9 +62,9 @@ class AuthenticationConfiguration {
     @Bean
     @ConditionalOnMissingBean
     fun accessTokenCache(
-        commands: RedisCoroutinesCommands<String, ByteArray>,
+        cacheService: CacheService,
         jwtProperties: JwtProperties
-    ) = AccessTokenCache(commands, jwtProperties)
+    ) = AccessTokenCache(cacheService, jwtProperties)
 
 
     // Component
