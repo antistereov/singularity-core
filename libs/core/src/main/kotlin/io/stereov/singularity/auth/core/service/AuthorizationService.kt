@@ -9,7 +9,6 @@ import io.stereov.singularity.auth.core.model.token.ErrorAuthenticationToken
 import io.stereov.singularity.auth.core.model.token.StepUpToken
 import io.stereov.singularity.auth.core.service.token.StepUpTokenService
 import io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException
-import io.stereov.singularity.user.core.exception.model.UserDoesNotExistException
 import io.stereov.singularity.user.core.model.Role
 import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.service.UserService
@@ -28,9 +27,6 @@ class AuthorizationService(
 
     private val logger: KLogger
         get() = KotlinLogging.logger {}
-
-    private var user: UserDocument? = null
-    private var userInitialized: Boolean = false
 
     /**
      * Check if the current user is authenticated.
@@ -73,12 +69,9 @@ class AuthorizationService(
      * @throws InvalidTokenException If the authentication does not contain the necessary properties.
      */
     suspend fun getCurrentUserOrNull(): UserDocument? {
-        if (userInitialized) return user
+        logger.debug { "Extracting current user" }
 
-        user = userService.findByIdOrNull(getCurrentUserId())
-        userInitialized = true
-
-        return user
+        return getCurrentUserIdOrNull()?.let { userService.findById(it) }
     }
 
     /**
@@ -90,8 +83,7 @@ class AuthorizationService(
     suspend fun getCurrentUser(): UserDocument {
         logger.debug { "Extracting current user" }
 
-        return getCurrentUserOrNull()
-            ?: throw UserDoesNotExistException("No user with ID ${getCurrentUserId()} found")
+        return userService.findById(getCurrentUserId())
     }
 
     /**
@@ -169,6 +161,10 @@ class AuthorizationService(
         if (!auth.groups.contains(groupKey) && !auth.roles.contains(Role.ADMIN)) {
             throw NotAuthorizedException("User does not have sufficient permission: User does not belong to group \"$groupKey\"")
         }
+    }
+
+    suspend fun getGroups(): Set<String> {
+        return getCurrentAuthentication().groups
     }
 
     suspend fun requireStepUp(): StepUpToken {
