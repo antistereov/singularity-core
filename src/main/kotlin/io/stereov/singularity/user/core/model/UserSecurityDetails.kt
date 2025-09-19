@@ -8,7 +8,7 @@ import java.time.Instant
 data class UserSecurityDetails(
     val twoFactor: TwoFactorDetails,
     val password: PasswordDetails = PasswordDetails(),
-    val mail: MailVerificationDetails = MailVerificationDetails(),
+    val email: MailVerificationDetails = MailVerificationDetails(),
 ) {
 
     constructor(mailEnabled: Boolean, mailTwoFactorCodeExpiresIn: Long, mailVerified: Boolean = false): this(
@@ -19,7 +19,7 @@ data class UserSecurityDetails(
                 expiresAt = Instant.now().plusSeconds(mailTwoFactorCodeExpiresIn)
             )
         ),
-        mail = MailVerificationDetails(mailVerified)
+        email = MailVerificationDetails(mailVerified)
     )
 
     data class TwoFactorDetails(
