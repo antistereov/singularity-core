@@ -13,28 +13,28 @@ import org.springframework.boot.runApplication
     info = Info(
         title = "Singularity API",
         description = """
-            Welcome to the Singularity! 
+            Welcome to the *Singularity*! 
             
             This documentation covers the ready-to-use endpoints 
             for authentication, user management, and content management that come pre-configured with 
-            Singularity.
+            *Singularity*.
 
-            Features at a Glance:
+            **Features at a Glance**:
             
-            - Authentication & User Management: Includes JWT auth with refresh tokens, 2FA, 
+            - **Authentication & User Management:** Includes JWT auth with refresh tokens, 2FA, 
               email verification, and role-based access control.
               
-            - Data & Content Management: Endpoints for interacting with a content management 
+            - **Data & Content Management:** Endpoints for interacting with a content management 
               system that supports multi-language content, configurable tagging, and built-in 
-              access control. A prebuilt Article class is also provided.
+              access control. A prebuilt `Article` class is also provided.
               
-            - Performance & Security: The API is built with a focus on production-readiness, 
+            - **Performance & Security:** The API is built with a focus on production-readiness, 
               including rate limiting and secret manager integration with automated key rotation.
             
             This API is a foundation for building robust backend services, microservices, or 
             full-stack applications.
             
-            Note: Some endpoints require explicit configuration to be enabled.
+            **Note:** Some endpoints require explicit configuration to be enabled.
             """,
         version = "1.0.0",
                 contact = Contact(
