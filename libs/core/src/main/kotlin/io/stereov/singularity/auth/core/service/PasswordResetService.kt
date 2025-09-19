@@ -11,21 +11,20 @@ import io.stereov.singularity.auth.core.model.IdentityProvider
 import io.stereov.singularity.auth.core.properties.PasswordResetProperties
 import io.stereov.singularity.auth.core.service.token.PasswordResetTokenService
 import io.stereov.singularity.database.hash.service.HashService
-import io.stereov.singularity.global.properties.AppProperties
-import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.email.core.exception.model.EmailCooldownException
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.email.core.service.EmailService
 import io.stereov.singularity.email.core.util.EmailConstants
 import io.stereov.singularity.email.template.service.TemplateService
 import io.stereov.singularity.email.template.util.TemplateBuilder
+import io.stereov.singularity.global.properties.AppProperties
+import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.translate.model.TranslateKey
 import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.user.core.exception.model.UserDoesNotExistException
 import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.service.UserService
 import kotlinx.coroutines.reactor.awaitSingleOrNull
-import org.bson.types.ObjectId
 import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.stereotype.Service
 import java.time.Duration
@@ -36,7 +35,6 @@ class PasswordResetService(
     private val userService: UserService,
     private val passwordResetTokenService: PasswordResetTokenService,
     private val hashService: HashService,
-    private val authorizationService: AuthorizationService,
     private val redisTemplate: ReactiveRedisTemplate<String, String>,
     private val emailProperties: EmailProperties,
     private val passwordResetProperties: PasswordResetProperties,
@@ -63,6 +61,7 @@ class PasswordResetService(
             val user = userService.findByEmail(req.email)
             return sendPasswordResetEmail(user, locale)
         } catch (_: UserDoesNotExistException) {
+            startCooldown(req.email)
             return
         }
     }
@@ -99,11 +98,10 @@ class PasswordResetService(
      *
      * @return The remaining cooldown time in seconds.
      */
-    suspend fun getRemainingCooldown(): MailCooldownResponse {
+    suspend fun getRemainingCooldown(req: SendPasswordResetRequest): MailCooldownResponse {
         logger.debug { "Getting remaining password reset cooldown" }
 
-        val userId = authorizationService.getCurrentUserId()
-        val remaining = getRemainingCooldown(userId)
+        val remaining = getRemainingCooldown(req.email)
 
         return MailCooldownResponse(remaining)
     }
@@ -117,10 +115,10 @@ class PasswordResetService(
      *
      * @return True if the cooldown was successfully started, false if it was already in progress.
      */
-    suspend fun startCooldown(userId: ObjectId): Boolean {
+    suspend fun startCooldown(email: String): Boolean {
         logger.debug { "Starting cooldown for password reset" }
 
-        val key = "password-reset-cooldown:$userId"
+        val key = "password-reset-cooldown:$email"
         val isNewKey = redisTemplate.opsForValue()
             .setIfAbsent(key, "1", Duration.ofSeconds(emailProperties.sendCooldown))
             .awaitSingleOrNull()
@@ -138,10 +136,10 @@ class PasswordResetService(
      *
      * @return The remaining cooldown time in seconds.
      */
-    suspend fun getRemainingCooldown(userId: ObjectId): Long {
+    suspend fun getRemainingCooldown(email: String): Long {
         logger.debug { "Getting remaining cooldown for password resets" }
 
-        val key = "password-reset-cooldown:$userId"
+        val key = "password-reset-cooldown:$email"
         val remainingTtl = redisTemplate.getExpire(key).awaitSingleOrNull() ?: Duration.ofSeconds(-1)
 
         return if (remainingTtl.seconds > 0) remainingTtl.seconds else 0
@@ -158,7 +156,7 @@ class PasswordResetService(
         val userId = user.id
         val actualLocale = locale ?: appProperties.locale
 
-        val remainingCooldown = getRemainingCooldown(userId)
+        val remainingCooldown = getRemainingCooldown(user.sensitive.email)
         if (remainingCooldown > 0) {
             throw EmailCooldownException(remainingCooldown)
         }
@@ -181,7 +179,7 @@ class PasswordResetService(
             .build()
 
         emailService.sendEmail(user.sensitive.email, subject, content, actualLocale)
-        startCooldown(userId)
+        startCooldown(user.sensitive.email)
     }
 
     /**

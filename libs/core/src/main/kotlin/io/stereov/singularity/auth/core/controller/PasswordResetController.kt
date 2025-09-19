@@ -6,14 +6,12 @@ import io.stereov.singularity.auth.core.dto.response.MailCooldownResponse
 import io.stereov.singularity.auth.core.service.PasswordResetService
 import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.model.MailSendResponse
-import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.global.model.SuccessResponse
 import io.swagger.v3.oas.annotations.ExternalDocumentation
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
-import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -32,8 +30,24 @@ class PasswordResetController(
     @PostMapping("/reset")
     @Operation(
         summary = "Reset Password",
-        description = "Perform a password reset using a PasswordResetToken you obtained from an email. " +
-                "If successful, the user can log in using the new password afterwards.",
+        description = """
+            Perform a password reset using a `token` you obtained the user received in a password reset email.
+            You can learn more about the password reset [here](https://singularity.stereov.io/docs/guides/auth/authentication#password-reset).
+            
+            When request a password reset through [`POST /api/auth/password/reset-request`](https://singularity.stereov.io/docs/api/send-password-reset-email) 
+            and [email is enabled in your application](https://singularity.stereov.io/docs/guides/email/configuration) 
+            an email containing a link is sent to the user's email address.
+            This link should point to the frontend of your application.
+            Your frontend should extract the token from the URL and send it to this endpoint with the
+            token as request parameter.
+            You can find more information about this [here](https://singularity.stereov.io/docs/guides/auth/authentication#password-reset).
+            
+            If successful, the user can log in using the new password afterwards.
+            
+            You can resend this email through the endpoint [`POST /api/auth/password/reset-request`](https://singularity.stereov.io/docs/api/send-password-reset-email).
+
+            **Note:** If email is not enabled, there is no way to reset the password.
+        """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/authentication#password-reset"),
         responses = [
             ApiResponse(
@@ -65,36 +79,50 @@ class PasswordResetController(
     @GetMapping("/reset/cooldown")
     @Operation(
         summary = "Get Remaining Password Reset Cooldown",
-        description = "Get the remaining time in seconds until you can send another password reset request.",
+        description = """
+            Get the remaining time in seconds until you can send another password reset request.
+            
+            You can find more information about a password reset [here](https://singularity.stereov.io/docs/guides/auth/authentication#password-reset).
+        """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/authentication#password-reset"),
-        security = [
-            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER),
-            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE)
-        ],
         responses = [
             ApiResponse(
                 responseCode = "200",
                 description = "The remaining cooldown.",
             ),
-            ApiResponse(
-                responseCode = "401",
-                description = "Unauthorized.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
         ]
     )
-    suspend fun getRemainingPasswordResetCooldown(): ResponseEntity<MailCooldownResponse> {
-        val remainingCooldown = passwordResetService.getRemainingCooldown()
+    suspend fun getRemainingPasswordResetCooldown(
+        @RequestParam email: String
+    ): ResponseEntity<MailCooldownResponse> {
+        val remainingCooldown = passwordResetService.getRemainingCooldown(email)
 
-        return ResponseEntity.ok().body(remainingCooldown)
+        return ResponseEntity.ok().body(MailCooldownResponse(remainingCooldown))
     }
 
     @PostMapping("/reset-request")
     @Operation(
         summary = "Send Password Reset Email",
-        description = "Send a password reset request email to the user's email. " +
-                "After sending an email, a cooldown is triggered " +
-                "during which no new passwort reset request email can be sent.",
+        description = """
+            Send a password reset request email to the user's email.
+            You can learn more about the password reset [here](https://singularity.stereov.io/docs/guides/auth/authentication#password-reset).
+            
+            When request a password reset through this endpoint
+            and [email is enabled in your application](https://singularity.stereov.io/docs/guides/email/configuration) 
+            an email containing a link is sent to the user's email address.
+            This link should point to the frontend of your application.
+            Your frontend should extract the token from the URL and send it to this endpoint with the
+            token as request parameter.
+            You can find more information about this [here](https://singularity.stereov.io/docs/guides/auth/authentication#password-reset).
+            
+            You can perform the reset using the token through the endpoint [`POST /api/auth/password/reset`](https://singularity.stereov.io/docs/api/reset-password).
+
+            **Note:** If email is not enabled, there is no way to reset the password.
+            
+            **Note:** After each email, a cooldown will be started.
+            When the cooldown is active, no new verification email can be sent.
+            The cooldown can be configured [here](https://singularity.stereov.io/docs/guides/email/configuration).
+        """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/authentication#password-reset"),
         responses = [
             ApiResponse(
@@ -108,7 +136,12 @@ class PasswordResetController(
             ),
             ApiResponse(
                 responseCode = "429",
-                description = "Failed to send another email. Wait until the cooldown is done.",
+                description = "Cooldown is active. You have to wait until you can send another email.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
+            ApiResponse(
+                responseCode = "503",
+                description = "Email is disabled in your application.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
         ]
@@ -120,7 +153,7 @@ class PasswordResetController(
         passwordResetService.sendPasswordReset(req, locale)
 
         return ResponseEntity.ok().body(
-            MailSendResponse(passwordResetService.getRemainingCooldown().remaining)
+            MailSendResponse(passwordResetService.getRemainingCooldown(req).remaining)
         )
     }
 }
