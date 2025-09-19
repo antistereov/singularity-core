@@ -136,7 +136,7 @@ class AuthenticationConfiguration {
             sessionService,
             cookieCreator,
             sessionTokenService,
-            sessionMapper
+            sessionMapper,
         )
     }
 
@@ -303,7 +303,6 @@ class AuthenticationConfiguration {
         userService: UserService,
         passwordResetTokenService: PasswordResetTokenService,
         hashService: HashService,
-        authorizationService: AuthorizationService,
         redisTemplate: ReactiveRedisTemplate<String, String>,
         emailProperties: EmailProperties,
         passwordResetProperties: PasswordResetProperties,
@@ -316,7 +315,6 @@ class AuthenticationConfiguration {
         userService,
         passwordResetTokenService,
         hashService,
-        authorizationService,
         redisTemplate,
         emailProperties,
         passwordResetProperties,
