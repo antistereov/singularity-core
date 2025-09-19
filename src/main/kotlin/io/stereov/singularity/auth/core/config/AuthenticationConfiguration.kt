@@ -243,7 +243,6 @@ class AuthenticationConfiguration {
         sessionService: SessionService,
         accessTokenCache: AccessTokenCache,
         emailVerificationService: EmailVerificationService,
-        appProperties: AppProperties,
         twoFactorEmailCodeProperties: TwoFactorEmailCodeProperties,
         emailProperties: EmailProperties
     ): AuthenticationService {
@@ -254,7 +253,6 @@ class AuthenticationConfiguration {
             sessionService,
             accessTokenCache,
             emailVerificationService,
-            appProperties,
             twoFactorEmailCodeProperties,
             emailProperties
         )

@@ -27,7 +27,6 @@ class AuthenticationService(
     private val sessionService: SessionService,
     private val accessTokenCache: AccessTokenCache,
     private val emailVerificationService: EmailVerificationService,
-    private val appProperties: AppProperties,
     private val factorMailCodeProperties: TwoFactorEmailCodeProperties,
     private val emailProperties: EmailProperties
 ) {
