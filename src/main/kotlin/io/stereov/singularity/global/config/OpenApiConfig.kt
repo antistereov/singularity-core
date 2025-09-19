@@ -91,9 +91,21 @@ class OpenApiConfig() {
 
     @Bean
     fun customize(): OpenApiCustomizer = OpenApiCustomizer { openApi ->
+        trimIndents(openApi)
         sortEndpoints(openApi)
         sortTags(openApi)
         sortSecurityRequirements(openApi)
+    }
+
+    private fun trimIndents(openApi: OpenAPI) {
+        openApi.info.description = openApi.info.description.trimIndent()
+
+        openApi.paths.forEach { (_, pathItem) ->
+            pathItem.readOperations().forEach { operation ->
+                operation.summary = operation.summary?.trimIndent()
+                operation.description = operation.description?.trimIndent()
+            }
+        }
     }
 
     private fun sortTags(openAPI: OpenAPI) {
