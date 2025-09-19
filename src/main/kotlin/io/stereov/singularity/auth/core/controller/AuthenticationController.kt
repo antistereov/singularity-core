@@ -16,6 +16,9 @@ import io.stereov.singularity.auth.core.service.token.AccessTokenService
 import io.stereov.singularity.auth.core.service.token.RefreshTokenService
 import io.stereov.singularity.auth.core.service.token.StepUpTokenService
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
+import io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException
+import io.stereov.singularity.auth.oauth2.model.token.OAuth2TokenType
+import io.stereov.singularity.auth.twofactor.model.token.TwoFactorTokenType
 import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthenticationService
 import io.stereov.singularity.auth.twofactor.service.token.TwoFactorAuthenticationTokenService
 import io.stereov.singularity.global.model.ErrorResponse
@@ -60,10 +63,115 @@ class AuthenticationController(
     private val logger: KLogger
         get() = KotlinLogging.logger {}
 
+    @PostMapping("/register")
+    @Operation(
+        summary = "Register",
+        description = """
+            Registers a new user account with `email`, `password`, and `name`.
+        
+            **Requirements:**
+            - The `email` should be a valid email address (e.g., "test@example.com")
+            - The `password` must be at least 8 characters long and include at least one uppercase letter, 
+              one lowercase letter, one number, and one special character (!@#$%^&*()_+={}[]|\:;'"<>,.?/).
+        
+            **Optional session data:**
+            - The `session` object can be included in the request body.
+            - Inside the `session` object, you can provide the following optional fields:
+                - `browser`: The name of the browser used (e.g., "Chrome", "Firefox").
+                - `os`: The operating system of the device (e.g., "Windows", "macOS", "Android").
+        
+            This information helps users identify and manage authorized sessions, improving overall account security.
+            
+            **Tokens:**
+            
+            If successful, [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) and 
+            [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token) 
+            will automatically be set as HTTP-only cookies.
+            If [header authentication](https://singularity.stereov.io/docs/guides/auth/securing-endpoints#header-authentication) is enabled,
+            [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) and 
+            [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)
+            will be returned in the response body and can be used as 
+            bearer tokens in the authorization header for upcoming requests.
+        """,
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/authentication#registering-users"),
+        responses = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Registration successful. Returns user details and tokens if header authentication is enabled.",
+            ),
+            ApiResponse(
+                responseCode = "304",
+                description = "User is already authenticated. Authenticated session state has not changed since last request.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
+            ApiResponse(
+                responseCode = "409",
+                description = "The email is already in use.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            )
+        ]
+    )
+    suspend fun register(
+        exchange: ServerWebExchange,
+        @RequestBody @Valid payload: RegisterUserRequest,
+        @RequestParam("send-email") sendEmail: Boolean = true,
+        @RequestParam locale: Locale?
+    ): ResponseEntity<RegisterResponse> {
+        logger.info { "Executing register" }
+
+        val user = authenticationService.register(payload, sendEmail, locale)
+        val sessionId = UUID.randomUUID()
+
+        val accessToken = accessTokenService.create(user, sessionId)
+        val refreshToken = refreshTokenService.create(user.id, sessionId, payload.session, exchange)
+
+        val res = RegisterResponse(
+            userMapper.toResponse(user),
+            if (authProperties.allowHeaderAuthentication) accessToken.value else null,
+            if (authProperties.allowHeaderAuthentication) refreshToken.value else null,
+            geoLocationService.getLocationOrNull(exchange.request)
+        )
+
+        return ResponseEntity.ok()
+            .header("Set-Cookie", cookieCreator.createCookie(accessToken).toString())
+            .header("Set-Cookie", cookieCreator.createCookie(refreshToken).toString())
+            .body(res)
+    }
+
     @PostMapping("/login")
     @Operation(
         summary = "Login",
-        description = "Authenticates a user, returns an access and refresh token and sets those tokens as HTTP-Only Cookies.",
+        description = """
+            Authenticates a user with `email` and `password`.
+            
+            **Optional session data:**
+            - The `session` object can be included in the request body.
+            - Inside the `session` object, you can provide the following optional fields:
+                - `browser`: The name of the browser used (e.g., "Chrome", "Firefox").
+                - `os`: The operating system of the device (e.g., "Windows", "macOS", "Android").
+        
+            This information helps users identify and manage authorized sessions, improving overall account security.
+            
+            **2FA:**
+            
+            If the user enabled 2FA, the user will not be authenticated immediately. 
+            Instead, a [`TwoFactorAuthenticationToken`](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token) 
+            is set as HTTP-only cookie and returned in the response body
+            if [header authentication](https://singularity.stereov.io/docs/guides/auth/securing-endpoints#header-authentication) is enabled.
+            
+            You can complete the login through the endpoint [`POST /api/auth/2fa/login`](https://singularity.stereov.io/docs/api/complete-login).
+            
+            **Tokens:**
+            - If 2FA is disabled and the request is successful, 
+              [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) 
+              and [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token) 
+              will automatically be set as HTTP-only cookies.
+              If [header authentication](https://singularity.stereov.io/docs/guides/auth/securing-endpoints#header-authentication) is enabled,
+              [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) and 
+              [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token) 
+              will be returned in the response body and can be used as 
+              bearer tokens in the authorization header for upcoming requests.
+        """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/authentication#login"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER),
@@ -75,13 +183,13 @@ class AuthenticationController(
                 description = "Authentication successful. Returns tokens and user details.",
             ),
             ApiResponse(
-                responseCode = "401",
-                description = "Invalid credentials.",
+                responseCode = "304",
+                description = "User is already authenticated. Authenticated session state has not changed since last request.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
             ApiResponse(
-                responseCode = "403",
-                description = "User is already authenticated.",
+                responseCode = "401",
+                description = "Invalid credentials.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
@@ -134,59 +242,17 @@ class AuthenticationController(
             .body(res)
     }
 
-    @PostMapping("/register")
-    @Operation(
-        summary = "Register",
-        description = "Creates a new user account and logs them in.",
-        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/authentication#registering-users"),
-        responses = [
-            ApiResponse(
-                responseCode = "200",
-                description = "Registration successful. Returns user details and tokens.",
-            ),
-            ApiResponse(
-                responseCode = "409",
-                description = "Email already exists.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "403",
-                description = "User is already authenticated.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            )
-        ]
-    )
-    suspend fun register(
-        exchange: ServerWebExchange,
-        @RequestBody @Valid payload: RegisterUserRequest,
-        @RequestParam("send-email") sendEmail: Boolean = true,
-        @RequestParam locale: Locale?
-    ): ResponseEntity<RegisterResponse> {
-        logger.info { "Executing register" }
-
-        val user = authenticationService.register(payload, sendEmail, locale)
-        val sessionId = UUID.randomUUID()
-
-        val accessToken = accessTokenService.create(user, sessionId)
-        val refreshToken = refreshTokenService.create(user.id, sessionId, payload.session, exchange)
-
-        val res = RegisterResponse(
-            userMapper.toResponse(user),
-            if (authProperties.allowHeaderAuthentication) accessToken.value else null,
-            if (authProperties.allowHeaderAuthentication) refreshToken.value else null,
-            geoLocationService.getLocationOrNull(exchange.request)
-        )
-
-        return ResponseEntity.ok()
-            .header("Set-Cookie", cookieCreator.createCookie(accessToken).toString())
-            .header("Set-Cookie", cookieCreator.createCookie(refreshToken).toString())
-            .body(res)
-    }
-
     @PostMapping("/logout")
     @Operation(
         summary = "Logout",
-        description = "Invalidates the current session's access and refresh tokens.",
+        description = """
+            Invalidates the current session's [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)s 
+            and [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)s.
+            
+            **Tokens:**
+            - To perform the logout, an [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
+            - If successful, all cookies related to the user's session will be invalidated.
+        """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/authentication#logout"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER),
@@ -196,6 +262,11 @@ class AuthenticationController(
             ApiResponse(
                 responseCode = "200",
                 description = "Logout successful.",
+            ),
+            ApiResponse(
+                responseCode = "401",
+                description = "Invalid AccessToken.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
     )
@@ -206,6 +277,8 @@ class AuthenticationController(
         val clearRefreshToken = cookieCreator.clearCookie(SessionTokenType.Refresh)
         val clearStepUpToken = cookieCreator.clearCookie(SessionTokenType.StepUp)
         val clearSessionToken = cookieCreator.clearCookie(SessionTokenType.Session)
+        val clearTwoFactorAuthenticationToken = cookieCreator.clearCookie(TwoFactorTokenType.Authentication)
+        val clearOAuth2ProviderConnectionToken = cookieCreator.clearCookie(OAuth2TokenType.ProviderConnection)
 
         authenticationService.logout()
 
@@ -214,13 +287,28 @@ class AuthenticationController(
             .header("Set-Cookie", clearRefreshToken.toString())
             .header("Set-Cookie", clearStepUpToken.toString())
             .header("Set-Cookie", clearSessionToken.toString())
+            .header("Set-Cookie", clearTwoFactorAuthenticationToken.toString())
+            .header("Set-Cookie", clearOAuth2ProviderConnectionToken.toString())
             .body(SuccessResponse(true))
     }
 
     @PostMapping("/refresh")
     @Operation(
         summary = "Refresh Access Token",
-        description = "Refresh the access token. Returns a new access and refresh token and sets those tokens as Http-Only Cookies.",
+        description = """
+            Request a new [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token).
+            
+            **Tokens:**
+            - Requires a valid [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token).
+            - If successful, [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) and 
+              [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token) 
+              will automatically be set as HTTP-only cookies.
+              If [header authentication](https://singularity.stereov.io/docs/guides/auth/securing-endpoints#header-authentication) is enabled,
+              [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) and 
+              [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)
+              will be returned in the response body and can be used as 
+              bearer tokens in the authorization header for upcoming requests.
+        """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/authentication#refresh"),
         security = [
             SecurityRequirement(OpenApiConstants.REFRESH_TOKEN_HEADER),
@@ -233,19 +321,20 @@ class AuthenticationController(
             ),
             ApiResponse(
                 responseCode = "401",
-                description = "Invalid credentials.",
+                description = "Invalid RefreshToken.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
     )
     suspend fun refreshAccessToken(
         exchange: ServerWebExchange,
-        @RequestBody sessionInfo: SessionInfoRequest?
+        @RequestBody(required = false) sessionInfo: SessionInfoRequest?
     ): ResponseEntity<RefreshTokenResponse> {
         logger.debug { "Refreshing token" }
 
         val refreshToken = refreshTokenService.extract(exchange)
-        val user = userService.findById(refreshToken.userId)
+        val user = userService.findByIdOrNull(refreshToken.userId)
+            ?: throw InvalidTokenException("The corresponds to a non-existing user")
 
         val newAccessToken = accessTokenService.create(user, refreshToken.sessionId)
         val newRefreshToken = refreshTokenService.create(user.id, refreshToken.sessionId, sessionInfo, exchange)
@@ -265,7 +354,27 @@ class AuthenticationController(
     @PostMapping("/step-up")
     @Operation(
         summary = "Step-Up",
-        description = "Requests step-up authentification. This re-authentication is required by critical endpoints.",
+        description = """
+            Requests [step-up authentification](https://singularity.stereov.io/docs/guides/auth/authentication#step-up). 
+            This re-authentication is required by critical endpoints.
+            
+            **2FA:**
+            
+            If the user enabled 2FA, the step-up will not be granted immediately. 
+            Instead, a [`TwoFactorAuthenticationToken`](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token) 
+            is set as HTTP-only cookie and returned in the response body
+            if [header authentication](https://singularity.stereov.io/docs/guides/auth/securing-endpoints#header-authentication) is enabled.
+            
+            You can complete the step-up through the endpoint [`POST /api/auth/2fa/step-up`](https://singularity.stereov.io/docs/api/complete-step-up).
+            
+            **Tokens:**
+            - Requires a valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token).
+            - If 2FA is disabled and the request is successful, [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
+              will automatically be set as HTTP-only cookie.
+              If [header authentication](https://singularity.stereov.io/docs/guides/auth/securing-endpoints#header-authentication) is enabled,
+              the [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
+              will be returned in the response body and can be used to authorized critical requests.
+        """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/authentication#step-up"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER),
@@ -278,7 +387,7 @@ class AuthenticationController(
             ),
             ApiResponse(
                 responseCode = "401",
-                description = "Unauthorized.",
+                description = "Invalid credentials.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
@@ -326,7 +435,13 @@ class AuthenticationController(
     @GetMapping("/status")
     @Operation(
         summary = "Get Authentication Status",
-        description = "Get detailed information about the current status authentication status of the user.",
+        description = """
+            Get detailed information about the current status authentication status of the user.
+            
+            This endpoint is primarily designed for cookie-based authentication.
+            *Singularity* sets HTTP-only cookies by default which cannot be accessed via JavaScript.
+            Therefore, you can use this endpoint to request if valid tokens are set.
+        """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/authentication#status"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER),
@@ -354,7 +469,7 @@ class AuthenticationController(
         val twoFactorToken = runCatching { twoFactorAuthenticationTokenService.extract(exchange) }.getOrNull()
 
         val authorized = authorizedUserId != null
-        val twoFactorRequired = twoFactorToken != null
+        val twoFactorRequired = if (authorized) false else (twoFactorToken != null)
 
         val stepUpToken = if (authorized && currentSessionId != null) {
             runCatching { stepUpTokenService.extract(exchange, authorizedUserId, currentSessionId) }
@@ -362,17 +477,21 @@ class AuthenticationController(
         } else null
         val stepUp = stepUpToken != null
 
-        val twoFactorMethods = if (twoFactorRequired) {
-            userService.findById(twoFactorToken.userId).twoFactorMethods
-        } else null
-        val preferredTwoFactorMethod = if (twoFactorRequired) {
-            userService.findById(twoFactorToken.userId).preferredTwoFactorMethod
-        } else null
+        val (twoFactorMethods, preferredTwoFactorMethod) = if (twoFactorRequired && twoFactorToken != null) {
+            val user = userService.findById(twoFactorToken.userId)
+
+            user.twoFactorMethods to user.preferredTwoFactorMethod
+        } else null to null
+
+        val emailVerified = authorizedUserId
+            ?.let { userService.findByIdOrNull(it) }
+            ?.sensitive?.security?.email?.verified
 
         return ResponseEntity.ok(
             AuthenticationStatusResponse(
-                authorized = authorized,
+                authenticated = authorized,
                 stepUp = stepUp,
+                emailVerified = emailVerified,
                 twoFactorRequired = twoFactorRequired,
                 preferredTwoFactorMethod = preferredTwoFactorMethod,
                 twoFactorMethods = twoFactorMethods
