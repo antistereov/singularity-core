@@ -7,14 +7,10 @@ import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import java.time.Instant
 import java.util.*
 
 class RedisServiceTest : BaseIntegrationTest() {
-
-    @Autowired
-    private lateinit var cacheService: CacheService
 
     @BeforeEach
     fun setup() = runBlocking {
