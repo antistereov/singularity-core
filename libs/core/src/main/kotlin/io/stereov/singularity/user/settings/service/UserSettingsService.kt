@@ -52,7 +52,7 @@ class UserSettingsService(
             emailVerificationService.sendVerificationEmail(user, locale, payload.newEmail)
         } else {
             user.sensitive.email = payload.newEmail
-            user.sensitive.security.mail.verified = true
+            user.sensitive.security.email.verified = true
         }
 
         return userService.save(user)
