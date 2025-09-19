@@ -33,7 +33,7 @@ class SessionController(
     private val sessionService: SessionService,
     private val cookieCreator: CookieCreator,
     private val sessionTokenService: SessionTokenService,
-    private val sessionMapper: SessionMapper
+    private val sessionMapper: SessionMapper,
 ) {
 
     private val logger = KotlinLogging.logger {}
@@ -41,7 +41,14 @@ class SessionController(
     @GetMapping
     @Operation(
         summary = "Get Active Sessions",
-        description = "Get all active sessions of the currently authenticated user.",
+        description = """
+            Get all active sessions of the currently authenticated user.
+            
+            You can learn more about sessions [here](https://singularity.stereov.io/docs/guides/auth/sessions).
+            
+            **Tokens:**
+            - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
+        """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/sessions#active-sessions"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER),
@@ -54,7 +61,7 @@ class SessionController(
             ),
             ApiResponse(
                 responseCode = "401",
-                description = "Unauthorized.",
+                description = "Invalid or expired AccessToken.",
                 content = [Content(schema = Schema(ErrorResponse::class))]
             )
         ]
@@ -68,10 +75,13 @@ class SessionController(
     @PostMapping("/token")
     @Operation(
         summary = "Generate SessionToken",
-        description = "Generate a SessionToken for the current session, if the user is authenticated or " +
-                "a new SessionToken instead. " +
-                "It will be set as an HTTP-only cookie and returned in the response body if header authentication " +
-                "is enabled.",
+        description = """
+            Generate a [`SessionToken`](https://singularity.stereov.io/docs/guides/auth/tokens#session-token) for the current session, if the user is authenticated or 
+            a new [`SessionToken`](https://singularity.stereov.io/docs/guides/auth/tokens#session-token) instead. 
+            
+            It's only purpose is to successfully register or log in a user via an OAuth2 provider.
+            You can learn more about OAuth2 providers [here](https://singularity.stereov.io/docs/guides/auth/oauth2).
+        """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/oauth2#1-retrieving-a-session-token"),
         responses = [
             ApiResponse(
@@ -93,7 +103,15 @@ class SessionController(
     @DeleteMapping("/{sessionId}")
     @Operation(
         summary = "Delete Session",
-        description = "Delete a session of the current user and invalidate all tokens related to this session.",
+        description = """
+            Delete the session of the current user with the given `id` 
+            and invalidate all tokens related to this session.
+            
+            You can learn more about sessions [here](https://singularity.stereov.io/docs/guides/auth/sessions).
+            
+            **Tokens:**
+            - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
+        """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/sessions#invalidating-a-specific-session"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER),
@@ -106,7 +124,7 @@ class SessionController(
             ),
             ApiResponse(
                 responseCode = "401",
-                description = "Unauthorized.",
+                description = "Invalid or expired AccessToken.",
                 content = [Content(schema = Schema(ErrorResponse::class))]
             )
         ]
@@ -121,7 +139,17 @@ class SessionController(
     @DeleteMapping
     @Operation(
         summary = "Delete All Sessions",
-        description = "Invalidates all the current session's access and refresh tokens from all sessions.",
+        description = """
+            Invalidates all the user's active sessions.
+            This also invalidates all [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)s 
+            and [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)s.
+            Therefore, logging out the user from all devices.
+            
+            You can learn more about sessions [here](https://singularity.stereov.io/docs/guides/auth/sessions).
+            
+            **Tokens:**
+            - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
+        """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/sessions#invalidating-all-session"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER),
@@ -130,7 +158,12 @@ class SessionController(
         responses = [
             ApiResponse(
                 responseCode = "200",
-                description = "Logout successful.",
+                description = "Successfully deleted all sessions.",
+            ),
+            ApiResponse(
+                responseCode = "401",
+                description = "Invalid or expired AccessToken.",
+                content = [Content(schema = Schema(ErrorResponse::class))]
             )
         ],
     )

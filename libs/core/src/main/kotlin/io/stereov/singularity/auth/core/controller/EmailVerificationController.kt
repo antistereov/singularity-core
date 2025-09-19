@@ -29,7 +29,24 @@ class EmailVerificationController(
     @PostMapping
     @Operation(
         summary = "Verify Email",
-        description = "Verify the user's email by validating the token.",
+        description = """
+            Verify the user's email address using the `token` the user received a email verification email.
+            You can find more information about this [here](https://singularity.stereov.io/docs/guides/auth/authentication#email-verification).
+            
+            When registering a user and [email is enabled in your application](https://singularity.stereov.io/docs/guides/email/configuration)
+            an email containing a link is sent to the user's email address.
+            This link should point to the frontend of your application.
+            Your frontend should extract the token from the URL and send it to this endpoint with the
+            token as request parameter.
+            You can find more information about this [here](https://singularity.stereov.io/docs/guides/auth/authentication#email-verification).
+            
+            You can resend this email through the endpoint [`POST /api/auth/email/verify/send`](https://singularity.stereov.io/docs/api/send-email-verification-email).
+
+            **Note:** If email is not enabled, there is no way to verify a user's email address.
+            
+            **Tokens:**
+            - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
+        """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/docs/auth/authentication#email-verification"),
         responses = [
             ApiResponse(
@@ -38,7 +55,7 @@ class EmailVerificationController(
             ),
             ApiResponse(
                 responseCode = "401",
-                description = "Token is invalid.",
+                description = "AccessToken is invalid or expired.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
         ]
@@ -53,7 +70,14 @@ class EmailVerificationController(
     @GetMapping("/cooldown")
     @Operation(
         summary = "Get Remaining Email Verification Cooldown",
-        description = "Get the remaining time in seconds until you can send another verification request.",
+        description = """
+            Get the remaining time in seconds until you can send another email verification email.
+            
+            You can find more information about email verification [here](https://singularity.stereov.io/docs/guides/auth/authentication#email-verification).
+            
+            **Tokens:**
+            - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
+        """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/docs/auth/authentication#email-verification"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER),
@@ -66,7 +90,7 @@ class EmailVerificationController(
             ),
             ApiResponse(
                 responseCode = "401",
-                description = "Unauthorized.",
+                description = "AccessToken is invalid or expired.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
         ]
@@ -80,9 +104,28 @@ class EmailVerificationController(
     @PostMapping("/send")
     @Operation(
         summary = "Send Email Verification Email",
-        description = "Send a new verification email to the user's email. " +
-                "After sending an email, a cooldown is triggered " +
-                "during which no new verification email can be sent.",
+        description = """
+            Send an email verification email to the user.
+            
+            This endpoint is for **resending** the verification email only.
+            When registering a user and [email is enabled in your application](https://singularity.stereov.io/docs/guides/email/configuration)
+            an email containing a link is automatically sent to the user's email address.
+            This link should point to the frontend of your application.
+            You can find more information about this [here](https://singularity.stereov.io/docs/guides/auth/authentication#email-verification).
+            Your frontend should extract the token from the URL and send it to this endpoint with the
+            token as request parameter.
+            
+            You can perform the verification using the token through the endpoint [`POST /api/auth/email/verify`](https://singularity.stereov.io/docs/api/verify-email).
+            
+            **Note:** If email is not enabled, there is no way to verify a user's email address.
+            
+            **Tokens:**
+            - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
+            
+            **Note:** After each email, a cooldown will be started.
+            When the cooldown is active, no new verification email can be sent.
+            The cooldown can be configured [here](https://singularity.stereov.io/docs/guides/email/configuration).
+        """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/docs/auth/authentication#email-verification"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER),
@@ -95,12 +138,17 @@ class EmailVerificationController(
             ),
             ApiResponse(
                 responseCode = "401",
-                description = "Unauthorized.",
+                description = "AccessToken is invalid or expired.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
             ApiResponse(
                 responseCode = "429",
-                description = "Failed to send another email. Wait until the cooldown is done.",
+                description = "Cooldown is active. You have to wait until you can send another email.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
+            ApiResponse(
+                responseCode = "503",
+                description = "Email is disabled in your application.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
         ]
