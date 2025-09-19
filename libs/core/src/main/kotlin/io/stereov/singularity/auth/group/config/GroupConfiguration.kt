@@ -1,5 +1,6 @@
 package io.stereov.singularity.auth.group.config
 
+import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.config.AuthenticationConfiguration
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.group.controller.GroupController
@@ -87,6 +88,7 @@ class GroupConfiguration {
     fun groupMemberService(
         userService: UserService,
         groupService: GroupService,
-        authService: AuthorizationService
-    ) = GroupMemberService(userService, groupService, authService)
+        authService: AuthorizationService,
+        accessTokenCache: AccessTokenCache
+    ) = GroupMemberService(userService, groupService, authService, accessTokenCache)
 }
