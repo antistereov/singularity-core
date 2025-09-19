@@ -2,8 +2,9 @@ package io.stereov.singularity.auth.geolocation.service
 
 import com.maxmind.geoip2.model.CityResponse
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.auth.geolocation.dto.GeolocationResponse
 import io.stereov.singularity.auth.geolocation.exception.GeolocationException
-import io.stereov.singularity.auth.geolocation.model.GeoLocationResponse
+import io.stereov.singularity.auth.geolocation.mapper.GeolocationMapper
 import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
 import io.stereov.singularity.global.util.getClientIp
 import org.springframework.http.server.reactive.ServerHttpRequest
@@ -22,6 +23,7 @@ import java.net.InetAddress
 class GeolocationService(
     private val geoIpDatabaseService: GeoIpDatabaseService,
     private val properties: GeolocationProperties,
+    private val geolocationMapper: GeolocationMapper,
 ) {
 
     private val logger = KotlinLogging.logger {}
@@ -42,18 +44,19 @@ class GeolocationService(
         }
     }
 
-    suspend fun getLocation(request: ServerHttpRequest): CityResponse {
+    suspend fun getLocation(request: ServerHttpRequest): GeolocationResponse {
         val ipAddress = request.getClientIp(properties.realIpHeader)
 
-        return getLocation(InetAddress.getByName(ipAddress))
+        val cityResponse = getLocation(InetAddress.getByName(ipAddress))
+
+        return geolocationMapper.createGeolocationResponse(cityResponse)
     }
 
-    suspend fun getLocationOrNull(request: ServerHttpRequest): CityResponse? {
+    suspend fun getLocationOrNull(request: ServerHttpRequest): GeolocationResponse? {
         return runCatching { getLocation(request) }
-            .onFailure { error ->
+            .getOrElse { error ->
                 logger.warn { error.message }
                 null
             }
-            .getOrNull()
     }
 }
