@@ -28,7 +28,7 @@ class GroupMemberController(
     @PostMapping("/{groupKey}/members")
     @Operation(
         summary = "Add Member to Group",
-        description = "Add a member to a group.",
+        description = "Add a member to a group. Invalidates all AccessTokens.",
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/groups#adding-members-to-groups"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER, scopes = [OpenApiConstants.ADMIN_SCOPE]),
@@ -64,7 +64,7 @@ class GroupMemberController(
     @DeleteMapping("/{groupKey}/members/{userId}")
     @Operation(
         summary = "Remove Member from Group",
-        description = "Remove a member from a group.",
+        description = "Remove a member from a group. Invalidates all AccessTokens.",
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/groups#removing-members-from-groups"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER, scopes = [OpenApiConstants.ADMIN_SCOPE]),
