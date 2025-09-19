@@ -11,8 +11,8 @@ import io.stereov.singularity.auth.core.exception.model.InvalidCredentialsExcept
 import io.stereov.singularity.auth.core.exception.model.UserAlreadyAuthenticatedException
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties
 import io.stereov.singularity.database.hash.service.HashService
-import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.email.core.properties.EmailProperties
+import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.user.core.exception.model.EmailAlreadyExistsException
 import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.service.UserService
@@ -117,7 +117,7 @@ class AuthenticationService(
         val sessionId = authorizationService.getCurrentSessionId()
 
         if (!user.sensitive.sessions.containsKey(sessionId)) {
-            throw AuthException("Step up failed: trying to execute for step up for invalid session, user logged out out revoked session")
+            throw AuthException("Step up failed: trying to execute for step up for invalid session, user logged out or revoked session")
         }
 
         val password = user.validateLoginTypeAndGetPassword()
