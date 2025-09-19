@@ -2,12 +2,12 @@ package io.stereov.singularity.auth.core.controller
 
 import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.auth.core.dto.request.RegisterUserRequest
-import io.stereov.singularity.auth.core.dto.request.SendPasswordResetRequest
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
-import io.stereov.singularity.auth.core.dto.response.LoginResponse
-import io.stereov.singularity.auth.core.dto.response.RefreshTokenResponse
-import io.stereov.singularity.auth.core.dto.response.RegisterResponse
+import io.stereov.singularity.auth.core.dto.request.StepUpRequest
+import io.stereov.singularity.auth.core.dto.response.*
 import io.stereov.singularity.auth.core.model.token.SessionTokenType
+import io.stereov.singularity.auth.oauth2.model.token.OAuth2TokenType
+import io.stereov.singularity.auth.twofactor.model.token.TwoFactorTokenType
 import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.test.BaseIntegrationTest
 import io.stereov.singularity.user.core.dto.response.UserResponse
@@ -19,11 +19,139 @@ import org.springframework.http.HttpStatus
 
 class AuthenticationControllerTest() : BaseIntegrationTest() {
 
-    @Test fun `login logs in user`() = runTest {
+    @Test fun `register registers new user`() = runTest {
         val email = "test@email.com"
-        val password = "password"
-        val user = registerUser(email, password,)
-        val loginRequest = LoginRequest(email, password)
+        val password = "Password\"3"
+
+        val response = webTestClient.post()
+            .uri("/api/auth/register")
+            .bodyValue(RegisterUserRequest(email = email, password = password, name = "Name"))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(RegisterResponse::class.java)
+            .returnResult()
+
+        val accessToken = response.responseCookies[SessionTokenType.Access.cookieName]
+            ?.firstOrNull()?.value
+        val refreshToken = response.responseCookies[SessionTokenType.Refresh.cookieName]
+            ?.firstOrNull()?.value
+        val userDto = response.responseBody!!.user
+
+        requireNotNull(accessToken) { "No access token provided in response" }
+        requireNotNull(refreshToken) { "No refresh token provided in response" }
+
+        Assertions.assertTrue(accessToken.isNotBlank())
+        Assertions.assertTrue(refreshToken.isNotBlank())
+
+        val userDetails = webTestClient.get()
+            .uri("/api/users/me")
+            .cookie(SessionTokenType.Access.cookieName, accessToken)
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(UserResponse::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(userDetails) { "No UserDetails provided in response" }
+
+        val sessions = userService.findById(userDto.id).sensitive.sessions
+
+        Assertions.assertEquals(userDto.id, userDetails.id)
+        Assertions.assertEquals(1, sessions.size)
+
+        Assertions.assertEquals(1, userService.findAll().count())
+    }
+    @Test fun `register requires valid email`() = runTest {
+        webTestClient.post()
+            .uri("/api/auth/register")
+            .bodyValue(
+                RegisterUserRequest(
+                    email = "invalid",
+                    password = "Password$2",
+                    name = "Name"
+                )
+            )
+            .exchange()
+            .expectStatus().isBadRequest
+    }
+    @Test fun `register requires password of min 8 characters`() {
+        webTestClient.post()
+            .uri("/api/auth/register")
+            .bodyValue(RegisterUserRequest(email = "", password = "Pas$2", name = "Name"))
+            .exchange()
+            .expectStatus().isBadRequest
+    }
+    @Test fun `register requires passwort with lower case letter`() {
+        webTestClient.post()
+            .uri("/api/auth/register")
+            .bodyValue(
+                RegisterUserRequest(
+                    email = "test@email.com",
+                    password = "PASSWORD$2",
+                    name = "Name",
+                )
+            )
+            .exchange()
+            .expectStatus().isBadRequest
+    }
+    @Test fun `register requires password with upper-case letter`() {
+        webTestClient.post()
+            .uri("/api/auth/register")
+            .bodyValue(
+                RegisterUserRequest(
+                    email = "test@email.com",
+                    password = "password$2",
+                    name = "Name",
+                )
+            )
+            .exchange()
+            .expectStatus().isBadRequest
+    }
+    @Test fun `register requires password with number`() {
+        webTestClient.post()
+            .uri("/api/auth/register")
+            .bodyValue(
+                RegisterUserRequest(
+                    email = "test@email.com",
+                    password = "Password$",
+                    name = "Name",
+                )
+            )
+            .exchange()
+            .expectStatus().isBadRequest
+    }
+    @Test fun `register requires password with special character`() {
+        webTestClient.post()
+            .uri("/api/auth/register")
+            .bodyValue(
+                RegisterUserRequest(
+                    email = "test@email.com",
+                    password = "Password2",
+                    name = "Name",
+                )
+            )
+            .exchange()
+            .expectStatus().isBadRequest
+    }
+    @Test fun `register needs body`() = runTest {
+        webTestClient.post()
+            .uri("/api/auth/login")
+            .exchange()
+            .expectStatus().isBadRequest
+    }
+    @Test fun `register returns not modified if already authenticated`() = runTest {
+        val user = registerUser()
+        webTestClient.post()
+            .uri("/api/auth/register")
+            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .bodyValue(RegisterUserRequest(email = user.email, password = user.password, name = "Name"))
+            .exchange()
+            .expectStatus().isNotModified
+    }
+
+    @Test fun `login logs in user`() = runTest {
+        val user = registerUser()
+        val loginRequest = LoginRequest(user.email, user.password)
 
         val response = webTestClient.post()
             .uri("/api/auth/login")
@@ -101,14 +229,11 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
             .expectStatus().isUnauthorized
     }
     @Test fun `login from new session saves session`() = runTest {
-        val email = "test@email.com"
-        val password = "password"
-
-        val user = registerUser(email, password)
+        val user = registerUser()
 
         val res = webTestClient.post()
             .uri("/api/auth/login")
-            .bodyValue(LoginRequest(email, password))
+            .bodyValue(LoginRequest(user.email, user.password))
             .exchange()
             .expectStatus().isOk
             .expectBody(LoginResponse::class.java)
@@ -133,12 +258,9 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
         Assertions.assertTrue { sessions.containsKey(accessToken.sessionId)}
     }
     @Test fun `login with two factor works as expected`() = runTest {
-        val email = "test@email.com"
-        val password = "password"
+        val user = registerUser(twoFactorEnabled = true)
 
-        val user = registerUser(email, password, true)
-
-        val loginRequest = LoginRequest(email, password)
+        val loginRequest = LoginRequest(user.email, user.password)
 
         val response = webTestClient.post()
             .uri("/api/auth/login")
@@ -157,171 +279,58 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
         Assertions.assertTrue(body.twoFactorRequired)
         Assertions.assertNotNull(body.user)
     }
+    @Test fun `login returns not modified if already authenticated`() = runTest {
+        val user = registerUser()
 
-    @Test fun `register registers new user`() = runTest {
-        val email = "test@email.com"
-        val password = "password"
-
-        val response = webTestClient.post()
-            .uri("/api/auth/register")
-            .bodyValue(RegisterUserRequest(email = email, password = password, name = "Name"))
-            .exchange()
-            .expectStatus().isOk
-            .expectBody(RegisterResponse::class.java)
-            .returnResult()
-
-        val accessToken = response.responseCookies[SessionTokenType.Access.cookieName]
-            ?.firstOrNull()?.value
-        val refreshToken = response.responseCookies[SessionTokenType.Refresh.cookieName]
-            ?.firstOrNull()?.value
-        val userDto = response.responseBody!!.user
-
-        requireNotNull(accessToken) { "No access token provided in response" }
-        requireNotNull(refreshToken) { "No refresh token provided in response" }
-
-        Assertions.assertTrue(accessToken.isNotBlank())
-        Assertions.assertTrue(refreshToken.isNotBlank())
-
-        val userDetails = webTestClient.get()
-            .uri("/api/users/me")
-            .cookie(SessionTokenType.Access.cookieName, accessToken)
-            .exchange()
-            .expectStatus().isOk
-            .expectBody(UserResponse::class.java)
-            .returnResult()
-            .responseBody
-
-        requireNotNull(userDetails) { "No UserDetails provided in response" }
-
-        val sessions = userService.findById(userDto.id).sensitive.sessions
-
-        Assertions.assertEquals(userDto.id, userDetails.id)
-        Assertions.assertEquals(1, sessions.size)
-
-        Assertions.assertEquals(1, userService.findAll().count())
-    }
-    @Test fun `register requires valid credentials`() = runTest {
-        val sessionInfo = SessionInfoRequest("session")
-        webTestClient.post()
-            .uri("/api/auth/register")
-            .bodyValue(
-                RegisterUserRequest(
-                    email = "invalid",
-                    password = "password",
-                    name = "Name",
-                    session = sessionInfo
-                )
-            )
-            .exchange()
-            .expectStatus().isBadRequest
-
-        webTestClient.post()
-            .uri("/api/auth/register")
-            .bodyValue(RegisterUserRequest(email = "", password = "password", name = "Name", session = sessionInfo))
-            .exchange()
-            .expectStatus().isBadRequest
-
-        webTestClient.post()
-            .uri("/api/auth/register")
-            .bodyValue(
-                RegisterUserRequest(
-                    email = "test@email.com",
-                    password = "",
-                    name = "Name",
-                    session = sessionInfo
-                )
-            )
-            .exchange()
-            .expectStatus().isBadRequest
-    }
-    @Test fun `register needs body`() = runTest {
         webTestClient.post()
             .uri("/api/auth/login")
-            .exchange()
-            .expectStatus().isBadRequest
-    }
-
-    @Test fun `sendVerificationEmail throws disabled exception`() = runTest {
-        val user = registerUser()
-
-        webTestClient.post()
-            .uri("/api/auth/email/verify/send")
+            .bodyValue(LoginRequest(email = user.email, password = user.password))
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
-            .expectStatus()
-            .isEqualTo(HttpStatus.SERVICE_UNAVAILABLE)
+            .expectStatus().isNotModified
     }
-    @Test fun `sendPasswordReset throws disabled exception`() = runTest {
+
+    @Test fun `logout deletes all cookies and logs out user`() = runTest {
         val user = registerUser()
 
-        webTestClient.post()
-            .uri("/api/auth/password/reset-request")
-            .bodyValue(SendPasswordResetRequest(user.info.sensitive.email))
+        val response = webTestClient.post()
+            .uri("/api/auth/logout")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .exchange()
-            .expectStatus()
-            .isEqualTo(HttpStatus.SERVICE_UNAVAILABLE)
-    }
-
-    @Test fun `refresh requires body`() = runTest {
-        webTestClient.post()
-            .uri("/api/auth/refresh")
-            .exchange()
-            .expectStatus().isBadRequest
-    }
-    @Test fun `refresh requires token`() = runTest {
-        val sessionInfo = SessionInfoRequest("session")
-        webTestClient.post()
-            .uri("/api/auth/refresh")
-            .bodyValue(sessionInfo)
-            .exchange()
-            .expectStatus().isUnauthorized
-    }
-    @Test fun `refresh requires valid token`() = runTest {
-        val sessionInfo = SessionInfoRequest("session")
-        webTestClient.post()
-            .uri("/api/auth/refresh")
-            .cookie(SessionTokenType.Refresh.cookieName, "Refresh")
-            .bodyValue(sessionInfo)
-            .exchange()
-            .expectStatus().isUnauthorized
-    }
-    @Test fun `refresh requires associated token to account`() = runTest {
-        val user = registerUser()
-        val refreshToken = refreshTokenService.create(
-            user.info.id,
-            user.sessionId,
-            Random.generateString(20)
-        )
-        webTestClient.post()
-            .uri("/api/auth/refresh")
-            .cookie(SessionTokenType.Refresh.cookieName, refreshToken.value)
-            .exchange()
-            .expectStatus().isUnauthorized
-    }
-    @Test fun `refresh token is valid once`() = runTest {
-        val user = registerUser()
-        webTestClient.post()
-            .uri("/api/auth/refresh")
-            .cookie(SessionTokenType.Refresh.cookieName, user.refreshToken)
             .exchange()
             .expectStatus().isOk
+            .expectBody()
+            .returnResult()
 
+        val cookies = response.responseCookies
+
+        val accessToken = cookies[SessionTokenType.Access.cookieName]?.firstOrNull()?.value
+        val refreshToken = cookies[SessionTokenType.Access.cookieName]?.firstOrNull()?.value
+        val sessionToken = cookies[SessionTokenType.Session.cookieName]?.firstOrNull()?.value
+        val stepUpToken = cookies[SessionTokenType.StepUp.cookieName]?.firstOrNull()?.value
+        val twoFactorAuthenticationToken = cookies[TwoFactorTokenType.Authentication.cookieName]?.firstOrNull()?.value
+        val oAuth2ProviderConnectionToken = cookies[OAuth2TokenType.ProviderConnection.cookieName]?.firstOrNull()?.value
+
+        Assertions.assertTrue(accessToken.isNullOrBlank())
+        Assertions.assertTrue(refreshToken.isNullOrBlank())
+        Assertions.assertTrue(sessionToken.isNullOrBlank())
+        Assertions.assertTrue(stepUpToken.isNullOrBlank())
+        Assertions.assertTrue(twoFactorAuthenticationToken.isNullOrBlank())
+        Assertions.assertTrue(oAuth2ProviderConnectionToken.isNullOrBlank())
+
+        val account = response.responseBody
+
+        requireNotNull(account) { "No account provided in response" }
+
+        Assertions.assertTrue(userService.findById(user.info.id).sensitive.sessions.isEmpty())
+    }
+    @Test fun `logout requires authentication`() = runTest {
         webTestClient.post()
-            .uri("/api/auth/refresh")
-            .cookie(SessionTokenType.Refresh.cookieName, user.refreshToken)
+            .uri("/api/auth/logout")
+            .bodyValue(SessionInfoRequest("session"))
             .exchange()
             .expectStatus().isUnauthorized
     }
-    @Test fun `refresh token requires associated session`() = runTest {
-        val user = registerUser()
-        webTestClient.post()
-            .uri("/api/auth/refresh")
-            .cookie(SessionTokenType.Refresh.cookieName, user.refreshToken)
-            .bodyValue(SessionInfoRequest("another session"))
-            .exchange()
-            .expectStatus().isUnauthorized
-    }
+
     @Test fun `refresh returns valid tokens`() = runTest {
         val user = registerUser()
         val response = webTestClient.post()
@@ -359,133 +368,309 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isOk
     }
+    @Test fun `refresh requires token`() = runTest {
+        val sessionInfo = SessionInfoRequest("session")
+        webTestClient.post()
+            .uri("/api/auth/refresh")
+            .bodyValue(sessionInfo)
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+    @Test fun `refresh requires valid token`() = runTest {
+        val sessionInfo = SessionInfoRequest("session")
+        webTestClient.post()
+            .uri("/api/auth/refresh")
+            .cookie(SessionTokenType.Refresh.cookieName, "Refresh")
+            .bodyValue(sessionInfo)
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+    @Test fun `refresh requires associated token to account`() = runTest {
+        val user = registerUser()
+        val anotherUser = registerUser(email = "another@email.com")
+        val refreshToken = refreshTokenService.create(
+            anotherUser.info.id,
+            user.sessionId,
+            Random.generateString(20)
+        )
 
-    @Test fun `logout requires body`() = runTest {
+        webTestClient.post()
+            .uri("/api/auth/refresh")
+            .cookie(SessionTokenType.Refresh.cookieName, refreshToken.value)
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+    @Test fun `refresh token is valid once`() = runTest {
+        val user = registerUser()
+        webTestClient.post()
+            .uri("/api/auth/refresh")
+            .cookie(SessionTokenType.Refresh.cookieName, user.refreshToken)
+            .exchange()
+            .expectStatus().isOk
+
+        webTestClient.post()
+            .uri("/api/auth/refresh")
+            .cookie(SessionTokenType.Refresh.cookieName, user.refreshToken)
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+    @Test fun `refresh token requires associated session`() = runTest {
+        val user = registerUser()
+
+        user.info.clearSessions()
+        userService.save(user.info)
+
+        webTestClient.post()
+            .uri("/api/auth/refresh")
+            .cookie(SessionTokenType.Refresh.cookieName, user.refreshToken)
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+
+    @Test fun `stepUp works`() = runTest {
+        val user = registerUser()
+        val req = StepUpRequest(user.password)
+
+        val response = webTestClient.post()
+            .uri("/api/auth/step-up")
+            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .bodyValue(req)
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(StepUpResponse::class.java)
+            .returnResult()
+
+        val stepUpTokenValue = response.responseCookies[SessionTokenType.StepUp.cookieName]
+            ?.firstOrNull()?.value
+
+        requireNotNull(stepUpTokenValue) { "No step up token info provided in response" }
+
+        val stepUpToken = stepUpTokenService.extract(stepUpTokenValue, user.info.id, user.sessionId)
+
+        Assertions.assertEquals(user.info.id, stepUpToken.userId)
+    }
+    @Test fun `stepUp needs body`() = runTest {
         val user = registerUser()
 
         webTestClient.post()
-            .uri("/api/auth/logout")
+            .uri("/api/auth/step-up")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isBadRequest
     }
-    @Test fun `logout deletes all cookies and logs out user`() = runTest {
+    @Test fun `stepUp needs correct body`() = runTest {
         val user = registerUser()
+
+        webTestClient.post()
+            .uri("/api/auth/step-up")
+            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .bodyValue("Test")
+            .exchange()
+            .expectStatus().isEqualTo(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+    }
+    @Test fun `stepUp needs valid credentials`() = runTest {
+        val user = registerUser()
+
+        webTestClient.post()
+            .uri("/api/auth/step-up")
+            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .bodyValue(StepUpRequest(
+                "wrong password"
+            ))
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+    @Test fun `stepUp needs valid access token`() = runTest {
+        val user = registerUser()
+
+        webTestClient.post()
+            .uri("/api/auth/step-up")
+            .bodyValue(StepUpRequest(user.password))
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+    @Test fun `stepUp needs access token of same account`() = runTest {
+        val user = registerUser()
+
+        webTestClient.post()
+            .uri("/api/auth/step-up")
+            .bodyValue(StepUpRequest(user.password))
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+    @Test fun `stepUp with two factor works as expected`() = runTest {
+        val user = registerUser(twoFactorEnabled = true)
+
+        val req = StepUpRequest(user.password)
 
         val response = webTestClient.post()
-            .uri("/api/auth/logout")
+            .uri("/api/auth/step-up")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .bodyValue(req)
             .exchange()
             .expectStatus().isOk
-            .expectBody()
+            .expectBody(StepUpResponse::class.java)
             .returnResult()
 
-        val cookies = response.responseCookies
+        val twoFactorToken = response.extractTwoFactorAuthenticationToken()
 
-        val accessToken = cookies[SessionTokenType.Access.cookieName]?.firstOrNull()?.value
-        val refreshToken = cookies[SessionTokenType.Access.cookieName]?.firstOrNull()?.value
+        val body = response.responseBody
+        requireNotNull(body)
 
-        Assertions.assertTrue(accessToken.isNullOrBlank())
-        Assertions.assertTrue(refreshToken.isNullOrBlank())
-
-        val account = response.responseBody
-
-        requireNotNull(account) { "No account provided in response" }
-
-        Assertions.assertTrue(userService.findById(user.info.id).sensitive.sessions.isEmpty())
-    }
-    @Test fun `logout requires authentication`() = runTest {
-        webTestClient.post()
-            .uri("/api/auth/logout")
-            .bodyValue(SessionInfoRequest("session"))
-            .exchange()
-            .expectStatus().isUnauthorized
+        Assertions.assertEquals(twoFactorToken.userId, user.info.id)
+        Assertions.assertTrue(body.twoFactorRequired)
     }
 
-    @Test fun `logoutAllsessions works`() = runTest {
-        val email = "test@email.com"
-        val password = "password"
-        val registeredUser = registerUser(email, password)
-
-        val sessionId1 = webTestClient.post()
-            .uri("/api/auth/login")
-            .bodyValue(LoginRequest(email, password))
+    @Test fun `status works with nothing`() = runTest {
+        val res = webTestClient.get()
+            .uri("/api/auth/status")
             .exchange()
             .expectStatus().isOk
-            .expectBody()
+            .expectBody(AuthenticationStatusResponse::class.java)
             .returnResult()
-            .responseCookies[SessionTokenType.Session.cookieName]
-            ?.firstOrNull()?.value
-            ?.let { accessTokenService.extract(it) }?.sessionId
+            .responseBody
 
-        val sessionId2 = webTestClient.post()
-            .uri("/api/auth/login")
-            .bodyValue(LoginRequest(email, password))
-            .exchange()
-            .expectStatus().isOk
-            .expectBody()
-            .returnResult()
-            .responseCookies[SessionTokenType.Session.cookieName]
-            ?.firstOrNull()?.value
-            ?.let { accessTokenService.extract(it) }?.sessionId
+        requireNotNull(res)
 
-        var user = userService.findByEmail(email)
-
-        Assertions.assertEquals(2, user.sensitive.sessions.size)
-        Assertions.assertTrue(user.sensitive.sessions.containsKey(sessionId1))
-        Assertions.assertTrue(user.sensitive.sessions.containsKey(sessionId2))
-
-        val response = webTestClient.delete()
-            .uri("/api/auth/sessions")
-            .cookie(SessionTokenType.Access.cookieName, registeredUser.accessToken)
-            .exchange()
-            .expectStatus().isOk
-            .expectBody()
-            .returnResult()
-
-        val cookies = response.responseCookies
-
-        val accessToken = cookies[SessionTokenType.Access.cookieName]?.firstOrNull()?.value
-        val refreshToken = cookies[SessionTokenType.Access.cookieName]?.firstOrNull()?.value
-
-        Assertions.assertTrue(accessToken.isNullOrBlank())
-        Assertions.assertTrue(refreshToken.isNullOrBlank())
-
-        user = userService.findByEmail(email)
-
-        Assertions.assertTrue(user.sensitive.sessions.isEmpty())
+        Assertions.assertFalse(res.authenticated)
+        Assertions.assertFalse(res.stepUp)
+        Assertions.assertNull(res.emailVerified)
+        Assertions.assertFalse(res.twoFactorRequired)
+        Assertions.assertNull(res.twoFactorMethods)
+        Assertions.assertNull(res.preferredTwoFactorMethod)
     }
-    @Test fun `logoutAllsessions requires authentication`() = runTest {
-        webTestClient.delete()
-            .uri("/api/auth/sessions")
-            .exchange()
-            .expectStatus().isUnauthorized
-    }
-
-    @Test fun `delete requires authentication`() = runTest {
-        webTestClient.delete()
-            .uri("/api/users/me")
-            .exchange()
-            .expectStatus().isUnauthorized
-    }
-    @Test fun `delete deletes all cookies and deletes user`() = runTest {
+    @Test fun `status works authenticated`() = runTest {
         val user = registerUser()
 
-        val response = webTestClient.delete()
-            .uri("/api/users/me")
+        val res = webTestClient.get()
+            .uri("/api/auth/status")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
-            .expectBody()
+            .expectStatus().isOk
+            .expectBody(AuthenticationStatusResponse::class.java)
             .returnResult()
+            .responseBody
 
-        val cookies = response.responseCookies
+        requireNotNull(res)
 
-        val accessToken = cookies[SessionTokenType.Access.cookieName]?.firstOrNull()?.value
-        val refreshToken = cookies[SessionTokenType.Access.cookieName]?.firstOrNull()?.value
+        Assertions.assertTrue(res.authenticated)
+        Assertions.assertFalse(res.stepUp)
+        Assertions.assertFalse(res.emailVerified!!)
+        Assertions.assertFalse(res.twoFactorRequired)
+        Assertions.assertNull(res.twoFactorMethods)
+        Assertions.assertNull(res.preferredTwoFactorMethod)
+    }
+    @Test fun `status works authenticated and email verified`() = runTest {
+        val user = registerUser()
+        user.info.sensitive.security.email.verified = true
+        userService.save(user.info)
 
-        Assertions.assertTrue(accessToken.isNullOrBlank())
-        Assertions.assertTrue(refreshToken.isNullOrBlank())
+        val res = webTestClient.get()
+            .uri("/api/auth/status")
+            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(AuthenticationStatusResponse::class.java)
+            .returnResult()
+            .responseBody
 
-        Assertions.assertEquals(0, userService.findAll().count())
+        requireNotNull(res)
+
+        Assertions.assertTrue(res.authenticated)
+        Assertions.assertFalse(res.stepUp)
+        Assertions.assertTrue(res.emailVerified!!)
+        Assertions.assertFalse(res.twoFactorRequired)
+        Assertions.assertNull(res.twoFactorMethods)
+        Assertions.assertNull(res.preferredTwoFactorMethod)
+    }
+    @Test fun `status works with step up`() = runTest {
+        val user = registerUser()
+
+        val res = webTestClient.get()
+            .uri("/api/auth/status")
+            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .cookie(SessionTokenType.StepUp.cookieName, user.stepUpToken)
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(AuthenticationStatusResponse::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        Assertions.assertTrue(res.authenticated)
+        Assertions.assertTrue(res.stepUp)
+        Assertions.assertFalse(res.emailVerified!!)
+        Assertions.assertFalse(res.twoFactorRequired)
+        Assertions.assertNull(res.twoFactorMethods)
+        Assertions.assertNull(res.preferredTwoFactorMethod)
+    }
+    @Test fun `status works with step up but not authenticated`() = runTest {
+        val user = registerUser()
+
+        val res = webTestClient.get()
+            .uri("/api/auth/status")
+            .cookie(SessionTokenType.StepUp.cookieName, user.stepUpToken)
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(AuthenticationStatusResponse::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        Assertions.assertFalse(res.authenticated)
+        Assertions.assertFalse(res.stepUp)
+        Assertions.assertNull(res.emailVerified)
+        Assertions.assertFalse(res.twoFactorRequired)
+        Assertions.assertNull(res.twoFactorMethods)
+        Assertions.assertNull(res.preferredTwoFactorMethod)
+    }
+    @Test fun `status works with two-factor`() = runTest {
+        val user = registerUser(twoFactorEnabled = true)
+
+        val twoFactorToken = twoFactorAuthenticationTokenService.create(user.info.id)
+
+        val res = webTestClient.get()
+            .uri("/api/auth/status")
+            .cookie(TwoFactorTokenType.Authentication.cookieName, twoFactorToken.value)
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(AuthenticationStatusResponse::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        Assertions.assertFalse(res.authenticated)
+        Assertions.assertFalse(res.stepUp)
+        Assertions.assertNull(res.emailVerified)
+        Assertions.assertTrue(res.twoFactorRequired)
+        Assertions.assertEquals(res.twoFactorMethods , user.info.twoFactorMethods)
+        Assertions.assertEquals(res.preferredTwoFactorMethod, user.info.preferredTwoFactorMethod)
+    }
+    @Test fun `status works with two-factor and authenticated`() = runTest {
+        val user = registerUser(twoFactorEnabled = true)
+
+        val twoFactorToken = twoFactorAuthenticationTokenService.create(user.info.id)
+
+        val res = webTestClient.get()
+            .uri("/api/auth/status")
+            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .cookie(TwoFactorTokenType.Authentication.cookieName, twoFactorToken.value)
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(AuthenticationStatusResponse::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(res)
+
+        Assertions.assertTrue(res.authenticated)
+        Assertions.assertFalse(res.stepUp)
+        Assertions.assertFalse(res.emailVerified!!)
+        Assertions.assertFalse(res.twoFactorRequired)
+        Assertions.assertNull(res.twoFactorMethods)
+        Assertions.assertNull(res.preferredTwoFactorMethod)
     }
 }

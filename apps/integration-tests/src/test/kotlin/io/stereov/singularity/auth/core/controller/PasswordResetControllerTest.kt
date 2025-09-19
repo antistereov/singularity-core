@@ -6,7 +6,6 @@ import io.stereov.singularity.auth.core.dto.request.ResetPasswordRequest
 import io.stereov.singularity.auth.core.dto.request.SendPasswordResetRequest
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
 import io.stereov.singularity.auth.core.dto.response.MailCooldownResponse
-import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.test.BaseMailIntegrationTest
 import jakarta.mail.internet.MimeMessage
 import kotlinx.coroutines.test.runTest
@@ -20,7 +19,7 @@ class PasswordResetControllerTest : BaseMailIntegrationTest() {
         val user = registerUser()
         val token = passwordResetTokenService.create(user.info.id, user.passwordResetSecret)
 
-        Assertions.assertFalse(user.info.sensitive.security.mail.verified)
+        Assertions.assertFalse(user.info.sensitive.security.email.verified)
 
         val newPassword = "new-password878"
         val req = ResetPasswordRequest(newPassword)
@@ -94,20 +93,25 @@ class PasswordResetControllerTest : BaseMailIntegrationTest() {
         webTestClient.post()
             .uri("/api/auth/password/reset-request")
             .bodyValue(SendPasswordResetRequest(user.info.sensitive.email))
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isOk
 
         verify { mailSender.send(any<MimeMessage>()) }
     }
     @Test fun `sendPasswordReset requires email`() = runTest {
-        val user = registerUser()
-
         webTestClient.post()
             .uri("/api/auth/password/reset-request")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isBadRequest
+    }
+    @Test fun `sendPasswordReset is ok for non-existing email`() = runTest {
+        webTestClient.post()
+            .uri("/api/auth/password/reset-request")
+            .bodyValue(SendPasswordResetRequest("another@email.com"))
+            .exchange()
+            .expectStatus().isOk
+
+        verify(exactly = 0) { mailSender.send(any<MimeMessage>()) }
     }
 
     @Test fun `passwordRestCooldown works`() = runTest {
@@ -120,8 +124,7 @@ class PasswordResetControllerTest : BaseMailIntegrationTest() {
             .expectStatus().isOk
 
         val res = webTestClient.get()
-            .uri("/api/auth/password/reset/cooldown")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .uri("/api/auth/password/reset/cooldown?email=${user.email}")
             .exchange()
             .expectStatus().isOk
             .expectBody(MailCooldownResponse::class.java)
@@ -136,8 +139,7 @@ class PasswordResetControllerTest : BaseMailIntegrationTest() {
         val user = registerUser()
 
         val res = webTestClient.get()
-            .uri("/api/auth/password/reset/cooldown")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .uri("/api/auth/password/reset/cooldown?email=${user.email}")
             .exchange()
             .expectStatus().isOk
             .expectBody(MailCooldownResponse::class.java)
@@ -148,10 +150,27 @@ class PasswordResetControllerTest : BaseMailIntegrationTest() {
 
         Assertions.assertEquals(0, res.remaining)
     }
-    @Test fun `passwordRestCooldown requires authentication`() = runTest {
+    @Test fun `passwordRestCooldown works when no email`() = runTest {
+        webTestClient.post()
+            .uri("/api/auth/password/reset-request")
+            .bodyValue(SendPasswordResetRequest("another@email.com"))
+            .exchange()
+            .expectStatus().isOk
+
+        val res = webTestClient.get()
+            .uri("/api/auth/password/reset/cooldown?email=another@email.com")
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(MailCooldownResponse::class.java)
+            .returnResult()
+            .responseBody
+
+        Assertions.assertTrue(res!!.remaining > 0)
+    }
+    @Test fun `passwordRestCooldown needs email`() = runTest {
         webTestClient.get()
             .uri("/api/auth/password/reset/cooldown")
             .exchange()
-            .expectStatus().isUnauthorized
+            .expectStatus().isBadRequest
     }
 }

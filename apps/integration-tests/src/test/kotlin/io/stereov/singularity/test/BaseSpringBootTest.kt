@@ -7,6 +7,8 @@ import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.auth.core.dto.request.RegisterUserRequest
 import io.stereov.singularity.auth.core.model.token.AccessToken
 import io.stereov.singularity.auth.core.model.token.SessionTokenType
+import io.stereov.singularity.auth.core.service.AuthorizationService
+import io.stereov.singularity.auth.core.service.SessionService
 import io.stereov.singularity.auth.core.service.token.*
 import io.stereov.singularity.auth.group.model.GroupDocument
 import io.stereov.singularity.auth.group.model.GroupTranslation
@@ -19,6 +21,7 @@ import io.stereov.singularity.auth.twofactor.model.token.TwoFactorAuthentication
 import io.stereov.singularity.auth.twofactor.model.token.TwoFactorTokenType
 import io.stereov.singularity.auth.twofactor.service.TotpService
 import io.stereov.singularity.auth.twofactor.service.token.TwoFactorAuthenticationTokenService
+import io.stereov.singularity.cache.service.CacheService
 import io.stereov.singularity.database.encryption.service.EncryptionSecretService
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.test.config.MockConfig
@@ -30,17 +33,27 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Import
-import org.springframework.http.HttpHeaders
 import org.springframework.test.web.reactive.server.EntityExchangeResult
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.returnResult
+import java.time.Duration
 import java.util.*
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(MockConfig::class)
 class BaseSpringBootTest {
+
+    @Autowired
+    lateinit var cacheService: CacheService
+
+    @Autowired
+    lateinit var sessionService: SessionService
+
+    @Autowired
+    lateinit var authorizationService: AuthorizationService
 
     @Autowired
     lateinit var twoFactorAuthenticationTokenService: TwoFactorAuthenticationTokenService
@@ -60,8 +73,19 @@ class BaseSpringBootTest {
     @Autowired
     lateinit var groupService: GroupService
 
-    @Autowired
     lateinit var webTestClient: WebTestClient
+
+    @LocalServerPort
+    lateinit var port: String
+
+    @BeforeEach
+    fun setupWebTestClient() {
+        webTestClient = WebTestClient
+            .bindToServer()
+            .baseUrl("http://localhost:$port")
+            .responseTimeout(Duration.ofSeconds(30))
+            .build()
+    }
 
     @Autowired
     lateinit var userService: UserService
@@ -93,6 +117,7 @@ class BaseSpringBootTest {
     @AfterEach
     fun clearDatabase() = runBlocking {
         userService.deleteAll()
+        cacheService.deleteAll()
     }
 
     @BeforeEach
@@ -109,9 +134,12 @@ class BaseSpringBootTest {
 
     data class TestRegisterResponse(
         val info: UserDocument,
+        val email: String,
+        val password: String,
         val accessToken: String,
         val refreshToken: String,
         val twoFactorToken: String?,
+        val stepUpToken: String,
         val totpSecret: String?,
         val totpRecovery: String?,
         val mailVerificationSecret: String,
@@ -126,7 +154,7 @@ class BaseSpringBootTest {
 
     suspend fun registerUser(
         email: String = "test@email.com",
-        password: String = "password",
+        password: String = "Password#3",
         twoFactorEnabled: Boolean = false,
         name: String = "Name",
         roles: List<Role> = listOf(Role.USER),
@@ -152,13 +180,14 @@ class BaseSpringBootTest {
         var twoFactorSecret: String? = null
 
         var user = userService.findByEmail(email)
+        var stepUpToken = stepUpTokenService.create(user.id, user.sensitive.sessions.keys.first())
 
         if (twoFactorEnabled) {
-            val stepUpToken = stepUpTokenService.create(user.id, user.sensitive.sessions.keys.first())
 
             val twoFactorRes = webTestClient.get()
                 .uri("/api/auth/2fa/totp/setup")
                 .cookie(SessionTokenType.Access.cookieName, accessToken)
+                .cookie(SessionTokenType.StepUp.cookieName, stepUpToken.value)
                 .exchange()
                 .expectStatus().isOk
                 .expectBody(TwoFactorSetupResponse::class.java)
@@ -208,6 +237,8 @@ class BaseSpringBootTest {
 
             requireNotNull(accessToken) { "No access token contained in response" }
             requireNotNull(refreshToken) { "No refresh token contained in response" }
+
+            stepUpToken = stepUpTokenService.create(user.id, accessTokenService.extract(accessToken).sessionId)
         }
 
         user = userService.findById(user.id)
@@ -220,26 +251,40 @@ class BaseSpringBootTest {
         user.sensitive.groups.addAll(groups)
         user = userService.save(user)
 
-        val mailVerificationToken = user.sensitive.security.mail.verificationSecret
+        val mailVerificationToken = user.sensitive.security.email.verificationSecret
         val passwordResetToken = user.sensitive.security.password.resetSecret
+
+        val sessionId = user.sensitive.sessions.keys.first()
 
         return TestRegisterResponse(
             user,
-            accessToken,
+            email,
+            password,
+            accessTokenService.create(user, sessionId).value,
             refreshToken,
             twoFactorToken,
+            stepUpToken.value,
             twoFactorSecret,
             twoFactorRecovery,
             mailVerificationToken,
             passwordResetToken,
-            user.sensitive.sessions.keys.first()
+            sessionId
         )
     }
 
     suspend fun deleteAccount(response: TestRegisterResponse) {
         webTestClient.delete()
             .uri("/api/users/me")
-            .header(HttpHeaders.COOKIE, "${SessionTokenType.Access.cookieName}=${response.accessToken}")
+            .cookie(SessionTokenType.Access.cookieName, response.accessToken)
+            .cookie(SessionTokenType.StepUp.cookieName, response.stepUpToken)
+            .exchange()
+            .expectStatus().isOk
+    }
+
+    suspend fun deleteAllSessions(response: TestRegisterResponse) {
+        webTestClient.delete()
+            .uri("/api/auth/sessions")
+            .cookie(SessionTokenType.Access.cookieName, response.accessToken)
             .exchange()
             .expectStatus().isOk
     }

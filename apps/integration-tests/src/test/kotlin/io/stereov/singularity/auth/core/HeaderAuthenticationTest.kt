@@ -13,31 +13,9 @@ import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.MongoDBContainer
 import org.testcontainers.utility.DockerImageName
 import java.time.Instant
+import java.util.*
 
 class HeaderAuthenticationTest : BaseSpringBootTest() {
-
-    companion object {
-        val mongoDBContainer = MongoDBContainer("mongo:latest").apply {
-            start()
-        }
-
-        private val redisContainer = GenericContainer(DockerImageName.parse("redis:latest"))
-            .withExposedPorts(6379)
-            .apply {
-                start()
-            }
-
-        @DynamicPropertySource
-        @JvmStatic
-        @Suppress("UNUSED")
-        fun properties(registry: DynamicPropertyRegistry) {
-            registry.add("singularity.auth.allow-header-authentication") { true }
-            registry.add("singularity.auth.prefer-header-authentication") { false }
-            registry.add("spring.data.mongodb.uri") { "${mongoDBContainer.connectionString}/test" }
-            registry.add("spring.data.redis.host") { redisContainer.host }
-            registry.add("spring.data.redis.port") { redisContainer.getMappedPort(6379) }
-        }
-    }
 
     @Test fun `access with valid token`() = runTest {
         val user = registerUser()
@@ -48,7 +26,7 @@ class HeaderAuthenticationTest : BaseSpringBootTest() {
             .exchange()
             .expectStatus().isOk
     }
-    @Test fun `valid token required needs bearer prefix`() = runTest {
+    @Test fun `access valid token required needs bearer prefix`() = runTest {
         val user = registerUser()
 
         webTestClient.get()
@@ -57,7 +35,7 @@ class HeaderAuthenticationTest : BaseSpringBootTest() {
             .exchange()
             .expectStatus().isUnauthorized
     }
-    @Test fun `valid token required`() = runTest {
+    @Test fun `access valid token required`() = runTest {
         webTestClient.get()
             .uri("/api/users/me")
             .header(HttpHeaders.AUTHORIZATION, "access_token")
@@ -74,7 +52,7 @@ class HeaderAuthenticationTest : BaseSpringBootTest() {
             .exchange()
             .expectStatus().isUnauthorized
     }
-    @Test fun `unexpired token required`() = runTest {
+    @Test fun `access unexpired token required`() = runTest {
         val user = registerUser()
         val token = accessTokenService.create(user.info, user.sessionId, Instant.ofEpochSecond(0))
 
@@ -84,7 +62,7 @@ class HeaderAuthenticationTest : BaseSpringBootTest() {
             .exchange()
             .expectStatus().isUnauthorized
     }
-    @Test fun `token gets invalid after logout`() = runTest {
+    @Test fun `access token gets invalid after logout`() = runTest {
         val user = registerUser()
 
         webTestClient.post()
@@ -99,7 +77,7 @@ class HeaderAuthenticationTest : BaseSpringBootTest() {
             .exchange()
             .expectStatus().isUnauthorized
     }
-    @Test fun `token gets invalid after logoutAll`() = runTest {
+    @Test fun `access token gets invalid after logoutAll`() = runTest {
         val user = registerUser()
 
         webTestClient.delete()
@@ -114,7 +92,7 @@ class HeaderAuthenticationTest : BaseSpringBootTest() {
             .exchange()
             .expectStatus().isUnauthorized
     }
-    @Test fun `invalid session will not be authorized`() = runTest {
+    @Test fun `access invalid session will not be authorized`() = runTest {
         val user = registerUser()
         val accessToken = accessTokenService.create(user.info, user.sessionId)
 
@@ -124,9 +102,7 @@ class HeaderAuthenticationTest : BaseSpringBootTest() {
             .exchange()
             .expectStatus().isOk
 
-        val foundUser = userService.findById(user.info.id)
-        foundUser.sensitive.sessions.clear()
-        userService.save(foundUser)
+        deleteAllSessions(user)
 
         webTestClient.get()
             .uri("/api/users/me")
@@ -151,7 +127,7 @@ class HeaderAuthenticationTest : BaseSpringBootTest() {
 
         webTestClient.get()
             .uri("/api/users/me")
-            .header(SessionTokenType.Refresh.header, "Bearer ${response.accessToken!!}")
+            .header(SessionTokenType.Access.header, "Bearer ${response.accessToken!!}")
             .exchange()
             .expectStatus().isOk
     }
@@ -171,7 +147,7 @@ class HeaderAuthenticationTest : BaseSpringBootTest() {
 
         webTestClient.get()
             .uri("/api/users/me")
-            .header(SessionTokenType.Refresh.header, "Bearer ${user.accessToken}")
+            .header(SessionTokenType.Access.header, "Bearer ${user.accessToken}")
             .exchange()
             .expectStatus().isOk
 
@@ -215,7 +191,7 @@ class HeaderAuthenticationTest : BaseSpringBootTest() {
 
         webTestClient.post()
             .uri("/api/auth/logout")
-            .header(SessionTokenType.Refresh.header, "Bearer ${user.accessToken}")
+            .header(SessionTokenType.Access.header, "Bearer ${user.accessToken}")
             .exchange()
             .expectStatus().isOk
 
@@ -230,7 +206,7 @@ class HeaderAuthenticationTest : BaseSpringBootTest() {
 
         webTestClient.delete()
             .uri("/api/auth/sessions")
-            .header(SessionTokenType.Refresh.header, "Bearer ${user.accessToken}")
+            .header(SessionTokenType.Access.header, "Bearer ${user.accessToken}")
             .exchange()
             .expectStatus().isOk
 
@@ -250,14 +226,119 @@ class HeaderAuthenticationTest : BaseSpringBootTest() {
             .exchange()
             .expectStatus().isOk
 
-        val foundUser = userService.findById(user.info.id)
-        foundUser.sensitive.sessions.clear()
-        userService.save(foundUser)
+        deleteAllSessions(user)
 
         webTestClient.post()
             .uri("/api/auth/refresh")
             .header(HttpHeaders.AUTHORIZATION, "Bearer ${user.refreshToken}")
             .exchange()
             .expectStatus().isUnauthorized
+    }
+
+    @Test fun `stepUp works`() = runTest {
+        val user = registerUser()
+
+        webTestClient.get()
+            .uri("/api/auth/2fa/totp/setup")
+            .header(SessionTokenType.Access.header, "Bearer ${user.accessToken}")
+            .header(SessionTokenType.StepUp.header, user.stepUpToken)
+            .exchange()
+            .expectStatus().isOk
+    }
+    @Test fun `stepUp requires valid token`() = runTest {
+        val user = registerUser()
+
+        webTestClient.get()
+            .uri("/api/auth/2fa/totp/setup")
+            .header(SessionTokenType.Access.header, "Bearer ${user.accessToken}")
+            .header(SessionTokenType.StepUp.header, "invalid")
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+    @Test fun `stepUp requires unexpired token`() = runTest {
+        val user = registerUser()
+        val stepUpToken = stepUpTokenService.create(user.info.id, user.sessionId, Instant.ofEpochSecond(0))
+
+        webTestClient.get()
+            .uri("/api/auth/2fa/totp/setup")
+            .header(SessionTokenType.Access.header, "Bearer ${user.accessToken}")
+            .header(SessionTokenType.StepUp.header, stepUpToken.value)
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+    @Test fun `stepUp needs access token`() = runTest {
+        val user = registerUser()
+
+        webTestClient.get()
+            .uri("/api/auth/2fa/totp/setup")
+            .header(SessionTokenType.StepUp.header, user.stepUpToken)
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+    @Test fun `stepUp needs valid access token`() = runTest {
+        val user = registerUser()
+
+        webTestClient.get()
+            .uri("/api/auth/2fa/totp/setup")
+            .header(SessionTokenType.Access.header, "invalid")
+            .header(SessionTokenType.StepUp.header, user.stepUpToken)
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+    @Test fun `stepUp needs valid unexpired access token`() = runTest {
+        val user = registerUser()
+        val accessToken = accessTokenService.create(user.info, user.sessionId, Instant.ofEpochSecond(0))
+
+        webTestClient.get()
+            .uri("/api/auth/2fa/totp/setup")
+            .header(SessionTokenType.Access.header, "Bearer ${accessToken.value}")
+            .header(SessionTokenType.StepUp.header, user.stepUpToken)
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+    @Test fun `stepUp needs access token from matching account`() = runTest {
+        val user = registerUser()
+        val another = registerUser(email = "another@email.com")
+
+        webTestClient.get()
+            .uri("/api/auth/2fa/totp/setup")
+            .header(SessionTokenType.Access.header, "Bearer ${another.accessToken}")
+            .header(SessionTokenType.StepUp.header, user.stepUpToken)
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+    @Test fun `stepUp needs access token from matching session`() = runTest {
+        val user = registerUser()
+        val stepUpToken = stepUpTokenService.create(user.info.id, UUID.randomUUID())
+
+        webTestClient.get()
+            .uri("/api/auth/2fa/totp/setup")
+            .header(SessionTokenType.Access.header, "Bearer ${user.accessToken}")
+            .header(SessionTokenType.StepUp.header, stepUpToken.value)
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+
+    companion object {
+        val mongoDBContainer = MongoDBContainer("mongo:latest").apply {
+            start()
+        }
+
+        private val redisContainer = GenericContainer(DockerImageName.parse("redis:latest"))
+            .withExposedPorts(6379)
+            .apply {
+                start()
+            }
+
+        @DynamicPropertySource
+        @JvmStatic
+        @Suppress("UNUSED")
+        fun properties(registry: DynamicPropertyRegistry) {
+            registry.add("singularity.auth.allow-header-authentication") { true }
+            registry.add("singularity.auth.prefer-header-authentication") { false }
+            registry.add("spring.data.mongodb.uri") { "${mongoDBContainer.connectionString}/test" }
+            registry.add("spring.data.redis.host") { redisContainer.host }
+            registry.add("spring.data.redis.port") { redisContainer.getMappedPort(6379) }
+        }
     }
 }

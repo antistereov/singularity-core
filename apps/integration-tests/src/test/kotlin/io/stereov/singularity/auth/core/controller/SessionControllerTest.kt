@@ -60,7 +60,7 @@ class SessionControllerTest : BaseIntegrationTest() {
     }
     @Test fun `removeSession requires authentication`() = runTest {
         webTestClient.delete()
-            .uri("/api/auth/sessions/session")
+            .uri("/api/auth/sessions/${UUID.randomUUID()}")
             .exchange()
             .expectStatus().isUnauthorized
     }

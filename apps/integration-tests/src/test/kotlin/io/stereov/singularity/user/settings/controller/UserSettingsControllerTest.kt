@@ -22,7 +22,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
     @Test fun `changeEmail works with 2fa`() = runTest {
         val oldEmail = "old@email.com"
         val newEmail = "new@email.com"
-        val password = "password"
+        val password = "Password$2"
         val user = registerUser(oldEmail, password, twoFactorEnabled = true)
 
 
@@ -58,7 +58,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
     @Test fun `changeEmail works without 2fa`() = runTest {
         val oldEmail = "old@email.com"
         val newEmail = "new@email.com"
-        val password = "password"
+        val password = "Password$2"
         val user = registerUser(oldEmail, password)
 
         webTestClient.put()
@@ -89,7 +89,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
     @Test fun `changeEmail changes email`() = runTest {
         val oldEmail = "old@email.com"
         val newEmail = "new@email.com"
-        val password = "password"
+        val password = "Password$2"
         val user = registerUser(oldEmail, password)
 
         val res = webTestClient.put()
@@ -110,7 +110,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
     @Test fun `changeEmail requires authentication`() = runTest {
         val oldEmail = "old@email.com"
         val newEmail = "new@email.com"
-        val password = "password"
+        val password = "Password$2"
         registerUser(oldEmail, password)
 
         webTestClient.put()
@@ -121,7 +121,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
     }
     @Test fun `changeEmail requires body`() = runTest {
         val oldEmail = "old@email.com"
-        val password = "password"
+        val password = "Password$2"
         val user = registerUser(oldEmail, password)
 
         webTestClient.put()
@@ -133,7 +133,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
     @Test fun `changeEmail requires correct password`() = runTest {
         val oldEmail = "old@email.com"
         val newEmail = "new@email.com"
-        val password = "password"
+        val password = "Password$2"
         val user = registerUser(oldEmail, password)
         gAuth.getTotpPassword(user.totpSecret)
 
@@ -147,7 +147,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
     @Test fun `changeEmail requires step up`() = runTest {
         val oldEmail = "old@email.com"
         val newEmail = "new@email.com"
-        val password = "password"
+        val password = "Password$2"
         val user = registerUser(oldEmail, password, twoFactorEnabled = true)
 
         webTestClient.put()
@@ -160,7 +160,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
     @Test fun `changeEmail requires step up token for same user`() = runTest {
         val oldEmail = "old@email.com"
         val newEmail = "new@email.com"
-        val password = "password"
+        val password = "Password$2"
         val user = registerUser(oldEmail, password, twoFactorEnabled = true)
         val anotherUser = registerUser("ttest@email.com")
 
@@ -178,7 +178,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
     @Test fun `changeEmail requires step up token for same session`() = runTest {
         val oldEmail = "old@email.com"
         val newEmail = "new@email.com"
-        val password = "password"
+        val password = "Password$2"
         val user = registerUser(oldEmail, password, twoFactorEnabled = true)
 
         webTestClient.put()
@@ -195,7 +195,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
     @Test fun `changeEmail requires unexpired step up token`() = runTest {
         val oldEmail = "old@email.com"
         val newEmail = "new@email.com"
-        val password = "password"
+        val password = "Password$2"
         val user = registerUser(oldEmail, password, twoFactorEnabled = true)
 
         webTestClient.put()
@@ -216,7 +216,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
     @Test fun `changeEmail requires valid step up token`() = runTest {
         val oldEmail = "old@email.com"
         val newEmail = "new@email.com"
-        val password = "password"
+        val password = "Password$2"
         val user = registerUser(oldEmail, password, twoFactorEnabled = true)
 
         webTestClient.put()
@@ -233,7 +233,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
     @Test fun `changeEmail requires non-existing email`() = runTest {
         val oldEmail = "old@email.com"
         val newEmail = "new@email.com"
-        val password = "password"
+        val password = "Password$2"
         val user = registerUser(oldEmail, password)
         registerUser(newEmail)
 
@@ -247,7 +247,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
     @Test fun `changeEmail does nothing without validation`() = runTest {
         val oldEmail = "old@email.com"
         val newEmail = "new@email.com"
-        val password = "password"
+        val password = "Password$2"
         val user = registerUser(oldEmail, password)
 
         val res = webTestClient.put()
@@ -268,8 +268,8 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
 
     @Test fun `changePassword works with 2fa`() = runTest {
         val email = "old@email.com"
-        val oldPassword = "password"
-        val newPassword = "newPassword"
+        val oldPassword = "Password$2"
+        val newPassword = "newPassword$2"
         val user = registerUser(email, oldPassword, twoFactorEnabled = true)
 
         val res = webTestClient.put()
@@ -296,8 +296,8 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
     }
     @Test fun `changePassword works without 2fa`() = runTest {
         val email = "old@email.com"
-        val oldPassword = "password"
-        val newPassword = "newPassword"
+        val oldPassword = "Password$2"
+        val newPassword = "newPassword$2"
         val user = registerUser(email, oldPassword)
 
         val res = webTestClient.put()
@@ -320,8 +320,8 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
     }
     @Test fun `changePassword requires authentication`() = runTest {
         val email = "old@email.com"
-        val oldPassword = "password"
-        val newPassword = "newPassword"
+        val oldPassword = "Password$2"
+        val newPassword = "newPassword$2"
         val user = registerUser(email, oldPassword)
         gAuth.getTotpPassword(user.totpSecret)
 
@@ -333,7 +333,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
     }
     @Test fun `changePassword requires body`() = runTest {
         val email = "old@email.com"
-        val oldPassword = "password"
+        val oldPassword = "Password$2"
         val user = registerUser(email, oldPassword)
 
         webTestClient.put()
@@ -344,8 +344,8 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
     }
     @Test fun `changePassword requires correct password`() = runTest {
         val email = "old@email.com"
-        val oldPassword = "password"
-        val newPassword = "newPassword"
+        val oldPassword = "Password$2"
+        val newPassword = "newPassword$2"
         val user = registerUser(email, oldPassword)
         gAuth.getTotpPassword(user.totpSecret)
 
@@ -358,8 +358,8 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
     }
     @Test fun `changePassword requires step up`() = runTest {
         val email = "old@email.com"
-        val oldPassword = "password"
-        val newPassword = "newPassword"
+        val oldPassword = "Password$2"
+        val newPassword = "newPassword$2"
         val user = registerUser(email, oldPassword, twoFactorEnabled = true)
 
         webTestClient.put()
@@ -371,8 +371,8 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
     }
     @Test fun `changePassword requires step up token for same user`() = runTest {
         val email = "old@email.com"
-        val oldPassword = "password"
-        val newPassword = "newPassword"
+        val oldPassword = "Password$2"
+        val newPassword = "newPassword$2"
         val user = registerUser(email, oldPassword, twoFactorEnabled = true)
         val anotherUser = registerUser("another@email.com")
 
@@ -389,8 +389,8 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
     }
     @Test fun `changePassword requires step up token for same session`() = runTest {
         val email = "old@email.com"
-        val oldPassword = "password"
-        val newPassword = "newPassword"
+        val oldPassword = "Password$2"
+        val newPassword = "newPassword$2"
         val user = registerUser(email, oldPassword, twoFactorEnabled = true)
 
         webTestClient.put()
@@ -406,8 +406,8 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
     }
     @Test fun `changePassword requires unexpired step up token`() = runTest {
         val email = "old@email.com"
-        val oldPassword = "password"
-        val newPassword = "newPassword"
+        val oldPassword = "Password$2"
+        val newPassword = "newPassword$2"
         val user = registerUser(email, oldPassword, twoFactorEnabled = true)
 
         webTestClient.put()
@@ -427,8 +427,8 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
     }
     @Test fun `changePassword requires valid step up token`() = runTest {
         val email = "old@email.com"
-        val oldPassword = "password"
-        val newPassword = "newPassword"
+        val oldPassword = "Password$2"
+        val newPassword = "newPassword$2"
         val user = registerUser(email, oldPassword, twoFactorEnabled = true)
 
         webTestClient.put()

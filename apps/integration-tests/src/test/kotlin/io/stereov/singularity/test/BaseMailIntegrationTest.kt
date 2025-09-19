@@ -1,6 +1,7 @@
 package io.stereov.singularity.test
 
 import io.mockk.Runs
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.just
 import io.stereov.singularity.test.config.MockMailSenderConfig
@@ -25,6 +26,7 @@ class BaseMailIntegrationTest : BaseSpringBootTest() {
 
     @BeforeEach
     fun init() {
+        clearMocks(mailSender)
         every { mailSender.send(any<SimpleMailMessage>()) } just Runs
     }
 
@@ -43,7 +45,7 @@ class BaseMailIntegrationTest : BaseSpringBootTest() {
         @JvmStatic
         @Suppress("UNUSED")
         fun properties(registry: DynamicPropertyRegistry) {
-            registry.add("singularity.app.enable-email") { true }
+            registry.add("singularity.email.enable") { true }
             registry.add("spring.data.mongodb.uri") { "${mongoDBContainer.connectionString}/test" }
             registry.add("spring.data.redis.host") { redisContainer.host }
             registry.add("spring.data.redis.port") { redisContainer.getMappedPort(6379) }

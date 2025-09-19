@@ -16,7 +16,7 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
         val user = registerUser()
         val token = emailVerificationTokenService.create(user.info.id, user.info.sensitive.email,user.mailVerificationSecret)
 
-        assertFalse(user.info.sensitive.security.mail.verified)
+        assertFalse(user.info.sensitive.security.email.verified)
 
         webTestClient.post()
             .uri("/api/auth/email/verify?token=$token")
@@ -25,7 +25,7 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
 
         val verifiedUser = userService.findByEmail(user.info.sensitive.email)
 
-        assertTrue(verifiedUser.sensitive.security.mail.verified)
+        assertTrue(verifiedUser.sensitive.security.email.verified)
     }
     @Test fun `verifyEmail requires token`() = runTest {
         webTestClient.post()
@@ -68,6 +68,12 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
             .expectStatus().isOk
 
         verify { mailSender.send(any<MimeMessage>()) }
+    }
+    @Test fun `sendVerificationEmail requires authentication`() = runTest {
+        webTestClient.post()
+            .uri("/api/auth/email/verify/send")
+            .exchange()
+            .expectStatus().isUnauthorized
     }
 
     @Test fun `verifyCooldown works`() = runTest {

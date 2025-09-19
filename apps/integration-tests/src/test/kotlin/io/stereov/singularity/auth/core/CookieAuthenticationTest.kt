@@ -12,8 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder
 import org.springframework.test.web.reactive.server.expectBody
 import java.time.Instant
+import java.util.*
 
-class SecurityIntegrationTest : BaseIntegrationTest() {
+class CookieAuthenticationTest() : BaseIntegrationTest() {
 
     @Autowired
     private lateinit var jwtDecoder: ReactiveJwtDecoder
@@ -30,7 +31,7 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isOk
     }
-    @Test fun `valid token required`() = runTest {
+    @Test fun `access valid token required`() = runTest {
         webTestClient.get()
             .uri("/api/users/me")
             .cookie(SessionTokenType.Access.cookieName, "access_token")
@@ -47,7 +48,7 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isUnauthorized
     }
-    @Test fun `unexpired token required`() = runTest {
+    @Test fun `access unexpired token required`() = runTest {
         val user = registerUser()
         val token = accessTokenService.create(user.info, user.sessionId, Instant.ofEpochSecond(0))
 
@@ -57,7 +58,7 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isUnauthorized
     }
-    @Test fun `token gets invalid after logout`() = runTest {
+    @Test fun `access token gets invalid after logout`() = runTest {
         val user = registerUser()
 
         webTestClient.post()
@@ -72,7 +73,7 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isUnauthorized
     }
-    @Test fun `token gets invalid after logoutAll`() = runTest {
+    @Test fun `access token gets invalid after logoutAll`() = runTest {
         val user = registerUser()
 
         webTestClient.delete()
@@ -87,23 +88,20 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isUnauthorized
     }
-    @Test fun `invalid session will not be authorized`() = runTest {
+    @Test fun `access with invalid session will not be authorized`() = runTest {
         val user = registerUser()
-        val accessToken = accessTokenService.create(user.info, user.sessionId)
 
         webTestClient.get()
             .uri("/api/users/me")
-            .cookie(SessionTokenType.Access.cookieName, cookieCreator.createCookie(accessToken).value)
+            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isOk
 
-        val foundUser = userService.findById(user.info.id)
-        foundUser.sensitive.sessions.clear()
-        userService.save(foundUser)
+        deleteAllSessions(user)
 
         webTestClient.get()
             .uri("/api/users/me")
-            .cookie(SessionTokenType.Access.cookieName, cookieCreator.createCookie(accessToken).value)
+            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -227,13 +225,95 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isOk
 
-        val foundUser = userService.findById(user.info.id)
-        foundUser.sensitive.sessions.clear()
-        userService.save(foundUser)
+        deleteAllSessions(user)
 
         webTestClient.post()
             .uri("/api/auth/refresh")
             .cookie(SessionTokenType.Refresh.cookieName, user.refreshToken)
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+
+    @Test fun `stepUp works`() = runTest {
+        val user = registerUser()
+
+        webTestClient.get()
+            .uri("/api/auth/2fa/totp/setup")
+            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .cookie(SessionTokenType.StepUp.cookieName, user.stepUpToken)
+            .exchange()
+            .expectStatus().isOk
+    }
+    @Test fun `stepUp requires valid token`() = runTest {
+        val user = registerUser()
+
+        webTestClient.get()
+            .uri("/api/auth/2fa/totp/setup")
+            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .cookie(SessionTokenType.StepUp.cookieName, "invalid")
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+    @Test fun `stepUp requires unexpired token`() = runTest {
+        val user = registerUser()
+        val stepUpToken = stepUpTokenService.create(user.info.id, user.sessionId, Instant.ofEpochSecond(0))
+
+        webTestClient.get()
+            .uri("/api/auth/2fa/totp/setup")
+            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .cookie(SessionTokenType.StepUp.cookieName, stepUpToken.value)
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+    @Test fun `stepUp needs access token`() = runTest {
+        val user = registerUser()
+
+        webTestClient.get()
+            .uri("/api/auth/2fa/totp/setup")
+            .cookie(SessionTokenType.StepUp.cookieName, user.stepUpToken)
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+    @Test fun `stepUp needs valid access token`() = runTest {
+        val user = registerUser()
+
+        webTestClient.get()
+            .uri("/api/auth/2fa/totp/setup")
+            .cookie(SessionTokenType.Access.cookieName, "invalid")
+            .cookie(SessionTokenType.StepUp.cookieName, user.stepUpToken)
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+    @Test fun `stepUp needs valid unexpired access token`() = runTest {
+        val user = registerUser()
+        val accessToken = accessTokenService.create(user.info, user.sessionId, Instant.ofEpochSecond(0))
+
+        webTestClient.get()
+            .uri("/api/auth/2fa/totp/setup")
+            .cookie(SessionTokenType.Access.cookieName, accessToken.value)
+            .cookie(SessionTokenType.StepUp.cookieName, user.stepUpToken)
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+    @Test fun `stepUp needs access token from matching account`() = runTest {
+        val user = registerUser()
+        val another = registerUser(email = "another@email.com")
+
+        webTestClient.get()
+            .uri("/api/auth/2fa/totp/setup")
+            .cookie(SessionTokenType.Access.cookieName, another.accessToken)
+            .cookie(SessionTokenType.StepUp.cookieName, user.stepUpToken)
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+    @Test fun `stepUp needs access token from matching session`() = runTest {
+        val user = registerUser()
+        val stepUpToken = stepUpTokenService.create(user.info.id, UUID.randomUUID())
+
+        webTestClient.get()
+            .uri("/api/auth/2fa/totp/setup")
+            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .cookie(SessionTokenType.StepUp.cookieName, stepUpToken.value)
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -254,6 +334,4 @@ class SecurityIntegrationTest : BaseIntegrationTest() {
 
         assertNotEquals(oldKeyId, newKeyId)
     }
-
-
 }
