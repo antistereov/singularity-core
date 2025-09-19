@@ -12,7 +12,6 @@ import io.stereov.singularity.auth.core.exception.model.UserAlreadyAuthenticated
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.email.core.properties.EmailProperties
-import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.user.core.exception.model.EmailAlreadyExistsException
 import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.service.UserService
