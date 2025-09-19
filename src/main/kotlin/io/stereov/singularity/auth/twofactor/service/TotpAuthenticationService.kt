@@ -10,7 +10,8 @@ import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.twofactor.dto.response.TwoFactorSetupResponse
 import io.stereov.singularity.auth.twofactor.exception.model.CannotDisableOnly2FAMethodException
 import io.stereov.singularity.auth.twofactor.exception.model.InvalidTwoFactorCodeException
-import io.stereov.singularity.auth.twofactor.exception.model.TwoFactorMethodSetupException
+import io.stereov.singularity.auth.twofactor.exception.model.MissingPasswordIdentityException
+import io.stereov.singularity.auth.twofactor.exception.model.TwoFactorMethodAlreadyEnabledException
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
 import io.stereov.singularity.auth.twofactor.properties.TotpRecoveryCodeProperties
 import io.stereov.singularity.auth.twofactor.service.token.TotpSetupTokenService
@@ -53,11 +54,12 @@ class TotpAuthenticationService(
         logger.debug { "Setting up two factor authentication" }
 
         val user = authorizationService.getCurrentUser()
+        authorizationService.requireStepUp()
         if (!user.sensitive.identities.containsKey(IdentityProvider.PASSWORD)) {
-            throw TwoFactorMethodSetupException("Cannot set up TOTP: user did not configured sign in using password.")
+            throw MissingPasswordIdentityException("Cannot set up TOTP: user did not configured sign in using password.")
         }
         if (user.sensitive.security.twoFactor.totp.enabled)
-            throw TwoFactorMethodSetupException("The user already set up TOTP")
+            throw TwoFactorMethodAlreadyEnabledException("The user already set up TOTP")
 
         val secret = totpService.generateSecretKey()
         val otpAuthUrl = totpService.getOtpAuthUrl(user.sensitive.email, secret)
@@ -86,11 +88,11 @@ class TotpAuthenticationService(
         val setupToken = setupTokenService.validate(token)
 
         if (!user.sensitive.identities.containsKey(IdentityProvider.PASSWORD)) {
-            throw TwoFactorMethodSetupException("Cannot set up TOTP: user did not configured sign in using password.")
+            throw MissingPasswordIdentityException("Cannot set up TOTP: user did not configured sign in using password.")
         }
 
         if (user.sensitive.security.twoFactor.totp.enabled)
-            throw TwoFactorMethodSetupException("The user already set up TOTP")
+            throw TwoFactorMethodAlreadyEnabledException("The user already set up TOTP")
 
         authorizationService.requireStepUp()
 

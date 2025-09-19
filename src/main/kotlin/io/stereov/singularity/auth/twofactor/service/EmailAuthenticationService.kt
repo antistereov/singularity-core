@@ -8,7 +8,7 @@ import io.stereov.singularity.auth.twofactor.dto.request.EnableEmailTwoFactorMet
 import io.stereov.singularity.auth.twofactor.exception.model.CannotDisableOnly2FAMethodException
 import io.stereov.singularity.auth.twofactor.exception.model.InvalidTwoFactorCodeException
 import io.stereov.singularity.auth.twofactor.exception.model.TwoFactorCodeExpiredException
-import io.stereov.singularity.auth.twofactor.exception.model.TwoFactorMethodSetupException
+import io.stereov.singularity.auth.twofactor.exception.model.TwoFactorMethodAlreadyEnabledException
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties
 import io.stereov.singularity.global.properties.AppProperties
@@ -136,7 +136,7 @@ class EmailAuthenticationService(
         authorizationService.requireStepUp()
 
         if (user.sensitive.security.twoFactor.mail.enabled)
-            throw TwoFactorMethodSetupException("Mail is already enabled as 2FA method")
+            throw TwoFactorMethodAlreadyEnabledException("Mail is already enabled as 2FA method")
 
         doValidateCode(user, req.code)
 
