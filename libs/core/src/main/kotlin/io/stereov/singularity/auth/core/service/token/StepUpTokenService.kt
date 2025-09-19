@@ -50,12 +50,10 @@ class StepUpTokenService(
         return create(userId, sessionId, issuedAt)
     }
 
-    suspend fun extract(exchange: ServerWebExchange, currentUserId: ObjectId, currentSessionId: UUID): StepUpToken {
+    suspend fun extract(tokenValue: String, currentUserId: ObjectId, currentSessionId: UUID): StepUpToken {
         logger.debug { "Extracting step up token" }
 
-        val token = tokenValueExtractor.extractValue(exchange, tokenType)
-
-        val jwt = jwtService.decodeJwt(token, true)
+        val jwt = jwtService.decodeJwt(tokenValue, true)
 
         val userId = jwt.subject?.let { ObjectId(it) }
             ?: throw InvalidTokenException("JWT does not contain sub")
@@ -73,5 +71,11 @@ class StepUpTokenService(
         }
 
         return StepUpToken(userId, sessionId, jwt)
+    }
+
+    suspend fun extract(exchange: ServerWebExchange, currentUserId: ObjectId, currentSessionId: UUID): StepUpToken {
+        val tokenValue = tokenValueExtractor.extractValue(exchange, tokenType)
+
+        return extract(tokenValue, currentUserId, currentSessionId)
     }
 }

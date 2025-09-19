@@ -58,10 +58,10 @@ class EmailVerificationService(
         val user = userService.findByIdOrNull(verificationToken.userId)
             ?: throw AuthException("User does not exist")
 
-        val savedSecret = user.sensitive.security.mail.verificationSecret
+        val savedSecret = user.sensitive.security.email.verificationSecret
 
         return if (verificationToken.secret == savedSecret) {
-            user.sensitive.security.mail.verified = true
+            user.sensitive.security.email.verified = true
             user.sensitive.email = verificationToken.email
             val savedUser = userService.save(user)
 
@@ -164,7 +164,7 @@ class EmailVerificationService(
             throw EmailCooldownException(remainingCooldown)
         }
 
-        val secret = user.sensitive.security.mail.verificationSecret
+        val secret = user.sensitive.security.email.verificationSecret
 
         val email = newEmail ?: user.sensitive.email
         val token = emailVerificationTokenService.create(userId, email, secret)
