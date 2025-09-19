@@ -226,6 +226,51 @@ class CoolStuffService(
 }
 ```
 
+### Requiring Step-Up Authentication
+
+You can secure critical endpoints by requiring the user to reauthenticate.
+
+:::note
+You can learn more about the step-up authentication flow [here](./authentication.md#step-up).
+:::
+
+```kotlin
+@RestController
+@RequestMapping("/api/cool-stuff")
+class CoolStuffController(
+    private val service: CoolStuffService
+) {
+
+    /**
+     * This endpoint removes cool stuff from the user.
+     * This is a security critical action.
+     */
+    @DeleteMapping
+    suspend fun removeCoolStuffFromUser(
+        @PathVariable val id: ObjectId
+    ): ResponseEntity<CoolStuff> {
+        return ResponseEntity.ok(service.getCoolStuffForUserWithId(id))
+    }
+}
+
+@Service
+class CoolStuffService(
+    private val authService: AuthorizationService
+) {
+
+    suspend fun removeCoolStuffFromUser() {
+        val user = authService.getCurrentUser()
+        
+        /**
+         * Require step-up authentication.
+         */
+        authService.requireStepUp()
+
+        user.removeCoolStuff()
+    }
+}
+```
+
 If you call `/api/cool-stuff` now, you get:
 * `200` whether you provide a token or not.
 

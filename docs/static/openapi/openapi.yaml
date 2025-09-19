@@ -1,22 +1,19 @@
 openapi: 3.1.0
 info:
   title: Singularity API
-  description: "\n            Welcome to the Singularity! \n            \n       \
-    \     This documentation covers the ready-to-use endpoints \n            for authentication,\
-    \ user management, and content management that come pre-configured with \n   \
-    \         Singularity.\n\n            Features at a Glance:\n            \n  \
-    \          - Authentication & User Management: Includes JWT auth with refresh\
-    \ tokens, 2FA, \n              email verification, and role-based access control.\n\
-    \              \n            - Data & Content Management: Endpoints for interacting\
-    \ with a content management \n              system that supports multi-language\
-    \ content, configurable tagging, and built-in \n              access control.\
-    \ A prebuilt Article class is also provided.\n              \n            - Performance\
-    \ & Security: The API is built with a focus on production-readiness, \n      \
-    \        including rate limiting and secret manager integration with automated\
-    \ key rotation.\n            \n            This API is a foundation for building\
-    \ robust backend services, microservices, or \n            full-stack applications.\n\
-    \            \n            Note: Some endpoints require explicit configuration\
-    \ to be enabled.\n            "
+  description: "Welcome to the *Singularity*! \n\nThis documentation covers the ready-to-use\
+    \ endpoints \nfor authentication, user management, and content management that\
+    \ come pre-configured with \n*Singularity*.\n\n**Features at a Glance**:\n\n-\
+    \ **Authentication & User Management:** Includes JWT auth with refresh tokens,\
+    \ 2FA, \n  email verification, and role-based access control.\n  \n- **Data &\
+    \ Content Management:** Endpoints for interacting with a content management \n\
+    \  system that supports multi-language content, configurable tagging, and built-in\
+    \ \n  access control. A prebuilt `Article` class is also provided.\n  \n- **Performance\
+    \ & Security:** The API is built with a focus on production-readiness, \n  including\
+    \ rate limiting and secret manager integration with automated key rotation.\n\n\
+    This API is a foundation for building robust backend services, microservices,\
+    \ or \nfull-stack applications.\n\n**Note:** Some endpoints require explicit configuration\
+    \ to be enabled."
   contact:
     name: Stereov
     url: https://stereov.io
@@ -52,7 +49,24 @@ paths:
       tags:
       - Authentication
       summary: Register
-      description: Creates a new user account and logs them in.
+      description: "Registers a new user account with `email`, `password`, and `name`.\n\
+        \n**Requirements:**\n- The `email` should be a valid email address (e.g.,\
+        \ \"test@example.com\")\n- The `password` must be at least 8 characters long\
+        \ and include at least one uppercase letter, \n  one lowercase letter, one\
+        \ number, and one special character (!@#$%^&*()_+={}[]|\\:;'\"<>,.?/).\n\n\
+        **Optional session data:**\n- The `session` object can be included in the\
+        \ request body.\n- Inside the `session` object, you can provide the following\
+        \ optional fields:\n    - `browser`: The name of the browser used (e.g., \"\
+        Chrome\", \"Firefox\").\n    - `os`: The operating system of the device (e.g.,\
+        \ \"Windows\", \"macOS\", \"Android\").\n\nThis information helps users identify\
+        \ and manage authorized sessions, improving overall account security.\n\n\
+        **Tokens:**\n\nIf successful, [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
+        \ and \n[`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)\
+        \ \nwill automatically be set as HTTP-only cookies.\nIf [header authentication](https://singularity.stereov.io/docs/guides/auth/securing-endpoints#header-authentication)\
+        \ is enabled,\n[`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
+        \ and \n[`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)\n\
+        will be returned in the response body and can be used as \nbearer tokens in\
+        \ the authorization header for upcoming requests."
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/authentication#registering-users
       operationId: register
@@ -75,19 +89,21 @@ paths:
         required: true
       responses:
         "200":
-          description: Registration successful. Returns user details and tokens.
+          description: Registration successful. Returns user details and tokens if
+            header authentication is enabled.
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/RegisterResponse"
-        "409":
-          description: Email already exists.
+        "304":
+          description: User is already authenticated. Authenticated session state
+            has not changed since last request.
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-        "403":
-          description: User is already authenticated.
+        "409":
+          description: The email is already in use.
           content:
             '*/*':
               schema:
@@ -100,8 +116,25 @@ paths:
       tags:
       - Authentication
       summary: Login
-      description: "Authenticates a user, returns an access and refresh token and\
-        \ sets those tokens as HTTP-Only Cookies."
+      description: "Authenticates a user with `email` and `password`.\n\n**Optional\
+        \ session data:**\n- The `session` object can be included in the request body.\n\
+        - Inside the `session` object, you can provide the following optional fields:\n\
+        \    - `browser`: The name of the browser used (e.g., \"Chrome\", \"Firefox\"\
+        ).\n    - `os`: The operating system of the device (e.g., \"Windows\", \"\
+        macOS\", \"Android\").\n\nThis information helps users identify and manage\
+        \ authorized sessions, improving overall account security.\n\n**2FA:**\n\n\
+        If the user enabled 2FA, the user will not be authenticated immediately. \n\
+        Instead, a [`TwoFactorAuthenticationToken`](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token)\
+        \ \nis set as HTTP-only cookie and returned in the response body\nif [header\
+        \ authentication](https://singularity.stereov.io/docs/guides/auth/securing-endpoints#header-authentication)\
+        \ is enabled.\n\nYou can complete the login through the endpoint [`POST /api/auth/2fa/login`](https://singularity.stereov.io/docs/api/complete-login).\n\
+        \n**Tokens:**\n- If 2FA is disabled and the request is successful, \n  [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
+        \ \n  and [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)\
+        \ \n  will automatically be set as HTTP-only cookies.\n  If [header authentication](https://singularity.stereov.io/docs/guides/auth/securing-endpoints#header-authentication)\
+        \ is enabled,\n  [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
+        \ and \n  [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)\
+        \ \n  will be returned in the response body and can be used as \n  bearer\
+        \ tokens in the authorization header for upcoming requests."
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/authentication#login
       operationId: login
@@ -124,14 +157,15 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/LoginResponse"
-        "401":
-          description: Invalid credentials.
+        "304":
+          description: User is already authenticated. Authenticated session state
+            has not changed since last request.
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-        "403":
-          description: User is already authenticated.
+        "401":
+          description: Invalid credentials.
           content:
             '*/*':
               schema:
@@ -144,7 +178,11 @@ paths:
       tags:
       - Authentication
       summary: Logout
-      description: Invalidates the current session's access and refresh tokens.
+      description: "Invalidates the current session's [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)s\
+        \ \nand [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)s.\n\
+        \n**Tokens:**\n- To perform the logout, an [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
+        \ is required.\n- If successful, all cookies related to the user's session\
+        \ will be invalidated."
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/authentication#logout
       operationId: logout
@@ -155,6 +193,12 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/SuccessResponse"
+        "401":
+          description: Invalid AccessToken.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader: []
       - accessTokenCookie: []
@@ -163,8 +207,15 @@ paths:
       tags:
       - Authentication
       summary: Refresh Access Token
-      description: Refresh the access token. Returns a new access and refresh token
-        and sets those tokens as Http-Only Cookies.
+      description: "Request a new [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token).\n\
+        \n**Tokens:**\n- Requires a valid [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token).\n\
+        - If successful, [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
+        \ and \n  [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)\
+        \ \n  will automatically be set as HTTP-only cookies.\n  If [header authentication](https://singularity.stereov.io/docs/guides/auth/securing-endpoints#header-authentication)\
+        \ is enabled,\n  [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
+        \ and \n  [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)\n\
+        \  will be returned in the response body and can be used as \n  bearer tokens\
+        \ in the authorization header for upcoming requests."
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/authentication#refresh
       operationId: refreshAccessToken
@@ -181,7 +232,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/RefreshTokenResponse"
         "401":
-          description: Invalid credentials.
+          description: Invalid RefreshToken.
           content:
             '*/*':
               schema:
@@ -194,8 +245,20 @@ paths:
       tags:
       - Authentication
       summary: Step-Up
-      description: Requests step-up authentification. This re-authentication is required
-        by critical endpoints.
+      description: "Requests [step-up authentification](https://singularity.stereov.io/docs/guides/auth/authentication#step-up).\
+        \ \nThis re-authentication is required by critical endpoints.\n\n**2FA:**\n\
+        \nIf the user enabled 2FA, the step-up will not be granted immediately. \n\
+        Instead, a [`TwoFactorAuthenticationToken`](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token)\
+        \ \nis set as HTTP-only cookie and returned in the response body\nif [header\
+        \ authentication](https://singularity.stereov.io/docs/guides/auth/securing-endpoints#header-authentication)\
+        \ is enabled.\n\nYou can complete the step-up through the endpoint [`POST\
+        \ /api/auth/2fa/step-up`](https://singularity.stereov.io/docs/api/complete-step-up).\n\
+        \n**Tokens:**\n- Requires a valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token).\n\
+        - If 2FA is disabled and the request is successful, [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)\n\
+        \  will automatically be set as HTTP-only cookie.\n  If [header authentication](https://singularity.stereov.io/docs/guides/auth/securing-endpoints#header-authentication)\
+        \ is enabled,\n  the [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)\n\
+        \  will be returned in the response body and can be used to authorized critical\
+        \ requests."
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/authentication#step-up
       operationId: stepUp
@@ -219,7 +282,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/StepUpResponse"
         "401":
-          description: Unauthorized.
+          description: Invalid credentials.
           content:
             '*/*':
               schema:
@@ -232,8 +295,12 @@ paths:
       tags:
       - Authentication
       summary: Get Authentication Status
-      description: Get detailed information about the current status authentication
-        status of the user.
+      description: |-
+        Get detailed information about the current status authentication status of the user.
+
+        This endpoint is primarily designed for cookie-based authentication.
+        *Singularity* sets HTTP-only cookies by default which cannot be accessed via JavaScript.
+        Therefore, you can use this endpoint to request if valid tokens are set.
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/authentication#status
       operationId: getAuthenticationStatus
@@ -263,9 +330,19 @@ paths:
       tags:
       - Authentication
       summary: Send Password Reset Email
-      description: "Send a password reset request email to the user's email. After\
-        \ sending an email, a cooldown is triggered during which no new passwort reset\
-        \ request email can be sent."
+      description: "Send a password reset request email to the user's email.\nYou\
+        \ can learn more about the password reset [here](https://singularity.stereov.io/docs/guides/auth/authentication#password-reset).\n\
+        \nWhen request a password reset through this endpoint\nand [email is enabled\
+        \ in your application](https://singularity.stereov.io/docs/guides/email/configuration)\
+        \ \nan email containing a link is sent to the user's email address.\nThis\
+        \ link should point to the frontend of your application.\nYour frontend should\
+        \ extract the token from the URL and send it to this endpoint with the\ntoken\
+        \ as request parameter.\nYou can find more information about this [here](https://singularity.stereov.io/docs/guides/auth/authentication#password-reset).\n\
+        \nYou can perform the reset using the token through the endpoint [`POST /api/auth/password/reset`](https://singularity.stereov.io/docs/api/reset-password).\n\
+        \n**Note:** If email is not enabled, there is no way to reset the password.\n\
+        \n**Note:** After each email, a cooldown will be started.\nWhen the cooldown\
+        \ is active, no new verification email can be sent.\nThe cooldown can be configured\
+        \ [here](https://singularity.stereov.io/docs/guides/email/configuration)."
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/authentication#password-reset
       operationId: sendPasswordResetEmail
@@ -296,7 +373,14 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "429":
-          description: Failed to send another email. Wait until the cooldown is done.
+          description: Cooldown is active. You have to wait until you can send another
+            email.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Email is disabled in your application.
           content:
             '*/*':
               schema:
@@ -309,9 +393,18 @@ paths:
       tags:
       - Authentication
       summary: Reset Password
-      description: "Perform a password reset using a PasswordResetToken you obtained\
-        \ from an email. If successful, the user can log in using the new password\
-        \ afterwards."
+      description: "Perform a password reset using a `token` you obtained the user\
+        \ received in a password reset email.\nYou can learn more about the password\
+        \ reset [here](https://singularity.stereov.io/docs/guides/auth/authentication#password-reset).\n\
+        \nWhen request a password reset through [`POST /api/auth/password/reset-request`](https://singularity.stereov.io/docs/api/send-password-reset-email)\
+        \ \nand [email is enabled in your application](https://singularity.stereov.io/docs/guides/email/configuration)\
+        \ \nan email containing a link is sent to the user's email address.\nThis\
+        \ link should point to the frontend of your application.\nYour frontend should\
+        \ extract the token from the URL and send it to this endpoint with the\ntoken\
+        \ as request parameter.\nYou can find more information about this [here](https://singularity.stereov.io/docs/guides/auth/authentication#password-reset).\n\
+        \nIf successful, the user can log in using the new password afterwards.\n\n\
+        You can resend this email through the endpoint [`POST /api/auth/password/reset-request`](https://singularity.stereov.io/docs/api/send-password-reset-email).\n\
+        \n**Note:** If email is not enabled, there is no way to reset the password."
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/authentication#password-reset
       operationId: resetPassword
@@ -354,11 +447,19 @@ paths:
       tags:
       - Authentication
       summary: Get Remaining Password Reset Cooldown
-      description: Get the remaining time in seconds until you can send another password
-        reset request.
+      description: |-
+        Get the remaining time in seconds until you can send another password reset request.
+
+        You can find more information about a password reset [here](https://singularity.stereov.io/docs/guides/auth/authentication#password-reset).
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/authentication#password-reset
       operationId: getRemainingPasswordResetCooldown
+      parameters:
+      - name: email
+        in: query
+        required: true
+        schema:
+          type: string
       responses:
         "200":
           description: The remaining cooldown.
@@ -366,23 +467,35 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/MailCooldownResponse"
-        "401":
-          description: Unauthorized.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
       security:
-      - accessTokenHeader: []
-      - accessTokenCookie: []
+      - {}
+      - {}
   /api/auth/email/verify/send:
     post:
       tags:
       - Authentication
       summary: Send Email Verification Email
-      description: "Send a new verification email to the user's email. After sending\
-        \ an email, a cooldown is triggered during which no new verification email\
-        \ can be sent."
+      description: |-
+        Send an email verification email to the user.
+
+        This endpoint is for **resending** the verification email only.
+        When registering a user and [email is enabled in your application](https://singularity.stereov.io/docs/guides/email/configuration)
+        an email containing a link is automatically sent to the user's email address.
+        This link should point to the frontend of your application.
+        You can find more information about this [here](https://singularity.stereov.io/docs/guides/auth/authentication#email-verification).
+        Your frontend should extract the token from the URL and send it to this endpoint with the
+        token as request parameter.
+
+        You can perform the verification using the token through the endpoint [`POST /api/auth/email/verify`](https://singularity.stereov.io/docs/api/verify-email).
+
+        **Note:** If email is not enabled, there is no way to verify a user's email address.
+
+        **Tokens:**
+        - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
+
+        **Note:** After each email, a cooldown will be started.
+        When the cooldown is active, no new verification email can be sent.
+        The cooldown can be configured [here](https://singularity.stereov.io/docs/guides/email/configuration).
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/docs/auth/authentication#email-verification
       operationId: sendEmailVerificationEmail
@@ -401,13 +514,20 @@ paths:
               schema:
                 $ref: "#/components/schemas/MailSendResponse"
         "401":
-          description: Unauthorized.
+          description: AccessToken is invalid or expired.
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "429":
-          description: Failed to send another email. Wait until the cooldown is done.
+          description: Cooldown is active. You have to wait until you can send another
+            email.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Email is disabled in your application.
           content:
             '*/*':
               schema:
@@ -420,7 +540,23 @@ paths:
       tags:
       - Authentication
       summary: Verify Email
-      description: Verify the user's email by validating the token.
+      description: |-
+        Verify the user's email address using the `token` the user received a email verification email.
+        You can find more information about this [here](https://singularity.stereov.io/docs/guides/auth/authentication#email-verification).
+
+        When registering a user and [email is enabled in your application](https://singularity.stereov.io/docs/guides/email/configuration)
+        an email containing a link is sent to the user's email address.
+        This link should point to the frontend of your application.
+        Your frontend should extract the token from the URL and send it to this endpoint with the
+        token as request parameter.
+        You can find more information about this [here](https://singularity.stereov.io/docs/guides/auth/authentication#email-verification).
+
+        You can resend this email through the endpoint [`POST /api/auth/email/verify/send`](https://singularity.stereov.io/docs/api/send-email-verification-email).
+
+        **Note:** If email is not enabled, there is no way to verify a user's email address.
+
+        **Tokens:**
+        - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/docs/auth/authentication#email-verification
       operationId: verifyEmail
@@ -438,7 +574,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/UserResponse"
         "401":
-          description: Token is invalid.
+          description: AccessToken is invalid or expired.
           content:
             '*/*':
               schema:
@@ -451,8 +587,13 @@ paths:
       tags:
       - Authentication
       summary: Get Remaining Email Verification Cooldown
-      description: Get the remaining time in seconds until you can send another verification
-        request.
+      description: |-
+        Get the remaining time in seconds until you can send another email verification email.
+
+        You can find more information about email verification [here](https://singularity.stereov.io/docs/guides/auth/authentication#email-verification).
+
+        **Tokens:**
+        - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/docs/auth/authentication#email-verification
       operationId: getRemainingEmailVerificationCooldown
@@ -464,7 +605,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/MailCooldownResponse"
         "401":
-          description: Unauthorized.
+          description: AccessToken is invalid or expired.
           content:
             '*/*':
               schema:
@@ -599,35 +740,61 @@ paths:
       tags:
       - Two-Factor Authentication
       summary: Get TOTP Setup Details
-      description: "Get a 2FA secret, recovery codes and a TOTP URL. This information\
-        \ will be stored inside a token that you will get in the response. Use this\
-        \ token to perform the validation."
+      description: |
+        Get a TOTP secret, recovery codes and a TOTP URL.
+        The user needs to save the recovery codes and use the URL or the secret to set up 2FA in their 2FA app.
+
+        This secret will be stored inside the token contained in the response.
+        This token is required to enable TOTP.
+        Performing this request will not change the user's state in the database.
+        Therefore, the token is the single point of truth for validation.
+        Every request will generate a new TOTP secret, new recovery codes and a new TOTP URL.
+
+        This action requires a valid `StepUpToken`.
+
+        The user must be able to authenticate using a password.
+        If the user registered using OAuth2 and did not [set up password authentication](https://singularity.stereov.io/docs/guides/auth/oauth2#adding-password-authentication),
+        this action will fail.
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/two-factor#setup
       operationId: getTotpSetupDetails
       responses:
         "200":
-          description: Success.
+          description: "\n                    The TOTP secret, recovery codes, TOTP\
+            \ URL and setup token.\n                    \n                    Show\
+            \ the secret, TOTP URL to the user. \n                    They can use\
+            \ the secret or URL to set up 2FA in their 2FA app.\n                \
+            \    \n                    Make sure the user saves the recovery codes\
+            \ in case they lost access to their 2FA app.\n                    \n \
+            \                   The token is required to enable TOTP.\n          \
+            \      "
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/TwoFactorSetupResponse"
         "401":
-          description: Not authenticated.
+          description: AccessToken or StepUpToken is invalid.
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "403":
-          description: The did not configure authentication using password or the
-            user already enabled TOTP.
+          description: The user did not configure authentication using password.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: The user already enabled TOTP.
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader: []
+        stepUpTokenHeader: []
       - accessTokenCookie: []
+        stepUpTokenCookie: []
     post:
       tags:
       - Two-Factor Authentication
@@ -650,12 +817,18 @@ paths:
               schema:
                 $ref: "#/components/schemas/TwoFactorSetupResponse"
         "401":
-          description: Wrong code or not authorized.
+          description: AccessToken or StepUpToken is invalid.
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "403":
+          description: The user did not configure authentication using password.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
           description: The user already enabled TOTP.
           content:
             '*/*':
@@ -1018,7 +1191,13 @@ paths:
       tags:
       - Sessions
       summary: Get Active Sessions
-      description: Get all active sessions of the currently authenticated user.
+      description: |-
+        Get all active sessions of the currently authenticated user.
+
+        You can learn more about sessions [here](https://singularity.stereov.io/docs/guides/auth/sessions).
+
+        **Tokens:**
+        - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/sessions#active-sessions
       operationId: getActiveSessions
@@ -1032,7 +1211,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/SessionInfoResponse"
         "401":
-          description: Unauthorized.
+          description: Invalid or expired AccessToken.
           content:
             '*/*':
               schema:
@@ -1044,18 +1223,29 @@ paths:
       tags:
       - Sessions
       summary: Delete All Sessions
-      description: Invalidates all the current session's access and refresh tokens
-        from all sessions.
+      description: "Invalidates all the user's active sessions.\nThis also invalidates\
+        \ all [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)s\
+        \ \nand [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)s.\n\
+        Therefore, logging out the user from all devices.\n\nYou can learn more about\
+        \ sessions [here](https://singularity.stereov.io/docs/guides/auth/sessions).\n\
+        \n**Tokens:**\n- A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
+        \ is required."
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/sessions#invalidating-all-session
       operationId: deleteAllSessions
       responses:
         "200":
-          description: Logout successful.
+          description: Successfully deleted all sessions.
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/SuccessResponse"
+        "401":
+          description: Invalid or expired AccessToken.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader: []
       - accessTokenCookie: []
@@ -1064,8 +1254,11 @@ paths:
       tags:
       - Sessions
       summary: Delete Session
-      description: Delete a session of the current user and invalidate all tokens
-        related to this session.
+      description: "Delete the session of the current user with the given `id` \n\
+        and invalidate all tokens related to this session.\n\nYou can learn more about\
+        \ sessions [here](https://singularity.stereov.io/docs/guides/auth/sessions).\n\
+        \n**Tokens:**\n- A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
+        \ is required."
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/sessions#invalidating-a-specific-session
       operationId: deleteSession
@@ -1086,7 +1279,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/SessionInfoResponse"
         "401":
-          description: Unauthorized.
+          description: Invalid or expired AccessToken.
           content:
             '*/*':
               schema:
@@ -1099,9 +1292,10 @@ paths:
       tags:
       - Sessions
       summary: Generate SessionToken
-      description: "Generate a SessionToken for the current session, if the user is\
-        \ authenticated or a new SessionToken instead. It will be set as an HTTP-only\
-        \ cookie and returned in the response body if header authentication is enabled."
+      description: "Generate a [`SessionToken`](https://singularity.stereov.io/docs/guides/auth/tokens#session-token)\
+        \ for the current session, if the user is authenticated or \na new [`SessionToken`](https://singularity.stereov.io/docs/guides/auth/tokens#session-token)\
+        \ instead. \n\nIt's only purpose is to successfully register or log in a user\
+        \ via an OAuth2 provider.\nYou can learn more about OAuth2 providers [here](https://singularity.stereov.io/docs/guides/auth/oauth2)."
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/oauth2#1-retrieving-a-session-token
       operationId: generateSessionToken
@@ -1359,7 +1553,7 @@ paths:
       tags:
       - Groups
       summary: Add Member to Group
-      description: Add a member to a group.
+      description: Add a member to a group. Invalidates all AccessTokens.
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/groups#adding-members-to-groups
       operationId: addMemberToGroup
@@ -1404,7 +1598,7 @@ paths:
       tags:
       - Groups
       summary: Remove Member from Group
-      description: Remove a member from a group.
+      description: Remove a member from a group. Invalidates all AccessTokens.
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/groups#removing-members-from-groups
       operationId: removeMemberFromGroup
@@ -2910,8 +3104,12 @@ components:
       properties:
         browser:
           type: string
+          description: The name of the browser used.
+          example: Chrome
         os:
           type: string
+          description: The operating system of the device.
+          example: WIndows
     GenerateSessionTokenResponse:
       type: object
       properties:
@@ -2924,15 +3122,24 @@ components:
       properties:
         email:
           type: string
+          description: The user's unique email address.
+          example: jane.doe@example.com
           minLength: 1
         password:
           type: string
-          minLength: 1
+          description: "The user's chosen password. It must be at least 8 characters\
+            \ long and include at least one uppercase letter, one lowercase letter,\
+            \ one number, and one special character (!@#$%^&*()_+={}[]|\\:;'\"<>,.?/)."
+          example: S3cur3P@ssw0rd!
+          pattern: "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+\\-={}\\[\\\
+            ]|\\\\:;'\"<,>.?/]).{8,}"
         name:
           type: string
+          description: The user's name. Makes the user experience more personalized
           minLength: 1
         session:
           $ref: "#/components/schemas/SessionInfoRequest"
+          description: "Information about the user's session, for security purposes."
       required:
       - email
       - name
@@ -2950,31 +3157,6 @@ components:
           type: object
           additionalProperties:
             type: string
-    CityResponse:
-      type: object
-      properties:
-        city:
-          $ref: "#/components/schemas/City"
-        continent:
-          $ref: "#/components/schemas/Continent"
-        country:
-          $ref: "#/components/schemas/Country"
-        location:
-          $ref: "#/components/schemas/Location"
-        maxmind:
-          $ref: "#/components/schemas/MaxMind"
-        postal:
-          $ref: "#/components/schemas/Postal"
-        registered_country:
-          $ref: "#/components/schemas/Country"
-        represented_country:
-          $ref: "#/components/schemas/RepresentedCountry"
-        subdivisions:
-          type: array
-          items:
-            $ref: "#/components/schemas/Subdivision"
-        traits:
-          $ref: "#/components/schemas/Traits"
     Continent:
       type: object
       properties:
@@ -3004,6 +3186,25 @@ components:
           type: object
           additionalProperties:
             type: string
+    GeolocationResponse:
+      type: object
+      properties:
+        ipAddress:
+          type: string
+        city:
+          $ref: "#/components/schemas/City"
+        country:
+          $ref: "#/components/schemas/Country"
+        continent:
+          $ref: "#/components/schemas/Continent"
+        location:
+          $ref: "#/components/schemas/Location"
+      required:
+      - city
+      - continent
+      - country
+      - ipAddress
+      - location
     Location:
       type: object
       properties:
@@ -3028,58 +3229,6 @@ components:
           format: int32
         time_zone:
           type: string
-    MaxMind:
-      type: object
-      properties:
-        queries_remaining:
-          type: integer
-          format: int32
-    Network:
-      type: object
-      properties:
-        prefixLength:
-          type: integer
-          format: int32
-        networkAddress:
-          type: object
-          properties:
-            hostAddress:
-              type: string
-            address:
-              type: string
-              format: byte
-            hostName:
-              type: string
-            linkLocalAddress:
-              type: boolean
-            anyLocalAddress:
-              type: boolean
-            multicastAddress:
-              type: boolean
-            loopbackAddress:
-              type: boolean
-            siteLocalAddress:
-              type: boolean
-            mcglobal:
-              type: boolean
-            mcnodeLocal:
-              type: boolean
-            mclinkLocal:
-              type: boolean
-            mcsiteLocal:
-              type: boolean
-            mcorgLocal:
-              type: boolean
-            canonicalHostName:
-              type: string
-    Postal:
-      type: object
-      properties:
-        code:
-          type: string
-        confidence:
-          type: integer
-          format: int32
     RegisterResponse:
       type: object
       properties:
@@ -3090,103 +3239,9 @@ components:
         refreshToken:
           type: string
         location:
-          $ref: "#/components/schemas/CityResponse"
+          $ref: "#/components/schemas/GeolocationResponse"
       required:
       - user
-    RepresentedCountry:
-      type: object
-      properties:
-        confidence:
-          type: integer
-          format: int32
-        geoname_id:
-          type: integer
-          format: int64
-        is_in_european_union:
-          type: boolean
-        iso_code:
-          type: string
-        names:
-          type: object
-          additionalProperties:
-            type: string
-        type:
-          type: string
-    Subdivision:
-      type: object
-      properties:
-        confidence:
-          type: integer
-          format: int32
-        geoname_id:
-          type: integer
-          format: int64
-        iso_code:
-          type: string
-        names:
-          type: object
-          additionalProperties:
-            type: string
-    Traits:
-      type: object
-      properties:
-        autonomous_system_number:
-          type: integer
-          format: int64
-        autonomous_system_organization:
-          type: string
-        connection_type:
-          type: string
-          enum:
-          - Dialup
-          - Cable/DSL
-          - Corporate
-          - Cellular
-          - Satellite
-        domain:
-          type: string
-        ip_address:
-          type: string
-        is_anonymous:
-          type: boolean
-        is_anonymous_proxy:
-          type: boolean
-          deprecated: true
-        is_anonymous_vpn:
-          type: boolean
-        is_anycast:
-          type: boolean
-        is_hosting_provider:
-          type: boolean
-        is_legitimate_proxy:
-          type: boolean
-        is_public_proxy:
-          type: boolean
-        is_residential_proxy:
-          type: boolean
-        is_satellite_provider:
-          type: boolean
-          deprecated: true
-        is_tor_exit_node:
-          type: boolean
-        isp:
-          type: string
-        mobile_country_code:
-          type: string
-        mobile_network_code:
-          type: string
-        network:
-          $ref: "#/components/schemas/Network"
-        organization:
-          type: string
-        user_type:
-          type: string
-        user_count:
-          type: integer
-          format: int32
-        static_ip_score:
-          type: number
-          format: double
     RefreshTokenResponse:
       type: object
       properties:
@@ -3280,7 +3335,7 @@ components:
         twoFactorAuthenticationToken:
           type: string
         location:
-          $ref: "#/components/schemas/CityResponse"
+          $ref: "#/components/schemas/GeolocationResponse"
       required:
       - twoFactorRequired
       - user
@@ -3289,7 +3344,7 @@ components:
       properties:
         secret:
           type: string
-        optAuthUrl:
+        totpAuthUrl:
           type: string
         recoveryCodes:
           type: array
@@ -3298,10 +3353,10 @@ components:
         token:
           type: string
       required:
-      - optAuthUrl
       - recoveryCodes
       - secret
       - token
+      - totpAuthUrl
     TwoFactorVerifySetupRequest:
       type: object
       properties:
@@ -3364,13 +3419,6 @@ components:
         totalPages:
           type: integer
           format: int32
-        first:
-          type: boolean
-        last:
-          type: boolean
-        numberOfElements:
-          type: integer
-          format: int32
         pageable:
           $ref: "#/components/schemas/PageableObject"
         size:
@@ -3385,6 +3433,13 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
+        numberOfElements:
+          type: integer
+          format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
         empty:
           type: boolean
     PageableObject:
@@ -3489,13 +3544,6 @@ components:
         totalPages:
           type: integer
           format: int32
-        first:
-          type: boolean
-        last:
-          type: boolean
-        numberOfElements:
-          type: integer
-          format: int32
         pageable:
           $ref: "#/components/schemas/PageableObject"
         size:
@@ -3510,6 +3558,13 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
+        numberOfElements:
+          type: integer
+          format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
         empty:
           type: boolean
     ArticleResponse:
@@ -3528,9 +3583,11 @@ components:
     AuthenticationStatusResponse:
       type: object
       properties:
-        authorized:
+        authenticated:
           type: boolean
         stepUp:
+          type: boolean
+        emailVerified:
           type: boolean
         twoFactorRequired:
           type: boolean
@@ -3547,7 +3604,7 @@ components:
             - totp
             - mail
       required:
-      - authorized
+      - authenticated
       - stepUp
       - twoFactorRequired
     LocationInfo:

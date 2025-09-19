@@ -234,6 +234,10 @@ Operations like changing the password or deleting the user account require reaut
 This means, an [`AccessToken`](./tokens#access-token) is not enough to perform these requests. 
 You need to provide a [`StepUpToken`](./tokens#step-up-token) to authorize a step-up.
 
+:::note
+You can learn more on how to secure your endpoints by requiring a step-up [here](./securing-endpoints#requiring-step-up-authentication)
+:::
+
 You can request a [`StepUpToken`](./tokens#step-up-token) using [`POST /api/auth/step-up`](../../api/step-up.api.mdx).
 
 :::info

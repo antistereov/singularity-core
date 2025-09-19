@@ -167,7 +167,7 @@ Placing them in the header will not lead to a successful connection since they w
 
 1. Log in the user by calling [`POST /api/auth/login`](../../api/login.api.mdx).
    This will set the [`AccessToken`](./tokens#access-token) as an HTTP-only cookie.
-2. Authorize a step-up by calling [POST /api/auth/step-up](../../api/step-up.api.mdx).
+2. Authorize a step-up by calling [`POST /api/auth/step-up`](../../api/step-up.api.mdx).
    This will set a [`StepUpToken`](./tokens#step-up-token) as an HTTP-only cookie.
    You can learn more about step-up authentication [here](./authentication#step-up).
 

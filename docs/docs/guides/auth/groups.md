@@ -50,9 +50,17 @@ You can delete a group through the endpoint [`DELETE /api/groups/{key}`](../../a
 
 You can add a member to a group through the endpoint [`POST /api/groups/{key}/members`](../../api/add-member-to-group.api.mdx).
 
+This will invalidate all [`AccessToken`](./tokens.md#access-token)s for the new member.
+This way, before performing a new request for the new member, a new token needs to be requested from [`POST /api/auth/refresh`](../../api/refresh-access-token.api.mdx).
+The new token will contain the new group membership.
+
 ### Removing Members from Groups
 
 You can remove a member from a group through the endpoint [`DELETE /api/groups/{key}/members`](../../api/remove-member-from-group.api.mdx).
+
+This will invalidate all [`AccessToken`](./tokens.md#access-token)s for the removed member.
+This way, before performing a new request for the new member, a new token needs to be requested from [`POST /api/auth/refresh`](../../api/refresh-access-token.api.mdx).
+The new token will contain the revoke the group membership.
 
 ## Configuration
 
