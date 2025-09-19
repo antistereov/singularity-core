@@ -27,17 +27,22 @@ class TranslateService(
     ): String = withContext(Dispatchers.IO) {
         logger.debug { "Translating key \"${translateKey.key}\" to $locale using resource: \"$resource\"" }
 
-        val actualLocale = locale ?: appProperties.locale
-
-        return@withContext try {
-            val bundle = ResourceBundle.getBundle(resource, actualLocale)
-            bundle.getString(translateKey.key).trim()
-        } catch (_: Throwable) {
-            val bundle = ResourceBundle.getBundle(resource, actualLocale)
-            bundle.getString(translateKey.key).trim()
-        } catch (_: Throwable) {
-            return@withContext translateKey.key
-        }
+        return@withContext locale
+            ?.let { locale ->
+                runCatching {
+                    val bundle = ResourceBundle.getBundle(resource, locale)
+                    bundle.getString(translateKey.key).trim()
+                }.getOrElse {
+                    runCatching {
+                        val bundle = ResourceBundle.getBundle(resource, Locale.forLanguageTag(locale.language))
+                        bundle.getString(translateKey.key).trim()
+                    }.getOrNull()
+                }
+            }
+            ?: runCatching {
+                val bundle = ResourceBundle.getBundle(resource, defaultLocale)
+                bundle.getString(translateKey.key).trim()
+            }.getOrElse { translateKey.key }
     }
 
     suspend fun <C> translate(translatable: Translatable<C>, languageTag: String?): Translation<C> {
