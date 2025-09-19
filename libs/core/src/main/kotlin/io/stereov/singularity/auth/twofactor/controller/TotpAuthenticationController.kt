@@ -47,28 +47,58 @@ class TotpAuthenticationController(
     @GetMapping("/setup")
     @Operation(
         summary = "Get TOTP Setup Details",
-        description = "Get a 2FA secret, recovery codes and a TOTP URL. " +
-                "This information will be stored inside a token that you will get in the response. " +
-                "Use this token to perform the validation.",
+        description = """
+            Get a TOTP secret, recovery codes and a TOTP URL.
+            The user needs to save the recovery codes and use the URL or the secret to set up 2FA in their 2FA app.
+            
+            This secret will be stored inside the token contained in the response.
+            This token is required to enable TOTP.
+            Performing this request will not change the user's state in the database.
+            Therefore, the token is the single point of truth for validation.
+            Every request will generate a new TOTP secret, new recovery codes and a new TOTP URL.
+            
+            This action requires a valid `StepUpToken`.
+            
+            The user must be able to authenticate using a password.
+            If the user registered using OAuth2 and did not [set up password authentication](https://singularity.stereov.io/docs/guides/auth/oauth2#adding-password-authentication),
+            this action will fail.
+    
+        """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/two-factor#setup"),
         security = [
             SecurityRequirement(name = OpenApiConstants.ACCESS_TOKEN_HEADER),
-            SecurityRequirement(name = OpenApiConstants.ACCESS_TOKEN_COOKIE)
+            SecurityRequirement(name = OpenApiConstants.ACCESS_TOKEN_COOKIE),
+            SecurityRequirement(name = OpenApiConstants.STEP_UP_TOKEN_HEADER),
+            SecurityRequirement(name = OpenApiConstants.STEP_UP_TOKEN_COOKIE),
         ],
         responses = [
             ApiResponse(
                 responseCode = "200",
-                description = "Success.",
+                description = """
+                    The TOTP secret, recovery codes, TOTP URL and setup token.
+                    
+                    Show the secret, TOTP URL to the user. 
+                    They can use the secret or URL to set up 2FA in their 2FA app.
+                    
+                    Make sure the user saves the recovery codes in case they lost access to their 2FA app.
+                    
+                    The token is required to enable TOTP.
+                """,
                 content = [Content(schema = Schema(implementation = TwoFactorSetupResponse::class))]
             ),
             ApiResponse(
                 responseCode = "401",
-                description = "Not authenticated.",
+                description = "AccessToken or StepUpToken is invalid.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
             ApiResponse(
                 responseCode = "403",
-                description = "The did not configure authentication using password or the user already enabled TOTP.",
+                description = "The user did not configure authentication using password.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
+            ApiResponse(
+                responseCode = "409",
+                description = "The user already enabled TOTP.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
@@ -98,11 +128,16 @@ class TotpAuthenticationController(
             ),
             ApiResponse(
                 responseCode = "401",
-                description = "Wrong code or not authorized.",
+                description = "AccessToken or StepUpToken is invalid.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
             ApiResponse(
                 responseCode = "403",
+                description = "The user did not configure authentication using password.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
+            ApiResponse(
+                responseCode = "409",
                 description = "The user already enabled TOTP.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )

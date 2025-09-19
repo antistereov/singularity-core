@@ -6,7 +6,7 @@ package io.stereov.singularity.auth.twofactor.dto.response
  * This class contains the secret key, the OTP auth URL, and a recovery code.
  *
  * @property secret The secret key for the user.
- * @property optAuthUrl The OTP auth URL for the user.
+ * @property totpAuthUrl The OTP auth URL for the user.
  * @property recoveryCodes The recovery codes for the user.
  * @property token The JWT needed for verification.
  *
@@ -14,7 +14,7 @@ package io.stereov.singularity.auth.twofactor.dto.response
  */
 data class TwoFactorSetupResponse(
     val secret: String,
-    val optAuthUrl: String,
+    val totpAuthUrl: String,
     val recoveryCodes: List<String>,
     val token: String,
 )
