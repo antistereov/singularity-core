@@ -8,7 +8,7 @@ import org.bson.types.ObjectId
 data class UserResponse(
     val id: ObjectId,
     val name: String,
-    val email: String,
+    val email: String?,
     val identityProviders: List<String>,
     val roles: Set<Role> = setOf(Role.USER),
     val emailVerified: Boolean = false,

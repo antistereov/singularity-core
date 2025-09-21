@@ -3,6 +3,7 @@ io.stereov.singularity.admin.core.config.AdminConfiguration
 io.stereov.singularity.auth.core.config.AuthenticationConfiguration
 io.stereov.singularity.auth.geolocation.config.GeoLocationConfiguration
 io.stereov.singularity.auth.group.config.GroupConfiguration
+io.stereov.singularity.auth.guest.config.GuestConfiguration
 io.stereov.singularity.auth.jwt.config.JwtConfiguration
 io.stereov.singularity.auth.oauth2.config.OAuth2Configuration
 io.stereov.singularity.auth.twofactor.config.TwoFactorAuthConfiguration

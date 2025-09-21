@@ -89,7 +89,7 @@ class TwoFactorAuthenticationController(
         val sessionId = UUID.randomUUID()
 
         val accessToken = accessTokenService.create(user, sessionId)
-        val refreshToken = refreshTokenService.create(user.id, sessionId, req.session, exchange)
+        val refreshToken = refreshTokenService.create(user, sessionId, req.session, exchange)
 
         val clearTwoFactorCookie = cookieCreator.clearCookie(TwoFactorTokenType.Authentication)
 

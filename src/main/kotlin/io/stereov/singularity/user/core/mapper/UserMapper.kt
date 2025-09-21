@@ -33,7 +33,7 @@ class UserMapper(
             user.sensitive.name,
             user.sensitive.email,
             user.sensitive.identities.map { it.key },
-            user.sensitive.roles,
+            user.roles,
             user.sensitive.security.email.verified,
             user.lastActive.toString(),
             user.twoFactorEnabled,
@@ -55,7 +55,8 @@ class UserMapper(
             user.id,
             user.sensitive.name,
             user.sensitive.email,
-            avatarMetadata
+            avatarMetadata,
+            user.roles
         )
     }
 }

@@ -20,7 +20,9 @@ data class RegisterUserRequest(
     )
     @field:Schema(description = "The user's chosen password. " +
             "It must be at least 8 characters long and include at least one uppercase letter, " +
-            "one lowercase letter, one number, and one special character (!@#$%^&*()_+={}[]|\\:;'\"<>,.?/).", example = "S3cur3P@ssw0rd!")
+            "one lowercase letter, one number, and one special character (!@#$%^&*()_+={}[]|\\:;'\"<>,.?/).",
+        example = "S3cur3P@ssw0rd!"
+    )
     val password: String,
 
     @field:NotBlank

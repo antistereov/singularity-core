@@ -15,6 +15,7 @@ import io.stereov.singularity.auth.jwt.service.JwtService
 import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.global.util.getClientIp
+import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.service.UserService
 import org.bson.types.ObjectId
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
@@ -59,7 +60,7 @@ class RefreshTokenService(
 
     private suspend fun updateSessions(
         exchange: ServerWebExchange,
-        userId: ObjectId,
+        user: UserDocument,
         sessionId: UUID,
         sessionInfo: SessionInfoRequest?,
         tokenId: String
@@ -83,29 +84,26 @@ class RefreshTokenService(
             },
         )
 
-        val user = userService.findById(userId)
         user.addOrUpdatesession(sessionId, sessionInfo)
         userService.save(user)
     }
 
     suspend fun create(
-        userId: ObjectId,
+        user: UserDocument,
         sessionId: UUID,
         sessionInfo: SessionInfoRequest?,
         exchange: ServerWebExchange
     ): RefreshToken {
         val refreshTokenId = Random.generateString(20)
-        val refreshToken = create(userId, sessionId, refreshTokenId)
+        val refreshToken = create(user.id, sessionId, refreshTokenId)
 
-        updateSessions(exchange, userId, sessionId, sessionInfo, refreshTokenId)
+        updateSessions(exchange, user, sessionId, sessionInfo, refreshTokenId)
 
         return refreshToken
     }
 
-    suspend fun extract(exchange: ServerWebExchange): RefreshToken {
+    suspend fun extract(tokenValue: String): RefreshToken {
         logger.debug { "Extracting refresh token" }
-
-        val tokenValue = tokenValueExtractor.extractValue(exchange, tokenType, true)
 
         val jwt = try {
             jwtService.decodeJwt(tokenValue, true)
@@ -130,5 +128,11 @@ class RefreshTokenService(
             throw InvalidTokenException("Refresh token does not correspond to an existing session")
 
         return RefreshToken(userId, sessionId, tokenId, jwt)
+    }
+
+    suspend fun extract(exchange: ServerWebExchange): RefreshToken {
+        val tokenValue = tokenValueExtractor.extractValue(exchange, tokenType, true)
+
+        return extract(tokenValue)
     }
 }

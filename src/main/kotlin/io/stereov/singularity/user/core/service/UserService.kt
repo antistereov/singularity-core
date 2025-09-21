@@ -7,10 +7,12 @@ import io.stereov.singularity.database.encryption.service.EncryptionService
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.user.core.exception.model.UserDoesNotExistException
 import io.stereov.singularity.user.core.model.EncryptedUserDocument
+import io.stereov.singularity.user.core.model.Role
 import io.stereov.singularity.user.core.model.SensitiveUserData
 import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.model.identity.HashedUserIdentity
 import io.stereov.singularity.user.core.repository.UserRepository
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import org.springframework.stereotype.Service
@@ -38,7 +40,7 @@ class UserService(
 
         if (otherValues.getOrNull(0) == true || otherValues.getOrNull(0) == null) document.updateLastActive()
 
-        val hashedEmail = hashService.hashSearchableHmacSha256(document.sensitive.email)
+        val hashedEmail = document.sensitive.email?.let { hashService.hashSearchableHmacSha256(it) }
         val hashedPrincipalId = document.sensitive.identities
             .map { (provider, identity) ->
                 val hashedUserIdentity = HashedUserIdentity(
@@ -123,6 +125,12 @@ class UserService(
         val user = repository.findByIdentity(provider, hashedPrincipalId)
 
         return user?.let { decrypt(it) }
+    }
+
+    suspend fun findAllByRolesContaining(role: Role): Flow<UserDocument> {
+        logger.debug { "Finding all users with role $role" }
+
+        return repository.findAllByRolesContaining(role).map { decrypt(it) }
     }
 
 }

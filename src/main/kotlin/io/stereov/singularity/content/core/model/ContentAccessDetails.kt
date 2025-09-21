@@ -48,7 +48,7 @@ data class ContentAccessDetails(
     }
 
     fun hasAccess(user: UserDocument, role: ContentAccessRole): Boolean {
-        val isAdmin = user.sensitive.roles.contains(Role.ADMIN)
+        val isAdmin = user.roles.contains(Role.ADMIN)
 
         val userIsAdmin = hasAccess(ContentAccessSubject.USER, user.id.toString(), ContentAccessRole.ADMIN)
         val groupIsAdmin = user.sensitive.groups.any { groupId -> hasAccess(ContentAccessSubject.GROUP, groupId, ContentAccessRole.ADMIN) }

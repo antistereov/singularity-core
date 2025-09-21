@@ -3,15 +3,18 @@ package io.stereov.singularity.auth.core.service
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.dto.response.MailCooldownResponse
 import io.stereov.singularity.auth.core.exception.AuthException
+import io.stereov.singularity.auth.core.exception.model.EmailAlreadyVerifiedException
 import io.stereov.singularity.auth.core.properties.EmailVerificationProperties
 import io.stereov.singularity.auth.core.service.token.EmailVerificationTokenService
-import io.stereov.singularity.global.properties.AppProperties
+import io.stereov.singularity.auth.guest.exception.model.GuestCannotPerformThisActionException
 import io.stereov.singularity.email.core.exception.model.EmailCooldownException
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.email.core.service.EmailService
 import io.stereov.singularity.email.core.util.EmailConstants
 import io.stereov.singularity.email.template.service.TemplateService
 import io.stereov.singularity.email.template.util.TemplateBuilder
+import io.stereov.singularity.global.exception.model.InvalidDocumentException
+import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.translate.model.TranslateKey
 import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.user.core.dto.response.UserResponse
@@ -58,6 +61,15 @@ class EmailVerificationService(
         val user = userService.findByIdOrNull(verificationToken.userId)
             ?: throw AuthException("User does not exist")
 
+        if (user.isGuest)
+            throw GuestCannotPerformThisActionException("Guests cannot verify their email since no email is specified")
+
+        if (user.sensitive.security.email.verified)
+            throw EmailAlreadyVerifiedException("Email is already verified")
+
+        if (user.sensitive.email == null)
+            throw InvalidDocumentException("No email specified")
+
         val savedSecret = user.sensitive.security.email.verificationSecret
 
         return if (verificationToken.secret == savedSecret) {
@@ -96,6 +108,13 @@ class EmailVerificationService(
         logger.debug { "Sending email verification token" }
 
         val user = authorizationService.getCurrentUser()
+
+        if (user.isGuest)
+            throw GuestCannotPerformThisActionException("Guests cannot verify their email since no email is specified")
+
+        if (user.sensitive.security.email.verified)
+            throw EmailAlreadyVerifiedException("Email is already verified")
+
         return sendVerificationEmail(user, locale)
     }
 
@@ -166,7 +185,10 @@ class EmailVerificationService(
 
         val secret = user.sensitive.security.email.verificationSecret
 
+        if (user.isGuest) throw GuestCannotPerformThisActionException("Failed to send verification email: a guest cannot verify an email address")
+
         val email = newEmail ?: user.sensitive.email
+            ?: throw InvalidDocumentException("No email specified in user document")
         val token = emailVerificationTokenService.create(userId, email, secret)
         val verificationUrl = generateVerificationUrl(token)
 

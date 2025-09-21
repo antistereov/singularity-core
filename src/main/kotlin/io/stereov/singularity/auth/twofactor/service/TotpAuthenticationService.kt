@@ -62,7 +62,7 @@ class TotpAuthenticationService(
             throw TwoFactorMethodAlreadyEnabledException("The user already set up TOTP")
 
         val secret = totpService.generateSecretKey()
-        val otpAuthUrl = totpService.getOtpAuthUrl(user.sensitive.email, secret)
+        val otpAuthUrl = totpService.getOtpAuthUrl(user.requireNotGuestAndGetEmail(), secret)
         val recoveryCodes = List(totpRecoveryCodeProperties.count) {
             Random.generateString(totpRecoveryCodeProperties.length)
         }

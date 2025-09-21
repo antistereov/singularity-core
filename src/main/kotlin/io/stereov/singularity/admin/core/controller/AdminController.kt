@@ -1,47 +1,111 @@
 package io.stereov.singularity.admin.core.controller
 
-import io.stereov.singularity.admin.core.dto.RotationStatusResponse
 import io.stereov.singularity.admin.core.service.AdminService
-import io.stereov.singularity.global.model.SuccessResponse
+import io.stereov.singularity.global.model.ErrorResponse
+import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.user.core.dto.response.UserResponse
-import io.stereov.singularity.user.core.mapper.UserMapper
-import io.stereov.singularity.user.core.service.UserService
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toList
+import io.swagger.v3.oas.annotations.ExternalDocumentation
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import io.swagger.v3.oas.annotations.tags.Tag
+import org.bson.types.ObjectId
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/api/admin")
+@RequestMapping("/api/admins")
+@Tag(name = "Roles", description = "Operations related to roles.")
 class AdminController(
     private val adminService: AdminService,
-    private val userService: UserService,
-    private val userMapper: UserMapper
 ) {
 
-    @PostMapping("/rotate-keys")
-    suspend fun rotateKeys(): ResponseEntity<SuccessResponse> = coroutineScope {
-        async { adminService.rotateKeys() }.start()
+    @PostMapping("{userId}")
+    @Operation(
+        summary = "Grant Admin Permissions",
+        description = """
+            Grant [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions to a user.
+            
+            You can find more information about roles [here](https://singularity.stereov.io/docs/guides/auth/roles).
+            
+            **Tokens:**
+            - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
+              with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
+        """,
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/roles#admins"),
+        security = [
+            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER, scopes = [OpenApiConstants.ADMIN_SCOPE]),
+            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE, scopes = [OpenApiConstants.ADMIN_SCOPE]),
 
-        return@coroutineScope ResponseEntity.ok(SuccessResponse(true))
+        ],
+        responses = [
+            ApiResponse(
+                responseCode = "200",
+                description = "The updated user information",
+            ),
+            ApiResponse(
+                responseCode = "401",
+                description = "Invalid or expired AccessToken.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
+            ApiResponse(
+                responseCode = "403",
+                description = "AccessToken does permit [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) access.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            )
+        ]
+    )
+    suspend fun grantAdminPermissions(
+        @PathVariable userId: ObjectId
+    ): ResponseEntity<UserResponse> {
+        return ResponseEntity.ok(adminService.addAdminRole(userId))
     }
 
-    @GetMapping("/rotate-keys/status")
-    suspend fun rotationOngoing(): ResponseEntity<RotationStatusResponse> {
-        return ResponseEntity.ok(
-            this.adminService.getRotationStatus()
-        )
-    }
+    @DeleteMapping("{userId}")
+    @Operation(
+        summary = "Revoke Admin Permissions",
+        description = """
+            Grant [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions to a user.
+            
+            You can find more information about roles [here](https://singularity.stereov.io/docs/guides/auth/roles).
+            
+            **Tokens:**
+            - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
+              with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
+        """,
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/roles#admins"),
+        security = [
+            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER, scopes = [OpenApiConstants.ADMIN_SCOPE]),
+            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE, scopes = [OpenApiConstants.ADMIN_SCOPE]),
 
-    @GetMapping("/users")
-    suspend fun getAllUsers(): ResponseEntity<List<UserResponse>> {
-        return ResponseEntity.ok(
-            userService.findAll().map { user -> userMapper.toResponse(user) }.toList()
-        )
+        ],
+        responses = [
+            ApiResponse(
+                responseCode = "200",
+                description = "The updated user information",
+            ),
+            ApiResponse(
+                responseCode = "401",
+                description = "Invalid or expired AccessToken.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
+            ApiResponse(
+                responseCode = "403",
+                description = "AccessToken does permit [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) access.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
+            ApiResponse(
+                responseCode = "409",
+                description = "Trying to revoke [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions for last remaining admin. At least one admin is required.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            )
+        ]
+    )
+    suspend fun revokeAdminPermissions(
+        @PathVariable userId: ObjectId
+    ): ResponseEntity<UserResponse> {
+        return ResponseEntity.ok(adminService.revokeAdminRole(userId))
     }
 }

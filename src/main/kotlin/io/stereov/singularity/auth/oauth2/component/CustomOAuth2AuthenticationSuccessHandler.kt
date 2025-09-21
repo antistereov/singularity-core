@@ -13,6 +13,7 @@ import io.stereov.singularity.auth.core.service.token.StepUpTokenService
 import io.stereov.singularity.auth.jwt.exception.model.TokenExpiredException
 import io.stereov.singularity.auth.oauth2.exception.model.OAuth2FlowException
 import io.stereov.singularity.auth.oauth2.model.CustomState
+import io.stereov.singularity.auth.oauth2.model.OAuth2ErrorCode
 import io.stereov.singularity.auth.oauth2.model.token.OAuth2TokenType
 import io.stereov.singularity.auth.oauth2.properties.OAuth2Properties
 import io.stereov.singularity.auth.oauth2.service.OAuth2AuthenticationService
@@ -57,7 +58,7 @@ class CustomOAuth2AuthenticationSuccessHandler(
 
     private fun getState(exchange: ServerWebExchange): CustomState {
         val stateValue = exchange.request.queryParams.getFirst("state")
-            ?: throw OAuth2FlowException("state_parameter_missing","No state parameter provided.")
+            ?: throw OAuth2FlowException(OAuth2ErrorCode.STATE_PARAMETER_MISSING,"No state parameter provided.")
         return objectMapper.readValue(stateValue, CustomState::class.java)
     }
 
@@ -66,13 +67,14 @@ class CustomOAuth2AuthenticationSuccessHandler(
 
         val sessionTokenValue = state.sessionTokenValue
             ?: exchange.request.cookies.getFirst(SessionTokenType.Session.COOKIE_NAME)?.value
-            ?: throw OAuth2FlowException("session_token_missing", "No session token provided as query parameter or cookie.")
+            ?: throw OAuth2FlowException(OAuth2ErrorCode.SESSION_TOKEN_MISSING, "No session token provided as query parameter or cookie.")
         return try {
             sessionTokenService.extract(sessionTokenValue)
         } catch (e: Exception) {
             when (e) {
-                is TokenExpiredException -> throw OAuth2FlowException("session_token_expired", "The provided session token is expired.")
-                else -> throw OAuth2FlowException("invalid_session_token","The provided session token cannot be decoded.")
+                is TokenExpiredException -> throw OAuth2FlowException(OAuth2ErrorCode.SESSION_TOKEN_EXPIRED,
+                    "The provided session token is expired.")
+                else -> throw OAuth2FlowException(OAuth2ErrorCode.INVALID_SESSION_TOKEN,"The provided session token cannot be decoded.")
             }
         }
     }
@@ -91,8 +93,7 @@ class CustomOAuth2AuthenticationSuccessHandler(
 
         val user = oAuth2AuthenticationService.findOrCreateUser(oauth2Authentication, oauth2ProviderConnectionToken)
         val accessToken = accessTokenService.create(user, sessionId)
-        val refreshToken = refreshTokenService.create(user.id, sessionId, sessionToken.toSessionInfoRequest(), exchange)
-
+        val refreshToken = refreshTokenService.create(user, sessionId, sessionToken.toSessionInfoRequest(), exchange)
 
         exchange.response.headers.add(SessionTokenType.Access.HEADER, accessToken.value)
         exchange.response.headers.add(SessionTokenType.Refresh.HEADER, refreshToken.value)
@@ -118,13 +119,13 @@ class CustomOAuth2AuthenticationSuccessHandler(
 
         val errorCode = when (e) {
             is OAuth2FlowException -> e.errorCode
-            else -> "server_error"
+            else -> OAuth2ErrorCode.SERVER_ERROR
         }
 
         val response = exchange.response
         response.statusCode = HttpStatus.FOUND
         response.headers.location = URIBuilder(oAuth2Properties.errorRedirectUri)
-            .addParameter("error", errorCode)
+            .addParameter("error", errorCode.value)
             .build()
     }
 }

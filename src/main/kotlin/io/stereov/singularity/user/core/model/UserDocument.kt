@@ -5,6 +5,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.exception.model.WrongIdentityProviderException
 import io.stereov.singularity.auth.core.model.IdentityProvider
 import io.stereov.singularity.auth.core.model.SessionInfo
+import io.stereov.singularity.auth.guest.exception.model.GuestCannotPerformThisActionException
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
 import io.stereov.singularity.database.core.model.SensitiveDocument
 import io.stereov.singularity.database.encryption.model.Encrypted
@@ -23,6 +24,7 @@ data class UserDocument(
     private var _id: ObjectId? = null,
     val created: Instant = Instant.now(),
     var lastActive: Instant = Instant.now(),
+    val roles: MutableSet<Role>,
     override var sensitive: SensitiveUserData,
 ) : SensitiveDocument<SensitiveUserData> {
 
@@ -83,8 +85,10 @@ data class UserDocument(
         encryptedSensitiveData: Encrypted<SensitiveUserData>,
         otherValues: List<Any?>
     ): EncryptedUserDocument {
-        val hashedEmail = runCatching { otherValues[0] as SearchableHash }
-            .getOrElse { e -> throw MissingFunctionParameterException("Please provide the hashed email as parameter.", e) }
+        val hashedEmail = if (isGuest) null else {
+            runCatching { otherValues[0] as SearchableHash }
+                .getOrElse { e -> throw MissingFunctionParameterException("Please provide the hashed email as parameter.", e) }
+        }
 
         val hashedIdentitiesParameter = runCatching { otherValues[1] as Map<*, *> }
             .getOrElse { e ->  throw MissingFunctionParameterException("Please provide the list of hashed user identities as a parameter", e) }
@@ -103,7 +107,7 @@ data class UserDocument(
             }.toMap()
 
         return EncryptedUserDocument(
-            _id, hashedEmail, hashedIdentities, created, lastActive, encryptedSensitiveData
+            _id, hashedEmail, hashedIdentities, roles, created, lastActive, encryptedSensitiveData
         )
     }
 
@@ -204,7 +208,7 @@ data class UserDocument(
      * @return The updated list of roles.
      */
     fun addRole(role: Role): UserDocument {
-        this.sensitive.roles.add(role)
+        this.roles.add(role)
         return this
     }
 
@@ -221,6 +225,19 @@ data class UserDocument(
         this.lastActive = Instant.now()
         return this
     }
+
+    fun requireNotGuestAndGetEmail(): String {
+        if (isGuest) throw GuestCannotPerformThisActionException("This action cannot be performed as a GUEST")
+
+        return sensitive.email
+            ?: throw InvalidDocumentException("No email saved for USER")
+    }
+
+    val isGuest: Boolean
+        get() = if (roles.contains(Role.GUEST)) {
+            if (roles.size == 1) true
+            else throw InvalidDocumentException("Account does have roles ${roles} although it is a GUEST account.")
+        } else false
 
     companion object {
 
@@ -241,11 +258,11 @@ data class UserDocument(
             id,
             created,
             lastActive,
+            roles,
             SensitiveUserData(
                 name,
                 email,
                 mutableMapOf(IdentityProvider.PASSWORD to UserIdentity.ofPassword(password, true)),
-                roles,
                 groups,
                 UserSecurityDetails(mailEnabled, mailTwoFactorCodeExpiresIn),
                 sessions,
@@ -263,7 +280,6 @@ data class UserDocument(
             email: String,
             roles: MutableSet<Role> = mutableSetOf(Role.USER),
             groups: MutableSet<String> = mutableSetOf(),
-            mailEnabled: Boolean,
             mailTwoFactorCodeExpiresIn: Long,
             sessions: MutableMap<UUID, SessionInfo> = mutableMapOf(),
             avatarFileKey: String? = null,
@@ -271,13 +287,13 @@ data class UserDocument(
             id,
             created,
             lastActive,
+            roles,
             SensitiveUserData(
                 name,
                 email,
                 mutableMapOf(provider to UserIdentity.ofProvider(principalId, true)),
-                roles,
                 groups,
-                UserSecurityDetails(mailEnabled, mailTwoFactorCodeExpiresIn, true),
+                UserSecurityDetails(false, mailTwoFactorCodeExpiresIn, true),
                 sessions,
                 avatarFileKey
             )

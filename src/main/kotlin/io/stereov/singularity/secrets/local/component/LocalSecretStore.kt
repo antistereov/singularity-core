@@ -1,5 +1,6 @@
 package io.stereov.singularity.secrets.local.component
 
+import io.stereov.singularity.secrets.core.component.SecretCache
 import io.stereov.singularity.secrets.core.component.SecretStore
 import io.stereov.singularity.secrets.core.model.Secret
 import io.stereov.singularity.secrets.local.data.LocalSecretEntity
@@ -14,14 +15,15 @@ import java.util.*
 @Primary
 @ConditionalOnProperty(prefix = "singularity.secrets", value = ["store"], havingValue = "local", matchIfMissing = true)
 class LocalSecretStore(
-    private val repository: LocalSecretRepository
+    private val repository: LocalSecretRepository,
+    override val secretCache: SecretCache
 ) : SecretStore {
 
-    override suspend fun getOrNull(key: String): Secret? {
+    override suspend fun doGetOrNull(key: String): Secret? {
         return repository.findByKey(key)?.toSecret()
     }
 
-    override suspend fun put(
+    override suspend fun doPut(
         key: String,
         value: String,
         note: String,

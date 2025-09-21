@@ -7,11 +7,10 @@ import java.util.*
 
 data class SensitiveUserData(
     var name: String,
-    var email: String,
+    var email: String?,
     val identities: MutableMap<String, UserIdentity>,
-    val roles: MutableSet<Role> = mutableSetOf(Role.USER),
     val groups: MutableSet<String> = mutableSetOf(),
-    val security: UserSecurityDetails,
+    var security: UserSecurityDetails,
     val sessions: MutableMap<UUID, SessionInfo> = mutableMapOf(),
     var avatarFileKey: String? = null,
 )
