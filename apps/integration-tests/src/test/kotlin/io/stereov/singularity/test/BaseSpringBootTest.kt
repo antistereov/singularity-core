@@ -8,6 +8,7 @@ import io.stereov.singularity.auth.core.dto.request.RegisterUserRequest
 import io.stereov.singularity.auth.core.model.token.AccessToken
 import io.stereov.singularity.auth.core.model.token.RefreshToken
 import io.stereov.singularity.auth.core.model.token.SessionTokenType
+import io.stereov.singularity.auth.core.model.token.StepUpToken
 import io.stereov.singularity.auth.core.service.token.*
 import io.stereov.singularity.auth.group.model.GroupDocument
 import io.stereov.singularity.auth.group.model.GroupTranslation
@@ -33,6 +34,7 @@ import io.stereov.singularity.user.core.model.Role
 import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.service.UserService
 import kotlinx.coroutines.runBlocking
+import org.bson.types.ObjectId
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
@@ -245,9 +247,7 @@ class BaseSpringBootTest {
         }
 
         if (email2faEnabled) {
-            webTestClient.post()
-                .uri("/api/auth/2fa/email/send")
-                .
+            twoFactorToken = twoFactorAuthenticationTokenService.create(user.id).value
         }
 
         user = userService.findById(user.id)
@@ -395,5 +395,12 @@ class BaseSpringBootTest {
             ?.firstOrNull()?.value
             ?.let { twoFactorAuthenticationTokenService.extract(it) }
             ?: throw TokenException("No TwoFactorAuthenticationToken found in response")
+    }
+
+    suspend fun EntityExchangeResult<*>.extractStepUpToken(userId: ObjectId, sessionId: UUID): StepUpToken {
+        return this.responseCookies[SessionTokenType.StepUp.cookieName]
+            ?.firstOrNull()?.value
+            ?.let { stepUpTokenService.extract(it, userId, sessionId) }
+            ?: throw TokenException("No StepUpToken found in response")
     }
 }

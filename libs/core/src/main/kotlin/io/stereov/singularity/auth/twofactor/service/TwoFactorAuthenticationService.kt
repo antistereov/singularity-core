@@ -7,7 +7,7 @@ import io.stereov.singularity.auth.core.exception.model.WrongIdentityProviderExc
 import io.stereov.singularity.auth.core.model.IdentityProvider
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorAuthenticationRequest
-import io.stereov.singularity.auth.twofactor.dto.request.UpdatePreferredTwoFactorMethodRequest
+import io.stereov.singularity.auth.twofactor.dto.request.ChangePreferredTwoFactorMethodRequest
 import io.stereov.singularity.auth.twofactor.exception.model.InvalidTwoFactorRequestException
 import io.stereov.singularity.auth.twofactor.exception.model.TwoFactorMethodDisabledException
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
@@ -32,7 +32,7 @@ class TwoFactorAuthenticationService(
 
     suspend fun handleTwoFactor(user: UserDocument, locale: Locale?) {
 
-        if (user.sensitive.security.twoFactor.preferred == TwoFactorMethod.MAIL) {
+        if (user.sensitive.security.twoFactor.preferred == TwoFactorMethod.EMAIL) {
             emailAuthenticationService.sendMail(user, locale)
         }
     }
@@ -66,15 +66,18 @@ class TwoFactorAuthenticationService(
         throw InvalidTwoFactorRequestException("2FA failed: no valid code found in request, available methods: ${user.twoFactorMethods}")
     }
 
-    suspend fun updatePreferredMethod(req: UpdatePreferredTwoFactorMethodRequest): UserDocument {
+    suspend fun updatePreferredMethod(req: ChangePreferredTwoFactorMethodRequest): UserDocument {
         logger.debug { "Changing preferred 2FA method to ${req.method}" }
 
         val user = authorizationService.getCurrentUser()
         authorizationService.requireStepUp()
 
+        if (!user.sensitive.identities.containsKey(IdentityProvider.PASSWORD))
+            throw WrongIdentityProviderException("Cannot update preferred method: user did not set up authentication using a password")
+
         when (req.method) {
-            TwoFactorMethod.MAIL -> if (!user.sensitive.security.twoFactor.mail.enabled)
-                throw TwoFactorMethodDisabledException("Cannot set ${TwoFactorMethod.MAIL} as preferred method: method is disabled")
+            TwoFactorMethod.EMAIL -> if (!user.sensitive.security.twoFactor.mail.enabled)
+                throw TwoFactorMethodDisabledException("Cannot set ${TwoFactorMethod.EMAIL} as preferred method: method is disabled")
 
             TwoFactorMethod.TOTP -> if (!user.sensitive.security.twoFactor.totp.enabled)
                 throw TwoFactorMethodDisabledException("Cannot set ${TwoFactorMethod.TOTP} as preferred method: method is disabled")

@@ -23,7 +23,7 @@ data class UserSecurityDetails(
     )
 
     data class TwoFactorDetails(
-        var preferred: TwoFactorMethod = TwoFactorMethod.MAIL,
+        var preferred: TwoFactorMethod = TwoFactorMethod.EMAIL,
         val totp: TotpDetails = TotpDetails(),
         val mail: MailTwoFactorDetails,
     ) {
@@ -32,7 +32,7 @@ data class UserSecurityDetails(
             val methods = mutableListOf<TwoFactorMethod>()
 
             if (totp.enabled) methods.add(TwoFactorMethod.TOTP)
-            if (mail.enabled) methods.add(TwoFactorMethod.MAIL)
+            if (mail.enabled) methods.add(TwoFactorMethod.EMAIL)
 
             return methods
         }

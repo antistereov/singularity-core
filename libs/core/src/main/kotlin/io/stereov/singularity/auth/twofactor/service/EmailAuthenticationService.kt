@@ -63,7 +63,7 @@ class EmailAuthenticationService(
         logger.debug { "Validating 2FA code" }
 
         if (!user.sensitive.security.twoFactor.mail.enabled)
-            throw TwoFactorMethodDisabledException(TwoFactorMethod.MAIL)
+            throw TwoFactorMethodDisabledException(TwoFactorMethod.EMAIL)
 
         doValidateCode(user, code)
 
@@ -108,13 +108,18 @@ class EmailAuthenticationService(
         return if (remainingTtl.seconds > 0) remainingTtl.seconds else 0
     }
 
-    private fun doValidateCode(user: UserDocument, code: String) {
+    private suspend fun doValidateCode(user: UserDocument, code: String) {
         val details = user.sensitive.security.twoFactor.mail
 
-        if (details.expiresAt.isAfter(Instant.now()))
+        if (details.expiresAt.isBefore(Instant.now()))
             throw TwoFactorCodeExpiredException("The code is expired. Please request a new email.")
         if (details.code != code)
             throw InvalidTwoFactorCodeException("Wrong code.")
+
+        details.code = Random.generateInt()
+        details.expiresAt = Instant.now().plusSeconds(twoFactorEmailCodeProperties.expiresIn)
+
+        userService.save(user)
     }
 
     private suspend fun startCooldown(userId: ObjectId): Boolean {
@@ -143,7 +148,7 @@ class EmailAuthenticationService(
         user.sensitive.security.twoFactor.mail.enabled = true
 
         if (user.twoFactorMethods.size == 1)
-            user.sensitive.security.twoFactor.preferred = TwoFactorMethod.MAIL
+            user.sensitive.security.twoFactor.preferred = TwoFactorMethod.EMAIL
 
         val savedUser = userService.save(user)
         accessTokenCache.invalidateAllTokens(user.id)

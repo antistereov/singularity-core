@@ -720,6 +720,12 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/LoginResponse"
+        "304":
+          description: User is already authenticated.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "400":
           description: No 2FA code for an enabled 2FA method was provided or 2FA is
             disabled.
@@ -819,7 +825,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdatePreferredTwoFactorMethodRequest"
+              $ref: "#/components/schemas/ChangePreferredTwoFactorMethodRequest"
         required: true
       responses:
         "200":
@@ -829,7 +835,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/UserResponse"
         "400":
-          description: This 2FA method is disabled.
+          description: This 2FA method is disabled or the user did not set up authentication
+            via password.
           content:
             '*/*':
               schema:
@@ -1077,9 +1084,14 @@ paths:
         \ user's password.\nYou can learn more about preferred 2FA methods [here](https://singularity.stereov.io/docs/guides/auth/two-factor#changing-the-preferred-method).\n\
         \n**Requirements:**\n- The user can authenticate using password. 2FA will\
         \ not work with OAuth2. \n  The OAuth2 provider will validate the second factor\
-        \ if the user enabled it for the provider.\n\n**Tokens:**\n\nThere are two\
-        \ options: \n1. If email as a 2FA method is disabled, you can request an email\
-        \ with a token to enable it.\n   In this case you need a valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token).\n\
+        \ if the user enabled it for the provider.\n  \n**Locale:**\n\nA locale can\
+        \ be specified for this request. \nThe email will be sent in the specified\
+        \ locale.\nYou can learn more about locale in emails [here](https://singularity.stereov.io/docs/guides/email/templates).\n\
+        \nIf no locale is specified, the applications default locale will be used.\n\
+        You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).\n\
+        \n**Tokens:**\n\nThere are two options: \n1. If email as a 2FA method is disabled,\
+        \ you can request an email with a token to enable it.\n   In this case you\
+        \ need a valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token).\n\
         \   If email is already enabled, this request will return `400 - BAD REQUEST`.\n\
         2. If email as 2FA method is already enabled, you can request a 2FA email\
         \ code with a valid\n   [`TwoFactorAuthenticationToken`](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token).\n\
@@ -4071,7 +4083,7 @@ components:
         totp:
           type: integer
           format: int32
-    UpdatePreferredTwoFactorMethodRequest:
+    ChangePreferredTwoFactorMethodRequest:
       type: object
       properties:
         method:
@@ -4111,12 +4123,15 @@ components:
     PageGroupResponse:
       type: object
       properties:
-        totalPages:
-          type: integer
-          format: int32
         totalElements:
           type: integer
           format: int64
+        totalPages:
+          type: integer
+          format: int32
+        numberOfElements:
+          type: integer
+          format: int32
         pageable:
           $ref: "#/components/schemas/PageableObject"
         first:
@@ -4135,9 +4150,6 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
-        numberOfElements:
-          type: integer
-          format: int32
         empty:
           type: boolean
     PageableObject:
@@ -4151,21 +4163,21 @@ components:
         pageNumber:
           type: integer
           format: int32
+        paged:
+          type: boolean
         offset:
           type: integer
           format: int64
         sort:
           $ref: "#/components/schemas/SortObject"
-        paged:
-          type: boolean
     SortObject:
       type: object
       properties:
         unsorted:
           type: boolean
-        empty:
-          type: boolean
         sorted:
+          type: boolean
+        empty:
           type: boolean
     KeyContainsResponse:
       type: object
@@ -4236,12 +4248,15 @@ components:
     PageArticleOverviewResponse:
       type: object
       properties:
-        totalPages:
-          type: integer
-          format: int32
         totalElements:
           type: integer
           format: int64
+        totalPages:
+          type: integer
+          format: int32
+        numberOfElements:
+          type: integer
+          format: int32
         pageable:
           $ref: "#/components/schemas/PageableObject"
         first:
@@ -4260,9 +4275,6 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
-        numberOfElements:
-          type: integer
-          format: int32
         empty:
           type: boolean
     ArticleResponse:

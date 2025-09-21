@@ -148,7 +148,7 @@ data class UserDocument(
         this.sensitive.security.twoFactor.totp.secret = null
         this.sensitive.security.twoFactor.totp.recoveryCodes = mutableListOf()
 
-        this.sensitive.security.twoFactor.preferred = TwoFactorMethod.MAIL
+        this.sensitive.security.twoFactor.preferred = TwoFactorMethod.EMAIL
 
         return this
     }
