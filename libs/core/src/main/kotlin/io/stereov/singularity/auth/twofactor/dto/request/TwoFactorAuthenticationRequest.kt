@@ -1,9 +1,6 @@
 package io.stereov.singularity.auth.twofactor.dto.request
 
-import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
-
-data class TwoFactorAuthenticationRequest(
-    val email: String? = null,
-    val totp: Int? = null,
-    val session: SessionInfoRequest? = null
-)
+interface TwoFactorAuthenticationRequest {
+    val totp: Int?
+    val email: String?
+}

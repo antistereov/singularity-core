@@ -20,7 +20,7 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
         assertFalse(user.info.sensitive.security.email.verified)
 
         webTestClient.post()
-            .uri("/api/auth/email/verify?token=$token")
+            .uri("/api/auth/email/verification?token=$token")
             .exchange()
             .expectStatus().isOk
 
@@ -30,13 +30,13 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
     }
     @Test fun `verifyEmail requires token`() = runTest {
         webTestClient.post()
-            .uri("/api/auth/email/verify")
+            .uri("/api/auth/email/verification")
             .exchange()
             .expectStatus().isBadRequest
     }
     @Test fun `verifyEmail requires valid token`() = runTest {
         webTestClient.post()
-            .uri("/api/auth/email/verify?token=test")
+            .uri("/api/auth/email/verification?token=test")
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -45,7 +45,7 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
         val token = emailVerificationTokenService.create(user.info.id, user.info.sensitive.email!!, encryptionSecretService.getCurrentSecret().value)
 
         webTestClient.post()
-            .uri("/api/auth/email/verify?token=$token")
+            .uri("/api/auth/email/verification?token=$token")
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -54,7 +54,7 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
         val token = emailVerificationTokenService.create(user.info.id, user.info.sensitive.email!!, user.mailVerificationSecret!!, Instant.ofEpochSecond(0))
 
         webTestClient.post()
-            .uri("/api/auth/email/verify?token=$token")
+            .uri("/api/auth/email/verification?token=$token")
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -66,7 +66,7 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
         val token = emailVerificationTokenService.create(user.info.id, user.info.sensitive.email!! ,user.mailVerificationSecret!!)
 
         webTestClient.post()
-            .uri("/api/auth/email/verify?token=$token")
+            .uri("/api/auth/email/verification?token=$token")
             .exchange()
             .expectStatus().isNotModified
     }
@@ -76,7 +76,7 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
         val token = emailVerificationTokenService.create(guest.info.id, "random-email" ,guest.info.sensitive.security.email.verificationSecret)
 
         webTestClient.post()
-            .uri("/api/auth/email/verify?token=$token")
+            .uri("/api/auth/email/verification?token=$token")
             .exchange()
             .expectStatus().isBadRequest
     }
@@ -85,7 +85,7 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
         val user = registerUser()
 
         webTestClient.post()
-            .uri("/api/auth/email/verify/send")
+            .uri("/api/auth/email/verification/send")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isOk
@@ -94,7 +94,7 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
     }
     @Test fun `sendVerificationEmail requires authentication`() = runTest {
         webTestClient.post()
-            .uri("/api/auth/email/verify/send")
+            .uri("/api/auth/email/verification/send")
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -104,7 +104,7 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
         userService.save(user.info)
 
         webTestClient.post()
-            .uri("/api/auth/email/verify/send")
+            .uri("/api/auth/email/verification/send")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isNotModified
@@ -113,7 +113,7 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
         val guest = createGuest()
 
         webTestClient.post()
-            .uri("/api/auth/email/verify/send")
+            .uri("/api/auth/email/verification/send")
             .cookie(SessionTokenType.Access.cookieName, guest.accessToken)
             .exchange()
             .expectStatus().isBadRequest
@@ -122,13 +122,13 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
         val user = registerUser()
 
         webTestClient.post()
-            .uri("/api/auth/email/verify/send")
+            .uri("/api/auth/email/verification/send")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isOk
 
         webTestClient.post()
-            .uri("/api/auth/email/verify/send")
+            .uri("/api/auth/email/verification/send")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isEqualTo(HttpStatus.TOO_MANY_REQUESTS)
@@ -140,13 +140,13 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
         val user = registerUser()
 
         webTestClient.post()
-            .uri("/api/auth/email/verify/send")
+            .uri("/api/auth/email/verification/send")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isOk
 
         val res = webTestClient.get()
-            .uri("/api/auth/email/verify/cooldown")
+            .uri("/api/auth/email/verification/cooldown")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isOk
@@ -162,7 +162,7 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
         val user = registerUser()
 
         val res = webTestClient.get()
-            .uri("/api/auth/email/verify/cooldown")
+            .uri("/api/auth/email/verification/cooldown")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus().isOk
@@ -176,7 +176,7 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
     }
     @Test fun `verifyCooldown requires authentication`() = runTest {
         webTestClient.get()
-            .uri("/api/auth/email/verify/cooldown")
+            .uri("/api/auth/email/verification/cooldown")
             .exchange()
             .expectStatus().isUnauthorized
     }

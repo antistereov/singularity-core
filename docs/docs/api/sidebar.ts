@@ -112,7 +112,7 @@ const sidebar: SidebarsConfig = {
         },
         {
           type: "doc",
-          id: "api/change-preferred-method",
+          id: "api/change-preferred-two-factor-method",
           label: "Change Preferred 2FA Method",
           className: "api-method post",
         },

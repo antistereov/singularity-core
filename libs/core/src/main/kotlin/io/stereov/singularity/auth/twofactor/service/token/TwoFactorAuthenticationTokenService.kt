@@ -23,12 +23,12 @@ class TwoFactorAuthenticationTokenService(
     private val logger = KotlinLogging.logger {}
     private val tokenType = TwoFactorTokenType.Authentication
 
-    suspend fun create(userId: ObjectId, expiration: Long = jwtProperties.expiresIn): TwoFactorAuthenticationToken {
+    suspend fun create(userId: ObjectId, issuedAt: Instant = Instant.now()): TwoFactorAuthenticationToken {
         logger.debug { "Creating two factor token" }
 
         val claims = JwtClaimsSet.builder()
-            .issuedAt(Instant.now())
-            .expiresAt(Instant.now().plusSeconds(expiration))
+            .issuedAt(issuedAt)
+            .expiresAt(issuedAt.plusSeconds(jwtProperties.expiresIn))
             .subject(userId.toHexString())
             .build()
 

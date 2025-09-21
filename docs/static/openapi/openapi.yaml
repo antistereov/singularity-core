@@ -71,7 +71,7 @@ paths:
         You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).\n\
         \n**Tokens:**\n\nIf successful, [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
         \ and \n[`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)\
-        \ \nwill automatically be set as HTTP-only cookies.\nIf [header authentication](https://singularity.stereov.io/docs/guides/auth/securing-endpoints#header-authentication)\
+        \ \nwill automatically be set as HTTP-only cookies.\nIf [header authentication](https://singularity.stereov.io/docs/guides/auth/authentication#header-authentication)\
         \ is enabled,\n[`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
         \ and \n[`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)\n\
         will be returned in the response body and can be used as \nbearer tokens in\
@@ -141,7 +141,7 @@ paths:
         If the user enabled 2FA, the user will not be authenticated immediately. \n\
         Instead, a [`TwoFactorAuthenticationToken`](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token)\
         \ \nis set as HTTP-only cookie and returned in the response body\nif [header\
-        \ authentication](https://singularity.stereov.io/docs/guides/auth/securing-endpoints#header-authentication)\
+        \ authentication](https://singularity.stereov.io/docs/guides/auth/authentication#header-authentication)\
         \ is enabled.\n\nYou can complete the login through the endpoint [`POST /api/auth/2fa/login`](https://singularity.stereov.io/docs/api/complete-login).\n\
         \n**Locale:**\n\nA locale can be specified for this request. \nThis will be\
         \ used for the email 2FA code if this method is enabled for the user.\nYou\
@@ -150,7 +150,7 @@ paths:
         You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).\n\
         \n**Tokens:**\n- If 2FA is disabled and the request is successful, \n  [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
         \ \n  and [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)\
-        \ \n  will automatically be set as HTTP-only cookies.\n  If [header authentication](https://singularity.stereov.io/docs/guides/auth/securing-endpoints#header-authentication)\
+        \ \n  will automatically be set as HTTP-only cookies.\n  If [header authentication](https://singularity.stereov.io/docs/guides/auth/authentication#header-authentication)\
         \ is enabled,\n  [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
         \ and \n  [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)\
         \ \n  will be returned in the response body and can be used as \n  bearer\
@@ -238,7 +238,7 @@ paths:
         \n**Tokens:**\n- Requires a valid [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token).\n\
         - If successful, [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
         \ and \n  [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)\
-        \ \n  will automatically be set as HTTP-only cookies.\n  If [header authentication](https://singularity.stereov.io/docs/guides/auth/securing-endpoints#header-authentication)\
+        \ \n  will automatically be set as HTTP-only cookies.\n  If [header authentication](https://singularity.stereov.io/docs/guides/auth/authentication#header-authentication)\
         \ is enabled,\n  [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
         \ and \n  [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)\n\
         \  will be returned in the response body and can be used as \n  bearer tokens\
@@ -277,7 +277,7 @@ paths:
         \nIf the user enabled 2FA, the step-up will not be granted immediately. \n\
         Instead, a [`TwoFactorAuthenticationToken`](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token)\
         \ \nis set as HTTP-only cookie and returned in the response body\nif [header\
-        \ authentication](https://singularity.stereov.io/docs/guides/auth/securing-endpoints#header-authentication)\
+        \ authentication](https://singularity.stereov.io/docs/guides/auth/authentication#header-authentication)\
         \ is enabled.\n\nYou can complete the step-up through the endpoint [`POST\
         \ /api/auth/2fa/step-up`](https://singularity.stereov.io/docs/api/complete-step-up).\n\
         \n**Request Body:**\n\nWhen requesting a step-up for a [`GUEST`](https://singularity.stereov.io/docs/guides/auth/roles#guests)\n\
@@ -291,7 +291,7 @@ paths:
         \ configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).\n\
         \n**Tokens:**\n- Requires a valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token).\n\
         - If 2FA is disabled and the request is successful, [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)\n\
-        \  will automatically be set as HTTP-only cookie.\n  If [header authentication](https://singularity.stereov.io/docs/guides/auth/securing-endpoints#header-authentication)\
+        \  will automatically be set as HTTP-only cookie.\n  If [header authentication](https://singularity.stereov.io/docs/guides/auth/authentication#header-authentication)\
         \ is enabled,\n  the [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)\n\
         \  will be returned in the response body and can be used to authorized critical\
         \ requests."
@@ -387,9 +387,10 @@ paths:
         \ [here](https://singularity.stereov.io/docs/guides/email/templates).\n\n\
         If no locale is specified, the applications default locale will be used.\n\
         You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).\n\
-        \n**Note:** After each email, a cooldown will be started.\nWhen the cooldown\
-        \ is active, no new verification email can be sent.\nThe cooldown can be configured\
-        \ [here](https://singularity.stereov.io/docs/guides/email/configuration)."
+        \n**Note:** After each email, a cooldown will be started.\nYou can check the\
+        \ status of the cooldown through the endpoint [`GET /api/auth/password/reset/cooldown`](https://singularity.stereov.io/docs/api/get-remaining-password-reset-cooldown).\n\
+        When the cooldown is active, no new email can be sent.\nThe cooldown can be\
+        \ configured [here](https://singularity.stereov.io/docs/guides/email/configuration)."
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/authentication#password-reset
       operationId: sendPasswordResetEmail
@@ -512,7 +513,7 @@ paths:
       security:
       - {}
       - {}
-  /api/auth/email/verify/send:
+  /api/auth/email/verification/send:
     post:
       tags:
       - Authentication
@@ -525,7 +526,7 @@ paths:
         \ more information about this [here](https://singularity.stereov.io/docs/guides/auth/authentication#email-verification).\n\
         Your frontend should extract the token from the URL and send it to this endpoint\
         \ with the\ntoken as request parameter.\n\nYou can perform the verification\
-        \ using the token through the endpoint [`POST /api/auth/email/verify`](https://singularity.stereov.io/docs/api/verify-email).\n\
+        \ using the token through the endpoint [`POST /api/auth/email/verification`](https://singularity.stereov.io/docs/api/verify-email).\n\
         \n**Note:** If email is disabled, there is no way to verify a user's email\
         \ address.\n\n**Locale:**\n\nA locale can be specified for this request. \n\
         The email will be sent in the specified locale.\nYou can learn more about\
@@ -534,6 +535,7 @@ paths:
         You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).\n\
         \n**Tokens:**\n- A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
         \ is required.\n\n**Note:** After each email, a cooldown will be started.\n\
+        You can check the status of the cooldown through the endpoint [`GET /api/auth/email/verification/cooldown`](https://singularity.stereov.io/docs/api/get-remaining-email-verification-cooldown).\n\
         When the cooldown is active, no new verification email can be sent.\nThe cooldown\
         \ can be configured [here](https://singularity.stereov.io/docs/guides/email/configuration)."
       externalDocs:
@@ -587,7 +589,7 @@ paths:
       security:
       - accessTokenHeader: []
       - accessTokenCookie: []
-  /api/auth/email/verify:
+  /api/auth/email/verification:
     post:
       tags:
       - Authentication
@@ -603,7 +605,7 @@ paths:
         token as request parameter.
         You can find more information about this [here](https://singularity.stereov.io/docs/guides/auth/authentication#email-verification).
 
-        You can resend this email through the endpoint [`POST /api/auth/email/verify/send`](https://singularity.stereov.io/docs/api/send-email-verification-email).
+        You can resend this email through the endpoint [`POST /api/auth/email/verification/send`](https://singularity.stereov.io/docs/api/send-email-verification-email).
 
         **Note:** If email is disabled, there is no way to verify a user's email address.
       externalDocs:
@@ -637,7 +639,7 @@ paths:
       security:
       - {}
       - {}
-  /api/auth/email/verify/cooldown:
+  /api/auth/email/verification/cooldown:
     get:
       tags:
       - Authentication
@@ -673,10 +675,34 @@ paths:
       tags:
       - Two-Factor Authentication
       summary: Complete Login
-      description: "Perform second factor for login. A TwoFactorAuthenticationToken\
-        \ is required. This token can be obtained by calling POST /api/auth/login.\
-        \ If successful, an AccessToken and RefreshToken will be set as HTTP-only\
-        \ cookies and returned in the response body if header authentication is enabled."
+      description: "Complete second factor for login.\n\nYou can learn more about\
+        \ the login flow [here](https://singularity.stereov.io/docs/guides/auth/authentication#login).\n\
+        \n**Requirements:**\n- User authenticated using their password through [`POST\
+        \ /api/auth/login`](https://singularity.stereov.io/docs/api/login).\n- At\
+        \ least one of [email](https://singularity.stereov.io/docs/guides/auth/two-factor#email)\
+        \ or [TOTP](https://singularity.stereov.io/docs/guides/auth/two-factor#totp)\
+        \ as 2FA methods should be enabled.\n- An `email` or `totp` 2FA code is present\
+        \ for an enabled 2FA method.\n  Check out [email](https://singularity.stereov.io/docs/guides/auth/two-factor#email)\
+        \ and [TOTP](https://singularity.stereov.io/docs/guides/auth/two-factor#totp)\n\
+        \  to learn how to retrieve a 2FA code.\n  \n**Optional session data:**\n\
+        - The `session` object can be included in the request body.\n- Inside the\
+        \ `session` object, you can provide the following optional fields:\n    -\
+        \ `browser`: The name of the browser used (e.g., \"Chrome\", \"Firefox\").\n\
+        \    - `os`: The operating system of the device (e.g., \"Windows\", \"macOS\"\
+        , \"Android\").\n\nThis information helps users identify and manage authorized\
+        \ sessions, improving overall account security.\n\n**Tokens:**\n- A valid\
+        \ [`TwoFactorAuthenticationToken`](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token)\n\
+        \  is required. This token will be set automatically as HTTP-only cookie through\
+        \ [`POST /api/auth/login`](https://singularity.stereov.io/docs/api/login)\n\
+        \  or can be retrieved from the response and set as header manually if [header\
+        \ authentication](https://singularity.stereov.io/docs/guides/authentication#header-authentication)\
+        \ \n  is enabled.\n- If this action is successful, [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
+        \ and \n  [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)\
+        \ \n  will automatically be set as HTTP-only cookies.\n  If [header authentication](https://singularity.stereov.io/docs/guides/auth/authentication#header-authentication)\
+        \ is enabled,\n  [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
+        \ and \n  [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)\n\
+        \  will be returned in the response body and can be used as \n  bearer tokens\
+        \ in the authorization header for upcoming requests."
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/two-factor
       operationId: completeLogin
@@ -684,7 +710,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/TwoFactorAuthenticationRequest"
+              $ref: "#/components/schemas/CompleteLoginRequest"
         required: true
       responses:
         "200":
@@ -694,14 +720,15 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/LoginResponse"
-        "401":
-          description: Not authorized.
+        "400":
+          description: No 2FA code for an enabled 2FA method was provided or 2FA is
+            disabled.
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-        "403":
-          description: This 2FA method is disabled.
+        "401":
+          description: Invalid or expired `TwoFactorAuthenticationToken`.
           content:
             '*/*':
               schema:
@@ -714,10 +741,27 @@ paths:
       tags:
       - Two-Factor Authentication
       summary: Complete Step-Up
-      description: "Perform second factor for step-up. A TwoFactorAuthenticationToken\
-        \ is required. This token can be obtained by calling POST /api/auth/step-up.\
-        \ If successful, a StepUpToken will be set as HTTP-only cookie and returned\
-        \ in the response body if header authentication is enabled."
+      description: |-
+        Perform second factor for step-up.
+
+        You can learn more about the step-up flow [here](https://singularity.stereov.io/docs/guides/auth/authentication#step-up).
+
+        **Requirements:**
+        - User authenticated using their password through [`POST /api/auth/step-up`](https://singularity.stereov.io/docs/api/step-up).
+        - At least one of [email](https://singularity.stereov.io/docs/guides/auth/two-factor#email) or [TOTP](https://singularity.stereov.io/docs/guides/auth/two-factor#totp) as 2FA methods should be enabled.
+        - An `email` or `totp` 2FA code is present for an enabled 2FA method.
+          Check out [email](https://singularity.stereov.io/docs/guides/auth/two-factor#email) and [TOTP](https://singularity.stereov.io/docs/guides/auth/two-factor#totp)
+          to learn how to retrieve a 2FA code.
+
+        **Tokens:**
+        - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
+        - A valid [`TwoFactorAuthenticationToken`](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token)
+          is required. This token should match user and session contained in the `AccessToken`.
+        - If 2FA is disabled and the request is successful, [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
+          will automatically be set as HTTP-only cookie.
+          If [header authentication](https://singularity.stereov.io/docs/guides/auth/authentication#header-authentication) is enabled,
+          the [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
+          will be returned in the response body and can be used to authorized critical requests.
       externalDocs:
         url: https://singularity.stereov.io/docs/auth/two-factor
       operationId: completeStepUp
@@ -725,7 +769,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/TwoFactorAuthenticationRequest"
+              $ref: "#/components/schemas/CompleteStepUpRequest"
         required: true
       responses:
         "200":
@@ -734,14 +778,16 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/StepUpResponse"
-        "401":
-          description: Not authorized.
+        "400":
+          description: No 2FA code for an enabled 2FA method was provided or 2FA is
+            disabled.
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-        "403":
-          description: This 2FA method is disabled.
+        "401":
+          description: Invalid or expired `TwoFactorAuthenticationToken` or invalid
+            or expired 2FA code.
           content:
             '*/*':
               schema:
@@ -756,10 +802,19 @@ paths:
       tags:
       - Two-Factor Authentication
       summary: Change Preferred 2FA Method
-      description: Change the preferred 2FA method. Step-up is required.
+      description: "Change the preferred 2FA method.\n\nYou can learn more about 2FA\
+        \ methods [here](https://singularity.stereov.io/docs/guides/auth/two-factor).\n\
+        \n**Requirements:**\n- The user can authenticate using password. 2FA will\
+        \ not work with OAuth2. \n  The OAuth2 provider will validate the second factor\
+        \ if the user enabled it for the provider.\n- At least one of [email](https://singularity.stereov.io/docs/guides/auth/two-factor#email)\
+        \ or [TOTP](https://singularity.stereov.io/docs/guides/auth/two-factor#totp)\
+        \ as 2FA methods should be enabled.\n\n**Tokens:**\n- A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
+        \ is required.\n- A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)\n\
+        \  is required. This token should match user and session contained in the\
+        \ `AccessToken`."
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/two-factor#changing-the-preferred-method
-      operationId: changePreferredMethod
+      operationId: changePreferredTwoFactorMethod
       requestBody:
         content:
           application/json:
@@ -773,14 +828,15 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/UserResponse"
-        "401":
-          description: Not authorized.
+        "400":
+          description: This 2FA method is disabled.
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-        "403":
-          description: This 2FA method is disabled.
+        "401":
+          description: '`AccessToken` or `StepUpToken` are invalid or expired or invalid
+            or expired 2FA code.'
           content:
             '*/*':
               schema:
@@ -795,40 +851,42 @@ paths:
       tags:
       - Two-Factor Authentication
       summary: Get TOTP Setup Details
-      description: |
-        Get a TOTP secret, recovery codes and a TOTP URL.
-        The user needs to save the recovery codes and use the URL or the secret to set up 2FA in their 2FA app.
-
-        This secret will be stored inside the token contained in the response.
-        This token is required to enable TOTP.
-        Performing this request will not change the user's state in the database.
-        Therefore, the token is the single point of truth for validation.
-        Every request will generate a new TOTP secret, new recovery codes and a new TOTP URL.
-
-        This action requires a valid `StepUpToken`.
-
-        The user must be able to authenticate using a password.
-        If the user registered using OAuth2 and did not [set up password authentication](https://singularity.stereov.io/docs/guides/auth/oauth2#adding-password-authentication),
-        this action will fail.
+      description: "Get a TOTP secret, recovery codes and a TOTP URL.\nThis is the\
+        \ first step to enabling TOTP as 2FA method.\nYou can learn more about this\
+        \ [here](https://singularity.stereov.io/docs/guides/auth/two-factor#setup).\n\
+        \nThe user needs to save the recovery codes and use the URL or the secret\
+        \ to set up 2FA in their 2FA app.\n\nThis secret will be stored inside the\
+        \ `token` contained in the response.\nThis `token` is required to enable TOTP.\n\
+        Performing this request will not change the user's state in the database.\n\
+        Therefore, the token is the single point of truth for validation.\nEvery request\
+        \ will generate a new TOTP secret, new recovery codes and a new TOTP URL.\n\
+        \nThe setup can be completed through the endpoint \n[`POST /api/auth/2fa/totp/setup`](https://singularity.stereov.io/docs/api/enable-totp-as-two-factor-method)\n\
+        using the `token` and a 2FA code from an authenticator app.\n\n**Requirements:**\n\
+        - The user can authenticate using password. 2FA will not work with OAuth2.\
+        \ \n  The OAuth2 provider will validate the second factor if the user enabled\
+        \ it for the provider.\n  \n**Tokens:**\n- A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
+        \ is required.\n- A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)\n\
+        \  is required. This token should match user and session contained in the\
+        \ `AccessToken`."
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/two-factor#setup
       operationId: getTotpSetupDetails
       responses:
         "200":
-          description: "\n                    The TOTP secret, recovery codes, TOTP\
-            \ URL and setup token.\n                    \n                    Show\
-            \ the secret, TOTP URL to the user. \n                    They can use\
-            \ the secret or URL to set up 2FA in their 2FA app.\n                \
-            \    \n                    Make sure the user saves the recovery codes\
-            \ in case they lost access to their 2FA app.\n                    \n \
-            \                   The token is required to enable TOTP.\n          \
-            \      "
+          description: "The TOTP secret, recovery codes, TOTP URL and setup token."
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/TwoFactorSetupResponse"
+        "400":
+          description: 2FA cannot be enabled for users who didn't configure authentication
+            using a password.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
-          description: AccessToken or StepUpToken is invalid.
+          description: '`AccessToken` or `StepUpToken` is invalid.'
           content:
             '*/*':
               schema:
@@ -854,7 +912,15 @@ paths:
       tags:
       - Two-Factor Authentication
       summary: Enable TOTP as 2FA Method
-      description: Set up TOTP for a user using a TOTPSetupToken and the TOTP code.
+      description: "Complete the TOTP setup `token` from [`GET /api/auth/2fa/setup`](https://singularity.stereov.io/docs/api/get-totp-setup-details)\
+        \ \nand a TOTP code from an authenticator app.\n\nYou can learn more about\
+        \ this [here](https://singularity.stereov.io/docs/guides/auth/two-factor#setup).\n\
+        \n**Requirements:**\n- The user can authenticate using password. 2FA will\
+        \ not work with OAuth2. \n  The OAuth2 provider will validate the second factor\
+        \ if the user enabled it for the provider.\n  \n**Tokens:**\n- A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
+        \ is required.\n- A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)\n\
+        \  is required. This token should match user and session contained in the\
+        \ `AccessToken`."
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/two-factor#setup
       operationId: enableTotpAsTwoFactorMethod
@@ -871,20 +937,21 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/TwoFactorSetupResponse"
-        "401":
-          description: AccessToken or StepUpToken is invalid.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "403":
-          description: The user did not configure authentication using password.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "409":
+        "304":
           description: The user already enabled TOTP.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "400":
+          description: 2FA cannot be enabled for users who didn't configure authentication
+            using a password.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: '`AccessToken` or `StepUpToken` is invalid.'
           content:
             '*/*':
               schema:
@@ -899,7 +966,15 @@ paths:
       tags:
       - Two-Factor Authentication
       summary: Disable TOTP as 2FA Method
-      description: Disable TOTP for the current user.
+      description: |-
+        Disable TOTP for the current user.
+
+        You can learn more about this [here](https://singularity.stereov.io/docs/guides/auth/two-factor#setup).
+
+        **Tokens:**
+        - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
+        - A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
+          is required. This token should match user and session contained in the `AccessToken`.
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/two-factor#disable
       operationId: disableTotpAsTwoFactorMethod
@@ -910,8 +985,14 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/UserResponse"
+        "400":
+          description: This method is already disabled for the user.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
-          description: Not authorized.
+          description: Invalid or expired `AccessToken` or `StepUpToken`.
           content:
             '*/*':
               schema:
@@ -926,10 +1007,24 @@ paths:
       tags:
       - Two-Factor Authentication
       summary: Recover From TOTP
-      description: "Recover the user if they lost access to their 2FA device. After\
-        \ successful recovery, an AccessToken, RefreshToken and StepUpToken will be\
-        \ set as HTTP-only cookies and returned in the response body if header authentication\
-        \ is enabled."
+      description: "Recover the user if they lost access to their 2FA device.\n\n\
+        You can learn more about recovery for TOTP [here](https://singularity.stereov.io/docs/guides/auth/two-factor#recovery).\n\
+        \n**Requirements:**\n- The user can authenticate using password.\n- The user\
+        \ enabled TOTP as 2FA method.\n\n**Tokens:**\n- A valid [`TwoFactorAuthenticationToken`](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token)\n\
+        \  is required. This token will be set automatically as HTTP-only cookie through\
+        \ \n  [`POST /api/auth/login`](https://singularity.stereov.io/docs/api/login)\
+        \ or\n  [`POST /api/auth/step-up`](https://singularity.stereov.io/docs/api/step-up)\n\
+        \  or can be retrieved from any of those endpoints' response and set as header\
+        \ manually if [header authentication](https://singularity.stereov.io/docs/guides/authentication#header-authentication)\
+        \ \n  is enabled.\n- If this action is successful, [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token),\
+        \ \n  [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)\
+        \ and\n  [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)\n\
+        \  will automatically be set as HTTP-only cookies.\n  \n  If [header authentication](https://singularity.stereov.io/docs/guides/auth/authentication#header-authentication)\
+        \ is enabled,\n  [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token),\
+        \ \n  [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)\
+        \ and\n  [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)\n\
+        \  will be returned in the response body and can be used in the authorization\
+        \ header for upcoming requests."
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/two-factor#recovery
       operationId: recoverFromTotp
@@ -952,14 +1047,14 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/TwoFactorRecoveryResponse"
-        "401":
-          description: Wrong code.
+        "304":
+          description: User is already authenticated.
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-        "403":
-          description: User is already authenticated.
+        "401":
+          description: Wrong code or invalid or expired `TwoFactorAuthenticationToken`.
           content:
             '*/*':
               schema:
@@ -972,9 +1067,26 @@ paths:
       tags:
       - Two-Factor Authentication
       summary: Send Email 2FA Code
-      description: Send an email containing a 2FA code to the user. It will update
-        the code in the database. Needs to be called before enabling this method for
-        the user.
+      description: "Send an email containing a 2FA code to the user.\n\nLearn more\
+        \ about email as 2FA method [here](https://singularity.stereov.io/docs/guides/auth/two-factor#email).\n\
+        \nThis endpoint is used to send a 2FA email code for enabling email as a 2FA\
+        \ method\nand to resend 2FA codes when authenticating user that already enabled\
+        \ email as a 2FA method.\n\n**Note:** Each request will generate a new code\
+        \ and invalidate all old codes.\n\nIf email is the preferred 2FA method, an\
+        \ email will be sent automatically after successful authentication\nwith the\
+        \ user's password.\nYou can learn more about preferred 2FA methods [here](https://singularity.stereov.io/docs/guides/auth/two-factor#changing-the-preferred-method).\n\
+        \n**Requirements:**\n- The user can authenticate using password. 2FA will\
+        \ not work with OAuth2. \n  The OAuth2 provider will validate the second factor\
+        \ if the user enabled it for the provider.\n\n**Tokens:**\n\nThere are two\
+        \ options: \n1. If email as a 2FA method is disabled, you can request an email\
+        \ with a token to enable it.\n   In this case you need a valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token).\n\
+        \   If email is already enabled, this request will return `400 - BAD REQUEST`.\n\
+        2. If email as 2FA method is already enabled, you can request a 2FA email\
+        \ code with a valid\n   [`TwoFactorAuthenticationToken`](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token).\n\
+        \   \n**Note:** After each email, a cooldown will be started.\nWhen the cooldown\
+        \ is active, no new email can be sent.\nYou can request the remaining cooldown\
+        \ throw the endpoint \n[`GET /api/auth/2fa/email/cooldown`](https://singularity.stereov.io/docs/api/get-remaining-email-two-factor-cooldown).\n\
+        The cooldown can be configured [here](https://singularity.stereov.io/docs/guides/email/configuration)."
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/two-factor#sending-a-2fa-code-via-email
       operationId: sendEmailTwoFactorCode
@@ -991,8 +1103,27 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/SuccessResponse"
+        "400":
+          description: 2FA cannot be sent for users who didn't configure authentication
+            using a password.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
-          description: Not authorized.
+          description: Invalid or expired `AccessToken` or `TwoFactorAuthenticationToken`.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: Cannot send email while cooldown is active.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Email is disabled in your application.
           content:
             '*/*':
               schema:
@@ -1000,12 +1131,23 @@ paths:
       security:
       - accessTokenHeader: []
       - accessTokenCookie: []
+      - twoFactorAuthenticationTokenHeader: []
+      - twoFactorAuthenticationTokenCookie: []
   /api/auth/2fa/email/enable:
     post:
       tags:
       - Two-Factor Authentication
       summary: Enable Email as 2FA Method
-      description: Enable email as 2FA method. Step-up is required.
+      description: "Enable email as 2FA method.\n\nLearn more about email as 2FA method\
+        \ [here](https://singularity.stereov.io/docs/guides/auth/two-factor#email).\n\
+        \n**Requirements:**\n- The user can authenticate using password. 2FA will\
+        \ not work with OAuth2. \n  The OAuth2 provider will validate the second factor\
+        \ if the user enabled it for the provider.\n\n**Note:** If [email is enabled](https://singularity.stereov.io/docs/guides/email/configuration)\
+        \ in your application,\nemail is 2FA method will be enabled by default for\
+        \ every user that registers with a password.\n\n**Tokens:**\n- A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
+        \ is required.\n- A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)\n\
+        \  is required. This token should match user and session contained in the\
+        \ `AccessToken`."
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/two-factor#setup-1
       operationId: enableEmailAsTwoFactorMethod
@@ -1022,14 +1164,21 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/UserResponse"
-        "401":
-          description: Not authorized.
+        "304":
+          description: This method is already enabled for the user.
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-        "403":
-          description: This method is already enabled for the user.
+        "400":
+          description: 2FA cannot be enabled for users who didn't configure authentication
+            using a password.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Invalid `AccessToken` or `StepUpToken`.
           content:
             '*/*':
               schema:
@@ -1044,7 +1193,15 @@ paths:
       tags:
       - Two-Factor Authentication
       summary: Disable Email as 2FA Method
-      description: Disable email as 2FA method. Step-up is required.
+      description: |-
+        Disable email as 2FA method.
+
+        Learn more about email as 2FA method [here](https://singularity.stereov.io/docs/guides/auth/two-factor#email).
+
+        **Tokens:**
+        - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
+        - A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
+          is required. This token should match user and session contained in the `AccessToken`.
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/two-factor#disable-1
       operationId: disableEmailAsTwoFactorMethod
@@ -1055,14 +1212,14 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/UserResponse"
-        "401":
-          description: Not authorized.
+        "400":
+          description: This method is already disabled for the user.
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-        "403":
-          description: This method is already enabled for the user.
+        "401":
+          description: Invalid `AccessToken` or `RefreshToken`.
           content:
             '*/*':
               schema:
@@ -1077,8 +1234,13 @@ paths:
       tags:
       - Two-Factor Authentication
       summary: Get Remaining Email 2FA Code Cooldown
-      description: Get the remaining time in seconds until you can send another email
-        containing a 2FA code.
+      description: |-
+        Get the remaining time in seconds until you can send another email containing a 2FA code.
+
+        Learn more about email as 2FA method [here](https://singularity.stereov.io/docs/guides/auth/two-factor#email).
+
+        **Tokens:**
+        - Requires a valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token).
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/two-factor#sending-a-2fa-code-via-email
       operationId: getRemainingEmailTwoFactorCooldown
@@ -1090,7 +1252,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/MailCooldownResponse"
         "401":
-          description: Unauthorized.
+          description: Invalid or expired `AccessToken`.
           content:
             '*/*':
               schema:
@@ -1103,7 +1265,14 @@ paths:
       tags:
       - OAuth2
       summary: Get Identity Providers
-      description: Get a list of connected identity providers for the current user.
+      description: |-
+        Get a list of connected identity providers for the current user.
+
+        Users can connect multiple OAuth2 providers to their account.
+        You can learn more about this [here](https://singularity.stereov.io/docs/guides/auth/oauth2).
+
+        **Tokens:**
+        - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/oauth2#getting-connected-providers
       operationId: getIdentityProviders
@@ -1130,9 +1299,16 @@ paths:
       tags:
       - OAuth2
       summary: Delete Identity Provider
-      description: Delete an identity provider from the connected identity providers
-        of the current user.You are not allowed to delete the password identity or
-        the only existing identity.
+      description: |-
+        Delete an identity provider from the connected identity providers of the current user.
+
+        **Requirements:**
+        - You are not allowed to delete the password identity or the only existing identity.
+
+        **Tokens:**
+        - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
+        - A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
+          is required. This token should match user and session contained in the `AccessToken`.
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/oauth2#disconnecting-an-oauth2-provider
       operationId: deleteIdentityProvider
@@ -1172,8 +1348,18 @@ paths:
       tags:
       - OAuth2
       summary: Add Password Authentication
-      description: Create a new identity provider for the current user that allows
-        the user to login with a password
+      description: |-
+        Create a new identity provider for the current user that allows the user to login with a password.
+
+        You can learn more about this [here](https://singularity.stereov.io/docs/guides/auth/oauth2#adding-password-authentication).
+
+        **Requirements:**
+        - The user registered via an OAuth2 provider.
+
+        **Tokens:**
+        - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
+        - A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
+          is required. This token should match user and session contained in the `AccessToken`.
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/oauth2#adding-password-authentication
       operationId: addPasswordAuthentication
@@ -1190,14 +1376,14 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/UserResponse"
-        "401":
-          description: Unauthorized
+        "304":
+          description: Bad request. User already created a password identity
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-        "400":
-          description: Bad request. User already created a password identity
+        "401":
+          description: Unauthorized
           content:
             '*/*':
               schema:
@@ -1212,8 +1398,13 @@ paths:
       tags:
       - OAuth2
       summary: Generate OAuth2ProviderConnectionToken
-      description: Generate an OAuth2ProviderConnectionToken that enables the user
-        to connect new OAuth2 providers.
+      description: "Generate an OAuth2ProviderConnectionToken that enables the user\
+        \ to connect new OAuth2 providers.\n\nYou can learn more about connecting\
+        \ OAuth2 providers to existing accounts \n[here](https://singularity.stereov.io/docs/guides/auth/oauth2#connecting-an-oauth2-provider-to-an-existing-account).\n\
+        \n**Tokens:**\n- A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
+        \ is required.\n- A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)\n\
+        \  is required. This token should match user and session contained in the\
+        \ `AccessToken`."
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/oauth2#connecting-an-oauth2-provider-to-an-existing-account
       operationId: generateOAuth2ProviderConnectionToken
@@ -1231,7 +1422,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/OAuth2ProviderConnectionTokenResponse"
         "401":
-          description: Unauthorized
+          description: Invalid or expired `AccessToken` or `StepUpToken`.
           content:
             '*/*':
               schema:
@@ -1385,7 +1576,7 @@ paths:
         \ and manage authorized sessions, improving overall account security.\n\n\
         **Tokens:**\n\nIf successful, [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
         \ and \n[`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)\
-        \ \nwill automatically be set as HTTP-only cookies.\nIf [header authentication](https://singularity.stereov.io/docs/guides/auth/securing-endpoints#header-authentication)\
+        \ \nwill automatically be set as HTTP-only cookies.\nIf [header authentication](https://singularity.stereov.io/docs/guides/auth/authentication#header-authentication)\
         \ is enabled,\n[`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
         \ and \n[`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)\n\
         will be returned in the response body and can be used as \nbearer tokens in\
@@ -1444,7 +1635,7 @@ paths:
         \  of a `GUEST` is required.\n- If successful, the tokens of the `GUEST` account\
         \ become invalid.\n    A new [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
         \ and \n    [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)\
-        \ \n    will automatically be set as HTTP-only cookies.\n    If [header authentication](https://singularity.stereov.io/docs/guides/auth/securing-endpoints#header-authentication)\
+        \ \n    will automatically be set as HTTP-only cookies.\n    If [header authentication](https://singularity.stereov.io/docs/guides/auth/authentication#header-authentication)\
         \ is enabled,\n    [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
         \ and \n    [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)\n\
         \    will be returned in the response body and can be used as \n    bearer\
@@ -3872,7 +4063,7 @@ components:
           type: string
       required:
       - user
-    TwoFactorAuthenticationRequest:
+    CompleteStepUpRequest:
       type: object
       properties:
         email:
@@ -3880,8 +4071,6 @@ components:
         totp:
           type: integer
           format: int32
-        session:
-          $ref: "#/components/schemas/SessionInfoRequest"
     UpdatePreferredTwoFactorMethodRequest:
       type: object
       properties:
@@ -3892,6 +4081,16 @@ components:
           - mail
       required:
       - method
+    CompleteLoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        totp:
+          type: integer
+          format: int32
+        session:
+          $ref: "#/components/schemas/SessionInfoRequest"
     EnableEmailTwoFactorMethodRequest:
       type: object
       properties:
@@ -3912,14 +4111,18 @@ components:
     PageGroupResponse:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         pageable:
           $ref: "#/components/schemas/PageableObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
         size:
           type: integer
           format: int32
@@ -3935,38 +4138,34 @@ components:
         numberOfElements:
           type: integer
           format: int32
-        first:
-          type: boolean
-        last:
-          type: boolean
         empty:
           type: boolean
     PageableObject:
       type: object
       properties:
-        paged:
+        unpaged:
           type: boolean
-        pageNumber:
-          type: integer
-          format: int32
         pageSize:
           type: integer
           format: int32
-        unpaged:
-          type: boolean
+        pageNumber:
+          type: integer
+          format: int32
         offset:
           type: integer
           format: int64
         sort:
           $ref: "#/components/schemas/SortObject"
+        paged:
+          type: boolean
     SortObject:
       type: object
       properties:
-        sorted:
-          type: boolean
         unsorted:
           type: boolean
         empty:
+          type: boolean
+        sorted:
           type: boolean
     KeyContainsResponse:
       type: object
@@ -4037,14 +4236,18 @@ components:
     PageArticleOverviewResponse:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         pageable:
           $ref: "#/components/schemas/PageableObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
         size:
           type: integer
           format: int32
@@ -4060,10 +4263,6 @@ components:
         numberOfElements:
           type: integer
           format: int32
-        first:
-          type: boolean
-        last:
-          type: boolean
         empty:
           type: boolean
     ArticleResponse:

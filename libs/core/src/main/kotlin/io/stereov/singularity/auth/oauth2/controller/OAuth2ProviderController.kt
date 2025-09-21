@@ -36,7 +36,17 @@ class OAuth2ProviderController(
     @PostMapping("token")
     @Operation(
         summary = "Generate OAuth2ProviderConnectionToken",
-        description = "Generate an OAuth2ProviderConnectionToken that enables the user to connect new OAuth2 providers.",
+        description = """
+            Generate an OAuth2ProviderConnectionToken that enables the user to connect new OAuth2 providers.
+            
+            You can learn more about connecting OAuth2 providers to existing accounts 
+            [here](https://singularity.stereov.io/docs/guides/auth/oauth2#connecting-an-oauth2-provider-to-an-existing-account).
+            
+            **Tokens:**
+            - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
+            - A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
+              is required. This token should match user and session contained in the `AccessToken`.
+        """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/oauth2#connecting-an-oauth2-provider-to-an-existing-account"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER),
@@ -52,7 +62,7 @@ class OAuth2ProviderController(
             ),
             ApiResponse(
                 responseCode = "401",
-                description = "Unauthorized",
+                description = "Invalid or expired `AccessToken` or `StepUpToken`.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]

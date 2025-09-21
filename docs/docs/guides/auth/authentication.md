@@ -25,7 +25,7 @@ In summary, the short-lived [`AccessToken`](./tokens#access-token) is the workho
 while the long-lived [`RefreshToken`](./tokens#refresh-token) serves as a secure backup to renew the session without the user having to log in again.
 
 Both tokens are generated on every successful login or register and automatically set as HTTP-only cookie.
-If [header authentication](./securing-endpoints#header-authentication) is enabled,
+If [header authentication](./authentication#header-authentication) is enabled,
 it will also be returned in the response body.
 
 ## Example
@@ -49,7 +49,7 @@ curl -X GET 'https://example.com/api/users/me' \
 
 ### Header
 
-If [header authentication](./securing-endpoints#header-authentication) is enabled, 
+If [header authentication](./authentication#header-authentication) is enabled, 
 you can set the access token as bearer token in the authorization header.
 
 ```shell
@@ -65,7 +65,7 @@ An error response will be returned if a register request is send with an email t
 
 After the registration succeeded,
 an HTTP-only cookie with [`AccessToken`](./tokens#access-token) and [`RefreshToken`](./tokens#refresh-token) will be set automatically.
-If [header authentication](./securing-endpoints#header-authentication) is enabled,
+If [header authentication](./authentication#header-authentication) is enabled,
 access token and refresh token will be returned in the response body.
 
 ### Email Verification
@@ -86,21 +86,21 @@ For example, if you set the property to `https://example.com/auth/verify-email`,
 the generated link will look like this `https://example.com/auth/verify-email?token=ey27308dh7a7...`.
 
 The link will include the query parameter `token` containing the token you need to verify the email.
-Your frontend application should then request [`POST /api/auth/email/verify`](../../api/verify-email.api.mdx)
+Your frontend application should then request [`POST /api/auth/email/verification`](../../api/verify-email.api.mdx)
 attaching the token.
 
 If successful, the user's email address is verified.
 
 #### Resending the Verification Email
 
-You can resend the verification email using [`POST /api/auth/email/verify/send`](../../api/send-email-verification-email.api.mdx).
+You can resend the verification email using [`POST /api/auth/email/verification/send`](../../api/send-email-verification-email.api.mdx).
 After sending the email, a cooldown will be started.
 The number of seconds the cooldown will take will be returned in the response body.
 
 You are not allowed to send another email while the cooldown is active.
 The cooldown can be configured [here](../email/configuration).
 
-You can check the state of the cooldown here [`GET /api/auth/email/verify/cooldown`](../../api/get-remaining-email-verification-cooldown.api.mdx).
+You can check the state of the cooldown here [`GET /api/auth/email/verification/cooldown`](../../api/get-remaining-email-verification-cooldown.api.mdx).
 
 ### OAuth2
 
@@ -114,14 +114,14 @@ You can log in a user by calling [`POST /api/auth/login`](../../api/login.api.md
 
 After the login succeeded,
 an HTTP-only cookie with [`AccessToken`](./tokens#access-token) and [`RefreshToken`](./tokens#refresh-token) will be set automatically.
-If [header authentication](./securing-endpoints#header-authentication) is enabled,
+If [header authentication](./authentication#header-authentication) is enabled,
 access token and refresh token will be returned in the response body.
 
 ### 2FA
 
 If the user enabled [2FA](./two-factor), 
 a [`TwoFactorAuthenticationToken`](./tokens#two-factor-authentication-token) will be set as an HTTP-only cookie and returned in the response body 
-if [header authentication](./securing-endpoints#header-authentication) is enabled.
+if [header authentication](./authentication#header-authentication) is enabled.
 This token is necessary to perform the second step in the login process.
 
 Depending on the [methods](./two-factor) the user configured, 
@@ -129,7 +129,7 @@ you can use the code you obtained from one of those methods to perform a second 
 
 If verification was successful, 
 an HTTP-only cookie containing an [`AccessToken`](./tokens#access-token) and one containing a [`RefreshToken`](./tokens#refresh-token) will be set automatically.
-If [header authentication](./securing-endpoints#header-authentication) is enabled,
+If [header authentication](./authentication#header-authentication) is enabled,
 access token and refresh token will be returned in the response body.
 The [`TwoFactorAuthenticationToken`](./tokens#two-factor-authentication-token) will also be deleted.
 
@@ -185,11 +185,11 @@ You can find more information [here](./oauth2#registration-and-login).
 ## Refresh
 
 You can request a new [`AccessToken`](./tokens#access-token) using [`POST /api/auth/refresh`](../../api/refresh-access-token.api.mdx) 
-using a valid [`RefreshToken`](./tokens#refresh-token) as HTTP-only cookie `refresh_token` or as bearer token in the `Authorization` header if [header authentication](./securing-endpoints#header-authentication) is enabled.
+using a valid [`RefreshToken`](./tokens#refresh-token) as HTTP-only cookie `refresh_token` or as bearer token in the `Authorization` header if [header authentication](./authentication#header-authentication) is enabled.
 
 If successful,  the [`RefreshToken`](./tokens#refresh-token) you used becomes invalid, 
 a new [`AccessToken`](./tokens#access-token) and [`RefreshToken`](./tokens#refresh-token) will be generated. 
-Both tokens will be set as HTTP-only cookies and returned in the response body if [header authentication](./securing-endpoints#header-authentication) is enabled.
+Both tokens will be set as HTTP-only cookies and returned in the response body if [header authentication](./authentication#header-authentication) is enabled.
 
 
 ### Example
@@ -206,7 +206,7 @@ curl -X GET 'https://example.com/api/auth/refresh' \
 
 #### Header
 
-If [header authentication](./securing-endpoints#header-authentication) is enabled,
+If [header authentication](./authentication#header-authentication) is enabled,
 you can set the [`RefreshToken`](./tokens#refresh-token) as bearer token in the authorization header.
 
 ```shell
@@ -246,13 +246,13 @@ Otherwise, the reauthentication will not be successful.
 :::
 
 If reauthenticated successfully, the [`StepUpToken`](./tokens#step-up-token) will be set
-as HTTP-only cookie and return in the response body if [header authentication](./securing-endpoints#header-authentication) is enabled.
+as HTTP-only cookie and return in the response body if [header authentication](./authentication#header-authentication) is enabled.
 
 ### 2FA
 
 If the user enabled [2FA](./two-factor),
 a [`TwoFactorAuthenticationToken`](./tokens#two-factor-authentication-token) will be set as an HTTP-only cookie and returned in the response body
-if [header authentication](./securing-endpoints#header-authentication) is enabled.
+if [header authentication](./authentication#header-authentication) is enabled.
 This token is necessary to perform the second step in the step-up process.
 
 Depending on the [methods](./two-factor) the user configured,
@@ -260,7 +260,7 @@ you can use one of those methods to perform a second request to [`POST /api/auth
 
 If verification was successful,
 an HTTP-only cookie containing your [`StepUpToken`](./tokens#step-up-token) will be set automatically.
-If [header authentication](./securing-endpoints#header-authentication) is enabled,
+If [header authentication](./authentication#header-authentication) is enabled,
 the [`StepUpToken`](./tokens#step-up-token) will be returned in the response body.
 The [`TwoFactorAuthenticationToken`](./tokens#two-factor-authentication-token) will also be deleted.
 
@@ -274,3 +274,36 @@ You can find more information [here](./oauth2#step-up-authentication).
 
 You can request the current authentication status using [`GET /api/auth/status`](../../api/get-authentication-status.api.mdx).
 This will check the cookies and headers you set in the request.
+
+
+## Header authentication
+
+It is possible to authorize users using a bearer token in the request header.
+This option is enabled by default.
+
+You can also configure if the access token stored inside an HTTP-only cookie or the bearer token should be preferred.
+
+:::info
+Please note that header authentication can be less secure because the tokens can be read from JavaScript.
+This allows **XSS-attacks** if not configured properly.
+
+HTTP-only cookies on the other hand are hidden from JavaScript and not directly accessible.
+If you don't need header authentication, you can disable it here.
+:::
+
+### Properties
+
+| Property                                      | Type      | Description                                                                                                                                           | Default value |
+|-----------------------------------------------|-----------|-------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
+| singularity.auth.allow-header-authentication  | `Boolean` | Allow authentication using a bearer token placed in the header along HTTP-only Cookies. Allowed by default.                                           | `true`        |
+| singularity.auth.prefer-header-authentication | `Boolean` | "If header authentication is allowed, this property controls the precedence: if true, the Authorization header is preferred over HTTP-only cookies.", | `true`        |
+
+
+#### Example
+
+```yaml
+singularity:
+  auth:
+    allow-header-authentication: true
+    prefer-header-authentication: true
+```

@@ -12,7 +12,7 @@ class EmailVerificationControllerDisabledTest : BaseIntegrationTest() {
         val user = registerUser()
 
         webTestClient.post()
-            .uri("/api/auth/email/verify/send")
+            .uri("/api/auth/email/verification/send")
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus()

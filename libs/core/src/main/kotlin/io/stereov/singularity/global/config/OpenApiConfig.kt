@@ -176,7 +176,7 @@ class OpenApiConfig() {
             TwoFactorAuthenticationController::completeLogin.name,
             TwoFactorAuthenticationController::completeStepUp.name,
 
-            TwoFactorAuthenticationController::changePreferredMethod.name,
+            TwoFactorAuthenticationController::changePreferredTwoFactorMethod.name,
 
             TotpAuthenticationController::getTotpSetupDetails.name,
             TotpAuthenticationController::enableTotpAsTwoFactorMethod.name,
@@ -269,8 +269,14 @@ class OpenApiConfig() {
     }
 
     fun sortSecurityRequirements(openApi: OpenAPI) {
+        val doNotSort = listOf(
+            EmailAuthenticationController::sendEmailTwoFactorCode.name,
+        )
+
         openApi.paths.values.forEach { pathItem ->
             pathItem.readOperations().forEach { op ->
+                if (doNotSort.contains(op.operationId)) return@forEach
+
                 val headers = mutableMapOf<String, List<String>>()
                 val cookies = mutableMapOf<String, List<String>>()
 

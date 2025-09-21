@@ -325,7 +325,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
         Assertions.assertTrue { sessions.containsKey(accessToken.sessionId)}
     }
     @Test fun `login with two factor works as expected`() = runTest {
-        val user = registerUser(twoFactorEnabled = true)
+        val user = registerUser(totpEnabled = true)
 
         val loginRequest = LoginRequest(user.email!!, user.password!!)
 
@@ -578,7 +578,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
             .expectStatus().isUnauthorized
     }
     @Test fun `stepUp with two factor works as expected`() = runTest {
-        val user = registerUser(twoFactorEnabled = true)
+        val user = registerUser(totpEnabled = true)
 
         val req = StepUpRequest(user.password!!)
 
@@ -726,7 +726,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
         Assertions.assertNull(res.preferredTwoFactorMethod)
     }
     @Test fun `status works with two-factor`() = runTest {
-        val user = registerUser(twoFactorEnabled = true)
+        val user = registerUser(totpEnabled = true)
 
         val twoFactorToken = twoFactorAuthenticationTokenService.create(user.info.id)
 
@@ -749,7 +749,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
         Assertions.assertEquals(res.preferredTwoFactorMethod, user.info.preferredTwoFactorMethod)
     }
     @Test fun `status works with two-factor and authenticated`() = runTest {
-        val user = registerUser(twoFactorEnabled = true)
+        val user = registerUser(totpEnabled = true)
 
         val twoFactorToken = twoFactorAuthenticationTokenService.create(user.info.id)
 

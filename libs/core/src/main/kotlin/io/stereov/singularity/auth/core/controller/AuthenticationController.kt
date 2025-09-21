@@ -97,7 +97,7 @@ class AuthenticationController(
             If successful, [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) and 
             [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token) 
             will automatically be set as HTTP-only cookies.
-            If [header authentication](https://singularity.stereov.io/docs/guides/auth/securing-endpoints#header-authentication) is enabled,
+            If [header authentication](https://singularity.stereov.io/docs/guides/auth/authentication#header-authentication) is enabled,
             [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) and 
             [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)
             will be returned in the response body and can be used as 
@@ -172,7 +172,7 @@ class AuthenticationController(
             If the user enabled 2FA, the user will not be authenticated immediately. 
             Instead, a [`TwoFactorAuthenticationToken`](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token) 
             is set as HTTP-only cookie and returned in the response body
-            if [header authentication](https://singularity.stereov.io/docs/guides/auth/securing-endpoints#header-authentication) is enabled.
+            if [header authentication](https://singularity.stereov.io/docs/guides/auth/authentication#header-authentication) is enabled.
             
             You can complete the login through the endpoint [`POST /api/auth/2fa/login`](https://singularity.stereov.io/docs/api/complete-login).
             
@@ -190,7 +190,7 @@ class AuthenticationController(
               [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) 
               and [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token) 
               will automatically be set as HTTP-only cookies.
-              If [header authentication](https://singularity.stereov.io/docs/guides/auth/securing-endpoints#header-authentication) is enabled,
+              If [header authentication](https://singularity.stereov.io/docs/guides/auth/authentication#header-authentication) is enabled,
               [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) and 
               [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token) 
               will be returned in the response body and can be used as 
@@ -332,7 +332,7 @@ class AuthenticationController(
             - If successful, [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) and 
               [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token) 
               will automatically be set as HTTP-only cookies.
-              If [header authentication](https://singularity.stereov.io/docs/guides/auth/securing-endpoints#header-authentication) is enabled,
+              If [header authentication](https://singularity.stereov.io/docs/guides/auth/authentication#header-authentication) is enabled,
               [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) and 
               [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)
               will be returned in the response body and can be used as 
@@ -392,7 +392,7 @@ class AuthenticationController(
             If the user enabled 2FA, the step-up will not be granted immediately. 
             Instead, a [`TwoFactorAuthenticationToken`](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token) 
             is set as HTTP-only cookie and returned in the response body
-            if [header authentication](https://singularity.stereov.io/docs/guides/auth/securing-endpoints#header-authentication) is enabled.
+            if [header authentication](https://singularity.stereov.io/docs/guides/auth/authentication#header-authentication) is enabled.
             
             You can complete the step-up through the endpoint [`POST /api/auth/2fa/step-up`](https://singularity.stereov.io/docs/api/complete-step-up).
             
@@ -418,7 +418,7 @@ class AuthenticationController(
             - Requires a valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token).
             - If 2FA is disabled and the request is successful, [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
               will automatically be set as HTTP-only cookie.
-              If [header authentication](https://singularity.stereov.io/docs/guides/auth/securing-endpoints#header-authentication) is enabled,
+              If [header authentication](https://singularity.stereov.io/docs/guides/auth/authentication#header-authentication) is enabled,
               the [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
               will be returned in the response body and can be used to authorized critical requests.
         """,

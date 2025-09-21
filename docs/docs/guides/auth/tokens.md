@@ -15,7 +15,7 @@ These tokens include claims that will be used for authentication and authorizati
 This way, the tokens are signed and can therefore verify their integrity.
 
 :::info
-If [header authentication](./securing-endpoints#header-authentication) is enabled,
+If [header authentication](./authentication#header-authentication) is enabled,
 all tokens will be included in the response body of the corresponding request.
 :::
 
@@ -43,7 +43,7 @@ The `AccessToken` can be attached to your API requests in two ways:
     curl -X GET https://example.com/api/users/me \
       --cookie 'access_token=<your-token>'
     ```
-* **As a Bearer Token in the Header**: This is an alternative if [header authentication](./securing-endpoints#header-authentication) is enabled.
+* **As a Bearer Token in the Header**: This is an alternative if [header authentication](./authentication#header-authentication) is enabled.
     ```shell
     curl -X GET https://example.com/api/users/me \
       -H 'Authorization: Bearer <your-token>'
@@ -75,7 +75,7 @@ The `RefreshToken` is used to request a new `AccessToken`:
     curl -X GET https://example.com/api/auth/refresh \
       --cookie 'refresh_token=<your-token>'
     ```
-* **As a Bearer Token in the Header**: This is an alternative if [header authentication](./securing-endpoints#header-authentication) is enabled.
+* **As a Bearer Token in the Header**: This is an alternative if [header authentication](./authentication#header-authentication) is enabled.
     ```shell
     curl -X GET https://example.com/api/auth/refresh \
       -H 'Authorization: Bearer <your-token>'
@@ -117,7 +117,7 @@ if successful, issues the [`AccessToken`](#access-token) and [`RefreshToken`](#r
     -H 'Content-Type: application/json' \
     -d <request-body>
   ```
-* **In the Header**: This is an alternative if [header authentication](./securing-endpoints#header-authentication) is enabled.  
+* **In the Header**: This is an alternative if [header authentication](./authentication#header-authentication) is enabled.  
   ```shell
   curl -X POST https://example.com/api/auth/2fa/login \
     -H 'X-Two-Factor-Authentication-Token: <your-token>' \
@@ -140,7 +140,7 @@ if successful, issues the [`StepUpToken`](#step-up-token) required for critical 
       -H 'Content-Type: application/json' \
       -d <request-body>
     ```
-* **In the Header**: This is an alternative if [header authentication](./securing-endpoints#header-authentication) is enabled.
+* **In the Header**: This is an alternative if [header authentication](./authentication#header-authentication) is enabled.
     ```shell
     curl -X POST https://example.com/api/auth/2fa/step-up \
     -H 'X-Two-Factor-Authentication-Token: <your-token>' \

@@ -16,7 +16,7 @@ import io.stereov.singularity.auth.group.service.GroupService
 import io.stereov.singularity.auth.guest.dto.request.CreateGuestRequest
 import io.stereov.singularity.auth.guest.dto.response.CreateGuestResponse
 import io.stereov.singularity.auth.jwt.exception.TokenException
-import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorAuthenticationRequest
+import io.stereov.singularity.auth.twofactor.dto.request.CompleteStepUpRequest
 import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorVerifySetupRequest
 import io.stereov.singularity.auth.twofactor.dto.response.StepUpResponse
 import io.stereov.singularity.auth.twofactor.dto.response.TwoFactorSetupResponse
@@ -157,7 +157,8 @@ class BaseSpringBootTest {
     suspend fun registerUser(
         email: String = "test@email.com",
         password: String = "Password#3",
-        twoFactorEnabled: Boolean = false,
+        totpEnabled: Boolean = false,
+        email2faEnabled: Boolean = false,
         name: String = "Name",
         roles: List<Role> = listOf(Role.USER),
         groups: List<String> = listOf(),
@@ -184,7 +185,7 @@ class BaseSpringBootTest {
         var user = userService.findByEmail(email)
         var stepUpToken = stepUpTokenService.create(user.id, user.sensitive.sessions.keys.first())
 
-        if (twoFactorEnabled) {
+        if (totpEnabled) {
 
             val twoFactorRes = webTestClient.get()
                 .uri("/api/auth/2fa/totp/setup")
@@ -227,7 +228,7 @@ class BaseSpringBootTest {
 
             responseCookies = webTestClient.post()
                 .uri("/api/auth/2fa/login")
-                .bodyValue(TwoFactorAuthenticationRequest(totp = gAuth.getTotpPassword(twoFactorSecret)))
+                .bodyValue(CompleteStepUpRequest(totp = gAuth.getTotpPassword(twoFactorSecret)))
                 .cookie(TwoFactorTokenType.Authentication.cookieName, twoFactorToken!!)
                 .exchange()
                 .expectStatus().isOk
@@ -241,6 +242,12 @@ class BaseSpringBootTest {
             requireNotNull(refreshToken) { "No refresh token contained in response" }
 
             stepUpToken = stepUpTokenService.create(user.id, accessTokenService.extract(accessToken).sessionId)
+        }
+
+        if (email2faEnabled) {
+            webTestClient.post()
+                .uri("/api/auth/2fa/email/send")
+                .
         }
 
         user = userService.findById(user.id)

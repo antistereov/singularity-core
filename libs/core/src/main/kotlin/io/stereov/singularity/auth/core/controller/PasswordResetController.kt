@@ -129,7 +129,8 @@ class PasswordResetController(
             You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
             
             **Note:** After each email, a cooldown will be started.
-            When the cooldown is active, no new verification email can be sent.
+            You can check the status of the cooldown through the endpoint [`GET /api/auth/password/reset/cooldown`](https://singularity.stereov.io/docs/api/get-remaining-password-reset-cooldown).
+            When the cooldown is active, no new email can be sent.
             The cooldown can be configured [here](https://singularity.stereov.io/docs/guides/email/configuration).
         """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/authentication#password-reset"),

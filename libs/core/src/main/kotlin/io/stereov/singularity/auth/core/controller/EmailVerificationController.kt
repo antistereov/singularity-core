@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*
 import java.util.*
 
 @RestController
-@RequestMapping("/api/auth/email/verify")
+@RequestMapping("/api/auth/email/verification")
 @Tag(
     name = "Authentication",
 )
@@ -40,7 +40,7 @@ class EmailVerificationController(
             token as request parameter.
             You can find more information about this [here](https://singularity.stereov.io/docs/guides/auth/authentication#email-verification).
             
-            You can resend this email through the endpoint [`POST /api/auth/email/verify/send`](https://singularity.stereov.io/docs/api/send-email-verification-email).
+            You can resend this email through the endpoint [`POST /api/auth/email/verification/send`](https://singularity.stereov.io/docs/api/send-email-verification-email).
 
             **Note:** If email is disabled, there is no way to verify a user's email address.
         """,
@@ -117,7 +117,7 @@ class EmailVerificationController(
             Your frontend should extract the token from the URL and send it to this endpoint with the
             token as request parameter.
             
-            You can perform the verification using the token through the endpoint [`POST /api/auth/email/verify`](https://singularity.stereov.io/docs/api/verify-email).
+            You can perform the verification using the token through the endpoint [`POST /api/auth/email/verification`](https://singularity.stereov.io/docs/api/verify-email).
             
             **Note:** If email is disabled, there is no way to verify a user's email address.
             
@@ -134,6 +134,7 @@ class EmailVerificationController(
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
             
             **Note:** After each email, a cooldown will be started.
+            You can check the status of the cooldown through the endpoint [`GET /api/auth/email/verification/cooldown`](https://singularity.stereov.io/docs/api/get-remaining-email-verification-cooldown).
             When the cooldown is active, no new verification email can be sent.
             The cooldown can be configured [here](https://singularity.stereov.io/docs/guides/email/configuration).
         """,

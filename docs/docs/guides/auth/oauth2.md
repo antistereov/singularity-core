@@ -100,7 +100,7 @@ You can learn more about that [here](./sessions).
 Therefore, before authenticating via an OAuth2 client, 
 you need to retrieve a [`SessionToken`](./tokens#session-token) using [`POST /api/auth/sessions/token`](../../api/generate-session-token.api.mdx).
 This sets the [`SessionToken`](./tokens#session-token) as an HTTP-only cookie and returns the value in the response body 
-if [header authentication](./securing-endpoints#header-authentication) is enabled.
+if [header authentication](./authentication#header-authentication) is enabled.
 
 ### 2. Calling the Spring OAuth2 Authorization Endpoint
 
@@ -173,7 +173,7 @@ Placing them in the header will not lead to a successful connection since they w
 #### 2. Create an OAuth2 Provider Connection Token
 
 Call [`POST /api/auth/providers/oauth2/token`](../../api/generate-o-auth-2-provider-connection-token.api.mdx) authenticated as the user to create an [`OAuth2ProviderConnectionToken`](./tokens#oauth2-provider-connection-token).
-This token will be set as an HTTP-only cookie and returned in the response if [header-authentication](./securing-endpoints#header-authentication) is enabled.
+This token will be set as an HTTP-only cookie and returned in the response if [header-authentication](./authentication#header-authentication) is enabled.
 
 #### 3. Follow the Steps For Registration
 

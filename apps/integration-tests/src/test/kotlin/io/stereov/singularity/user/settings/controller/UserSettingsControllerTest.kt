@@ -23,7 +23,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
         val oldEmail = "old@email.com"
         val newEmail = "new@email.com"
         val password = "Password$2"
-        val user = registerUser(oldEmail, password, twoFactorEnabled = true)
+        val user = registerUser(oldEmail, password, totpEnabled = true)
 
 
         webTestClient.put()
@@ -43,7 +43,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
         val token = emailVerificationTokenService.create(user.info.id, newEmail, user.mailVerificationSecret!!)
 
         val res = webTestClient.post()
-            .uri("/api/auth/email/verify?token=$token")
+            .uri("/api/auth/email/verification?token=$token")
             .exchange()
             .expectStatus().isOk
             .expectBody(UserResponse::class.java)
@@ -74,7 +74,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
         val token = emailVerificationTokenService.create(user.info.id, newEmail, user.mailVerificationSecret!!)
 
         val res = webTestClient.post()
-            .uri("/api/auth/email/verify?token=$token")
+            .uri("/api/auth/email/verification?token=$token")
             .exchange()
             .expectStatus().isOk
             .expectBody(UserResponse::class.java)
@@ -148,7 +148,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
         val oldEmail = "old@email.com"
         val newEmail = "new@email.com"
         val password = "Password$2"
-        val user = registerUser(oldEmail, password, twoFactorEnabled = true)
+        val user = registerUser(oldEmail, password, totpEnabled = true)
 
         webTestClient.put()
             .uri("/api/users/me/email")
@@ -161,7 +161,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
         val oldEmail = "old@email.com"
         val newEmail = "new@email.com"
         val password = "Password$2"
-        val user = registerUser(oldEmail, password, twoFactorEnabled = true)
+        val user = registerUser(oldEmail, password, totpEnabled = true)
         val anotherUser = registerUser("ttest@email.com")
 
         webTestClient.put()
@@ -179,7 +179,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
         val oldEmail = "old@email.com"
         val newEmail = "new@email.com"
         val password = "Password$2"
-        val user = registerUser(oldEmail, password, twoFactorEnabled = true)
+        val user = registerUser(oldEmail, password, totpEnabled = true)
 
         webTestClient.put()
             .uri("/api/users/me/email")
@@ -196,7 +196,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
         val oldEmail = "old@email.com"
         val newEmail = "new@email.com"
         val password = "Password$2"
-        val user = registerUser(oldEmail, password, twoFactorEnabled = true)
+        val user = registerUser(oldEmail, password, totpEnabled = true)
 
         webTestClient.put()
             .uri("/api/users/me/email")
@@ -217,7 +217,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
         val oldEmail = "old@email.com"
         val newEmail = "new@email.com"
         val password = "Password$2"
-        val user = registerUser(oldEmail, password, twoFactorEnabled = true)
+        val user = registerUser(oldEmail, password, totpEnabled = true)
 
         webTestClient.put()
             .uri("/api/users/me/email")
@@ -270,7 +270,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
         val email = "old@email.com"
         val oldPassword = "Password$2"
         val newPassword = "newPassword$2"
-        val user = registerUser(email, oldPassword, twoFactorEnabled = true)
+        val user = registerUser(email, oldPassword, totpEnabled = true)
 
         val res = webTestClient.put()
             .uri("/api/users/me/password")
@@ -360,7 +360,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
         val email = "old@email.com"
         val oldPassword = "Password$2"
         val newPassword = "newPassword$2"
-        val user = registerUser(email, oldPassword, twoFactorEnabled = true)
+        val user = registerUser(email, oldPassword, totpEnabled = true)
 
         webTestClient.put()
             .uri("/api/users/me/password")
@@ -373,7 +373,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
         val email = "old@email.com"
         val oldPassword = "Password$2"
         val newPassword = "newPassword$2"
-        val user = registerUser(email, oldPassword, twoFactorEnabled = true)
+        val user = registerUser(email, oldPassword, totpEnabled = true)
         val anotherUser = registerUser("another@email.com")
 
         webTestClient.put()
@@ -391,7 +391,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
         val email = "old@email.com"
         val oldPassword = "Password$2"
         val newPassword = "newPassword$2"
-        val user = registerUser(email, oldPassword, twoFactorEnabled = true)
+        val user = registerUser(email, oldPassword, totpEnabled = true)
 
         webTestClient.put()
             .uri("/api/users/me/password")
@@ -408,7 +408,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
         val email = "old@email.com"
         val oldPassword = "Password$2"
         val newPassword = "newPassword$2"
-        val user = registerUser(email, oldPassword, twoFactorEnabled = true)
+        val user = registerUser(email, oldPassword, totpEnabled = true)
 
         webTestClient.put()
             .uri("/api/users/me/password")
@@ -429,7 +429,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
         val email = "old@email.com"
         val oldPassword = "Password$2"
         val newPassword = "newPassword$2"
-        val user = registerUser(email, oldPassword, twoFactorEnabled = true)
+        val user = registerUser(email, oldPassword, totpEnabled = true)
 
         webTestClient.put()
             .uri("/api/users/me/password")

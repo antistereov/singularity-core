@@ -3,8 +3,8 @@ package io.stereov.singularity.auth.twofactor.controller
 import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.auth.core.dto.response.LoginResponse
 import io.stereov.singularity.auth.core.model.token.SessionTokenType
+import io.stereov.singularity.auth.twofactor.dto.request.CompleteStepUpRequest
 import io.stereov.singularity.auth.twofactor.dto.request.DisableTwoFactorRequest
-import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorAuthenticationRequest
 import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorVerifySetupRequest
 import io.stereov.singularity.auth.twofactor.dto.response.TwoFactorRecoveryResponse
 import io.stereov.singularity.auth.twofactor.dto.response.TwoFactorSetupResponse
@@ -90,7 +90,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
         val userRes = webTestClient.post()
             .uri("/api/auth/2fa/login")
             .cookie(TwoFactorTokenType.Authentication.cookieName, twoFactorToken)
-            .bodyValue(TwoFactorAuthenticationRequest(totp = code))
+            .bodyValue(CompleteStepUpRequest(totp = code))
             .exchange()
             .expectStatus().isOk
             .expectBody(LoginResponse::class.java)
@@ -158,7 +158,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
         assertTrue(userWith2fa.sensitive.sessions.isEmpty())
     }
     @Test fun `totp get setup details requires totp to be disabled`() = runTest {
-        val user = registerUser(twoFactorEnabled = true)
+        val user = registerUser(totpEnabled = true)
 
         webTestClient.get()
             .uri("/api/auth/2fa/totp/setup")
@@ -291,7 +291,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
     }
 
     @Test fun `totp recovery works with login verification token`() = runTest {
-        val user = registerUser(twoFactorEnabled = true)
+        val user = registerUser(totpEnabled = true)
         requireNotNull(user.twoFactorToken)
         requireNotNull(user.totpRecovery)
 
@@ -324,7 +324,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
         assertFalse(userAfterRecovery.sensitive.security.twoFactor.totp.recoveryCodes.contains(hashService.hashBcrypt(user.totpRecovery)))
     }
     @Test fun `totp recovery works with access token`() = runTest {
-        val user = registerUser(twoFactorEnabled = true)
+        val user = registerUser(totpEnabled = true)
         requireNotNull(user.twoFactorToken)
         requireNotNull(user.totpRecovery)
 
@@ -357,7 +357,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
         assertFalse(userAfterRecovery.sensitive.security.twoFactor.totp.recoveryCodes.contains(hashService.hashBcrypt(user.totpRecovery)))
     }
     @Test fun `totp recovery needs correct code`() = runTest {
-        val user = registerUser(twoFactorEnabled = true)
+        val user = registerUser(totpEnabled = true)
         requireNotNull(user.twoFactorToken)
 
         val code = gAuth.getTotpPassword(user.totpSecret) + 1
@@ -369,7 +369,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
             .expectStatus().isUnauthorized
     }
     @Test fun `totp recovery needs param code`() = runTest {
-        val user = registerUser(twoFactorEnabled = true)
+        val user = registerUser(totpEnabled = true)
         requireNotNull(user.twoFactorToken)
 
         webTestClient.post()
@@ -379,7 +379,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
             .expectStatus().isBadRequest
     }
     @Test fun `totp recovery needs login verification or access token`() = runTest {
-        val user = registerUser(twoFactorEnabled = true)
+        val user = registerUser(totpEnabled = true)
         requireNotNull(user.twoFactorToken)
 
         webTestClient.post()
@@ -388,7 +388,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
             .expectStatus().isUnauthorized
     }
     @Test fun `totp recovery needs body`() = runTest {
-        val user = registerUser(twoFactorEnabled = true)
+        val user = registerUser(totpEnabled = true)
         requireNotNull(user.twoFactorToken)
 
         webTestClient.post()
@@ -398,7 +398,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
     }
 
     @Test fun `disable works`() = runTest {
-        val user = registerUser(twoFactorEnabled = true)
+        val user = registerUser(totpEnabled = true)
 
         val res = webTestClient.delete()
             .uri("/api/auth/2fa/totp")
@@ -419,7 +419,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
         assertFalse(userAfterDisable.sensitive.security.twoFactor.totp.enabled)
     }
     @Test fun `disable requires authentication`() = runTest {
-        val user = registerUser(twoFactorEnabled = true)
+        val user = registerUser(totpEnabled = true)
         val token = stepUpTokenService.create(user.info.id, user.sessionId)
 
         webTestClient.delete()
@@ -429,7 +429,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
             .expectStatus().isUnauthorized
     }
     @Test fun `disable requires step up token`() = runTest {
-        val user = registerUser(twoFactorEnabled = true)
+        val user = registerUser(totpEnabled = true)
 
         webTestClient.delete()
             .uri("/api/auth/2fa/totp")
@@ -438,7 +438,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
             .expectStatus().isUnauthorized
     }
     @Test fun `disable requires valid step up token`() = runTest {
-        val user = registerUser(twoFactorEnabled = true)
+        val user = registerUser(totpEnabled = true)
 
         webTestClient.delete()
             .uri("/api/auth/2fa/totp")
@@ -449,7 +449,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
     }
     @Test fun `disable requires unexpired step up token`() = runTest {
         val password = "password"
-        val user = registerUser(twoFactorEnabled = true)
+        val user = registerUser(totpEnabled = true)
         val req = DisableTwoFactorRequest(password)
 
         webTestClient.delete()
@@ -461,7 +461,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
     }
     @Test fun `disable requires step up token for same user`() = runTest {
         val password = "password"
-        val user = registerUser(twoFactorEnabled = true)
+        val user = registerUser(totpEnabled = true)
 
         val anotherUser = registerUser("another@email.com")
 
@@ -473,7 +473,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
             .expectStatus().isUnauthorized
     }
     @Test fun `disable requires step up token for same session`() = runTest {
-        val user = registerUser(twoFactorEnabled = true)
+        val user = registerUser(totpEnabled = true)
 
         webTestClient.delete()
             .uri("/api/auth/2fa/totp")
@@ -494,7 +494,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
             .expectStatus().isBadRequest
     }
     @Test fun `disable needs correct password`() = runTest {
-        val user = registerUser(twoFactorEnabled = true)
+        val user = registerUser(totpEnabled = true)
 
         val stepUp = stepUpTokenService.create(user.info.id, user.sessionId)
 

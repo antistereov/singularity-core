@@ -60,7 +60,7 @@ class PasswordResetControllerTest : BaseMailIntegrationTest() {
         val req = ResetPasswordRequest("test")
 
         webTestClient.post()
-            .uri("/api/auth/email/verify?token=test")
+            .uri("/api/auth/email/verification?token=test")
             .bodyValue(req)
             .exchange()
             .expectStatus().isUnauthorized
@@ -72,7 +72,7 @@ class PasswordResetControllerTest : BaseMailIntegrationTest() {
         val req = ResetPasswordRequest("Test")
 
         webTestClient.post()
-            .uri("/api/auth/email/verify?token=$token")
+            .uri("/api/auth/email/verification?token=$token")
             .bodyValue(req)
             .exchange()
             .expectStatus().isUnauthorized

@@ -8,7 +8,8 @@ import io.stereov.singularity.auth.core.service.token.AccessTokenService
 import io.stereov.singularity.auth.core.service.token.RefreshTokenService
 import io.stereov.singularity.auth.core.service.token.StepUpTokenService
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
-import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorAuthenticationRequest
+import io.stereov.singularity.auth.twofactor.dto.request.CompleteLoginRequest
+import io.stereov.singularity.auth.twofactor.dto.request.CompleteStepUpRequest
 import io.stereov.singularity.auth.twofactor.dto.request.UpdatePreferredTwoFactorMethodRequest
 import io.stereov.singularity.auth.twofactor.dto.response.StepUpResponse
 import io.stereov.singularity.auth.twofactor.model.token.TwoFactorTokenType
@@ -53,11 +54,40 @@ class TwoFactorAuthenticationController(
     @PostMapping("/login")
     @Operation(
         summary = "Complete Login",
-        description = "Perform second factor for login. " +
-                "A TwoFactorAuthenticationToken is required. " +
-                "This token can be obtained by calling POST /api/auth/login. " +
-                "If successful, an AccessToken and RefreshToken will be set as HTTP-only cookies " +
-                "and returned in the response body if header authentication is enabled.",
+        description = """
+            Complete second factor for login.
+            
+            You can learn more about the login flow [here](https://singularity.stereov.io/docs/guides/auth/authentication#login).
+            
+            **Requirements:**
+            - User authenticated using their password through [`POST /api/auth/login`](https://singularity.stereov.io/docs/api/login).
+            - At least one of [email](https://singularity.stereov.io/docs/guides/auth/two-factor#email) or [TOTP](https://singularity.stereov.io/docs/guides/auth/two-factor#totp) as 2FA methods should be enabled.
+            - An `email` or `totp` 2FA code is present for an enabled 2FA method.
+              Check out [email](https://singularity.stereov.io/docs/guides/auth/two-factor#email) and [TOTP](https://singularity.stereov.io/docs/guides/auth/two-factor#totp)
+              to learn how to retrieve a 2FA code.
+              
+            **Optional session data:**
+            - The `session` object can be included in the request body.
+            - Inside the `session` object, you can provide the following optional fields:
+                - `browser`: The name of the browser used (e.g., "Chrome", "Firefox").
+                - `os`: The operating system of the device (e.g., "Windows", "macOS", "Android").
+        
+            This information helps users identify and manage authorized sessions, improving overall account security.
+            
+            **Tokens:**
+            - A valid [`TwoFactorAuthenticationToken`](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token)
+              is required. This token will be set automatically as HTTP-only cookie through [`POST /api/auth/login`](https://singularity.stereov.io/docs/api/login)
+              or can be retrieved from the response and set as header manually if [header authentication](https://singularity.stereov.io/docs/guides/authentication#header-authentication) 
+              is enabled.
+            - If this action is successful, [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) and 
+              [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token) 
+              will automatically be set as HTTP-only cookies.
+              If [header authentication](https://singularity.stereov.io/docs/guides/auth/authentication#header-authentication) is enabled,
+              [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) and 
+              [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)
+              will be returned in the response body and can be used as 
+              bearer tokens in the authorization header for upcoming requests.
+        """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/two-factor"),
         security = [
             SecurityRequirement(name = OpenApiConstants.TWO_FACTOR_AUTHENTICATION_TOKEN_HEADER),
@@ -70,20 +100,20 @@ class TwoFactorAuthenticationController(
                 content = [Content(schema = Schema(implementation = LoginResponse::class))]
             ),
             ApiResponse(
-                responseCode = "401",
-                description = "Not authorized.",
+                responseCode = "400",
+                description = "No 2FA code for an enabled 2FA method was provided or 2FA is disabled.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
             ApiResponse(
-                responseCode = "403",
-                description = "This 2FA method is disabled.",
+                responseCode = "401",
+                description = "Invalid or expired `TwoFactorAuthenticationToken`.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
     )
     suspend fun completeLogin(
         exchange: ServerWebExchange,
-        @RequestBody req: TwoFactorAuthenticationRequest
+        @RequestBody req: CompleteLoginRequest
     ): ResponseEntity<LoginResponse> {
         val user = twoFactorAuthService.validateTwoFactor(exchange, req)
         val sessionId = UUID.randomUUID()
@@ -113,11 +143,28 @@ class TwoFactorAuthenticationController(
     @PostMapping("/step-up")
     @Operation(
         summary = "Complete Step-Up",
-        description = "Perform second factor for step-up. " +
-                "A TwoFactorAuthenticationToken is required. " +
-                "This token can be obtained by calling POST /api/auth/step-up. " +
-                "If successful, a StepUpToken will be set as HTTP-only cookie " +
-                "and returned in the response body if header authentication is enabled.",
+        description = """
+            Perform second factor for step-up.
+            
+            You can learn more about the step-up flow [here](https://singularity.stereov.io/docs/guides/auth/authentication#step-up).
+            
+            **Requirements:**
+            - User authenticated using their password through [`POST /api/auth/step-up`](https://singularity.stereov.io/docs/api/step-up).
+            - At least one of [email](https://singularity.stereov.io/docs/guides/auth/two-factor#email) or [TOTP](https://singularity.stereov.io/docs/guides/auth/two-factor#totp) as 2FA methods should be enabled.
+            - An `email` or `totp` 2FA code is present for an enabled 2FA method.
+              Check out [email](https://singularity.stereov.io/docs/guides/auth/two-factor#email) and [TOTP](https://singularity.stereov.io/docs/guides/auth/two-factor#totp)
+              to learn how to retrieve a 2FA code.
+            
+            **Tokens:**
+            - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
+            - A valid [`TwoFactorAuthenticationToken`](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token)
+              is required. This token should match user and session contained in the `AccessToken`.
+            - If 2FA is disabled and the request is successful, [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
+              will automatically be set as HTTP-only cookie.
+              If [header authentication](https://singularity.stereov.io/docs/guides/auth/authentication#header-authentication) is enabled,
+              the [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
+              will be returned in the response body and can be used to authorized critical requests.
+        """,
         externalDocs = ExternalDocumentation(
             url = "https://singularity.stereov.io/docs/auth/two-factor",
         ),
@@ -134,19 +181,19 @@ class TwoFactorAuthenticationController(
                 content = [Content(schema = Schema(implementation = StepUpResponse::class))]
             ),
             ApiResponse(
-                responseCode = "401",
-                description = "Not authorized.",
+                responseCode = "400",
+                description = "No 2FA code for an enabled 2FA method was provided or 2FA is disabled.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
             ApiResponse(
-                responseCode = "403",
-                description = "This 2FA method is disabled.",
+                responseCode = "401",
+                description = "Invalid or expired `TwoFactorAuthenticationToken` or invalid or expired 2FA code.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
     )
     suspend fun completeStepUp(
-        @RequestBody req: TwoFactorAuthenticationRequest,
+        @RequestBody req: CompleteStepUpRequest,
         exchange: ServerWebExchange
     ): ResponseEntity<StepUpResponse> {
         val user = twoFactorAuthService.validateTwoFactor(exchange, req)
@@ -162,7 +209,21 @@ class TwoFactorAuthenticationController(
     @PostMapping("/preferred-method")
     @Operation(
         summary = "Change Preferred 2FA Method",
-        description = "Change the preferred 2FA method. Step-up is required.",
+        description = """
+            Change the preferred 2FA method.
+            
+            You can learn more about 2FA methods [here](https://singularity.stereov.io/docs/guides/auth/two-factor).
+            
+            **Requirements:**
+            - The user can authenticate using password. 2FA will not work with OAuth2. 
+              The OAuth2 provider will validate the second factor if the user enabled it for the provider.
+            - At least one of [email](https://singularity.stereov.io/docs/guides/auth/two-factor#email) or [TOTP](https://singularity.stereov.io/docs/guides/auth/two-factor#totp) as 2FA methods should be enabled.
+            
+            **Tokens:**
+            - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
+            - A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
+              is required. This token should match user and session contained in the `AccessToken`.
+        """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/two-factor#changing-the-preferred-method"),
         security = [
             SecurityRequirement(name = OpenApiConstants.ACCESS_TOKEN_HEADER),
@@ -177,18 +238,18 @@ class TwoFactorAuthenticationController(
                 content = [Content(schema = Schema(implementation = UserResponse::class))]
             ),
             ApiResponse(
-                responseCode = "401",
-                description = "Not authorized.",
+                responseCode = "400",
+                description = "This 2FA method is disabled.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
             ApiResponse(
-                responseCode = "403",
-                description = "This 2FA method is disabled.",
+                responseCode = "401",
+                description = "`AccessToken` or `StepUpToken` are invalid or expired or invalid or expired 2FA code.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
     )
-    suspend fun changePreferredMethod(
+    suspend fun changePreferredTwoFactorMethod(
         @RequestBody req: UpdatePreferredTwoFactorMethodRequest
     ): ResponseEntity<UserResponse> {
         return ResponseEntity.ok(

@@ -13,12 +13,13 @@ class TwoFactorAuthExceptionHandler : BaseExceptionHandler<TwoFactorAuthExceptio
 
     override fun getHttpStatus(ex: TwoFactorAuthException) = when (ex) {
         is CannotDisableOnly2FAMethodException -> HttpStatus.BAD_REQUEST
+        is EmailTwoFactorEnabledAndUserAuthenticatedException -> HttpStatus.BAD_REQUEST
         is InvalidTwoFactorCodeException -> HttpStatus.UNAUTHORIZED
         is InvalidTwoFactorRequestException -> HttpStatus.BAD_REQUEST
         is MissingPasswordIdentityException -> HttpStatus.BAD_REQUEST
         is TwoFactorMethodAlreadyEnabledException -> HttpStatus.CONFLICT
-        is TwoFactorCodeExpiredException -> HttpStatus.FORBIDDEN
-        is TwoFactorMethodDisabledException -> HttpStatus.FORBIDDEN
+        is TwoFactorCodeExpiredException -> HttpStatus.UNAUTHORIZED
+        is TwoFactorMethodDisabledException -> HttpStatus.BAD_REQUEST
         else -> HttpStatus.UNAUTHORIZED
     }
 
