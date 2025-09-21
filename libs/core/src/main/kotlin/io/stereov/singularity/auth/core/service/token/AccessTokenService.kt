@@ -43,13 +43,13 @@ class AccessTokenService(
             .subject(user.id.toHexString())
             .claim(Constants.JWT_ROLES_CLAIM, user.roles)
             .claim(Constants.JWT_SESSION_CLAIM, sessionId)
-            .claim(Constants.JWT_GROUPS_CLAIM, user.sensitive.groups)
+            .claim(Constants.JWT_GROUPS_CLAIM, user.groups)
             .id(tokenId)
             .build()
 
         val jwt = jwtService.encodeJwt(claims)
 
-        return AccessToken(user.id, sessionId, tokenId, user.roles, user.sensitive.groups, jwt)
+        return AccessToken(user.id, sessionId, tokenId, user.roles, user.groups, jwt)
     }
 
     suspend fun extract(exchange: ServerWebExchange): AccessToken {

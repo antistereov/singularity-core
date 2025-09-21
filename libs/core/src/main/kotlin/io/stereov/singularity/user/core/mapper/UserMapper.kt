@@ -41,7 +41,7 @@ class UserMapper(
             user.twoFactorMethods,
             avatarMetadata,
             user.created.toString(),
-            user.sensitive.groups
+            user.groups
         )
     }
 

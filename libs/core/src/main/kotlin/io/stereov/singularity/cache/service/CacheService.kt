@@ -7,6 +7,8 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.lettuce.core.ExperimentalLettuceCoroutinesApi
 import io.lettuce.core.api.coroutines.RedisCoroutinesCommands
 import io.stereov.singularity.cache.exception.model.RedisKeyNotFoundException
+import kotlinx.coroutines.reactive.collect
+import kotlinx.coroutines.reactor.asFlux
 import org.springframework.stereotype.Service
 
 /**
@@ -118,16 +120,10 @@ class CacheService(
             redisCommands.flushall()
             return
         }
-
-        val keys = mutableListOf<String>()
-        redisCommands.keys(pattern).collect { key ->
-            keys.add(key)
-            if (keys.size >= 1000) {
+        redisCommands.keys(pattern).asFlux()
+            .buffer(1000)
+            .collect { keys ->
                 redisCommands.unlink(*keys.toTypedArray())
-                keys.clear()
             }
-        }
-
-        if (keys.isNotEmpty()) redisCommands.unlink(*keys.toTypedArray())
     }
 }

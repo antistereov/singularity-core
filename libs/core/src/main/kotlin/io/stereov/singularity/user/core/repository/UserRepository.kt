@@ -19,4 +19,6 @@ interface UserRepository : SensitiveCrudRepository<EncryptedUserDocument> {
     suspend fun findByIdentity(provider: String, principalId: SearchableHash): EncryptedUserDocument?
 
     suspend fun findAllByRolesContaining(role: Role): Flow<EncryptedUserDocument>
+
+    suspend fun findAllByGroupsContaining(group: String): Flow<EncryptedUserDocument>
 }

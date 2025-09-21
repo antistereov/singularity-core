@@ -37,9 +37,11 @@ class GroupConfiguration {
     fun groupController(
         service: GroupService,
         groupMapper: GroupMapper,
+        authorizationService: AuthorizationService,
     ) = GroupController(
         service,
         groupMapper,
+        authorizationService,
     )
 
     @Bean
@@ -72,14 +74,16 @@ class GroupConfiguration {
         appProperties: AppProperties,
         authorizationService: AuthorizationService,
         reactiveMongoTemplate: ReactiveMongoTemplate,
-        groupMapper: GroupMapper
+        groupMapper: GroupMapper,
+        userService: UserService
     ): GroupService {
         return GroupService(
             groupRepository,
             appProperties,
             authorizationService,
             reactiveMongoTemplate,
-            groupMapper
+            groupMapper,
+            userService
         )
     }
 

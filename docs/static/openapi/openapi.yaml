@@ -1665,7 +1665,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "403":
-          description: User does not have ADMIN role.
+          description: User does not have `ADMIN` permissions.
           content:
             '*/*':
               schema:
@@ -1690,9 +1690,13 @@ paths:
         These can be set when [creating](https://singularity.stereov.io/docs/guides/auth/groups#creating-groups)
         groups or through [updates](https://singularity.stereov.io/docs/guides/auth/groups#updating-groups).
 
-        The `locale` request parameter specifies in which language the information should be returned.
-        If no locale is specified, the applications default locale will be used.
+        A `primaryLocale` can be set and defaults to the application's default locale.
         You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
+
+        **Note:** A group needs at least one translation and a translation for the `primaryLocale` must exist.
+
+        The `locale` request parameter specifies in which language the information should be returned.
+        If no locale is specified, the application's default locale will be used.
 
         **Tokens:**
         - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
@@ -1720,13 +1724,19 @@ paths:
               schema:
                 $ref: "#/components/schemas/GroupResponse"
         "401":
-          description: Invalid token.
+          description: Invalid or expired `AccessToken`.
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "403":
-          description: User does not have ADMIN role.
+          description: User does not have `ADMIN` role.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Group with this `key` already exists.
           content:
             '*/*':
               schema:
@@ -1813,9 +1823,10 @@ paths:
         These can be set when [creating](https://singularity.stereov.io/docs/guides/auth/groups#creating-groups)
         groups or through [updates](https://singularity.stereov.io/docs/guides/auth/groups#updating-groups).
 
-        The `locale` request parameter specifies in which language the information should be returned.
-        If no locale is specified, the applications default locale will be used.
+        A `primaryLocale` can be set and defaults to the application's default locale.
         You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
+
+        **Note:** A group needs at least one translation and a translation for the `primaryLocale` must exist.
 
         **Tokens:**
         - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
@@ -3042,6 +3053,20 @@ components:
           type: object
           additionalProperties:
             $ref: "#/components/schemas/GroupTranslation"
+          description: A map of locale to group translation.
+          example:
+            en:
+              name: Pilots
+              description: People who can fly
+            de:
+              name: Piloten
+              description: "Personen, die fliegen können"
+        primaryLocale:
+          type: string
+          description: "The primary locale of the translations. If not specified,\
+            \ the applications default locale is used. It must be contained in the\
+            \ new or existing translations."
+          example: en
       required:
       - translations
     GroupResponse:
@@ -3464,12 +3489,26 @@ components:
       properties:
         key:
           type: string
+          description: A unique key for the group.
+          example: pilots
         translations:
           type: object
           additionalProperties:
             $ref: "#/components/schemas/GroupTranslation"
+          description: A map of locale to group translation.
+          example:
+            en:
+              name: Pilots
+              description: People who can fly
+            de:
+              name: Piloten
+              description: "Personen, die fliegen können"
         primaryLocale:
           type: string
+          description: "The primary locale of the translations. If not specified,\
+            \ the applications default locale is used. It must be contained in the\
+            \ new or existing translations."
+          example: en
       required:
       - key
       - translations

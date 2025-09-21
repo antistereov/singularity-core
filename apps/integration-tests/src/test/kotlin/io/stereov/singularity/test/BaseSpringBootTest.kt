@@ -11,6 +11,7 @@ import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.auth.core.service.token.*
 import io.stereov.singularity.auth.group.model.GroupDocument
 import io.stereov.singularity.auth.group.model.GroupTranslation
+import io.stereov.singularity.auth.group.repository.GroupRepository
 import io.stereov.singularity.auth.group.service.GroupService
 import io.stereov.singularity.auth.guest.dto.request.CreateGuestRequest
 import io.stereov.singularity.auth.guest.dto.response.CreateGuestResponse
@@ -26,6 +27,7 @@ import io.stereov.singularity.auth.twofactor.service.token.TwoFactorAuthenticati
 import io.stereov.singularity.cache.service.CacheService
 import io.stereov.singularity.database.encryption.service.EncryptionSecretService
 import io.stereov.singularity.database.hash.service.HashService
+import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.test.config.MockConfig
 import io.stereov.singularity.user.core.model.Role
 import io.stereov.singularity.user.core.model.UserDocument
@@ -71,6 +73,9 @@ class BaseSpringBootTest {
     @LocalServerPort
     lateinit var port: String
 
+    @Autowired
+    lateinit var appProperties: AppProperties
+
     @BeforeEach
     fun setupWebTestClient() {
         webTestClient = WebTestClient
@@ -107,10 +112,14 @@ class BaseSpringBootTest {
     @Autowired
     lateinit var encryptionSecretService: EncryptionSecretService
 
+    @Autowired
+    lateinit var groupRepository: GroupRepository
+
     @AfterEach
     fun clearDatabase() = runBlocking {
         userService.deleteAll()
         cacheService.deleteAll()
+        groupRepository.deleteAll()
     }
 
     @BeforeEach
@@ -241,7 +250,7 @@ class BaseSpringBootTest {
                 user.addRole(role)
             }
         }
-        user.sensitive.groups.addAll(groups)
+        user.groups.addAll(groups)
         user = userService.save(user)
 
         val mailVerificationToken = user.sensitive.security.email.verificationSecret
