@@ -12,7 +12,8 @@ import io.stereov.singularity.auth.core.exception.model.UserAlreadyAuthenticated
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.email.core.properties.EmailProperties
-import io.stereov.singularity.user.core.exception.model.EmailAlreadyExistsException
+import io.stereov.singularity.global.exception.model.MissingRequestParameterException
+import io.stereov.singularity.user.core.exception.model.EmailAlreadyTakenException
 import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.service.UserService
 import org.springframework.stereotype.Service
@@ -68,7 +69,7 @@ class AuthenticationService(
      *
      * @return The [UserDocument] of the registered user.
      *
-     * @throws EmailAlreadyExistsException If the email already exists in the system.
+     * @throws EmailAlreadyTakenException If the email already exists in the system.
      * @throws io.stereov.singularity.auth.core.exception.AuthException If the user document does not contain an ID.
      */
     suspend fun register(payload: RegisterUserRequest, sendEmail: Boolean, locale: Locale?): UserDocument {
@@ -78,7 +79,7 @@ class AuthenticationService(
             throw UserAlreadyAuthenticatedException("Register failed: user is already authenticated")
 
         if (userService.existsByEmail(payload.email)) {
-            throw EmailAlreadyExistsException("Failed to register user ${payload.email}")
+            throw EmailAlreadyTakenException("Failed to register user ${payload.email}")
         }
 
         val userDocument = UserDocument.ofPassword(
@@ -108,7 +109,7 @@ class AuthenticationService(
         return sessionService.deleteSession(sessionId)
     }
 
-    suspend fun stepUp(req: StepUpRequest): UserDocument {
+    suspend fun stepUp(req: StepUpRequest?): UserDocument {
         logger.debug { "Executing step up" }
 
         val user = authorizationService.getCurrentUser()
@@ -118,7 +119,11 @@ class AuthenticationService(
             throw AuthException("Step up failed: trying to execute for step up for invalid session, user logged out or revoked session")
         }
 
+        if (user.isGuest) return user
+
         val password = user.validateLoginTypeAndGetPassword()
+        if (req?.password == null)
+            throw MissingRequestParameterException("User is not GUEST, therefore a password is required")
         if (!hashService.checkBcrypt(req.password, password)) {
             throw InvalidCredentialsException()
         }

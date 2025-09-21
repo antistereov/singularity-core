@@ -32,7 +32,25 @@ class GroupController(
     @PostMapping
     @Operation(
         summary = "Create Group",
-        description = "Creates a new group.",
+        description = """
+            Create a new group.
+            
+            You can find more information about groups [here](https://singularity.stereov.io/docs/guides/auth/groups).
+            
+            **Locale:**
+            
+            Group names and descriptions can be specified in multiples languages.
+            These can be set when [creating](https://singularity.stereov.io/docs/guides/auth/groups#creating-groups)
+            groups or through [updates](https://singularity.stereov.io/docs/guides/auth/groups#updating-groups).
+            
+            The `locale` request parameter specifies in which language the information should be returned.
+            If no locale is specified, the applications default locale will be used.
+            You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
+            
+            **Tokens:**
+            - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
+              with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
+            """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/groups#creating-groups"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER, scopes = [OpenApiConstants.ADMIN_SCOPE]),
@@ -69,7 +87,25 @@ class GroupController(
     @GetMapping
     @Operation(
         summary = "Get Groups",
-        description = "Get all configured groups.",
+        description = """
+            Get all configured groups.
+            
+            You can find more information about groups [here](https://singularity.stereov.io/docs/guides/auth/groups).
+            
+            **Locale:**
+            
+            Group names and descriptions can be specified in multiples languages.
+            These can be set when [creating](https://singularity.stereov.io/docs/guides/auth/groups#creating-groups)
+            groups or through [updates](https://singularity.stereov.io/docs/guides/auth/groups#updating-groups).
+            
+            The `locale` request parameter specifies in which language the information should be returned.
+            If no locale is specified, the applications default locale will be used.
+            You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
+            
+            **Tokens:**
+            - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
+              with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
+        """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/groups#getting-groups"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER, scopes = [OpenApiConstants.ADMIN_SCOPE]),
@@ -110,7 +146,25 @@ class GroupController(
     @GetMapping("/{key}")
     @Operation(
         summary = "Get Group By Key",
-        description = "Get all a groups by key.",
+        description = """
+            Get a group by its `key`.
+            
+            You can find more information about groups [here](https://singularity.stereov.io/docs/guides/auth/groups).
+            
+            **Locale:**
+            
+            Group names and descriptions can be specified in multiples languages.
+            These can be set when [creating](https://singularity.stereov.io/docs/guides/auth/groups#creating-groups)
+            groups or through [updates](https://singularity.stereov.io/docs/guides/auth/groups#updating-groups).
+            
+            The `locale` request parameter specifies in which language the information should be returned.
+            If no locale is specified, the applications default locale will be used.
+            You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
+            
+            **Tokens:**
+            - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
+              with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
+        """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/groups#getting-groups"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER, scopes = [OpenApiConstants.ADMIN_SCOPE]),
@@ -129,7 +183,7 @@ class GroupController(
             ),
             ApiResponse(
                 responseCode = "403",
-                description = "User does not have ADMIN role.",
+                description = "`AccessToken` does permit [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles) access.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
@@ -146,7 +200,25 @@ class GroupController(
     @PutMapping("/{key}")
     @Operation(
         summary = "Update Group",
-        description = "Update a group.",
+        description = """
+            Update the group with the given `key`.
+            
+            You can find more information about groups [here](https://singularity.stereov.io/docs/guides/auth/groups).
+            
+            **Locale:**
+            
+            Group names and descriptions can be specified in multiples languages.
+            These can be set when [creating](https://singularity.stereov.io/docs/guides/auth/groups#creating-groups)
+            groups or through [updates](https://singularity.stereov.io/docs/guides/auth/groups#updating-groups).
+            
+            The `locale` request parameter specifies in which language the information should be returned.
+            If no locale is specified, the applications default locale will be used.
+            You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
+            
+            **Tokens:**
+            - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
+              with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
+        """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/groups#updating-groups"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER, scopes = [OpenApiConstants.ADMIN_SCOPE]),
@@ -165,7 +237,7 @@ class GroupController(
             ),
             ApiResponse(
                 responseCode = "403",
-                description = "User does not have ADMIN role.",
+                description = "`AccessToken` does permit [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles) access.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
@@ -183,7 +255,15 @@ class GroupController(
     @DeleteMapping("/{key}")
     @Operation(
         summary = "Delete Group",
-        description = "Delete a group.",
+        description = """
+            Delete the group of the given `key`.
+            
+            You can find more information about groups [here](https://singularity.stereov.io/docs/guides/auth/groups).
+            
+            **Tokens:**
+            - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
+              with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
+        """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/groups#deleting-groups"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER, scopes = [OpenApiConstants.ADMIN_SCOPE]),
@@ -202,7 +282,7 @@ class GroupController(
             ),
             ApiResponse(
                 responseCode = "403",
-                description = "User does not have ADMIN role.",
+                description = "AccessToken does permit [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles) access.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]

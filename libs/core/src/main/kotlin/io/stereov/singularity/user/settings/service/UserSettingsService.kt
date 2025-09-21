@@ -11,7 +11,7 @@ import io.stereov.singularity.file.core.exception.model.UnsupportedMediaTypeExce
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.user.core.dto.response.UserResponse
-import io.stereov.singularity.user.core.exception.model.EmailAlreadyExistsException
+import io.stereov.singularity.user.core.exception.model.EmailAlreadyTakenException
 import io.stereov.singularity.user.core.mapper.UserMapper
 import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.service.UserService
@@ -45,7 +45,7 @@ class UserSettingsService(
         authorizationService.requireStepUp()
 
         if (userService.existsByEmail(payload.newEmail)) {
-            throw EmailAlreadyExistsException("Failed to register user ${payload.newEmail}")
+            throw EmailAlreadyTakenException("Failed to register user ${payload.newEmail}")
         }
 
         if (emailProperties.enable) {

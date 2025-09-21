@@ -238,6 +238,41 @@ const sidebar: SidebarsConfig = {
     },
     {
       type: "category",
+      label: "Roles",
+      link: {
+        type: "generated-index",
+        title: "Roles",
+        slug: "/category/api/roles",
+      },
+      items: [
+        {
+          type: "doc",
+          id: "api/create-guest-account",
+          label: "Create Guest Account",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "api/convert-guest-to-user",
+          label: "Convert Guest To User",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "api/grant-admin-permissions",
+          label: "Grant Admin Permissions",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "api/revoke-admin-permissions",
+          label: "Revoke Admin Permissions",
+          className: "api-method delete",
+        },
+      ],
+    },
+    {
+      type: "category",
       label: "Groups",
       link: {
         type: "generated-index",
@@ -333,6 +368,29 @@ const sidebar: SidebarsConfig = {
           id: "api/delete-avatar",
           label: "deleteAvatar",
           className: "api-method delete",
+        },
+      ],
+    },
+    {
+      type: "category",
+      label: "Security",
+      link: {
+        type: "generated-index",
+        title: "Security",
+        slug: "/category/api/security",
+      },
+      items: [
+        {
+          type: "doc",
+          id: "api/rotate-keys",
+          label: "rotateKeys",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "api/rotation-ongoing",
+          label: "rotationOngoing",
+          className: "api-method get",
         },
       ],
     },
@@ -479,35 +537,6 @@ const sidebar: SidebarsConfig = {
           type: "doc",
           id: "api/get-extended-access-details",
           label: "getExtendedAccessDetails",
-          className: "api-method get",
-        },
-      ],
-    },
-    {
-      type: "category",
-      label: "admin-controller",
-      link: {
-        type: "generated-index",
-        title: "admin-controller",
-        slug: "/category/api/admin-controller",
-      },
-      items: [
-        {
-          type: "doc",
-          id: "api/rotate-keys",
-          label: "rotateKeys",
-          className: "api-method post",
-        },
-        {
-          type: "doc",
-          id: "api/get-all-users",
-          label: "getAllUsers",
-          className: "api-method get",
-        },
-        {
-          type: "doc",
-          id: "api/rotation-ongoing",
-          label: "rotationOngoing",
           className: "api-method get",
         },
       ],

@@ -11,13 +11,14 @@ import jakarta.mail.internet.MimeMessage
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import org.springframework.http.HttpStatus
 import java.time.Instant
 
 class PasswordResetControllerTest : BaseMailIntegrationTest() {
 
     @Test fun `resetPassword works`() = runTest {
         val user = registerUser()
-        val token = passwordResetTokenService.create(user.info.id, user.passwordResetSecret)
+        val token = passwordResetTokenService.create(user.info.id, user.passwordResetSecret!!)
 
         Assertions.assertFalse(user.info.sensitive.security.email.verified)
 
@@ -38,7 +39,7 @@ class PasswordResetControllerTest : BaseMailIntegrationTest() {
         )
         Assertions.assertNotEquals(user.info.password, verifiedUser.password)
 
-        val credentials = LoginRequest(user.info.sensitive.email, newPassword, SessionInfoRequest("test"))
+        val credentials = LoginRequest(user.info.sensitive.email!!, newPassword, SessionInfoRequest("test"))
 
         webTestClient.post()
             .uri("/api/auth/login")
@@ -66,7 +67,7 @@ class PasswordResetControllerTest : BaseMailIntegrationTest() {
     }
     @Test fun `resetPassword requires unexpired token`() = runTest {
         val user = registerUser()
-        val token = passwordResetTokenService.create(user.info.id, user.passwordResetSecret, Instant.ofEpochSecond(0))
+        val token = passwordResetTokenService.create(user.info.id, user.passwordResetSecret!!, Instant.ofEpochSecond(0))
 
         val req = ResetPasswordRequest("Test")
 
@@ -78,11 +79,37 @@ class PasswordResetControllerTest : BaseMailIntegrationTest() {
     }
     @Test fun `resetPassword needs body`() = runTest {
         val user = registerUser()
-        val token = passwordResetTokenService.create(user.info.id, user.passwordResetSecret)
+        val token = passwordResetTokenService.create(user.info.id, user.passwordResetSecret!!)
 
 
         webTestClient.post()
             .uri("/api/auth/password/reset?token=$token")
+            .exchange()
+            .expectStatus().isBadRequest
+    }
+    @Test fun `resetPassword is bad for only oauth2`() = runTest {
+        val user = registerOAuth2()
+        val token = passwordResetTokenService.create(user.info.id, user.info.sensitive.security.password.resetSecret)
+
+        val newPassword = "new-password878"
+        val req = ResetPasswordRequest(newPassword)
+
+        webTestClient.post()
+            .uri("/api/auth/password/reset?token=$token")
+            .bodyValue(req)
+            .exchange()
+            .expectStatus().isBadRequest
+    }
+    @Test fun `resetPassword is bad for guest`() = runTest {
+        val guest = createGuest()
+        val token = passwordResetTokenService.create(guest.info.id, guest.info.sensitive.security.password.resetSecret)
+
+        val newPassword = "new-password878"
+        val req = ResetPasswordRequest(newPassword)
+
+        webTestClient.post()
+            .uri("/api/auth/password/reset?token=$token")
+            .bodyValue(req)
             .exchange()
             .expectStatus().isBadRequest
     }
@@ -92,7 +119,7 @@ class PasswordResetControllerTest : BaseMailIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/auth/password/reset-request")
-            .bodyValue(SendPasswordResetRequest(user.info.sensitive.email))
+            .bodyValue(SendPasswordResetRequest(user.info.sensitive.email!!))
             .exchange()
             .expectStatus().isOk
 
@@ -113,13 +140,30 @@ class PasswordResetControllerTest : BaseMailIntegrationTest() {
 
         verify(exactly = 0) { mailSender.send(any<MimeMessage>()) }
     }
+    @Test fun `sendPasswordReset is too many requests when cooldown is active`() = runTest {
+        val user = registerUser()
+
+        webTestClient.post()
+            .uri("/api/auth/password/reset-request")
+            .bodyValue(SendPasswordResetRequest(user.info.sensitive.email!!))
+            .exchange()
+            .expectStatus().isOk
+
+        webTestClient.post()
+            .uri("/api/auth/password/reset-request")
+            .bodyValue(SendPasswordResetRequest(user.info.sensitive.email!!))
+            .exchange()
+            .expectStatus().isEqualTo(HttpStatus.TOO_MANY_REQUESTS)
+
+        verify(exactly = 1) { mailSender.send(any<MimeMessage>()) }
+    }
 
     @Test fun `passwordRestCooldown works`() = runTest {
         val user = registerUser()
 
         webTestClient.post()
             .uri("/api/auth/password/reset-request")
-            .bodyValue(SendPasswordResetRequest(user.info.sensitive.email))
+            .bodyValue(SendPasswordResetRequest(user.info.sensitive.email!!))
             .exchange()
             .expectStatus().isOk
 

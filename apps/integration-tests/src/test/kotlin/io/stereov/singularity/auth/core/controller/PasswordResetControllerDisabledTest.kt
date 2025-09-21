@@ -15,7 +15,7 @@ class PasswordResetControllerDisabledTest : BaseIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/auth/password/reset-request")
-            .bodyValue(SendPasswordResetRequest(user.info.sensitive.email))
+            .bodyValue(SendPasswordResetRequest(user.info.sensitive.email!!))
             .cookie(SessionTokenType.Access.cookieName, user.accessToken)
             .exchange()
             .expectStatus()

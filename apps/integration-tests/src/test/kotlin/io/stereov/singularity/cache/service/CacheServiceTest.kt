@@ -4,18 +4,14 @@ import io.stereov.singularity.cache.exception.model.RedisKeyNotFoundException
 import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.time.delay
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.Duration
 import java.time.Instant
 import java.util.*
 
-class RedisServiceTest : BaseIntegrationTest() {
-
-    @BeforeEach
-    fun setup() = runBlocking {
-        cacheService.deleteAll()
-    }
+class CacheServiceTest : BaseIntegrationTest() {
 
     data class TestData(
         val id: UUID = UUID.randomUUID(),
@@ -40,6 +36,22 @@ class RedisServiceTest : BaseIntegrationTest() {
 
         cacheService.put("key", "value2")
         assertEquals("value2", cacheService.getOrNull("key"))
+    }
+    @Test fun `put expiration works`() = runTest {
+        cacheService.put("test", "test", 1)
+
+        assertTrue(cacheService.exists("test"))
+
+        runBlocking { delay(Duration.ofSeconds(1)) }
+
+        assertFalse(cacheService.exists("test"))
+    }
+
+    @Test fun `exists works`() = runTest {
+        cacheService.put("test", "test")
+
+        assertTrue(cacheService.exists("test"))
+        assertFalse(cacheService.exists("te"))
     }
 
     @Test fun `delete works`() = runTest {
@@ -76,5 +88,16 @@ class RedisServiceTest : BaseIntegrationTest() {
     }
     @Test fun `deleteAll works if no data exist`() = runTest {
         cacheService.deleteAll()
+    }
+    @Test fun `deleteAll works with pattern`() = runTest {
+        cacheService.put("test:1", "test")
+        cacheService.put("test:2", "test")
+        cacheService.put("te:1", "test")
+
+        cacheService.deleteAll("test:*")
+
+        assertFalse(cacheService.exists("test:1"))
+        assertFalse(cacheService.exists("test:2"))
+        assertTrue(cacheService.exists("te:1"))
     }
 }

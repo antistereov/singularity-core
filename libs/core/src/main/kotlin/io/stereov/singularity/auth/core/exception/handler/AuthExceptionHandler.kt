@@ -22,6 +22,7 @@ import org.springframework.web.server.ServerWebExchange
 class AuthExceptionHandler : BaseExceptionHandler<AuthException> {
 
     override fun getHttpStatus(ex: AuthException) = when (ex) {
+        is EmailAlreadyVerifiedException -> HttpStatus.NOT_MODIFIED
         is InvalidCredentialsException -> HttpStatus.UNAUTHORIZED
         is InvalidPrincipalException -> HttpStatus.UNAUTHORIZED
         is NotAuthorizedException -> HttpStatus.FORBIDDEN
@@ -29,7 +30,7 @@ class AuthExceptionHandler : BaseExceptionHandler<AuthException> {
         is NoTwoFactorUserAttributeException -> HttpStatus.BAD_REQUEST
         is TwoFactorMethodDisabledException -> HttpStatus.BAD_REQUEST
         is UserAlreadyAuthenticatedException -> HttpStatus.NOT_MODIFIED
-        is WrongIdentityProviderException -> HttpStatus.FORBIDDEN
+        is WrongIdentityProviderException -> HttpStatus.BAD_REQUEST
         else -> HttpStatus.UNAUTHORIZED
     }
 

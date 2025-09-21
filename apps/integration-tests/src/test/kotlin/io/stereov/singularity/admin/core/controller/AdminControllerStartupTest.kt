@@ -1,9 +1,9 @@
-package io.stereov.singularity.admin.core.service
+package io.stereov.singularity.admin.core.controller
 
 import io.stereov.singularity.test.BaseSpringBootTest
 import io.stereov.singularity.user.core.model.Role
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
@@ -11,7 +11,13 @@ import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.MongoDBContainer
 import org.testcontainers.utility.DockerImageName
 
-class AdminServiceIntegrationTest : BaseSpringBootTest() {
+class AdminControllerStartupTest : BaseSpringBootTest() {
+
+    @Test fun `root account will be created at start`() = runTest {
+        val root = userService.findByEmail("root@email.com")
+
+        Assertions.assertTrue(root.roles.contains(Role.ADMIN))
+    }
 
     companion object {
         val mongoDBContainer = MongoDBContainer("mongo:latest").apply {
@@ -35,11 +41,5 @@ class AdminServiceIntegrationTest : BaseSpringBootTest() {
             registry.add("spring.data.redis.host") { redisContainer.host }
             registry.add("spring.data.redis.port") { redisContainer.getMappedPort(6379) }
         }
-    }
-
-    @Test fun `root account will be created at start`() = runTest {
-        val root = userService.findByEmail("root@email.com")
-
-        assertTrue(root.sensitive.roles.contains(Role.ADMIN))
     }
 }

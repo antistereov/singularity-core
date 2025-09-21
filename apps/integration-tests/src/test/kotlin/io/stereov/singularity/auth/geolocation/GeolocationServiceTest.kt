@@ -14,7 +14,7 @@ import java.io.FileNotFoundException
 import java.net.InetAddress
 import java.net.URL
 
-class GeoLocationServiceTest : BaseIntegrationTest() {
+class GeolocationServiceTest : BaseIntegrationTest() {
 
     @Autowired
     private lateinit var geoLocationService: GeolocationService
@@ -44,7 +44,7 @@ class GeoLocationServiceTest : BaseIntegrationTest() {
 
     @Test fun `it should resolve geolocation in session`() = runTest {
         val email = "test@example.com"
-        val body = RegisterUserRequest(email = email, password = "password", "Name")
+        val body = RegisterUserRequest(email = email, password = "Password$2", "Name")
 
         webTestClient.post()
             .uri("/api/auth/register")

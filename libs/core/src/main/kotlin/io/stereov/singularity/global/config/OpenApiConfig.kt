@@ -1,5 +1,6 @@
 package io.stereov.singularity.global.config
 
+import io.stereov.singularity.admin.core.controller.AdminController
 import io.stereov.singularity.auth.core.controller.AuthenticationController
 import io.stereov.singularity.auth.core.controller.EmailVerificationController
 import io.stereov.singularity.auth.core.controller.PasswordResetController
@@ -7,6 +8,7 @@ import io.stereov.singularity.auth.core.controller.SessionController
 import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.auth.group.controller.GroupController
 import io.stereov.singularity.auth.group.controller.GroupMemberController
+import io.stereov.singularity.auth.guest.controller.GuestController
 import io.stereov.singularity.auth.oauth2.controller.IdentityProviderController
 import io.stereov.singularity.auth.oauth2.controller.OAuth2ProviderController
 import io.stereov.singularity.auth.twofactor.controller.EmailAuthenticationController
@@ -32,14 +34,16 @@ import org.springframework.context.annotation.Bean
     type = SecuritySchemeType.HTTP,
     scheme = "bearer",
     bearerFormat = "JWT",
-    description = "Access token for user authentication."
+    description = "Access token for user authentication. " +
+            "You can learn more [here](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)."
 )
 @SecurityScheme(
     name = OpenApiConstants.ACCESS_TOKEN_COOKIE,
     type = SecuritySchemeType.APIKEY,
     `in` = SecuritySchemeIn.COOKIE,
     paramName = SessionTokenType.Access.COOKIE_NAME,
-    description = "Access token for user authentication."
+    description = "Access token for user authentication." +
+            "You can learn more [here](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)."
 )
 
 @SecurityScheme(
@@ -47,14 +51,16 @@ import org.springframework.context.annotation.Bean
     type = SecuritySchemeType.HTTP,
     scheme = "bearer",
     bearerFormat = "JWT",
-    description = "Refresh token to request new access tokens."
+    description = "Refresh token to request new access tokens." +
+            "You can learn more [here](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)."
 )
 @SecurityScheme(
     name = OpenApiConstants.REFRESH_TOKEN_COOKIE,
     type = SecuritySchemeType.APIKEY,
     `in` = SecuritySchemeIn.COOKIE,
     paramName = SessionTokenType.Refresh.COOKIE_NAME,
-    description = "Refresh token to request new access tokens."
+    description = "Refresh token to request new access tokens." +
+            "You can learn more [here](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)."
 )
 
 @SecurityScheme(
@@ -62,14 +68,16 @@ import org.springframework.context.annotation.Bean
     type = SecuritySchemeType.APIKEY,
     `in` = SecuritySchemeIn.HEADER,
     paramName = SessionTokenType.StepUp.HEADER,
-    description = "Token for step up authentication allowing access of secure resources."
+    description = "Token for step up authentication allowing access of secure resources." +
+            "You can learn more [here](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)."
 )
 @SecurityScheme(
     name = OpenApiConstants.STEP_UP_TOKEN_COOKIE,
     type = SecuritySchemeType.APIKEY,
     `in` = SecuritySchemeIn.COOKIE,
     paramName = SessionTokenType.StepUp.COOKIE_NAME,
-    description = "Token for step up authentication allowing access of secure resources."
+    description = "Token for step up authentication allowing access of secure resources." +
+            "You can learn more [here](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)."
 )
 
 @SecurityScheme(
@@ -77,14 +85,16 @@ import org.springframework.context.annotation.Bean
     type = SecuritySchemeType.APIKEY,
     `in` = SecuritySchemeIn.HEADER,
     paramName = TwoFactorTokenType.Authentication.HEADER,
-    description = "Token for successful authentication with email and password, indicating 2FA is required."
+    description = "Token for successful authentication with email and password, indicating 2FA is required." +
+            "You can learn more [here](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token)."
 )
 @SecurityScheme(
     name = OpenApiConstants.TWO_FACTOR_AUTHENTICATION_TOKEN_COOKIE,
     type = SecuritySchemeType.APIKEY,
     `in` = SecuritySchemeIn.COOKIE,
     paramName = TwoFactorTokenType.Authentication.COOKIE_NAME,
-    description = "Token for successful authentication with email and password, indicating 2FA is required."
+    description = "Token for successful authentication with email and password, indicating 2FA is required." +
+            "You can learn more [here](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token)."
 )
 
 class OpenApiConfig() {
@@ -114,7 +124,9 @@ class OpenApiConfig() {
             "Two-Factor Authentication",
             "OAuth2",
             "Sessions",
+            "Roles",
             "Groups",
+            "Administration",
         )
 
         val sortedTags = mutableListOf<Tag>()
@@ -189,6 +201,16 @@ class OpenApiConfig() {
             SessionController::deleteSession.name,
             SessionController::deleteAllSessions.name,
             SessionController::generateSessionToken.name
+        ))
+
+        // Roles
+
+        sortedOperationIds.addAll(listOf(
+            GuestController::createGuestAccount.name,
+            GuestController::convertGuestToUser.name,
+
+            AdminController::grantAdminPermissions.name,
+            AdminController::revokeAdminPermissions.name
         ))
 
         // Groups

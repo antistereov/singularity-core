@@ -1,5 +1,5 @@
 ---
-sidebar_position: 5
+sidebar_position: 6
 description: Learn how a user can manage their sessions.
 ---
 

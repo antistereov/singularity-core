@@ -16,8 +16,8 @@ class SessionControllerTest : BaseIntegrationTest() {
         val user = registerUser()
         val sessionId2 = UUID.randomUUID()
         val sessionId3 = UUID.randomUUID()
-        user.info.sensitive.sessions[sessionId2] = SessionInfo()
-        user.info.sensitive.sessions[sessionId3] = SessionInfo()
+        user.info.sensitive.sessions[sessionId2] = SessionInfo(browser = "browser1", os = "os1")
+        user.info.sensitive.sessions[sessionId3] = SessionInfo(browser = "browser2", os = "os2")
 
         userService.save(user.info)
 
@@ -34,8 +34,8 @@ class SessionControllerTest : BaseIntegrationTest() {
 
         Assertions.assertEquals(3, response.size)
         Assertions.assertTrue(response.any { it.id == user.sessionId })
-        Assertions.assertTrue(response.any { it.id == sessionId2 })
-        Assertions.assertTrue(response.any { it.id == sessionId3 })
+        Assertions.assertTrue(response.any { it.id == sessionId2 && it.browser == "browser1" && it.os == "os1" })
+        Assertions.assertTrue(response.any { it.id == sessionId3 && it.browser == "browser2" && it.os == "os2" })
     }
     @Test fun `getSessions requires authentication`() = runTest {
         webTestClient.get()

@@ -42,10 +42,7 @@ class EmailVerificationController(
             
             You can resend this email through the endpoint [`POST /api/auth/email/verify/send`](https://singularity.stereov.io/docs/api/send-email-verification-email).
 
-            **Note:** If email is not enabled, there is no way to verify a user's email address.
-            
-            **Tokens:**
-            - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
+            **Note:** If email is disabled, there is no way to verify a user's email address.
         """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/docs/auth/authentication#email-verification"),
         responses = [
@@ -54,10 +51,15 @@ class EmailVerificationController(
                 description = "Updated user information.",
             ),
             ApiResponse(
-                responseCode = "401",
-                description = "AccessToken is invalid or expired.",
+                responseCode = "304",
+                description = "Trying to verify an email for verified account.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
+            ApiResponse(
+                responseCode = "400",
+                description = "Trying to verify an email for [`GUEST`](https://singularity.stereov.io/docs/guides/auth/roles#guests).",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            )
         ]
     )
     suspend fun verifyEmail(@RequestParam token: String): ResponseEntity<UserResponse> {
@@ -117,8 +119,17 @@ class EmailVerificationController(
             
             You can perform the verification using the token through the endpoint [`POST /api/auth/email/verify`](https://singularity.stereov.io/docs/api/verify-email).
             
-            **Note:** If email is not enabled, there is no way to verify a user's email address.
+            **Note:** If email is disabled, there is no way to verify a user's email address.
             
+            **Locale:**
+            
+            A locale can be specified for this request. 
+            The email will be sent in the specified locale.
+            You can learn more about locale in emails [here](https://singularity.stereov.io/docs/guides/email/templates).
+            
+            If no locale is specified, the applications default locale will be used.
+            You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
+
             **Tokens:**
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
             
@@ -135,6 +146,16 @@ class EmailVerificationController(
             ApiResponse(
                 responseCode = "200",
                 description = "The number of seconds the user needs to wait before sending a new email.",
+            ),
+            ApiResponse(
+                responseCode = "304",
+                description = "Trying to send a verification email for verified account.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
+            ApiResponse(
+                responseCode = "400",
+                description = "Trying to send a verification email for [`GUEST`](https://singularity.stereov.io/docs/guides/auth/roles#guests).",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
             ApiResponse(
                 responseCode = "401",

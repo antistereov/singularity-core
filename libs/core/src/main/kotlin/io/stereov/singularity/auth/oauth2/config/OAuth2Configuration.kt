@@ -1,8 +1,10 @@
 package io.stereov.singularity.auth.oauth2.config
 
+import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.component.CookieCreator
 import io.stereov.singularity.auth.core.properties.AuthProperties
 import io.stereov.singularity.auth.core.service.AuthorizationService
+import io.stereov.singularity.auth.guest.service.GuestService
 import io.stereov.singularity.auth.jwt.properties.JwtProperties
 import io.stereov.singularity.auth.jwt.service.JwtService
 import io.stereov.singularity.auth.oauth2.controller.IdentityProviderController
@@ -75,12 +77,14 @@ class OAuth2Configuration {
         userService: UserService,
         oAuth2ProviderConnectionTokenService: OAuth2ProviderConnectionTokenService,
         authorizationService: AuthorizationService,
-        hashService: HashService
+        hashService: HashService,
+        accessTokenCache: AccessTokenCache
     ) = IdentityProviderService(
         userService,
         oAuth2ProviderConnectionTokenService,
         authorizationService,
-        hashService
+        hashService,
+        accessTokenCache
     )
     
     @Bean
@@ -102,12 +106,14 @@ class OAuth2Configuration {
         twoFactorEmailCodeProperties: TwoFactorEmailCodeProperties,
         identityProviderService: IdentityProviderService,
         authorizationService: AuthorizationService,
-        emailProperties: EmailProperties
+        emailProperties: EmailProperties,
+        guestService: GuestService
     ) = OAuth2AuthenticationService(
         userService,
         twoFactorEmailCodeProperties,
         identityProviderService,
         authorizationService,
-        emailProperties
+        emailProperties,
+        guestService
     )
 }

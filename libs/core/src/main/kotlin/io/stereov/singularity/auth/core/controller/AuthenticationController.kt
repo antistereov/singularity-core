@@ -71,9 +71,10 @@ class AuthenticationController(
         
             **Requirements:**
             - The `email` should be a valid email address (e.g., "test@example.com")
+              that is not associated to an existing account.
             - The `password` must be at least 8 characters long and include at least one uppercase letter, 
               one lowercase letter, one number, and one special character (!@#$%^&*()_+={}[]|\:;'"<>,.?/).
-        
+
             **Optional session data:**
             - The `session` object can be included in the request body.
             - Inside the `session` object, you can provide the following optional fields:
@@ -81,6 +82,15 @@ class AuthenticationController(
                 - `os`: The operating system of the device (e.g., "Windows", "macOS", "Android").
         
             This information helps users identify and manage authorized sessions, improving overall account security.
+            
+            **Locale:**
+            
+            A locale can be specified for this request. 
+            This will be used for the email verification email.
+            You can learn more about email verification [here](https://singularity.stereov.io/docs/guides/auth/authentication#email-verification).
+            
+            If no locale is specified, the applications default locale will be used.
+            You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
             
             **Tokens:**
             
@@ -105,6 +115,11 @@ class AuthenticationController(
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
             ApiResponse(
+                responseCode = "400",
+                description = "`email` or `password` are invalid.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
+            ApiResponse(
                 responseCode = "409",
                 description = "The email is already in use.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
@@ -123,7 +138,7 @@ class AuthenticationController(
         val sessionId = UUID.randomUUID()
 
         val accessToken = accessTokenService.create(user, sessionId)
-        val refreshToken = refreshTokenService.create(user.id, sessionId, payload.session, exchange)
+        val refreshToken = refreshTokenService.create(user, sessionId, payload.session, exchange)
 
         val res = RegisterResponse(
             userMapper.toResponse(user),
@@ -161,6 +176,15 @@ class AuthenticationController(
             
             You can complete the login through the endpoint [`POST /api/auth/2fa/login`](https://singularity.stereov.io/docs/api/complete-login).
             
+            **Locale:**
+            
+            A locale can be specified for this request. 
+            This will be used for the email 2FA code if this method is enabled for the user.
+            You can learn more about 2FA through email [here](/docs/guides/auth/two-factor#email).
+            
+            If no locale is specified, the applications default locale will be used.
+            You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
+            
             **Tokens:**
             - If 2FA is disabled and the request is successful, 
               [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) 
@@ -185,6 +209,11 @@ class AuthenticationController(
             ApiResponse(
                 responseCode = "304",
                 description = "User is already authenticated. Authenticated session state has not changed since last request.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
+            ApiResponse(
+                responseCode = "400",
+                description = "Trying to log in user that did not set up authentication using password.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
             ApiResponse(
@@ -224,7 +253,7 @@ class AuthenticationController(
 
         val sessionId = UUID.randomUUID()
         val accessToken = accessTokenService.create(user, sessionId)
-        val refreshToken = refreshTokenService.create(user.id, sessionId, payload.session, exchange)
+        val refreshToken = refreshTokenService.create(user, sessionId, payload.session, exchange)
 
         val res = LoginResponse(
             user = userMapper.toResponse(user),
@@ -337,7 +366,7 @@ class AuthenticationController(
             ?: throw InvalidTokenException("The corresponds to a non-existing user")
 
         val newAccessToken = accessTokenService.create(user, refreshToken.sessionId)
-        val newRefreshToken = refreshTokenService.create(user.id, refreshToken.sessionId, sessionInfo, exchange)
+        val newRefreshToken = refreshTokenService.create(user, refreshToken.sessionId, sessionInfo, exchange)
 
         val res = RefreshTokenResponse(
             userMapper.toResponse(user),
@@ -367,6 +396,24 @@ class AuthenticationController(
             
             You can complete the step-up through the endpoint [`POST /api/auth/2fa/step-up`](https://singularity.stereov.io/docs/api/complete-step-up).
             
+            **Request Body:**
+            
+            When requesting a step-up for a [`GUEST`](https://singularity.stereov.io/docs/guides/auth/roles#guests)
+            there is no way to authenticate the user.
+            Therefore, no request body is required in this case.
+            
+            If you request a step-up for a regular [`USER`](https://singularity.stereov.io/docs/guides/auth/roles#users),
+            it will result in a `400 - BAD REQUEST`.
+            
+            **Locale:**
+            
+            A locale can be specified for this request. 
+            This will be used for the email 2FA code if this method is enabled for the user.
+            You can learn more about 2FA through email [here](/docs/guides/auth/two-factor#email).
+            
+            If no locale is specified, the applications default locale will be used.
+            You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
+            
             **Tokens:**
             - Requires a valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token).
             - If 2FA is disabled and the request is successful, [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
@@ -386,6 +433,12 @@ class AuthenticationController(
                 description = "Logout successful.",
             ),
             ApiResponse(
+                responseCode = "400",
+                description = "Trying to request step-up for user that authenticated only via OAuth2 providers or " +
+                        "missing request body for authenticated users.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
+            ApiResponse(
                 responseCode = "401",
                 description = "Invalid credentials.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
@@ -393,7 +446,7 @@ class AuthenticationController(
         ]
     )
     suspend fun stepUp(
-        @RequestBody req: StepUpRequest,
+        @RequestBody(required = false) req: StepUpRequest?,
         @RequestParam locale: Locale?
     ): ResponseEntity<StepUpResponse> {
         logger.info { "Executing step up request" }

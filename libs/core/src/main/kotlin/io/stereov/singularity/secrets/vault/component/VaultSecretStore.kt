@@ -1,6 +1,7 @@
 package io.stereov.singularity.secrets.vault.component
 
 import io.stereov.singularity.global.properties.AppProperties
+import io.stereov.singularity.secrets.core.component.SecretCache
 import io.stereov.singularity.secrets.core.component.SecretStore
 import io.stereov.singularity.secrets.core.exception.model.SecretStoreException
 import io.stereov.singularity.secrets.core.model.Secret
@@ -18,7 +19,8 @@ import java.util.*
 class VaultSecretStore(
     private val properties: VaultSecretStoreProperties,
     private val appProperties: AppProperties,
-    private val vaultOperations: ReactiveVaultOperations
+    private val vaultOperations: ReactiveVaultOperations,
+    override val secretCache: SecretCache
 ) : SecretStore {
 
     private val apiPath: String
@@ -26,7 +28,7 @@ class VaultSecretStore(
 
     private fun getSecretPath(key: String): String = "$apiPath/$key"
 
-    override suspend fun getOrNull(key: String): Secret? {
+    override suspend fun doGetOrNull(key: String): Secret? {
         val secretPath = getSecretPath(key)
 
         val data = vaultOperations.read(secretPath).awaitSingleOrNull()?.data
@@ -36,7 +38,7 @@ class VaultSecretStore(
     }
 
 
-    override suspend fun put(
+    override suspend fun doPut(
         key: String,
         value: String,
         note: String

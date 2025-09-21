@@ -1,7 +1,10 @@
 package io.stereov.singularity.admin.core.config
 
 import io.stereov.singularity.admin.core.controller.AdminController
+import io.stereov.singularity.admin.core.exception.handler.AdminExceptionHandler
 import io.stereov.singularity.admin.core.service.AdminService
+import io.stereov.singularity.auth.core.cache.AccessTokenCache
+import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties
 import io.stereov.singularity.database.hash.config.HashConfiguration
 import io.stereov.singularity.database.hash.service.HashService
@@ -25,6 +28,22 @@ import org.springframework.context.annotation.Configuration
 )
 class AdminConfiguration {
 
+    // Controller
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun adminController(
+        adminService: AdminService,
+    ): AdminController {
+        return AdminController(adminService)
+    }
+
+    // ExceptionHandler
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun adminExceptionHandler() = AdminExceptionHandler()
+
     // Services
 
     @Bean
@@ -35,23 +54,20 @@ class AdminConfiguration {
         hashService: HashService,
         appProperties: AppProperties,
         twoFactorEmailCodeProperties: TwoFactorEmailCodeProperties,
-        emailProperties: EmailProperties
+        emailProperties: EmailProperties,
+        authorizationService: AuthorizationService,
+        userMapper: UserMapper,
+        accessTokenCache: AccessTokenCache
     ): AdminService {
         return AdminService(
-            context,
             userService,
             appProperties,
             hashService,
             twoFactorEmailCodeProperties,
-            emailProperties
+            emailProperties,
+            authorizationService,
+            userMapper,
+            accessTokenCache
         )
-    }
-
-    // Controller
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun adminController(adminService: AdminService, userService: UserService, userMapper: UserMapper): AdminController {
-        return AdminController(adminService, userService, userMapper)
     }
 }

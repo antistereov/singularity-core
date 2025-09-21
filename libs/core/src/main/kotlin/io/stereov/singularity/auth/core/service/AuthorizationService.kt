@@ -146,7 +146,7 @@ class AuthorizationService(
      * @throws NotAuthorizedException If the user does not have the required role.
      */
     suspend fun requireRole(role: Role) {
-        logger.debug { "Validating authorization" }
+        logger.debug { "Validating authorization: role $role" }
 
         val valid = getCurrentAuthentication().roles.contains(role)
 

@@ -221,7 +221,7 @@ class TotpAuthenticationController(
         val clearTwoFactorCookie = cookieCreator.clearCookie(TwoFactorTokenType.Authentication)
         val sessionToken = sessionTokenService.create(sessionInfo = session)
         val accessToken = accessTokenService.create(user, sessionId)
-        val refreshToken = refreshTokenService.create(user.id, sessionId,session, exchange)
+        val refreshToken = refreshTokenService.create(user, sessionId,session, exchange)
         val stepUpToken = stepUpTokenService.createForRecovery(user.id, sessionId, exchange)
 
         val res = TwoFactorRecoveryResponse(

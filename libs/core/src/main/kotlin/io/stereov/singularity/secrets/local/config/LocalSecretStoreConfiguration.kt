@@ -4,6 +4,7 @@ import io.r2dbc.h2.H2ConnectionConfiguration
 import io.r2dbc.h2.H2ConnectionFactory
 import io.r2dbc.spi.ConnectionFactory
 import io.stereov.singularity.global.config.ApplicationConfiguration
+import io.stereov.singularity.secrets.core.component.SecretCache
 import io.stereov.singularity.secrets.core.component.SecretStore
 import io.stereov.singularity.secrets.local.component.LocalSecretStore
 import io.stereov.singularity.secrets.local.properties.LocalSecretStoreProperties
@@ -66,8 +67,11 @@ class LocalSecretStoreConfiguration(
 
     @Bean
     @ConditionalOnMissingBean
-    fun localSecretStore(repository: LocalSecretRepository): SecretStore {
-        return LocalSecretStore(repository)
+    fun localSecretStore(
+        repository: LocalSecretRepository,
+        secretCache: SecretCache
+    ): SecretStore {
+        return LocalSecretStore(repository, secretCache)
     }
 
 }

@@ -165,8 +165,7 @@ Placing them in the header will not lead to a successful connection since they w
 
 #### 1. Authenticate the User
 
-1. Log in the user by calling [`POST /api/auth/login`](../../api/login.api.mdx).
-   This will set the [`AccessToken`](./tokens#access-token) as an HTTP-only cookie.
+1. Make sure the user is authenticated and a valid [`AccessToken`](./tokens#access-token) is set as cookie.
 2. Authorize a step-up by calling [`POST /api/auth/step-up`](../../api/step-up.api.mdx).
    This will set a [`StepUpToken`](./tokens#step-up-token) as an HTTP-only cookie.
    You can learn more about step-up authentication [here](./authentication#step-up).
@@ -220,6 +219,7 @@ The following error types exist:
 |--------------------------------------|-------------------------------------------------------------------------------------------------------------------------------|
 | `state_parameter_missing`            | No state parameter found in callback.                                                                                         |
 | `user_already_authenticated`         | Login with an existing account connected to the provider failed because the user already authenticated.                       |
+| `email_already_registered`           | The email attribute of the OAuth2 provider matches an email of an already registered user. Registration failed.               |
 | `session_token_missing`              | No session token provided as query parameter or cookie.                                                                       |
 | `session_token_expired`              | The provided session token is expired.                                                                                        |
 | `invalid_session_token`              | The provided session token cannot be decoded.                                                                                 |

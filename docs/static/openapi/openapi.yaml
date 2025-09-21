@@ -37,10 +37,14 @@ tags:
     to existing accounts.
 - name: Sessions
   description: Operations related to session management.
+- name: Roles
+  description: Operations related to roles.
 - name: Groups
   description: Operation related to group and member management.
 - name: User Settings
   description: Operations related to user settings.
+- name: Security
+  description: Operations related to managing the servers security.
 - name: Users
   description: Operations related to user information.
 paths:
@@ -51,16 +55,21 @@ paths:
       summary: Register
       description: "Registers a new user account with `email`, `password`, and `name`.\n\
         \n**Requirements:**\n- The `email` should be a valid email address (e.g.,\
-        \ \"test@example.com\")\n- The `password` must be at least 8 characters long\
-        \ and include at least one uppercase letter, \n  one lowercase letter, one\
-        \ number, and one special character (!@#$%^&*()_+={}[]|\\:;'\"<>,.?/).\n\n\
-        **Optional session data:**\n- The `session` object can be included in the\
-        \ request body.\n- Inside the `session` object, you can provide the following\
-        \ optional fields:\n    - `browser`: The name of the browser used (e.g., \"\
-        Chrome\", \"Firefox\").\n    - `os`: The operating system of the device (e.g.,\
-        \ \"Windows\", \"macOS\", \"Android\").\n\nThis information helps users identify\
-        \ and manage authorized sessions, improving overall account security.\n\n\
-        **Tokens:**\n\nIf successful, [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
+        \ \"test@example.com\")\n  that is not associated to an existing account.\n\
+        - The `password` must be at least 8 characters long and include at least one\
+        \ uppercase letter, \n  one lowercase letter, one number, and one special\
+        \ character (!@#$%^&*()_+={}[]|\\:;'\"<>,.?/).\n\n**Optional session data:**\n\
+        - The `session` object can be included in the request body.\n- Inside the\
+        \ `session` object, you can provide the following optional fields:\n    -\
+        \ `browser`: The name of the browser used (e.g., \"Chrome\", \"Firefox\").\n\
+        \    - `os`: The operating system of the device (e.g., \"Windows\", \"macOS\"\
+        , \"Android\").\n\nThis information helps users identify and manage authorized\
+        \ sessions, improving overall account security.\n\n**Locale:**\n\nA locale\
+        \ can be specified for this request. \nThis will be used for the email verification\
+        \ email.\nYou can learn more about email verification [here](https://singularity.stereov.io/docs/guides/auth/authentication#email-verification).\n\
+        \nIf no locale is specified, the applications default locale will be used.\n\
+        You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).\n\
+        \n**Tokens:**\n\nIf successful, [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
         \ and \n[`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)\
         \ \nwill automatically be set as HTTP-only cookies.\nIf [header authentication](https://singularity.stereov.io/docs/guides/auth/securing-endpoints#header-authentication)\
         \ is enabled,\n[`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
@@ -102,6 +111,12 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+        "400":
+          description: '`email` or `password` are invalid.'
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "409":
           description: The email is already in use.
           content:
@@ -128,6 +143,11 @@ paths:
         \ \nis set as HTTP-only cookie and returned in the response body\nif [header\
         \ authentication](https://singularity.stereov.io/docs/guides/auth/securing-endpoints#header-authentication)\
         \ is enabled.\n\nYou can complete the login through the endpoint [`POST /api/auth/2fa/login`](https://singularity.stereov.io/docs/api/complete-login).\n\
+        \n**Locale:**\n\nA locale can be specified for this request. \nThis will be\
+        \ used for the email 2FA code if this method is enabled for the user.\nYou\
+        \ can learn more about 2FA through email [here](/docs/guides/auth/two-factor#email).\n\
+        \nIf no locale is specified, the applications default locale will be used.\n\
+        You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).\n\
         \n**Tokens:**\n- If 2FA is disabled and the request is successful, \n  [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
         \ \n  and [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)\
         \ \n  will automatically be set as HTTP-only cookies.\n  If [header authentication](https://singularity.stereov.io/docs/guides/auth/securing-endpoints#header-authentication)\
@@ -160,6 +180,13 @@ paths:
         "304":
           description: User is already authenticated. Authenticated session state
             has not changed since last request.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "400":
+          description: Trying to log in user that did not set up authentication using
+            password.
           content:
             '*/*':
               schema:
@@ -253,6 +280,15 @@ paths:
         \ authentication](https://singularity.stereov.io/docs/guides/auth/securing-endpoints#header-authentication)\
         \ is enabled.\n\nYou can complete the step-up through the endpoint [`POST\
         \ /api/auth/2fa/step-up`](https://singularity.stereov.io/docs/api/complete-step-up).\n\
+        \n**Request Body:**\n\nWhen requesting a step-up for a [`GUEST`](https://singularity.stereov.io/docs/guides/auth/roles#guests)\n\
+        there is no way to authenticate the user.\nTherefore, no request body is required\
+        \ in this case.\n\nIf you request a step-up for a regular [`USER`](https://singularity.stereov.io/docs/guides/auth/roles#users),\n\
+        it will result in a `400 - BAD REQUEST`.\n\n**Locale:**\n\nA locale can be\
+        \ specified for this request. \nThis will be used for the email 2FA code if\
+        \ this method is enabled for the user.\nYou can learn more about 2FA through\
+        \ email [here](/docs/guides/auth/two-factor#email).\n\nIf no locale is specified,\
+        \ the applications default locale will be used.\nYou can learn more about\
+        \ configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).\n\
         \n**Tokens:**\n- Requires a valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token).\n\
         - If 2FA is disabled and the request is successful, [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)\n\
         \  will automatically be set as HTTP-only cookie.\n  If [header authentication](https://singularity.stereov.io/docs/guides/auth/securing-endpoints#header-authentication)\
@@ -273,7 +309,6 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/StepUpRequest"
-        required: true
       responses:
         "200":
           description: Logout successful.
@@ -281,6 +316,13 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/StepUpResponse"
+        "400":
+          description: Trying to request step-up for user that authenticated only
+            via OAuth2 providers or missing request body for authenticated users.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: Invalid credentials.
           content:
@@ -339,7 +381,12 @@ paths:
         \ extract the token from the URL and send it to this endpoint with the\ntoken\
         \ as request parameter.\nYou can find more information about this [here](https://singularity.stereov.io/docs/guides/auth/authentication#password-reset).\n\
         \nYou can perform the reset using the token through the endpoint [`POST /api/auth/password/reset`](https://singularity.stereov.io/docs/api/reset-password).\n\
-        \n**Note:** If email is not enabled, there is no way to reset the password.\n\
+        \n**Note:** If email is disabled, there is no way to reset the password.\n\
+        \n**Locale:**\n\nA locale can be specified for this request. \nThe email will\
+        \ be sent in the specified locale.\nYou can learn more about locale in emails\
+        \ [here](https://singularity.stereov.io/docs/guides/email/templates).\n\n\
+        If no locale is specified, the applications default locale will be used.\n\
+        You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).\n\
         \n**Note:** After each email, a cooldown will be started.\nWhen the cooldown\
         \ is active, no new verification email can be sent.\nThe cooldown can be configured\
         \ [here](https://singularity.stereov.io/docs/guides/email/configuration)."
@@ -366,12 +413,6 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/MailSendResponse"
-        "401":
-          description: Unauthorized.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
         "429":
           description: Cooldown is active. You have to wait until you can send another
             email.
@@ -404,7 +445,7 @@ paths:
         \ as request parameter.\nYou can find more information about this [here](https://singularity.stereov.io/docs/guides/auth/authentication#password-reset).\n\
         \nIf successful, the user can log in using the new password afterwards.\n\n\
         You can resend this email through the endpoint [`POST /api/auth/password/reset-request`](https://singularity.stereov.io/docs/api/send-password-reset-email).\n\
-        \n**Note:** If email is not enabled, there is no way to reset the password."
+        \n**Note:** If email is disabled, there is no way to reset the password."
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/authentication#password-reset
       operationId: resetPassword
@@ -427,8 +468,9 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/SuccessResponse"
-        "401":
-          description: Token is invalid.
+        "400":
+          description: "Trying to request a password reset for a user that only authenticated\
+            \ via OAuth2 providers or a [`GUEST`](https://singularity.stereov.io/docs/guides/auth/roles#guests)."
           content:
             '*/*':
               schema:
@@ -475,27 +517,25 @@ paths:
       tags:
       - Authentication
       summary: Send Email Verification Email
-      description: |-
-        Send an email verification email to the user.
-
-        This endpoint is for **resending** the verification email only.
-        When registering a user and [email is enabled in your application](https://singularity.stereov.io/docs/guides/email/configuration)
-        an email containing a link is automatically sent to the user's email address.
-        This link should point to the frontend of your application.
-        You can find more information about this [here](https://singularity.stereov.io/docs/guides/auth/authentication#email-verification).
-        Your frontend should extract the token from the URL and send it to this endpoint with the
-        token as request parameter.
-
-        You can perform the verification using the token through the endpoint [`POST /api/auth/email/verify`](https://singularity.stereov.io/docs/api/verify-email).
-
-        **Note:** If email is not enabled, there is no way to verify a user's email address.
-
-        **Tokens:**
-        - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
-
-        **Note:** After each email, a cooldown will be started.
-        When the cooldown is active, no new verification email can be sent.
-        The cooldown can be configured [here](https://singularity.stereov.io/docs/guides/email/configuration).
+      description: "Send an email verification email to the user.\n\nThis endpoint\
+        \ is for **resending** the verification email only.\nWhen registering a user\
+        \ and [email is enabled in your application](https://singularity.stereov.io/docs/guides/email/configuration)\n\
+        an email containing a link is automatically sent to the user's email address.\n\
+        This link should point to the frontend of your application.\nYou can find\
+        \ more information about this [here](https://singularity.stereov.io/docs/guides/auth/authentication#email-verification).\n\
+        Your frontend should extract the token from the URL and send it to this endpoint\
+        \ with the\ntoken as request parameter.\n\nYou can perform the verification\
+        \ using the token through the endpoint [`POST /api/auth/email/verify`](https://singularity.stereov.io/docs/api/verify-email).\n\
+        \n**Note:** If email is disabled, there is no way to verify a user's email\
+        \ address.\n\n**Locale:**\n\nA locale can be specified for this request. \n\
+        The email will be sent in the specified locale.\nYou can learn more about\
+        \ locale in emails [here](https://singularity.stereov.io/docs/guides/email/templates).\n\
+        \nIf no locale is specified, the applications default locale will be used.\n\
+        You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).\n\
+        \n**Tokens:**\n- A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
+        \ is required.\n\n**Note:** After each email, a cooldown will be started.\n\
+        When the cooldown is active, no new verification email can be sent.\nThe cooldown\
+        \ can be configured [here](https://singularity.stereov.io/docs/guides/email/configuration)."
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/docs/auth/authentication#email-verification
       operationId: sendEmailVerificationEmail
@@ -513,6 +553,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/MailSendResponse"
+        "304":
+          description: Trying to send a verification email for verified account.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "400":
+          description: "Trying to send a verification email for [`GUEST`](https://singularity.stereov.io/docs/guides/auth/roles#guests)."
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: AccessToken is invalid or expired.
           content:
@@ -553,10 +605,7 @@ paths:
 
         You can resend this email through the endpoint [`POST /api/auth/email/verify/send`](https://singularity.stereov.io/docs/api/send-email-verification-email).
 
-        **Note:** If email is not enabled, there is no way to verify a user's email address.
-
-        **Tokens:**
-        - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
+        **Note:** If email is disabled, there is no way to verify a user's email address.
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/docs/auth/authentication#email-verification
       operationId: verifyEmail
@@ -573,8 +622,14 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/UserResponse"
-        "401":
-          description: AccessToken is invalid or expired.
+        "304":
+          description: Trying to verify an email for verified account.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "400":
+          description: "Trying to verify an email for [`GUEST`](https://singularity.stereov.io/docs/guides/auth/roles#guests)."
           content:
             '*/*':
               schema:
@@ -1315,12 +1370,259 @@ paths:
       security:
       - {}
       - {}
+  /api/guests:
+    post:
+      tags:
+      - Roles
+      summary: Create Guest Account
+      description: "Create a new [`GUEST`](https://singularity.stereov.io/docs/guides/auth/roles#guests)\
+        \ account.\n\nYou can learn more about `GUEST` accounts [here](https://singularity.stereov.io/docs/guides/roles#guests).\n\
+        \n**Optional session data:**\n- The `session` object can be included in the\
+        \ request body.\n- Inside the `session` object, you can provide the following\
+        \ optional fields:\n    - `browser`: The name of the browser used (e.g., \"\
+        Chrome\", \"Firefox\").\n    - `os`: The operating system of the device (e.g.,\
+        \ \"Windows\", \"macOS\", \"Android\").\n\nThis information helps users identify\
+        \ and manage authorized sessions, improving overall account security.\n\n\
+        **Tokens:**\n\nIf successful, [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
+        \ and \n[`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)\
+        \ \nwill automatically be set as HTTP-only cookies.\nIf [header authentication](https://singularity.stereov.io/docs/guides/auth/securing-endpoints#header-authentication)\
+        \ is enabled,\n[`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
+        \ and \n[`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)\n\
+        will be returned in the response body and can be used as \nbearer tokens in\
+        \ the authorization header for upcoming requests."
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/auth/roles#creating-guest-accounts
+      operationId: createGuestAccount
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateGuestRequest"
+        required: true
+      responses:
+        "200":
+          description: Registration successful. Returns user details and tokens if
+            header authentication is enabled.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CreateGuestResponse"
+        "304":
+          description: User is already authenticated. Authenticated session state
+            has not changed since last request.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - {}
+      - {}
+  /api/guests/convert-to-user:
+    post:
+      tags:
+      - Roles
+      summary: Convert Guest To User
+      description: "Converts a [`GUEST`](https://singularity.stereov.io/docs/guides/roles#guests)\
+        \ \naccount to a regular [`USER`](https://singularity.stereov.io/docs/guides/roles#users)\
+        \ account.\n\nYou can learn more about `GUEST` accounts [here](https://singularity.stereov.io/docs/guides/roles#guests).\n\
+        \n**Requirements:**\n- The `email` should be a valid email address (e.g.,\
+        \ \"test@example.com\")\n  that is not associated to an existing account.\n\
+        - The `password` must be at least 8 characters long and include at least one\
+        \ uppercase letter, \n  one lowercase letter, one number, and one special\
+        \ character (!@#$%^&*()_+={}[]|\\:;'\"<>,.?/).\n\n**Optional session data:**\n\
+        - The `session` object can be included in the request body.\n- Inside the\
+        \ `session` object, you can provide the following optional fields:\n    -\
+        \ `browser`: The name of the browser used (e.g., \"Chrome\", \"Firefox\").\n\
+        \    - `os`: The operating system of the device (e.g., \"Windows\", \"macOS\"\
+        , \"Android\").\n\nThis information helps users identify and manage authorized\
+        \ sessions, improving overall account security.\n\n**Locale:**\n\nA locale\
+        \ can be specified for this request. \nThis will be used for the email verification\
+        \ email.\nYou can learn more about email verification [here](https://singularity.stereov.io/docs/guides/auth/authentication#email-verification).\n\
+        \nIf no locale is specified, the applications default locale will be used.\n\
+        You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).\n\
+        \n**Tokens:**\n- A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\n\
+        \  of a `GUEST` is required.\n- If successful, the tokens of the `GUEST` account\
+        \ become invalid.\n    A new [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
+        \ and \n    [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)\
+        \ \n    will automatically be set as HTTP-only cookies.\n    If [header authentication](https://singularity.stereov.io/docs/guides/auth/securing-endpoints#header-authentication)\
+        \ is enabled,\n    [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
+        \ and \n    [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)\n\
+        \    will be returned in the response body and can be used as \n    bearer\
+        \ tokens in the authorization header for upcoming requests."
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/auth/roles#creating-guest-accounts
+      operationId: convertGuestToUser
+      parameters:
+      - name: locale
+        in: query
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConvertToUserRequest"
+        required: true
+      responses:
+        "200":
+          description: Registration successful. Returns user details and tokens if
+            header authentication is enabled.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ConvertToUserResponse"
+        "304":
+          description: "Account is already regular [`USER`](https://singularity.stereov.io/docs/guides/roles#users).\
+            \ Authenticated session state has not changed since last request."
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "400":
+          description: '`email` or `password` are invalid.'
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: AccessToken is invalid or expired.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: The email is already in use.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+      - accessTokenCookie: []
+  /api/admins/{userId}:
+    post:
+      tags:
+      - Roles
+      summary: Grant Admin Permissions
+      description: |-
+        Grant [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions to a user.
+
+        You can find more information about roles [here](https://singularity.stereov.io/docs/guides/auth/roles).
+
+        **Tokens:**
+        - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
+          with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/auth/roles#admins
+      operationId: grantAdminPermissions
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/ObjectId"
+      responses:
+        "200":
+          description: The updated user information
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "401":
+          description: Invalid or expired AccessToken.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: "AccessToken does permit [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins)\
+            \ access."
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader:
+        - adminScope
+      - accessTokenCookie:
+        - adminScope
+    delete:
+      tags:
+      - Roles
+      summary: Revoke Admin Permissions
+      description: |-
+        Grant [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions to a user.
+
+        You can find more information about roles [here](https://singularity.stereov.io/docs/guides/auth/roles).
+
+        **Tokens:**
+        - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
+          with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/auth/roles#admins
+      operationId: revokeAdminPermissions
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/ObjectId"
+      responses:
+        "200":
+          description: The updated user information
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "401":
+          description: Invalid or expired AccessToken.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: "AccessToken does permit [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins)\
+            \ access."
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: "Trying to revoke [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins)\
+            \ permissions for last remaining admin. At least one admin is required."
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader:
+        - adminScope
+      - accessTokenCookie:
+        - adminScope
   /api/groups:
     get:
       tags:
       - Groups
       summary: Get Groups
-      description: Get all configured groups.
+      description: |-
+        Get all configured groups.
+
+        You can find more information about groups [here](https://singularity.stereov.io/docs/guides/auth/groups).
+
+        **Locale:**
+
+        Group names and descriptions can be specified in multiples languages.
+        These can be set when [creating](https://singularity.stereov.io/docs/guides/auth/groups#creating-groups)
+        groups or through [updates](https://singularity.stereov.io/docs/guides/auth/groups#updating-groups).
+
+        The `locale` request parameter specifies in which language the information should be returned.
+        If no locale is specified, the applications default locale will be used.
+        You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
+
+        **Tokens:**
+        - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
+          with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/groups#getting-groups
       operationId: getGroups
@@ -1377,7 +1679,24 @@ paths:
       tags:
       - Groups
       summary: Create Group
-      description: Creates a new group.
+      description: |-
+        Create a new group.
+
+        You can find more information about groups [here](https://singularity.stereov.io/docs/guides/auth/groups).
+
+        **Locale:**
+
+        Group names and descriptions can be specified in multiples languages.
+        These can be set when [creating](https://singularity.stereov.io/docs/guides/auth/groups#creating-groups)
+        groups or through [updates](https://singularity.stereov.io/docs/guides/auth/groups#updating-groups).
+
+        The `locale` request parameter specifies in which language the information should be returned.
+        If no locale is specified, the applications default locale will be used.
+        You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
+
+        **Tokens:**
+        - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
+          with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/groups#creating-groups
       operationId: createGroup
@@ -1422,7 +1741,24 @@ paths:
       tags:
       - Groups
       summary: Get Group By Key
-      description: Get all a groups by key.
+      description: |-
+        Get a group by its `key`.
+
+        You can find more information about groups [here](https://singularity.stereov.io/docs/guides/auth/groups).
+
+        **Locale:**
+
+        Group names and descriptions can be specified in multiples languages.
+        These can be set when [creating](https://singularity.stereov.io/docs/guides/auth/groups#creating-groups)
+        groups or through [updates](https://singularity.stereov.io/docs/guides/auth/groups#updating-groups).
+
+        The `locale` request parameter specifies in which language the information should be returned.
+        If no locale is specified, the applications default locale will be used.
+        You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
+
+        **Tokens:**
+        - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
+          with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/groups#getting-groups
       operationId: getGroupByKey
@@ -1451,7 +1787,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "403":
-          description: User does not have ADMIN role.
+          description: "`AccessToken` does permit [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles)\
+            \ access."
           content:
             '*/*':
               schema:
@@ -1465,7 +1802,24 @@ paths:
       tags:
       - Groups
       summary: Update Group
-      description: Update a group.
+      description: |-
+        Update the group with the given `key`.
+
+        You can find more information about groups [here](https://singularity.stereov.io/docs/guides/auth/groups).
+
+        **Locale:**
+
+        Group names and descriptions can be specified in multiples languages.
+        These can be set when [creating](https://singularity.stereov.io/docs/guides/auth/groups#creating-groups)
+        groups or through [updates](https://singularity.stereov.io/docs/guides/auth/groups#updating-groups).
+
+        The `locale` request parameter specifies in which language the information should be returned.
+        If no locale is specified, the applications default locale will be used.
+        You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
+
+        **Tokens:**
+        - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
+          with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/groups#updating-groups
       operationId: updateGroup
@@ -1500,7 +1854,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "403":
-          description: User does not have ADMIN role.
+          description: "`AccessToken` does permit [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles)\
+            \ access."
           content:
             '*/*':
               schema:
@@ -1514,7 +1869,14 @@ paths:
       tags:
       - Groups
       summary: Delete Group
-      description: Delete a group.
+      description: |-
+        Delete the group of the given `key`.
+
+        You can find more information about groups [here](https://singularity.stereov.io/docs/guides/auth/groups).
+
+        **Tokens:**
+        - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
+          with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/groups#deleting-groups
       operationId: deleteGroup
@@ -1538,7 +1900,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "403":
-          description: User does not have ADMIN role.
+          description: "AccessToken does permit [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles)\
+            \ access."
           content:
             '*/*':
               schema:
@@ -2117,6 +2480,21 @@ paths:
       security:
       - {}
       - {}
+  /api/security/secrets/rotate-keys:
+    post:
+      tags:
+      - Security
+      operationId: rotateKeys
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+      security:
+      - {}
+      - {}
   /api/content/tags:
     get:
       tags:
@@ -2249,21 +2627,6 @@ paths:
       security:
       - {}
       - {}
-  /api/admin/rotate-keys:
-    post:
-      tags:
-      - admin-controller
-      operationId: rotateKeys
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/SuccessResponse"
-      security:
-      - {}
-      - {}
   /api/users/{id}/avatar:
     get:
       tags:
@@ -2282,6 +2645,21 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/FileMetadataResponse"
+      security:
+      - {}
+      - {}
+  /api/security/secrets/rotate-keys/status:
+    get:
+      tags:
+      - Security
+      operationId: rotationOngoing
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/RotationStatusResponse"
       security:
       - {}
       - {}
@@ -2418,38 +2796,6 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/DataBuffer"
-      security:
-      - {}
-      - {}
-  /api/admin/users:
-    get:
-      tags:
-      - admin-controller
-      operationId: getAllUsers
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/UserResponse"
-      security:
-      - {}
-      - {}
-  /api/admin/rotate-keys/status:
-    get:
-      tags:
-      - admin-controller
-      operationId: rotationOngoing
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/RotationStatusResponse"
       security:
       - {}
       - {}
@@ -2632,7 +2978,6 @@ components:
           uniqueItems: true
       required:
       - created
-      - email
       - emailVerified
       - groups
       - id
@@ -2881,10 +3226,19 @@ components:
           type: string
         avatar:
           $ref: "#/components/schemas/FileMetadataResponse"
+        roles:
+          type: array
+          items:
+            type: string
+            enum:
+            - USER
+            - ADMIN
+            - GUEST
+          uniqueItems: true
       required:
-      - email
       - id
       - name
+      - roles
     ArticleTrustedResponse:
       type: object
       properties:
@@ -2946,6 +3300,165 @@ components:
       required:
       - content
       - locale
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+      required:
+      - success
+    CreateGuestRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        session:
+          $ref: "#/components/schemas/SessionInfoRequest"
+      required:
+      - name
+    SessionInfoRequest:
+      type: object
+      properties:
+        browser:
+          type: string
+          description: The name of the browser used.
+          example: Chrome
+        os:
+          type: string
+          description: The operating system of the device.
+          example: WIndows
+    City:
+      type: object
+      properties:
+        confidence:
+          type: integer
+          format: int32
+        geoname_id:
+          type: integer
+          format: int64
+        names:
+          type: object
+          additionalProperties:
+            type: string
+    Continent:
+      type: object
+      properties:
+        code:
+          type: string
+        geoname_id:
+          type: integer
+          format: int64
+        names:
+          type: object
+          additionalProperties:
+            type: string
+    Country:
+      type: object
+      properties:
+        confidence:
+          type: integer
+          format: int32
+        geoname_id:
+          type: integer
+          format: int64
+        is_in_european_union:
+          type: boolean
+        iso_code:
+          type: string
+        names:
+          type: object
+          additionalProperties:
+            type: string
+    CreateGuestResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/UserResponse"
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        location:
+          $ref: "#/components/schemas/GeolocationResponse"
+      required:
+      - user
+    GeolocationResponse:
+      type: object
+      properties:
+        ipAddress:
+          type: string
+        city:
+          $ref: "#/components/schemas/City"
+        country:
+          $ref: "#/components/schemas/Country"
+        continent:
+          $ref: "#/components/schemas/Continent"
+        location:
+          $ref: "#/components/schemas/Location"
+      required:
+      - city
+      - continent
+      - country
+      - ipAddress
+      - location
+    Location:
+      type: object
+      properties:
+        accuracy_radius:
+          type: integer
+          format: int32
+        average_income:
+          type: integer
+          format: int32
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        metro_code:
+          type: integer
+          format: int32
+          deprecated: true
+        population_density:
+          type: integer
+          format: int32
+        time_zone:
+          type: string
+    ConvertToUserRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          description: The user's unique email address.
+          example: jane.doe@example.com
+          minLength: 1
+        password:
+          type: string
+          description: "The user's chosen password. It must be at least 8 characters\
+            \ long and include at least one uppercase letter, one lowercase letter,\
+            \ one number, and one special character (!@#$%^&*()_+={}[]|\\:;'\"<>,.?/)."
+          example: S3cur3P@ssw0rd!
+          pattern: "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+\\-={}\\[\\\
+            ]|\\\\:;'\"<,>.?/]).{8,}"
+        session:
+          $ref: "#/components/schemas/SessionInfoRequest"
+      required:
+      - email
+      - password
+    ConvertToUserResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/UserResponse"
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        location:
+          $ref: "#/components/schemas/GeolocationResponse"
+      required:
+      - user
     CreateGroupRequest:
       type: object
       properties:
@@ -3099,17 +3612,6 @@ components:
       properties:
         token:
           type: string
-    SessionInfoRequest:
-      type: object
-      properties:
-        browser:
-          type: string
-          description: The name of the browser used.
-          example: Chrome
-        os:
-          type: string
-          description: The operating system of the device.
-          example: WIndows
     GenerateSessionTokenResponse:
       type: object
       properties:
@@ -3144,91 +3646,6 @@ components:
       - email
       - name
       - password
-    City:
-      type: object
-      properties:
-        confidence:
-          type: integer
-          format: int32
-        geoname_id:
-          type: integer
-          format: int64
-        names:
-          type: object
-          additionalProperties:
-            type: string
-    Continent:
-      type: object
-      properties:
-        code:
-          type: string
-        geoname_id:
-          type: integer
-          format: int64
-        names:
-          type: object
-          additionalProperties:
-            type: string
-    Country:
-      type: object
-      properties:
-        confidence:
-          type: integer
-          format: int32
-        geoname_id:
-          type: integer
-          format: int64
-        is_in_european_union:
-          type: boolean
-        iso_code:
-          type: string
-        names:
-          type: object
-          additionalProperties:
-            type: string
-    GeolocationResponse:
-      type: object
-      properties:
-        ipAddress:
-          type: string
-        city:
-          $ref: "#/components/schemas/City"
-        country:
-          $ref: "#/components/schemas/Country"
-        continent:
-          $ref: "#/components/schemas/Continent"
-        location:
-          $ref: "#/components/schemas/Location"
-      required:
-      - city
-      - continent
-      - country
-      - ipAddress
-      - location
-    Location:
-      type: object
-      properties:
-        accuracy_radius:
-          type: integer
-          format: int32
-        average_income:
-          type: integer
-          format: int32
-        latitude:
-          type: number
-          format: double
-        longitude:
-          type: number
-          format: double
-        metro_code:
-          type: integer
-          format: int32
-          deprecated: true
-        population_density:
-          type: integer
-          format: int32
-        time_zone:
-          type: string
     RegisterResponse:
       type: object
       properties:
@@ -3279,13 +3696,6 @@ components:
           type: string
       required:
       - newPassword
-    SuccessResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-      required:
-      - success
     SendPasswordResetRequest:
       type: object
       properties:
@@ -3410,6 +3820,16 @@ components:
           type: string
       required:
       - code
+    RotationStatusResponse:
+      type: object
+      properties:
+        isOngoing:
+          type: boolean
+        lastRotation:
+          type: string
+          format: date-time
+      required:
+      - isOngoing
     PageGroupResponse:
       type: object
       properties:
@@ -3433,13 +3853,13 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
-        numberOfElements:
-          type: integer
-          format: int32
         first:
           type: boolean
         last:
           type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
         empty:
           type: boolean
     PageableObject:
@@ -3558,13 +3978,13 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
-        numberOfElements:
-          type: integer
-          format: int32
         first:
           type: boolean
         last:
           type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
         empty:
           type: boolean
     ArticleResponse:
@@ -3660,56 +4080,50 @@ components:
       required:
       - remaining
     DataBuffer: {}
-    RotationStatusResponse:
-      type: object
-      properties:
-        isOngoing:
-          type: boolean
-        lastRotation:
-          type: string
-          format: date-time
-      required:
-      - isOngoing
   securitySchemes:
     twoFactorAuthenticationTokenCookie:
       type: apiKey
       description: "Token for successful authentication with email and password, indicating\
-        \ 2FA is required."
+        \ 2FA is required.You can learn more [here](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token)."
       name: two_factor_authentication_token
       in: cookie
     accessTokenHeader:
       type: http
-      description: Access token for user authentication.
+      description: "Access token for user authentication. You can learn more [here](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)."
       scheme: bearer
       bearerFormat: JWT
     accessTokenCookie:
       type: apiKey
-      description: Access token for user authentication.
+      description: "Access token for user authentication.You can learn more [here](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)."
       name: access_token
       in: cookie
     stepUpTokenCookie:
       type: apiKey
-      description: Token for step up authentication allowing access of secure resources.
+      description: "Token for step up authentication allowing access of secure resources.You\
+        \ can learn more [here](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)."
       name: step_up_token
       in: cookie
     twoFactorAuthenticationTokenHeader:
       type: apiKey
       description: "Token for successful authentication with email and password, indicating\
-        \ 2FA is required."
+        \ 2FA is required.You can learn more [here](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token)."
       name: X-Two-Factor-Authentication-Token
       in: header
     refreshTokenHeader:
       type: http
-      description: Refresh token to request new access tokens.
+      description: "Refresh token to request new access tokens.You can learn more\
+        \ [here](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)."
       scheme: bearer
       bearerFormat: JWT
     stepUpTokenHeader:
       type: apiKey
-      description: Token for step up authentication allowing access of secure resources.
+      description: "Token for step up authentication allowing access of secure resources.You\
+        \ can learn more [here](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)."
       name: X-Step-Up-Token
       in: header
     refreshTokenCookie:
       type: apiKey
-      description: Refresh token to request new access tokens.
+      description: "Refresh token to request new access tokens.You can learn more\
+        \ [here](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)."
       name: refresh_token
       in: cookie

@@ -1,49 +1,77 @@
 package io.stereov.singularity.admin.core.service
 
-import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.admin.core.dto.RotationStatusResponse
+import io.stereov.singularity.admin.core.exception.model.AtLeastOneAdminRequiredException
+import io.stereov.singularity.admin.core.exception.model.GuestCannotBeAdminException
+import io.stereov.singularity.auth.core.cache.AccessTokenCache
+import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties
-import io.stereov.singularity.database.core.service.SensitiveCrudService
 import io.stereov.singularity.database.hash.service.HashService
-import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.email.core.properties.EmailProperties
-import io.stereov.singularity.secrets.core.service.SecretService
+import io.stereov.singularity.global.properties.AppProperties
+import io.stereov.singularity.user.core.dto.response.UserResponse
+import io.stereov.singularity.user.core.mapper.UserMapper
 import io.stereov.singularity.user.core.model.Role
 import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.service.UserService
 import jakarta.annotation.PostConstruct
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.runBlocking
-import org.springframework.context.ApplicationContext
-import org.springframework.scheduling.annotation.Scheduled
+import org.bson.types.ObjectId
 import org.springframework.stereotype.Service
-import java.time.Instant
-import java.util.concurrent.atomic.AtomicBoolean
 
 @Service
 class AdminService(
-    private val context: ApplicationContext,
     private val userService: UserService,
     private val appProperties: AppProperties,
     private val hashService: HashService,
     private val twoFactorEmailCodeProperties: TwoFactorEmailCodeProperties,
-    private val emailProperties: EmailProperties
+    private val emailProperties: EmailProperties,
+    private val authorizationService: AuthorizationService,
+    private val userMapper: UserMapper,
+    private val accessTokenCache: AccessTokenCache
 ) {
 
-    private val logger: KLogger
-        get() = KotlinLogging.logger {}
-
-    private val rotationOngoing = AtomicBoolean(false)
-
-    private val keyRotationScope = CoroutineScope(Dispatchers.Default)
+    private val logger = KotlinLogging.logger {}
 
     @PostConstruct
     fun init() {
-        this.getSecretServices().forEach { runBlocking { it.getCurrentSecret() } }
         runBlocking { initRootAccount() }
+    }
+
+    suspend fun addAdminRole(userId: ObjectId): UserResponse {
+        logger.debug { "Adding admin role to user $userId" }
+
+        authorizationService.requireRole(Role.ADMIN)
+
+        val user = userService.findById(userId)
+
+        if (user.isGuest)
+            throw GuestCannotBeAdminException("A guest cannot be admin")
+
+        user.addRole(Role.ADMIN)
+        val updatedUser = userService.save(user)
+
+        accessTokenCache.invalidateAllTokens(user.id)
+
+        return userMapper.toResponse(updatedUser)
+    }
+
+    suspend fun revokeAdminRole(userId: ObjectId): UserResponse {
+        logger.debug { "Revoking admin role from user $userId" }
+
+        authorizationService.requireRole(Role.ADMIN)
+
+        if (userService.findAllByRolesContaining(Role.ADMIN).count() == 1)
+            throw AtLeastOneAdminRequiredException("Cannot revoke admin role for last existing admin: at least one admin is required")
+
+        val user = userService.findById(userId)
+        user.roles.remove(Role.ADMIN)
+        val updatedUser = userService.save(user)
+
+        accessTokenCache.invalidateAllTokens(user.id)
+
+        return userMapper.toResponse(updatedUser)
     }
 
     private suspend fun initRootAccount() {
@@ -62,57 +90,5 @@ class AdminService(
         } else {
             this.logger.info { "Root account exists, skipping creation" }
         }
-    }
-
-    private fun getSecretServices(): List<SecretService> {
-        return this.context.getBeansOfType(SecretService::class.java).values.toList()
-    }
-
-
-    @Scheduled(cron = "\${singularity.secrets.key-rotation-cron:0 0 4 1 1,4,7,10 *}")
-    suspend fun rotateKeys() {
-        this.logger.info { "Rotating keys" }
-
-        if (this.rotationOngoing.get()) {
-            this.logger.warn { "Rotation is currently ongoing. Stopping new attempt" }
-            return
-        }
-
-        this.rotationOngoing.set(true)
-
-        this.keyRotationScope.launch {
-            logger.info { "Rotating secrets" }
-            context.getBeansOfType(SecretService::class.java).forEach { (name, service) ->
-                logger.info { "Rotating keys for secrets defined in $name}" }
-                service.rotateSecret()
-            }
-
-            logger.info { "Rotating encryption secrets" }
-            context.getBeansOfType(SensitiveCrudService::class.java).forEach { (name, service) ->
-                logger.info { "Rotating keys for documents defined in $name" }
-                service.rotateSecret()
-            }
-
-            rotationOngoing.set(false)
-            logger.info { "Rotation finished successfully" }
-        }
-    }
-
-    suspend fun getRotationStatus(): RotationStatusResponse {
-        this.logger.debug { "Checking rotation status" }
-
-        return RotationStatusResponse(
-            this.rotationOngoing.get(),
-            this.getLastRotation()
-        )
-    }
-
-    suspend fun getLastRotation(): Instant? {
-        this.logger.debug { "Getting last rotation" }
-
-        return context.getBeansOfType(SecretService::class.java)
-            .map { (_, service) -> service.getLastUpdate() }
-            .sortedBy { it?.toEpochMilli() }
-            .firstOrNull()
     }
 }

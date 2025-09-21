@@ -40,7 +40,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
             .returnResult()
             .responseBody
 
-        val token = emailVerificationTokenService.create(user.info.id, newEmail, user.mailVerificationSecret)
+        val token = emailVerificationTokenService.create(user.info.id, newEmail, user.mailVerificationSecret!!)
 
         val res = webTestClient.post()
             .uri("/api/auth/email/verify?token=$token")
@@ -71,7 +71,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
             .returnResult()
             .responseBody
 
-        val token = emailVerificationTokenService.create(user.info.id, newEmail, user.mailVerificationSecret)
+        val token = emailVerificationTokenService.create(user.info.id, newEmail, user.mailVerificationSecret!!)
 
         val res = webTestClient.post()
             .uri("/api/auth/email/verify?token=$token")

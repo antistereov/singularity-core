@@ -11,14 +11,14 @@ import io.stereov.singularity.auth.twofactor.exception.model.TwoFactorCodeExpire
 import io.stereov.singularity.auth.twofactor.exception.model.TwoFactorMethodAlreadyEnabledException
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties
-import io.stereov.singularity.global.properties.AppProperties
-import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.email.core.exception.model.EmailCooldownException
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.email.core.service.EmailService
 import io.stereov.singularity.email.core.util.EmailConstants
 import io.stereov.singularity.email.template.service.TemplateService
 import io.stereov.singularity.email.template.util.TemplateBuilder
+import io.stereov.singularity.global.properties.AppProperties
+import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.translate.model.TranslateKey
 import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.user.core.model.UserDocument
@@ -95,7 +95,7 @@ class EmailAuthenticationService(
             )))
             .build()
 
-        emailService.sendEmail(user.sensitive.email, subject, content, actualLocale)
+        emailService.sendEmail(user.requireNotGuestAndGetEmail(), subject, content, actualLocale)
         startCooldown(userId)
     }
 

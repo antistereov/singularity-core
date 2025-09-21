@@ -46,7 +46,7 @@ class PasswordResetController(
             
             You can resend this email through the endpoint [`POST /api/auth/password/reset-request`](https://singularity.stereov.io/docs/api/send-password-reset-email).
 
-            **Note:** If email is not enabled, there is no way to reset the password.
+            **Note:** If email is disabled, there is no way to reset the password.
         """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/authentication#password-reset"),
         responses = [
@@ -55,8 +55,8 @@ class PasswordResetController(
                 description = "Updated user information.",
             ),
             ApiResponse(
-                responseCode = "401",
-                description = "Token is invalid.",
+                responseCode = "400",
+                description = "Trying to request a password reset for a user that only authenticated via OAuth2 providers or a [`GUEST`](https://singularity.stereov.io/docs/guides/auth/roles#guests).",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
             ApiResponse(
@@ -117,7 +117,16 @@ class PasswordResetController(
             
             You can perform the reset using the token through the endpoint [`POST /api/auth/password/reset`](https://singularity.stereov.io/docs/api/reset-password).
 
-            **Note:** If email is not enabled, there is no way to reset the password.
+            **Note:** If email is disabled, there is no way to reset the password.
+            
+            **Locale:**
+            
+            A locale can be specified for this request. 
+            The email will be sent in the specified locale.
+            You can learn more about locale in emails [here](https://singularity.stereov.io/docs/guides/email/templates).
+            
+            If no locale is specified, the applications default locale will be used.
+            You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
             
             **Note:** After each email, a cooldown will be started.
             When the cooldown is active, no new verification email can be sent.
@@ -128,11 +137,6 @@ class PasswordResetController(
             ApiResponse(
                 responseCode = "200",
                 description = "The number of seconds the user needs to wait to send a new email.",
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "Unauthorized.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
             ApiResponse(
                 responseCode = "429",

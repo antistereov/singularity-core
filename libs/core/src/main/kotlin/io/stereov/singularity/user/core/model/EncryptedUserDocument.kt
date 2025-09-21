@@ -12,14 +12,15 @@ import java.time.Instant
 @Document(collection = "users")
 data class EncryptedUserDocument(
     @Id override val _id: ObjectId? = null,
-    val email: SearchableHash,
+    val email: SearchableHash?,
     val identities: Map<String, HashedUserIdentity>,
+    val roles: MutableSet<Role>,
     val created: Instant = Instant.now(),
     var lastActive: Instant = Instant.now(),
     override var sensitive: Encrypted<SensitiveUserData>,
 )  : EncryptedSensitiveDocument<SensitiveUserData> {
 
     override fun toSensitiveDocument(decrypted: SensitiveUserData, otherValues: List<Any?>) : UserDocument {
-        return UserDocument(_id, created, lastActive, decrypted)
+        return UserDocument(_id, created, lastActive, roles,decrypted)
     }
 }

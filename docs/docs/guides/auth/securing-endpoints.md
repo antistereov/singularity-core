@@ -297,7 +297,7 @@ singularity:
       - /api/user/path
       - /api/user/another-path
     admin-paths:
-      - /api/admin/path
+      - /api/admins/path
 ```
 
 ## Header authentication
