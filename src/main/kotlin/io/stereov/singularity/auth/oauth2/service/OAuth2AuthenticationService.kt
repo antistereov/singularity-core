@@ -2,11 +2,9 @@ package io.stereov.singularity.auth.oauth2.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.service.AuthorizationService
-import io.stereov.singularity.auth.guest.service.GuestService
 import io.stereov.singularity.auth.oauth2.exception.model.OAuth2FlowException
 import io.stereov.singularity.auth.oauth2.model.OAuth2ErrorCode
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties
-import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.service.UserService
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
@@ -18,8 +16,6 @@ class OAuth2AuthenticationService(
     private val twoFactorEmailCodeProperties: TwoFactorEmailCodeProperties,
     private val identityProviderService: IdentityProviderService,
     private val authorizationService: AuthorizationService,
-    private val emailProperties: EmailProperties,
-    private val guestService: GuestService
 ) {
 
     private val logger = KotlinLogging.logger {}

@@ -4,7 +4,6 @@ import io.stereov.singularity.database.core.repository.SensitiveCrudRepository
 import io.stereov.singularity.database.hash.model.SearchableHash
 import io.stereov.singularity.user.core.model.EncryptedUserDocument
 import io.stereov.singularity.user.core.model.Role
-import io.stereov.singularity.user.core.model.UserDocument
 import kotlinx.coroutines.flow.Flow
 import org.springframework.data.mongodb.repository.Query
 import org.springframework.stereotype.Repository
