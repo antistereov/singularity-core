@@ -49,20 +49,29 @@ class TotpAuthenticationController(
         summary = "Get TOTP Setup Details",
         description = """
             Get a TOTP secret, recovery codes and a TOTP URL.
+            This is the first step to enabling TOTP as 2FA method.
+            You can learn more about this [here](https://singularity.stereov.io/docs/guides/auth/two-factor#setup).
+            
             The user needs to save the recovery codes and use the URL or the secret to set up 2FA in their 2FA app.
             
-            This secret will be stored inside the token contained in the response.
-            This token is required to enable TOTP.
+            This secret will be stored inside the `token` contained in the response.
+            This `token` is required to enable TOTP.
             Performing this request will not change the user's state in the database.
             Therefore, the token is the single point of truth for validation.
             Every request will generate a new TOTP secret, new recovery codes and a new TOTP URL.
             
-            This action requires a valid `StepUpToken`.
+            The setup can be completed through the endpoint 
+            [`POST /api/auth/2fa/totp/setup`](https://singularity.stereov.io/docs/api/enable-totp-as-two-factor-method)
+            using the `token` and a 2FA code from an authenticator app.
             
-            The user must be able to authenticate using a password.
-            If the user registered using OAuth2 and did not [set up password authentication](https://singularity.stereov.io/docs/guides/auth/oauth2#adding-password-authentication),
-            this action will fail.
-    
+            **Requirements:**
+            - The user can authenticate using password. 2FA will not work with OAuth2. 
+              The OAuth2 provider will validate the second factor if the user enabled it for the provider.
+              
+            **Tokens:**
+            - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
+            - A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
+              is required. This token should match user and session contained in the `AccessToken`.
         """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/two-factor#setup"),
         security = [
@@ -74,21 +83,17 @@ class TotpAuthenticationController(
         responses = [
             ApiResponse(
                 responseCode = "200",
-                description = """
-                    The TOTP secret, recovery codes, TOTP URL and setup token.
-                    
-                    Show the secret, TOTP URL to the user. 
-                    They can use the secret or URL to set up 2FA in their 2FA app.
-                    
-                    Make sure the user saves the recovery codes in case they lost access to their 2FA app.
-                    
-                    The token is required to enable TOTP.
-                """,
+                description = "The TOTP secret, recovery codes, TOTP URL and setup token.",
                 content = [Content(schema = Schema(implementation = TwoFactorSetupResponse::class))]
             ),
             ApiResponse(
+                responseCode = "400",
+                description = "2FA cannot be enabled for users who didn't configure authentication using a password.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
+            ApiResponse(
                 responseCode = "401",
-                description = "AccessToken or StepUpToken is invalid.",
+                description = "`AccessToken` or `StepUpToken` is invalid.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
             ApiResponse(
@@ -112,7 +117,21 @@ class TotpAuthenticationController(
     @PostMapping("/setup")
     @Operation(
         summary = "Enable TOTP as 2FA Method",
-        description = "Set up TOTP for a user using a TOTPSetupToken and the TOTP code.",
+        description = """
+            Complete the TOTP setup `token` from [`GET /api/auth/2fa/setup`](https://singularity.stereov.io/docs/api/get-totp-setup-details) 
+            and a TOTP code from an authenticator app.
+            
+            You can learn more about this [here](https://singularity.stereov.io/docs/guides/auth/two-factor#setup).
+            
+            **Requirements:**
+            - The user can authenticate using password. 2FA will not work with OAuth2. 
+              The OAuth2 provider will validate the second factor if the user enabled it for the provider.
+              
+            **Tokens:**
+            - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
+            - A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
+              is required. This token should match user and session contained in the `AccessToken`.
+        """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/two-factor#setup"),
         security = [
             SecurityRequirement(name = OpenApiConstants.ACCESS_TOKEN_HEADER),
@@ -127,18 +146,18 @@ class TotpAuthenticationController(
                 content = [Content(schema = Schema(implementation = TwoFactorSetupResponse::class))]
             ),
             ApiResponse(
-                responseCode = "401",
-                description = "AccessToken or StepUpToken is invalid.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "403",
-                description = "The user did not configure authentication using password.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "409",
+                responseCode = "304",
                 description = "The user already enabled TOTP.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
+            ApiResponse(
+                responseCode = "400",
+                description = "2FA cannot be enabled for users who didn't configure authentication using a password.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
+            ApiResponse(
+                responseCode = "401",
+                description = "`AccessToken` or `StepUpToken` is invalid.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
@@ -154,7 +173,16 @@ class TotpAuthenticationController(
     @DeleteMapping
     @Operation(
         summary = "Disable TOTP as 2FA Method",
-        description = "Disable TOTP for the current user.",
+        description = """
+            Disable TOTP for the current user.
+            
+            You can learn more about this [here](https://singularity.stereov.io/docs/guides/auth/two-factor#setup).
+            
+            **Tokens:**
+            - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
+            - A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
+              is required. This token should match user and session contained in the `AccessToken`.
+        """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/two-factor#disable"),
         security = [
             SecurityRequirement(name = OpenApiConstants.ACCESS_TOKEN_HEADER),
@@ -169,8 +197,13 @@ class TotpAuthenticationController(
                 content = [Content(schema = Schema(implementation = UserResponse::class))]
             ),
             ApiResponse(
+                responseCode = "400",
+                description = "This method is already disabled for the user.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
+            ApiResponse(
                 responseCode = "401",
-                description = "Not authorized.",
+                description = "Invalid or expired `AccessToken` or `StepUpToken`.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
@@ -182,9 +215,33 @@ class TotpAuthenticationController(
     @PostMapping("/recover")
     @Operation(
         summary = "Recover From TOTP",
-        description = "Recover the user if they lost access to their 2FA device. " +
-                "After successful recovery, an AccessToken, RefreshToken and StepUpToken will be set " +
-                "as HTTP-only cookies and returned in the response body if header authentication is enabled.",
+        description = """
+            Recover the user if they lost access to their 2FA device.
+            
+            You can learn more about recovery for TOTP [here](https://singularity.stereov.io/docs/guides/auth/two-factor#recovery).
+            
+            **Requirements:**
+            - The user can authenticate using password.
+            - The user enabled TOTP as 2FA method.
+            
+            **Tokens:**
+            - A valid [`TwoFactorAuthenticationToken`](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token)
+              is required. This token will be set automatically as HTTP-only cookie through 
+              [`POST /api/auth/login`](https://singularity.stereov.io/docs/api/login) or
+              [`POST /api/auth/step-up`](https://singularity.stereov.io/docs/api/step-up)
+              or can be retrieved from any of those endpoints' response and set as header manually if [header authentication](https://singularity.stereov.io/docs/guides/authentication#header-authentication) 
+              is enabled.
+            - If this action is successful, [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token), 
+              [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token) and
+              [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
+              will automatically be set as HTTP-only cookies.
+              
+              If [header authentication](https://singularity.stereov.io/docs/guides/auth/authentication#header-authentication) is enabled,
+              [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token), 
+              [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token) and
+              [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
+              will be returned in the response body and can be used in the authorization header for upcoming requests.
+        """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/two-factor#recovery"),
         security = [
             SecurityRequirement(name = OpenApiConstants.TWO_FACTOR_AUTHENTICATION_TOKEN_HEADER),
@@ -198,13 +255,13 @@ class TotpAuthenticationController(
                 content = [Content(schema = Schema(implementation = TwoFactorRecoveryResponse::class))]
             ),
             ApiResponse(
-                responseCode = "401",
-                description = "Wrong code.",
+                responseCode = "304",
+                description = "User is already authenticated.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
             ApiResponse(
-                responseCode = "403",
-                description = "User is already authenticated.",
+                responseCode = "401",
+                description = "Wrong code or invalid or expired `TwoFactorAuthenticationToken`.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
         ]

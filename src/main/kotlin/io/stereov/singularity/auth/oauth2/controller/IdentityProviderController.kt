@@ -33,7 +33,15 @@ class IdentityProviderController(
     @GetMapping
     @Operation(
         summary = "Get Identity Providers",
-        description = "Get a list of connected identity providers for the current user.",
+        description = """
+            Get a list of connected identity providers for the current user.
+            
+            Users can connect multiple OAuth2 providers to their account.
+            You can learn more about this [here](https://singularity.stereov.io/docs/guides/auth/oauth2).
+            
+            **Tokens:**
+            - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
+        """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/oauth2#getting-connected-providers"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER),
@@ -62,7 +70,19 @@ class IdentityProviderController(
     @PostMapping("password")
     @Operation(
         summary = "Add Password Authentication",
-        description = "Create a new identity provider for the current user that allows the user to login with a password",
+        description = """
+            Create a new identity provider for the current user that allows the user to login with a password.
+            
+            You can learn more about this [here](https://singularity.stereov.io/docs/guides/auth/oauth2#adding-password-authentication).
+            
+            **Requirements:**
+            - The user registered via an OAuth2 provider.
+            
+            **Tokens:**
+            - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
+            - A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
+              is required. This token should match user and session contained in the `AccessToken`.
+        """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/oauth2#adding-password-authentication"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER),
@@ -77,15 +97,15 @@ class IdentityProviderController(
                 content = [Content(schema = Schema(implementation = UserResponse::class))]
             ),
             ApiResponse(
+                responseCode = "304",
+                description = "Bad request. User already created a password identity",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
+            ApiResponse(
                 responseCode = "401",
                 description = "Unauthorized",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
-            ApiResponse(
-                responseCode = "400",
-                description = "Bad request. User already created a password identity",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            )
         ]
     )
     suspend fun addPasswordAuthentication(@RequestBody req: ConnectPasswordIdentityRequest): ResponseEntity<UserResponse> {
@@ -97,8 +117,17 @@ class IdentityProviderController(
     @DeleteMapping("{provider}")
     @Operation(
         summary = "Delete Identity Provider",
-        description = "Delete an identity provider from the connected identity providers of the current user." +
-                "You are not allowed to delete the password identity or the only existing identity.",
+        description = """
+            Delete an identity provider from the connected identity providers of the current user.
+            
+            **Requirements:**
+            - You are not allowed to delete the password identity or the only existing identity.
+            
+            **Tokens:**
+            - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
+            - A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
+              is required. This token should match user and session contained in the `AccessToken`.
+        """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/oauth2#disconnecting-an-oauth2-provider"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER),

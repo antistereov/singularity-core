@@ -26,11 +26,11 @@ import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthenticationServ
 import io.stereov.singularity.auth.twofactor.service.token.TotpSetupTokenService
 import io.stereov.singularity.auth.twofactor.service.token.TwoFactorAuthenticationTokenService
 import io.stereov.singularity.database.hash.service.HashService
-import io.stereov.singularity.global.config.ApplicationConfiguration
-import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.email.core.service.EmailService
 import io.stereov.singularity.email.template.service.TemplateService
+import io.stereov.singularity.global.config.ApplicationConfiguration
+import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.user.core.mapper.UserMapper
 import io.stereov.singularity.user.core.service.UserService
@@ -55,8 +55,16 @@ class TwoFactorAuthConfiguration {
     fun mailAuthenticationController(
         emailAuthenticationService: EmailAuthenticationService,
         authorizationService: AuthorizationService,
-        userMapper: UserMapper
-    ) = EmailAuthenticationController(emailAuthenticationService, authorizationService, userMapper)
+        userMapper: UserMapper,
+        twoFactorAuthTokenService: TwoFactorAuthenticationTokenService,
+        userService: UserService
+    ) = EmailAuthenticationController(
+        emailAuthenticationService,
+        authorizationService,
+        userMapper,
+        twoFactorAuthTokenService,
+        userService
+    )
     
     @Bean
     @ConditionalOnMissingBean

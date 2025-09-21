@@ -3,6 +3,8 @@ package io.stereov.singularity.auth.twofactor.service
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.exception.AuthException
+import io.stereov.singularity.auth.core.exception.model.WrongIdentityProviderException
+import io.stereov.singularity.auth.core.model.IdentityProvider
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorAuthenticationRequest
 import io.stereov.singularity.auth.twofactor.dto.request.UpdatePreferredTwoFactorMethodRequest
@@ -49,6 +51,10 @@ class TwoFactorAuthenticationService(
 
         val token = twoFactorAuthTokenService.extract(exchange)
         val user = userService.findById(token.userId)
+
+        if (!user.sensitive.identities.containsKey(IdentityProvider.PASSWORD))
+            throw WrongIdentityProviderException("Authentication with password is disabled")
+        if (!user.twoFactorEnabled) throw TwoFactorMethodDisabledException("No 2FA method is enabled")
 
         if (user.sensitive.security.twoFactor.totp.enabled) {
             req.totp?.let { return totpAuthenticationService.validateCode(user, it) }

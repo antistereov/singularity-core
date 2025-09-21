@@ -63,7 +63,7 @@ class GuestController(
             If successful, [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) and 
             [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token) 
             will automatically be set as HTTP-only cookies.
-            If [header authentication](https://singularity.stereov.io/docs/guides/auth/securing-endpoints#header-authentication) is enabled,
+            If [header authentication](https://singularity.stereov.io/docs/guides/auth/authentication#header-authentication) is enabled,
             [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) and 
             [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)
             will be returned in the response body and can be used as 
@@ -148,7 +148,7 @@ class GuestController(
                 A new [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) and 
                 [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token) 
                 will automatically be set as HTTP-only cookies.
-                If [header authentication](https://singularity.stereov.io/docs/guides/auth/securing-endpoints#header-authentication) is enabled,
+                If [header authentication](https://singularity.stereov.io/docs/guides/auth/authentication#header-authentication) is enabled,
                 [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) and 
                 [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)
                 will be returned in the response body and can be used as 
