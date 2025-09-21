@@ -1658,8 +1658,14 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/PageGroupResponse"
+        "400":
+          description: Translation for default locale is missing.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
-          description: Invalid token.
+          description: Invalid or expired `AccessToken`.
           content:
             '*/*':
               schema:
@@ -1690,10 +1696,8 @@ paths:
         These can be set when [creating](https://singularity.stereov.io/docs/guides/auth/groups#creating-groups)
         groups or through [updates](https://singularity.stereov.io/docs/guides/auth/groups#updating-groups).
 
-        A `primaryLocale` can be set and defaults to the application's default locale.
+        **Note:** A translation for the application's default locale must exist.
         You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
-
-        **Note:** A group needs at least one translation and a translation for the `primaryLocale` must exist.
 
         The `locale` request parameter specifies in which language the information should be returned.
         If no locale is specified, the application's default locale will be used.
@@ -1823,10 +1827,8 @@ paths:
         These can be set when [creating](https://singularity.stereov.io/docs/guides/auth/groups#creating-groups)
         groups or through [updates](https://singularity.stereov.io/docs/guides/auth/groups#updating-groups).
 
-        A `primaryLocale` can be set and defaults to the application's default locale.
+        **Note:** A translation for the application's default locale must exist.
         You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
-
-        **Note:** A group needs at least one translation and a translation for the `primaryLocale` must exist.
 
         **Tokens:**
         - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
@@ -1858,8 +1860,15 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/GroupResponse"
+        "400":
+          description: Update would cause the translation for default locale to be
+            missing.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
-          description: Invalid token.
+          description: Invalid or expired `AccessToken`.
           content:
             '*/*':
               schema:
@@ -1867,6 +1876,12 @@ paths:
         "403":
           description: "`AccessToken` does permit [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles)\
             \ access."
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: A group with this key already exists.
           content:
             '*/*':
               schema:
@@ -1913,6 +1928,12 @@ paths:
         "403":
           description: "AccessToken does permit [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles)\
             \ access."
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: No group with `key` found.
           content:
             '*/*':
               schema:
@@ -3049,11 +3070,15 @@ components:
     UpdateGroupRequest:
       type: object
       properties:
+        key:
+          type: string
+          description: "The updated group key. If empty, no change will be made"
         translations:
           type: object
           additionalProperties:
             $ref: "#/components/schemas/GroupTranslation"
-          description: A map of locale to group translation.
+          description: A map of locale to group translation. The translations will
+            be added or updated.
           example:
             en:
               name: Pilots
@@ -3061,14 +3086,16 @@ components:
             de:
               name: Piloten
               description: "Personen, die fliegen können"
-        primaryLocale:
-          type: string
-          description: "The primary locale of the translations. If not specified,\
-            \ the applications default locale is used. It must be contained in the\
-            \ new or existing translations."
+        translationsToDelete:
+          type: array
+          description: The translations to delete.
           example: en
+          items:
+            type: string
+          uniqueItems: true
       required:
       - translations
+      - translationsToDelete
     GroupResponse:
       type: object
       properties:
@@ -3503,12 +3530,6 @@ components:
             de:
               name: Piloten
               description: "Personen, die fliegen können"
-        primaryLocale:
-          type: string
-          description: "The primary locale of the translations. If not specified,\
-            \ the applications default locale is used. It must be contained in the\
-            \ new or existing translations."
-          example: en
       required:
       - key
       - translations
