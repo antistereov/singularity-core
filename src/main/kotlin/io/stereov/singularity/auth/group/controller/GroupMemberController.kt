@@ -1,6 +1,5 @@
 package io.stereov.singularity.auth.group.controller
 
-import io.stereov.singularity.auth.group.dto.request.AddGroupMemberRequest
 import io.stereov.singularity.auth.group.service.GroupMemberService
 import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.model.OpenApiConstants
@@ -25,10 +24,21 @@ class GroupMemberController(
     private val userMapper: UserMapper
 ) {
 
-    @PostMapping("/{groupKey}/members")
+    @PostMapping("/{groupKey}/members/{userId}")
     @Operation(
         summary = "Add Member to Group",
-        description = "Add a member to a group. Invalidates all AccessTokens.",
+        description = """
+            Add a member to a group with given `key`. 
+            
+            You can find more information about groups [here](https://singularity.stereov.io/docs/guides/auth/groups).
+            
+            **Note:** Invalidates all [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
+            because they would contain the wrong group information.
+            
+            **Tokens:**
+            - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
+              with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
+        """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/groups#adding-members-to-groups"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER, scopes = [OpenApiConstants.ADMIN_SCOPE]),
@@ -42,21 +52,26 @@ class GroupMemberController(
             ),
             ApiResponse(
                 responseCode = "401",
-                description = "Invalid token.",
+                description = "Invalid or expired `AccessToken`.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
             ApiResponse(
                 responseCode = "403",
-                description = "User does not have ADMIN role.",
+                description = "`AccessToken` does not contain `ADMIN` permissions.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
+            ApiResponse(
+                responseCode = "404",
+                description = "No group with `key` or user with `userId` found.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
     )
     suspend fun addMemberToGroup(
         @PathVariable groupKey: String,
-        @RequestBody req: AddGroupMemberRequest
+        @PathVariable userId: ObjectId,
     ): ResponseEntity<UserResponse> {
-        val user = groupMemberService.add(req.userId, groupKey)
+        val user = groupMemberService.add(userId, groupKey)
 
         return ResponseEntity.ok(userMapper.toResponse(user))
     }
@@ -64,7 +79,18 @@ class GroupMemberController(
     @DeleteMapping("/{groupKey}/members/{userId}")
     @Operation(
         summary = "Remove Member from Group",
-        description = "Remove a member from a group. Invalidates all AccessTokens.",
+        description = """
+            Remove a member from the group with given `key`.
+            
+            You can find more information about groups [here](https://singularity.stereov.io/docs/guides/auth/groups).
+            
+            **Note:** Invalidates all [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
+            because they would contain the wrong group information.
+            
+            **Tokens:**
+            - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
+              with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
+        """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/groups#removing-members-from-groups"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER, scopes = [OpenApiConstants.ADMIN_SCOPE]),
@@ -78,12 +104,17 @@ class GroupMemberController(
             ),
             ApiResponse(
                 responseCode = "401",
-                description = "Invalid token.",
+                description = "Invalid or expired `AccessToken`.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
             ApiResponse(
                 responseCode = "403",
-                description = "User does not have ADMIN role.",
+                description = "`AccessToken` does not contain `ADMIN` permissions.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
+            ApiResponse(
+                responseCode = "404",
+                description = "No group with `key` or user with `userId` found.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
