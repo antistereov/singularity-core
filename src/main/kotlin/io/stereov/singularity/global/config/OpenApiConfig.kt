@@ -111,7 +111,7 @@ class OpenApiConfig() {
         openApi.info.summary = openApi.info.summary?.trimIndent()
         openApi.info.description = openApi.info.description?.trimIndent()
 
-        openApi.components.schemas.forEach { (k, v) ->
+        openApi.components.schemas.forEach { (_, v) ->
             v.name = v.name?.trimIndent()
             v.description = v.description?.trimIndent()
         }
