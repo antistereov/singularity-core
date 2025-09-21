@@ -11,9 +11,9 @@ import java.util.*
 @Document(collection = "groups")
 data class GroupDocument(
     @Id private val _id: ObjectId? = null,
-    @Indexed(unique = true) val key: String,
+    @Indexed(unique = true) var key: String,
     override val translations: MutableMap<Locale, GroupTranslation>,
-    override val primaryLocale: Locale
+    override var primaryLocale: Locale
 ) : Translatable<GroupTranslation> {
 
     val id: ObjectId

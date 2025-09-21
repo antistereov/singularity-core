@@ -29,7 +29,7 @@ class GroupMemberService(
         }
 
         val user = userService.findById(userId)
-        user.sensitive.groups.add(groupKey)
+        user.groups.add(groupKey)
 
         val savedUser = userService.save(user)
         accessTokenCache.invalidateAllTokens(user.id)
@@ -47,7 +47,7 @@ class GroupMemberService(
         }
         val user = userService.findById(userId)
 
-        user.sensitive.groups.remove(groupKey)
+        user.groups.remove(groupKey)
 
         val savedUser = userService.save(user)
         accessTokenCache.invalidateAllTokens(user.id)

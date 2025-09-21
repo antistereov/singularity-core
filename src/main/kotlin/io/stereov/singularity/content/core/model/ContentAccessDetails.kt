@@ -51,13 +51,13 @@ data class ContentAccessDetails(
         val isAdmin = user.roles.contains(Role.ADMIN)
 
         val userIsAdmin = hasAccess(ContentAccessSubject.USER, user.id.toString(), ContentAccessRole.ADMIN)
-        val groupIsAdmin = user.sensitive.groups.any { groupId -> hasAccess(ContentAccessSubject.GROUP, groupId, ContentAccessRole.ADMIN) }
+        val groupIsAdmin = user.groups.any { groupId -> hasAccess(ContentAccessSubject.GROUP, groupId, ContentAccessRole.ADMIN) }
 
         val userIsEditor = hasAccess(ContentAccessSubject.USER, user.id.toString(), ContentAccessRole.EDITOR)
-        val groupIsEditor = user.sensitive.groups.any { groupId -> hasAccess(ContentAccessSubject.GROUP, groupId, ContentAccessRole.EDITOR) }
+        val groupIsEditor = user.groups.any { groupId -> hasAccess(ContentAccessSubject.GROUP, groupId, ContentAccessRole.EDITOR) }
 
         val userIsViewer = hasAccess(ContentAccessSubject.USER, user.id.toString(), ContentAccessRole.VIEWER)
-        val groupIsViewer = user.sensitive.groups.any { groupId -> hasAccess(ContentAccessSubject.GROUP, groupId, ContentAccessRole.VIEWER) }
+        val groupIsViewer = user.groups.any { groupId -> hasAccess(ContentAccessSubject.GROUP, groupId, ContentAccessRole.VIEWER) }
 
         val isPublic = visibility == AccessType.PUBLIC
 

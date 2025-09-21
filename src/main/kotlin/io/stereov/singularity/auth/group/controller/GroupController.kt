@@ -1,13 +1,15 @@
 package io.stereov.singularity.auth.group.controller
 
+import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.group.dto.request.CreateGroupRequest
+import io.stereov.singularity.auth.group.dto.request.UpdateGroupRequest
 import io.stereov.singularity.auth.group.dto.response.GroupResponse
-import io.stereov.singularity.auth.group.dto.response.UpdateGroupRequest
 import io.stereov.singularity.auth.group.mapper.GroupMapper
 import io.stereov.singularity.auth.group.service.GroupService
 import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.global.model.SuccessResponse
+import io.stereov.singularity.user.core.model.Role
 import io.swagger.v3.oas.annotations.ExternalDocumentation
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -26,7 +28,8 @@ import java.util.*
 @Tag(name = "Groups", description = "Operation related to group and member management.")
 class GroupController(
     private val service: GroupService,
-    private val groupMapper: GroupMapper
+    private val groupMapper: GroupMapper,
+    private val authorizationService: AuthorizationService
 ) {
 
     @PostMapping
@@ -43,9 +46,11 @@ class GroupController(
             These can be set when [creating](https://singularity.stereov.io/docs/guides/auth/groups#creating-groups)
             groups or through [updates](https://singularity.stereov.io/docs/guides/auth/groups#updating-groups).
             
-            The `locale` request parameter specifies in which language the information should be returned.
-            If no locale is specified, the applications default locale will be used.
+            **Note:** A translation for the application's default locale must exist.
             You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
+            
+            The `locale` request parameter specifies in which language the information should be returned.
+            If no locale is specified, the application's default locale will be used.
             
             **Tokens:**
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
@@ -65,12 +70,17 @@ class GroupController(
             ),
             ApiResponse(
                 responseCode = "401",
-                description = "Invalid token.",
+                description = "Invalid or expired `AccessToken`.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
             ApiResponse(
                 responseCode = "403",
-                description = "User does not have ADMIN role.",
+                description = "User does not have `ADMIN` role.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
+            ApiResponse(
+                responseCode = "409",
+                description = "Group with this `key` already exists.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
@@ -118,13 +128,18 @@ class GroupController(
                 description = "Paginated groups.",
             ),
             ApiResponse(
+                responseCode = "400",
+                description = "Translation for default locale is missing.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
+            ApiResponse(
                 responseCode = "401",
-                description = "Invalid token.",
+                description = "Invalid or expired `AccessToken`.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
             ApiResponse(
                 responseCode = "403",
-                description = "User does not have ADMIN role.",
+                description = "User does not have `ADMIN` permissions.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
@@ -135,6 +150,7 @@ class GroupController(
         @RequestParam sort: List<String> = emptyList(),
         @RequestParam locale: Locale?
     ): ResponseEntity<Page<GroupResponse>> {
+        authorizationService.requireRole(Role.ADMIN)
         val pages = service.findAllPaginated(page, size, sort, locale = locale)
         val responses = pages.content.map { group -> groupMapper.createGroupResponse(group, locale) }
 
@@ -192,6 +208,8 @@ class GroupController(
         @PathVariable key: String,
         @RequestParam locale: Locale?
     ): ResponseEntity<GroupResponse> {
+        authorizationService.requireRole(Role.ADMIN)
+
         return ResponseEntity.ok(
             groupMapper.createGroupResponse(service.findByKey(key), locale)
         )
@@ -211,8 +229,7 @@ class GroupController(
             These can be set when [creating](https://singularity.stereov.io/docs/guides/auth/groups#creating-groups)
             groups or through [updates](https://singularity.stereov.io/docs/guides/auth/groups#updating-groups).
             
-            The `locale` request parameter specifies in which language the information should be returned.
-            If no locale is specified, the applications default locale will be used.
+            **Note:** A translation for the application's default locale must exist.
             You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
             
             **Tokens:**
@@ -231,13 +248,23 @@ class GroupController(
                 description = "Updated group information.",
             ),
             ApiResponse(
+                responseCode = "400",
+                description = "Update would cause the translation for default locale to be missing.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
+            ApiResponse(
                 responseCode = "401",
-                description = "Invalid token.",
+                description = "Invalid or expired `AccessToken`.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
             ApiResponse(
                 responseCode = "403",
                 description = "`AccessToken` does permit [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles) access.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
+            ApiResponse(
+                responseCode = "409",
+                description = "A group with this key already exists.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
@@ -283,6 +310,11 @@ class GroupController(
             ApiResponse(
                 responseCode = "403",
                 description = "AccessToken does permit [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles) access.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
+            ApiResponse(
+                responseCode = "404",
+                description = "No group with `key` found.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]

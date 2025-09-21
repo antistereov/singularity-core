@@ -27,11 +27,11 @@ class GuestMapper() {
         created = created,
         lastActive = lastActive,
         roles = mutableSetOf(Role.GUEST),
+        groups = mutableSetOf(),
         sensitive = SensitiveUserData(
             name = name,
             email = null,
             identities = mutableMapOf(),
-            groups = mutableSetOf(),
             UserSecurityDetails(false, mailTwoFactorCodeExpiresIn, false),
             sessions = sessions,
             avatarFileKey

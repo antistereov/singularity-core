@@ -133,4 +133,10 @@ class UserService(
         return repository.findAllByRolesContaining(role).map { decrypt(it) }
     }
 
+    suspend fun findAllByGroupContaining(group: String): Flow<UserDocument> {
+        logger.debug { "Finding all users with group membership $group" }
+
+        return repository.findAllByGroupsContaining(group).map { decrypt(it) }
+    }
+
 }

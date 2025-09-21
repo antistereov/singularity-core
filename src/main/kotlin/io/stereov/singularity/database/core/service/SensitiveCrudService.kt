@@ -10,6 +10,7 @@ import io.stereov.singularity.global.exception.model.DocumentNotFoundException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.toList
 import org.bson.types.ObjectId
 
 interface SensitiveCrudService<S, D: SensitiveDocument<S>, E: EncryptedSensitiveDocument<S>> {
@@ -75,6 +76,16 @@ interface SensitiveCrudService<S, D: SensitiveDocument<S>, E: EncryptedSensitive
         this.logger.debug { "Successfully saved user" }
 
         return this.decrypt(savedDoc)
+    }
+
+    suspend fun saveAll(documents: List<D>): List<D> {
+        logger.debug { "Saving all documents" }
+
+        val encryptedDocs = documents.map { encrypt(it) }
+        val savedDocs = repository.saveAll(encryptedDocs)
+
+        return savedDocs.map { decrypt(it) }
+            .toList()
     }
 
     suspend fun deleteById(id: ObjectId) {

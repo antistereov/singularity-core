@@ -25,6 +25,7 @@ data class UserDocument(
     val created: Instant = Instant.now(),
     var lastActive: Instant = Instant.now(),
     val roles: MutableSet<Role>,
+    val groups: MutableSet<String>,
     override var sensitive: SensitiveUserData,
 ) : SensitiveDocument<SensitiveUserData> {
 
@@ -107,7 +108,7 @@ data class UserDocument(
             }.toMap()
 
         return EncryptedUserDocument(
-            _id, hashedEmail, hashedIdentities, roles, created, lastActive, encryptedSensitiveData
+            _id, hashedEmail, hashedIdentities, roles, groups, created, lastActive, encryptedSensitiveData
         )
     }
 
@@ -236,7 +237,7 @@ data class UserDocument(
     val isGuest: Boolean
         get() = if (roles.contains(Role.GUEST)) {
             if (roles.size == 1) true
-            else throw InvalidDocumentException("Account does have roles ${roles} although it is a GUEST account.")
+            else throw InvalidDocumentException("Account does have roles $roles although it is a GUEST account.")
         } else false
 
     companion object {
@@ -259,11 +260,11 @@ data class UserDocument(
             created,
             lastActive,
             roles,
+            groups,
             SensitiveUserData(
                 name,
                 email,
                 mutableMapOf(IdentityProvider.PASSWORD to UserIdentity.ofPassword(password, true)),
-                groups,
                 UserSecurityDetails(mailEnabled, mailTwoFactorCodeExpiresIn),
                 sessions,
                 avatarFileKey
@@ -288,11 +289,11 @@ data class UserDocument(
             created,
             lastActive,
             roles,
+            groups,
             SensitiveUserData(
                 name,
                 email,
                 mutableMapOf(provider to UserIdentity.ofProvider(principalId, true)),
-                groups,
                 UserSecurityDetails(false, mailTwoFactorCodeExpiresIn, true),
                 sessions,
                 avatarFileKey

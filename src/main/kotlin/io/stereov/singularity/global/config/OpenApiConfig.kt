@@ -108,7 +108,13 @@ class OpenApiConfig() {
     }
 
     private fun trimIndents(openApi: OpenAPI) {
-        openApi.info.description = openApi.info.description.trimIndent()
+        openApi.info.summary = openApi.info.summary?.trimIndent()
+        openApi.info.description = openApi.info.description?.trimIndent()
+
+        openApi.components.schemas.forEach { (k, v) ->
+            v.name = v.name?.trimIndent()
+            v.description = v.description?.trimIndent()
+        }
 
         openApi.paths.forEach { (_, pathItem) ->
             pathItem.readOperations().forEach { operation ->
