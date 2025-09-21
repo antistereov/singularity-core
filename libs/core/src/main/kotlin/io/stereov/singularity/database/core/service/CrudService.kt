@@ -35,6 +35,7 @@ interface CrudService<T: Any> {
         return repository.existsById(id)
     }
 
+    @Suppress("UNUSED")
     suspend fun deleteById(id: ObjectId) {
         logger.debug { "Deleting ${collectionClass.name} by ID $id" }
 
@@ -53,12 +54,14 @@ interface CrudService<T: Any> {
         return repository.save(doc)
     }
 
+    @Suppress("UNUSED")
     suspend fun saveAll(docs: Collection<T>): List<T> {
         logger.debug { "Saving multiple ${collectionClass.name}s" }
 
         return repository.saveAll(docs).toList()
     }
 
+    @Suppress("UNUSED")
     suspend fun findAllPaginated(page: Int, size: Int, sort: List<String>, criteria: Criteria? = null): Page<T> {
 
         val pageable = PageRequest.of(page, size, Sort.by(sort.map { item ->
