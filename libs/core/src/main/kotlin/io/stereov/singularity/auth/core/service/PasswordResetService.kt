@@ -47,13 +47,6 @@ class PasswordResetService(
 
     private val logger = KotlinLogging.logger {}
 
-    /**
-     * Sends a password-reset email to the user.
-     *
-     * This method generates a password reset token and sends it to the user's email address.
-     *
-     * @param req The email address of the user to send the password-reset email to.
-     */
     suspend fun sendPasswordReset(req: SendPasswordResetRequest, locale: Locale?) {
         logger.debug { "Sending password reset email" }
 
@@ -91,13 +84,6 @@ class PasswordResetService(
         userService.save(user)
     }
 
-    /**
-     * Gets the remaining cooldown time for password reset.
-     *
-     * This method checks the Redis cache for the remaining time to wait before sending another password reset email.
-     *
-     * @return The remaining cooldown time in seconds.
-     */
     suspend fun getRemainingCooldown(req: SendPasswordResetRequest): MailCooldownResponse {
         logger.debug { "Getting remaining password reset cooldown" }
 
@@ -106,15 +92,6 @@ class PasswordResetService(
         return MailCooldownResponse(remaining)
     }
 
-    /**
-     * Starts the cooldown period for password reset.
-     *
-     * This method sets a key in Redis to indicate that the cooldown period has started.
-     *
-     * @param userId The ID of the user to start the cooldown for.
-     *
-     * @return True if the cooldown was successfully started, false if it was already in progress.
-     */
     suspend fun startCooldown(email: String): Boolean {
         logger.debug { "Starting cooldown for password reset" }
 
@@ -127,15 +104,6 @@ class PasswordResetService(
         return isNewKey
     }
 
-    /**
-     * Gets the remaining cooldown time for password reset.
-     *
-     * This method checks the Redis cache for the remaining time to wait before sending another password reset email.
-     *
-     * @param userId The ID of the user to check the cooldown for.
-     *
-     * @return The remaining cooldown time in seconds.
-     */
     suspend fun getRemainingCooldown(email: String): Long {
         logger.debug { "Getting remaining cooldown for password resets" }
 
@@ -145,11 +113,6 @@ class PasswordResetService(
         return if (remainingTtl.seconds > 0) remainingTtl.seconds else 0
     }
 
-    /**
-     * Sends a password reset email to the user.
-     *
-     * @param user The user to send the password reset email to.
-     */
     private suspend fun sendPasswordResetEmail(user: UserDocument, locale: Locale?) {
         logger.debug { "Sending password reset email to ${user.sensitive.email}" }
 
@@ -182,12 +145,6 @@ class PasswordResetService(
         startCooldown(email)
     }
 
-    /**
-     * Generates a password reset URL for the user.
-     *
-     * @param token The token to include in the password reset URL.
-     * @return The generated password reset URL.
-     */
     private fun generatePasswordResetUrl(token: String): String {
         return "${passwordResetProperties.uri}?token=$token"
     }

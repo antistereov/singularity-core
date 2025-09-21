@@ -37,10 +37,6 @@ const config: Config = {
         locales: ['en'],
     },
 
-    customFields: {
-        openApiUrl: 'http://localhost:8000/api/openapi.yaml'
-    },
-
     presets: [
         [
             '@docusaurus/preset-classic',

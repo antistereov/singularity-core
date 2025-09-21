@@ -8,8 +8,6 @@ import io.stereov.singularity.auth.core.dto.request.RegisterUserRequest
 import io.stereov.singularity.auth.core.model.token.AccessToken
 import io.stereov.singularity.auth.core.model.token.RefreshToken
 import io.stereov.singularity.auth.core.model.token.SessionTokenType
-import io.stereov.singularity.auth.core.service.AuthorizationService
-import io.stereov.singularity.auth.core.service.SessionService
 import io.stereov.singularity.auth.core.service.token.*
 import io.stereov.singularity.auth.group.model.GroupDocument
 import io.stereov.singularity.auth.group.model.GroupTranslation
@@ -54,16 +52,7 @@ class BaseSpringBootTest {
     lateinit var cacheService: CacheService
 
     @Autowired
-    lateinit var sessionService: SessionService
-
-    @Autowired
-    lateinit var authorizationService: AuthorizationService
-
-    @Autowired
     lateinit var twoFactorAuthenticationTokenService: TwoFactorAuthenticationTokenService
-
-    @Autowired
-    lateinit var sessionTokenService: SessionTokenService
 
     @Autowired
     lateinit var cookieCreator: CookieCreator
