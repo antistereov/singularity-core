@@ -17,7 +17,7 @@ class TwoFactorAuthExceptionHandler : BaseExceptionHandler<TwoFactorAuthExceptio
         is InvalidTwoFactorCodeException -> HttpStatus.UNAUTHORIZED
         is InvalidTwoFactorRequestException -> HttpStatus.BAD_REQUEST
         is MissingPasswordIdentityException -> HttpStatus.BAD_REQUEST
-        is TwoFactorMethodAlreadyEnabledException -> HttpStatus.CONFLICT
+        is TwoFactorMethodAlreadyEnabledException -> HttpStatus.NOT_MODIFIED
         is TwoFactorCodeExpiredException -> HttpStatus.UNAUTHORIZED
         is TwoFactorMethodDisabledException -> HttpStatus.BAD_REQUEST
         else -> HttpStatus.UNAUTHORIZED

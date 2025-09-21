@@ -57,6 +57,15 @@ class EmailAuthenticationController(
             **Requirements:**
             - The user can authenticate using password. 2FA will not work with OAuth2. 
               The OAuth2 provider will validate the second factor if the user enabled it for the provider.
+              
+            **Locale:**
+            
+            A locale can be specified for this request. 
+            The email will be sent in the specified locale.
+            You can learn more about locale in emails [here](https://singularity.stereov.io/docs/guides/email/templates).
+            
+            If no locale is specified, the applications default locale will be used.
+            You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
             
             **Tokens:**
             

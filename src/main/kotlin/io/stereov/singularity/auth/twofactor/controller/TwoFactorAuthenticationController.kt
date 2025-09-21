@@ -2,15 +2,17 @@ package io.stereov.singularity.auth.twofactor.controller
 
 import io.stereov.singularity.auth.core.component.CookieCreator
 import io.stereov.singularity.auth.core.dto.response.LoginResponse
+import io.stereov.singularity.auth.core.exception.model.UserAlreadyAuthenticatedException
 import io.stereov.singularity.auth.core.properties.AuthProperties
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.core.service.token.AccessTokenService
 import io.stereov.singularity.auth.core.service.token.RefreshTokenService
 import io.stereov.singularity.auth.core.service.token.StepUpTokenService
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
+import io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException
+import io.stereov.singularity.auth.twofactor.dto.request.ChangePreferredTwoFactorMethodRequest
 import io.stereov.singularity.auth.twofactor.dto.request.CompleteLoginRequest
 import io.stereov.singularity.auth.twofactor.dto.request.CompleteStepUpRequest
-import io.stereov.singularity.auth.twofactor.dto.request.UpdatePreferredTwoFactorMethodRequest
 import io.stereov.singularity.auth.twofactor.dto.response.StepUpResponse
 import io.stereov.singularity.auth.twofactor.model.token.TwoFactorTokenType
 import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthenticationService
@@ -100,6 +102,11 @@ class TwoFactorAuthenticationController(
                 content = [Content(schema = Schema(implementation = LoginResponse::class))]
             ),
             ApiResponse(
+                responseCode = "304",
+                description = "User is already authenticated.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
+            ApiResponse(
                 responseCode = "400",
                 description = "No 2FA code for an enabled 2FA method was provided or 2FA is disabled.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
@@ -115,6 +122,9 @@ class TwoFactorAuthenticationController(
         exchange: ServerWebExchange,
         @RequestBody req: CompleteLoginRequest
     ): ResponseEntity<LoginResponse> {
+        if (authorizationService.isAuthenticated())
+            throw UserAlreadyAuthenticatedException("Login not required: user is already authenticated.")
+
         val user = twoFactorAuthService.validateTwoFactor(exchange, req)
         val sessionId = UUID.randomUUID()
 
@@ -199,11 +209,14 @@ class TwoFactorAuthenticationController(
         val user = twoFactorAuthService.validateTwoFactor(exchange, req)
         val sessionId = authorizationService.getCurrentSessionId()
 
-        val stepUpTokenCookie = stepUpTokenService.create(user.id, sessionId)
+        if (user.id != authorizationService.getCurrentUserId())
+            throw InvalidTokenException("TwoFactorAuthenticationToken does not match AccessToken")
+
+        val stepUpToken = stepUpTokenService.create(user.id, sessionId)
 
         return ResponseEntity.ok()
-            .header("Set-Cookie", cookieCreator.createCookie(stepUpTokenCookie).toString())
-            .body(StepUpResponse(if (authProperties.allowHeaderAuthentication) stepUpTokenCookie.value else null))
+            .header("Set-Cookie", cookieCreator.createCookie(stepUpToken).toString())
+            .body(StepUpResponse(if (authProperties.allowHeaderAuthentication) stepUpToken.value else null))
     }
 
     @PostMapping("/preferred-method")
@@ -239,7 +252,7 @@ class TwoFactorAuthenticationController(
             ),
             ApiResponse(
                 responseCode = "400",
-                description = "This 2FA method is disabled.",
+                description = "This 2FA method is disabled or the user did not set up authentication via password.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
             ApiResponse(
@@ -250,7 +263,7 @@ class TwoFactorAuthenticationController(
         ]
     )
     suspend fun changePreferredTwoFactorMethod(
-        @RequestBody req: UpdatePreferredTwoFactorMethodRequest
+        @RequestBody req: ChangePreferredTwoFactorMethodRequest
     ): ResponseEntity<UserResponse> {
         return ResponseEntity.ok(
             userMapper.toResponse(twoFactorAuthService.updatePreferredMethod(req))
