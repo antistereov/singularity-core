@@ -1658,12 +1658,6 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/PageGroupResponse"
-        "400":
-          description: Translation for default locale is missing.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: Invalid or expired `AccessToken`.
           content:
@@ -1727,6 +1721,12 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/GroupResponse"
+        "400":
+          description: Translation for default locale is missing.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: Invalid or expired `AccessToken`.
           content:
@@ -1943,12 +1943,18 @@ paths:
         - adminScope
       - accessTokenCookie:
         - adminScope
-  /api/groups/{groupKey}/members:
+  /api/groups/{groupKey}/members/{userId}:
     post:
       tags:
       - Groups
       summary: Add Member to Group
-      description: Add a member to a group. Invalidates all AccessTokens.
+      description: "Add a member to a group with given `key`. \n\nYou can find more\
+        \ information about groups [here](https://singularity.stereov.io/docs/guides/auth/groups).\n\
+        \n**Note:** Invalidates all [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\n\
+        because they would contain the wrong group information.\n\n**Tokens:**\n-\
+        \ A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\n\
+        \  with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins)\
+        \ permissions is required."
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/groups#adding-members-to-groups
       operationId: addMemberToGroup
@@ -1958,12 +1964,11 @@ paths:
         required: true
         schema:
           type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/AddGroupMemberRequest"
+      - name: userId
+        in: path
         required: true
+        schema:
+          $ref: "#/components/schemas/ObjectId"
       responses:
         "200":
           description: Updated user information.
@@ -1972,13 +1977,19 @@ paths:
               schema:
                 $ref: "#/components/schemas/UserResponse"
         "401":
-          description: Invalid token.
+          description: Invalid or expired `AccessToken`.
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "403":
-          description: User does not have ADMIN role.
+          description: '`AccessToken` does not contain `ADMIN` permissions.'
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: No group with `key` or user with `userId` found.
           content:
             '*/*':
               schema:
@@ -1988,12 +1999,21 @@ paths:
         - adminScope
       - accessTokenCookie:
         - adminScope
-  /api/groups/{groupKey}/members/{userId}:
     delete:
       tags:
       - Groups
       summary: Remove Member from Group
-      description: Remove a member from a group. Invalidates all AccessTokens.
+      description: |-
+        Remove a member from the group with given `key`.
+
+        You can find more information about groups [here](https://singularity.stereov.io/docs/guides/auth/groups).
+
+        **Note:** Invalidates all [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
+        because they would contain the wrong group information.
+
+        **Tokens:**
+        - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
+          with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/groups#removing-members-from-groups
       operationId: removeMemberFromGroup
@@ -2016,13 +2036,19 @@ paths:
               schema:
                 $ref: "#/components/schemas/UserResponse"
         "401":
-          description: Invalid token.
+          description: Invalid or expired `AccessToken`.
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "403":
-          description: User does not have ADMIN role.
+          description: '`AccessToken` does not contain `ADMIN` permissions.'
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: No group with `key` or user with `userId` found.
           content:
             '*/*':
               schema:
@@ -3533,13 +3559,6 @@ components:
       required:
       - key
       - translations
-    AddGroupMemberRequest:
-      type: object
-      properties:
-        userId:
-          $ref: "#/components/schemas/ObjectId"
-      required:
-      - userId
     CreateTagRequest:
       type: object
       properties:
@@ -3913,13 +3932,13 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
+        numberOfElements:
+          type: integer
+          format: int32
         first:
           type: boolean
         last:
           type: boolean
-        numberOfElements:
-          type: integer
-          format: int32
         empty:
           type: boolean
     PageableObject:
@@ -4038,13 +4057,13 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
+        numberOfElements:
+          type: integer
+          format: int32
         first:
           type: boolean
         last:
           type: boolean
-        numberOfElements:
-          type: integer
-          format: int32
         empty:
           type: boolean
     ArticleResponse:

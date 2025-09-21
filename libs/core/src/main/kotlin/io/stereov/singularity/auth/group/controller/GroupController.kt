@@ -69,6 +69,11 @@ class GroupController(
                 content = [Content(schema = Schema(implementation = GroupResponse::class))]
             ),
             ApiResponse(
+                responseCode = "400",
+                description = "Translation for default locale is missing.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
+            ApiResponse(
                 responseCode = "401",
                 description = "Invalid or expired `AccessToken`.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
@@ -126,11 +131,6 @@ class GroupController(
             ApiResponse(
                 responseCode = "200",
                 description = "Paginated groups.",
-            ),
-            ApiResponse(
-                responseCode = "400",
-                description = "Translation for default locale is missing.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
             ApiResponse(
                 responseCode = "401",
