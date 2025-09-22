@@ -61,6 +61,9 @@ import java.util.concurrent.atomic.AtomicInteger
 @Import(MockConfig::class) class BaseSpringBootTest() {
 
     @Autowired
+    lateinit var sessionTokenService: SessionTokenService
+
+    @Autowired
     lateinit var objectMapper: ObjectMapper
 
     @Autowired
