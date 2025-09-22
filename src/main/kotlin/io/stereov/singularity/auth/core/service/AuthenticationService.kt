@@ -10,6 +10,7 @@ import io.stereov.singularity.auth.core.exception.AuthException
 import io.stereov.singularity.auth.core.exception.model.InvalidCredentialsException
 import io.stereov.singularity.auth.core.exception.model.UserAlreadyAuthenticatedException
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties
+import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailProperties
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.global.exception.model.MissingRequestParameterException
@@ -28,7 +29,8 @@ class AuthenticationService(
     private val accessTokenCache: AccessTokenCache,
     private val emailVerificationService: EmailVerificationService,
     private val factorMailCodeProperties: TwoFactorEmailCodeProperties,
-    private val emailProperties: EmailProperties
+    private val emailProperties: EmailProperties,
+    private val twoFactorEmailProperties: TwoFactorEmailProperties
 ) {
 
     private val logger: KLogger
@@ -86,7 +88,7 @@ class AuthenticationService(
             email = payload.email,
             password = hashService.hashBcrypt(payload.password),
             name = payload.name,
-            mailEnabled = emailProperties.enable,
+            email2faEnabled = emailProperties.enable && twoFactorEmailProperties.enableByDefault,
             mailTwoFactorCodeExpiresIn = factorMailCodeProperties.expiresIn
         )
 

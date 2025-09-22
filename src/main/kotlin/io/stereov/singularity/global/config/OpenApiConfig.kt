@@ -271,6 +271,7 @@ class OpenApiConfig() {
     fun sortSecurityRequirements(openApi: OpenAPI) {
         val doNotSort = listOf(
             EmailAuthenticationController::sendEmailTwoFactorCode.name,
+            EmailAuthenticationController::getRemainingEmailTwoFactorCooldown.name
         )
 
         openApi.paths.values.forEach { pathItem ->

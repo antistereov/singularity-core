@@ -4,7 +4,6 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.exception.AuthException
 import io.stereov.singularity.auth.core.exception.model.TwoFactorMethodDisabledException
-import io.stereov.singularity.auth.core.exception.model.UserAlreadyAuthenticatedException
 import io.stereov.singularity.auth.core.model.IdentityProvider
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.twofactor.dto.response.TwoFactorSetupResponse
@@ -138,12 +137,12 @@ class TotpAuthenticationService(
     suspend fun recoverUser(exchange: ServerWebExchange, recoveryCode: String): UserDocument {
         logger.debug { "Recovering user" }
 
-        if (authorizationService.isAuthenticated())
-            throw UserAlreadyAuthenticatedException("Recovery failed: user is already authenticated")
-
         val userId = twoFactorAuthTokenService.extract(exchange).userId
 
         val user = userService.findById(userId)
+        if (!user.twoFactorMethods.contains(TwoFactorMethod.TOTP))
+            throw TwoFactorMethodDisabledException(TwoFactorMethod.TOTP)
+
         val recoveryCodeHashes = user.sensitive.security.twoFactor.totp.recoveryCodes
 
         val match = recoveryCodeHashes.removeAll { hash ->
@@ -166,8 +165,11 @@ class TotpAuthenticationService(
         logger.debug { "Disabling 2FA" }
 
         authorizationService.requireStepUp()
-
         val user = authorizationService.getCurrentUser()
+
+        if (!user.sensitive.security.twoFactor.totp.enabled) {
+            throw TwoFactorMethodDisabledException(TwoFactorMethod.TOTP)
+        }
 
         if (user.twoFactorMethods.size == 1 && user.sensitive.security.twoFactor.totp.enabled)
             throw CannotDisableOnly2FAMethodException("Failed to disable TOTP: it not allowed to disable the only configured 2FA method.")

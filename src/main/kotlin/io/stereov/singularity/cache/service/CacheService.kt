@@ -36,7 +36,7 @@ class CacheService(
      * @param expiresIn The number of seconds until the key expires. If null, it will never expire.
      */
     suspend fun <T: Any> put(key: String, value: T, expiresIn: Long? = null): T {
-        logger.debug { "Saving value: $value for key: $key to Redis" }
+        logger.debug { "Saving key $key to Redis" }
 
         val string = objectMapper.writeValueAsString(value)
         if (expiresIn != null) {

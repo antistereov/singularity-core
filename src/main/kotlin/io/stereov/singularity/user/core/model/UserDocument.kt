@@ -251,7 +251,7 @@ data class UserDocument(
             email: String,
             roles: MutableSet<Role> = mutableSetOf(Role.USER),
             groups: MutableSet<String> = mutableSetOf(),
-            mailEnabled: Boolean,
+            email2faEnabled: Boolean,
             mailTwoFactorCodeExpiresIn: Long,
             sessions: MutableMap<UUID, SessionInfo> = mutableMapOf(),
             avatarFileKey: String? = null,
@@ -265,7 +265,7 @@ data class UserDocument(
                 name,
                 email,
                 mutableMapOf(IdentityProvider.PASSWORD to UserIdentity.ofPassword(password, true)),
-                UserSecurityDetails(mailEnabled, mailTwoFactorCodeExpiresIn),
+                UserSecurityDetails(email2faEnabled, mailTwoFactorCodeExpiresIn),
                 sessions,
                 avatarFileKey
             )

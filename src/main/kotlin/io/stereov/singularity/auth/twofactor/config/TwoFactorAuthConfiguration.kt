@@ -19,6 +19,7 @@ import io.stereov.singularity.auth.twofactor.controller.TwoFactorAuthenticationC
 import io.stereov.singularity.auth.twofactor.exception.handler.TwoFactorAuthExceptionHandler
 import io.stereov.singularity.auth.twofactor.properties.TotpRecoveryCodeProperties
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties
+import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailProperties
 import io.stereov.singularity.auth.twofactor.service.EmailAuthenticationService
 import io.stereov.singularity.auth.twofactor.service.TotpAuthenticationService
 import io.stereov.singularity.auth.twofactor.service.TotpService
@@ -45,7 +46,11 @@ import org.springframework.data.redis.core.ReactiveRedisTemplate
         ApplicationConfiguration::class
     ]
 )
-@EnableConfigurationProperties(TotpRecoveryCodeProperties::class, TwoFactorEmailCodeProperties::class)
+@EnableConfigurationProperties(
+    TotpRecoveryCodeProperties::class,
+    TwoFactorEmailCodeProperties::class,
+    TwoFactorEmailProperties::class
+)
 class TwoFactorAuthConfiguration {
 
     // Controller

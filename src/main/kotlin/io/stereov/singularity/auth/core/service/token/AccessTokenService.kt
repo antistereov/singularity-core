@@ -47,7 +47,7 @@ class AccessTokenService(
             .id(tokenId)
             .build()
 
-        val jwt = jwtService.encodeJwt(claims)
+        val jwt = jwtService.encodeJwt(claims,tokenType.cookieName)
 
         return AccessToken(user.id, sessionId, tokenId, user.roles, user.groups, jwt)
     }
@@ -62,7 +62,7 @@ class AccessTokenService(
     suspend fun extract(tokenValue: String): AccessToken {
         logger.debug { "Extracting and validating access token" }
 
-        val jwt = jwtService.decodeJwt(tokenValue, true)
+        val jwt = jwtService.decodeJwt(tokenValue, tokenType.cookieName)
 
         val userId = jwt.subject?.let { ObjectId(it) }
             ?: throw InvalidTokenException("AccessToken does not contain sub")

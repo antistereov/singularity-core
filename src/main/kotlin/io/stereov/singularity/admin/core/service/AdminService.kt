@@ -82,7 +82,7 @@ class AdminService(
                 email = appProperties.rootEmail,
                 password = hashService.hashBcrypt(appProperties.rootPassword),
                 name = "Root",
-                mailEnabled = emailProperties.enable,
+                email2faEnabled = emailProperties.enable,
                 mailTwoFactorCodeExpiresIn = twoFactorEmailCodeProperties.expiresIn
             ).addRole(Role.ADMIN)
 

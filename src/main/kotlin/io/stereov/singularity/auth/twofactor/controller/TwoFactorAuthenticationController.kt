@@ -140,6 +140,7 @@ class TwoFactorAuthenticationController(
             refreshToken = if (authProperties.allowHeaderAuthentication) refreshToken.value else null,
             allowedTwoFactorMethods = null,
             twoFactorAuthenticationToken = null,
+            preferredTwoFactorMethod = null,
             location = geolocationService.getLocationOrNull(exchange.request)
         )
 

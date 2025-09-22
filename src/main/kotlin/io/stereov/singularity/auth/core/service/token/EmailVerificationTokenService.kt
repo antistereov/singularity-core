@@ -17,6 +17,7 @@ class EmailVerificationTokenService(
 ) {
 
     private val logger = KotlinLogging.logger {}
+    private val tokenType = "email_verification"
 
     /**
      * Creates an email verification token.
@@ -40,7 +41,7 @@ class EmailVerificationTokenService(
             .id(secret)
             .build()
 
-        return jwtService.encodeJwt(claims).tokenValue
+        return jwtService.encodeJwt(claims, tokenType).tokenValue
     }
 
     /**
@@ -58,7 +59,7 @@ class EmailVerificationTokenService(
     suspend fun extract(token: String): EmailVerificationToken {
         logger.debug { "Validating email verification token" }
 
-        val jwt = jwtService.decodeJwt(token, true)
+        val jwt = jwtService.decodeJwt(token, tokenType)
 
         val userId = ObjectId(jwt.subject)
         val email = jwt.claims["email"] as? String

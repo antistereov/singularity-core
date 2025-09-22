@@ -23,6 +23,7 @@ class OAuth2ProviderConnectionTokenService(
 ) {
 
     private val logger = KotlinLogging.logger {}
+    private val tokenType = "oauth2_provider_connection"
 
     suspend fun create(userId: ObjectId, sessionId: UUID, provider: String, issuedAt: Instant = Instant.now()): OAuth2ProviderConnectionToken {
         logger.debug { "Creating OAuth2ProviderConnectionToken for user $userId and session $sessionId" }
@@ -35,7 +36,7 @@ class OAuth2ProviderConnectionTokenService(
             .claim(Constants.JWT_OAUTH2_PROVIDER_CLAIM, provider)
             .build()
 
-        val jwt = jwtService.encodeJwt(claims)
+        val jwt = jwtService.encodeJwt(claims, tokenType)
 
         return OAuth2ProviderConnectionToken(userId, sessionId, provider, jwt)
     }
@@ -43,7 +44,7 @@ class OAuth2ProviderConnectionTokenService(
     suspend fun extract(tokenValue: String): OAuth2ProviderConnectionToken {
         logger.debug { "Extracting OAuth2ProviderConnectionToken" }
 
-        val jwt = jwtService.decodeJwt(tokenValue, true)
+        val jwt = jwtService.decodeJwt(tokenValue, tokenType)
 
         val userId = jwt.subject?.let { ObjectId(it) }
             ?: throw InvalidTokenException("OAuth2ProviderConnectionToken does not contain sub")

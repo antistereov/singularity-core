@@ -14,7 +14,7 @@ data class UserSecurityDetails(
     constructor(email2faEnabled: Boolean, mailTwoFactorCodeExpiresIn: Long, mailVerified: Boolean = false): this(
         twoFactor = TwoFactorDetails(
             totp = TwoFactorDetails.TotpDetails(),
-            mail = TwoFactorDetails.MailTwoFactorDetails(
+            email = TwoFactorDetails.MailTwoFactorDetails(
                 enabled = email2faEnabled,
                 expiresAt = Instant.now().plusSeconds(mailTwoFactorCodeExpiresIn)
             )
@@ -25,14 +25,14 @@ data class UserSecurityDetails(
     data class TwoFactorDetails(
         var preferred: TwoFactorMethod = TwoFactorMethod.EMAIL,
         val totp: TotpDetails = TotpDetails(),
-        val mail: MailTwoFactorDetails,
+        val email: MailTwoFactorDetails,
     ) {
 
         private fun getAvailableMethods(): List<TwoFactorMethod> {
             val methods = mutableListOf<TwoFactorMethod>()
 
             if (totp.enabled) methods.add(TwoFactorMethod.TOTP)
-            if (mail.enabled) methods.add(TwoFactorMethod.EMAIL)
+            if (email.enabled) methods.add(TwoFactorMethod.EMAIL)
 
             return methods
         }

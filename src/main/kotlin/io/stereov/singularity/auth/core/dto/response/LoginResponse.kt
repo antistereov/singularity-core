@@ -10,6 +10,7 @@ data class LoginResponse(
     val refreshToken: String?,
     val twoFactorRequired: Boolean,
     val allowedTwoFactorMethods: List<TwoFactorMethod>?,
+    val preferredTwoFactorMethod: TwoFactorMethod?,
     val twoFactorAuthenticationToken: String?,
     val location: GeolocationResponse?
 )

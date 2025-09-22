@@ -15,7 +15,7 @@ data class UserResponse(
     val lastActive: String,
     val twoFactorAuthEnabled: Boolean,
     val preferredTwoFactorMethod: TwoFactorMethod?,
-    val twoFactorAuthMethods: List<TwoFactorMethod>,
+    val twoFactorMethods: List<TwoFactorMethod>,
     val avatar: FileMetadataResponse?,
     val created: String,
     val groups: Set<String>,

@@ -32,7 +32,7 @@ class TwoFactorAuthenticationTokenService(
             .subject(userId.toHexString())
             .build()
 
-        val jwt = jwtService.encodeJwt(claims)
+        val jwt = jwtService.encodeJwt(claims, tokenType.cookieName)
 
         return TwoFactorAuthenticationToken(userId, jwt)
     }
@@ -46,7 +46,7 @@ class TwoFactorAuthenticationTokenService(
     suspend fun extract(tokenValue: String): TwoFactorAuthenticationToken {
         logger.debug { "Extracting two factor login token" }
 
-        val jwt = jwtService.decodeJwt(tokenValue, true)
+        val jwt = jwtService.decodeJwt(tokenValue, tokenType.cookieName)
 
         val userId = jwt.subject?.let { ObjectId(it) }
             ?: throw InvalidTokenException("JWT does not contain sub")
