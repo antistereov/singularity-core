@@ -35,7 +35,7 @@ class JwtService(
      * This method decodes the JWT token and checks for expiration if specified.
      *
      * @param token The JWT token to decode.
-     * @param checkExpiration Whether to check for expiration.
+     * @param tokenType The type of token.
      *
      * @return The decoded JWT.
      */
@@ -70,6 +70,7 @@ class JwtService(
      * This method encodes the JWT token using the provided claims.
      *
      * @param claims The claims to include in the JWT.
+     * @param tokenType The type of token.
      *
      * @return The encoded JWT token as a string.
      */
