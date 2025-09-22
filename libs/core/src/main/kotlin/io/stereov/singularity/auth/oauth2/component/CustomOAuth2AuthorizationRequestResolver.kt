@@ -1,8 +1,9 @@
 package io.stereov.singularity.auth.oauth2.component
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.stereov.singularity.auth.oauth2.model.CustomState
+import io.stereov.singularity.auth.oauth2.service.token.OAuth2StateTokenService
 import io.stereov.singularity.global.util.Constants
+import kotlinx.coroutines.reactor.mono
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository
 import org.springframework.security.oauth2.client.web.server.DefaultServerOAuth2AuthorizationRequestResolver
 import org.springframework.security.oauth2.client.web.server.ServerOAuth2AuthorizationRequestResolver
@@ -12,26 +13,26 @@ import reactor.core.publisher.Mono
 
 class CustomOAuth2AuthorizationRequestResolver(
     clientRegistrations: ReactiveClientRegistrationRepository,
-    private val objectMapper: ObjectMapper,
+    private val oAuth2StateTokenService: OAuth2StateTokenService
 ) : ServerOAuth2AuthorizationRequestResolver {
 
     private val delegate = DefaultServerOAuth2AuthorizationRequestResolver(clientRegistrations)
 
     override fun resolve(exchange: ServerWebExchange): Mono<OAuth2AuthorizationRequest> {
         return delegate.resolve(exchange)
-            .map { request ->
-                addSessionTokenToState(exchange, request)
+            .flatMap { request ->
+                mono { addSessionTokenToState(exchange, request) }
             }
     }
 
     override fun resolve(exchange: ServerWebExchange, clientRegistrationId: String): Mono<OAuth2AuthorizationRequest> {
         return delegate.resolve(exchange, clientRegistrationId)
-            .map { request ->
-                addSessionTokenToState(exchange, request)
+            .flatMap { request ->
+                mono { addSessionTokenToState(exchange, request) }
             }
     }
 
-    private fun addSessionTokenToState(
+    private suspend fun addSessionTokenToState(
         exchange: ServerWebExchange,
         request: OAuth2AuthorizationRequest
     ): OAuth2AuthorizationRequest {
@@ -40,17 +41,16 @@ class CustomOAuth2AuthorizationRequestResolver(
         val oauth2ProviderConnectionToken = exchange.request.queryParams.getFirst(Constants.OAUTH2_PROVIDER_CONNECTION_TOKEN_PARAMETER)
         val stepUp = exchange.request.queryParams.getFirst(Constants.STEP_UP_PARAMETER).toBoolean()
 
-        val customState = CustomState(
+        val oAuth2StateToken = oAuth2StateTokenService.create(
             request.state,
             sessionToken,
             redirectUri,
             oauth2ProviderConnectionToken,
             stepUp
         )
-        val customStateJson = objectMapper.writeValueAsString(customState)
 
         val req = OAuth2AuthorizationRequest.from(request)
-            .state(customStateJson)
+            .state(oAuth2StateToken.value)
 
         if (stepUp) {
             val additionalParameters = mutableMapOf<String, Any>()

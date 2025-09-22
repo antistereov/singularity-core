@@ -1,6 +1,5 @@
 package io.stereov.singularity.security.core.config
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.stereov.singularity.auth.core.component.CookieCreator
 import io.stereov.singularity.auth.core.config.AuthenticationConfiguration
 import io.stereov.singularity.auth.core.filter.AuthenticationFilter
@@ -17,13 +16,13 @@ import io.stereov.singularity.auth.oauth2.component.CustomOAuth2AuthorizationReq
 import io.stereov.singularity.auth.oauth2.config.OAuth2Configuration
 import io.stereov.singularity.auth.oauth2.properties.OAuth2Properties
 import io.stereov.singularity.auth.oauth2.service.OAuth2AuthenticationService
+import io.stereov.singularity.auth.oauth2.service.token.OAuth2StateTokenService
 import io.stereov.singularity.global.filter.LoggingFilter
 import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.ratelimit.filter.RateLimitFilter
 import io.stereov.singularity.ratelimit.service.RateLimitService
 import io.stereov.singularity.security.core.properties.SecurityProperties
 import io.stereov.singularity.user.core.model.Role
-import io.stereov.singularity.user.core.service.UserService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -102,10 +101,10 @@ class WebSecurityConfiguration {
         cookieCreator: CookieCreator,
         sessionTokenService: SessionTokenService,
         clientRegistrations: ReactiveClientRegistrationRepository,
-        objectMapper: ObjectMapper,
         oAuth2Properties: OAuth2Properties,
         stepUpTokenService: StepUpTokenService,
-        authorizationService: AuthorizationService
+        authorizationService: AuthorizationService,
+        oAuth2StateTokenService: OAuth2StateTokenService,
     ): SecurityWebFilterChain {
         return http
             .csrf { it.disable() }
@@ -132,12 +131,11 @@ class WebSecurityConfiguration {
                 oauth2.authorizationRequestResolver(
                     CustomOAuth2AuthorizationRequestResolver(
                         clientRegistrations,
-                        objectMapper
+                        oAuth2StateTokenService
                     )
                 )
                 oauth2.authenticationSuccessHandler(
                     CustomOAuth2AuthenticationSuccessHandler(
-                        objectMapper,
                         accessTokenService,
                         refreshTokenService,
                         sessionTokenService,
@@ -145,7 +143,8 @@ class WebSecurityConfiguration {
                         cookieCreator,
                         oAuth2Properties,
                         stepUpTokenService,
-                        authorizationService
+                        authorizationService,
+                        oAuth2StateTokenService
                     )
                 )
             }

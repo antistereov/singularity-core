@@ -1,6 +1,5 @@
 package io.stereov.singularity.auth.oauth2.component
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.component.CookieCreator
 import io.stereov.singularity.auth.core.model.token.SessionToken
@@ -12,11 +11,12 @@ import io.stereov.singularity.auth.core.service.token.SessionTokenService
 import io.stereov.singularity.auth.core.service.token.StepUpTokenService
 import io.stereov.singularity.auth.jwt.exception.model.TokenExpiredException
 import io.stereov.singularity.auth.oauth2.exception.model.OAuth2FlowException
-import io.stereov.singularity.auth.oauth2.model.CustomState
 import io.stereov.singularity.auth.oauth2.model.OAuth2ErrorCode
+import io.stereov.singularity.auth.oauth2.model.token.OAuth2StateToken
 import io.stereov.singularity.auth.oauth2.model.token.OAuth2TokenType
 import io.stereov.singularity.auth.oauth2.properties.OAuth2Properties
 import io.stereov.singularity.auth.oauth2.service.OAuth2AuthenticationService
+import io.stereov.singularity.auth.oauth2.service.token.OAuth2StateTokenService
 import kotlinx.coroutines.reactor.mono
 import org.apache.http.client.utils.URIBuilder
 import org.springframework.http.HttpStatus
@@ -30,7 +30,6 @@ import java.net.URI
 import java.util.*
 
 class CustomOAuth2AuthenticationSuccessHandler(
-    private val objectMapper: ObjectMapper,
     private val accessTokenService: AccessTokenService,
     private val refreshTokenService: RefreshTokenService,
     private val sessionTokenService: SessionTokenService,
@@ -39,6 +38,7 @@ class CustomOAuth2AuthenticationSuccessHandler(
     private val oAuth2Properties: OAuth2Properties,
     private val stepUpTokenService: StepUpTokenService,
     private val authorizationService: AuthorizationService,
+    private val oAuth2StateTokenService: OAuth2StateTokenService
 ) : ServerAuthenticationSuccessHandler {
 
     private val logger = KotlinLogging.logger {}
@@ -56,13 +56,13 @@ class CustomOAuth2AuthenticationSuccessHandler(
         Mono.empty()
     }.then()
 
-    private fun getState(exchange: ServerWebExchange): CustomState {
+    private suspend fun getState(exchange: ServerWebExchange): OAuth2StateToken {
         val stateValue = exchange.request.queryParams.getFirst("state")
             ?: throw OAuth2FlowException(OAuth2ErrorCode.STATE_PARAMETER_MISSING,"No state parameter provided.")
-        return objectMapper.readValue(stateValue, CustomState::class.java)
+        return oAuth2StateTokenService.extract(stateValue)
     }
 
-    private suspend fun getSessionToken(state: CustomState, exchange: ServerWebExchange): SessionToken {
+    private suspend fun getSessionToken(state: OAuth2StateToken, exchange: ServerWebExchange): SessionToken {
         logger.debug { "Extracting session token from callback" }
 
         val sessionTokenValue = state.sessionTokenValue
@@ -83,7 +83,7 @@ class CustomOAuth2AuthenticationSuccessHandler(
         authentication: Authentication,
         exchange: ServerWebExchange,
         sessionToken: SessionToken,
-        state: CustomState
+        state: OAuth2StateToken
     ) {
         val oauth2Authentication = authentication as OAuth2AuthenticationToken
         val sessionId = authorizationService.getCurrentSessionIdOrNull() ?: UUID.randomUUID()

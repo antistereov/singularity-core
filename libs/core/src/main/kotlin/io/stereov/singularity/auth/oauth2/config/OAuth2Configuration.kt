@@ -13,6 +13,7 @@ import io.stereov.singularity.auth.oauth2.properties.OAuth2Properties
 import io.stereov.singularity.auth.oauth2.service.IdentityProviderService
 import io.stereov.singularity.auth.oauth2.service.OAuth2AuthenticationService
 import io.stereov.singularity.auth.oauth2.service.token.OAuth2ProviderConnectionTokenService
+import io.stereov.singularity.auth.oauth2.service.token.OAuth2StateTokenService
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.global.config.ApplicationConfiguration
@@ -95,6 +96,12 @@ class OAuth2Configuration {
         jwtService,
         jwtProperties,
     )
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun oauth2StateTokenService(
+        jwtService: JwtService
+    ) = OAuth2StateTokenService(jwtService)
 
     @Bean
     @ConditionalOnMissingBean
