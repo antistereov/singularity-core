@@ -193,10 +193,12 @@ data class UserDocument(
      *
      * This method removes all sessions from the user's session list.
      */
-    fun clearSessions() {
+    fun clearSessions(): UserDocument {
         logger.debug { "Clearing sessions" }
 
-        this.sensitive.sessions.clear()
+        sensitive.sessions.clear()
+
+        return this
     }
 
     /**
@@ -209,7 +211,7 @@ data class UserDocument(
      * @return The updated list of roles.
      */
     fun addRole(role: Role): UserDocument {
-        this.roles.add(role)
+        roles.add(role)
         return this
     }
 

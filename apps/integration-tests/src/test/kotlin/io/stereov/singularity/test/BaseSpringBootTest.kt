@@ -1,10 +1,12 @@
 package io.stereov.singularity.test
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.warrenstrange.googleauth.GoogleAuthenticator
 import io.mockk.every
 import io.stereov.singularity.auth.core.component.CookieCreator
 import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.auth.core.dto.request.RegisterUserRequest
+import io.stereov.singularity.auth.core.model.SessionInfo
 import io.stereov.singularity.auth.core.model.token.AccessToken
 import io.stereov.singularity.auth.core.model.token.RefreshToken
 import io.stereov.singularity.auth.core.model.token.SessionTokenType
@@ -17,6 +19,9 @@ import io.stereov.singularity.auth.group.service.GroupService
 import io.stereov.singularity.auth.guest.dto.request.CreateGuestRequest
 import io.stereov.singularity.auth.guest.dto.response.CreateGuestResponse
 import io.stereov.singularity.auth.jwt.exception.TokenException
+import io.stereov.singularity.auth.oauth2.model.token.OAuth2ProviderConnectionToken
+import io.stereov.singularity.auth.oauth2.model.token.OAuth2TokenType
+import io.stereov.singularity.auth.oauth2.service.token.OAuth2ProviderConnectionTokenService
 import io.stereov.singularity.auth.twofactor.dto.request.CompleteStepUpRequest
 import io.stereov.singularity.auth.twofactor.dto.request.EnableEmailTwoFactorMethodRequest
 import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorVerifySetupRequest
@@ -54,6 +59,12 @@ import java.util.concurrent.atomic.AtomicInteger
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(MockConfig::class) class BaseSpringBootTest() {
+
+    @Autowired
+    lateinit var objectMapper: ObjectMapper
+
+    @Autowired
+    lateinit var oAuth2ProviderConnectionTokenService: OAuth2ProviderConnectionTokenService
 
     @Autowired
     lateinit var setupTokenService: TotpSetupTokenService
@@ -365,12 +376,13 @@ import java.util.concurrent.atomic.AtomicInteger
     }
 
     suspend fun registerOAuth2(
-        email: String = "oauth2@email.com",
+        emailSuffix: String = "oauth2@email.com",
         provider: String = "github",
         principalId: String = "123456"
     ): TestRegisterResponse {
+        val actualEmail = "${counter.getAndIncrement()}$emailSuffix"
         val user = userService.save(UserDocument.ofIdentityProvider(
-            email = email,
+            email = actualEmail,
             provider = provider,
             principalId = principalId,
             mailTwoFactorCodeExpiresIn = 10,
@@ -379,12 +391,17 @@ import java.util.concurrent.atomic.AtomicInteger
 
         val sessionId = UUID.randomUUID()
 
+        val accessToken = accessTokenService.create(user, sessionId).value
+        val refreshToken = refreshTokenService.create(user.id, sessionId, "tokenId").value
+        val stepUpToken = stepUpTokenService.create(user.id, sessionId).value
+
         return TestRegisterResponse(
-            info = user,
-            accessToken = accessTokenService.create(user, sessionId).value,
-            refreshToken = refreshTokenService.create(user.id, sessionId, "tokenId").value,
-            stepUpToken = stepUpTokenService.create(user.id, sessionId).value,
-            email = null,
+            info = userService.save(user.copy(sensitive = user.sensitive.copy(sessions = user.sensitive.sessions.apply { put(sessionId,
+                SessionInfo()) } ))),
+            accessToken = accessToken,
+            refreshToken = refreshToken,
+            stepUpToken = stepUpToken,
+            email = actualEmail,
             password = null,
             twoFactorToken = null,
             totpSecret = null,
@@ -437,6 +454,13 @@ import java.util.concurrent.atomic.AtomicInteger
             ?.firstOrNull()?.value
             ?.let { stepUpTokenService.extract(it, userId, sessionId) }
             ?: throw TokenException("No StepUpToken found in response")
+    }
+
+    suspend fun EntityExchangeResult<*>.extractOAuth2ProviderConnectionToken(user: UserDocument): OAuth2ProviderConnectionToken {
+        return this.responseCookies[OAuth2TokenType.ProviderConnection.cookieName]
+            ?.firstOrNull()?.value
+            ?.let { oAuth2ProviderConnectionTokenService.extract(it, user) }
+            ?: throw TokenException("No OAuth2ProviderConnectionToken found in response")
     }
 
     fun <S: WebTestClient.RequestHeadersSpec<S>> WebTestClient.RequestHeadersSpec<S>.accessTokenCookie(tokenValue: String): WebTestClient.RequestBodySpec {

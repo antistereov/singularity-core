@@ -1,8 +1,8 @@
 package io.stereov.singularity.auth.oauth2.controller
 
-import io.stereov.singularity.auth.core.dto.request.ConnectPasswordIdentityRequest
 import io.stereov.singularity.auth.core.dto.response.IdentityProviderResponse
 import io.stereov.singularity.auth.core.service.AuthorizationService
+import io.stereov.singularity.auth.oauth2.dto.request.AddPasswordAuthenticationRequest
 import io.stereov.singularity.auth.oauth2.service.IdentityProviderService
 import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.model.OpenApiConstants
@@ -10,12 +10,12 @@ import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.core.mapper.UserMapper
 import io.swagger.v3.oas.annotations.ExternalDocumentation
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -51,11 +51,10 @@ class IdentityProviderController(
             ApiResponse(
                 responseCode = "200",
                 description = "The list of identity providers.",
-                content = [Content(array = ArraySchema(schema = Schema(implementation = IdentityProviderResponse::class)))]
             ),
             ApiResponse(
                 responseCode = "401",
-                description = "Unauthorized.",
+                description = "Invalid `AccessToken`.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
@@ -98,17 +97,22 @@ class IdentityProviderController(
             ),
             ApiResponse(
                 responseCode = "304",
-                description = "Bad request. User already created a password identity",
+                description = "User already created a password identity.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
+            ApiResponse(
+                responseCode = "400",
+                description = "Guests are not allowed to add a password identity this way. They need to be converted to users.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
             ApiResponse(
                 responseCode = "401",
-                description = "Unauthorized",
+                description = "Invalid `AccessToken` or `StepUpToken`.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
         ]
     )
-    suspend fun addPasswordAuthentication(@RequestBody req: ConnectPasswordIdentityRequest): ResponseEntity<UserResponse> {
+    suspend fun addPasswordAuthentication(@RequestBody @Valid req: AddPasswordAuthenticationRequest): ResponseEntity<UserResponse> {
         val user = identityProviderService.connect(req)
 
         return ResponseEntity.ok(userMapper.toResponse(user))
@@ -142,15 +146,20 @@ class IdentityProviderController(
                 content = [Content(schema = Schema(implementation = UserResponse::class))]
             ),
             ApiResponse(
-                responseCode = "401",
-                description = "Unauthorized",
+                responseCode = "400",
+                description = "Deleting the password identity or the only registered identity is forbidden.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
             ApiResponse(
-                responseCode = "400",
-                description = "Bad request: deleting the password identity or the only registered identity is forbidden.",
+                responseCode = "401",
+                description = "Invalid `AccessToken` or `StepUpToken`.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            )
+            ),
+            ApiResponse(
+                responseCode = "404",
+                description = "The requested provider is not connected.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
         ]
     )
     suspend fun deleteIdentityProvider(@PathVariable provider: String): ResponseEntity<UserResponse> {

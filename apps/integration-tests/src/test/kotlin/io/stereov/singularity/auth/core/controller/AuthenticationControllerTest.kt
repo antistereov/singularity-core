@@ -114,14 +114,14 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isEqualTo(HttpStatus.CONFLICT)
     }
-    @Test fun `register requires password of min 8 characters`() {
+    @Test fun `register requires password of min 8 characters`() = runTest {
         webTestClient.post()
             .uri("/api/auth/register")
             .bodyValue(RegisterUserRequest(email = "", password = "Pas$2", name = "Name"))
             .exchange()
             .expectStatus().isBadRequest
     }
-    @Test fun `register requires passwort with lower case letter`() {
+    @Test fun `register requires passwort with lower case letter`() = runTest {
         webTestClient.post()
             .uri("/api/auth/register")
             .bodyValue(
@@ -134,7 +134,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isBadRequest
     }
-    @Test fun `register requires password with upper-case letter`() {
+    @Test fun `register requires password with upper-case letter`() = runTest {
         webTestClient.post()
             .uri("/api/auth/register")
             .bodyValue(
@@ -147,7 +147,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isBadRequest
     }
-    @Test fun `register requires password with number`() {
+    @Test fun `register requires password with number`() = runTest {
         webTestClient.post()
             .uri("/api/auth/register")
             .bodyValue(
@@ -160,7 +160,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isBadRequest
     }
-    @Test fun `register requires password with special character`() {
+    @Test fun `register requires password with special character`() = runTest {
         webTestClient.post()
             .uri("/api/auth/register")
             .bodyValue(

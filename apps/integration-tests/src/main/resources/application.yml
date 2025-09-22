@@ -17,6 +17,17 @@ spring:
     restart:
       enabled: false
       additional-paths: src/main
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id: client-id
+            client-secret: client-secret
+            scope:
+              - user:email
+              - read:user
+
 
 logging:
   level:
@@ -41,6 +52,8 @@ singularity:
           count: 6
       email:
         enable-by-default: false
+    oauth2:
+      enable: true
 
   file:
     storage:
