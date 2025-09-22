@@ -35,6 +35,7 @@ class OAuth2Configuration {
     // Controller
     
     @Bean
+    @ConditionalOnProperty("singularity.auth.oauth2.enable", matchIfMissing = false)
     @ConditionalOnMissingBean
     fun identityProviderController(
         identityProviderService: IdentityProviderService,
@@ -90,11 +91,9 @@ class OAuth2Configuration {
     fun oauth2ProviderConnectionTokenService(
         jwtService: JwtService,
         jwtProperties: JwtProperties,
-        authorizationService: AuthorizationService,
     ) = OAuth2ProviderConnectionTokenService(
         jwtService,
         jwtProperties,
-        authorizationService
     )
 
     @Bean

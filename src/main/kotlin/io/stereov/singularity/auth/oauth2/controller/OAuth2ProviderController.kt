@@ -70,6 +70,8 @@ class OAuth2ProviderController(
     suspend fun generateOAuth2ProviderConnectionToken(@RequestBody req: OAuth2ProviderConnectionRequest): ResponseEntity<OAuth2ProviderConnectionTokenResponse> {
         val userId = authorizationService.getCurrentUserId()
         val sessionId = authorizationService.getCurrentSessionId()
+
+        authorizationService.requireStepUp()
         val token = oAuth2ProviderConnectionTokenService.create(userId, sessionId, req.provider)
 
         val res = OAuth2ProviderConnectionTokenResponse(

@@ -7,10 +7,12 @@ import io.stereov.singularity.auth.oauth2.model.OAuth2ErrorCode
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties
 import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.service.UserService
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
 import org.springframework.stereotype.Service
 
 @Service
+@ConditionalOnProperty("singularity.auth.oauth2.enable", matchIfMissing = false)
 class OAuth2AuthenticationService(
     private val userService: UserService,
     private val twoFactorEmailCodeProperties: TwoFactorEmailCodeProperties,

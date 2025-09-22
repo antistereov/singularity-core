@@ -2,16 +2,18 @@ package io.stereov.singularity.auth.oauth2.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
-import io.stereov.singularity.auth.core.dto.request.ConnectPasswordIdentityRequest
 import io.stereov.singularity.auth.core.model.IdentityProvider
 import io.stereov.singularity.auth.core.service.AuthorizationService
+import io.stereov.singularity.auth.guest.exception.model.GuestCannotPerformThisActionException
 import io.stereov.singularity.auth.jwt.exception.model.TokenExpiredException
-import io.stereov.singularity.auth.oauth2.exception.model.CannotConnectIdentityProviderException
+import io.stereov.singularity.auth.oauth2.dto.request.AddPasswordAuthenticationRequest
 import io.stereov.singularity.auth.oauth2.exception.model.CannotDisconnectIdentityProviderException
 import io.stereov.singularity.auth.oauth2.exception.model.OAuth2FlowException
+import io.stereov.singularity.auth.oauth2.exception.model.PasswordIdentityAlreadyAddedException
 import io.stereov.singularity.auth.oauth2.model.OAuth2ErrorCode
 import io.stereov.singularity.auth.oauth2.service.token.OAuth2ProviderConnectionTokenService
 import io.stereov.singularity.database.hash.service.HashService
+import io.stereov.singularity.global.exception.model.DocumentNotFoundException
 import io.stereov.singularity.user.core.model.Role
 import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.model.identity.UserIdentity
@@ -29,16 +31,20 @@ class IdentityProviderService(
 
     private val logger = KotlinLogging.logger {}
 
-    suspend fun connect(req: ConnectPasswordIdentityRequest): UserDocument {
+    suspend fun connect(req: AddPasswordAuthenticationRequest): UserDocument {
         logger.debug { "Creating password identity" }
 
         authorizationService.requireStepUp()
 
         val user = authorizationService.getCurrentUser()
+
+        if (user.isGuest)
+            throw GuestCannotPerformThisActionException("Guests cannot add a password identity this way. They need to be converted to a user.")
+
         val identities = user.sensitive.identities
 
         if (identities.containsKey(IdentityProvider.PASSWORD))
-            throw CannotConnectIdentityProviderException("The user already identified with password")
+            throw PasswordIdentityAlreadyAddedException("The user already added password")
 
         identities[IdentityProvider.PASSWORD] = UserIdentity.ofPassword(hashService.hashBcrypt(req.password), true)
 
@@ -69,7 +75,7 @@ class IdentityProviderService(
                 "The user already connected the provider $provider")
 
         val connectionToken = try {
-            oAuth2ProviderConnectionTokenService.extract(oauth2ProviderConnectionTokenValue)
+            oAuth2ProviderConnectionTokenService.extract(oauth2ProviderConnectionTokenValue, user)
         } catch(e: Exception) {
             when (e) {
                 is TokenExpiredException -> throw OAuth2FlowException(OAuth2ErrorCode.CONNECTION_TOKEN_EXPIRED,
@@ -117,7 +123,7 @@ class IdentityProviderService(
             throw CannotDisconnectIdentityProviderException("Password provider cannot be disconnected from user")
 
         if (!identities.containsKey(provider))
-            throw CannotDisconnectIdentityProviderException("Provider $provider is not connected with user")
+            throw DocumentNotFoundException("Provider $provider is not connected with user")
 
         if (identities.size == 1)
             throw CannotDisconnectIdentityProviderException("Provider $provider is the only identity provider")

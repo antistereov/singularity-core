@@ -1,10 +1,10 @@
 package io.stereov.singularity.auth.oauth2.exception.handler
 
 import io.stereov.singularity.auth.oauth2.exception.OAuth2Exception
-import io.stereov.singularity.auth.oauth2.exception.model.CannotConnectIdentityProviderException
 import io.stereov.singularity.auth.oauth2.exception.model.CannotDisconnectIdentityProviderException
 import io.stereov.singularity.auth.oauth2.exception.model.OAuth2FlowException
 import io.stereov.singularity.auth.oauth2.exception.model.OAuth2ProviderConnectedException
+import io.stereov.singularity.auth.oauth2.exception.model.PasswordIdentityAlreadyAddedException
 import io.stereov.singularity.global.exception.BaseExceptionHandler
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ControllerAdvice
@@ -15,10 +15,10 @@ import org.springframework.web.server.ServerWebExchange
 class OAuth2ExceptionHandler : BaseExceptionHandler<OAuth2Exception> {
 
     override fun getHttpStatus(ex: OAuth2Exception) = when (ex) {
-        is CannotConnectIdentityProviderException -> HttpStatus.BAD_REQUEST
         is CannotDisconnectIdentityProviderException -> HttpStatus.BAD_REQUEST
         is OAuth2FlowException -> HttpStatus.BAD_REQUEST
         is OAuth2ProviderConnectedException -> HttpStatus.FORBIDDEN
+        is PasswordIdentityAlreadyAddedException -> HttpStatus.NOT_MODIFIED
         else -> HttpStatus.UNAUTHORIZED
     }
 
