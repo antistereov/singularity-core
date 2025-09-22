@@ -47,6 +47,7 @@ class CustomOAuth2AuthenticationSuccessHandler(
         exchange: WebFilterExchange,
         authentication: Authentication
     ): Mono<Void> = mono {
+        logger.debug { "Received callback from ${exchange.exchange.request.remoteAddress}" }
         val state = getState(exchange.exchange)
         val sessionToken = getSessionToken(state, exchange.exchange)
 
@@ -59,7 +60,13 @@ class CustomOAuth2AuthenticationSuccessHandler(
     private suspend fun getState(exchange: ServerWebExchange): OAuth2StateToken {
         val stateValue = exchange.request.queryParams.getFirst("state")
             ?: throw OAuth2FlowException(OAuth2ErrorCode.STATE_PARAMETER_MISSING,"No state parameter provided.")
-        return oAuth2StateTokenService.extract(stateValue)
+        return runCatching { oAuth2StateTokenService.extract(stateValue) }
+            .getOrElse { exception ->
+                when (exception) {
+                    is TokenExpiredException -> throw OAuth2FlowException(OAuth2ErrorCode.STATE_EXPIRED, "State expired.", exception)
+                    else -> throw OAuth2FlowException(OAuth2ErrorCode.INVALID_STATE, "State is invalid.", exception)
+                }
+            }
     }
 
     private suspend fun getSessionToken(state: OAuth2StateToken, exchange: ServerWebExchange): SessionToken {
@@ -125,7 +132,7 @@ class CustomOAuth2AuthenticationSuccessHandler(
         val response = exchange.response
         response.statusCode = HttpStatus.FOUND
         response.headers.location = URIBuilder(oAuth2Properties.errorRedirectUri)
-            .addParameter("error", errorCode.value)
+            .addParameter("code", errorCode.value)
             .build()
     }
 }

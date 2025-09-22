@@ -2,14 +2,17 @@ package io.stereov.singularity.auth.oauth2.service.token
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException
+import io.stereov.singularity.auth.jwt.properties.JwtProperties
 import io.stereov.singularity.auth.jwt.service.JwtService
 import io.stereov.singularity.auth.oauth2.model.token.OAuth2StateToken
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
 import org.springframework.stereotype.Service
+import java.time.Instant
 
 @Service
 class OAuth2StateTokenService(
-    private val jwtService: JwtService
+    private val jwtService: JwtService,
+    private val jwtProperties: JwtProperties
 ) {
 
     private val logger = KotlinLogging.logger {}
@@ -31,7 +34,8 @@ class OAuth2StateTokenService(
 
         val claims = JwtClaimsSet.builder()
             .claim(randomStateClaim, randomState)
-            .claim(stepUpClaim, stepUp)
+            .claim(stepUpClaim, stepUp.toString())
+            .expiresAt(Instant.now().plusSeconds(jwtProperties.expiresIn))
 
         if (sessionTokenValue != null)
             claims.claim(sessionTokenClaim, sessionTokenValue)
