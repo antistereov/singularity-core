@@ -23,7 +23,7 @@ class SessionControllerTest : BaseIntegrationTest() {
 
         val response = webTestClient.get()
             .uri("/api/auth/sessions")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(object : ParameterizedTypeReference<List<SessionInfoResponse>>() {})
@@ -49,7 +49,7 @@ class SessionControllerTest : BaseIntegrationTest() {
 
         webTestClient.delete()
             .uri("/api/auth/sessions/${user.sessionId}")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isOk
 
@@ -69,7 +69,7 @@ class SessionControllerTest : BaseIntegrationTest() {
         val user = registerUser()
         webTestClient.delete()
             .uri("/api/auth/sessions")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus()
             .isOk

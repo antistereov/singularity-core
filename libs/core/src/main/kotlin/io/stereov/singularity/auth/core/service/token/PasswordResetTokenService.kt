@@ -21,6 +21,7 @@ class PasswordResetTokenService(
 ) {
 
     private val logger = KotlinLogging.logger {}
+    private val tokenType = "password_reset"
 
     /**
      * Creates a password reset token.
@@ -46,7 +47,7 @@ class PasswordResetTokenService(
             .claim("encryption-key-id", encryptedSecret.secretKey)
             .build()
 
-        return jwtService.encodeJwt(claims).tokenValue
+        return jwtService.encodeJwt(claims, tokenType).tokenValue
     }
 
     /**
@@ -64,7 +65,7 @@ class PasswordResetTokenService(
     suspend fun extract(token: String): PasswordResetToken {
         logger.debug { "Validating and extracting password reset token" }
 
-        val jwt = jwtService.decodeJwt(token, true)
+        val jwt = jwtService.decodeJwt(token, tokenType)
 
         val userId = ObjectId(jwt.subject)
         val encryptedSecret = jwt.claims["secret"] as? String

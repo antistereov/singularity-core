@@ -18,7 +18,7 @@ class AdminControllerTest : BaseIntegrationTest() {
 
         val res = webTestClient.post()
             .uri("/api/admins/${user.info.id}")
-            .cookie(SessionTokenType.Access.cookieName, admin.accessToken)
+            .accessTokenCookie(admin.accessToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(UserResponse::class.java)
@@ -42,7 +42,7 @@ class AdminControllerTest : BaseIntegrationTest() {
 
         val res = webTestClient.post()
             .uri("/api/admins/${admin.info.id}")
-            .cookie(SessionTokenType.Access.cookieName, admin.accessToken)
+            .accessTokenCookie(admin.accessToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(UserResponse::class.java)
@@ -79,7 +79,7 @@ class AdminControllerTest : BaseIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/admins/${user.info.id}")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isForbidden
 
@@ -94,7 +94,7 @@ class AdminControllerTest : BaseIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/admins/${guest.info.id}")
-            .cookie(SessionTokenType.Access.cookieName, admin.accessToken)
+            .accessTokenCookie(admin.accessToken)
             .exchange()
             .expectStatus().isBadRequest
 
@@ -108,7 +108,7 @@ class AdminControllerTest : BaseIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/admins/not-valid")
-            .cookie(SessionTokenType.Access.cookieName, admin.accessToken)
+            .accessTokenCookie(admin.accessToken)
             .exchange()
             .expectStatus().isBadRequest
     }
@@ -119,7 +119,7 @@ class AdminControllerTest : BaseIntegrationTest() {
 
         val res = webTestClient.delete()
             .uri("/api/admins/${anotherAdmin.info.id}")
-            .cookie(SessionTokenType.Access.cookieName, admin.accessToken)
+            .accessTokenCookie(admin.accessToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(UserResponse::class.java)
@@ -157,7 +157,7 @@ class AdminControllerTest : BaseIntegrationTest() {
 
         webTestClient.delete()
             .uri("/api/admins/${anotherAdmin.info.id}")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isForbidden
 
@@ -171,7 +171,7 @@ class AdminControllerTest : BaseIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/admins/not-valid")
-            .cookie(SessionTokenType.Access.cookieName, admin.accessToken)
+            .accessTokenCookie(admin.accessToken)
             .exchange()
             .expectStatus().isBadRequest
     }
@@ -180,7 +180,7 @@ class AdminControllerTest : BaseIntegrationTest() {
 
         webTestClient.delete()
             .uri("/api/admins/${admin.info.id}")
-            .cookie(SessionTokenType.Access.cookieName, admin.accessToken)
+            .accessTokenCookie(admin.accessToken)
             .exchange()
             .expectStatus().isEqualTo(HttpStatus.CONFLICT)
     }

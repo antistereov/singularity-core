@@ -1,6 +1,5 @@
 package io.stereov.singularity.file.local
 
-import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.file.core.model.FileMetadataDocument
 import io.stereov.singularity.file.core.service.FileMetadataService
 import io.stereov.singularity.file.core.service.FileStorage
@@ -101,7 +100,7 @@ class TestLocalFileStorage : BaseIntegrationTest() {
 
             webTestClient.get()
                 .uri("/api/assets/${metadata.key}")
-                .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+                .accessTokenCookie(user.accessToken)
                 .exchange()
                 .expectStatus().isOk
                 .expectHeader().contentType(MediaType.IMAGE_JPEG)
@@ -123,13 +122,13 @@ class TestLocalFileStorage : BaseIntegrationTest() {
         }
     }
     @Test fun `should not serve private file to non-owner`() = runTest {
-        val anotherUser = registerUser(email = "another@email.com")
+        val anotherUser = registerUser(emailSuffix = "another@email.com")
 
         runFileTest(false) { _, metadata, _ ->
 
             webTestClient.get()
                 .uri("/api/assets/${metadata.key}")
-                .cookie(SessionTokenType.Access.cookieName, anotherUser.accessToken)
+                .accessTokenCookie(anotherUser.accessToken)
                 .exchange()
                 .expectStatus().isForbidden
         }

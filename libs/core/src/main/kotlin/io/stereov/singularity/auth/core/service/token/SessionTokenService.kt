@@ -21,6 +21,7 @@ class SessionTokenService(
 ) {
 
     private val logger = KotlinLogging.logger {}
+    val tokenType = "session"
 
     suspend fun create(sessionInfo: SessionInfoRequest? = null, issuedAt: Instant = Instant.now()): SessionToken {
         logger.debug { "Creating session token" }
@@ -36,7 +37,7 @@ class SessionTokenService(
             claims.claim(Constants.JWT_OS_CLAIM, sessionInfo.os)
         }
 
-        val jwt = jwtService.encodeJwt(claims.build())
+        val jwt = jwtService.encodeJwt(claims.build(), tokenType)
 
         return SessionToken(sessionInfo?.browser, sessionInfo?.os, jwt)
     }
@@ -51,7 +52,7 @@ class SessionTokenService(
     suspend fun extract(tokenValue: String): SessionToken {
         logger.debug { "Extracting session token" }
 
-        val jwt = jwtService.decodeJwt(tokenValue, true)
+        val jwt = jwtService.decodeJwt(tokenValue, tokenType)
         val browser = jwt.claims[Constants.JWT_BROWSER_CLAIM] as? String
         val os = jwt.claims[Constants.JWT_OS_CLAIM] as? String
 

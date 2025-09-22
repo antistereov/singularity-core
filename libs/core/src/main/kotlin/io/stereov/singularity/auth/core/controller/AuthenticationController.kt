@@ -244,6 +244,7 @@ class AuthenticationController(
                         twoFactorRequired = true,
                         allowedTwoFactorMethods = user.twoFactorMethods,
                         twoFactorAuthenticationToken = if (authProperties.allowHeaderAuthentication) twoFactorAuthenticationToken.value else null,
+                        preferredTwoFactorMethod = user.preferredTwoFactorMethod,
                         accessToken = null,
                         refreshToken = null,
                         location = geoLocationService.getLocationOrNull(exchange.request)
@@ -262,6 +263,7 @@ class AuthenticationController(
             twoFactorRequired = false,
             allowedTwoFactorMethods = null,
             twoFactorAuthenticationToken = null,
+            preferredTwoFactorMethod = null,
             location = geoLocationService.getLocationOrNull(exchange.request)
         )
 

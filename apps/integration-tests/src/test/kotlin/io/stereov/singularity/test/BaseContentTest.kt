@@ -36,7 +36,7 @@ class BaseContentTest : BaseIntegrationTest() {
         val req = CreateArticleRequest(Locale.ENGLISH, title ?: "test", "", "")
         val res = webTestClient.post()
             .uri("/api/content/articles/create")
-            .cookie(SessionTokenType.Access.cookieName, actualUser.accessToken)
+            .accessTokenCookie(actualUser.accessToken)
             .bodyValue(req)
             .exchange()
             .expectStatus().isOk

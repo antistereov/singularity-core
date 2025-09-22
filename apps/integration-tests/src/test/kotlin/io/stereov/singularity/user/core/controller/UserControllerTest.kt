@@ -43,7 +43,7 @@ class UserControllerTest : BaseIntegrationTest() {
 
         val response = webTestClient.get()
             .uri("/api/users/me")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(UserResponse::class.java)

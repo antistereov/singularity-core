@@ -71,7 +71,7 @@ class GuestControllerTest : BaseIntegrationTest() {
         val user = registerUser()
         webTestClient.post()
             .uri("/api/guests")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .bodyValue(CreateGuestRequest(name, null))
             .exchange()
             .expectStatus().isNotModified
@@ -89,7 +89,7 @@ class GuestControllerTest : BaseIntegrationTest() {
         val result = webTestClient.post()
             .uri("/api/guests/convert-to-user")
             .bodyValue(req)
-            .cookie(SessionTokenType.Access.cookieName, guest.accessToken)
+            .accessTokenCookie(guest.accessToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(ConvertToUserResponse::class.java)
@@ -129,7 +129,7 @@ class GuestControllerTest : BaseIntegrationTest() {
         val result = webTestClient.post()
             .uri("/api/guests/convert-to-user")
             .bodyValue(req)
-            .cookie(SessionTokenType.Access.cookieName, guest.accessToken)
+            .accessTokenCookie(guest.accessToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(ConvertToUserResponse::class.java)
@@ -153,7 +153,7 @@ class GuestControllerTest : BaseIntegrationTest() {
         webTestClient.post()
             .uri("/api/guests/convert-to-user")
             .bodyValue(req)
-            .cookie(SessionTokenType.Access.cookieName, guest.accessToken)
+            .accessTokenCookie(guest.accessToken)
             .exchange()
             .expectStatus().isBadRequest
     }
@@ -168,7 +168,7 @@ class GuestControllerTest : BaseIntegrationTest() {
         webTestClient.post()
             .uri("/api/guests/convert-to-user")
             .bodyValue(req)
-            .cookie(SessionTokenType.Access.cookieName, guest.accessToken)
+            .accessTokenCookie(guest.accessToken)
             .exchange()
             .expectStatus().isEqualTo(HttpStatus.CONFLICT)
     }
@@ -181,7 +181,7 @@ class GuestControllerTest : BaseIntegrationTest() {
         webTestClient.post()
             .uri("/api/guests/convert-to-user")
             .bodyValue(req)
-            .cookie(SessionTokenType.Access.cookieName, guest.accessToken)
+            .accessTokenCookie(guest.accessToken)
             .exchange()
             .expectStatus().isBadRequest
     }
@@ -194,7 +194,7 @@ class GuestControllerTest : BaseIntegrationTest() {
         webTestClient.post()
             .uri("/api/guests/convert-to-user")
             .bodyValue(req)
-            .cookie(SessionTokenType.Access.cookieName, guest.accessToken)
+            .accessTokenCookie(guest.accessToken)
             .exchange()
             .expectStatus().isBadRequest
     }
@@ -207,7 +207,7 @@ class GuestControllerTest : BaseIntegrationTest() {
         webTestClient.post()
             .uri("/api/guests/convert-to-user")
             .bodyValue(req)
-            .cookie(SessionTokenType.Access.cookieName, guest.accessToken)
+            .accessTokenCookie(guest.accessToken)
             .exchange()
             .expectStatus().isBadRequest
     }
@@ -220,7 +220,7 @@ class GuestControllerTest : BaseIntegrationTest() {
         webTestClient.post()
             .uri("/api/guests/convert-to-user")
             .bodyValue(req)
-            .cookie(SessionTokenType.Access.cookieName, guest.accessToken)
+            .accessTokenCookie(guest.accessToken)
             .exchange()
             .expectStatus().isBadRequest
     }
@@ -233,7 +233,7 @@ class GuestControllerTest : BaseIntegrationTest() {
         webTestClient.post()
             .uri("/api/guests/convert-to-user")
             .bodyValue(req)
-            .cookie(SessionTokenType.Access.cookieName, guest.accessToken)
+            .accessTokenCookie(guest.accessToken)
             .exchange()
             .expectStatus().isBadRequest
     }
@@ -242,7 +242,7 @@ class GuestControllerTest : BaseIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/guests/convert-to-user")
-            .cookie(SessionTokenType.Access.cookieName, guest.accessToken)
+            .accessTokenCookie(guest.accessToken)
             .exchange()
             .expectStatus().isBadRequest
     }
@@ -255,7 +255,7 @@ class GuestControllerTest : BaseIntegrationTest() {
         webTestClient.post()
             .uri("/api/guests/convert-to-user")
             .bodyValue(req)
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isNotModified
     }

@@ -3,6 +3,8 @@ package io.stereov.singularity.auth.twofactor.service
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.exception.model.TwoFactorMethodDisabledException
+import io.stereov.singularity.auth.core.exception.model.WrongIdentityProviderException
+import io.stereov.singularity.auth.core.model.IdentityProvider
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.twofactor.dto.request.EnableEmailTwoFactorMethodRequest
 import io.stereov.singularity.auth.twofactor.exception.model.CannotDisableOnly2FAMethodException
@@ -51,8 +53,8 @@ class EmailAuthenticationService(
         logger.debug { "Generating new code and sending email" }
 
         val code = Random.generateInt()
-        user.sensitive.security.twoFactor.mail.code = code
-        user.sensitive.security.twoFactor.mail.expiresAt = Instant.now().plusSeconds(twoFactorEmailCodeProperties.expiresIn)
+        user.sensitive.security.twoFactor.email.code = code
+        user.sensitive.security.twoFactor.email.expiresAt = Instant.now().plusSeconds(twoFactorEmailCodeProperties.expiresIn)
 
         userService.save(user)
 
@@ -62,12 +64,12 @@ class EmailAuthenticationService(
     suspend fun validateCode(user: UserDocument, code: String): UserDocument {
         logger.debug { "Validating 2FA code" }
 
-        if (!user.sensitive.security.twoFactor.mail.enabled)
+        if (!user.sensitive.security.twoFactor.email.enabled)
             throw TwoFactorMethodDisabledException(TwoFactorMethod.EMAIL)
 
         doValidateCode(user, code)
 
-        return user
+        return userService.save(user)
     }
 
     suspend fun sendAuthenticationEmail(user: UserDocument, code: String, locale: Locale?) {
@@ -75,6 +77,9 @@ class EmailAuthenticationService(
 
         val userId = user.id
         val actualLocale = locale ?: appProperties.locale
+
+        if (!user.sensitive.identities.contains(IdentityProvider.PASSWORD))
+            throw WrongIdentityProviderException("Cannot enable email as 2FA method: password authentication required")
 
         val remainingCooldown = getRemainingCooldown(userId)
         if (remainingCooldown > 0) {
@@ -102,14 +107,14 @@ class EmailAuthenticationService(
     suspend fun getRemainingCooldown(userId: ObjectId): Long {
         logger.debug { "Getting remaining cooldown for email authentication" }
 
-        val key = "email-verification-cooldown:$userId"
+        val key = "email-authentication-cooldown:$userId"
         val remainingTtl = redisTemplate.getExpire(key).awaitSingleOrNull() ?: Duration.ofSeconds(-1)
 
         return if (remainingTtl.seconds > 0) remainingTtl.seconds else 0
     }
 
     private suspend fun doValidateCode(user: UserDocument, code: String) {
-        val details = user.sensitive.security.twoFactor.mail
+        val details = user.sensitive.security.twoFactor.email
 
         if (details.expiresAt.isBefore(Instant.now()))
             throw TwoFactorCodeExpiredException("The code is expired. Please request a new email.")
@@ -118,8 +123,6 @@ class EmailAuthenticationService(
 
         details.code = Random.generateInt()
         details.expiresAt = Instant.now().plusSeconds(twoFactorEmailCodeProperties.expiresIn)
-
-        userService.save(user)
     }
 
     private suspend fun startCooldown(userId: ObjectId): Boolean {
@@ -140,12 +143,15 @@ class EmailAuthenticationService(
         val user = authorizationService.getCurrentUser()
         authorizationService.requireStepUp()
 
-        if (user.sensitive.security.twoFactor.mail.enabled)
+        if (!user.sensitive.identities.contains(IdentityProvider.PASSWORD))
+            throw WrongIdentityProviderException("Cannot enable email as 2FA method: password authentication required")
+
+        if (user.sensitive.security.twoFactor.email.enabled)
             throw TwoFactorMethodAlreadyEnabledException("Mail is already enabled as 2FA method")
 
         doValidateCode(user, req.code)
 
-        user.sensitive.security.twoFactor.mail.enabled = true
+        user.sensitive.security.twoFactor.email.enabled = true
 
         if (user.twoFactorMethods.size == 1)
             user.sensitive.security.twoFactor.preferred = TwoFactorMethod.EMAIL
@@ -162,10 +168,13 @@ class EmailAuthenticationService(
         val user = authorizationService.getCurrentUser()
         authorizationService.requireStepUp()
 
-        if (user.twoFactorMethods.size == 1 && user.sensitive.security.twoFactor.mail.enabled)
+        if (!user.sensitive.security.twoFactor.email.enabled)
+            throw TwoFactorMethodDisabledException(TwoFactorMethod.EMAIL)
+
+        if (user.twoFactorMethods.size == 1 && user.sensitive.security.twoFactor.email.enabled)
             throw CannotDisableOnly2FAMethodException("Failed to disable email: it not allowed to disable the only configured 2FA method.")
 
-        user.sensitive.security.twoFactor.mail.enabled = false
+        user.sensitive.security.twoFactor.email.enabled = false
 
         return userService.save(user)
     }

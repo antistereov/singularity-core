@@ -30,7 +30,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
 
         val res = webTestClient.post()
             .uri("/api/groups/${group.key}/members/${user.info.id}")
-            .cookie(SessionTokenType.Access.cookieName, admin.accessToken)
+            .accessTokenCookie(admin.accessToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(UserResponse::class.java)
@@ -51,7 +51,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
 
         webTestClient.post()
             .uri("/api/groups/new-pilots/members/${user.info.id}")
-            .cookie(SessionTokenType.Access.cookieName, admin.accessToken)
+            .accessTokenCookie(admin.accessToken)
             .exchange()
             .expectStatus().isNotFound
 
@@ -100,7 +100,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
 
         webTestClient.post()
             .uri("/api/groups/${group.key}/members/${user.info.id}")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isForbidden
 
@@ -127,7 +127,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
 
         webTestClient.post()
             .uri("/api/groups/${group.key}/members/${user.info.id}")
-            .cookie(SessionTokenType.Access.cookieName, admin.accessToken)
+            .accessTokenCookie(admin.accessToken)
             .exchange()
             .expectStatus().isNotFound
     }
@@ -150,7 +150,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
 
         val res = webTestClient.delete()
             .uri("/api/groups/${group.key}/members/${user.info.id}")
-            .cookie(SessionTokenType.Access.cookieName, admin.accessToken)
+            .accessTokenCookie(admin.accessToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(UserResponse::class.java)
@@ -170,7 +170,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
 
         webTestClient.delete()
             .uri("/api/groups/new-pilots/members/${user.info.id}")
-            .cookie(SessionTokenType.Access.cookieName, admin.accessToken)
+            .accessTokenCookie(admin.accessToken)
             .exchange()
             .expectStatus().isNotFound
 
@@ -217,7 +217,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
 
         webTestClient.delete()
             .uri("/api/groups/${group.key}/members/${user.info.id}")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isForbidden
 
@@ -243,7 +243,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
 
         webTestClient.delete()
             .uri("/api/groups/${group.key}/members/${user.info.id}")
-            .cookie(SessionTokenType.Access.cookieName, admin.accessToken)
+            .accessTokenCookie(admin.accessToken)
             .exchange()
             .expectStatus().isNotFound
     }

@@ -1,7 +1,6 @@
 package io.stereov.singularity.content.article.controller
 
 import io.stereov.singularity.auth.core.model.token.AccessType
-import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.auth.group.model.KnownGroups
 import io.stereov.singularity.content.article.dto.response.ArticleOverviewResponse
 import io.stereov.singularity.content.article.dto.response.ArticleResponse
@@ -89,7 +88,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
 
         val res = webTestClient.get()
             .uri(articleBasePath)
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectBody(ArticleOverviewPage::class.java)
             .returnResult()
@@ -101,14 +100,14 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         assertEquals(article.id, res.content.first().id)
     }
     @Test fun `getArticles works with user viewer`() = runTest {
-        val user = registerUser(email = "another@email.com")
+        val user = registerUser(emailSuffix = "another@email.com")
         val article = save()
         article.share(ContentAccessSubject.USER, user.info.id.toHexString(), ContentAccessRole.VIEWER)
         articleService.save(article)
 
         val res = webTestClient.get()
             .uri(articleBasePath)
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectBody(ArticleOverviewPage::class.java)
             .returnResult()
@@ -120,14 +119,14 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         assertEquals(article.id, res.content.first().id)
     }
     @Test fun `getArticles works with user editor`() = runTest {
-        val user = registerUser(email = "another@email.com")
+        val user = registerUser(emailSuffix = "another@email.com")
         val article = save()
         article.share(ContentAccessSubject.USER, user.info.id.toHexString(), ContentAccessRole.EDITOR)
         articleService.save(article)
 
         val res = webTestClient.get()
             .uri(articleBasePath)
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectBody(ArticleOverviewPage::class.java)
             .returnResult()
@@ -139,14 +138,14 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         assertEquals(article.id, res.content.first().id)
     }
     @Test fun `getArticles works with user admin`() = runTest {
-        val user = registerUser(email = "another@email.com")
+        val user = registerUser(emailSuffix = "another@email.com")
         val article = save()
         article.share(ContentAccessSubject.USER, user.info.id.toHexString(), ContentAccessRole.ADMIN)
         articleService.save(article)
 
         val res = webTestClient.get()
             .uri(articleBasePath)
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectBody(ArticleOverviewPage::class.java)
             .returnResult()
@@ -160,14 +159,14 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
     @Test fun `getArticles works with group viewer`() = runTest {
         val group = createGroup()
 
-        val user = registerUser(email = "another@email.com", groups = listOf(group.key))
+        val user = registerUser(emailSuffix = "another@email.com", groups = listOf(group.key))
         val article = save()
         article.share(ContentAccessSubject.GROUP, user.info.groups.first(), ContentAccessRole.VIEWER)
         articleService.save(article)
 
         val res = webTestClient.get()
             .uri(articleBasePath)
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectBody(ArticleOverviewPage::class.java)
             .returnResult()
@@ -180,14 +179,14 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
     }
     @Test fun `getArticles works with group editor`() = runTest {
         val group = createGroup()
-        val user = registerUser(email = "another@email.com", groups = listOf(group.key))
+        val user = registerUser(emailSuffix = "another@email.com", groups = listOf(group.key))
         val article = save()
         article.share(ContentAccessSubject.GROUP, user.info.groups.first(), ContentAccessRole.EDITOR)
         articleService.save(article)
 
         val res = webTestClient.get()
             .uri(articleBasePath)
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectBody(ArticleOverviewPage::class.java)
             .returnResult()
@@ -200,14 +199,14 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
     }
     @Test fun `getArticles works with group admin`() = runTest {
         val group = createGroup()
-        val user = registerUser(email = "another@email.com", groups = listOf(group.key))
+        val user = registerUser(emailSuffix = "another@email.com", groups = listOf(group.key))
         val article = save()
         article.share(ContentAccessSubject.GROUP, user.info.groups.first(), ContentAccessRole.ADMIN)
         articleService.save(article)
 
         val res = webTestClient.get()
             .uri(articleBasePath)
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectBody(ArticleOverviewPage::class.java)
             .returnResult()
@@ -230,7 +229,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
 
         val res = webTestClient.get()
             .uri("$articleBasePath?tags=${tag.key}")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectBody(ArticleOverviewPage::class.java)
             .returnResult()
@@ -256,7 +255,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
 
         val res = webTestClient.get()
             .uri("$articleBasePath?tags=${tag.key},${anotherTag.key}")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectBody(ArticleOverviewPage::class.java)
             .returnResult()
@@ -370,7 +369,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
 
         val res = webTestClient.get()
             .uri("$articleBasePath/scroll")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectBody(ArticleResponse::class.java)
             .returnResult()
@@ -383,7 +382,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         assertEquals(article.id, res.articles.first().id)
     }
     @Test fun `getLatestArticles works with user viewer`() = runTest {
-        val user = registerUser(email = "another@email.com")
+        val user = registerUser(emailSuffix = "another@email.com")
         val article = save()
         article.share(ContentAccessSubject.USER, user.info.id.toHexString(), ContentAccessRole.VIEWER)
         article.state = ArticleState.PUBLISHED
@@ -391,7 +390,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
 
         val res = webTestClient.get()
             .uri("$articleBasePath/scroll")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectBody(ArticleResponse::class.java)
             .returnResult()
@@ -404,7 +403,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         assertEquals(article.id, res.articles.first().id)
     }
     @Test fun `getLatestArticles works with user editor`() = runTest {
-        val user = registerUser(email = "another@email.com")
+        val user = registerUser(emailSuffix = "another@email.com")
         val article = save()
         article.share(ContentAccessSubject.USER, user.info.id.toHexString(), ContentAccessRole.EDITOR)
         article.state = ArticleState.PUBLISHED
@@ -412,7 +411,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
 
         val res = webTestClient.get()
             .uri("$articleBasePath/scroll")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectBody(ArticleResponse::class.java)
             .returnResult()
@@ -425,7 +424,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         assertEquals(article.id, res.articles.first().id)
     }
     @Test fun `getLatestArticles works with user admin`() = runTest {
-        val user = registerUser(email = "another@email.com")
+        val user = registerUser(emailSuffix = "another@email.com")
         val article = save()
         article.share(ContentAccessSubject.USER, user.info.id.toHexString(), ContentAccessRole.ADMIN)
         article.state = ArticleState.PUBLISHED
@@ -433,7 +432,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
 
         val res = webTestClient.get()
             .uri("$articleBasePath/scroll")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectBody(ArticleResponse::class.java)
             .returnResult()
@@ -447,7 +446,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
     }
     @Test fun `getLatestArticles works with group viewer`() = runTest {
         val group = createGroup()
-        val user = registerUser(email = "another@email.com", groups = listOf(group.key))
+        val user = registerUser(emailSuffix = "another@email.com", groups = listOf(group.key))
         val article = save()
         article.share(ContentAccessSubject.GROUP, user.info.groups.first(), ContentAccessRole.VIEWER)
         article.state = ArticleState.PUBLISHED
@@ -455,7 +454,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
 
         val res = webTestClient.get()
             .uri("$articleBasePath/scroll")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectBody(ArticleResponse::class.java)
             .returnResult()
@@ -469,7 +468,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
     }
     @Test fun `getLatestArticles works with group editor`() = runTest {
         val group = createGroup()
-        val user = registerUser(email = "another@email.com", groups = listOf(group.key))
+        val user = registerUser(emailSuffix = "another@email.com", groups = listOf(group.key))
         val article = save()
         article.share(ContentAccessSubject.GROUP, user.info.groups.first(), ContentAccessRole.EDITOR)
         article.state = ArticleState.PUBLISHED
@@ -477,7 +476,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
 
         val res = webTestClient.get()
             .uri("$articleBasePath/scroll")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectBody(ArticleResponse::class.java)
             .returnResult()
@@ -491,7 +490,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
     }
     @Test fun `getLatestArticles works with group admin`() = runTest {
         val group = createGroup()
-        val user = registerUser(email = "another@email.com", groups = listOf(group.key))
+        val user = registerUser(emailSuffix = "another@email.com", groups = listOf(group.key))
         val article = save()
         article.share(ContentAccessSubject.GROUP, user.info.groups.first(), ContentAccessRole.ADMIN)
         article.state = ArticleState.PUBLISHED
@@ -499,7 +498,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
 
         val res = webTestClient.get()
             .uri("$articleBasePath/scroll")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectBody(ArticleResponse::class.java)
             .returnResult()

@@ -31,11 +31,17 @@ singularity:
     create-root-user: false
     root-email: ${ROOT_EMAIL}
     root-password: ${ROOT_PASSWORD}
-    enable-mail: false
+  email:
+    enable: false
   auth:
     two-factor:
-      recovery-code-length: 10
-      recovery-code-count: 6
+      totp:
+        recovery-code:
+          length: 10
+          count: 6
+      email:
+        enable-by-default: false
+
   file:
     storage:
       type: local

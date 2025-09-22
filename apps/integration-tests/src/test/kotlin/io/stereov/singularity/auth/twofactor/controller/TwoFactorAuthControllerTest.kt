@@ -1,9 +1,6 @@
 package io.stereov.singularity.auth.twofactor.controller
 
-import io.mockk.verify
-import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
-import io.stereov.singularity.auth.core.dto.request.StepUpRequest
 import io.stereov.singularity.auth.core.dto.response.LoginResponse
 import io.stereov.singularity.auth.core.dto.response.StepUpResponse
 import io.stereov.singularity.auth.core.model.token.SessionTokenType
@@ -14,7 +11,6 @@ import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
 import io.stereov.singularity.auth.twofactor.model.token.TwoFactorTokenType
 import io.stereov.singularity.test.BaseMailIntegrationTest
 import io.stereov.singularity.user.core.dto.response.UserResponse
-import jakarta.mail.internet.MimeMessage
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -31,13 +27,13 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
         webTestClient.post()
             .uri("/api/auth/2fa/login")
             .bodyValue(CompleteStepUpRequest(totp = 123456, email = "123456"))
-            .cookie(TwoFactorTokenType.Authentication.cookieName, twoFactorToken.value)
+            .twoFactorAuthenticationTokenCookie(twoFactorToken.value)
             .exchange()
             .expectStatus().isBadRequest
     }
     @Test fun `verifyLogin requires 2fa enabled`() = runTest {
         val user = registerUser()
-        user.info.sensitive.security.twoFactor.mail.enabled = false
+        user.info.sensitive.security.twoFactor.email.enabled = false
         userService.save(user.info)
 
         val twoFactorToken = twoFactorAuthenticationTokenService.create(user.info.id)
@@ -45,7 +41,7 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
         webTestClient.post()
             .uri("/api/auth/2fa/login")
             .bodyValue(CompleteStepUpRequest(totp = 123456, email = "123456"))
-            .cookie(TwoFactorTokenType.Authentication.cookieName, twoFactorToken.value)
+            .twoFactorAuthenticationTokenCookie(twoFactorToken.value)
             .exchange()
             .expectStatus().isBadRequest
     }
@@ -59,7 +55,7 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
         val res = webTestClient.post()
             .uri("/api/auth/2fa/login")
             .bodyValue(CompleteStepUpRequest(totp = code))
-            .cookie(TwoFactorTokenType.Authentication.cookieName, user.twoFactorToken)
+            .twoFactorAuthenticationTokenCookie(user.twoFactorToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(LoginResponse::class.java)
@@ -89,7 +85,7 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
         val accessToken = webTestClient.post()
             .uri("/api/auth/2fa/login")
             .bodyValue(req)
-            .cookie(TwoFactorTokenType.Authentication.cookieName, user.twoFactorToken)
+            .twoFactorAuthenticationTokenCookie(user.twoFactorToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(LoginResponse::class.java)
@@ -111,7 +107,7 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
         webTestClient.post()
             .uri("/api/auth/2fa/login")
             .bodyValue(CompleteStepUpRequest(totp = code))
-            .cookie(TwoFactorTokenType.Authentication.cookieName, user.twoFactorToken)
+            .twoFactorAuthenticationTokenCookie(user.twoFactorToken)
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -135,7 +131,7 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/auth/2fa/login")
-            .cookie(TwoFactorTokenType.Authentication.cookieName, "invalid")
+            .twoFactorAuthenticationTokenCookie("invalid")
             .bodyValue(CompleteLoginRequest(totp = code))
             .exchange()
             .expectStatus().isUnauthorized
@@ -148,7 +144,7 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/auth/2fa/login")
-            .cookie(TwoFactorTokenType.Authentication.cookieName, twoFactorToken.value)
+            .twoFactorAuthenticationTokenCookie(twoFactorToken.value)
             .bodyValue(CompleteLoginRequest(totp = code))
             .exchange()
             .expectStatus().isUnauthorized
@@ -159,20 +155,20 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/auth/2fa/login")
-            .cookie(TwoFactorTokenType.Authentication.cookieName, user.twoFactorToken)
+            .twoFactorAuthenticationTokenCookie(user.twoFactorToken)
             .exchange()
             .expectStatus().isBadRequest
     }
     @Test fun `verifyLogin with only TOTP needs TOTP code`() = runTest {
         val user = registerUser(totpEnabled = true)
-        user.info.sensitive.security.twoFactor.mail.enabled = false
+        user.info.sensitive.security.twoFactor.email.enabled = false
         userService.save(user.info)
         requireNotNull(user.twoFactorToken)
 
         webTestClient.post()
             .uri("/api/auth/2fa/login")
             .bodyValue(CompleteLoginRequest(email = "123456"))
-            .cookie(TwoFactorTokenType.Authentication.cookieName, user.twoFactorToken)
+            .twoFactorAuthenticationTokenCookie(user.twoFactorToken)
             .exchange()
             .expectStatus().isBadRequest
     }
@@ -185,8 +181,8 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
         webTestClient.post()
             .uri("/api/auth/2fa/login")
             .bodyValue(CompleteStepUpRequest(totp = code))
-            .cookie(TwoFactorTokenType.Authentication.cookieName, user.twoFactorToken)
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .twoFactorAuthenticationTokenCookie(user.twoFactorToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isNotModified
     }
@@ -199,7 +195,7 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
         webTestClient.post()
             .uri("/api/auth/2fa/login")
             .bodyValue(CompleteStepUpRequest(totp = code, email = "123456"))
-            .cookie(TwoFactorTokenType.Authentication.cookieName, user.twoFactorToken)
+            .twoFactorAuthenticationTokenCookie(user.twoFactorToken)
             .exchange()
             .expectStatus().isOk
     }
@@ -208,12 +204,12 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
         val user = registerUser(email2faEnabled = true)
         requireNotNull(user.twoFactorToken)
 
-        val code = user.info.sensitive.security.twoFactor.mail.code
+        val code = user.info.sensitive.security.twoFactor.email.code
 
         val res = webTestClient.post()
             .uri("/api/auth/2fa/login")
             .bodyValue(CompleteStepUpRequest(email = code))
-            .cookie(TwoFactorTokenType.Authentication.cookieName, user.twoFactorToken)
+            .twoFactorAuthenticationTokenCookie(user.twoFactorToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(LoginResponse::class.java)
@@ -235,32 +231,32 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
         val user = registerUser(email2faEnabled = true)
         requireNotNull(user.twoFactorToken)
 
-        val code = user.info.sensitive.security.twoFactor.mail.code
+        val code = user.info.sensitive.security.twoFactor.email.code
 
         webTestClient.post()
             .uri("/api/auth/2fa/login")
             .bodyValue(CompleteStepUpRequest(email = code))
-            .cookie(TwoFactorTokenType.Authentication.cookieName, user.twoFactorToken)
+            .twoFactorAuthenticationTokenCookie(user.twoFactorToken)
             .exchange()
             .expectStatus().isOk
 
         val updatedUser = userService.findById(user.info.id)
 
-        Assertions.assertNotEquals(code, updatedUser.sensitive.security.twoFactor.mail.code)
-        Assertions.assertTrue(user.info.sensitive.security.twoFactor.mail.expiresAt.isBefore(updatedUser.sensitive.security.twoFactor.mail.expiresAt))
+        Assertions.assertNotEquals(code, updatedUser.sensitive.security.twoFactor.email.code)
+        Assertions.assertTrue(user.info.sensitive.security.twoFactor.email.expiresAt.isBefore(updatedUser.sensitive.security.twoFactor.email.expiresAt))
     }
     @Test fun `verifyLogin with email requires unexpired code`() = runTest {
         val user = registerUser(email2faEnabled = true)
         requireNotNull(user.twoFactorToken)
 
-        user.info.sensitive.security.twoFactor.mail.expiresAt = Instant.ofEpochSecond(0)
+        user.info.sensitive.security.twoFactor.email.expiresAt = Instant.ofEpochSecond(0)
         userService.save(user.info)
-        val code = user.info.sensitive.security.twoFactor.mail.code
+        val code = user.info.sensitive.security.twoFactor.email.code
 
         webTestClient.post()
             .uri("/api/auth/2fa/login")
             .bodyValue(CompleteStepUpRequest(email = code))
-            .cookie(TwoFactorTokenType.Authentication.cookieName, user.twoFactorToken)
+            .twoFactorAuthenticationTokenCookie(user.twoFactorToken)
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -269,14 +265,14 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
         requireNotNull(user.twoFactorToken)
 
         val req = CompleteLoginRequest(
-            email = user.info.sensitive.security.twoFactor.mail.code,
+            email = user.info.sensitive.security.twoFactor.email.code,
             session = SessionInfoRequest("browser", "os")
         )
 
         val res = webTestClient.post()
             .uri("/api/auth/2fa/login")
             .bodyValue(req)
-            .cookie(TwoFactorTokenType.Authentication.cookieName, user.twoFactorToken)
+            .twoFactorAuthenticationTokenCookie(user.twoFactorToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(LoginResponse::class.java)
@@ -294,12 +290,12 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
         val user = registerUser(email2faEnabled = true)
         requireNotNull(user.twoFactorToken)
 
-        val code = user.info.sensitive.security.twoFactor.mail.code + 1
+        val code = user.info.sensitive.security.twoFactor.email.code + 1
 
         webTestClient.post()
             .uri("/api/auth/2fa/login")
             .bodyValue(CompleteStepUpRequest(email = code))
-            .cookie(TwoFactorTokenType.Authentication.cookieName, user.twoFactorToken)
+            .twoFactorAuthenticationTokenCookie(user.twoFactorToken)
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -307,7 +303,7 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
         val user = registerUser(email2faEnabled = true)
         requireNotNull(user.twoFactorToken)
 
-        val code = user.info.sensitive.security.twoFactor.mail.code
+        val code = user.info.sensitive.security.twoFactor.email.code
 
         webTestClient.post()
             .uri("/api/auth/2fa/login")
@@ -319,11 +315,11 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
         val user = registerUser(email2faEnabled = true)
         requireNotNull(user.twoFactorToken)
 
-        val code = user.info.sensitive.security.twoFactor.mail.code
+        val code = user.info.sensitive.security.twoFactor.email.code
 
         webTestClient.post()
             .uri("/api/auth/2fa/login")
-            .cookie(TwoFactorTokenType.Authentication.cookieName, "invalid")
+            .twoFactorAuthenticationTokenCookie("invalid")
             .bodyValue(CompleteLoginRequest(email = code))
             .exchange()
             .expectStatus().isUnauthorized
@@ -332,11 +328,11 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
         val user = registerUser(email2faEnabled = true)
         val twoFactorToken = twoFactorAuthenticationTokenService.create(user.info.id, Instant.ofEpochSecond(0))
 
-        val code = user.info.sensitive.security.twoFactor.mail.code
+        val code = user.info.sensitive.security.twoFactor.email.code
 
         webTestClient.post()
             .uri("/api/auth/2fa/login")
-            .cookie(TwoFactorTokenType.Authentication.cookieName, twoFactorToken.value)
+            .twoFactorAuthenticationTokenCookie(twoFactorToken.value)
             .bodyValue(CompleteLoginRequest(email = code))
             .exchange()
             .expectStatus().isUnauthorized
@@ -347,7 +343,7 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/auth/2fa/login")
-            .cookie(TwoFactorTokenType.Authentication.cookieName, user.twoFactorToken)
+            .twoFactorAuthenticationTokenCookie(user.twoFactorToken)
             .exchange()
             .expectStatus().isBadRequest
     }
@@ -358,7 +354,7 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
         webTestClient.post()
             .uri("/api/auth/2fa/login")
             .bodyValue(CompleteLoginRequest(totp = 123456))
-            .cookie(TwoFactorTokenType.Authentication.cookieName, user.twoFactorToken)
+            .twoFactorAuthenticationTokenCookie(user.twoFactorToken)
             .exchange()
             .expectStatus().isBadRequest
     }
@@ -366,13 +362,13 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
         val user = registerUser(email2faEnabled = true)
         requireNotNull(user.twoFactorToken)
 
-        val code = user.info.sensitive.security.twoFactor.mail.code
+        val code = user.info.sensitive.security.twoFactor.email.code
 
         webTestClient.post()
             .uri("/api/auth/2fa/login")
             .bodyValue(CompleteStepUpRequest(email = code))
-            .cookie(TwoFactorTokenType.Authentication.cookieName, user.twoFactorToken)
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .twoFactorAuthenticationTokenCookie(user.twoFactorToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isNotModified
     }
@@ -384,15 +380,15 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/auth/2fa/step-up")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .bodyValue(CompleteStepUpRequest(totp = 123456, email = "123456"))
-            .cookie(TwoFactorTokenType.Authentication.cookieName, twoFactorToken.value)
+            .twoFactorAuthenticationTokenCookie(twoFactorToken.value)
             .exchange()
             .expectStatus().isBadRequest
     }
     @Test fun `verifyStepUp requires 2fa enabled`() = runTest {
         val user = registerUser()
-        user.info.sensitive.security.twoFactor.mail.enabled = false
+        user.info.sensitive.security.twoFactor.email.enabled = false
         userService.save(user.info)
 
         val twoFactorToken = twoFactorAuthenticationTokenService.create(user.info.id)
@@ -400,8 +396,8 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
         webTestClient.post()
             .uri("/api/auth/2fa/step-up")
             .bodyValue(CompleteStepUpRequest(totp = 123456, email = "123456"))
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .cookie(TwoFactorTokenType.Authentication.cookieName, twoFactorToken.value)
+            .accessTokenCookie(user.accessToken)
+            .twoFactorAuthenticationTokenCookie(twoFactorToken.value)
             .exchange()
             .expectStatus().isBadRequest
     }
@@ -415,8 +411,8 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
         val res = webTestClient.post()
             .uri("/api/auth/2fa/step-up")
             .bodyValue(CompleteStepUpRequest(totp = code))
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .cookie(TwoFactorTokenType.Authentication.cookieName, user.twoFactorToken)
+            .accessTokenCookie(user.accessToken)
+            .twoFactorAuthenticationTokenCookie(user.twoFactorToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(StepUpResponse::class.java)
@@ -436,8 +432,8 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
         webTestClient.post()
             .uri("/api/auth/2fa/step-up")
             .bodyValue(CompleteStepUpRequest(totp = code))
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .cookie(TwoFactorTokenType.Authentication.cookieName, user.twoFactorToken)
+            .accessTokenCookie(user.accessToken)
+            .twoFactorAuthenticationTokenCookie(user.twoFactorToken)
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -449,7 +445,7 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/auth/2fa/step-up")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .bodyValue(CompleteLoginRequest(totp = code))
             .exchange()
             .expectStatus().isUnauthorized
@@ -462,7 +458,7 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/auth/2fa/step-up")
-            .cookie(TwoFactorTokenType.Authentication.cookieName, user.twoFactorToken)
+            .twoFactorAuthenticationTokenCookie(user.twoFactorToken)
             .bodyValue(CompleteLoginRequest(totp = code))
             .exchange()
             .expectStatus().isUnauthorized
@@ -475,7 +471,7 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/auth/2fa/step-up")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .bodyValue(CompleteLoginRequest(totp = code))
             .exchange()
             .expectStatus().isUnauthorized
@@ -488,8 +484,8 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/auth/2fa/step-up")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .cookie(TwoFactorTokenType.Authentication.cookieName, twoFactorToken.value)
+            .accessTokenCookie(user.accessToken)
+            .twoFactorAuthenticationTokenCookie(twoFactorToken.value)
             .bodyValue(CompleteLoginRequest(totp = code))
             .exchange()
             .expectStatus().isUnauthorized
@@ -503,8 +499,8 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/auth/2fa/step-up")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .cookie(TwoFactorTokenType.Authentication.cookieName, twoFactorToken.value)
+            .accessTokenCookie(user.accessToken)
+            .twoFactorAuthenticationTokenCookie(twoFactorToken.value)
             .bodyValue(CompleteLoginRequest(totp = code))
             .exchange()
             .expectStatus().isUnauthorized
@@ -515,22 +511,22 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/auth/2fa/step-up")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .cookie(TwoFactorTokenType.Authentication.cookieName, user.twoFactorToken)
+            .accessTokenCookie(user.accessToken)
+            .twoFactorAuthenticationTokenCookie(user.twoFactorToken)
             .exchange()
             .expectStatus().isBadRequest
     }
     @Test fun `verifyStepUp with only TOTP needs TOTP code`() = runTest {
         val user = registerUser(totpEnabled = true)
         requireNotNull(user.twoFactorToken)
-        user.info.sensitive.security.twoFactor.mail.enabled = false
+        user.info.sensitive.security.twoFactor.email.enabled = false
         userService.save(user.info)
 
         webTestClient.post()
             .uri("/api/auth/2fa/step-up")
             .bodyValue(CompleteLoginRequest(email = "123456"))
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .cookie(TwoFactorTokenType.Authentication.cookieName, user.twoFactorToken)
+            .accessTokenCookie(user.accessToken)
+            .twoFactorAuthenticationTokenCookie(user.twoFactorToken)
             .exchange()
             .expectStatus().isBadRequest
     }
@@ -543,8 +539,8 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
         webTestClient.post()
             .uri("/api/auth/2fa/step-up")
             .bodyValue(CompleteStepUpRequest(totp = code, email = "123456"))
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .cookie(TwoFactorTokenType.Authentication.cookieName, user.twoFactorToken)
+            .accessTokenCookie(user.accessToken)
+            .twoFactorAuthenticationTokenCookie(user.twoFactorToken)
             .exchange()
             .expectStatus().isOk
     }
@@ -553,13 +549,13 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
         val user = registerUser(email2faEnabled = true)
         requireNotNull(user.twoFactorToken)
 
-        val code = user.info.sensitive.security.twoFactor.mail.code
+        val code = user.info.sensitive.security.twoFactor.email.code
 
         val res = webTestClient.post()
             .uri("/api/auth/2fa/step-up")
             .bodyValue(CompleteStepUpRequest(email = code))
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .cookie(TwoFactorTokenType.Authentication.cookieName, user.twoFactorToken)
+            .accessTokenCookie(user.accessToken)
+            .twoFactorAuthenticationTokenCookie(user.twoFactorToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(StepUpResponse::class.java)
@@ -574,34 +570,34 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
         val user = registerUser(email2faEnabled = true)
         requireNotNull(user.twoFactorToken)
 
-        val code = user.info.sensitive.security.twoFactor.mail.code
+        val code = user.info.sensitive.security.twoFactor.email.code
 
         webTestClient.post()
             .uri("/api/auth/2fa/step-up")
             .bodyValue(CompleteStepUpRequest(email = code))
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .cookie(TwoFactorTokenType.Authentication.cookieName, user.twoFactorToken)
+            .accessTokenCookie(user.accessToken)
+            .twoFactorAuthenticationTokenCookie(user.twoFactorToken)
             .exchange()
             .expectStatus().isOk
 
         val updatedUser = userService.findById(user.info.id)
 
-        Assertions.assertNotEquals(code, updatedUser.sensitive.security.twoFactor.mail.code)
-        Assertions.assertTrue(user.info.sensitive.security.twoFactor.mail.expiresAt.isBefore(updatedUser.sensitive.security.twoFactor.mail.expiresAt))
+        Assertions.assertNotEquals(code, updatedUser.sensitive.security.twoFactor.email.code)
+        Assertions.assertTrue(user.info.sensitive.security.twoFactor.email.expiresAt.isBefore(updatedUser.sensitive.security.twoFactor.email.expiresAt))
     }
     @Test fun `verifyStepUp with email requires unexpired code`() = runTest {
         val user = registerUser(email2faEnabled = true)
         requireNotNull(user.twoFactorToken)
 
-        user.info.sensitive.security.twoFactor.mail.expiresAt = Instant.ofEpochSecond(0)
+        user.info.sensitive.security.twoFactor.email.expiresAt = Instant.ofEpochSecond(0)
         userService.save(user.info)
-        val code = user.info.sensitive.security.twoFactor.mail.code
+        val code = user.info.sensitive.security.twoFactor.email.code
 
         webTestClient.post()
             .uri("/api/auth/2fa/step-up")
             .bodyValue(CompleteStepUpRequest(email = code))
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .cookie(TwoFactorTokenType.Authentication.cookieName, user.twoFactorToken)
+            .accessTokenCookie(user.accessToken)
+            .twoFactorAuthenticationTokenCookie(user.twoFactorToken)
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -609,13 +605,13 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
         val user = registerUser(email2faEnabled = true)
         requireNotNull(user.twoFactorToken)
 
-        val code = user.info.sensitive.security.twoFactor.mail.code + 1
+        val code = user.info.sensitive.security.twoFactor.email.code + 1
 
         webTestClient.post()
             .uri("/api/auth/2fa/step-up")
             .bodyValue(CompleteStepUpRequest(email = code))
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .cookie(TwoFactorTokenType.Authentication.cookieName, user.twoFactorToken)
+            .accessTokenCookie(user.accessToken)
+            .twoFactorAuthenticationTokenCookie(user.twoFactorToken)
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -623,12 +619,12 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
         val user = registerUser(email2faEnabled = true)
         requireNotNull(user.twoFactorToken)
 
-        val code = user.info.sensitive.security.twoFactor.mail.code
+        val code = user.info.sensitive.security.twoFactor.email.code
 
         webTestClient.post()
             .uri("/api/auth/2fa/step-up")
             .bodyValue(CompleteStepUpRequest(email = code))
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -636,12 +632,12 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
         val user = registerUser(email2faEnabled = true)
         requireNotNull(user.twoFactorToken)
 
-        val code = user.info.sensitive.security.twoFactor.mail.code
+        val code = user.info.sensitive.security.twoFactor.email.code
 
         webTestClient.post()
             .uri("/api/auth/2fa/step-up")
             .bodyValue(CompleteStepUpRequest(email = code))
-            .cookie(TwoFactorTokenType.Authentication.cookieName, user.twoFactorToken)
+            .twoFactorAuthenticationTokenCookie(user.twoFactorToken)
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -649,13 +645,13 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
         val user = registerUser(email2faEnabled = true)
         requireNotNull(user.twoFactorToken)
 
-        val code = user.info.sensitive.security.twoFactor.mail.code
+        val code = user.info.sensitive.security.twoFactor.email.code
 
         webTestClient.post()
             .uri("/api/auth/2fa/step-up")
             .bodyValue(CompleteStepUpRequest(email = code))
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .cookie(TwoFactorTokenType.Authentication.cookieName, "invalid")
+            .accessTokenCookie(user.accessToken)
+            .twoFactorAuthenticationTokenCookie("invalid")
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -663,12 +659,12 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
         val user = registerUser(email2faEnabled = true)
         val twoFactorToken = twoFactorAuthenticationTokenService.create(user.info.id, Instant.ofEpochSecond(0))
 
-        val code = user.info.sensitive.security.twoFactor.mail.code
+        val code = user.info.sensitive.security.twoFactor.email.code
 
         webTestClient.post()
             .uri("/api/auth/2fa/step-up")
-            .cookie(TwoFactorTokenType.Authentication.cookieName, twoFactorToken.value)
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .twoFactorAuthenticationTokenCookie(twoFactorToken.value)
+            .accessTokenCookie(user.accessToken)
             .bodyValue(CompleteLoginRequest(email = code))
             .exchange()
             .expectStatus().isUnauthorized
@@ -678,12 +674,12 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
         val anotherUser = registerUser("another@email.com", email2faEnabled = true)
         val twoFactorToken = twoFactorAuthenticationTokenService.create(anotherUser.info.id)
 
-        val code = user.info.sensitive.security.twoFactor.mail.code
+        val code = user.info.sensitive.security.twoFactor.email.code
 
         webTestClient.post()
             .uri("/api/auth/2fa/step-up")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .cookie(TwoFactorTokenType.Authentication.cookieName, twoFactorToken.value)
+            .accessTokenCookie(user.accessToken)
+            .twoFactorAuthenticationTokenCookie(twoFactorToken.value)
             .bodyValue(CompleteLoginRequest(email = code))
             .exchange()
             .expectStatus().isUnauthorized
@@ -694,8 +690,8 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/auth/2fa/step-up")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .cookie(TwoFactorTokenType.Authentication.cookieName, user.twoFactorToken)
+            .accessTokenCookie(user.accessToken)
+            .twoFactorAuthenticationTokenCookie(user.twoFactorToken)
             .exchange()
             .expectStatus().isBadRequest
     }
@@ -706,62 +702,10 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
         webTestClient.post()
             .uri("/api/auth/2fa/step-up")
             .bodyValue(CompleteLoginRequest(totp = 123456))
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .cookie(TwoFactorTokenType.Authentication.cookieName, user.twoFactorToken)
+            .accessTokenCookie(user.accessToken)
+            .twoFactorAuthenticationTokenCookie(user.twoFactorToken)
             .exchange()
             .expectStatus().isBadRequest
-    }
-
-    @Test fun `login sends 2fa email automatically after login when preferred`() = runTest {
-        val user = registerUser(email2faEnabled = true, totpEnabled = true)
-        user.info.sensitive.security.twoFactor.preferred = TwoFactorMethod.EMAIL
-
-        webTestClient.post()
-            .uri("/api/auth/login")
-            .bodyValue(LoginRequest(user.email!!, user.password!!))
-            .exchange()
-            .expectStatus().isOk
-
-        verify(exactly = 1) { mailSender.send(any<MimeMessage>()) }
-    }
-    @Test fun `login does not send 2fa email automatically after login when not preferred`() = runTest {
-        val user = registerUser(email2faEnabled = true, totpEnabled = true)
-        user.info.sensitive.security.twoFactor.preferred = TwoFactorMethod.TOTP
-
-        webTestClient.post()
-            .uri("/api/auth/login")
-            .bodyValue(LoginRequest(user.email!!, user.password!!))
-            .exchange()
-            .expectStatus().isOk
-
-        verify(exactly = 0) { mailSender.send(any<MimeMessage>()) }
-    }
-
-    @Test fun `stepUp sends 2fa email automatically after login when preferred`() = runTest {
-        val user = registerUser(email2faEnabled = true, totpEnabled = true)
-        user.info.sensitive.security.twoFactor.preferred = TwoFactorMethod.EMAIL
-
-        webTestClient.post()
-            .uri("/api/auth/step-up")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .bodyValue(StepUpRequest(user.password!!))
-            .exchange()
-            .expectStatus().isOk
-
-        verify(exactly = 1) { mailSender.send(any<MimeMessage>()) }
-    }
-    @Test fun `stepUp does not send 2fa email automatically after login when not preferred`() = runTest {
-        val user = registerUser(email2faEnabled = true, totpEnabled = true)
-        user.info.sensitive.security.twoFactor.preferred = TwoFactorMethod.TOTP
-
-        webTestClient.post()
-            .uri("/api/auth/step-up")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .bodyValue(StepUpRequest(user.password!!))
-            .exchange()
-            .expectStatus().isOk
-
-        verify(exactly = 0) { mailSender.send(any<MimeMessage>()) }
     }
 
     @Test fun `changePreferred works`() = runTest {
@@ -772,8 +716,8 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
         val res = webTestClient.post()
             .uri("/api/auth/2fa/preferred-method")
             .bodyValue(ChangePreferredTwoFactorMethodRequest(TwoFactorMethod.TOTP))
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .cookie(SessionTokenType.StepUp.cookieName, user.stepUpToken)
+            .accessTokenCookie(user.accessToken)
+            .stepUpTokenCookie(user.stepUpToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(UserResponse::class.java)
@@ -795,8 +739,8 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
         val res = webTestClient.post()
             .uri("/api/auth/2fa/preferred-method")
             .bodyValue(ChangePreferredTwoFactorMethodRequest(TwoFactorMethod.EMAIL))
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .cookie(SessionTokenType.StepUp.cookieName, user.stepUpToken)
+            .accessTokenCookie(user.accessToken)
+            .stepUpTokenCookie(user.stepUpToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(UserResponse::class.java)
@@ -812,13 +756,13 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
     }
     @Test fun `changePreferred is bad when changing to disabled mail`() = runTest {
         val user = registerUser(totpEnabled = true)
-        user.info.sensitive.security.twoFactor.mail.enabled = false
+        user.info.sensitive.security.twoFactor.email.enabled = false
         userService.save(user.info)
 
         webTestClient.post()
             .uri("/api/auth/2fa/preferred-method")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .cookie(SessionTokenType.StepUp.cookieName, user.stepUpToken)
+            .accessTokenCookie(user.accessToken)
+            .stepUpTokenCookie(user.stepUpToken)
             .bodyValue(ChangePreferredTwoFactorMethodRequest(TwoFactorMethod.EMAIL))
             .exchange()
             .expectStatus().isBadRequest
@@ -831,8 +775,8 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/auth/2fa/preferred-method")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .cookie(SessionTokenType.StepUp.cookieName, user.stepUpToken)
+            .accessTokenCookie(user.accessToken)
+            .stepUpTokenCookie(user.stepUpToken)
             .bodyValue(ChangePreferredTwoFactorMethodRequest(TwoFactorMethod.TOTP))
             .exchange()
             .expectStatus().isBadRequest
@@ -845,8 +789,8 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/auth/2fa/preferred-method")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .cookie(SessionTokenType.StepUp.cookieName, user.stepUpToken)
+            .accessTokenCookie(user.accessToken)
+            .stepUpTokenCookie(user.stepUpToken)
             .bodyValue(ChangePreferredTwoFactorMethodRequest(TwoFactorMethod.TOTP))
             .exchange()
             .expectStatus().isBadRequest
@@ -862,7 +806,7 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
         webTestClient.post()
             .uri("/api/auth/2fa/preferred-method")
             .bodyValue(ChangePreferredTwoFactorMethodRequest(TwoFactorMethod.TOTP))
-            .cookie(SessionTokenType.StepUp.cookieName, user.stepUpToken)
+            .stepUpTokenCookie(user.stepUpToken)
             .exchange()
             .expectStatus().isUnauthorized
 
@@ -877,8 +821,8 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
         webTestClient.post()
             .uri("/api/auth/2fa/preferred-method")
             .bodyValue(ChangePreferredTwoFactorMethodRequest(TwoFactorMethod.TOTP))
-            .cookie(SessionTokenType.Access.cookieName, "invalid")
-            .cookie(SessionTokenType.StepUp.cookieName, user.stepUpToken)
+            .accessTokenCookie("invalid")
+            .stepUpTokenCookie(user.stepUpToken)
             .exchange()
             .expectStatus().isUnauthorized
 
@@ -893,8 +837,8 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
         webTestClient.post()
             .uri("/api/auth/2fa/preferred-method")
             .bodyValue(ChangePreferredTwoFactorMethodRequest(TwoFactorMethod.TOTP))
-            .cookie(SessionTokenType.Access.cookieName, accessTokenService.create(user.info, user.sessionId, Instant.ofEpochSecond(0)).value)
-            .cookie(SessionTokenType.StepUp.cookieName, user.stepUpToken)
+            .accessTokenCookie(accessTokenService.create(user.info, user.sessionId, Instant.ofEpochSecond(0)).value)
+            .stepUpTokenCookie(user.stepUpToken)
             .exchange()
             .expectStatus().isUnauthorized
 
@@ -909,7 +853,7 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
         webTestClient.post()
             .uri("/api/auth/2fa/preferred-method")
             .bodyValue(ChangePreferredTwoFactorMethodRequest(TwoFactorMethod.TOTP))
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isUnauthorized
 
@@ -924,8 +868,8 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
         webTestClient.post()
             .uri("/api/auth/2fa/preferred-method")
             .bodyValue(ChangePreferredTwoFactorMethodRequest(TwoFactorMethod.TOTP))
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .cookie(SessionTokenType.StepUp.cookieName, "invalid")
+            .accessTokenCookie(user.accessToken)
+            .stepUpTokenCookie("invalid")
             .exchange()
             .expectStatus().isUnauthorized
 
@@ -940,8 +884,8 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
         webTestClient.post()
             .uri("/api/auth/2fa/preferred-method")
             .bodyValue(ChangePreferredTwoFactorMethodRequest(TwoFactorMethod.TOTP))
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .cookie(SessionTokenType.StepUp.cookieName, stepUpTokenService.create(user.info.id, user.sessionId, Instant.ofEpochSecond(0)).value)
+            .accessTokenCookie(user.accessToken)
+            .stepUpTokenCookie(stepUpTokenService.create(user.info.id, user.sessionId, Instant.ofEpochSecond(0)).value)
             .exchange()
             .expectStatus().isUnauthorized
 
@@ -950,15 +894,15 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
     }
     @Test fun `changePreferred needs step up token of same user`() = runTest {
         val user = registerUser(email2faEnabled = true, totpEnabled = true)
-        val anotherUser = registerUser(email = "another@email.com")
+        val anotherUser = registerUser(emailSuffix = "another@email.com")
         user.info.sensitive.security.twoFactor.preferred = TwoFactorMethod.EMAIL
         userService.save(user.info)
 
         webTestClient.post()
             .uri("/api/auth/2fa/preferred-method")
             .bodyValue(ChangePreferredTwoFactorMethodRequest(TwoFactorMethod.TOTP))
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .cookie(SessionTokenType.StepUp.cookieName, stepUpTokenService.create(anotherUser.info.id, anotherUser.sessionId).value)
+            .accessTokenCookie(user.accessToken)
+            .stepUpTokenCookie(stepUpTokenService.create(anotherUser.info.id, anotherUser.sessionId).value)
             .exchange()
             .expectStatus().isUnauthorized
 
@@ -973,13 +917,12 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
         webTestClient.post()
             .uri("/api/auth/2fa/preferred-method")
             .bodyValue(ChangePreferredTwoFactorMethodRequest(TwoFactorMethod.TOTP))
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .cookie(SessionTokenType.StepUp.cookieName, stepUpTokenService.create(user.info.id, UUID.randomUUID()).value)
+            .accessTokenCookie(user.accessToken)
+            .stepUpTokenCookie(stepUpTokenService.create(user.info.id, UUID.randomUUID()).value)
             .exchange()
             .expectStatus().isUnauthorized
 
         val updatedUser = userService.findById(user.info.id)
         Assertions.assertEquals(TwoFactorMethod.EMAIL, updatedUser.preferredTwoFactorMethod)
     }
-
 }

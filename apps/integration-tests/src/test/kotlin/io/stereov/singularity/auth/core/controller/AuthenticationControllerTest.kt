@@ -45,7 +45,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
 
         val userDetails = webTestClient.get()
             .uri("/api/users/me")
-            .cookie(SessionTokenType.Access.cookieName, accessToken)
+            .accessTokenCookie(accessToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(UserResponse::class.java)
@@ -183,7 +183,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
         val user = registerUser()
         webTestClient.post()
             .uri("/api/auth/register")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .bodyValue(RegisterUserRequest(email = user.email!!, password = user.password!!, name = "Name"))
             .exchange()
             .expectStatus().isNotModified
@@ -217,7 +217,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
 
         val userResponse = webTestClient.get()
             .uri("/api/users/me")
-            .cookie(SessionTokenType.Access.cookieName, accessToken)
+            .accessTokenCookie(accessToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(UserResponse::class.java)
@@ -309,7 +309,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
 
         val userInfo = webTestClient.get()
             .uri("/api/users/me")
-            .cookie(SessionTokenType.Access.cookieName, accessToken.value)
+            .accessTokenCookie(accessToken.value)
             .exchange()
             .expectStatus().isOk
             .expectBody(UserResponse::class.java)
@@ -352,7 +352,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
         webTestClient.post()
             .uri("/api/auth/login")
             .bodyValue(LoginRequest(email = user.email!!, password = user.password!!))
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isNotModified
     }
@@ -374,7 +374,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
 
         val response = webTestClient.post()
             .uri("/api/auth/logout")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isOk
             .expectBody()
@@ -443,7 +443,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
 
         webTestClient.get()
             .uri("/api/users/me")
-            .cookie(SessionTokenType.Access.cookieName, accessToken)
+            .accessTokenCookie(accessToken)
             .exchange()
             .expectStatus().isOk
     }
@@ -466,7 +466,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
     }
     @Test fun `refresh requires associated token to account`() = runTest {
         val user = registerUser()
-        val anotherUser = registerUser(email = "another@email.com")
+        val anotherUser = registerUser(emailSuffix = "another@email.com")
         val refreshToken = refreshTokenService.create(
             anotherUser.info.id,
             user.sessionId,
@@ -512,7 +512,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
 
         val response = webTestClient.post()
             .uri("/api/auth/step-up")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .bodyValue(req)
             .exchange()
             .expectStatus().isOk
@@ -533,7 +533,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/auth/step-up")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isBadRequest
     }
@@ -542,7 +542,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/auth/step-up")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .bodyValue("Test")
             .exchange()
             .expectStatus().isEqualTo(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
@@ -552,7 +552,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/auth/step-up")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .bodyValue(StepUpRequest(
                 "wrong password"
             ))
@@ -584,7 +584,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
 
         val response = webTestClient.post()
             .uri("/api/auth/step-up")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .bodyValue(req)
             .exchange()
             .expectStatus().isOk
@@ -604,7 +604,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
 
         val response = webTestClient.post()
             .uri("/api/auth/step-up")
-            .cookie(SessionTokenType.Access.cookieName, guest.accessToken)
+            .accessTokenCookie(guest.accessToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(StepUpResponse::class.java)
@@ -643,7 +643,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
 
         val res = webTestClient.get()
             .uri("/api/auth/status")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(AuthenticationStatusResponse::class.java)
@@ -666,7 +666,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
 
         val res = webTestClient.get()
             .uri("/api/auth/status")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(AuthenticationStatusResponse::class.java)
@@ -687,8 +687,8 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
 
         val res = webTestClient.get()
             .uri("/api/auth/status")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .cookie(SessionTokenType.StepUp.cookieName, user.stepUpToken)
+            .accessTokenCookie(user.accessToken)
+            .stepUpTokenCookie(user.stepUpToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(AuthenticationStatusResponse::class.java)
@@ -709,7 +709,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
 
         val res = webTestClient.get()
             .uri("/api/auth/status")
-            .cookie(SessionTokenType.StepUp.cookieName, user.stepUpToken)
+            .stepUpTokenCookie(user.stepUpToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(AuthenticationStatusResponse::class.java)
@@ -732,7 +732,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
 
         val res = webTestClient.get()
             .uri("/api/auth/status")
-            .cookie(TwoFactorTokenType.Authentication.cookieName, twoFactorToken.value)
+            .twoFactorAuthenticationTokenCookie(twoFactorToken.value)
             .exchange()
             .expectStatus().isOk
             .expectBody(AuthenticationStatusResponse::class.java)
@@ -755,8 +755,8 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
 
         val res = webTestClient.get()
             .uri("/api/auth/status")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .cookie(TwoFactorTokenType.Authentication.cookieName, twoFactorToken.value)
+            .accessTokenCookie(user.accessToken)
+            .twoFactorAuthenticationTokenCookie(twoFactorToken.value)
             .exchange()
             .expectStatus().isOk
             .expectBody(AuthenticationStatusResponse::class.java)

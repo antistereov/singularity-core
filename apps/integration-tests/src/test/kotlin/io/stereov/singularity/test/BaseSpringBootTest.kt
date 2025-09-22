@@ -18,12 +18,15 @@ import io.stereov.singularity.auth.guest.dto.request.CreateGuestRequest
 import io.stereov.singularity.auth.guest.dto.response.CreateGuestResponse
 import io.stereov.singularity.auth.jwt.exception.TokenException
 import io.stereov.singularity.auth.twofactor.dto.request.CompleteStepUpRequest
+import io.stereov.singularity.auth.twofactor.dto.request.EnableEmailTwoFactorMethodRequest
 import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorVerifySetupRequest
 import io.stereov.singularity.auth.twofactor.dto.response.StepUpResponse
 import io.stereov.singularity.auth.twofactor.dto.response.TwoFactorSetupResponse
 import io.stereov.singularity.auth.twofactor.model.token.TwoFactorAuthenticationToken
 import io.stereov.singularity.auth.twofactor.model.token.TwoFactorTokenType
+import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailProperties
 import io.stereov.singularity.auth.twofactor.service.TotpService
+import io.stereov.singularity.auth.twofactor.service.token.TotpSetupTokenService
 import io.stereov.singularity.auth.twofactor.service.token.TwoFactorAuthenticationTokenService
 import io.stereov.singularity.cache.service.CacheService
 import io.stereov.singularity.database.encryption.service.EncryptionSecretService
@@ -47,10 +50,16 @@ import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.returnResult
 import java.time.Duration
 import java.util.*
+import java.util.concurrent.atomic.AtomicInteger
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Import(MockConfig::class)
-class BaseSpringBootTest {
+@Import(MockConfig::class) class BaseSpringBootTest() {
+
+    @Autowired
+    lateinit var setupTokenService: TotpSetupTokenService
+
+    @Autowired
+    lateinit var twoFactorEmailProperties: TwoFactorEmailProperties
 
     @Autowired
     lateinit var cacheService: CacheService
@@ -122,6 +131,7 @@ class BaseSpringBootTest {
         userService.deleteAll()
         cacheService.deleteAll()
         groupRepository.deleteAll()
+        counter.set(0)
     }
 
     @BeforeEach
@@ -136,6 +146,8 @@ class BaseSpringBootTest {
         every { gAuth.getTotpPassword(secret) } returns code
     }
 
+    private val counter = AtomicInteger(0)
+
     data class TestRegisterResponse(
         val info: UserDocument,
         val email: String?,
@@ -148,7 +160,8 @@ class BaseSpringBootTest {
         val totpRecovery: String?,
         val mailVerificationSecret: String?,
         val passwordResetSecret: String?,
-        val sessionId: UUID
+        val sessionId: UUID,
+        val email2faCode: String,
     )
 
     suspend fun createGroup(key: String = "test-group"): GroupDocument {
@@ -157,7 +170,7 @@ class BaseSpringBootTest {
     }
 
     suspend fun registerUser(
-        email: String = "test@email.com",
+        emailSuffix: String = "test@email.com",
         password: String = "Password#3",
         totpEnabled: Boolean = false,
         email2faEnabled: Boolean = false,
@@ -165,10 +178,11 @@ class BaseSpringBootTest {
         roles: List<Role> = listOf(Role.USER),
         groups: List<String> = listOf(),
     ): TestRegisterResponse {
+        val actualEmail = "${counter.getAndIncrement()}$emailSuffix"
 
         var responseCookies = webTestClient.post()
             .uri("/api/auth/register?send-email=false")
-            .bodyValue(RegisterUserRequest(email = email, password = password, name = name, session = null))
+            .bodyValue(RegisterUserRequest(email = actualEmail, password = password, name = name, session = null))
             .exchange()
             .expectStatus().isOk
             .returnResult<Void>()
@@ -184,15 +198,15 @@ class BaseSpringBootTest {
         var twoFactorRecovery: String? = null
         var twoFactorSecret: String? = null
 
-        var user = userService.findByEmail(email)
+        var user = userService.findByEmail(actualEmail)
         var stepUpToken = stepUpTokenService.create(user.id, user.sensitive.sessions.keys.first())
 
         if (totpEnabled) {
 
             val twoFactorRes = webTestClient.get()
                 .uri("/api/auth/2fa/totp/setup")
-                .cookie(SessionTokenType.Access.cookieName, accessToken)
-                .cookie(SessionTokenType.StepUp.cookieName, stepUpToken.value)
+                .accessTokenCookie(accessToken)
+                .stepUpTokenCookie(stepUpToken.value)
                 .exchange()
                 .expectStatus().isOk
                 .expectBody(TwoFactorSetupResponse::class.java)
@@ -212,15 +226,15 @@ class BaseSpringBootTest {
 
             webTestClient.post()
                 .uri("/api/auth/2fa/totp/setup")
-                .cookie(SessionTokenType.Access.cookieName, accessToken)
-                .cookie(SessionTokenType.StepUp.cookieName, stepUpToken.value)
+                .accessTokenCookie(accessToken)
+                .stepUpTokenCookie(stepUpToken.value)
                 .bodyValue(twoFactorSetupReq)
                 .exchange()
                 .expectStatus().isOk
 
             twoFactorToken = webTestClient.post()
                 .uri("/api/auth/login")
-                .bodyValue(LoginRequest(email, password, null))
+                .bodyValue(LoginRequest(actualEmail, password, null))
                 .exchange()
                 .expectStatus().isOk
                 .returnResult<Void>()
@@ -231,7 +245,7 @@ class BaseSpringBootTest {
             responseCookies = webTestClient.post()
                 .uri("/api/auth/2fa/login")
                 .bodyValue(CompleteStepUpRequest(totp = gAuth.getTotpPassword(twoFactorSecret)))
-                .cookie(TwoFactorTokenType.Authentication.cookieName, twoFactorToken!!)
+                .twoFactorAuthenticationTokenCookie(twoFactorToken!!)
                 .exchange()
                 .expectStatus().isOk
                 .returnResult<Void>()
@@ -247,7 +261,25 @@ class BaseSpringBootTest {
         }
 
         if (email2faEnabled) {
-            twoFactorToken = twoFactorAuthenticationTokenService.create(user.id).value
+            if (twoFactorEmailProperties.enableByDefault) {
+                twoFactorToken = twoFactorAuthenticationTokenService.create(user.id).value
+            } else {
+
+                user = userService.findById(user.id)
+                val code = user.sensitive.security.twoFactor.email.code
+
+                webTestClient.post()
+                    .uri("/api/auth/2fa/email/enable")
+                    .accessTokenCookie(accessToken)
+                    .stepUpTokenCookie(stepUpToken.value)
+                    .bodyValue(EnableEmailTwoFactorMethodRequest(code))
+                    .exchange()
+                    .expectStatus().isOk
+
+                user = userService.findById(user.id)
+
+                twoFactorToken = twoFactorAuthenticationTokenService.create(user.id).value
+            }
         }
 
         user = userService.findById(user.id)
@@ -267,7 +299,7 @@ class BaseSpringBootTest {
 
         return TestRegisterResponse(
             user,
-            email,
+            actualEmail,
             password,
             accessTokenService.create(user, sessionId).value,
             refreshToken,
@@ -277,12 +309,13 @@ class BaseSpringBootTest {
             twoFactorRecovery,
             mailVerificationToken,
             passwordResetToken,
-            sessionId
+            sessionId,
+            user.sensitive.security.twoFactor.email.code
         )
     }
 
     suspend fun createAdmin(email: String = "admin@example.com"): TestRegisterResponse {
-        return registerUser(email = email, roles = listOf(Role.USER, Role.ADMIN))
+        return registerUser(emailSuffix = email, roles = listOf(Role.USER, Role.ADMIN))
     }
     
     suspend fun createGuest(): TestRegisterResponse {
@@ -305,7 +338,7 @@ class BaseSpringBootTest {
 
         val stepUpTokenValue = webTestClient.post()
             .uri("/api/auth/step-up")
-            .cookie(SessionTokenType.Access.cookieName, accessToken.value)
+            .accessTokenCookie(accessToken.value)
             .exchange()
             .expectStatus().isOk
             .returnResult<StepUpResponse>()
@@ -326,7 +359,8 @@ class BaseSpringBootTest {
             totpRecovery = null,
             mailVerificationSecret = null,
             passwordResetSecret = null,
-            sessionId = guest.sensitive.sessions.keys.first()
+            sessionId = guest.sensitive.sessions.keys.first(),
+            email2faCode = guest.sensitive.security.twoFactor.email.code,
         )
     }
 
@@ -357,15 +391,16 @@ class BaseSpringBootTest {
             totpRecovery = null,
             mailVerificationSecret = null,
             passwordResetSecret = null,
-            sessionId = sessionId
+            sessionId = sessionId,
+            email2faCode = user.sensitive.security.twoFactor.email.code
         )
     }
 
     suspend fun deleteAccount(response: TestRegisterResponse) {
         webTestClient.delete()
             .uri("/api/users/me")
-            .cookie(SessionTokenType.Access.cookieName, response.accessToken)
-            .cookie(SessionTokenType.StepUp.cookieName, response.stepUpToken)
+            .accessTokenCookie(response.accessToken)
+            .stepUpTokenCookie(response.stepUpToken)
             .exchange()
             .expectStatus().isOk
     }
@@ -373,7 +408,7 @@ class BaseSpringBootTest {
     suspend fun deleteAllSessions(response: TestRegisterResponse) {
         webTestClient.delete()
             .uri("/api/auth/sessions")
-            .cookie(SessionTokenType.Access.cookieName, response.accessToken)
+            .accessTokenCookie(response.accessToken)
             .exchange()
             .expectStatus().isOk
     }
@@ -402,5 +437,21 @@ class BaseSpringBootTest {
             ?.firstOrNull()?.value
             ?.let { stepUpTokenService.extract(it, userId, sessionId) }
             ?: throw TokenException("No StepUpToken found in response")
+    }
+
+    fun <S: WebTestClient.RequestHeadersSpec<S>> WebTestClient.RequestHeadersSpec<S>.accessTokenCookie(tokenValue: String): WebTestClient.RequestBodySpec {
+        return this.cookie(SessionTokenType.Access.cookieName, tokenValue) as WebTestClient.RequestBodySpec
+    }
+    fun <S: WebTestClient.RequestHeadersSpec<S>> WebTestClient.RequestHeadersSpec<S>.refreshTokenCookie(tokenValue: String): WebTestClient.RequestBodySpec {
+        return this.cookie(SessionTokenType.Refresh.cookieName, tokenValue) as WebTestClient.RequestBodySpec
+    }
+    fun <S: WebTestClient.RequestHeadersSpec<S>> WebTestClient.RequestHeadersSpec<S>.stepUpTokenCookie(tokenValue: String): WebTestClient.RequestBodySpec {
+        return this.cookie(SessionTokenType.StepUp.cookieName, tokenValue) as WebTestClient.RequestBodySpec
+    }
+    fun <S: WebTestClient.RequestHeadersSpec<S>> WebTestClient.RequestHeadersSpec<S>.twoFactorAuthenticationTokenCookie(token: TwoFactorAuthenticationToken): WebTestClient.RequestBodySpec {
+        return this.twoFactorAuthenticationTokenCookie(token.value)
+    }
+    fun <S: WebTestClient.RequestHeadersSpec<S>> WebTestClient.RequestHeadersSpec<S>.twoFactorAuthenticationTokenCookie(tokenValue: String): WebTestClient.RequestBodySpec {
+        return this.cookie(TwoFactorTokenType.Authentication.cookieName, tokenValue) as WebTestClient.RequestBodySpec
     }
 }

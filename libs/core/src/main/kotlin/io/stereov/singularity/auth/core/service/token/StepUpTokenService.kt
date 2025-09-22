@@ -36,7 +36,7 @@ class StepUpTokenService(
             .claim(Constants.JWT_SESSION_CLAIM, sessionId)
             .build()
 
-        val jwt = jwtService.encodeJwt(claims)
+        val jwt = jwtService.encodeJwt(claims, tokenType.cookieName)
 
         return StepUpToken(userId, sessionId, jwt)
     }
@@ -44,8 +44,8 @@ class StepUpTokenService(
     suspend fun createForRecovery(userId: ObjectId, sessionId: UUID, exchange: ServerWebExchange, issuedAt: Instant = Instant.now()): StepUpToken {
         logger.debug { "Creating step up token" }
 
-        if (exchange.request.path.toString() != "/api/auth/2fa/recover")
-            throw AuthException("Cannot createGroup step up token. This function call is only allowed when it is called from /api/auth/2fa/recover")
+        if (exchange.request.path.toString() != "/api/auth/2fa/totp/recover")
+            throw AuthException("Cannot createGroup step up token. This function call is only allowed when it is called from /api/auth/2fa/totp/recover")
 
         return create(userId, sessionId, issuedAt)
     }
@@ -53,7 +53,7 @@ class StepUpTokenService(
     suspend fun extract(tokenValue: String, currentUserId: ObjectId, currentSessionId: UUID): StepUpToken {
         logger.debug { "Extracting step up token" }
 
-        val jwt = jwtService.decodeJwt(tokenValue, true)
+        val jwt = jwtService.decodeJwt(tokenValue, tokenType.cookieName)
 
         val userId = jwt.subject?.let { ObjectId(it) }
             ?: throw InvalidTokenException("JWT does not contain sub")

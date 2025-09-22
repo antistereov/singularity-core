@@ -27,6 +27,8 @@ class JwtService(
     private val logger: KLogger
         get() = KotlinLogging.logger {}
 
+    val tokenTypeClaim = "token_type"
+
     /**
      * Decodes a JWT token.
      *
@@ -37,7 +39,7 @@ class JwtService(
      *
      * @return The decoded JWT.
      */
-    suspend fun decodeJwt(token: String, checkExpiration: Boolean = true): Jwt {
+    suspend fun decodeJwt(token: String, tokenType: String): Jwt {
         logger.debug { "Decoding jwt" }
 
         val jwt = try {
@@ -47,16 +49,17 @@ class JwtService(
             throw InvalidTokenException("Cannot decode token", e)
         }
 
+        if (jwt.claims[tokenTypeClaim] != tokenType)
+            throw InvalidTokenException("Token is not of type $tokenType")
+
         if (jwt.notBefore != null && jwt.notBefore > Instant.now()) {
             throw InvalidTokenException("Token not valid before ${jwt.notBefore}")
         }
 
-        if (checkExpiration) {
-            val expiresAt = jwt.expiresAt
-                ?: throw InvalidTokenException("JWT does not contain expiration information")
+        val expiresAt = jwt.expiresAt
+            ?: throw InvalidTokenException("JWT does not contain expiration information")
 
-            if (expiresAt <= Instant.now()) throw TokenExpiredException("Token is expired")
-        }
+        if (expiresAt <= Instant.now()) throw TokenExpiredException("Token is expired")
 
         return jwt
     }
@@ -70,15 +73,19 @@ class JwtService(
      *
      * @return The encoded JWT token as a string.
      */
-    suspend fun encodeJwt(claims: JwtClaimsSet): Jwt {
+    suspend fun encodeJwt(claims: JwtClaimsSet, tokenType: String): Jwt {
         val currentJwt = jwtSecretService.getCurrentSecret()
+
+        val actualClaims = JwtClaimsSet.from(claims)
+            .claim(tokenTypeClaim, tokenType)
+            .build()
 
         val jwsHeader = JwsHeader
             .with { "HS256" }
             .keyId(currentJwt.key)
             .build()
 
-        return this.encodeJwt(JwtEncoderParameters.from(jwsHeader, claims))
+        return this.encodeJwt(JwtEncoderParameters.from(jwsHeader, actualClaims))
     }
 
     private fun encodeJwt(parameters: JwtEncoderParameters): Jwt {

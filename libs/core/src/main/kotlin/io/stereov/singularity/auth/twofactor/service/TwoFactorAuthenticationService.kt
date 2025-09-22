@@ -6,8 +6,8 @@ import io.stereov.singularity.auth.core.exception.AuthException
 import io.stereov.singularity.auth.core.exception.model.WrongIdentityProviderException
 import io.stereov.singularity.auth.core.model.IdentityProvider
 import io.stereov.singularity.auth.core.service.AuthorizationService
-import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorAuthenticationRequest
 import io.stereov.singularity.auth.twofactor.dto.request.ChangePreferredTwoFactorMethodRequest
+import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorAuthenticationRequest
 import io.stereov.singularity.auth.twofactor.exception.model.InvalidTwoFactorRequestException
 import io.stereov.singularity.auth.twofactor.exception.model.TwoFactorMethodDisabledException
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
@@ -59,7 +59,7 @@ class TwoFactorAuthenticationService(
         if (user.sensitive.security.twoFactor.totp.enabled) {
             req.totp?.let { return totpAuthenticationService.validateCode(user, it) }
         }
-        if (user.sensitive.security.twoFactor.mail.enabled) {
+        if (user.sensitive.security.twoFactor.email.enabled) {
             req.email?.let { return emailAuthenticationService.validateCode(user, it) }
         }
 
@@ -76,7 +76,7 @@ class TwoFactorAuthenticationService(
             throw WrongIdentityProviderException("Cannot update preferred method: user did not set up authentication using a password")
 
         when (req.method) {
-            TwoFactorMethod.EMAIL -> if (!user.sensitive.security.twoFactor.mail.enabled)
+            TwoFactorMethod.EMAIL -> if (!user.sensitive.security.twoFactor.email.enabled)
                 throw TwoFactorMethodDisabledException("Cannot set ${TwoFactorMethod.EMAIL} as preferred method: method is disabled")
 
             TwoFactorMethod.TOTP -> if (!user.sensitive.security.twoFactor.totp.enabled)

@@ -41,7 +41,7 @@ class HeaderAuthenticationPreferCookiesTest : BaseSpringBootTest() {
 
         webTestClient.get()
             .uri("/api/users/me")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .header(HttpHeaders.AUTHORIZATION, "Bearer invalid")
             .exchange()
             .expectStatus().isOk
@@ -51,7 +51,7 @@ class HeaderAuthenticationPreferCookiesTest : BaseSpringBootTest() {
 
         webTestClient.get()
             .uri("/api/users/me")
-            .cookie(SessionTokenType.Access.cookieName, "invalid")
+            .accessTokenCookie("invalid")
             .header(HttpHeaders.AUTHORIZATION, "Bearer ${user.accessToken}")
             .exchange()
             .expectStatus().isUnauthorized

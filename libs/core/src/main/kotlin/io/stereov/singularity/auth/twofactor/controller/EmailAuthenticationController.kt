@@ -243,12 +243,15 @@ class EmailAuthenticationController(
             Learn more about email as 2FA method [here](https://singularity.stereov.io/docs/guides/auth/two-factor#email).
             
             **Tokens:**
-            - Requires a valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token).
+            - Requires either a valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
+              or [`TwoFactorAuthenticationToken`](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token).
         """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/two-factor#sending-a-2fa-code-via-email"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER),
-            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE)
+            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE),
+            SecurityRequirement(OpenApiConstants.TWO_FACTOR_AUTHENTICATION_TOKEN_HEADER),
+            SecurityRequirement(OpenApiConstants.TWO_FACTOR_AUTHENTICATION_TOKEN_COOKIE)
         ],
         responses = [
             ApiResponse(
@@ -258,13 +261,17 @@ class EmailAuthenticationController(
             ),
             ApiResponse(
                 responseCode = "401",
-                description = "Invalid or expired `AccessToken`.",
+                description = "Invalid or expired `AccessToken` or `TwoFactorAuthenticationToken`.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
         ]
     )
-    suspend fun getRemainingEmailTwoFactorCooldown(): ResponseEntity<MailCooldownResponse> {
-        val userId = authorizationService.getCurrentUserId()
+    suspend fun getRemainingEmailTwoFactorCooldown(
+        exchange: ServerWebExchange
+    ): ResponseEntity<MailCooldownResponse> {
+        val userId = authorizationService.getCurrentUserIdOrNull()
+            ?: twoFactorAuthenticationTokenService.extract(exchange).userId
+
         val remainingCooldown = emailAuthenticationService.getRemainingCooldown(userId)
 
         return ResponseEntity.ok().body(MailCooldownResponse(remainingCooldown))

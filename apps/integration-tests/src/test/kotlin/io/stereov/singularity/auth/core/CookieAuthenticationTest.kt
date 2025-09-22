@@ -27,14 +27,14 @@ class CookieAuthenticationTest() : BaseIntegrationTest() {
 
         webTestClient.get()
             .uri("/api/users/me")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isOk
     }
     @Test fun `access valid token required`() = runTest {
         webTestClient.get()
             .uri("/api/users/me")
-            .cookie(SessionTokenType.Access.cookieName, "access_token")
+            .accessTokenCookie("access_token")
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -44,7 +44,7 @@ class CookieAuthenticationTest() : BaseIntegrationTest() {
 
         webTestClient.get()
             .uri("/api/users/me")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -54,7 +54,7 @@ class CookieAuthenticationTest() : BaseIntegrationTest() {
 
         webTestClient.get()
             .uri("/api/users/me")
-            .cookie(SessionTokenType.Access.cookieName, token.value)
+            .accessTokenCookie(token.value)
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -63,13 +63,13 @@ class CookieAuthenticationTest() : BaseIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/auth/logout")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isOk
 
         webTestClient.get()
             .uri("/api/users/me")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -78,13 +78,13 @@ class CookieAuthenticationTest() : BaseIntegrationTest() {
 
         webTestClient.delete()
             .uri("/api/auth/sessions")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isOk
 
         webTestClient.get()
             .uri("/api/users/me")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -93,7 +93,7 @@ class CookieAuthenticationTest() : BaseIntegrationTest() {
 
         webTestClient.get()
             .uri("/api/users/me")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isOk
 
@@ -101,7 +101,7 @@ class CookieAuthenticationTest() : BaseIntegrationTest() {
 
         webTestClient.get()
             .uri("/api/users/me")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -122,7 +122,7 @@ class CookieAuthenticationTest() : BaseIntegrationTest() {
 
         webTestClient.get()
             .uri("/api/users/me")
-            .cookie(SessionTokenType.Access.cookieName, response.accessToken!!)
+            .accessTokenCookie(response.accessToken!!)
             .exchange()
             .expectStatus().isOk
     }
@@ -142,13 +142,13 @@ class CookieAuthenticationTest() : BaseIntegrationTest() {
 
         webTestClient.get()
             .uri("/api/users/me")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isOk
 
         webTestClient.get()
             .uri("/api/users/me")
-            .cookie(SessionTokenType.Access.cookieName, response.accessToken!!)
+            .accessTokenCookie(response.accessToken!!)
             .exchange()
             .expectStatus().isOk
     }
@@ -190,7 +190,7 @@ class CookieAuthenticationTest() : BaseIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/auth/logout")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isOk
 
@@ -205,7 +205,7 @@ class CookieAuthenticationTest() : BaseIntegrationTest() {
 
         webTestClient.delete()
             .uri("/api/auth/sessions")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isOk
 
@@ -221,7 +221,7 @@ class CookieAuthenticationTest() : BaseIntegrationTest() {
 
         webTestClient.get()
             .uri("/api/users/me")
-            .cookie(SessionTokenType.Access.cookieName, cookieCreator.createCookie(accessToken).value)
+            .accessTokenCookie(cookieCreator.createCookie(accessToken).value)
             .exchange()
             .expectStatus().isOk
 
@@ -239,8 +239,8 @@ class CookieAuthenticationTest() : BaseIntegrationTest() {
 
         webTestClient.get()
             .uri("/api/auth/2fa/totp/setup")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .cookie(SessionTokenType.StepUp.cookieName, user.stepUpToken)
+            .accessTokenCookie(user.accessToken)
+            .stepUpTokenCookie(user.stepUpToken)
             .exchange()
             .expectStatus().isOk
     }
@@ -249,8 +249,8 @@ class CookieAuthenticationTest() : BaseIntegrationTest() {
 
         webTestClient.get()
             .uri("/api/auth/2fa/totp/setup")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .cookie(SessionTokenType.StepUp.cookieName, "invalid")
+            .accessTokenCookie(user.accessToken)
+            .stepUpTokenCookie("invalid")
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -260,8 +260,8 @@ class CookieAuthenticationTest() : BaseIntegrationTest() {
 
         webTestClient.get()
             .uri("/api/auth/2fa/totp/setup")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .cookie(SessionTokenType.StepUp.cookieName, stepUpToken.value)
+            .accessTokenCookie(user.accessToken)
+            .stepUpTokenCookie(stepUpToken.value)
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -270,7 +270,7 @@ class CookieAuthenticationTest() : BaseIntegrationTest() {
 
         webTestClient.get()
             .uri("/api/auth/2fa/totp/setup")
-            .cookie(SessionTokenType.StepUp.cookieName, user.stepUpToken)
+            .stepUpTokenCookie(user.stepUpToken)
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -279,8 +279,8 @@ class CookieAuthenticationTest() : BaseIntegrationTest() {
 
         webTestClient.get()
             .uri("/api/auth/2fa/totp/setup")
-            .cookie(SessionTokenType.Access.cookieName, "invalid")
-            .cookie(SessionTokenType.StepUp.cookieName, user.stepUpToken)
+            .accessTokenCookie("invalid")
+            .stepUpTokenCookie(user.stepUpToken)
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -290,19 +290,19 @@ class CookieAuthenticationTest() : BaseIntegrationTest() {
 
         webTestClient.get()
             .uri("/api/auth/2fa/totp/setup")
-            .cookie(SessionTokenType.Access.cookieName, accessToken.value)
-            .cookie(SessionTokenType.StepUp.cookieName, user.stepUpToken)
+            .accessTokenCookie(accessToken.value)
+            .stepUpTokenCookie(user.stepUpToken)
             .exchange()
             .expectStatus().isUnauthorized
     }
     @Test fun `stepUp needs access token from matching account`() = runTest {
         val user = registerUser()
-        val another = registerUser(email = "another@email.com")
+        val another = registerUser(emailSuffix = "another@email.com")
 
         webTestClient.get()
             .uri("/api/auth/2fa/totp/setup")
-            .cookie(SessionTokenType.Access.cookieName, another.accessToken)
-            .cookie(SessionTokenType.StepUp.cookieName, user.stepUpToken)
+            .accessTokenCookie(another.accessToken)
+            .stepUpTokenCookie(user.stepUpToken)
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -312,8 +312,8 @@ class CookieAuthenticationTest() : BaseIntegrationTest() {
 
         webTestClient.get()
             .uri("/api/auth/2fa/totp/setup")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
-            .cookie(SessionTokenType.StepUp.cookieName, stepUpToken.value)
+            .accessTokenCookie(user.accessToken)
+            .stepUpTokenCookie(stepUpToken.value)
             .exchange()
             .expectStatus().isUnauthorized
     }

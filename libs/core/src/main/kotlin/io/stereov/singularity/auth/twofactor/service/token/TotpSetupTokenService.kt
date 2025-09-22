@@ -20,6 +20,7 @@ class TotpSetupTokenService(
 ) {
 
     private val logger = KotlinLogging.logger {}
+    private val tokenType = "totp_setup"
 
     suspend fun create(userId: ObjectId, secret: String, recoveryCodes: List<String>, issuedAt: Instant = Instant.now()): TotpSetupToken {
         logger.debug { "Creating setup token for 2fa" }
@@ -32,7 +33,7 @@ class TotpSetupTokenService(
             .claim(Constants.TWO_FACTOR_RECOVERY_CLAIM, recoveryCodes)
             .build()
 
-        val jwt = jwtService.encodeJwt(claims)
+        val jwt = jwtService.encodeJwt(claims, tokenType)
 
         return TotpSetupToken(secret, recoveryCodes, jwt)
     }
@@ -40,7 +41,7 @@ class TotpSetupTokenService(
     suspend fun validate(token: String): TotpSetupToken {
         logger.debug { "Validating two factor setup token" }
 
-        val jwt = jwtService.decodeJwt(token, true)
+        val jwt = jwtService.decodeJwt(token, tokenType)
 
         val userId = authorizationService.getCurrentUserId()
         val subject = jwt.subject?.let { ObjectId(it) }

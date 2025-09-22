@@ -20,6 +20,7 @@ import io.stereov.singularity.auth.geolocation.service.GeolocationService
 import io.stereov.singularity.auth.jwt.properties.JwtProperties
 import io.stereov.singularity.auth.jwt.service.JwtService
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties
+import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailProperties
 import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthenticationService
 import io.stereov.singularity.auth.twofactor.service.token.TwoFactorAuthenticationTokenService
 import io.stereov.singularity.cache.service.CacheService
@@ -244,7 +245,8 @@ class AuthenticationConfiguration {
         accessTokenCache: AccessTokenCache,
         emailVerificationService: EmailVerificationService,
         twoFactorEmailCodeProperties: TwoFactorEmailCodeProperties,
-        emailProperties: EmailProperties
+        emailProperties: EmailProperties,
+        twoFactorEmailProperties: TwoFactorEmailProperties,
     ): AuthenticationService {
         return AuthenticationService(
             userService,
@@ -254,7 +256,8 @@ class AuthenticationConfiguration {
             accessTokenCache,
             emailVerificationService,
             twoFactorEmailCodeProperties,
-            emailProperties
+            emailProperties,
+            twoFactorEmailProperties
         )
     }
 

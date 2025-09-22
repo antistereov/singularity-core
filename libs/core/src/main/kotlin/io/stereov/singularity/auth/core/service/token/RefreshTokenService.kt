@@ -53,7 +53,7 @@ class RefreshTokenService(
             .claim(Constants.JWT_SESSION_CLAIM, sessionId)
             .build()
 
-        val jwt = jwtService.encodeJwt(claims)
+        val jwt = jwtService.encodeJwt(claims, tokenType.cookieName)
 
         return RefreshToken(userId, sessionId, tokenId, jwt)
     }
@@ -106,7 +106,7 @@ class RefreshTokenService(
         logger.debug { "Extracting refresh token" }
 
         val jwt = try {
-            jwtService.decodeJwt(tokenValue, true)
+            jwtService.decodeJwt(tokenValue, tokenType.cookieName)
         } catch (e: Exception) {
             throw InvalidTokenException("Cannot decode refresh token", e)
         }

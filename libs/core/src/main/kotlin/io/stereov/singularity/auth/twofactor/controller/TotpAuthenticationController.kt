@@ -1,12 +1,12 @@
 package io.stereov.singularity.auth.twofactor.controller
 
 import io.stereov.singularity.auth.core.component.CookieCreator
-import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
 import io.stereov.singularity.auth.core.properties.AuthProperties
 import io.stereov.singularity.auth.core.service.token.AccessTokenService
 import io.stereov.singularity.auth.core.service.token.RefreshTokenService
 import io.stereov.singularity.auth.core.service.token.SessionTokenService
 import io.stereov.singularity.auth.core.service.token.StepUpTokenService
+import io.stereov.singularity.auth.twofactor.dto.request.TotpRecoveryRequest
 import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorVerifySetupRequest
 import io.stereov.singularity.auth.twofactor.dto.response.TwoFactorRecoveryResponse
 import io.stereov.singularity.auth.twofactor.dto.response.TwoFactorSetupResponse
@@ -87,6 +87,11 @@ class TotpAuthenticationController(
                 content = [Content(schema = Schema(implementation = TwoFactorSetupResponse::class))]
             ),
             ApiResponse(
+                responseCode = "304",
+                description = "User already enabled TOTP.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
+            ApiResponse(
                 responseCode = "400",
                 description = "2FA cannot be enabled for users who didn't configure authentication using a password.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
@@ -96,16 +101,6 @@ class TotpAuthenticationController(
                 description = "`AccessToken` or `StepUpToken` is invalid.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
-            ApiResponse(
-                responseCode = "403",
-                description = "The user did not configure authentication using password.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "409",
-                description = "The user already enabled TOTP.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            )
         ]
     )
     suspend fun getTotpSetupDetails(): ResponseEntity<TwoFactorSetupResponse> {
@@ -216,13 +211,20 @@ class TotpAuthenticationController(
     @Operation(
         summary = "Recover From TOTP",
         description = """
-            Recover the user if they lost access to their 2FA device.
+            Recover the user if they lost access to their 2FA device using a recovery `code`.
+            Each `code` is only valid once.
             
             You can learn more about recovery for TOTP [here](https://singularity.stereov.io/docs/guides/auth/two-factor#recovery).
             
             **Requirements:**
             - The user can authenticate using password.
             - The user enabled TOTP as 2FA method.
+            
+            **Optional session data:**
+            - The `session` object can be included in the request body.
+            - Inside the `session` object, you can provide the following optional fields:
+                - `browser`: The name of the browser used (e.g., "Chrome", "Firefox").
+                - `os`: The operating system of the device (e.g., "Windows", "macOS", "Android").
             
             **Tokens:**
             - A valid [`TwoFactorAuthenticationToken`](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token)
@@ -255,8 +257,8 @@ class TotpAuthenticationController(
                 content = [Content(schema = Schema(implementation = TwoFactorRecoveryResponse::class))]
             ),
             ApiResponse(
-                responseCode = "304",
-                description = "User is already authenticated.",
+                responseCode = "400",
+                description = "TOTP is disabled.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
             ApiResponse(
@@ -267,18 +269,17 @@ class TotpAuthenticationController(
         ]
     )
     suspend fun recoverFromTotp(
-        @RequestParam("code") code: String,
         exchange: ServerWebExchange,
-        @RequestBody session: SessionInfoRequest?
+        @RequestBody req: TotpRecoveryRequest
     ): ResponseEntity<TwoFactorRecoveryResponse> {
 
-        val user = totpAuthenticationService.recoverUser(exchange, code)
+        val user = totpAuthenticationService.recoverUser(exchange, req.code)
         val sessionId = UUID.randomUUID()
 
         val clearTwoFactorCookie = cookieCreator.clearCookie(TwoFactorTokenType.Authentication)
-        val sessionToken = sessionTokenService.create(sessionInfo = session)
+        val sessionToken = sessionTokenService.create(sessionInfo = req.session)
         val accessToken = accessTokenService.create(user, sessionId)
-        val refreshToken = refreshTokenService.create(user, sessionId,session, exchange)
+        val refreshToken = refreshTokenService.create(user, sessionId,req.session, exchange)
         val stepUpToken = stepUpTokenService.createForRecovery(user.id, sessionId, exchange)
 
         val res = TwoFactorRecoveryResponse(

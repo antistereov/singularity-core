@@ -13,7 +13,7 @@ class EmailVerificationControllerDisabledTest : BaseIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/auth/email/verification/send")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus()
             .isEqualTo(HttpStatus.SERVICE_UNAVAILABLE)

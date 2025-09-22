@@ -298,7 +298,7 @@ class HeaderAuthenticationTest : BaseSpringBootTest() {
     }
     @Test fun `stepUp needs access token from matching account`() = runTest {
         val user = registerUser()
-        val another = registerUser(email = "another@email.com")
+        val another = registerUser(emailSuffix = "another@email.com")
 
         webTestClient.get()
             .uri("/api/auth/2fa/totp/setup")

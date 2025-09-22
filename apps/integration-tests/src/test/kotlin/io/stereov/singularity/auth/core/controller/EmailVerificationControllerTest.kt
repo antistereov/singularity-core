@@ -86,7 +86,7 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/auth/email/verification/send")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isOk
 
@@ -105,7 +105,7 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/auth/email/verification/send")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isNotModified
     }
@@ -114,7 +114,7 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/auth/email/verification/send")
-            .cookie(SessionTokenType.Access.cookieName, guest.accessToken)
+            .accessTokenCookie(guest.accessToken)
             .exchange()
             .expectStatus().isBadRequest
     }
@@ -123,13 +123,13 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/auth/email/verification/send")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isOk
 
         webTestClient.post()
             .uri("/api/auth/email/verification/send")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isEqualTo(HttpStatus.TOO_MANY_REQUESTS)
 
@@ -141,13 +141,13 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/auth/email/verification/send")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isOk
 
         val res = webTestClient.get()
             .uri("/api/auth/email/verification/cooldown")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(MailCooldownResponse::class.java)
@@ -163,7 +163,7 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
 
         val res = webTestClient.get()
             .uri("/api/auth/email/verification/cooldown")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(MailCooldownResponse::class.java)

@@ -16,6 +16,7 @@ class InvitationTokenService(
 
     private val logger: KLogger
         get() = KotlinLogging.logger {}
+    private val tokenType = "invitation_token"
 
     suspend fun create(invitation: InvitationDocument): InvitationToken {
         logger.debug { "Creating invitation token" }
@@ -26,13 +27,13 @@ class InvitationTokenService(
             .subject(invitation.id.toString())
             .build()
 
-        return InvitationToken(invitation.id, jwtService.encodeJwt(claims))
+        return InvitationToken(invitation.id, jwtService.encodeJwt(claims, tokenType))
     }
 
     suspend fun extract(token: String): InvitationToken {
         logger.debug { "Validating invitation token" }
 
-        val jwt = jwtService.decodeJwt(token, true)
+        val jwt = jwtService.decodeJwt(token, tokenType)
 
         return InvitationToken(ObjectId(jwt.subject), jwt)
     }

@@ -41,7 +41,7 @@ class HeaderAuthenticationPreferHeaderTest : BaseSpringBootTest() {
 
         webTestClient.get()
             .uri("/api/users/me")
-            .cookie(SessionTokenType.Access.cookieName, "invalid")
+            .accessTokenCookie("invalid")
             .header(HttpHeaders.AUTHORIZATION, "Bearer ${user.accessToken}")
             .exchange()
             .expectStatus().isOk
@@ -51,7 +51,7 @@ class HeaderAuthenticationPreferHeaderTest : BaseSpringBootTest() {
 
         webTestClient.get()
             .uri("/api/users/me")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .header(HttpHeaders.AUTHORIZATION, "Bearer invalid")
             .exchange()
             .expectStatus().isUnauthorized
@@ -61,14 +61,14 @@ class HeaderAuthenticationPreferHeaderTest : BaseSpringBootTest() {
 
         webTestClient.get()
             .uri("/api/users/me")
-            .cookie(SessionTokenType.Access.cookieName, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isOk
     }
     @Test fun `should prefer header token and fall back to cookie token with invalid token`() = runTest {
         webTestClient.get()
             .uri("/api/users/me")
-            .cookie(SessionTokenType.Access.cookieName, "invalid")
+            .accessTokenCookie("invalid")
             .exchange()
             .expectStatus().isUnauthorized
     }
