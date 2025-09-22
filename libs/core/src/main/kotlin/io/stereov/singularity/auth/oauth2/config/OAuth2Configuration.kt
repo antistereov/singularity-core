@@ -100,8 +100,9 @@ class OAuth2Configuration {
     @Bean
     @ConditionalOnMissingBean
     fun oauth2StateTokenService(
-        jwtService: JwtService
-    ) = OAuth2StateTokenService(jwtService)
+        jwtService: JwtService,
+        jwtProperties: JwtProperties
+    ) = OAuth2StateTokenService(jwtService, jwtProperties)
 
     @Bean
     @ConditionalOnMissingBean

@@ -27,11 +27,14 @@ spring:
             scope:
               - user:email
               - read:user
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            authorization-grant-type: authorization_code
 
 
 logging:
   level:
     io.stereov: DEBUG
+    org.springframework.security: TRACE
 
 singularity:
   app:

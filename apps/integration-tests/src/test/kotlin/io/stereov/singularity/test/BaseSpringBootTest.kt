@@ -3,14 +3,12 @@ package io.stereov.singularity.test
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.warrenstrange.googleauth.GoogleAuthenticator
 import io.mockk.every
+import io.stereov.singularity.WebSpringBootStarterApplication
 import io.stereov.singularity.auth.core.component.CookieCreator
 import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.auth.core.dto.request.RegisterUserRequest
 import io.stereov.singularity.auth.core.model.SessionInfo
-import io.stereov.singularity.auth.core.model.token.AccessToken
-import io.stereov.singularity.auth.core.model.token.RefreshToken
-import io.stereov.singularity.auth.core.model.token.SessionTokenType
-import io.stereov.singularity.auth.core.model.token.StepUpToken
+import io.stereov.singularity.auth.core.model.token.*
 import io.stereov.singularity.auth.core.service.token.*
 import io.stereov.singularity.auth.group.model.GroupDocument
 import io.stereov.singularity.auth.group.model.GroupTranslation
@@ -57,8 +55,12 @@ import java.time.Duration
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Import(MockConfig::class) class BaseSpringBootTest() {
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    classes = [WebSpringBootStarterApplication::class]
+)
+@Import(MockConfig::class)
+class BaseSpringBootTest() {
 
     @Autowired
     lateinit var sessionTokenService: SessionTokenService
@@ -480,5 +482,11 @@ import java.util.concurrent.atomic.AtomicInteger
     }
     fun <S: WebTestClient.RequestHeadersSpec<S>> WebTestClient.RequestHeadersSpec<S>.twoFactorAuthenticationTokenCookie(tokenValue: String): WebTestClient.RequestBodySpec {
         return this.cookie(TwoFactorTokenType.Authentication.cookieName, tokenValue) as WebTestClient.RequestBodySpec
+    }
+    fun <S: WebTestClient.RequestHeadersSpec<S>> WebTestClient.RequestHeadersSpec<S>.sessionTokenCookie(tokenValue: String): WebTestClient.RequestBodySpec {
+        return this.cookie(SessionTokenType.Session.cookieName, tokenValue) as WebTestClient.RequestBodySpec
+    }
+    fun <S: WebTestClient.RequestHeadersSpec<S>> WebTestClient.RequestHeadersSpec<S>.sessionTokenCookie(token: SessionToken): WebTestClient.RequestBodySpec {
+        return this.sessionTokenCookie(token.value)
     }
 }

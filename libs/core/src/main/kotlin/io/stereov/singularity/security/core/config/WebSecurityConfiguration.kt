@@ -1,7 +1,6 @@
 package io.stereov.singularity.security.core.config
 
 import io.stereov.singularity.auth.core.component.CookieCreator
-import io.stereov.singularity.auth.core.config.AuthenticationConfiguration
 import io.stereov.singularity.auth.core.filter.AuthenticationFilter
 import io.stereov.singularity.auth.core.properties.AuthProperties
 import io.stereov.singularity.auth.core.service.AuthorizationService
@@ -11,9 +10,9 @@ import io.stereov.singularity.auth.core.service.token.SessionTokenService
 import io.stereov.singularity.auth.core.service.token.StepUpTokenService
 import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
+import io.stereov.singularity.auth.oauth2.component.CustomOAuth2AuthenticationFailureHandler
 import io.stereov.singularity.auth.oauth2.component.CustomOAuth2AuthenticationSuccessHandler
 import io.stereov.singularity.auth.oauth2.component.CustomOAuth2AuthorizationRequestResolver
-import io.stereov.singularity.auth.oauth2.config.OAuth2Configuration
 import io.stereov.singularity.auth.oauth2.properties.OAuth2Properties
 import io.stereov.singularity.auth.oauth2.service.OAuth2AuthenticationService
 import io.stereov.singularity.auth.oauth2.service.token.OAuth2StateTokenService
@@ -40,7 +39,6 @@ import org.springframework.security.oauth2.client.registration.ReactiveClientReg
 import org.springframework.security.web.server.SecurityWebFilterChain
 import org.springframework.security.web.server.ServerAuthenticationEntryPoint
 import org.springframework.security.web.server.authentication.HttpStatusServerEntryPoint
-import org.springframework.security.web.server.context.NoOpServerSecurityContextRepository
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.reactive.CorsConfigurationSource
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
@@ -71,12 +69,7 @@ import reactor.core.publisher.Mono
 @Configuration
 @EnableWebFluxSecurity
 @EnableMethodSecurity(prePostEnabled = true)
-@AutoConfiguration(
-    after = [
-        AuthenticationConfiguration::class,
-        OAuth2Configuration::class
-    ]
-)
+@AutoConfiguration
 @EnableConfigurationProperties(SecurityProperties::class)
 class WebSecurityConfiguration {
 
@@ -128,6 +121,11 @@ class WebSecurityConfiguration {
                 it.anyExchange().permitAll()
             }
             .oauth2Login { oauth2 ->
+                oauth2.authenticationFailureHandler(
+                    CustomOAuth2AuthenticationFailureHandler(
+                        oAuth2Properties
+                    )
+                )
                 oauth2.authorizationRequestResolver(
                     CustomOAuth2AuthorizationRequestResolver(
                         clientRegistrations,
@@ -151,7 +149,6 @@ class WebSecurityConfiguration {
             .addFilterBefore(RateLimitFilter(rateLimitService, geolocationProperties), SecurityWebFiltersOrder.FIRST)
             .addFilterBefore(LoggingFilter(geolocationProperties, geoLocationService), SecurityWebFiltersOrder.AUTHENTICATION)
             .addFilterAfter(AuthenticationFilter(accessTokenService), SecurityWebFiltersOrder.AUTHENTICATION)
-            .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())
             .build()
     }
 

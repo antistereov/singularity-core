@@ -118,7 +118,7 @@ on the path `/oauth2/authorization/{registrationId}`.
 
 ### 3. Redirect
 
-If the authorization was successful, you will be redirected to `/login/oauth2/{registrationId}/code`.
+If the authorization was successful, you will be redirected to `/login/oauth2/code/{registrationId}`.
 *Singularity* will check the response and redirect the user to the `redirect_uri` if specified in the previous step.
 
 The user is now authenticated.
@@ -212,12 +212,15 @@ If authentication failed,
 the user will be redirected to the URI you specify in `singularity.auth.oauth2.error-redirect-uri`.
 This allows you to specifically handle these scenarios in your frontend.
 
-The full URI will contain a query parameter `error` (for example `https://example.com/oauth2/error?error=state_parameter_missing`) that specifies the type of error that occurred.
+The full URI will contain a query parameter `code` (for example `https://example.com/oauth2/error?code=state_parameter_missing`) that specifies the type of error that occurred.
 The following error types exist:
 
 | Code                                 | Description                                                                                                                   |
 |--------------------------------------|-------------------------------------------------------------------------------------------------------------------------------|
+| `authentication_failed`              | Authentication at OAuth2 provider failed. In this case another parameter `details` is included that specifies the error.      |
 | `state_parameter_missing`            | No state parameter found in callback.                                                                                         |
+| `state_expired`                      | The state token is expired. It is valid for 15 min by default.                                                                |
+| `invalid_state`                      | The state token cannot be decoded.                                                                                            |
 | `user_already_authenticated`         | Login with an existing account connected to the provider failed because the user already authenticated.                       |
 | `email_already_registered`           | The email attribute of the OAuth2 provider matches an email of an already registered user. Registration failed.               |
 | `session_token_missing`              | No session token provided as query parameter or cookie.                                                                       |
