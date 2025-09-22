@@ -148,7 +148,8 @@ such as **disabling TOTP**.
 ## Email
 
 :::info
-If [email is enabled](../email/configuration) in your application,
+If [email is enabled](../email/configuration) in your application
+and email as 2FA method is [enabled by default](#configuration-1),
 email as a 2FA method will be automatically enabled for every user that registers using a password.
 :::
 
@@ -279,9 +280,10 @@ using a valid [`AccessToken`](./tokens#access-token) and [`StepUpToken`](./token
 
 ### Configuration
 
-| Property                                          | Type   | Description                                                | Default value |
-|---------------------------------------------------|--------|------------------------------------------------------------|---------------|
-| singularity.auth.two-factor.email.code.expires-in | `Long` | The number of seconds the 2FA code sent by email is valid. | `900`         |
+| Property                                            | Type      | Description                                                                                                                 | Default value |
+|-----------------------------------------------------|-----------|-----------------------------------------------------------------------------------------------------------------------------|---------------|
+| singularity.auth.two-factor.email.enable-by-default | `Boolean` | The number of seconds the 2FA code sent by email is valid.                                                                  | `true`        |
+| singularity.auth.two-factor.email.code.expires-in   | `Long`    | Enable email as 2FA method be enabled by default for new users. Has an effect only if `singularity.email.enable` is `true`. | `900`         |
 
 
 ## Changing the Preferred Method

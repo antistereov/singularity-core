@@ -885,6 +885,12 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/TwoFactorSetupResponse"
+        "304":
+          description: User already enabled TOTP.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "400":
           description: 2FA cannot be enabled for users who didn't configure authentication
             using a password.
@@ -894,18 +900,6 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: '`AccessToken` or `StepUpToken` is invalid.'
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "403":
-          description: The user did not configure authentication using password.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "409":
-          description: The user already enabled TOTP.
           content:
             '*/*':
               schema:
@@ -1014,10 +1008,16 @@ paths:
       tags:
       - Two-Factor Authentication
       summary: Recover From TOTP
-      description: "Recover the user if they lost access to their 2FA device.\n\n\
-        You can learn more about recovery for TOTP [here](https://singularity.stereov.io/docs/guides/auth/two-factor#recovery).\n\
+      description: "Recover the user if they lost access to their 2FA device using\
+        \ a recovery `code`.\nEach `code` is only valid once.\n\nYou can learn more\
+        \ about recovery for TOTP [here](https://singularity.stereov.io/docs/guides/auth/two-factor#recovery).\n\
         \n**Requirements:**\n- The user can authenticate using password.\n- The user\
-        \ enabled TOTP as 2FA method.\n\n**Tokens:**\n- A valid [`TwoFactorAuthenticationToken`](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token)\n\
+        \ enabled TOTP as 2FA method.\n\n**Optional session data:**\n- The `session`\
+        \ object can be included in the request body.\n- Inside the `session` object,\
+        \ you can provide the following optional fields:\n    - `browser`: The name\
+        \ of the browser used (e.g., \"Chrome\", \"Firefox\").\n    - `os`: The operating\
+        \ system of the device (e.g., \"Windows\", \"macOS\", \"Android\").\n\n**Tokens:**\n\
+        - A valid [`TwoFactorAuthenticationToken`](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token)\n\
         \  is required. This token will be set automatically as HTTP-only cookie through\
         \ \n  [`POST /api/auth/login`](https://singularity.stereov.io/docs/api/login)\
         \ or\n  [`POST /api/auth/step-up`](https://singularity.stereov.io/docs/api/step-up)\n\
@@ -1035,17 +1035,12 @@ paths:
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/two-factor#recovery
       operationId: recoverFromTotp
-      parameters:
-      - name: code
-        in: query
-        required: true
-        schema:
-          type: string
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/SessionInfoRequest"
+              $ref: "#/components/schemas/TotpRecoveryRequest"
+        required: true
       responses:
         "200":
           description: "Recovery successful. If header authentication is enabled,\
@@ -1054,8 +1049,8 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/TwoFactorRecoveryResponse"
-        "304":
-          description: User is already authenticated.
+        "400":
+          description: TOTP is disabled.
           content:
             '*/*':
               schema:
@@ -1252,7 +1247,8 @@ paths:
         Learn more about email as 2FA method [here](https://singularity.stereov.io/docs/guides/auth/two-factor#email).
 
         **Tokens:**
-        - Requires a valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token).
+        - Requires either a valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
+          or [`TwoFactorAuthenticationToken`](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token).
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/two-factor#sending-a-2fa-code-via-email
       operationId: getRemainingEmailTwoFactorCooldown
@@ -1264,7 +1260,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/MailCooldownResponse"
         "401":
-          description: Invalid or expired `AccessToken`.
+          description: Invalid or expired `AccessToken` or `TwoFactorAuthenticationToken`.
           content:
             '*/*':
               schema:
@@ -1272,6 +1268,8 @@ paths:
       security:
       - accessTokenHeader: []
       - accessTokenCookie: []
+      - twoFactorAuthenticationTokenHeader: []
+      - twoFactorAuthenticationTokenCookie: []
   /api/auth/providers:
     get:
       tags:
@@ -3221,7 +3219,7 @@ components:
           enum:
           - totp
           - mail
-        twoFactorAuthMethods:
+        twoFactorMethods:
           type: array
           items:
             type: string
@@ -3247,7 +3245,7 @@ components:
       - name
       - roles
       - twoFactorAuthEnabled
-      - twoFactorAuthMethods
+      - twoFactorMethods
     ChangePasswordRequest:
       type: object
       properties:
@@ -4024,6 +4022,11 @@ components:
             enum:
             - totp
             - mail
+        preferredTwoFactorMethod:
+          type: string
+          enum:
+          - totp
+          - mail
         twoFactorAuthenticationToken:
           type: string
         location:
@@ -4075,6 +4078,15 @@ components:
           type: string
       required:
       - user
+    TotpRecoveryRequest:
+      type: object
+      properties:
+        code:
+          type: string
+        session:
+          $ref: "#/components/schemas/SessionInfoRequest"
+      required:
+      - code
     CompleteStepUpRequest:
       type: object
       properties:
@@ -4129,15 +4141,8 @@ components:
         totalPages:
           type: integer
           format: int32
-        numberOfElements:
-          type: integer
-          format: int32
         pageable:
           $ref: "#/components/schemas/PageableObject"
-        first:
-          type: boolean
-        last:
-          type: boolean
         size:
           type: integer
           format: int32
@@ -4150,20 +4155,27 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
         empty:
           type: boolean
     PageableObject:
       type: object
       properties:
-        unpaged:
+        paged:
           type: boolean
-        pageSize:
-          type: integer
-          format: int32
         pageNumber:
           type: integer
           format: int32
-        paged:
+        pageSize:
+          type: integer
+          format: int32
+        unpaged:
           type: boolean
         offset:
           type: integer
@@ -4173,9 +4185,9 @@ components:
     SortObject:
       type: object
       properties:
-        unsorted:
-          type: boolean
         sorted:
+          type: boolean
+        unsorted:
           type: boolean
         empty:
           type: boolean
@@ -4254,15 +4266,8 @@ components:
         totalPages:
           type: integer
           format: int32
-        numberOfElements:
-          type: integer
-          format: int32
         pageable:
           $ref: "#/components/schemas/PageableObject"
-        first:
-          type: boolean
-        last:
-          type: boolean
         size:
           type: integer
           format: int32
@@ -4275,6 +4280,13 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
         empty:
           type: boolean
     ArticleResponse:
