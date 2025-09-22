@@ -2,7 +2,6 @@ package io.stereov.singularity.auth.guest.controller
 
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
 import io.stereov.singularity.auth.core.model.IdentityProvider
-import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.auth.guest.dto.request.ConvertToUserRequest
 import io.stereov.singularity.auth.guest.dto.request.CreateGuestRequest
 import io.stereov.singularity.auth.guest.dto.response.ConvertToUserResponse

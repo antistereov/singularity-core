@@ -1,6 +1,5 @@
 package io.stereov.singularity.admin.core.controller
 
-import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.test.BaseIntegrationTest
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.core.model.Role

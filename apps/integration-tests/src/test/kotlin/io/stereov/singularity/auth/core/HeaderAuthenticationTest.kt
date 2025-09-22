@@ -158,8 +158,6 @@ class HeaderAuthenticationTest : BaseSpringBootTest() {
             .expectStatus().isOk
     }
     @Test fun `refresh requires valid token`() = runTest {
-        val user = registerUser()
-
         webTestClient.post()
             .uri("/api/auth/refresh")
             .header(SessionTokenType.Refresh.header, "invalid-token")

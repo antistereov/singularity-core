@@ -1,6 +1,5 @@
 package io.stereov.singularity.auth.group.controller
 
-import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.auth.group.dto.request.CreateGroupRequest
 import io.stereov.singularity.auth.group.dto.request.UpdateGroupRequest
 import io.stereov.singularity.auth.group.dto.response.GroupResponse

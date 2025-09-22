@@ -1,6 +1,5 @@
 package io.stereov.singularity.test
 
-import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.auth.group.model.KnownGroups
 import io.stereov.singularity.content.article.dto.request.CreateArticleRequest
 import io.stereov.singularity.content.article.dto.response.FullArticleResponse

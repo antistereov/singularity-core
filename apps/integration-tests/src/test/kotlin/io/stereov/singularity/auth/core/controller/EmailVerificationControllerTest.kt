@@ -2,7 +2,6 @@ package io.stereov.singularity.auth.core.controller
 
 import io.mockk.verify
 import io.stereov.singularity.auth.core.dto.response.MailCooldownResponse
-import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.test.BaseMailIntegrationTest
 import jakarta.mail.internet.MimeMessage
 import kotlinx.coroutines.test.runTest

@@ -103,8 +103,6 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
     @Test fun `totp get setup details requires authentication`() = runTest {
         val user = registerUser()
 
-        val stepUpToken = stepUpTokenService.create(user.info.id, user.sessionId)
-
         webTestClient.get()
             .uri("/api/auth/2fa/totp/setup")
             .stepUpTokenCookie(user.stepUpToken)

@@ -1,7 +1,6 @@
 package io.stereov.singularity.auth.core.controller
 
 import io.stereov.singularity.auth.core.dto.request.SendPasswordResetRequest
-import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test

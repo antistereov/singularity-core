@@ -153,8 +153,6 @@ class CookieAuthenticationTest() : BaseIntegrationTest() {
             .expectStatus().isOk
     }
     @Test fun `refresh requires valid token`() = runTest {
-        val user = registerUser()
-
         webTestClient.post()
             .uri("/api/auth/refresh")
             .cookie(SessionTokenType.Refresh.cookieName, "invalid-token")
