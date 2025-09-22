@@ -1296,7 +1296,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/IdentityProviderResponse"
         "401":
-          description: Unauthorized.
+          description: Invalid `AccessToken`.
           content:
             '*/*':
               schema:
@@ -1335,15 +1335,21 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/UserResponse"
-        "401":
-          description: Unauthorized
+        "400":
+          description: Deleting the password identity or the only registered identity
+            is forbidden.
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-        "400":
-          description: "Bad request: deleting the password identity or the only registered\
-            \ identity is forbidden."
+        "401":
+          description: Invalid `AccessToken` or `StepUpToken`.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: The requested provider is not connected.
           content:
             '*/*':
               schema:
@@ -1377,7 +1383,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ConnectPasswordIdentityRequest"
+              $ref: "#/components/schemas/AddPasswordAuthenticationRequest"
         required: true
       responses:
         "200":
@@ -1387,13 +1393,20 @@ paths:
               schema:
                 $ref: "#/components/schemas/UserResponse"
         "304":
-          description: Bad request. User already created a password identity
+          description: User already created a password identity.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "400":
+          description: Guests are not allowed to add a password identity this way.
+            They need to be converted to users.
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "401":
-          description: Unauthorized
+          description: Invalid `AccessToken` or `StepUpToken`.
           content:
             '*/*':
               schema:
@@ -3950,11 +3963,17 @@ components:
           type: string
       required:
       - user
-    ConnectPasswordIdentityRequest:
+    AddPasswordAuthenticationRequest:
       type: object
       properties:
         password:
           type: string
+          description: "The user's chosen password. It must be at least 8 characters\
+            \ long and include at least one uppercase letter, one lowercase letter,\
+            \ one number, and one special character (!@#$%^&*()_+={}[]|\\:;'\"<>,.?/)."
+          example: S3cur3P@ssw0rd!
+          pattern: "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+\\-={}\\[\\\
+            ]|\\\\:;'\"<,>.?/]).{8,}"
       required:
       - password
     OAuth2ProviderConnectionTokenResponse:
