@@ -27,7 +27,8 @@ class OAuth2AuthenticationService(
          oauth2Authentication: OAuth2AuthenticationToken,
          oauth2ProviderConnectionTokenValue: String?,
          stepUpTokenValue: String?,
-         exchange: ServerWebExchange
+         exchange: ServerWebExchange,
+         stepUp: Boolean
      ): UserDocument {
          logger.debug { "Finding or creating user after OAuth2 authentication" }
 
@@ -49,7 +50,7 @@ class OAuth2AuthenticationService(
          val authenticated = runCatching { accessTokenService.extract(exchange) }.isSuccess
 
          val existingUser = userService.findByIdentityOrNull(provider, principalId)
-         if (existingUser != null) return handleLogin(existingUser, authenticated)
+         if (existingUser != null) return handleLogin(existingUser, authenticated, stepUp)
 
          return when (oauth2ProviderConnectionTokenValue != null) {
              true -> handleConnection(email, provider, principalId, oauth2ProviderConnectionTokenValue, stepUpTokenValue, exchange)
@@ -57,10 +58,10 @@ class OAuth2AuthenticationService(
          }
     }
 
-    private suspend fun handleLogin(user: UserDocument, authenticated: Boolean): UserDocument {
+    private suspend fun handleLogin(user: UserDocument, authenticated: Boolean, stepUp: Boolean): UserDocument {
         logger.debug { "Handling OAuth2 login for user ${user.id}" }
 
-        if (authenticated)
+        if (authenticated && !stepUp)
             throw OAuth2FlowException(OAuth2ErrorCode.USER_ALREADY_AUTHENTICATED, "Login via OAuth2 provider failed: user is already authenticated")
 
         return user

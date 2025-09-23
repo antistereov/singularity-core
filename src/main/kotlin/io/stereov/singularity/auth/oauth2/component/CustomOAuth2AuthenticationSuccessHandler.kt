@@ -47,7 +47,7 @@ class CustomOAuth2AuthenticationSuccessHandler(
     ): Mono<Void> = mono {
         logger.debug { "Received callback from ${exchange.exchange.request.remoteAddress}" }
         val state = getState(exchange.exchange)
-        val sessionToken = getSessionToken(state, exchange.exchange)
+        val sessionToken = getSessionToken(exchange.exchange)
 
         buildResponse(authentication, exchange.exchange, sessionToken, state)
     }.onErrorResume { e ->
@@ -67,11 +67,10 @@ class CustomOAuth2AuthenticationSuccessHandler(
             }
     }
 
-    private suspend fun getSessionToken(state: OAuth2StateToken, exchange: ServerWebExchange): SessionToken {
+    private suspend fun getSessionToken(exchange: ServerWebExchange): SessionToken {
         logger.debug { "Extracting session token from callback" }
 
-        val sessionTokenValue = state.sessionTokenValue
-            ?: exchange.request.cookies.getFirst(SessionTokenType.Session.COOKIE_NAME)?.value
+        val sessionTokenValue = exchange.request.cookies.getFirst(SessionTokenType.Session.COOKIE_NAME)?.value
             ?: throw OAuth2FlowException(OAuth2ErrorCode.SESSION_TOKEN_MISSING, "No session token provided as query parameter or cookie.")
         return try {
             sessionTokenService.extract(sessionTokenValue)
@@ -91,28 +90,32 @@ class CustomOAuth2AuthenticationSuccessHandler(
         state: OAuth2StateToken
     ) {
         val oauth2Authentication = authentication as OAuth2AuthenticationToken
-        val sessionId = runCatching { accessTokenService.extract(exchange).sessionId }
-            .getOrElse { UUID.randomUUID() }
+        val sessionId = runCatching { accessTokenService.extract(exchange).sessionId }.getOrNull()
+            ?: UUID.randomUUID()
 
-        val oauth2ProviderConnectionToken = state.oauth2ProviderConnectionTokenValue
-            ?: exchange.request.cookies.getFirst(OAuth2TokenType.ProviderConnection.COOKIE_NAME)?.value
-        val stepUpTokenValue = state.stepUpTokenValue
-            ?: exchange.request.cookies.getFirst(SessionTokenType.StepUp.COOKIE_NAME)?.value
+        val oauth2ProviderConnectionToken = exchange.request.cookies.getFirst(OAuth2TokenType.ProviderConnection.COOKIE_NAME)?.value
+        val stepUpTokenValue = exchange.request.cookies.getFirst(SessionTokenType.StepUp.COOKIE_NAME)?.value
 
-        val user = oAuth2AuthenticationService.findOrCreateUser(oauth2Authentication, oauth2ProviderConnectionToken, stepUpTokenValue, exchange)
+        val user = oAuth2AuthenticationService.findOrCreateUser(oauth2Authentication, oauth2ProviderConnectionToken, stepUpTokenValue, exchange, state.stepUp)
         val accessToken = accessTokenService.create(user, sessionId)
         val refreshToken = refreshTokenService.create(user, sessionId, sessionToken.toSessionInfoRequest(), exchange)
+
+        if (state.stepUp) {
+            val accessToken = accessTokenService.extractOrOAuth2FlowException(exchange)
+            if (user.id != accessToken.userId)
+                throw OAuth2FlowException(
+                    OAuth2ErrorCode.WRONG_ACCOUNT_AUTHENTICATED,
+                    "Step-up failed: the account you authenticated via OAuth2 doesn't match the AccessToken"
+                )
+            val stepUpToken = stepUpTokenService.create(user.id, sessionId)
+            exchange.response.headers.add(SessionTokenType.StepUp.HEADER, stepUpToken.value)
+            exchange.response.cookies.add(SessionTokenType.StepUp.COOKIE_NAME, cookieCreator.createCookie(stepUpToken))
+        }
 
         exchange.response.headers.add(SessionTokenType.Access.HEADER, accessToken.value)
         exchange.response.headers.add(SessionTokenType.Refresh.HEADER, refreshToken.value)
         exchange.response.cookies.add(SessionTokenType.Access.COOKIE_NAME, cookieCreator.createCookie(accessToken))
         exchange.response.cookies.add(SessionTokenType.Refresh.COOKIE_NAME, cookieCreator.createCookie(refreshToken))
-
-        if (state.stepUp) {
-            val stepUpToken = stepUpTokenService.create(user.id, sessionId)
-            exchange.response.headers.add(SessionTokenType.StepUp.HEADER, stepUpToken.value)
-            exchange.response.cookies.add(SessionTokenType.StepUp.COOKIE_NAME, cookieCreator.createCookie(stepUpToken))
-        }
 
         if (state.redirectUri != null) {
             exchange.response.statusCode = HttpStatus.FOUND

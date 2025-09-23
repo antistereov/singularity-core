@@ -19,6 +19,10 @@ enum class OAuth2ErrorCode(val value: String) {
     STEP_UP_MISSING("step_up_missing"),
     STEP_UP_TOKEN_EXPIRED("step_up_token_expired"),
     INVALID_STEP_UP_TOKEN("invalid_step_up_token"),
+    ACCESS_TOKEN_MISSING("access_token_missing"),
+    INVALID_ACCESS_TOKEN("invalid_access_token"),
+    ACCESS_TOKEN_EXPIRED("access_token_expired"),
+    WRONG_ACCOUNT_AUTHENTICATED("wrong_account_authenticated"),
     SERVER_ERROR("server_error");
 
     override fun toString(): String {

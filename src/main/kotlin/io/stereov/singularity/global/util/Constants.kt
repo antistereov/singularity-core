@@ -10,10 +10,7 @@ object Constants {
     const val TWO_FACTOR_SECRET_CLAIM = "2fa_secret"
     const val TWO_FACTOR_RECOVERY_CLAIM = "2fa_recovery"
 
-    const val SESSION_TOKEN_PARAMETER = "session_token"
     const val REDIRECT_URI_PARAMETER = "redirect_uri"
-    const val STEP_UP_TOKEN_PARAMETER = "step_up_token"
-    const val OAUTH2_PROVIDER_CONNECTION_TOKEN_PARAMETER = "oauth2_provider_connection_token"
     const val STEP_UP_PARAMETER = "step_up"
 
     const val ENCRYPTION_SECRET = "encryption-secret"
