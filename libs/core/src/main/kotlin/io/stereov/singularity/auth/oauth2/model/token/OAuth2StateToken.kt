@@ -9,5 +9,6 @@ data class OAuth2StateToken(
     val redirectUri: String?,
     val oauth2ProviderConnectionTokenValue: String?,
     val stepUp: Boolean,
-    override val jwt: Jwt
+    override val jwt: Jwt,
+    val stepUpTokenValue: String?,
 ) : Token()

@@ -22,6 +22,7 @@ class OAuth2StateTokenService(
     private val redirectUriClaim = "redirect_uri"
     private val providerConnectionTokenClaim = "oauth2_provider_connection_token"
     private val stepUpClaim = "step_up"
+    private val stepUpTokenClaim = "step_up_token"
 
     suspend fun create(
         randomState: String,
@@ -29,6 +30,7 @@ class OAuth2StateTokenService(
         redirectUri: String?,
         oauth2ProviderConnectionTokenValue: String?,
         stepUp: Boolean,
+        stepUpTokenValue: String?
     ): OAuth2StateToken {
         logger.debug { "Creating OAuth2StateToken" }
 
@@ -43,6 +45,8 @@ class OAuth2StateTokenService(
             claims.claim(redirectUriClaim, redirectUri)
         if (oauth2ProviderConnectionTokenValue != null)
             claims.claim(providerConnectionTokenClaim, oauth2ProviderConnectionTokenValue)
+        if (stepUpTokenValue != null)
+            claims.claim(stepUpTokenClaim, stepUpTokenValue)
 
         val jwt = jwtService.encodeJwt(claims.build(), tokenType)
 
@@ -52,7 +56,8 @@ class OAuth2StateTokenService(
             redirectUri = redirectUri,
             oauth2ProviderConnectionTokenValue = oauth2ProviderConnectionTokenValue,
             stepUp = stepUp,
-            jwt= jwt
+            jwt= jwt,
+            stepUpTokenValue = stepUpTokenValue
         )
     }
 
@@ -66,6 +71,7 @@ class OAuth2StateTokenService(
         val sessionTokenValue = jwt.claims[sessionTokenClaim]?.let { it as? String }
         val redirectUri = jwt.claims[redirectUriClaim]?.let { it as? String }
         val connectionToken = jwt.claims[providerConnectionTokenClaim]?.let { it as? String }
+        val stepUpToken = jwt.claims[stepUpTokenClaim]?.let { it as? String }
         val stepUp = (jwt.claims[stepUpClaim] as? String)?.toBooleanStrictOrNull()
             ?: throw InvalidTokenException("No step-up claim found in token")
 
@@ -75,7 +81,8 @@ class OAuth2StateTokenService(
             redirectUri = redirectUri,
             oauth2ProviderConnectionTokenValue = connectionToken,
             stepUp = stepUp,
-            jwt = jwt
+            jwt = jwt,
+            stepUpTokenValue = stepUpToken
         )
     }
 }

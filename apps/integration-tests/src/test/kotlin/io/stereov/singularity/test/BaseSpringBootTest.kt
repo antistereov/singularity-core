@@ -475,12 +475,14 @@ class BaseSpringBootTest() {
     fun <S: WebTestClient.RequestHeadersSpec<S>> WebTestClient.RequestHeadersSpec<S>.accessTokenCookie(tokenValue: String): WebTestClient.RequestBodySpec {
         return this.cookie(SessionTokenType.Access.cookieName, tokenValue) as WebTestClient.RequestBodySpec
     }
+    @Suppress("UNUSED")
     fun <S: WebTestClient.RequestHeadersSpec<S>> WebTestClient.RequestHeadersSpec<S>.refreshTokenCookie(tokenValue: String): WebTestClient.RequestBodySpec {
         return this.cookie(SessionTokenType.Refresh.cookieName, tokenValue) as WebTestClient.RequestBodySpec
     }
     fun <S: WebTestClient.RequestHeadersSpec<S>> WebTestClient.RequestHeadersSpec<S>.stepUpTokenCookie(tokenValue: String): WebTestClient.RequestBodySpec {
         return this.cookie(SessionTokenType.StepUp.cookieName, tokenValue) as WebTestClient.RequestBodySpec
     }
+    @Suppress("UNUSED")
     fun <S: WebTestClient.RequestHeadersSpec<S>> WebTestClient.RequestHeadersSpec<S>.twoFactorAuthenticationTokenCookie(token: TwoFactorAuthenticationToken): WebTestClient.RequestBodySpec {
         return this.twoFactorAuthenticationTokenCookie(token.value)
     }
@@ -492,5 +494,11 @@ class BaseSpringBootTest() {
     }
     fun <S: WebTestClient.RequestHeadersSpec<S>> WebTestClient.RequestHeadersSpec<S>.sessionTokenCookie(token: SessionToken): WebTestClient.RequestBodySpec {
         return this.sessionTokenCookie(token.value)
+    }
+    fun <S: WebTestClient.RequestHeadersSpec<S>> WebTestClient.RequestHeadersSpec<S>.oauth2ConnectionCookie(tokenValue: String): WebTestClient.RequestBodySpec {
+        return this.cookie(OAuth2TokenType.ProviderConnection.cookieName, tokenValue) as WebTestClient.RequestBodySpec
+    }
+    fun <S: WebTestClient.RequestHeadersSpec<S>> WebTestClient.RequestHeadersSpec<S>.oauth2ConnectionCookie(token: OAuth2ProviderConnectionToken): WebTestClient.RequestBodySpec {
+        return this.oauth2ConnectionCookie(token.value)
     }
 }

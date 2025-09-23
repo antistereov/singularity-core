@@ -4,6 +4,8 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.model.IdentityProvider
 import io.stereov.singularity.auth.core.service.AuthorizationService
+import io.stereov.singularity.auth.core.service.token.AccessTokenService
+import io.stereov.singularity.auth.core.service.token.StepUpTokenService
 import io.stereov.singularity.auth.guest.exception.model.GuestCannotPerformThisActionException
 import io.stereov.singularity.auth.jwt.exception.model.TokenExpiredException
 import io.stereov.singularity.auth.oauth2.dto.request.AddPasswordAuthenticationRequest
@@ -19,6 +21,7 @@ import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.model.identity.UserIdentity
 import io.stereov.singularity.user.core.service.UserService
 import org.springframework.stereotype.Service
+import org.springframework.web.server.ServerWebExchange
 
 @Service
 class IdentityProviderService(
@@ -26,7 +29,9 @@ class IdentityProviderService(
     private val oAuth2ProviderConnectionTokenService: OAuth2ProviderConnectionTokenService,
     private val authorizationService: AuthorizationService,
     private val hashService: HashService,
-    private val accessTokenCache: AccessTokenCache
+    private val accessTokenCache: AccessTokenCache,
+    private val accessTokenService: AccessTokenService,
+    private val stepUpTokenService: StepUpTokenService
 ) {
 
     private val logger = KotlinLogging.logger {}
@@ -55,20 +60,37 @@ class IdentityProviderService(
         email: String,
         provider: String,
         principalId: String,
-        oauth2ProviderConnectionTokenValue: String?
+        oauth2ProviderConnectionTokenValue: String,
+        stepUpTokenValue: String?,
+        exchange: ServerWebExchange
     ): UserDocument {
         logger.debug { "Connecting a new OAuth2 provider $provider to user" }
 
-        val user = authorizationService.getCurrentUser()
-        val sessionId = authorizationService.getCurrentSessionId()
-        authorizationService.requireStepUp()
-
-        if (oauth2ProviderConnectionTokenValue == null)
+        val accessToken = accessTokenService.extract(exchange)
+        val sessionId = accessToken.sessionId
+        if (stepUpTokenValue == null)
             throw OAuth2FlowException(
-                OAuth2ErrorCode.CONNECTION_TOKEN_MISSING,
-                "Failed to connect a new provider to the current user. " +
-                        "No OAuth2ProviderConnection set as cookie or sent as request parameter."
+                OAuth2ErrorCode.STEP_UP_MISSING,
+                "Failed to connect a new provider to the current user. Step-up authentication missing. Provide it as cookie or request param."
             )
+
+        runCatching { stepUpTokenService.extract(stepUpTokenValue, accessToken.userId, sessionId) }
+            .getOrElse { exception ->
+                when (exception) {
+                    is TokenExpiredException -> throw OAuth2FlowException(
+                        OAuth2ErrorCode.STEP_UP_TOKEN_EXPIRED,
+                        "Failed to connect a new provider to the current user. StepUpToken expired.",
+                        exception
+                    )
+                    else -> throw OAuth2FlowException(
+                        OAuth2ErrorCode.INVALID_STEP_UP_TOKEN,
+                        "Failed to connect a new provider to the current user: StepUpToken is invalid",
+                        exception
+                    )
+                }
+            }
+
+        val user = userService.findById(accessToken.userId)
 
         if (user.sensitive.identities.containsKey(provider))
             throw OAuth2FlowException(OAuth2ErrorCode.PROVIDER_ALREADY_CONNECTED,

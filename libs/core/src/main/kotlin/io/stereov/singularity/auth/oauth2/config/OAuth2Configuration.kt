@@ -5,6 +5,7 @@ import io.stereov.singularity.auth.core.component.CookieCreator
 import io.stereov.singularity.auth.core.properties.AuthProperties
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.core.service.token.AccessTokenService
+import io.stereov.singularity.auth.core.service.token.StepUpTokenService
 import io.stereov.singularity.auth.jwt.properties.JwtProperties
 import io.stereov.singularity.auth.jwt.service.JwtService
 import io.stereov.singularity.auth.oauth2.controller.IdentityProviderController
@@ -79,13 +80,17 @@ class OAuth2Configuration {
         oAuth2ProviderConnectionTokenService: OAuth2ProviderConnectionTokenService,
         authorizationService: AuthorizationService,
         hashService: HashService,
-        accessTokenCache: AccessTokenCache
+        accessTokenCache: AccessTokenCache,
+        accessTokenService: AccessTokenService,
+        stepUpTokenService: StepUpTokenService
     ) = IdentityProviderService(
         userService,
         oAuth2ProviderConnectionTokenService,
         authorizationService,
         hashService,
-        accessTokenCache
+        accessTokenCache,
+        accessTokenService,
+        stepUpTokenService
     )
     
     @Bean

@@ -109,12 +109,13 @@ on the path `/oauth2/authorization/{registrationId}`.
 
 #### Parameters
 
-| Parameter                          | Description                                                                                                                                                                                                                                                                                                                                                    | Required |
-|------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|
-| `redirect_uri`                     | The URI the user will be redirected to after the authentication was successful.                                                                                                                                                                                                                                                                                | `false`  |
-| `step_up`                          | Should step-up authentication be requested? Boolean. Learn more [here](#step-up-authentication).                                                                                                                                                                                                                                                               | `false`  |
-| `session_token`                    | The token specifying the current session you obtained from calling [`POST /api/auth/sessions/token`](../../api/generate-session-token.api.mdx). It is not necessary to set this parameter since it will already be set as a HTTP-only cookie. You can override this value using this parameter or use it instead if for some reason cookies are not available. | `false`  |
-| `oauth2_provider_connection_token` | A token used to connect a new OAuth2 client to an existing account. It is not necessary to set this parameter since this token will already be set as an HTTP-only cookie. You can use this parameter to override the token. Go [here](#connecting-an-oauth2-provider-to-an-existing-account) for more information.                                            | `false`  |
+| Parameter                          | Description                                                                                                                                                                                                                                                                                                                                                                                          | Required |
+|------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|
+| `redirect_uri`                     | The URI the user will be redirected to after the authentication was successful.                                                                                                                                                                                                                                                                                                                      | `false`  |
+| `step_up`                          | Should step-up authentication be requested? Boolean. Learn more [here](#step-up-authentication).                                                                                                                                                                                                                                                                                                     | `false`  |
+| `session_token`                    | The [`SessionToken`](./tokens.md#session-token) specifying the current session you obtained from calling [`POST /api/auth/sessions/token`](../../api/generate-session-token.api.mdx). It is not necessary to set this parameter since it will already be set as a HTTP-only cookie. You can override this value using this parameter or use it instead if for some reason cookies are not available. | `false`  |
+| `oauth2_provider_connection_token` | The [`OAuth2ProviderConnectionToken`](./tokens.md#oauth2-provider-connection-token) used to connect a new OAuth2 client to an existing account. It is not necessary to set this parameter since this token will already be set as an HTTP-only cookie. You can use this parameter to override the token. Go [here](#connecting-an-oauth2-provider-to-an-existing-account) for more information.      | `false`  |
+| `step_up_token`                    | The [`StepUpToken`](./tokens.md#step-up-token) used to connect a new OAuth2 client to an existing account. It is not necessary to set this parameter since this token will already be set as an HTTP-only cookie. You can use this parameter to override the token. Go [here](#connecting-an-oauth2-provider-to-an-existing-account) for more information.                                           | `false`  |
 
 ### 3. Redirect
 
@@ -237,22 +238,48 @@ These error codes can occur on any type of flow.
 Besides the error codes that can occur on all flows, 
 these codes can occur when trying to connect an OAuth2 provider to an existing account.
 
-| Code                                 | Description                                                                                                                                                                                                                                                                                                             |
-|--------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `connection_token_missing`           | Failed to connect a new provider to the current user. No OAuth2ProviderConnection set as cookie or sent as request parameter.                                                                                                                                                                                           |
-| `provider_already_connected`         | The user already connected the provider.                                                                                                                                                                                                                                                                                |
-| `connection_token_expired`           | The provided OAuth2ProviderConnectionToken is expired.                                                                                                                                                                                                                                                                  |
-| `invalid_connection_token`           | The provided OAuth2ProviderConnectionToken cannot be decoded.                                                                                                                                                                                                                                                           |
-| `connection_token_provider_mismatch` | The provided OAuth2ProviderConnectionToken does not match the requested provider.                                                                                                                                                                                                                                       |
+| Code                                 | Description                                                                                                                         |
+|--------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------|
+| `provider_already_connected`         | The user already connected the provider.                                                                                            |
+| `connection_token_expired`           | The provided [`OAuth2ProviderConnectionToken`](./tokens.md#oauth2-provider-connection-token) is expired.                            |
+| `invalid_connection_token`           | The provided [`OAuth2ProviderConnectionToken`](./tokens.md#oauth2-provider-connection-token) cannot be decoded.                     |
+| `connection_token_provider_mismatch` | The provided [`OAuth2ProviderConnectionToken`](./tokens.md#oauth2-provider-connection-token) does not match the requested provider. |
+| `step_up_missing`                    | Connecting a new provider requires step-up.                                                                                         |
+| `step_up_token_expired`              | The provided [`StepUpToken`](./tokens.md#step-up-token) is expired.                                                                 |
+| `invalid_step_up_token`              | The provided [`StepUpToken`](./tokens.md#step-up-token) is invalid.                                                                 |
 
 
-### Registration, Login and Conversion of Guest Accounts to User Accounts
+### Registration
 
 Besides the error codes that can occur on all flows,
 these codes can occur when trying to register, login or converting a [`GUEST`](./roles.md#guests) to user account via OAuth2.
 
-| Code                                 | Description                                                                                                                                                                   |
-|--------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `user_already_authenticated`         | Login, registration or conversion of [`GUEST`](./roles.md#guests) to user account failed. The user already authenticated.                                                     |
-| `email_already_registered`           | Registration or conversion of [`GUEST`](./roles.md#guests) to user account failed. The email attribute of the OAuth2 provider matches an email of an already registered user. |
+| Code                         | Description                                                                                                     |
+|------------------------------|-----------------------------------------------------------------------------------------------------------------|
+| `user_already_authenticated` | Registration failed. The user is already authenticated.                                                         |
+| `email_already_registered`   | Registration failed. The email attribute of the OAuth2 provider matches an email of an already registered user. |
 
+
+### Login
+
+Besides the error codes that can occur on all flows,
+these codes can occur when trying to register, login or converting a [`GUEST`](./roles.md#guests) to user account via OAuth2.
+
+| Code                         | Description                                      |
+|------------------------------|--------------------------------------------------|
+| `user_already_authenticated` | Login failed. The user is already authenticated. |
+
+
+### Converting Guests to Users
+
+| Code                                 | Description                                                                                                                                                   |
+|--------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `user_already_authenticated`         | Conversion of [`GUEST`](./roles.md#guests) to user account failed. The user already authenticated.                                                            |
+| `email_already_registered`           | Conversion of [`GUEST`](./roles.md#guests) to user account failed. The email attribute of the OAuth2 provider matches an email of an already registered user. |
+| `provider_already_connected`         | The user already connected the provider.                                                                                                                      |
+| `connection_token_expired`           | The provided [`OAuth2ProviderConnectionToken`](./tokens.md#oauth2-provider-connection-token) is expired.                                                      |
+| `invalid_connection_token`           | The provided [`OAuth2ProviderConnectionToken`](./tokens.md#oauth2-provider-connection-token) cannot be decoded.                                               |
+| `connection_token_provider_mismatch` | The provided [`OAuth2ProviderConnectionToken`](./tokens.md#oauth2-provider-connection-token) does not match the requested provider.                           |
+| `step_up_missing`                    | Connecting a new provider requires step-up.                                                                                                                   |
+| `step_up_token_expired`              | The provided [`StepUpToken`](./tokens.md#step-up-token) is expired.                                                                                           |
+| `invalid_step_up_token`              | The provided [`StepUpToken`](./tokens.md#step-up-token) is invalid.                                                                                           |
