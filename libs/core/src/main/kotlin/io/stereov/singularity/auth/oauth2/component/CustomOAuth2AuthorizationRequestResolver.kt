@@ -35,19 +35,13 @@ class CustomOAuth2AuthorizationRequestResolver(
         exchange: ServerWebExchange,
         request: OAuth2AuthorizationRequest
     ): OAuth2AuthorizationRequest {
-        val sessionToken = exchange.request.queryParams.getFirst(Constants.SESSION_TOKEN_PARAMETER)
-        val stepUpToken = exchange.request.queryParams.getFirst(Constants.STEP_UP_TOKEN_PARAMETER)
         val redirectUri = exchange.request.queryParams.getFirst(Constants.REDIRECT_URI_PARAMETER)
-        val oauth2ProviderConnectionToken = exchange.request.queryParams.getFirst(Constants.OAUTH2_PROVIDER_CONNECTION_TOKEN_PARAMETER)
         val stepUp = exchange.request.queryParams.getFirst(Constants.STEP_UP_PARAMETER).toBoolean()
 
         val oAuth2StateToken = oAuth2StateTokenService.create(
             request.state,
-            sessionToken,
             redirectUri,
-            oauth2ProviderConnectionToken,
             stepUp,
-            stepUpToken
         )
 
         val req = OAuth2AuthorizationRequest.from(request)

@@ -6,8 +6,11 @@ import io.stereov.singularity.auth.core.component.TokenValueExtractor
 import io.stereov.singularity.auth.core.model.token.AccessToken
 import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException
+import io.stereov.singularity.auth.jwt.exception.model.TokenExpiredException
 import io.stereov.singularity.auth.jwt.properties.JwtProperties
 import io.stereov.singularity.auth.jwt.service.JwtService
+import io.stereov.singularity.auth.oauth2.exception.model.OAuth2FlowException
+import io.stereov.singularity.auth.oauth2.model.OAuth2ErrorCode
 import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.user.core.model.Role
@@ -57,6 +60,35 @@ class AccessTokenService(
         val tokenValue = tokenValueExtractor.extractValue(exchange, tokenType, true)
 
         return extract(tokenValue)
+    }
+
+    suspend fun extractOrNull(exchange: ServerWebExchange): AccessToken? {
+
+        val tokenValue = tokenValueExtractor.extractValueOrNull(exchange, tokenType, true)
+
+        return tokenValue?.let { extract(tokenValue) }
+    }
+
+    suspend fun extractOrOAuth2FlowException(exchange: ServerWebExchange): AccessToken {
+
+        return runCatching { extractOrNull(exchange) }
+            .getOrElse { exception ->
+                when(exception) {
+                    is TokenExpiredException -> throw OAuth2FlowException(
+                        OAuth2ErrorCode.ACCESS_TOKEN_EXPIRED,
+                        "Failed to connect a new provider to the current user. AccessToken expired.",
+                        exception
+                    )
+                    else -> throw OAuth2FlowException(
+                        OAuth2ErrorCode.INVALID_ACCESS_TOKEN,
+                        "Failed to connect a new provider to the current user: AccessToken is invalid",
+                        exception
+                    )
+                }
+            } ?: throw OAuth2FlowException(
+            OAuth2ErrorCode.ACCESS_TOKEN_MISSING,
+            "Failed to connect a new provider to the current user: AccessToken is invalid"
+        )
     }
 
     suspend fun extract(tokenValue: String): AccessToken {

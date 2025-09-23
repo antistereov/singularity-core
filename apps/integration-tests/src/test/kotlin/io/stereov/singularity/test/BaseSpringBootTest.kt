@@ -475,12 +475,18 @@ class BaseSpringBootTest() {
     fun <S: WebTestClient.RequestHeadersSpec<S>> WebTestClient.RequestHeadersSpec<S>.accessTokenCookie(tokenValue: String): WebTestClient.RequestBodySpec {
         return this.cookie(SessionTokenType.Access.cookieName, tokenValue) as WebTestClient.RequestBodySpec
     }
+    fun <S: WebTestClient.RequestHeadersSpec<S>> WebTestClient.RequestHeadersSpec<S>.accessTokenCookie(token: AccessToken): WebTestClient.RequestBodySpec {
+        return this.accessTokenCookie(token.value)
+    }
     @Suppress("UNUSED")
     fun <S: WebTestClient.RequestHeadersSpec<S>> WebTestClient.RequestHeadersSpec<S>.refreshTokenCookie(tokenValue: String): WebTestClient.RequestBodySpec {
         return this.cookie(SessionTokenType.Refresh.cookieName, tokenValue) as WebTestClient.RequestBodySpec
     }
     fun <S: WebTestClient.RequestHeadersSpec<S>> WebTestClient.RequestHeadersSpec<S>.stepUpTokenCookie(tokenValue: String): WebTestClient.RequestBodySpec {
         return this.cookie(SessionTokenType.StepUp.cookieName, tokenValue) as WebTestClient.RequestBodySpec
+    }
+    fun <S: WebTestClient.RequestHeadersSpec<S>> WebTestClient.RequestHeadersSpec<S>.stepUpTokenCookie(token: StepUpToken): WebTestClient.RequestBodySpec {
+        return this.stepUpTokenCookie(token.value)
     }
     @Suppress("UNUSED")
     fun <S: WebTestClient.RequestHeadersSpec<S>> WebTestClient.RequestHeadersSpec<S>.twoFactorAuthenticationTokenCookie(token: TwoFactorAuthenticationToken): WebTestClient.RequestBodySpec {

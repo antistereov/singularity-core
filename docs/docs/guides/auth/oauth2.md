@@ -113,9 +113,6 @@ on the path `/oauth2/authorization/{registrationId}`.
 |------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|
 | `redirect_uri`                     | The URI the user will be redirected to after the authentication was successful.                                                                                                                                                                                                                                                                                                                      | `false`  |
 | `step_up`                          | Should step-up authentication be requested? Boolean. Learn more [here](#step-up-authentication).                                                                                                                                                                                                                                                                                                     | `false`  |
-| `session_token`                    | The [`SessionToken`](./tokens.md#session-token) specifying the current session you obtained from calling [`POST /api/auth/sessions/token`](../../api/generate-session-token.api.mdx). It is not necessary to set this parameter since it will already be set as a HTTP-only cookie. You can override this value using this parameter or use it instead if for some reason cookies are not available. | `false`  |
-| `oauth2_provider_connection_token` | The [`OAuth2ProviderConnectionToken`](./tokens.md#oauth2-provider-connection-token) used to connect a new OAuth2 client to an existing account. It is not necessary to set this parameter since this token will already be set as an HTTP-only cookie. You can use this parameter to override the token. Go [here](#connecting-an-oauth2-provider-to-an-existing-account) for more information.      | `false`  |
-| `step_up_token`                    | The [`StepUpToken`](./tokens.md#step-up-token) used to connect a new OAuth2 client to an existing account. It is not necessary to set this parameter since this token will already be set as an HTTP-only cookie. You can use this parameter to override the token. Go [here](#connecting-an-oauth2-provider-to-an-existing-account) for more information.                                           | `false`  |
 
 ### 3. Redirect
 
@@ -244,15 +241,17 @@ these codes can occur when trying to connect an OAuth2 provider to an existing a
 | `connection_token_expired`           | The provided [`OAuth2ProviderConnectionToken`](./tokens.md#oauth2-provider-connection-token) is expired.                            |
 | `invalid_connection_token`           | The provided [`OAuth2ProviderConnectionToken`](./tokens.md#oauth2-provider-connection-token) cannot be decoded.                     |
 | `connection_token_provider_mismatch` | The provided [`OAuth2ProviderConnectionToken`](./tokens.md#oauth2-provider-connection-token) does not match the requested provider. |
-| `step_up_missing`                    | Connecting a new provider requires step-up.                                                                                         |
+| `step_up_missing`                    | Connecting a new provider requires s [`StepUpToken`](./tokens.md#step-up-token).                                                    |
 | `step_up_token_expired`              | The provided [`StepUpToken`](./tokens.md#step-up-token) is expired.                                                                 |
 | `invalid_step_up_token`              | The provided [`StepUpToken`](./tokens.md#step-up-token) is invalid.                                                                 |
-
+| `access_token_missing`               | Connecting a new provider requires an [`AccessToken`](./tokens#access-token).                                                       |
+| `access_token_expired`               | The provided [`AccessToken`](./tokens#access-token) is expired.                                                                     |
+| `invalid_access_token`               | The provided [`AccessToken`](./tokens#access-token) is invalid.                                                                     |
 
 ### Registration
 
 Besides the error codes that can occur on all flows,
-these codes can occur when trying to register, login or converting a [`GUEST`](./roles.md#guests) to user account via OAuth2.
+these codes can occur when trying to register a user via OAuth2.
 
 | Code                         | Description                                                                                                     |
 |------------------------------|-----------------------------------------------------------------------------------------------------------------|
@@ -263,12 +262,23 @@ these codes can occur when trying to register, login or converting a [`GUEST`](.
 ### Login
 
 Besides the error codes that can occur on all flows,
-these codes can occur when trying to register, login or converting a [`GUEST`](./roles.md#guests) to user account via OAuth2.
+these codes can occur when trying to log in a user account via OAuth2.
 
 | Code                         | Description                                      |
 |------------------------------|--------------------------------------------------|
 | `user_already_authenticated` | Login failed. The user is already authenticated. |
 
+### Step-Up
+
+Besides the error codes that can occur on all flows,
+these codes can occur when trying to perform [step-up authentication](./authentication.md#step-up) via OAuth2.
+
+| Code                          | Description                                                                                     |
+|-------------------------------|-------------------------------------------------------------------------------------------------|
+| `access_token_missing`        | Connecting a new provider requires an [`AccessToken`](./tokens#access-token).                   |
+| `access_token_expired`        | The provided [`AccessToken`](./tokens#access-token) is expired.                                 |
+| `invalid_access_token`        | The provided [`AccessToken`](./tokens#access-token) is invalid.                                 |
+| `wrong_account_authenticated` | The account you logged in via OAuth2 does not match the [`AccessToken`](./tokens#access-token). |
 
 ### Converting Guests to Users
 

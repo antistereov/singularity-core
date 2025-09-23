@@ -66,7 +66,8 @@ class IdentityProviderService(
     ): UserDocument {
         logger.debug { "Connecting a new OAuth2 provider $provider to user" }
 
-        val accessToken = accessTokenService.extract(exchange)
+        val accessToken = accessTokenService.extractOrOAuth2FlowException(exchange)
+
         val sessionId = accessToken.sessionId
         if (stepUpTokenValue == null)
             throw OAuth2FlowException(
