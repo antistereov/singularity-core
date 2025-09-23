@@ -6,5 +6,4 @@ import io.stereov.singularity.database.hash.model.SecureHash
 data class HashedUserIdentity(
     val password: SecureHash?,
     val principalId: SearchableHash?,
-    val isPrimary: Boolean,
 )

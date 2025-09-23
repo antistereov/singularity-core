@@ -4,6 +4,7 @@ import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.component.CookieCreator
 import io.stereov.singularity.auth.core.properties.AuthProperties
 import io.stereov.singularity.auth.core.service.AuthorizationService
+import io.stereov.singularity.auth.core.service.token.AccessTokenService
 import io.stereov.singularity.auth.jwt.properties.JwtProperties
 import io.stereov.singularity.auth.jwt.service.JwtService
 import io.stereov.singularity.auth.oauth2.controller.IdentityProviderController
@@ -110,11 +111,11 @@ class OAuth2Configuration {
         userService: UserService,
         twoFactorEmailCodeProperties: TwoFactorEmailCodeProperties,
         identityProviderService: IdentityProviderService,
-        authorizationService: AuthorizationService,
+        accessTokenService: AccessTokenService,
     ) = OAuth2AuthenticationService(
         userService,
         twoFactorEmailCodeProperties,
         identityProviderService,
-        authorizationService,
+        accessTokenService,
     )
 }

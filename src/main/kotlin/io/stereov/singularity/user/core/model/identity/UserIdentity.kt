@@ -5,17 +5,16 @@ import io.stereov.singularity.database.hash.model.SecureHash
 data class UserIdentity(
     var password: SecureHash?,
     val principalId: String?,
-    val isPrimary: Boolean = false,
 ) {
 
     companion object {
 
-        fun ofPassword(password: SecureHash, isPrimary: Boolean): UserIdentity {
-            return UserIdentity(password, null, isPrimary)
+        fun ofPassword(password: SecureHash): UserIdentity {
+            return UserIdentity(password, null)
         }
 
-        fun ofProvider(principalId: String, isPrimary: Boolean): UserIdentity {
-            return UserIdentity(null, principalId, isPrimary)
+        fun ofProvider(principalId: String): UserIdentity {
+            return UserIdentity(null, principalId)
         }
     }
 }

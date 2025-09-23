@@ -98,7 +98,7 @@ class CustomOAuth2AuthenticationSuccessHandler(
         val oauth2ProviderConnectionToken = state.oauth2ProviderConnectionTokenValue
             ?: exchange.request.cookies.getFirst(OAuth2TokenType.ProviderConnection.COOKIE_NAME)?.value
 
-        val user = oAuth2AuthenticationService.findOrCreateUser(oauth2Authentication, oauth2ProviderConnectionToken)
+        val user = oAuth2AuthenticationService.findOrCreateUser(oauth2Authentication, oauth2ProviderConnectionToken, exchange)
         val accessToken = accessTokenService.create(user, sessionId)
         val refreshToken = refreshTokenService.create(user, sessionId, sessionToken.toSessionInfoRequest(), exchange)
 

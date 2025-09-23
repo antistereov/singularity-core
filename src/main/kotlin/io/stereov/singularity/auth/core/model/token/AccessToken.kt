@@ -12,7 +12,7 @@ data class AccessToken(
     val roles: Set<Role>,
     val groups: Set<String>,
     override val jwt: Jwt
-) : SecurityToken<SessionTokenType.Access> {
+) : SecurityToken<SessionTokenType.Access>() {
 
     override val type = SessionTokenType.Access
 }

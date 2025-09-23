@@ -9,4 +9,4 @@ data class EmailVerificationToken(
     val email: String,
     val secret: String,
     override val jwt: Jwt
-) : Token
+) : Token()

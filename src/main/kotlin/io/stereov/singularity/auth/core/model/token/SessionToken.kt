@@ -7,7 +7,7 @@ data class SessionToken(
     val browser: String?,
     val os: String?,
     override val jwt: Jwt
-) : SecurityToken<SessionTokenType.Session> {
+) : SecurityToken<SessionTokenType.Session>() {
 
     override val type = SessionTokenType.Session
 

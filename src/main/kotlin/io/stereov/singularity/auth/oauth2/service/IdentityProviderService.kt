@@ -46,7 +46,7 @@ class IdentityProviderService(
         if (identities.containsKey(IdentityProvider.PASSWORD))
             throw PasswordIdentityAlreadyAddedException("The user already added password")
 
-        identities[IdentityProvider.PASSWORD] = UserIdentity.ofPassword(hashService.hashBcrypt(req.password), true)
+        identities[IdentityProvider.PASSWORD] = UserIdentity.ofPassword(hashService.hashBcrypt(req.password))
 
         return userService.save(user)
     }
@@ -95,7 +95,7 @@ class IdentityProviderService(
             throw OAuth2FlowException(OAuth2ErrorCode.CONNECTION_TOKEN_PROVIDER_MISMATCH,
                 "The provided OAuth2ProviderConnectionToken does not match the requested provider.")
 
-        user.sensitive.identities[provider] = UserIdentity.ofProvider(principalId, false)
+        user.sensitive.identities[provider] = UserIdentity.ofProvider(principalId)
 
         if (user.isGuest) {
             if (userService.existsByEmail(email))

@@ -8,7 +8,7 @@ data class StepUpToken(
     val userId: ObjectId,
     val sessionId: UUID,
     override val jwt: Jwt
-) : SecurityToken<SessionTokenType.StepUp> {
+) : SecurityToken<SessionTokenType.StepUp>() {
 
     override val type = SessionTokenType.StepUp
 }

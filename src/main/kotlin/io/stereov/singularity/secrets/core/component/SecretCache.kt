@@ -26,12 +26,12 @@ class SecretCache(
     private val expirationDurationSeconds = secretStoreProperties.cacheExpiration
 
     suspend fun put(secret: Secret) {
-        logger.debug { "Caching secret ${secret.key}" }
+        logger.trace { "Caching secret ${secret.key}" }
         cacheService.put(getCacheKey(secret.key), secret, expirationDurationSeconds)
     }
 
     suspend fun getOrNull(key: String): Secret? {
-        logger.debug { "Retrieving secret $key from cache" }
+        logger.trace { "Retrieving secret $key from cache" }
         return cacheService.getOrNull<Secret>(getCacheKey(key))
     }
 }

@@ -8,4 +8,4 @@ data class PasswordResetToken(
     val userId: ObjectId,
     val secret: String,
     override val jwt: Jwt
-) : Token
+) : Token()

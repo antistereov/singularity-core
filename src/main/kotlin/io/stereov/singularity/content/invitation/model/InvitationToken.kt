@@ -7,4 +7,4 @@ import org.springframework.security.oauth2.jwt.Jwt
 data class InvitationToken(
     val invitationId: ObjectId,
     override val jwt: Jwt
-) : Token
+) : Token()
