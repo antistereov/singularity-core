@@ -9,6 +9,7 @@ import io.stereov.singularity.user.settings.dto.request.ChangePasswordRequest
 import io.stereov.singularity.user.settings.dto.request.ChangeUserRequest
 import io.stereov.singularity.user.settings.service.UserSettingsService
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.web.bind.annotation.*
@@ -17,7 +18,7 @@ import java.util.*
 @RestController
 @RequestMapping("/api/users/me")
 @Tag(
-    name = "User Settings",
+    name = "Profile Management",
     description = "Operations related to user settings."
 )
 class UserSettingsController(
@@ -28,7 +29,7 @@ class UserSettingsController(
 
     @PutMapping("/email")
     suspend fun changeEmail(
-        @RequestBody payload: ChangeEmailRequest,
+        @RequestBody @Valid payload: ChangeEmailRequest,
         @RequestParam locale: Locale?,
     ): ResponseEntity<UserResponse> {
         val user = userSettingsService.changeEmail(payload, locale)
@@ -38,7 +39,9 @@ class UserSettingsController(
     }
 
     @PutMapping("/password")
-    suspend fun changePassword(@RequestBody payload: ChangePasswordRequest): ResponseEntity<UserResponse> {
+    suspend fun changePassword(
+        @RequestBody @Valid payload: ChangePasswordRequest
+    ): ResponseEntity<UserResponse> {
         val user = userSettingsService.changePassword(payload)
 
         return ResponseEntity.ok().body(

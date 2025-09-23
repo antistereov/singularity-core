@@ -90,13 +90,19 @@ class GeoIpDatabaseService(
                 .uri(URI(downloadUrl))
                 .headers { it.setBasicAuth(properties.accountId, properties.licenseKey) }
                 .retrieve()
-                .onStatus({ it == HttpStatus.TOO_MANY_REQUESTS}) { res ->
+                .onStatus({ it == HttpStatus.TOO_MANY_REQUESTS}) {
                     Mono.error(TooManyRequestsException("Cannot fetch database: too many request for your account"))
+                }
+                .onStatus( { it == HttpStatus.UNAUTHORIZED }) {
+                    Mono.error(GeolocationException("Database download unauthorized"))
                 }
                 .toBodilessEntity()
                 .awaitSingle()
                 .headers
-        } catch (e: Exception) {
+        } catch (e: TooManyRequestsException) {
+            logger.warn(e) { "Database download failed: ${e.message}" }
+            return false
+        } catch (e: GeolocationException) {
             logger.warn(e) { "Database download failed: ${e.message}" }
             return false
         }
