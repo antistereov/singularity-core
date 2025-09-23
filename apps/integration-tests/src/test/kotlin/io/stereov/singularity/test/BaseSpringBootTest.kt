@@ -19,6 +19,7 @@ import io.stereov.singularity.auth.guest.dto.response.CreateGuestResponse
 import io.stereov.singularity.auth.jwt.exception.TokenException
 import io.stereov.singularity.auth.oauth2.model.token.OAuth2ProviderConnectionToken
 import io.stereov.singularity.auth.oauth2.model.token.OAuth2TokenType
+import io.stereov.singularity.auth.oauth2.properties.OAuth2Properties
 import io.stereov.singularity.auth.oauth2.service.token.OAuth2ProviderConnectionTokenService
 import io.stereov.singularity.auth.twofactor.dto.request.CompleteStepUpRequest
 import io.stereov.singularity.auth.twofactor.dto.request.EnableEmailTwoFactorMethodRequest
@@ -61,6 +62,9 @@ import java.util.concurrent.atomic.AtomicInteger
 )
 @Import(MockConfig::class)
 class BaseSpringBootTest() {
+
+    @Autowired
+    lateinit var oAuth2Properties: OAuth2Properties
 
     @Autowired
     lateinit var sessionTokenService: SessionTokenService

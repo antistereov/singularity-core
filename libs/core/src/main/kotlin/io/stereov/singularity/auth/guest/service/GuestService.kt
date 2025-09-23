@@ -64,8 +64,7 @@ class GuestService(
         user.sensitive.email = req.email
         user.sensitive.identities[IdentityProvider.PASSWORD] = UserIdentity(
             hashService.hashBcrypt(req.password),
-            null,
-            true
+            null
         )
         user.sensitive.security = UserSecurityDetails(
             emailEnabled,

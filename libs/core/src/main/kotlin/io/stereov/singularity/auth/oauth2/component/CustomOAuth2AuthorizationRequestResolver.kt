@@ -9,6 +9,7 @@ import org.springframework.security.oauth2.client.web.server.ServerOAuth2Authori
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
+import java.time.Instant
 
 class CustomOAuth2AuthorizationRequestResolver(
     clientRegistrations: ReactiveClientRegistrationRepository,
@@ -45,7 +46,7 @@ class CustomOAuth2AuthorizationRequestResolver(
             sessionToken,
             redirectUri,
             oauth2ProviderConnectionToken,
-            stepUp
+            stepUp,
         )
 
         val req = OAuth2AuthorizationRequest.from(request)

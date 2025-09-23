@@ -215,22 +215,44 @@ This allows you to specifically handle these scenarios in your frontend.
 The full URI will contain a query parameter `code` (for example `https://example.com/oauth2/error?code=state_parameter_missing`) that specifies the type of error that occurred.
 The following error types exist:
 
-| Code                                 | Description                                                                                                                   |
-|--------------------------------------|-------------------------------------------------------------------------------------------------------------------------------|
-| `authentication_failed`              | Authentication at OAuth2 provider failed. In this case another parameter `details` is included that specifies the error.      |
-| `state_parameter_missing`            | No state parameter found in callback.                                                                                         |
-| `state_expired`                      | The state token is expired. It is valid for 15 min by default.                                                                |
-| `invalid_state`                      | The state token cannot be decoded.                                                                                            |
-| `user_already_authenticated`         | Login with an existing account connected to the provider failed because the user already authenticated.                       |
-| `email_already_registered`           | The email attribute of the OAuth2 provider matches an email of an already registered user. Registration failed.               |
-| `session_token_missing`              | No session token provided as query parameter or cookie.                                                                       |
-| `session_token_expired`              | The provided session token is expired.                                                                                        |
-| `invalid_session_token`              | The provided session token cannot be decoded.                                                                                 |
-| `principal_id_missing`               | No principal ID provided from OAuth2 provider.                                                                                |
-| `email_attribute_missing`            | No email provided from OAuth2 provider.                                                                                       |
-| `connection_token_missing`           | Failed to connect a new provider to the current user. No OAuth2ProviderConnection set as cookie or sent as request parameter. |
-| `provider_already_connected`         | The user already connected the provider.                                                                                      |
-| `connection_token_expired`           | The provided OAuth2ProviderConnectionToken is expired.                                                                        |
-| `invalid_connection_token`           | The provided OAuth2ProviderConnectionToken cannot be decoded.                                                                 |
-| `connection_token_provider_mismatch` | The provided OAuth2ProviderConnectionToken does not match the requested provider.                                             |
-| `server_error`                       | An unspecified error occurred.                                                                                                |
+### All Flows
+
+These error codes can occur on any type of flow.
+
+| Code                                 | Description                                                                                                                                                                                                                                                                                                             |
+|--------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `authentication_failed`              | Authentication at OAuth2 provider failed. In this case another parameter `details` is included that specifies the error. This parameter correspond to error codes thrown by [Spring OAuth 2.0](https://docs.spring.io/spring-security/reference/servlet/oauth2/client). Check their documentation for more information. |
+| `state_parameter_missing`            | No state parameter found in callback.                                                                                                                                                                                                                                                                                   |
+| `state_expired`                      | The state token is expired. It is valid for 15 min by default.                                                                                                                                                                                                                                                          |
+| `invalid_state`                      | The state token cannot be decoded.                                                                                                                                                                                                                                                                                      |
+| `session_token_missing`              | No session token provided as query parameter or cookie.                                                                                                                                                                                                                                                                 |
+| `session_token_expired`              | The provided session token is expired.                                                                                                                                                                                                                                                                                  |
+| `invalid_session_token`              | The provided session token cannot be decoded.                                                                                                                                                                                                                                                                           |
+| `sub_claim_missing`                  | No `sub` claim. provided from OAuth2 provider.                                                                                                                                                                                                                                                                          |
+| `email_claim_missing`                | No `email` provided from OAuth2 provider.                                                                                                                                                                                                                                                                               |
+| `server_error`                       | An unspecified error occurred.                                                                                                                                                                                                                                                                                          |
+
+### Connection to Existing Account
+
+Besides the error codes that can occur on all flows, 
+these codes can occur when trying to connect an OAuth2 provider to an existing account.
+
+| Code                                 | Description                                                                                                                                                                                                                                                                                                             |
+|--------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `connection_token_missing`           | Failed to connect a new provider to the current user. No OAuth2ProviderConnection set as cookie or sent as request parameter.                                                                                                                                                                                           |
+| `provider_already_connected`         | The user already connected the provider.                                                                                                                                                                                                                                                                                |
+| `connection_token_expired`           | The provided OAuth2ProviderConnectionToken is expired.                                                                                                                                                                                                                                                                  |
+| `invalid_connection_token`           | The provided OAuth2ProviderConnectionToken cannot be decoded.                                                                                                                                                                                                                                                           |
+| `connection_token_provider_mismatch` | The provided OAuth2ProviderConnectionToken does not match the requested provider.                                                                                                                                                                                                                                       |
+
+
+### Registration, Login and Conversion of Guest Accounts to User Accounts
+
+Besides the error codes that can occur on all flows,
+these codes can occur when trying to register, login or converting a [`GUEST`](./roles.md#guests) to user account via OAuth2.
+
+| Code                                 | Description                                                                                                                                                                   |
+|--------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `user_already_authenticated`         | Login, registration or conversion of [`GUEST`](./roles.md#guests) to user account failed. The user already authenticated.                                                     |
+| `email_already_registered`           | Registration or conversion of [`GUEST`](./roles.md#guests) to user account failed. The email attribute of the OAuth2 provider matches an email of an already registered user. |
+

@@ -9,7 +9,7 @@ data class RefreshToken(
     val sessionId: UUID,
     val tokenId: String,
     override val jwt: Jwt
-) : SecurityToken<SessionTokenType.Refresh> {
+) : SecurityToken<SessionTokenType.Refresh>() {
 
     override val type = SessionTokenType.Refresh
 }

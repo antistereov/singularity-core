@@ -46,7 +46,6 @@ class UserService(
                 val hashedUserIdentity = HashedUserIdentity(
                     password = identity.password,
                     principalId = identity.principalId?.let { hashService.hashSearchableHmacSha256(it) },
-                    isPrimary = identity.isPrimary
                 )
                 provider to hashedUserIdentity
             }.toMap()

@@ -266,7 +266,7 @@ data class UserDocument(
             SensitiveUserData(
                 name,
                 email,
-                mutableMapOf(IdentityProvider.PASSWORD to UserIdentity.ofPassword(password, true)),
+                mutableMapOf(IdentityProvider.PASSWORD to UserIdentity.ofPassword(password)),
                 UserSecurityDetails(email2faEnabled, mailTwoFactorCodeExpiresIn),
                 sessions,
                 avatarFileKey
@@ -295,7 +295,7 @@ data class UserDocument(
             SensitiveUserData(
                 name,
                 email,
-                mutableMapOf(provider to UserIdentity.ofProvider(principalId, true)),
+                mutableMapOf(provider to UserIdentity.ofProvider(principalId)),
                 UserSecurityDetails(false, mailTwoFactorCodeExpiresIn, true),
                 sessions,
                 avatarFileKey

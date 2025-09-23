@@ -37,7 +37,7 @@ class AccessTokenCache(
      * @param tokenId The token ID to be added.
      */
     suspend fun addTokenId(userId: ObjectId, sessionId: UUID, tokenId: String) {
-        logger.debug { "Adding token ID for user $userId" }
+        logger.trace { "Adding token ID for user $userId" }
 
         val key = "$activeTokenKey:${userId.toHexString()}:${sessionId}:$tokenId"
         cacheService.put(key, tokenId, expiresIn)
@@ -51,7 +51,7 @@ class AccessTokenCache(
      * @return True if the token ID is valid, false otherwise.
      */
     suspend fun isTokenIdValid(userId: ObjectId, sessionId: UUID, tokenId: String): Boolean {
-        logger.debug { "Checking validity of token for user $userId" }
+        logger.trace { "Checking validity of token for user $userId" }
 
         val key = "$activeTokenKey:${userId.toHexString()}:${sessionId}:$tokenId"
         return cacheService.exists(key)
@@ -65,7 +65,7 @@ class AccessTokenCache(
      * @return True if the token ID is valid, false otherwise.
      */
     suspend fun invalidateToken(userId: ObjectId, sessionId: UUID, tokenId: String): Boolean {
-        logger.debug { "Removing token for user $userId" }
+        logger.trace { "Removing token for user $userId" }
 
         val key = "$activeTokenKey:${userId.toHexString()}:${sessionId}:$tokenId"
         return cacheService.delete(key) == 1L
@@ -83,7 +83,7 @@ class AccessTokenCache(
      * @param userId The ID of the user.
      */
     suspend fun invalidateAllTokens(userId: ObjectId) {
-        logger.debug { "Invalidating all tokens for user $userId" }
+        logger.trace { "Invalidating all tokens for user $userId" }
 
         cacheService.deleteAll("$activeTokenKey:$userId:*")
     }
