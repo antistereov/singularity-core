@@ -4,7 +4,6 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.component.CookieCreator
 import io.stereov.singularity.auth.core.model.token.SessionToken
 import io.stereov.singularity.auth.core.model.token.SessionTokenType
-import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.core.service.token.AccessTokenService
 import io.stereov.singularity.auth.core.service.token.RefreshTokenService
 import io.stereov.singularity.auth.core.service.token.SessionTokenService
@@ -37,7 +36,6 @@ class CustomOAuth2AuthenticationSuccessHandler(
     private val cookieCreator: CookieCreator,
     private val oAuth2Properties: OAuth2Properties,
     private val stepUpTokenService: StepUpTokenService,
-    private val authorizationService: AuthorizationService,
     private val oAuth2StateTokenService: OAuth2StateTokenService
 ) : ServerAuthenticationSuccessHandler {
 
@@ -93,12 +91,15 @@ class CustomOAuth2AuthenticationSuccessHandler(
         state: OAuth2StateToken
     ) {
         val oauth2Authentication = authentication as OAuth2AuthenticationToken
-        val sessionId = authorizationService.getCurrentSessionIdOrNull() ?: UUID.randomUUID()
+        val sessionId = runCatching { accessTokenService.extract(exchange).sessionId }
+            .getOrElse { UUID.randomUUID() }
 
         val oauth2ProviderConnectionToken = state.oauth2ProviderConnectionTokenValue
             ?: exchange.request.cookies.getFirst(OAuth2TokenType.ProviderConnection.COOKIE_NAME)?.value
+        val stepUpTokenValue = state.stepUpTokenValue
+            ?: exchange.request.cookies.getFirst(SessionTokenType.StepUp.COOKIE_NAME)?.value
 
-        val user = oAuth2AuthenticationService.findOrCreateUser(oauth2Authentication, oauth2ProviderConnectionToken, exchange)
+        val user = oAuth2AuthenticationService.findOrCreateUser(oauth2Authentication, oauth2ProviderConnectionToken, stepUpTokenValue, exchange)
         val accessToken = accessTokenService.create(user, sessionId)
         val refreshToken = refreshTokenService.create(user, sessionId, sessionToken.toSessionInfoRequest(), exchange)
 

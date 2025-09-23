@@ -12,11 +12,13 @@ enum class OAuth2ErrorCode(val value: String) {
     INVALID_SESSION_TOKEN("invalid_session_token"),
     SUB_CLAIM_MISSING("sub_claim_missing"),
     EMAIL_CLAIM_MISSING("email_claim_missing"),
-    CONNECTION_TOKEN_MISSING("connection_token_missing"),
     PROVIDER_ALREADY_CONNECTED("provider_already_connected"),
     CONNECTION_TOKEN_EXPIRED("connection_token_expired"),
     INVALID_CONNECTION_TOKEN("invalid_connection_token"),
     CONNECTION_TOKEN_PROVIDER_MISMATCH("connection_token_provider_mismatch"),
+    STEP_UP_MISSING("step_up_missing"),
+    STEP_UP_TOKEN_EXPIRED("step_up_token_expired"),
+    INVALID_STEP_UP_TOKEN("invalid_step_up_token"),
     SERVER_ERROR("server_error");
 
     override fun toString(): String {

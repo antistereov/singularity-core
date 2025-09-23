@@ -26,6 +26,7 @@ class OAuth2AuthenticationService(
      suspend fun findOrCreateUser(
          oauth2Authentication: OAuth2AuthenticationToken,
          oauth2ProviderConnectionTokenValue: String?,
+         stepUpTokenValue: String?,
          exchange: ServerWebExchange
      ): UserDocument {
          logger.debug { "Finding or creating user after OAuth2 authentication" }
@@ -51,7 +52,7 @@ class OAuth2AuthenticationService(
          if (existingUser != null) return handleLogin(existingUser, authenticated)
 
          return when (oauth2ProviderConnectionTokenValue != null) {
-             true -> handleConnection(email, provider, principalId, oauth2ProviderConnectionTokenValue)
+             true -> handleConnection(email, provider, principalId, oauth2ProviderConnectionTokenValue, stepUpTokenValue, exchange)
              false -> handleRegistration(name, email, provider, principalId, authenticated)
          }
     }
@@ -96,7 +97,9 @@ class OAuth2AuthenticationService(
         email: String,
         provider: String,
         principalId: String,
-        oauth2ProviderConnectionToken: String
+        oauth2ProviderConnectionToken: String,
+        stepUpTokenValue: String?,
+        exchange: ServerWebExchange
     ): UserDocument {
         logger.debug { "Handling connection" }
 
@@ -104,7 +107,9 @@ class OAuth2AuthenticationService(
             email,
             provider,
             principalId,
-            oauth2ProviderConnectionToken
+            oauth2ProviderConnectionToken,
+            stepUpTokenValue,
+            exchange
         )
     }
 }

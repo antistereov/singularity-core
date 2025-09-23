@@ -3,7 +3,6 @@ package io.stereov.singularity.security.core.config
 import io.stereov.singularity.auth.core.component.CookieCreator
 import io.stereov.singularity.auth.core.filter.AuthenticationFilter
 import io.stereov.singularity.auth.core.properties.AuthProperties
-import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.core.service.token.AccessTokenService
 import io.stereov.singularity.auth.core.service.token.RefreshTokenService
 import io.stereov.singularity.auth.core.service.token.SessionTokenService
@@ -96,7 +95,6 @@ class WebSecurityConfiguration {
         clientRegistrations: ReactiveClientRegistrationRepository,
         oAuth2Properties: OAuth2Properties,
         stepUpTokenService: StepUpTokenService,
-        authorizationService: AuthorizationService,
         oAuth2StateTokenService: OAuth2StateTokenService,
     ): SecurityWebFilterChain {
         return http
@@ -141,7 +139,6 @@ class WebSecurityConfiguration {
                         cookieCreator,
                         oAuth2Properties,
                         stepUpTokenService,
-                        authorizationService,
                         oAuth2StateTokenService
                     )
                 )
