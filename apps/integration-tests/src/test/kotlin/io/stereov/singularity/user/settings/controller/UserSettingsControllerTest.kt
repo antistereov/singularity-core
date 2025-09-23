@@ -3,13 +3,15 @@ package io.stereov.singularity.user.settings.controller
 import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
 import io.stereov.singularity.auth.core.model.token.SessionTokenType
-import io.stereov.singularity.test.BaseIntegrationTest
+import io.stereov.singularity.file.util.MockFilePart
+import io.stereov.singularity.test.BaseMailIntegrationTest
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.settings.dto.request.ChangeEmailRequest
 import io.stereov.singularity.user.settings.dto.request.ChangePasswordRequest
 import io.stereov.singularity.user.settings.dto.request.ChangeUserRequest
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpStatus
@@ -17,84 +19,16 @@ import org.springframework.http.client.MultipartBodyBuilder
 import java.time.Instant
 import java.util.*
 
-class UserSettingsControllerTest : BaseIntegrationTest() {
+class UserSettingsControllerTest() : BaseMailIntegrationTest() {
 
-    @Test fun `changeEmail works with 2fa`() = runTest {
-        val oldEmail = "old@email.com"
-        val newEmail = "new@email.com"
-        val password = "Password$2"
-        val user = registerUser(oldEmail, password, totpEnabled = true)
-
-
-        webTestClient.put()
-            .uri("/api/users/me/email")
-            .accessTokenCookie(user.accessToken)
-            .cookie(
-                SessionTokenType.StepUp.cookieName,
-                stepUpTokenService.create(user.info.id, user.sessionId).value
-            )
-            .bodyValue(ChangeEmailRequest(newEmail))
-            .exchange()
-            .expectStatus().isOk
-            .expectBody(UserResponse::class.java)
-            .returnResult()
-            .responseBody
-
-        val token = emailVerificationTokenService.create(user.info.id, newEmail, user.mailVerificationSecret!!)
-
-        val res = webTestClient.post()
-            .uri("/api/auth/email/verification?token=$token")
-            .exchange()
-            .expectStatus().isOk
-            .expectBody(UserResponse::class.java)
-            .returnResult()
-            .responseBody
-
-        requireNotNull(res)
-
-        assertEquals(newEmail, res.email)
-        userService.findByEmail(newEmail)
-    }
-    @Test fun `changeEmail works without 2fa`() = runTest {
-        val oldEmail = "old@email.com"
-        val newEmail = "new@email.com"
-        val password = "Password$2"
-        val user = registerUser(oldEmail, password)
-
-        webTestClient.put()
-            .uri("/api/users/me/email")
-            .accessTokenCookie(user.accessToken)
-            .bodyValue(ChangeEmailRequest(newEmail))
-            .exchange()
-            .expectStatus().isOk
-            .expectBody(UserResponse::class.java)
-            .returnResult()
-            .responseBody
-
-        val token = emailVerificationTokenService.create(user.info.id, newEmail, user.mailVerificationSecret!!)
-
-        val res = webTestClient.post()
-            .uri("/api/auth/email/verification?token=$token")
-            .exchange()
-            .expectStatus().isOk
-            .expectBody(UserResponse::class.java)
-            .returnResult()
-            .responseBody
-
-        requireNotNull(res)
-
-        assertEquals(newEmail, res.email)
-        userService.findByEmail(newEmail)
-    }
     @Test fun `changeEmail changes email`() = runTest {
-        val oldEmail = "old@email.com"
         val newEmail = "new@email.com"
-        val password = "Password$2"
-        val user = registerUser(oldEmail, password)
+        val user = registerUser()
 
-        val res = webTestClient.put()
+        webTestClient.put()
             .uri("/api/users/me/email")
             .accessTokenCookie(user.accessToken)
+            .stepUpTokenCookie(user.stepUpToken)
             .bodyValue(ChangeEmailRequest(newEmail))
             .exchange()
             .expectStatus().isOk
@@ -102,8 +36,13 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
             .returnResult()
             .responseBody
 
-        requireNotNull(res)
-        assertEquals(newEmail, res.email)
+        val token = emailVerificationTokenService.create(user.info.id, newEmail, user.info.sensitive.security.email.verificationSecret)
+
+        webTestClient.post()
+            .uri("/api/auth/email/verification?token=$token")
+            .exchange()
+            .expectStatus().isOk
+
         val foundUser = userService.findByEmail(newEmail)
         assertEquals(user.info.id, foundUser.id)
     }
@@ -111,11 +50,12 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
         val oldEmail = "old@email.com"
         val newEmail = "new@email.com"
         val password = "Password$2"
-        registerUser(oldEmail, password)
+        val user = registerUser(oldEmail, password)
 
         webTestClient.put()
             .uri("/api/users/me/email")
             .bodyValue(ChangeEmailRequest(newEmail))
+            .stepUpTokenCookie(user.stepUpToken)
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -127,22 +67,9 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
         webTestClient.put()
             .uri("/api/users/me/email")
             .accessTokenCookie(user.accessToken)
+            .stepUpTokenCookie(user.stepUpToken)
             .exchange()
             .expectStatus().isBadRequest
-    }
-    @Test fun `changeEmail requires correct password`() = runTest {
-        val oldEmail = "old@email.com"
-        val newEmail = "new@email.com"
-        val password = "Password$2"
-        val user = registerUser(oldEmail, password)
-        gAuth.getTotpPassword(user.totpSecret)
-
-        webTestClient.put()
-            .uri("/api/users/me/email")
-            .accessTokenCookie(user.accessToken)
-            .bodyValue(ChangeEmailRequest(newEmail))
-            .exchange()
-            .expectStatus().isUnauthorized
     }
     @Test fun `changeEmail requires step up`() = runTest {
         val oldEmail = "old@email.com"
@@ -231,28 +158,25 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
             .expectStatus().isUnauthorized
     }
     @Test fun `changeEmail requires non-existing email`() = runTest {
-        val oldEmail = "old@email.com"
-        val newEmail = "new@email.com"
-        val password = "Password$2"
-        val user = registerUser(oldEmail, password)
-        registerUser(newEmail)
+        val user = registerUser()
+        val anotherUser = registerUser()
 
         webTestClient.put()
             .uri("/api/users/me/email")
             .accessTokenCookie(user.accessToken)
-            .bodyValue(ChangeEmailRequest(newEmail))
+            .stepUpTokenCookie(user.stepUpToken)
+            .bodyValue(ChangeEmailRequest(anotherUser.email!!))
             .exchange()
             .expectStatus().isEqualTo(HttpStatus.CONFLICT)
     }
     @Test fun `changeEmail does nothing without validation`() = runTest {
-        val oldEmail = "old@email.com"
+        val user = registerUser()
         val newEmail = "new@email.com"
-        val password = "Password$2"
-        val user = registerUser(oldEmail, password)
 
         val res = webTestClient.put()
             .uri("/api/users/me/email")
             .accessTokenCookie(user.accessToken)
+            .stepUpTokenCookie(user.stepUpToken)
             .bodyValue(ChangeEmailRequest(newEmail))
             .exchange()
             .expectStatus().isOk
@@ -261,20 +185,36 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
             .responseBody
 
         requireNotNull(res)
-        assertEquals(oldEmail, res.email)
-        val foundUser = userService.findByEmail(oldEmail)
+        assertEquals(user.email!!, res.email)
+        val foundUser = userService.findByEmail(user.email)
+        assertEquals(user.info.id, foundUser.id)
+    }
+    @Test fun `changeEmail requires valid email`() = runTest {
+        val user = registerUser()
+        val newEmail = "invalid"
+
+        val res = webTestClient.put()
+            .uri("/api/users/me/email")
+            .accessTokenCookie(user.accessToken)
+            .stepUpTokenCookie(user.stepUpToken)
+            .bodyValue(ChangeEmailRequest(newEmail))
+            .exchange()
+            .expectStatus().isBadRequest
+
+        requireNotNull(res)
+        val foundUser = userService.findByEmail(user.email!!)
         assertEquals(user.info.id, foundUser.id)
     }
 
-    @Test fun `changePassword works with 2fa`() = runTest {
-        val email = "old@email.com"
+    @Test fun `changePassword works`() = runTest {
         val oldPassword = "Password$2"
         val newPassword = "newPassword$2"
-        val user = registerUser(email, oldPassword, totpEnabled = true)
+        val user = registerUser( password = oldPassword, totpEnabled = true)
 
         val res = webTestClient.put()
             .uri("/api/users/me/password")
             .accessTokenCookie(user.accessToken)
+            .stepUpTokenCookie(user.stepUpToken)
             .cookie(
                 SessionTokenType.StepUp.cookieName,
                 stepUpTokenService.create(user.info.id, user.sessionId).value
@@ -290,31 +230,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/auth/login")
-            .bodyValue(LoginRequest(email, newPassword, SessionInfoRequest("session")))
-            .exchange()
-            .expectStatus().isOk
-    }
-    @Test fun `changePassword works without 2fa`() = runTest {
-        val email = "old@email.com"
-        val oldPassword = "Password$2"
-        val newPassword = "newPassword$2"
-        val user = registerUser(email, oldPassword)
-
-        val res = webTestClient.put()
-            .uri("/api/users/me/password")
-            .accessTokenCookie(user.accessToken)
-            .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
-            .exchange()
-            .expectStatus().isOk
-            .expectBody(UserResponse::class.java)
-            .returnResult()
-            .responseBody
-
-        requireNotNull(res)
-
-        webTestClient.post()
-            .uri("/api/auth/login")
-            .bodyValue(LoginRequest(email, newPassword, SessionInfoRequest("session")))
+            .bodyValue(LoginRequest(user.email!!, newPassword, SessionInfoRequest("session")))
             .exchange()
             .expectStatus().isOk
     }
@@ -330,6 +246,89 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
             .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
             .exchange()
             .expectStatus().isUnauthorized
+
+        val foundUser = userService.findById(user.info.id)
+        assertTrue(hashService.checkBcrypt(oldPassword, foundUser.password!!))
+    }
+    @Test fun `changePassword requires capital letter`() = runTest {
+        val email = "old@email.com"
+        val oldPassword = "Password$2"
+        val newPassword = "newpassword$2"
+        val user = registerUser(email, oldPassword)
+        gAuth.getTotpPassword(user.totpSecret)
+
+        webTestClient.put()
+            .uri("/api/users/me/password")
+            .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
+            .exchange()
+            .expectStatus().isBadRequest
+
+        val foundUser = userService.findById(user.info.id)
+        assertTrue(hashService.checkBcrypt(oldPassword, foundUser.password!!))
+    }
+    @Test fun `changePassword requires small letter`() = runTest {
+        val email = "old@email.com"
+        val oldPassword = "Password$2"
+        val newPassword = "PASSWORD$2"
+        val user = registerUser(email, oldPassword)
+        gAuth.getTotpPassword(user.totpSecret)
+
+        webTestClient.put()
+            .uri("/api/users/me/password")
+            .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
+            .exchange()
+            .expectStatus().isBadRequest
+
+        val foundUser = userService.findById(user.info.id)
+        assertTrue(hashService.checkBcrypt(oldPassword, foundUser.password!!))
+    }
+    @Test fun `changePassword requires at least 8 characters`() = runTest {
+        val email = "old@email.com"
+        val oldPassword = "Password$2"
+        val newPassword = "Pas$2"
+        val user = registerUser(email, oldPassword)
+        gAuth.getTotpPassword(user.totpSecret)
+
+        webTestClient.put()
+            .uri("/api/users/me/password")
+            .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
+            .exchange()
+            .expectStatus().isBadRequest
+
+        val foundUser = userService.findById(user.info.id)
+        assertTrue(hashService.checkBcrypt(oldPassword, foundUser.password!!))
+    }
+    @Test fun `changePassword requires a number`() = runTest {
+        val email = "old@email.com"
+        val oldPassword = "Password$2"
+        val newPassword = "Password$"
+        val user = registerUser(email, oldPassword)
+        gAuth.getTotpPassword(user.totpSecret)
+
+        webTestClient.put()
+            .uri("/api/users/me/password")
+            .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
+            .exchange()
+            .expectStatus().isBadRequest
+
+        val foundUser = userService.findById(user.info.id)
+        assertTrue(hashService.checkBcrypt(oldPassword, foundUser.password!!))
+    }
+    @Test fun `changePassword requires a special character`() = runTest {
+        val email = "old@email.com"
+        val oldPassword = "Password$2"
+        val newPassword = "Password2"
+        val user = registerUser(email, oldPassword)
+        gAuth.getTotpPassword(user.totpSecret)
+
+        webTestClient.put()
+            .uri("/api/users/me/password")
+            .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
+            .exchange()
+            .expectStatus().isBadRequest
+
+        val foundUser = userService.findById(user.info.id)
+        assertTrue(hashService.checkBcrypt(oldPassword, foundUser.password!!))
     }
     @Test fun `changePassword requires body`() = runTest {
         val email = "old@email.com"
@@ -341,6 +340,9 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
             .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isBadRequest
+
+        val foundUser = userService.findById(user.info.id)
+        assertTrue(hashService.checkBcrypt(oldPassword, foundUser.password!!))
     }
     @Test fun `changePassword requires correct password`() = runTest {
         val email = "old@email.com"
@@ -355,6 +357,9 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
             .bodyValue(ChangePasswordRequest("wrong-password", newPassword))
             .exchange()
             .expectStatus().isUnauthorized
+
+        val foundUser = userService.findById(user.info.id)
+        assertTrue(hashService.checkBcrypt(oldPassword, foundUser.password!!))
     }
     @Test fun `changePassword requires step up`() = runTest {
         val email = "old@email.com"
@@ -368,6 +373,9 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
             .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
             .exchange()
             .expectStatus().isUnauthorized
+
+        val foundUser = userService.findById(user.info.id)
+        assertTrue(hashService.checkBcrypt(oldPassword, foundUser.password!!))
     }
     @Test fun `changePassword requires step up token for same user`() = runTest {
         val email = "old@email.com"
@@ -386,6 +394,9 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
             .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
             .exchange()
             .expectStatus().isUnauthorized
+
+        val foundUser = userService.findById(user.info.id)
+        assertTrue(hashService.checkBcrypt(oldPassword, foundUser.password!!))
     }
     @Test fun `changePassword requires step up token for same session`() = runTest {
         val email = "old@email.com"
@@ -403,6 +414,9 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
             .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
             .exchange()
             .expectStatus().isUnauthorized
+
+        val foundUser = userService.findById(user.info.id)
+        assertTrue(hashService.checkBcrypt(oldPassword, foundUser.password!!))
     }
     @Test fun `changePassword requires unexpired step up token`() = runTest {
         val email = "old@email.com"
@@ -424,6 +438,9 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
             .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
             .exchange()
             .expectStatus().isUnauthorized
+
+        val foundUser = userService.findById(user.info.id)
+        assertTrue(hashService.checkBcrypt(oldPassword, foundUser.password!!))
     }
     @Test fun `changePassword requires valid step up token`() = runTest {
         val email = "old@email.com"
@@ -438,6 +455,9 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
             .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
             .exchange()
             .expectStatus().isUnauthorized
+
+        val foundUser = userService.findById(user.info.id)
+        assertTrue(hashService.checkBcrypt(oldPassword, foundUser.password!!))
     }
 
     @Test fun `changeUser works`() = runTest {
@@ -461,7 +481,7 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
         assertEquals(newName, userService.findById(user.info.id).sensitive.name)
     }
     @Test fun `changeUser requires authentication`() = runTest {
-        registerUser()
+        val user = registerUser()
         val newName = "MyName"
 
         webTestClient.put()
@@ -469,6 +489,9 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
             .bodyValue(ChangeUserRequest(newName))
             .exchange()
             .expectStatus().isUnauthorized
+
+        val foundUser = userService.findById(user.info.id)
+        assertEquals(user.info.sensitive.name, foundUser.sensitive.name)
     }
     @Test fun `changeUser requires body`() = runTest {
         val user = registerUser()
@@ -479,6 +502,9 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
             .accessTokenCookie(accessToken)
             .exchange()
             .expectStatus().isBadRequest
+
+        val foundUser = userService.findById(user.info.id)
+        assertEquals(user.info.sensitive.name, foundUser.sensitive.name)
     }
 
     @Test fun `setAvatar works`() = runTest {
@@ -498,5 +524,101 @@ class UserSettingsControllerTest : BaseIntegrationTest() {
             .expectBody(UserResponse::class.java)
             .returnResult()
             .responseBody
+    }
+    @Test fun `setAvatar requires authentication`() = runTest {
+        val user = registerUser()
+
+        webTestClient.put()
+            .uri("/api/users/me/avatar")
+            .bodyValue(
+                MultipartBodyBuilder().apply {
+                    part("file", ClassPathResource("files/test-image.jpg"))
+                }.build()
+            )
+            .exchange()
+            .expectStatus().isUnauthorized
+
+        val foundUser = userService.findById(user.info.id)
+        assertNull(foundUser.sensitive.avatarFileKey)
+    }
+    @Test fun `setAvatar requires body`() = runTest {
+        val user = registerUser()
+
+        webTestClient.put()
+            .uri("/api/users/me/avatar")
+            .exchange()
+            .expectStatus().isBadRequest
+
+        val foundUser = userService.findById(user.info.id)
+        assertNull(foundUser.sensitive.avatarFileKey)
+    }
+
+    @Test fun `deleteAvatar works`() = runTest {
+        val user = registerUser()
+        val accessToken = user.accessToken
+
+        fileStorage.upload(user.info.id, MockFilePart(ClassPathResource("files/test-image.jpg").file), "avatar", true)
+
+        webTestClient.delete()
+            .uri("/api/users/me/avatar")
+            .accessTokenCookie(accessToken)
+            .exchange()
+            .expectStatus().isOk
+
+        val foundUser = userService.findById(user.info.id)
+        assertNull(foundUser.sensitive.avatarFileKey)
+    }
+    @Test fun `deleteAvatar requires authentication`() = runTest {
+        val user = registerUser()
+        user.info.sensitive.avatarFileKey = "avatar"
+        userService.save(user.info)
+
+
+        webTestClient.delete()
+            .uri("/api/users/me/avatar")
+            .exchange()
+            .expectStatus().isUnauthorized
+
+        val foundUser = userService.findById(user.info.id)
+        assertEquals("avatar", foundUser.sensitive.avatarFileKey)
+    }
+
+    @Test fun `delete works`() = runTest {
+        val user = registerUser()
+
+        webTestClient.delete()
+            .uri("/api/users/me")
+            .accessTokenCookie(user.accessToken)
+            .stepUpTokenCookie(user.stepUpToken)
+            .exchange()
+            .expectStatus().isOk
+
+        assertTrue(userService.findAll().toList().isEmpty())
+    }
+    @Test fun `delete requires authentication`() = runTest {
+        val user = registerUser()
+
+        webTestClient.delete()
+            .uri("/api/users/me")
+            .stepUpTokenCookie(user.stepUpToken)
+            .exchange()
+            .expectStatus().isUnauthorized
+
+        assertEquals(1, userService.findAll().toList().size)
+        val foundUser = userService.findById(user.info.id)
+        assertEquals(user.info.id, foundUser.id)
+    }
+    @Test fun `delete requires stepUp`() = runTest {
+        val user = registerUser()
+
+        webTestClient.delete()
+            .uri("/api/users/me")
+            .accessTokenCookie(user.accessToken)
+            .exchange()
+            .expectStatus().isUnauthorized
+
+        assertEquals(1, userService.findAll().toList().size)
+        val foundUser = userService.findById(user.info.id)
+        assertEquals(user.info.id, foundUser.id)
     }
 }

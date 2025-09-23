@@ -35,6 +35,7 @@ import io.stereov.singularity.auth.twofactor.service.token.TwoFactorAuthenticati
 import io.stereov.singularity.cache.service.CacheService
 import io.stereov.singularity.database.encryption.service.EncryptionSecretService
 import io.stereov.singularity.database.hash.service.HashService
+import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.test.config.MockConfig
 import io.stereov.singularity.user.core.model.Role
@@ -62,6 +63,9 @@ import java.util.concurrent.atomic.AtomicInteger
 )
 @Import(MockConfig::class)
 class BaseSpringBootTest() {
+
+    @Autowired
+    lateinit var fileStorage: FileStorage
 
     @Autowired
     lateinit var oAuth2Properties: OAuth2Properties
