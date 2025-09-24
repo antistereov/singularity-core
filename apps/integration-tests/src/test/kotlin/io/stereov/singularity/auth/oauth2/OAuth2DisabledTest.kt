@@ -2,7 +2,7 @@ package io.stereov.singularity.auth.oauth2
 
 import io.stereov.singularity.auth.oauth2.controller.IdentityProviderController
 import io.stereov.singularity.auth.oauth2.controller.OAuth2ProviderController
-import io.stereov.singularity.test.BaseSpringBootTest
+import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -10,7 +10,7 @@ import org.springframework.beans.factory.getBeansOfType
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 
-class OAuth2DisabledTest : BaseSpringBootTest() {
+class OAuth2DisabledTest : BaseIntegrationTest() {
 
     @Test
     fun `controller should be disabled`() = runTest {
