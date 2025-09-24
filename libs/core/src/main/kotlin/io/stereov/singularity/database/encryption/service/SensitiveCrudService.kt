@@ -146,13 +146,15 @@ abstract class SensitiveCrudService<SensitiveData, DecryptedDocument: SensitiveD
             .collect {}
     }
 
-    suspend inline fun findAllPaginated(pageable: Pageable, criteria: Criteria? = null): Page<DecryptedDocument> {
-        logger.debug { "Finding ${encryptedDocumentClazz}: page ${pageable.pageNumber}, size: ${pageable.pageSize}, sort: ${pageable.sort}" }
+    suspend fun findAllPaginated(pageable: Pageable, criteria: Criteria? = null): Page<DecryptedDocument> {
+        logger.debug { "Finding ${encryptedDocumentClazz.simpleName}: page ${pageable.pageNumber}, size: ${pageable.pageSize}, sort: ${pageable.sort}" }
 
         val query = criteria?.let { Query(it) } ?: Query()
-        val paginatedQuery = query.with(pageable)
 
-        val count = reactiveMongoTemplate.count(paginatedQuery, encryptedDocumentClazz).awaitFirstOrElse { 0 }
+        logger.debug { "Executing count with query: $query" }
+
+        val count = reactiveMongoTemplate.count(query, encryptedDocumentClazz).awaitFirstOrElse { 0 }
+        val paginatedQuery = query.with(pageable)
         val encrypted = reactiveMongoTemplate.find(paginatedQuery, encryptedDocumentClazz).collectList().awaitFirstOrElse { emptyList() }
         val decrypted = encrypted.map { decrypt(it) }
 

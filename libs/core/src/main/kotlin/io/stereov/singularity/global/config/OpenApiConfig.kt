@@ -16,6 +16,8 @@ import io.stereov.singularity.auth.twofactor.controller.TotpAuthenticationContro
 import io.stereov.singularity.auth.twofactor.controller.TwoFactorAuthenticationController
 import io.stereov.singularity.auth.twofactor.model.token.TwoFactorTokenType
 import io.stereov.singularity.global.model.OpenApiConstants
+import io.stereov.singularity.user.core.controller.UserController
+import io.stereov.singularity.user.settings.controller.UserSettingsController
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType
 import io.swagger.v3.oas.annotations.security.SecurityScheme
@@ -132,7 +134,8 @@ class OpenApiConfig() {
             "Sessions",
             "Roles",
             "Groups",
-            "Administration",
+            "Manging Users",
+            "Profile Management",
         )
 
         val sortedTags = mutableListOf<Tag>()
@@ -230,6 +233,26 @@ class OpenApiConfig() {
 
             GroupMemberController::addMemberToGroup.name,
             GroupMemberController::removeMemberFromGroup.name
+        ))
+
+        // Managing Users
+
+        sortedOperationIds.addAll(listOf(
+            UserController::getUserById.name,
+            UserController::getUsers.name,
+            UserController::deleteUserById.name,
+        ))
+
+        // Profile Management
+
+        sortedOperationIds.addAll(listOf(
+            UserSettingsController::getAuthorizedUser.name,
+            UserSettingsController::updateAuthorizedUser.name,
+            UserSettingsController::changeEmailOfAuthorizedUser.name,
+            UserSettingsController::changePasswordOfAuthorizedUser.name,
+            UserSettingsController::setAvatarOfAuthorizedUser.name,
+            UserSettingsController::deleteAvatarOfAuthorizedUser.name,
+            UserSettingsController::deleteAuthorizedUser.name
         ))
 
         val allOperations = mutableListOf<Triple<String, PathItem.HttpMethod, Operation>>()

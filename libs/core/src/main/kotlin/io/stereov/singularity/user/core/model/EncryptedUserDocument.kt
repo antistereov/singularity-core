@@ -16,7 +16,7 @@ data class EncryptedUserDocument(
     val identities: Map<String, HashedUserIdentity>,
     val roles: MutableSet<Role>,
     val groups: MutableSet<String>,
-    val created: Instant = Instant.now(),
+    val createdAt: Instant = Instant.now(),
     var lastActive: Instant = Instant.now(),
     override var sensitive: Encrypted<SensitiveUserData>,
 )  : EncryptedSensitiveDocument<SensitiveUserData>

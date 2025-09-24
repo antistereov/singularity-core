@@ -15,8 +15,13 @@ import io.stereov.singularity.user.core.model.identity.HashedUserIdentity
 import io.stereov.singularity.user.core.repository.UserRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
+import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.stereotype.Service
+import java.time.Instant
 
 @Service
 class UserService(
@@ -65,7 +70,7 @@ class UserService(
     ): UserDocument {
         return UserDocument(
             encrypted._id,
-            encrypted.created,
+            encrypted.createdAt,
             encrypted.lastActive,
             encrypted.roles,
             encrypted.groups,
@@ -140,6 +145,60 @@ class UserService(
         logger.debug { "Finding all users with group membership $group" }
 
         return repository.findAllByGroupsContaining(group).map { decrypt(it) }
+    }
+
+    suspend fun findAllPaginated(
+        pageable: Pageable,
+        email: String?,
+        roles: Set<Role>?,
+        groups: Set<String>?,
+        createdAtBefore: Instant?,
+        createdAtAfter: Instant?,
+        lastActiveBefore: Instant?,
+        lastActiveAfter: Instant?,
+        identityKeys: Set<String>?
+    ): Page<UserDocument> {
+        logger.debug { "Finding ${encryptedDocumentClazz.simpleName}: page ${pageable.pageNumber}, size: ${pageable.pageSize}, sort: ${pageable.sort}" }
+
+        val criteriaList = mutableListOf<Criteria>()
+
+        if (email != null) {
+            criteriaList.add(Criteria.where(EncryptedUserDocument::email.name)
+                .isEqualTo(hashService.hashSearchableHmacSha256(email)))
+        }
+        if (!roles.isNullOrEmpty()) {
+            criteriaList.add(Criteria.where(EncryptedUserDocument::roles.name).`in`(roles))
+        }
+        if (!groups.isNullOrEmpty()) {
+            criteriaList.add(Criteria.where(EncryptedUserDocument::groups.name).`in`(groups))
+        }
+        if (createdAtAfter != null) {
+            criteriaList.add(Criteria.where(EncryptedUserDocument::createdAt.name).gte(createdAtAfter))
+        }
+        if (createdAtBefore != null) {
+            criteriaList.add(Criteria.where(EncryptedUserDocument::createdAt.name).lte(createdAtBefore))
+        }
+        if (lastActiveAfter != null) {
+            criteriaList.add(Criteria.where(EncryptedUserDocument::lastActive.name).gte(lastActiveAfter))
+        }
+        if (lastActiveBefore != null) {
+            criteriaList.add(Criteria.where(EncryptedUserDocument::lastActive.name).lte(lastActiveBefore))
+        }
+
+        if (!identityKeys.isNullOrEmpty()) {
+            val identityCriteria = Criteria().orOperator(
+                *identityKeys.map { key ->
+                    Criteria.where("${EncryptedUserDocument::identities.name}.$key").exists(true)
+                }.toTypedArray()
+            )
+            criteriaList.add(identityCriteria)
+        }
+
+        val criteria = if (criteriaList.isNotEmpty()) {
+            Criteria().andOperator(*criteriaList.toTypedArray())
+        } else null
+
+        return findAllPaginated(pageable, criteria)
     }
 
 }

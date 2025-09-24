@@ -14,12 +14,36 @@ import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.springframework.core.io.ClassPathResource
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.client.MultipartBodyBuilder
 import java.time.Instant
 import java.util.*
 
 class UserSettingsControllerTest() : BaseMailIntegrationTest() {
+
+    @Test fun `get returns user account`() = runTest {
+        val user = registerUser()
+
+        val responseBody = webTestClient.get()
+            .uri("/api/users/me")
+            .header(HttpHeaders.COOKIE, "${SessionTokenType.Access.cookieName}=${user.accessToken}")
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(UserResponse::class.java)
+            .returnResult()
+            .responseBody
+
+        requireNotNull(responseBody) { "Response has empty body" }
+
+        assertEquals(user.info.sensitive.email, responseBody.email)
+    }
+    @Test fun `get needs authentication`() = runTest {
+        webTestClient.get()
+            .uri("/api/users/me")
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
 
     @Test fun `changeEmail changes email`() = runTest {
         val newEmail = "new@email.com"

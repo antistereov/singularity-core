@@ -75,11 +75,9 @@ interface CrudService<T: Any> {
     suspend fun findAllPaginated(pageable: Pageable, criteria: Criteria? = null): Page<T> {
         logger.debug { "Finding ${collectionClazz.simpleName}: page ${pageable.pageNumber}, size: ${pageable.pageSize}, sort: ${pageable.sort}" }
 
-
         val query = criteria?.let { Query(it) } ?: Query()
+        val count = reactiveMongoTemplate.count(query, collectionClazz).awaitFirstOrElse { 0 }
         val paginatedQuery = query.with(pageable)
-
-        val count = reactiveMongoTemplate.count(paginatedQuery, collectionClazz).awaitFirstOrElse { 0 }
         val groups = reactiveMongoTemplate.find(paginatedQuery, collectionClazz).collectList().awaitFirstOrElse { emptyList() }
 
         return PageImpl(groups, pageable, count)

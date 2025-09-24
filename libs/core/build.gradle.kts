@@ -38,7 +38,7 @@ repositories {
 
 val kotlinVersion = "2.0.21"
 val kotlinxVersion = "1.10.1"
-val springBootVersion = "3.5.5"
+val springBootVersion = "3.5.6"
 val bucket4jVersion = "8.14.0"
 
 dependencies {
@@ -128,7 +128,7 @@ val mavenCentralPassword: String? = properties["mavencentral.password"] as Strin
     ?: System.getenv("MAVENCENTRAL_PASSWORD")
 val gpgPassphrase: String? = properties["gpg.passphrase"] as String?
     ?: System.getenv("GPG_PASSPHRASE")
-val gpgUseFileCondition: String? = properties["gpg.use-file"] as String?
+val gpgUseFileCondition: String = properties["gpg.use-file"] as String?
     ?: "false"
 val gpgUseFile: Boolean = gpgUseFileCondition.toBoolean()
 val gpgSecretKey: String? = properties["gpg.private-key"] as String?

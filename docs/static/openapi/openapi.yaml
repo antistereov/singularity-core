@@ -41,12 +41,12 @@ tags:
   description: Operations related to roles.
 - name: Groups
   description: Operation related to group and member management.
-- name: User Settings
+- name: Profile Management
   description: Operations related to user settings.
 - name: Security
   description: Operations related to managing the servers security.
-- name: Users
-  description: Operations related to user information.
+- name: Managing Users
+  description: Operations related to user management.
 paths:
   /api/auth/register:
     post:
@@ -2272,23 +2272,221 @@ paths:
         - adminScope
       - accessTokenCookie:
         - adminScope
+  /api/users/{id}:
+    get:
+      tags:
+      - Managing Users
+      summary: Get User By ID
+      description: |-
+        Get information about a specific user.
+
+        You can find more information about user management [here](https://singularity.stereov.io/docs/guides/users/managing-users).
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/users/managing-users
+      operationId: getUserById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/ObjectId"
+      responses:
+        "200":
+          description: The user information
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserOverviewResponse"
+        "404":
+          description: No user with given ID found.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - {}
+      - {}
+    delete:
+      tags:
+      - Managing Users
+      summary: Delete User By ID
+      description: |-
+        Delete a User with given ID.
+
+        You can find more information about user management [here](https://singularity.stereov.io/docs/guides/users/managing-users).
+
+        **Tokens:**
+        - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
+          with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/users/managing-users
+      operationId: deleteUserById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/ObjectId"
+      responses:
+        "200":
+          description: The users.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "401":
+          description: Invalid or expired AccessToken.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: "AccessToken does permit [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins)\
+            \ access."
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader:
+        - adminScope
+      - accessTokenCookie:
+        - adminScope
+  /api/users:
+    get:
+      tags:
+      - Managing Users
+      summary: Get Users
+      description: |-
+        Find all users with the specified filters.
+
+        You can find more information about user management [here](https://singularity.stereov.io/docs/guides/users/managing-users).
+
+        **Filter:**
+
+        * **`email`**: The email of a user; must be an exact match.
+        * **`roles`**: A set of roles the users should have.
+        * **`groups`**: A set of groups the users should be a member of.
+        * **`identities`**: A set of identity providers the users should be connected to.
+        * **`createdAtAfter`:** A date the users should be created after.
+        * **`createdAtBefore`:** A date the users should be created before.
+        * **`lastActiveAfter`:** A date the users should be last active after.
+        * **`lastActiveBefore`:** A date the users should be last active before.
+
+        **Tokens:**
+        - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
+          with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/users/managing-users
+      operationId: getUsers
+      parameters:
+      - name: pageable
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/Pageable"
+      - name: email
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: roles
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          uniqueItems: true
+      - name: groups
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          uniqueItems: true
+      - name: identities
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          uniqueItems: true
+      - name: createdAtAfter
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: createdAtBefore
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: lastActiveAfter
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: lastActiveBefore
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date-time
+      responses:
+        "200":
+          description: The users.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageUserOverviewResponse"
+        "401":
+          description: Invalid or expired AccessToken.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: "AccessToken does permit [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins)\
+            \ access."
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader:
+        - adminScope
+      - accessTokenCookie:
+        - adminScope
   /api/users/me:
     get:
       tags:
-      - Users
-      summary: Get currently authenticated user
-      description: Retrieves the user profile information of the currently authenticated
-        user.
-      operationId: getUser
+      - Profile Management
+      summary: Get User
+      description: |-
+        Retrieves the user profile information of the currently authenticated user.
+
+        You can find more information about profile management [here](https://singularity.stereov.io/docs/guides/users/profile-management).
+
+        **Tokens:**
+        - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/users/profile-management
+      operationId: getAuthorizedUser
       responses:
         "200":
-          description: User found.
+          description: User information.
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/UserResponse"
         "401":
-          description: Unauthorized. No valid token provided.
+          description: '`AccessToken` is invalid or expired.'
           content:
             '*/*':
               schema:
@@ -2298,8 +2496,18 @@ paths:
       - accessTokenCookie: []
     put:
       tags:
-      - User Settings
-      operationId: changeUser
+      - Profile Management
+      summary: Update User
+      description: |-
+        Update the user information of the currently authenticated user.
+
+        You can find more information about profile management [here](https://singularity.stereov.io/docs/guides/users/profile-management).
+
+        **Tokens:**
+        - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/users/profile-management
+      operationId: updateAuthorizedUser
       requestBody:
         content:
           application/json:
@@ -2308,56 +2516,82 @@ paths:
         required: true
       responses:
         "200":
-          description: OK
+          description: User information.
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/UserResponse"
+        "401":
+          description: '`AccessToken` is invalid or expired.'
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
-      - {}
-      - {}
+      - accessTokenHeader: []
+      - accessTokenCookie: []
     delete:
       tags:
-      - User Settings
-      operationId: delete
+      - Profile Management
+      summary: Delete User
+      description: |-
+        Delete the currently authenticated user.
+
+        You can find more information about profile management [here](https://singularity.stereov.io/docs/guides/users/profile-management).
+
+        **Tokens:**
+        - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
+        - A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
+          is required. This token should match user and session contained in the `AccessToken`.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/users/profile-management
+      operationId: deleteAuthorizedUser
       responses:
         "200":
-          description: OK
+          description: User information.
           content:
             '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: string
-      security:
-      - {}
-      - {}
-  /api/users/me/password:
-    put:
-      tags:
-      - User Settings
-      operationId: changePassword
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ChangePasswordRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
+        "401":
+          description: '`AccessToken` or `StepUpToken` are invalid or expired.'
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/UserResponse"
+                $ref: "#/components/schemas/ErrorResponse"
       security:
-      - {}
-      - {}
+      - accessTokenHeader: []
+        stepUpTokenHeader: []
+      - accessTokenCookie: []
+        stepUpTokenCookie: []
   /api/users/me/email:
     put:
       tags:
-      - User Settings
-      operationId: changeEmail
+      - Profile Management
+      summary: Change Email
+      description: |-
+        Change the email of the currently authenticated user.
+
+        If [email is enabled](https://singularity.stereov.io/docs/guides/email/configuration),
+        the user needs to verify this email address with a token that is sent to the new email address.
+        Only then the email is changed in the database.
+        If email is disabled, the email will be changed immediately.
+
+        **Requirements:**
+        - The `email` should be a valid email address (e.g., "test@example.com")
+          that is not associated to an existing account.
+
+        You can find more information about profile management [here](https://singularity.stereov.io/docs/guides/users/profile-management).
+
+        **Tokens:**
+        - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
+        - A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
+          is required. This token should match user and session contained in the `AccessToken`.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/users/profile-management
+      operationId: changeEmailOfAuthorizedUser
       parameters:
       - name: locale
         in: query
@@ -2372,19 +2606,91 @@ paths:
         required: true
       responses:
         "200":
-          description: OK
+          description: User information.
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/UserResponse"
+        "400":
+          description: Invalid `email` provided
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: '`AccessToken` or `StepUpToken` are invalid or expired.'
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
-      - {}
-      - {}
+      - accessTokenHeader: []
+        stepUpTokenHeader: []
+      - accessTokenCookie: []
+        stepUpTokenCookie: []
+  /api/users/me/password:
+    put:
+      tags:
+      - Profile Management
+      summary: Change Password
+      description: "Change the password of the currently authenticated user.\n\nYou\
+        \ can find more information about profile management [here](https://singularity.stereov.io/docs/guides/users/profile-management).\n\
+        \n**Requirements:**\n- The `password` must be at least 8 characters long and\
+        \ include at least one uppercase letter, \n  one lowercase letter, one number,\
+        \ and one special character (!@#$%^&*()_+={}[]|\\:;'\"<>,.?/).\n\n**Tokens:**\n\
+        - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
+        \ is required.\n- A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)\n\
+        \  is required. This token should match user and session contained in the\
+        \ `AccessToken`."
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/users/profile-management
+      operationId: changePasswordOfAuthorizedUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangePasswordRequest"
+        required: true
+      responses:
+        "200":
+          description: User information.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "400":
+          description: Invalid `password` provided
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: '`AccessToken` or `StepUpToken` are invalid or expired or password
+            is wrong.'
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+        stepUpTokenHeader: []
+      - accessTokenCookie: []
+        stepUpTokenCookie: []
   /api/users/me/avatar:
     put:
       tags:
-      - User Settings
-      operationId: setAvatar
+      - Profile Management
+      summary: Update Avatar
+      description: |-
+        Update the avatar of the currently authenticated user.
+
+        You can find more information about profile management [here](https://singularity.stereov.io/docs/guides/users/profile-management).
+
+        **Tokens:**
+        - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/users/profile-management
+      operationId: setAvatarOfAuthorizedUser
       requestBody:
         content:
           application/json:
@@ -2398,28 +2704,50 @@ paths:
               - file
       responses:
         "200":
-          description: OK
+          description: User information.
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/UserResponse"
+        "401":
+          description: '`AccessToken` is invalid or expired.'
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
-      - {}
-      - {}
+      - accessTokenHeader: []
+      - accessTokenCookie: []
     delete:
       tags:
-      - User Settings
-      operationId: deleteAvatar
+      - Profile Management
+      summary: Delete Avatar
+      description: |-
+        Delete the avatar of the currently authenticated user.
+
+        You can find more information about profile management [here](https://singularity.stereov.io/docs/guides/users/profile-management).
+
+        **Tokens:**
+        - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/users/profile-management
+      operationId: deleteAvatarOfAuthorizedUser
       responses:
         "200":
-          description: OK
+          description: User information.
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/UserResponse"
+        "401":
+          description: '`AccessToken` is invalid or expired.'
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
-      - {}
-      - {}
+      - accessTokenHeader: []
+      - accessTokenCookie: []
   /api/content/tags/{key}:
     get:
       tags:
@@ -2756,17 +3084,43 @@ paths:
     post:
       tags:
       - Security
-      operationId: rotateKeys
+      summary: Trigger Secret Rotation
+      description: |-
+        Triggers an immediate secret key rotation. This is an asynchronous operation.
+
+        You can learn more about key rotation [here](https://singularity.stereov.io/docs/guides/secret-store/basics#secret-rotation).
+
+        **Tokens:**
+        - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
+          with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/secret-store/basics#secret-rotation
+      operationId: rotateSecretKeys
       responses:
         "200":
-          description: OK
+          description: Rotation process successfully triggered.
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/SuccessResponse"
+        "401":
+          description: Invalid or expired AccessToken.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: "AccessToken does not grant [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins)\
+            \ access."
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
-      - {}
-      - {}
+      - accessTokenHeader:
+        - adminScope
+      - accessTokenCookie:
+        - adminScope
   /api/content/tags:
     get:
       tags:
@@ -2899,42 +3253,47 @@ paths:
       security:
       - {}
       - {}
-  /api/users/{id}/avatar:
-    get:
-      tags:
-      - Users
-      operationId: getAvatar
-      parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          $ref: "#/components/schemas/ObjectId"
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/FileMetadataResponse"
-      security:
-      - {}
-      - {}
   /api/security/secrets/rotate-keys/status:
     get:
       tags:
       - Security
-      operationId: rotationOngoing
+      summary: Get Secret Rotation Status
+      description: |-
+        Returns the status of the current or most recent secret rotation process.
+
+        You can learn more about key rotation [here](https://singularity.stereov.io/docs/guides/secret-store/basics#secret-rotation).
+
+        **Tokens:**
+        - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
+          with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/secret-store/basics#secret-rotation
+      operationId: getSecretKeyRotationStatus
       responses:
         "200":
-          description: OK
+          description: The rotation status.
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/RotationStatusResponse"
+        "401":
+          description: Invalid or expired AccessToken.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: "AccessToken does not grant [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins)\
+            \ access."
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
-      - {}
-      - {}
+      - accessTokenHeader:
+        - adminScope
+      - accessTokenCookie:
+        - adminScope
   /api/content/articles:
     get:
       tags:
@@ -3054,23 +3413,6 @@ paths:
       security:
       - {}
       - {}
-  /api/assets/**:
-    get:
-      tags:
-      - local-file-storage-controller
-      operationId: serveFile
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/DataBuffer"
-      security:
-      - {}
-      - {}
   /api/invite/{id}:
     delete:
       tags:
@@ -3094,6 +3436,25 @@ paths:
       - {}
 components:
   schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+          format: int32
+        error:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+      required:
+      - error
+      - status
+      - timestamp
     ChangeUserRequest:
       type: object
       properties:
@@ -3266,7 +3627,13 @@ components:
           type: string
         newPassword:
           type: string
+          description: "The user's chosen password. It must be at least 8 characters\
+            \ long and include at least one uppercase letter, one lowercase letter,\
+            \ one number, and one special character (!@#$%^&*()_+={}[]|\\:;'\"<>,.?/)."
+          example: S3cur3P@ssw0rd!
           minLength: 1
+          pattern: "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+\\-={}\\[\\\
+            ]|\\\\:;'\"<,>.?/]).{8,}"
       required:
       - newPassword
       - oldPassword
@@ -3278,25 +3645,6 @@ components:
           minLength: 1
       required:
       - newEmail
-    ErrorResponse:
-      type: object
-      properties:
-        timestamp:
-          type: string
-          format: date-time
-        status:
-          type: integer
-          format: int32
-        error:
-          type: string
-        message:
-          type: string
-        path:
-          type: string
-      required:
-      - error
-      - status
-      - timestamp
     GroupTranslation:
       type: object
       properties:
@@ -4141,6 +4489,80 @@ components:
           type: string
       required:
       - code
+    Pageable:
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+          minimum: 0
+        size:
+          type: integer
+          format: int32
+          minimum: 1
+        sort:
+          type: array
+          items:
+            type: string
+    PageUserOverviewResponse:
+      type: object
+      properties:
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
+        size:
+          type: integer
+          format: int32
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserOverviewResponse"
+        number:
+          type: integer
+          format: int32
+        sort:
+          $ref: "#/components/schemas/SortObject"
+        numberOfElements:
+          type: integer
+          format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
+        empty:
+          type: boolean
+    PageableObject:
+      type: object
+      properties:
+        paged:
+          type: boolean
+        pageNumber:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        unpaged:
+          type: boolean
+        offset:
+          type: integer
+          format: int64
+        sort:
+          $ref: "#/components/schemas/SortObject"
+    SortObject:
+      type: object
+      properties:
+        sorted:
+          type: boolean
+        unsorted:
+          type: boolean
+        empty:
+          type: boolean
     RotationStatusResponse:
       type: object
       properties:
@@ -4174,39 +4596,12 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
-        first:
-          type: boolean
-        last:
-          type: boolean
         numberOfElements:
           type: integer
           format: int32
-        empty:
+        first:
           type: boolean
-    PageableObject:
-      type: object
-      properties:
-        paged:
-          type: boolean
-        pageNumber:
-          type: integer
-          format: int32
-        pageSize:
-          type: integer
-          format: int32
-        unpaged:
-          type: boolean
-        offset:
-          type: integer
-          format: int64
-        sort:
-          $ref: "#/components/schemas/SortObject"
-    SortObject:
-      type: object
-      properties:
-        sorted:
-          type: boolean
-        unsorted:
+        last:
           type: boolean
         empty:
           type: boolean
@@ -4299,13 +4694,13 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
+        numberOfElements:
+          type: integer
+          format: int32
         first:
           type: boolean
         last:
           type: boolean
-        numberOfElements:
-          type: integer
-          format: int32
         empty:
           type: boolean
     ArticleResponse:
@@ -4400,7 +4795,6 @@ components:
           format: int64
       required:
       - remaining
-    DataBuffer: {}
   securitySchemes:
     twoFactorAuthenticationTokenCookie:
       type: apiKey

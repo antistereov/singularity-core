@@ -9,7 +9,7 @@ This guide assumes familiarity with the [Spring Framework](https://spring.io).
 If you are new to Spring, we recommend starting with their [official guides](https://spring.io/quickstart) to get up to speed.
 :::
 
-Sensitive information like email addresses or passwords should not be stored in the database as clear text.
+Sensitive information like phone addresses or passwords should not be stored in the database as clear text.
 This would cause a major security risk.
 
 *Singularity* offers a way to encrypt these fields safely.
@@ -34,11 +34,13 @@ You can use the searchable hashes for queries and store the sensitive data encry
 This way you retrieve the initial value as well.
 :::
 
-## Example
+## Usage
 
-Let's say you have some sensitive information inside a `CoolStuff` document, like a phone number.
+### Encrypting Whole Documents
 
-### 1. Creating a Sensitive Information Class
+We can also encrypt the whole document by encapsulating the sensitive information in a separate data class.
+
+#### 1. Creating a Sensitive Information Class
 
 The first step is creating a class that contains sensitive information.
 The provided fields will be encrypted before they get stored.
@@ -50,7 +52,7 @@ data class SensitiveCoolStuffData(
 )
 ```
 
-### 2. Creating a Decrypted Document Class
+#### 2. Creating a Decrypted Document Class
 
 This class is only needed in the code, no objects of this class will be stored.
 It needs to implement the [`SensitiveDocument`](https://github.com/antistereov/singularity-core/blob/main/src/main/kotlin/io/stereov/singularity/database/encryption/model/SensitiveDocument.kt) interface.
@@ -66,7 +68,7 @@ data class CoolStuff(
 ) : SensitiveDocument<SensitiveCoolStuffData>
 ```
 
-### 3. Creating an Encrypted Document Class
+#### 3. Creating an Encrypted Document Class
 
 This is the actual document class that will be stored to the database.
 It is the encrypted representation of the `CoolStuff` class.
@@ -84,7 +86,7 @@ data class EncryptedCoolStuff(
 ) : EncryptedSensitiveDocument<SensitiveCoolStuffData>
 ```
 
-### 4. Creating a Repository
+#### 4. Creating a Repository
 
 Create an interface based on the [`SensitiveCrudRepository`](https://github.com/antistereov/singularity-core/blob/main/src/main/kotlin/io/stereov/singularity/database/encryption/repository/SensitiveCrudRepository.kt).
 It already includes the most relevant methods.
@@ -93,7 +95,7 @@ It already includes the most relevant methods.
 interface EncryptedCoolStuffRepository : SensitiveCrudRepository<EncryptedCoolStuffDocument>
 ```
 
-### 5. Creating a Service
+#### 5. Creating a Service
 
 Create a service class based on the [`SensitiveCrudService`](https://github.com/antistereov/singularity-core/blob/main/src/main/kotlin/io/stereov/singularity/database/encryption/service/SensitiveCrudService.kt).
 It already includes the base logic for storing and retrieving data.
@@ -150,7 +152,8 @@ class CoolStuffService(
     )
 }
 ```
-### Usage
+
+#### Usage
 
 We will now create a controller that lets us query the `CoolStuff`.
 The `SensitiveCrudService` takes all the decryption logic away from you and
@@ -181,3 +184,78 @@ class CoolStuffController(
     }
 }
 ```
+### Encrypting Whole Documents With Searchability
+
+As stated earlier, it is not possible to search values of the `SenstiveCoolData`.
+If you want to search the `phone` field, you can create an extra `SearchableHash` field.
+You can learn more about hashes [here](./hashing.md).
+
+For this, you only need to add the extra field to the [`EncryptedCoolStuff`](#2-creating-a-decrypted-document-class):
+
+```kotlin
+@Document(collection = "cool_stuff")
+data class EncryptedCoolStuff(
+    @Id override val _id: ObjectId? = null,
+    override val sensitive: Encrypted<SensitiveCoolStuffData>,
+    
+    // The new field:
+    val phone: SearchableHash
+) : EncryptedSensitiveDocument<SensitiveCoolStuffData>
+```
+
+And update the [`CoolStuffRepository`](#4-creating-a-repository) and [`CoolStuffService`](#5-creating-a-service):
+
+```kotlin
+interface EncryptedCoolStuffRepository : SensitiveCrudRepository<EncryptedCoolStuffDocument> {
+    
+    // Add a method to search by phone
+    suspend fun findByPhone(phone: SearchableHash)
+}
+
+@Service
+class CoolStuffService(
+    override val repository: EncryptedCoolStuffRepository,
+    override val encryptionService: EncryptionService,
+    override val reactiveMongoTemplate: ReactiveMongoTemplate,
+    override val encryptionSecretService: EncryptionSecretService,
+    // Add the HashService
+    private val hashService: HashService
+) : SensitiveCrudService<SensitiveCoolStuffData, CoolStuff, EncryptedCoolStuff>() {
+    // ... (rest of the service, including doEncrypt and doDecrypt) ...
+    
+    // Implement the doEncrypt method that specifies how to create an encrypted version of the document.
+    override suspend fun doEncrypt(
+        // This is the developer-facing object
+        document: CoolStuff,
+        // This is the already encrypted sensitive data, provided by the framework
+        encryptedSensitive: Encrypted<SensitiveCoolStuffData>
+    ): EncryptedCoolStuff {
+        // 1. Create the searchable hash from the original string.
+        val hashedPhone = hashService.hashSearchableHmacSha256(document.phone)
+
+        // 2. Map all fields to the EncryptedCoolStuff object.
+        return EncryptedCoolStuff(
+            // Map the ID from the developer-facing object
+            _id = document.id,
+            // The framework has already encrypted this data for you
+            sensitive = encryptedSensitive,
+            // Map the newly created searchable hash
+            phone = hashedPhone
+        )
+    }
+        
+
+    // A new method to find a document by its searchable hash
+    suspend fun findByPhone(phone: String): CoolStuff? {
+        val hashedPhone = hashService.hashSearchableHmacSha256(phone)
+
+        // This query is performed on the database level
+        val encryptedCoolStuff = repository.findByPhone(hashedPhone)
+
+        // Return the decrypted document
+        return encryptedCoolStuff?.let { decrypt(it) }
+    }
+}
+```
+
+
