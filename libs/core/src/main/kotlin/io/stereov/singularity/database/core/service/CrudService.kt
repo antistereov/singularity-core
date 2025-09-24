@@ -15,48 +15,48 @@ interface CrudService<T: Any> {
 
     val logger: KLogger
 
-    val collectionClass: Class<T>
+    val collectionClazz: Class<T>
     val reactiveMongoTemplate: ReactiveMongoTemplate
     val repository: CoroutineCrudRepository<T, ObjectId>
 
     suspend fun findByIdOrNull(id: ObjectId): T? {
-        logger.debug { "Finding ${collectionClass.name} by ID $id" }
+        logger.debug { "Finding ${collectionClazz.name} by ID $id" }
 
         return repository.findById(id)
     }
 
     suspend fun findById(id: ObjectId): T {
-        return findByIdOrNull(id) ?: throw DocumentNotFoundException("No ${collectionClass.name} with ID $id found")
+        return findByIdOrNull(id) ?: throw DocumentNotFoundException("No ${collectionClazz.name} with ID $id found")
     }
 
     suspend fun existsById(id: ObjectId): Boolean {
-        logger.debug { "Checking if ${collectionClass.name} exists by ID $id" }
+        logger.debug { "Checking if ${collectionClazz.name} exists by ID $id" }
 
         return repository.existsById(id)
     }
 
     @Suppress("UNUSED")
     suspend fun deleteById(id: ObjectId) {
-        logger.debug { "Deleting ${collectionClass.name} by ID $id" }
+        logger.debug { "Deleting ${collectionClazz.name} by ID $id" }
 
         return repository.deleteById(id)
     }
 
     suspend fun deleteAll() {
-        logger.debug { "Deleting all ${collectionClass.name}" }
+        logger.debug { "Deleting all ${collectionClazz.name}" }
 
         return repository.deleteAll()
     }
 
     suspend fun save(doc: T): T {
-        logger.debug { "Saving ${collectionClass.name}" }
+        logger.debug { "Saving ${collectionClazz.name}" }
 
         return repository.save(doc)
     }
 
     @Suppress("UNUSED")
     suspend fun saveAll(docs: Collection<T>): List<T> {
-        logger.debug { "Saving multiple ${collectionClass.name}s" }
+        logger.debug { "Saving multiple ${collectionClazz.name}s" }
 
         return repository.saveAll(docs).toList()
     }
@@ -73,14 +73,12 @@ interface CrudService<T: Any> {
     }
 
     suspend fun findAllPaginated(pageable: Pageable, criteria: Criteria? = null): Page<T> {
-        logger.debug { "Finding ${collectionClass.simpleName}: page ${pageable.pageNumber}, size: ${pageable.pageSize}, sort: ${pageable.sort}" }
-
+        logger.debug { "Finding ${collectionClazz.simpleName}: page ${pageable.pageNumber}, size: ${pageable.pageSize}, sort: ${pageable.sort}" }
 
         val query = criteria?.let { Query(it) } ?: Query()
+        val count = reactiveMongoTemplate.count(query, collectionClazz).awaitFirstOrElse { 0 }
         val paginatedQuery = query.with(pageable)
-
-        val count = reactiveMongoTemplate.count(paginatedQuery, collectionClass).awaitFirstOrElse { 0 }
-        val groups = reactiveMongoTemplate.find(paginatedQuery, collectionClass).collectList().awaitFirstOrElse { emptyList() }
+        val groups = reactiveMongoTemplate.find(paginatedQuery, collectionClazz).collectList().awaitFirstOrElse { emptyList() }
 
         return PageImpl(groups, pageable, count)
     }

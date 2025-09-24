@@ -50,7 +50,7 @@ class GuestService(
         req: ConvertToUserRequest,
         locale: Locale?
     ): UserDocument {
-        val userId = authorizationService.getCurrentUserId()
+        val userId = authorizationService.getUserId()
         val user = userService.findById(userId)
 
         if (user.roles.contains(Role.USER))

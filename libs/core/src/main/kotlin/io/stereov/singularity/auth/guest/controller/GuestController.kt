@@ -193,7 +193,7 @@ class GuestController(
     ): ResponseEntity<ConvertToUserResponse> {
 
         val user = guestService.convertToUser(req, locale)
-        val sessionId = authorizationService.getCurrentSessionId()
+        val sessionId = authorizationService.getSessionId()
 
         val accessToken = accessTokenService.create(user, sessionId)
         val refreshToken = refreshTokenService.create(user, sessionId, req.session, exchange)

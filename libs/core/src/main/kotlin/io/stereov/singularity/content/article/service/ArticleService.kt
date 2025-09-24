@@ -38,7 +38,7 @@ class ArticleService(
     private val userService: UserService,
     override val authorizationService: AuthorizationService,
     private val tagService: TagService,
-    private val reactiveMongoTemplate: ReactiveMongoTemplate,
+    override val reactiveMongoTemplate: ReactiveMongoTemplate,
     private val accessCriteria: AccessCriteria,
     private val fileStorage: FileStorage,
     private val userMapper: UserMapper,
@@ -48,7 +48,7 @@ class ArticleService(
 ) : ContentService<Article> {
 
     override val logger: KLogger = KotlinLogging.logger {}
-    override val contentClass: Class<Article> = Article::class.java
+    override val collectionClazz: Class<Article> = Article::class.java
 
     private val isPublished = Criteria.where(Article::state.name).`is`(ArticleState.PUBLISHED.toString())
 
@@ -61,7 +61,7 @@ class ArticleService(
     }
 
     suspend fun fullArticledResponseFrom(article: Article, locale: Locale?, owner: UserDocument? = null): FullArticleResponse {
-        val currentUser = authorizationService.getCurrentUserOrNull()
+        val currentUser = authorizationService.getAuthenticationOrNull()
 
         val actualOwner = owner ?: userService.findById(article.access.ownerId)
         val access = ContentAccessDetailsResponse.create(article.access, currentUser)

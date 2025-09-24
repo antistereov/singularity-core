@@ -35,7 +35,7 @@ class AuthorizationService(
     suspend fun isAuthenticated(): Boolean {
         logger.debug { "Checking if user is authenticated" }
 
-        return getCurrentUserIdOrNull() != null
+        return getUserIdOrNull() != null
     }
 
     /**
@@ -44,10 +44,10 @@ class AuthorizationService(
      * @throws InvalidPrincipalException If the security context or authentication is missing.
      * @throws InvalidTokenException If the authentication does not contain the necessary properties.
      */
-    suspend fun getCurrentUserId(): ObjectId {
+    suspend fun getUserId(): ObjectId {
         logger.debug {"Extracting user ID." }
 
-        val auth = getCurrentAuthentication()
+        val auth = getAuthentication()
         return auth.userId
     }
 
@@ -57,8 +57,8 @@ class AuthorizationService(
      * @throws InvalidPrincipalException If the security context or authentication is missing.
      * @throws InvalidTokenException If the authentication does not contain the necessary properties.
      */
-    suspend fun getCurrentUserIdOrNull(): ObjectId? {
-        return runCatching { getCurrentUserId() }
+    suspend fun getUserIdOrNull(): ObjectId? {
+        return runCatching { getUserId() }
             .getOrNull()
     }
 
@@ -68,10 +68,10 @@ class AuthorizationService(
      * @throws InvalidPrincipalException If the security context or authentication is missing.
      * @throws InvalidTokenException If the authentication does not contain the necessary properties.
      */
-    suspend fun getCurrentUserOrNull(): UserDocument? {
+    suspend fun getUserOrNull(): UserDocument? {
         logger.debug { "Extracting current user" }
 
-        return getCurrentUserIdOrNull()?.let { userService.findById(it) }
+        return getUserIdOrNull()?.let { userService.findById(it) }
     }
 
     /**
@@ -80,10 +80,10 @@ class AuthorizationService(
      * @throws InvalidPrincipalException If the security context or authentication is missing.
      * @throws InvalidTokenException If the authentication does not contain the necessary properties.
      */
-    suspend fun getCurrentUser(): UserDocument {
+    suspend fun getUser(): UserDocument {
         logger.debug { "Extracting current user" }
 
-        return userService.findById(getCurrentUserId())
+        return userService.findById(getUserId())
     }
 
     /**
@@ -92,10 +92,10 @@ class AuthorizationService(
      * @throws InvalidPrincipalException If the security context or authentication is missing.
      * @throws InvalidTokenException If the authentication does not contain the necessary properties.
      */
-    suspend fun getCurrentSessionId(): UUID {
+    suspend fun getSessionId(): UUID {
         logger.debug { "Extracting session ID" }
 
-        val auth = getCurrentAuthentication()
+        val auth = getAuthentication()
         return auth.sessionId
     }
 
@@ -105,9 +105,9 @@ class AuthorizationService(
      * @throws InvalidPrincipalException If the security context or authentication is missing.
      * @throws InvalidTokenException If the authentication does not contain the necessary properties.
      */
-    suspend fun getCurrentSessionIdOrNull(): UUID? {
+    suspend fun getSessionIdOrNull(): UUID? {
         return try {
-            getCurrentSessionId()
+            getSessionId()
         } catch(_: Exception) {
             null
         }
@@ -119,10 +119,10 @@ class AuthorizationService(
      * @throws InvalidPrincipalException If the security context or authentication is missing.
      * @throws InvalidTokenException If the authentication does not contain the necessary properties.
      */
-    suspend fun getCurrentTokenId(): String {
+    suspend fun getTokenId(): String {
         logger.debug { "Extracting token ID" }
 
-        val auth = getCurrentAuthentication()
+        val auth = getAuthentication()
         return auth.tokenId
     }
 
@@ -134,7 +134,7 @@ class AuthorizationService(
      */
     @Suppress("UNUSED")
     suspend fun requireAuthentication() {
-        getCurrentAuthentication()
+        getAuthentication()
     }
 
     /**
@@ -148,7 +148,7 @@ class AuthorizationService(
     suspend fun requireRole(role: Role) {
         logger.debug { "Validating authorization: role $role" }
 
-        val valid = getCurrentAuthentication().roles.contains(role)
+        val valid = getAuthentication().roles.contains(role)
 
         if (!valid) throw NotAuthorizedException("User does not have sufficient permission: User does not have role $role")
     }
@@ -156,22 +156,30 @@ class AuthorizationService(
     suspend fun requireGroupMembership(groupKey: String) {
         logger.debug { "Validating that the current user is part of the group \"$groupKey\"" }
 
-        val auth = getCurrentAuthentication()
+        val auth = getAuthentication()
 
         if (!auth.groups.contains(groupKey) && !auth.roles.contains(Role.ADMIN)) {
             throw NotAuthorizedException("User does not have sufficient permission: User does not belong to group \"$groupKey\"")
         }
     }
 
+    suspend fun getRoles(): Set<Role> {
+        return getAuthentication().roles
+    }
+
     suspend fun getGroups(): Set<String> {
-        return getCurrentAuthentication().groups
+        return getAuthentication().groups
     }
 
     suspend fun requireStepUp(): StepUpToken {
         logger.debug { "Validating step up" }
 
-        val authentication = getCurrentAuthentication()
+        val authentication = getAuthentication()
         return stepUpTokenService.extract(authentication.exchange, authentication.userId, authentication.sessionId)
+    }
+
+    suspend fun getAuthenticationOrNull(): CustomAuthenticationToken? {
+        return runCatching { getAuthentication() }.getOrNull()
     }
 
     /**
@@ -182,7 +190,7 @@ class AuthorizationService(
      * @throws InvalidPrincipalException If the security context or authentication is missing.
      * @throws InvalidTokenException If the authentication does not contain the necessary properties.
      */
-    private suspend fun getCurrentAuthentication(): CustomAuthenticationToken {
+    suspend fun getAuthentication(): CustomAuthenticationToken {
         val securityContext: SecurityContext = ReactiveSecurityContextHolder.getContext().awaitFirstOrNull()
             ?: throw InvalidPrincipalException("No security context found.")
 

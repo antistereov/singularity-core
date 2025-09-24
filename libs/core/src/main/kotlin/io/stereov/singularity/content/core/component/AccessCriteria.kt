@@ -43,7 +43,7 @@ class AccessCriteria(
     private fun isAdminGroup(groups: Set<String>) = Criteria.where(isAdminGroupsField).`in`(groups)
 
     suspend fun getViewCriteria(): Criteria {
-        val userId = authorizationService.getCurrentUserIdOrNull()
+        val userId = authorizationService.getUserIdOrNull()
 
         return if (userId != null) {
             val groups = authorizationService.getGroups()

@@ -11,6 +11,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRepositories
 
 @Configuration
@@ -27,8 +28,16 @@ class StorageConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun fileMetaDataService(repository: FileMetadataRepository, authorizationService: AuthorizationService): FileMetadataService {
-        return FileMetadataService(repository, authorizationService)
+    fun fileMetaDataService(
+        repository: FileMetadataRepository,
+        authorizationService: AuthorizationService,
+        reactiveMongoTemplate: ReactiveMongoTemplate
+    ): FileMetadataService {
+        return FileMetadataService(
+            repository,
+            authorizationService,
+            reactiveMongoTemplate
+        )
     }
 
     // Exception Handler

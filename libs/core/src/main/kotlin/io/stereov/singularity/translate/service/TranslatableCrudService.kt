@@ -1,5 +1,6 @@
-package io.stereov.singularity.database.core.service
+package io.stereov.singularity.translate.service
 
+import io.stereov.singularity.database.core.service.CrudService
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.translate.model.Translatable
 import org.springframework.data.domain.Page

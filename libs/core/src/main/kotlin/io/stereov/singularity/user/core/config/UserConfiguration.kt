@@ -5,9 +5,9 @@ import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.database.encryption.service.EncryptionSecretService
 import io.stereov.singularity.database.encryption.service.EncryptionService
 import io.stereov.singularity.database.hash.service.HashService
+import io.stereov.singularity.email.core.config.EmailConfiguration
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.global.config.ApplicationConfiguration
-import io.stereov.singularity.email.core.config.EmailConfiguration
 import io.stereov.singularity.user.core.controller.UserController
 import io.stereov.singularity.user.core.exception.handler.UserExceptionHandler
 import io.stereov.singularity.user.core.mapper.UserMapper
@@ -17,6 +17,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRepositories
 
 @Configuration
@@ -38,8 +39,7 @@ class UserConfiguration {
         userService: UserService,
         authorizationService: AuthorizationService,
         userMapper: UserMapper,
-        fileStorage: FileStorage
-    ) = UserController(userService, authorizationService, userMapper, fileStorage)
+    ) = UserController(userService, authorizationService, userMapper)
 
     // Mapper
 
@@ -54,12 +54,14 @@ class UserConfiguration {
     fun userService(
         userRepository: UserRepository,
         encryptionTransformer: EncryptionService,
+        reactiveMongoTemplate: ReactiveMongoTemplate,
         hashService: HashService,
         encryptionSecretService: EncryptionSecretService,
     ): UserService {
         return UserService(
             userRepository,
             encryptionTransformer,
+            reactiveMongoTemplate,
             hashService,
             encryptionSecretService,
         )

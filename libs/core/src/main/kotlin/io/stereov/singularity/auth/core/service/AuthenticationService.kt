@@ -102,9 +102,9 @@ class AuthenticationService(
     suspend fun logout(): UserDocument {
         logger.debug { "Logging out user" }
 
-        val userId = authorizationService.getCurrentUserId()
-        val tokenId = authorizationService.getCurrentTokenId()
-        val sessionId = authorizationService.getCurrentSessionId()
+        val userId = authorizationService.getUserId()
+        val tokenId = authorizationService.getTokenId()
+        val sessionId = authorizationService.getSessionId()
 
         accessTokenCache.invalidateToken(userId, sessionId, tokenId)
 
@@ -114,8 +114,8 @@ class AuthenticationService(
     suspend fun stepUp(req: StepUpRequest?): UserDocument {
         logger.debug { "Executing step up" }
 
-        val user = authorizationService.getCurrentUser()
-        val sessionId = authorizationService.getCurrentSessionId()
+        val user = authorizationService.getUser()
+        val sessionId = authorizationService.getSessionId()
 
         if (!user.sensitive.sessions.containsKey(sessionId)) {
             throw AuthException("Step up failed: trying to execute for step up for invalid session, user logged out or revoked session")

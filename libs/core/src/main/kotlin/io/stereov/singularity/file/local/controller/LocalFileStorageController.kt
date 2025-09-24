@@ -13,9 +13,9 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Flux
@@ -24,7 +24,7 @@ import java.nio.file.Paths
 import kotlin.io.path.absolute
 import kotlin.io.path.exists
 
-@RestController
+@Controller
 @RequestMapping("/api/assets")
 @ConditionalOnProperty(prefix = "singularity.file.storage", value = ["type"], havingValue = "local", matchIfMissing = true)
 class LocalFileStorageController(

@@ -40,6 +40,7 @@ import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.test.config.MockConfig
 import io.stereov.singularity.user.core.model.Role
 import io.stereov.singularity.user.core.model.UserDocument
+import io.stereov.singularity.user.core.repository.UserRepository
 import io.stereov.singularity.user.core.service.UserService
 import kotlinx.coroutines.runBlocking
 import org.bson.types.ObjectId
@@ -63,6 +64,9 @@ import java.util.concurrent.atomic.AtomicInteger
 )
 @Import(MockConfig::class)
 class BaseSpringBootTest() {
+
+    @Autowired
+    lateinit var userRepository: UserRepository
 
     @Autowired
     lateinit var fileStorage: FileStorage

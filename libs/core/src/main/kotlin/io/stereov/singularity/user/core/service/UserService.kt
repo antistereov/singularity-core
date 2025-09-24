@@ -1,9 +1,10 @@
 package io.stereov.singularity.user.core.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.database.core.service.SensitiveCrudService
+import io.stereov.singularity.database.encryption.model.Encrypted
 import io.stereov.singularity.database.encryption.service.EncryptionSecretService
 import io.stereov.singularity.database.encryption.service.EncryptionService
+import io.stereov.singularity.database.encryption.service.SensitiveCrudService
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.user.core.exception.model.UserDoesNotExistException
 import io.stereov.singularity.user.core.model.EncryptedUserDocument
@@ -14,34 +15,34 @@ import io.stereov.singularity.user.core.model.identity.HashedUserIdentity
 import io.stereov.singularity.user.core.repository.UserRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onCompletion
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate
+import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.stereotype.Service
+import java.time.Instant
 
-/**
- * # Service for managing user accounts.
- *
- * This service provides methods to find, save, and delete user accounts.
- * It interacts with the [UserRepository] to perform database operations.
- *
- * @author <a href="https://github.com/antistereov">antistereov</a>
- */
 @Service
 class UserService(
     override val repository: UserRepository,
     override val encryptionService: EncryptionService,
+    override val reactiveMongoTemplate: ReactiveMongoTemplate,
     private val hashService: HashService,
     override val encryptionSecretService: EncryptionSecretService,
-) : SensitiveCrudService<SensitiveUserData, UserDocument, EncryptedUserDocument> {
+) : SensitiveCrudService<SensitiveUserData, UserDocument, EncryptedUserDocument>() {
 
     override val logger = KotlinLogging.logger {}
-    override val clazz = SensitiveUserData::class.java
+    override val sensitiveClazz = SensitiveUserData::class.java
+    override val encryptedDocumentClazz= EncryptedUserDocument::class.java
 
-    override suspend fun encrypt(document: UserDocument, otherValues: List<Any?>): EncryptedUserDocument {
-
-        if (otherValues.getOrNull(0) == true || otherValues.getOrNull(0) == null) document.updateLastActive()
+    override suspend fun doEncrypt(
+        document: UserDocument,
+        encryptedSensitive: Encrypted<SensitiveUserData>,
+    ): EncryptedUserDocument {
 
         val hashedEmail = document.sensitive.email?.let { hashService.hashSearchableHmacSha256(it) }
-        val hashedPrincipalId = document.sensitive.identities
+        val hashedIdentities = document.sensitive.identities
             .map { (provider, identity) ->
                 val hashedUserIdentity = HashedUserIdentity(
                     password = identity.password,
@@ -49,24 +50,32 @@ class UserService(
                 )
                 provider to hashedUserIdentity
             }.toMap()
-        return this.encryptionService.encrypt(document, listOf(hashedEmail, hashedPrincipalId)) as EncryptedUserDocument
+
+
+        return EncryptedUserDocument(
+            document._id,
+            hashedEmail,
+            hashedIdentities,
+            document.roles,
+            document.groups,
+            document.createdAt,
+            document.lastActive,
+            encryptedSensitive
+        )
     }
 
-    override suspend fun rotateSecret() {
-        logger.debug { "Rotating encryption secrets for users" }
-
-        this.repository.findAll()
-            .map {
-                if (it.sensitive.secretKey == encryptionSecretService.getCurrentSecret().key) {
-                    logger.debug { "Skipping rotation of user document ${it._id}: Encryption secret did not change" }
-                    return@map it
-                }
-
-                this.logger.debug { "Rotating key of user document ${it._id}" }
-                this.repository.save(this.encrypt(this.decrypt(it), listOf(false)))
-            }
-            .onCompletion { logger.debug { "Key successfully rotated" } }
-            .collect {}
+    override suspend fun doDecrypt(
+        encrypted: EncryptedUserDocument,
+        decryptedSensitive: SensitiveUserData,
+    ): UserDocument {
+        return UserDocument(
+            encrypted._id,
+            encrypted.createdAt,
+            encrypted.lastActive,
+            encrypted.roles,
+            encrypted.groups,
+            decryptedSensitive
+        )
     }
 
     /**
@@ -136,6 +145,60 @@ class UserService(
         logger.debug { "Finding all users with group membership $group" }
 
         return repository.findAllByGroupsContaining(group).map { decrypt(it) }
+    }
+
+    suspend fun findAllPaginated(
+        pageable: Pageable,
+        email: String?,
+        roles: Set<Role>?,
+        groups: Set<String>?,
+        createdAtBefore: Instant?,
+        createdAtAfter: Instant?,
+        lastActiveBefore: Instant?,
+        lastActiveAfter: Instant?,
+        identityKeys: Set<String>?
+    ): Page<UserDocument> {
+        logger.debug { "Finding ${encryptedDocumentClazz.simpleName}: page ${pageable.pageNumber}, size: ${pageable.pageSize}, sort: ${pageable.sort}" }
+
+        val criteriaList = mutableListOf<Criteria>()
+
+        if (email != null) {
+            criteriaList.add(Criteria.where(EncryptedUserDocument::email.name)
+                .isEqualTo(hashService.hashSearchableHmacSha256(email)))
+        }
+        if (!roles.isNullOrEmpty()) {
+            criteriaList.add(Criteria.where(EncryptedUserDocument::roles.name).`in`(roles))
+        }
+        if (!groups.isNullOrEmpty()) {
+            criteriaList.add(Criteria.where(EncryptedUserDocument::groups.name).`in`(groups))
+        }
+        if (createdAtAfter != null) {
+            criteriaList.add(Criteria.where(EncryptedUserDocument::createdAt.name).gte(createdAtAfter))
+        }
+        if (createdAtBefore != null) {
+            criteriaList.add(Criteria.where(EncryptedUserDocument::createdAt.name).lte(createdAtBefore))
+        }
+        if (lastActiveAfter != null) {
+            criteriaList.add(Criteria.where(EncryptedUserDocument::lastActive.name).gte(lastActiveAfter))
+        }
+        if (lastActiveBefore != null) {
+            criteriaList.add(Criteria.where(EncryptedUserDocument::lastActive.name).lte(lastActiveBefore))
+        }
+
+        if (!identityKeys.isNullOrEmpty()) {
+            val identityCriteria = Criteria().orOperator(
+                *identityKeys.map { key ->
+                    Criteria.where("${EncryptedUserDocument::identities.name}.$key").exists(true)
+                }.toTypedArray()
+            )
+            criteriaList.add(identityCriteria)
+        }
+
+        val criteria = if (criteriaList.isNotEmpty()) {
+            Criteria().andOperator(*criteriaList.toTypedArray())
+        } else null
+
+        return findAllPaginated(pageable, criteria)
     }
 
 }

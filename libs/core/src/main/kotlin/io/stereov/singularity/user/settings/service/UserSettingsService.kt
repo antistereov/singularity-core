@@ -40,7 +40,8 @@ class UserSettingsService(
     suspend fun changeEmail(payload: ChangeEmailRequest, locale: Locale?): UserDocument {
         logger.debug { "Changing email" }
 
-        val user = authorizationService.getCurrentUser()
+        val user = authorizationService.getUser()
+
         authorizationService.requireStepUp()
 
         if (userService.existsByEmail(payload.newEmail)) {
@@ -60,7 +61,7 @@ class UserSettingsService(
     suspend fun changePassword(payload: ChangePasswordRequest): UserDocument {
         logger.debug { "Changing password" }
 
-        val user = authorizationService.getCurrentUser()
+        val user = authorizationService.getUser()
         val passwordProvider = user.sensitive.identities[IdentityProvider.PASSWORD]
             ?: throw WrongIdentityProviderException("Cannot change password: user did not set up password authentication")
 
@@ -72,7 +73,7 @@ class UserSettingsService(
     }
 
     suspend fun changeUser(payload: ChangeUserRequest): UserDocument {
-        val user = authorizationService.getCurrentUser()
+        val user = authorizationService.getUser()
 
         if (payload.name != null) user.sensitive.name = payload.name
 
@@ -80,7 +81,7 @@ class UserSettingsService(
     }
 
     suspend fun setAvatar(file: FilePart): UserResponse {
-        val user = authorizationService.getCurrentUser()
+        val user = authorizationService.getUser()
 
         val currentAvatar = user.sensitive.avatarFileKey
 
@@ -108,7 +109,7 @@ class UserSettingsService(
     }
 
     suspend fun deleteAvatar(): UserResponse {
-        val user = authorizationService.getCurrentUser()
+        val user = authorizationService.getUser()
 
         val currentAvatar = user.sensitive.avatarFileKey
 
@@ -127,7 +128,7 @@ class UserSettingsService(
         logger.debug { "Deleting user" }
 
         authorizationService.requireStepUp()
-        val userId = authorizationService.getCurrentUserId()
+        val userId = authorizationService.getUserId()
         accessTokenCache.invalidateAllTokens(userId)
 
         userService.deleteById(userId)

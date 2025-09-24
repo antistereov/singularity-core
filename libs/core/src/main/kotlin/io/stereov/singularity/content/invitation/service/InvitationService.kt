@@ -6,14 +6,15 @@ import io.stereov.singularity.content.invitation.model.EncryptedInvitationDocume
 import io.stereov.singularity.content.invitation.model.InvitationDocument
 import io.stereov.singularity.content.invitation.model.SensitiveInvitationData
 import io.stereov.singularity.content.invitation.repository.InvitationRepository
-import io.stereov.singularity.database.core.service.SensitiveCrudService
+import io.stereov.singularity.database.encryption.model.Encrypted
 import io.stereov.singularity.database.encryption.service.EncryptionSecretService
 import io.stereov.singularity.database.encryption.service.EncryptionService
-import io.stereov.singularity.global.properties.AppProperties
-import io.stereov.singularity.global.properties.UiProperties
+import io.stereov.singularity.database.encryption.service.SensitiveCrudService
 import io.stereov.singularity.email.core.service.EmailService
 import io.stereov.singularity.email.template.service.TemplateService
 import io.stereov.singularity.email.template.util.TemplateBuilder
+import io.stereov.singularity.global.properties.AppProperties
+import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.translate.model.TranslateKey
 import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.user.core.service.UserService
@@ -31,7 +32,7 @@ class InvitationService(
     override val repository: InvitationRepository,
     override val encryptionService: EncryptionService,
     override val encryptionSecretService: EncryptionSecretService,
-    private val reactiveMongoTemplate: ReactiveMongoTemplate,
+    override val reactiveMongoTemplate: ReactiveMongoTemplate,
     private val invitationTokenService: InvitationTokenService,
     private val templateService: TemplateService,
     private val emailService: EmailService,
@@ -39,10 +40,35 @@ class InvitationService(
     private val userService: UserService,
     private val uiProperties: UiProperties,
     private val appProperties: AppProperties,
-) : SensitiveCrudService<SensitiveInvitationData, InvitationDocument, EncryptedInvitationDocument> {
+) : SensitiveCrudService<SensitiveInvitationData, InvitationDocument, EncryptedInvitationDocument>() {
 
-    override val clazz = SensitiveInvitationData::class.java
+    override val encryptedDocumentClazz = EncryptedInvitationDocument::class.java
+    override val sensitiveClazz = SensitiveInvitationData::class.java
     override val logger = KotlinLogging.logger {}
+
+    override suspend fun doDecrypt(
+        encrypted: EncryptedInvitationDocument,
+        decryptedSensitive: SensitiveInvitationData
+    ): InvitationDocument {
+        return InvitationDocument(
+            encrypted._id,
+            encrypted.issuedAt,
+            encrypted.expiresAt,
+            decryptedSensitive
+        )
+    }
+
+    override suspend fun doEncrypt(
+        document: InvitationDocument,
+        encryptedSensitive: Encrypted<SensitiveInvitationData>
+    ): EncryptedInvitationDocument {
+        return EncryptedInvitationDocument(
+            document._id,
+            document.issuedAt,
+            document.expiresAt,
+            encryptedSensitive
+        )
+    }
 
     suspend fun invite(
         email: String,
