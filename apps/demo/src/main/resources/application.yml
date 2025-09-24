@@ -53,7 +53,7 @@ singularity:
     base-url: ${BACKEND_BASE_URL:http://localhost:8000}
     support-mail: support@example.com
     secure: false
-    create-root-user: false
+    create-root-user: true
     root-email: root@example.com
     root-password: very-secure-root-password
     default-locale: en
