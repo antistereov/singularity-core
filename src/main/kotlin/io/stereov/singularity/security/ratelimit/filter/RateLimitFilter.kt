@@ -38,7 +38,8 @@ class RateLimitFilter(
             val clientIp = exchange.request.getClientIp(geolocationProperties.realIpHeader) ?: "unknown"
             val path = exchange.request.path.toString()
             val isLoginAttempt = path.contains("/api/auth/login") ||
-                    path.contains("/api/auth/2fa/recovery") ||
+                    path.contains("/api/auth/ste-up")
+                    path.contains("/api/auth/2fa/totp/recover") ||
                     path.contains("/api/auth/password/reset") ||
                     path.contains("/api/auth/2fa/step-up") ||
                     path.contains("/api/auth/2fa/login")

@@ -8,7 +8,6 @@ import io.stereov.singularity.auth.core.service.EmailVerificationService
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.file.core.service.FileStorage
-import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.user.core.mapper.UserMapper
 import io.stereov.singularity.user.core.service.UserService
 import io.stereov.singularity.user.settings.controller.UserSettingsController
@@ -29,8 +28,9 @@ class UserSettingsConfiguration {
     fun userSettingsController(
         userMapper: UserMapper,
         userSettingsService: UserSettingsService,
-        cookieCreator: CookieCreator
-    ) = UserSettingsController(userMapper, userSettingsService, cookieCreator)
+        cookieCreator: CookieCreator,
+        authorizationService: AuthorizationService
+    ) = UserSettingsController(userMapper, userSettingsService, cookieCreator, authorizationService)
 
     // Service
 
