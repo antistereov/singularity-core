@@ -1,6 +1,6 @@
 package io.stereov.singularity.file.core.config
 
-import io.stereov.singularity.auth.core.service.AuthenticationService
+import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.file.core.exception.handler.FileExceptionHandler
 import io.stereov.singularity.file.core.properties.StorageProperties
 import io.stereov.singularity.file.core.repository.FileMetadataRepository
@@ -27,8 +27,8 @@ class StorageConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun fileMetaDataService(repository: FileMetadataRepository, authenticationService: AuthenticationService): FileMetadataService {
-        return FileMetadataService(repository, authenticationService)
+    fun fileMetaDataService(repository: FileMetadataRepository, authorizationService: AuthorizationService): FileMetadataService {
+        return FileMetadataService(repository, authorizationService)
     }
 
     // Exception Handler

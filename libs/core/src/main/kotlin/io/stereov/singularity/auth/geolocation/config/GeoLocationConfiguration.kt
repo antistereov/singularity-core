@@ -1,6 +1,7 @@
 package io.stereov.singularity.auth.geolocation.config
 
 import io.stereov.singularity.auth.geolocation.exception.handler.GeolocationExceptionHandler
+import io.stereov.singularity.auth.geolocation.mapper.GeolocationMapper
 import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
 import io.stereov.singularity.auth.geolocation.service.GeoIpDatabaseService
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
@@ -19,21 +20,31 @@ import org.springframework.web.reactive.function.client.WebClient
 @EnableConfigurationProperties(GeolocationProperties::class)
 class GeoLocationConfiguration {
 
-    // Service
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun geoLocationService(geoIpDatabaseService: GeoIpDatabaseService, properties: GeolocationProperties): GeolocationService {
-        return GeolocationService(geoIpDatabaseService, properties)
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun geoIpDatabaseService(properties: GeolocationProperties, webClient: WebClient) = GeoIpDatabaseService(properties, webClient)
-
     // Exception Handler
 
     @Bean
     @ConditionalOnMissingBean
     fun geoLocationExceptionHandler() = GeolocationExceptionHandler()
+
+    // Mapper
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun geolocationMapper() = GeolocationMapper()
+
+    // Service
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun geoLocationService(
+        geoIpDatabaseService: GeoIpDatabaseService,
+        properties: GeolocationProperties,
+        geolocationMapper: GeolocationMapper
+    ): GeolocationService {
+        return GeolocationService(geoIpDatabaseService, properties, geolocationMapper)
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun geoIpDatabaseService(properties: GeolocationProperties, webClient: WebClient) = GeoIpDatabaseService(properties, webClient)
 }

@@ -12,7 +12,7 @@ import io.lettuce.core.api.coroutines.RedisCoroutinesCommands
 import io.lettuce.core.codec.ByteArrayCodec
 import io.lettuce.core.codec.RedisCodec
 import io.lettuce.core.codec.StringCodec
-import io.stereov.singularity.cache.service.RedisService
+import io.stereov.singularity.cache.service.CacheService
 import io.stereov.singularity.global.config.ApplicationConfiguration
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
@@ -35,7 +35,7 @@ import java.time.Duration
  * the necessary configurations are applied in the correct order.
  *
  * It enables the following services:
- * - [RedisService]
+ * - [CacheService]
  *
  * It enables the following beans:
  * - [StatefulRedisConnection]
@@ -89,11 +89,5 @@ class RedisConfiguration {
     @ConditionalOnMissingBean
     fun redisCoroutinesCommands(connection: StatefulRedisConnection<String, ByteArray>): RedisCoroutinesCommands<String, ByteArray> {
         return connection.coroutines()
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun redisService(commands: RedisCoroutinesCommands<String, ByteArray>): RedisService {
-        return RedisService(commands)
     }
 }

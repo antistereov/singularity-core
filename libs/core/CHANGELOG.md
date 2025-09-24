@@ -44,7 +44,7 @@ antistereov
 - [fee34c5](https://github.com/antistereov/singularity-content/commits/fee34c5) **core**: add fallback options for translate method in Translatable interface
 - [0119182](https://github.com/antistereov/singularity-content/commits/0119182) **core**: rename UserDto to UserResponse
 - [134f857](https://github.com/antistereov/singularity-content/commits/134f857) **core**: remove application info from user document - this will be saved in a separate collection in the future
-- [f97d013](https://github.com/antistereov/singularity-content/commits/f97d013) **core**: remove device data from UserDto
+- [f97d013](https://github.com/antistereov/singularity-content/commits/f97d013) **core**: remove session data from UserDto
 - [e82f07f](https://github.com/antistereov/singularity-content/commits/e82f07f) **core**: add translations
 - [cc56711](https://github.com/antistereov/singularity-content/commits/cc56711) **core**: simplify base exception handler and update usages
 - [7c91660](https://github.com/antistereov/singularity-content/commits/7c91660) **content**: use tag key for identification instead of id

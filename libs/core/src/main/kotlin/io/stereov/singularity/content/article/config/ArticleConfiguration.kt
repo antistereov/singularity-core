@@ -1,18 +1,22 @@
 package io.stereov.singularity.content.article.config
 
-import io.stereov.singularity.auth.core.service.AuthenticationService
+import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.content.article.controller.ArticleController
 import io.stereov.singularity.content.article.controller.ArticleManagementController
+import io.stereov.singularity.content.article.mapper.ArticleMapper
 import io.stereov.singularity.content.article.repository.ArticleRepository
 import io.stereov.singularity.content.article.service.ArticleManagementService
 import io.stereov.singularity.content.article.service.ArticleService
 import io.stereov.singularity.content.core.component.AccessCriteria
 import io.stereov.singularity.content.core.config.ContentConfiguration
 import io.stereov.singularity.content.invitation.service.InvitationService
+import io.stereov.singularity.content.tag.mapper.TagMapper
 import io.stereov.singularity.content.tag.service.TagService
-import io.stereov.singularity.content.translate.service.TranslateService
 import io.stereov.singularity.file.core.service.FileStorage
+import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.global.properties.UiProperties
+import io.stereov.singularity.translate.service.TranslateService
+import io.stereov.singularity.user.core.mapper.UserMapper
 import io.stereov.singularity.user.core.service.UserService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
@@ -44,6 +48,12 @@ class ArticleConfiguration {
         return ArticleManagementController(articleManagementService)
     }
 
+    // Mapper
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun articleMapper(appProperties: AppProperties) = ArticleMapper(appProperties)
+
     // Service
 
     @Bean
@@ -51,34 +61,56 @@ class ArticleConfiguration {
     fun articleService(
         articleRepository: ArticleRepository,
         userService: UserService,
-        authenticationService: AuthenticationService,
+        authorizationService: AuthorizationService,
         tagService: TagService,
         reactiveMongoTemplate: ReactiveMongoTemplate,
         accessCriteria: AccessCriteria,
-        fileStorage: FileStorage
+        fileStorage: FileStorage,
+        userMapper: UserMapper,
+        articleMapper: ArticleMapper,
+        tagMapper: TagMapper,
+        translateService: TranslateService
     ): ArticleService {
         return ArticleService(
             articleRepository,
             userService,
-            authenticationService,
+            authorizationService,
             tagService,
             reactiveMongoTemplate,
             accessCriteria,
             fileStorage,
+            userMapper,
+            articleMapper,
+            tagMapper,
+            translateService
         )
     }
 
     @Bean
     @ConditionalOnMissingBean
-    fun articleManagementService(articleService: ArticleService, authenticationService: AuthenticationService, invitationService: InvitationService, fileStorage: FileStorage, translateService: TranslateService, uiProperties: UiProperties, userService: UserService): ArticleManagementService {
+    fun articleManagementService(
+        articleService: ArticleService,
+        authorizationService: AuthorizationService,
+        invitationService: InvitationService,
+        fileStorage: FileStorage,
+        translateService: TranslateService,
+        uiProperties: UiProperties,
+        userService: UserService,
+        userMapper: UserMapper,
+        articleMapper: ArticleMapper,
+        appProperties: AppProperties
+    ): ArticleManagementService {
         return ArticleManagementService(
             articleService,
-            authenticationService,
+            authorizationService,
             invitationService,
             fileStorage,
             translateService,
             uiProperties,
-            userService
+            userService,
+            userMapper,
+            articleMapper,
+            appProperties
         )
     }
 }

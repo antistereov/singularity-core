@@ -36,3 +36,19 @@ openApi {
     outputFileName.set("openapi.yaml")
 }
 
+tasks.register("updateDocusaurusOpenApiDocs") {
+    group = "openApi"
+
+    dependsOn("generateOpenApiDocs")
+
+    doLast {
+        exec {
+            commandLine = listOf("yarn", "docusaurus", "clean-api-docs", "all")
+            workingDir = File("$rootDir/docs")
+        }
+        exec {
+            commandLine = listOf("yarn", "docusaurus", "gen-api-docs", "all")
+            workingDir = File("$rootDir/docs")
+        }
+    }
+}

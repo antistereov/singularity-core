@@ -1,15 +1,10 @@
 package io.stereov.singularity.secrets.core.component
 
-import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.secrets.core.model.CachedSecret
+import io.stereov.singularity.cache.service.CacheService
 import io.stereov.singularity.secrets.core.model.Secret
 import io.stereov.singularity.secrets.core.properties.SecretStoreProperties
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
-import java.time.Instant
-import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 
 /**
  * A cache for secrets loaded from a key manager.
@@ -17,42 +12,26 @@ import java.util.concurrent.ConcurrentHashMap
  * The secrets will expire and be deleted automatically. It is configured in the [SecretStoreProperties].
  */
 @Component
-class SecretCache(secretStoreProperties: SecretStoreProperties) {
+class SecretCache(
+    secretStoreProperties: SecretStoreProperties,
+    private val cacheService: CacheService
+) {
 
-    private val logger: KLogger
-        get() = KotlinLogging.logger {}
+    private val logger = KotlinLogging.logger {}
+
+    private val prefix = "secrets"
+
+    private fun getCacheKey(key: String) = "$prefix:$key"
 
     private val expirationDurationSeconds = secretStoreProperties.cacheExpiration
-    private val cache = ConcurrentHashMap<UUID, CachedSecret>()
 
-    fun put(secret: Secret) {
-        val expirationTime = Instant.now().plusSeconds(expirationDurationSeconds)
-        cache[secret.id] = CachedSecret(secret, expirationTime)
+    suspend fun put(secret: Secret) {
+        logger.trace { "Caching secret ${secret.key}" }
+        cacheService.put(getCacheKey(secret.key), secret, expirationDurationSeconds)
     }
 
-    fun get(id: UUID): Secret? {
-        val cached = cache[id]
-        if (cached != null && cached.expirationTime.isAfter(Instant.now())) {
-            put(cached.secret)
-            return cached.secret
-        }
-
-        cache.remove(id)
-        return null
-    }
-
-    fun getByKey(key: String): Secret? {
-        return cache.entries.firstOrNull { it.value.secret.key == key }?.value?.secret
-    }
-
-    fun cleanupExpiredEntries() {
-        val now = Instant.now()
-        cache.entries.removeIf { it.value.expirationTime.isBefore(now) }
-    }
-
-    @Scheduled(fixedRateString = "\${singularity.secrets.cache-expiration:900000}")
-    fun scheduledCleanup() {
-        logger.debug { "Starting scheduled cleanup of secret cache" }
-        cleanupExpiredEntries()
+    suspend fun getOrNull(key: String): Secret? {
+        logger.trace { "Retrieving secret $key from cache" }
+        return cacheService.getOrNull<Secret>(getCacheKey(key))
     }
 }

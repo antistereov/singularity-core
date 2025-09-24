@@ -1,26 +1,27 @@
 package io.stereov.singularity.content.core.service
 
 import io.github.oshai.kotlinlogging.KLogger
-import io.stereov.singularity.auth.core.service.AuthenticationService
+import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.content.core.dto.*
-import io.stereov.singularity.content.core.dto.AcceptInvitationToContentRequest
 import io.stereov.singularity.content.core.model.ContentAccessRole
 import io.stereov.singularity.content.core.model.ContentAccessSubject
 import io.stereov.singularity.content.core.model.ContentDocument
-import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.content.invitation.exception.model.InvalidInvitationException
 import io.stereov.singularity.content.invitation.model.InvitationDocument
 import io.stereov.singularity.content.invitation.service.InvitationService
+import io.stereov.singularity.user.core.mapper.UserMapper
 import io.stereov.singularity.user.core.service.UserService
 import org.bson.types.ObjectId
+import java.util.*
 
 interface ContentManagementService<T: ContentDocument<T>> {
 
     val userService: UserService
     val contentService: ContentService<T>
-    val authenticationService: AuthenticationService
+    val authorizationService: AuthorizationService
     val invitationService: InvitationService
     val acceptPath: String
+    val userMapper: UserMapper
 
     val logger: KLogger
 
@@ -47,11 +48,11 @@ interface ContentManagementService<T: ContentDocument<T>> {
         key: String,
         req: InviteUserToContentRequest,
         invitedTo: String,
-        lang: Language,
+        locale: Locale?,
     ): ExtendedContentAccessDetailsResponse {
         logger.debug { "Inviting user with email \"${req.email}\" to content with key \"$key\" as ${req.role}" }
 
-        val user = authenticationService.getCurrentUser()
+        val user = authorizationService.getCurrentUser()
         val content = contentService.findAuthorizedByKey(key, ContentAccessRole.ADMIN)
         val invitation = invitationService.invite(
             email = req.email,
@@ -59,7 +60,7 @@ interface ContentManagementService<T: ContentDocument<T>> {
             invitedTo = invitedTo,
             acceptPath = acceptPath,
             claims = mapOf("key" to key, "role" to req.role),
-            lang = lang
+            locale = locale
         )
 
         content.addInvitation(invitation)
@@ -85,7 +86,7 @@ interface ContentManagementService<T: ContentDocument<T>> {
         val email = invitation.sensitive.email
 
         val user = userService.findByEmailOrNull(email)
-            ?: throw InvalidInvitationException("No user exists with mail from invitation")
+            ?: throw InvalidInvitationException("No user exists with email from invitation")
         val content = contentService.findByKeyOrNull(key)
             ?: throw InvalidInvitationException("No content matched key from invitation")
 
@@ -131,7 +132,7 @@ interface ContentManagementService<T: ContentDocument<T>> {
             val foundUser = userService.findByIdOrNull(ObjectId(id))
 
             if (foundUser != null) {
-                users.add(UserContentAccessDetails(userService.createOverview(foundUser), ContentAccessRole.ADMIN))
+                users.add(UserContentAccessDetails(userMapper.toOverview(foundUser), ContentAccessRole.ADMIN))
             } else {
                 content.access.users.admin.remove(id)
             }
@@ -141,7 +142,7 @@ interface ContentManagementService<T: ContentDocument<T>> {
             val foundUser = userService.findByIdOrNull(ObjectId(id))
 
             if (foundUser != null) {
-                users.add(UserContentAccessDetails(userService.createOverview(foundUser), ContentAccessRole.EDITOR))
+                users.add(UserContentAccessDetails(userMapper.toOverview(foundUser), ContentAccessRole.EDITOR))
             } else {
                 content.access.users.editor.remove(id)
             }
@@ -151,7 +152,7 @@ interface ContentManagementService<T: ContentDocument<T>> {
             val foundUser = userService.findByIdOrNull(ObjectId(id))
 
             if (foundUser != null) {
-                users.add(UserContentAccessDetails(userService.createOverview(foundUser), ContentAccessRole.VIEWER))
+                users.add(UserContentAccessDetails(userMapper.toOverview(foundUser), ContentAccessRole.VIEWER))
             } else {
                 content.access.users.viewer.remove(id)
             }

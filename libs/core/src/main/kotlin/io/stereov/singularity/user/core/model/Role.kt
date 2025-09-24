@@ -42,8 +42,6 @@ enum class Role(private val value: String) {
      * @return The string representation of the role.
      */
     override fun toString(): String {
-        logger.debug { "Returning role as string" }
-
         return this.value
     }
 

@@ -2,6 +2,7 @@ package io.stereov.singularity.secrets.vault.config
 
 import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.global.properties.AppProperties
+import io.stereov.singularity.secrets.core.component.SecretCache
 import io.stereov.singularity.secrets.core.component.SecretStore
 import io.stereov.singularity.secrets.vault.component.VaultSecretStore
 import io.stereov.singularity.secrets.vault.properties.VaultSecretStoreProperties
@@ -31,8 +32,13 @@ class VaultSecretStoreConfiguration(
 
     @Bean
     @ConditionalOnMissingBean
-    fun vaultSecretStore(properties: VaultSecretStoreProperties, appProperties: AppProperties, vaultOperations: ReactiveVaultOperations): SecretStore {
-        return VaultSecretStore(properties, appProperties, vaultOperations)
+    fun vaultSecretStore(
+        properties: VaultSecretStoreProperties,
+        appProperties: AppProperties,
+        vaultOperations: ReactiveVaultOperations,
+        secretCache: SecretCache
+    ): SecretStore {
+        return VaultSecretStore(properties, appProperties, vaultOperations, secretCache)
     }
 
     override fun vaultEndpoint(): VaultEndpoint {

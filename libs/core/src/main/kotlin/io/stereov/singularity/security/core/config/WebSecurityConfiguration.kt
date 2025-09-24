@@ -1,20 +1,29 @@
 package io.stereov.singularity.security.core.config
 
-import io.stereov.singularity.auth.core.config.AuthenticationConfiguration
-import io.stereov.singularity.auth.core.filter.CookieAuthenticationFilter
+import io.stereov.singularity.auth.core.component.CookieCreator
+import io.stereov.singularity.auth.core.filter.AuthenticationFilter
 import io.stereov.singularity.auth.core.properties.AuthProperties
+import io.stereov.singularity.auth.core.service.token.AccessTokenService
+import io.stereov.singularity.auth.core.service.token.RefreshTokenService
+import io.stereov.singularity.auth.core.service.token.SessionTokenService
+import io.stereov.singularity.auth.core.service.token.StepUpTokenService
 import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
+import io.stereov.singularity.auth.oauth2.component.CustomOAuth2AuthenticationFailureHandler
+import io.stereov.singularity.auth.oauth2.component.CustomOAuth2AuthenticationSuccessHandler
+import io.stereov.singularity.auth.oauth2.component.CustomOAuth2AuthorizationRequestResolver
+import io.stereov.singularity.auth.oauth2.properties.OAuth2Properties
+import io.stereov.singularity.auth.oauth2.service.OAuth2AuthenticationService
+import io.stereov.singularity.auth.oauth2.service.token.OAuth2StateTokenService
 import io.stereov.singularity.global.filter.LoggingFilter
 import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.ratelimit.filter.RateLimitFilter
 import io.stereov.singularity.ratelimit.service.RateLimitService
 import io.stereov.singularity.security.core.properties.SecurityProperties
 import io.stereov.singularity.user.core.model.Role
-import io.stereov.singularity.user.core.service.UserService
-import io.stereov.singularity.user.token.service.AccessTokenService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -25,13 +34,14 @@ import org.springframework.security.config.web.server.SecurityWebFiltersOrder
 import org.springframework.security.config.web.server.ServerHttpSecurity
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository
 import org.springframework.security.web.server.SecurityWebFilterChain
 import org.springframework.security.web.server.ServerAuthenticationEntryPoint
 import org.springframework.security.web.server.authentication.HttpStatusServerEntryPoint
-import org.springframework.security.web.server.context.NoOpServerSecurityContextRepository
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.reactive.CorsConfigurationSource
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
+import reactor.core.publisher.Mono
 
 /**
  * # Configuration class for web security.
@@ -44,7 +54,7 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
  * the necessary configurations are applied in the correct order.
  *
  * It enables the following services:
- * - [io.stereov.singularity.user.token.service.AccessTokenService]
+ * - [AccessTokenService]
  * - [io.stereov.singularity.user.core.service.UserService]
  *
  * It enables the following beans:
@@ -58,11 +68,7 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
 @Configuration
 @EnableWebFluxSecurity
 @EnableMethodSecurity(prePostEnabled = true)
-@AutoConfiguration(
-    after = [
-        AuthenticationConfiguration::class
-    ]
-)
+@AutoConfiguration
 @EnableConfigurationProperties(SecurityProperties::class)
 class WebSecurityConfiguration {
 
@@ -79,10 +85,17 @@ class WebSecurityConfiguration {
         authProperties: AuthProperties,
         uiProperties: UiProperties,
         accessTokenService: AccessTokenService,
-        userService: UserService,
         rateLimitService: RateLimitService, geolocationProperties: GeolocationProperties,
         geoLocationService: GeolocationService,
-        securityProperties: SecurityProperties
+        securityProperties: SecurityProperties,
+        oAuth2AuthenticationService: OAuth2AuthenticationService,
+        refreshTokenService: RefreshTokenService,
+        cookieCreator: CookieCreator,
+        sessionTokenService: SessionTokenService,
+        clientRegistrations: ReactiveClientRegistrationRepository,
+        oAuth2Properties: OAuth2Properties,
+        stepUpTokenService: StepUpTokenService,
+        oAuth2StateTokenService: OAuth2StateTokenService,
     ): SecurityWebFilterChain {
         return http
             .csrf { it.disable() }
@@ -105,10 +118,34 @@ class WebSecurityConfiguration {
                 it.pathMatchers("/admin/**").hasRole(Role.ADMIN.name)
                 it.anyExchange().permitAll()
             }
-            .addFilterBefore(RateLimitFilter(rateLimitService), SecurityWebFiltersOrder.FIRST)
+            .oauth2Login { oauth2 ->
+                oauth2.authenticationFailureHandler(
+                    CustomOAuth2AuthenticationFailureHandler(
+                        oAuth2Properties
+                    )
+                )
+                oauth2.authorizationRequestResolver(
+                    CustomOAuth2AuthorizationRequestResolver(
+                        clientRegistrations,
+                        oAuth2StateTokenService
+                    )
+                )
+                oauth2.authenticationSuccessHandler(
+                    CustomOAuth2AuthenticationSuccessHandler(
+                        accessTokenService,
+                        refreshTokenService,
+                        sessionTokenService,
+                        oAuth2AuthenticationService,
+                        cookieCreator,
+                        oAuth2Properties,
+                        stepUpTokenService,
+                        oAuth2StateTokenService
+                    )
+                )
+            }
+            .addFilterBefore(RateLimitFilter(rateLimitService, geolocationProperties), SecurityWebFiltersOrder.FIRST)
             .addFilterBefore(LoggingFilter(geolocationProperties, geoLocationService), SecurityWebFiltersOrder.AUTHENTICATION)
-            .addFilterBefore(CookieAuthenticationFilter(accessTokenService, userService, authProperties), SecurityWebFiltersOrder.AUTHENTICATION)
-            .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())
+            .addFilterAfter(AuthenticationFilter(accessTokenService), SecurityWebFiltersOrder.AUTHENTICATION)
             .build()
     }
 
@@ -135,5 +172,12 @@ class WebSecurityConfiguration {
         val source = UrlBasedCorsConfigurationSource()
         source.registerCorsConfiguration("/**", configuration)
         return source
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty("singularity.auth.oauth2.enable", havingValue = "false", matchIfMissing = true)
+    fun emptyClientRegistrationRepository(): ReactiveClientRegistrationRepository {
+        return ReactiveClientRegistrationRepository { Mono.empty() }
     }
 }

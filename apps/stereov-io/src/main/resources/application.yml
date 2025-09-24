@@ -13,6 +13,17 @@ spring:
       timeout: ${REDIS_TIMEOUT:5000ms}
       ssl:
         enabled: ${REDIS_SSL_ENABLED:false}
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id: ${GITHUB_OAUTH2_CLIENT_ID}
+            client-secret: ${GITHUB_OAUTH2_CLIENT_SECRET}
+            scope:
+              - user:email
+              - read:user
+
   devtools:
     restart:
       enabled: ${DEV_MODE:false}
@@ -39,6 +50,10 @@ singularity:
       account-id: ${MAXMIND_ACCOUNT_ID}
       license-key: ${MAXMIND_LICENSE_KEY}
     allow-header-authentication: false
+    allow-oauth2-providers: true
+    two-factor:
+      recovery-code-length: 10
+      recovery-code-count: 6
   file:
     storage:
       type: ${STORAGE_TYPE}
@@ -73,9 +88,8 @@ singularity:
     smtp-starttls: ${MAIL_SMTP_STARTTLS:true}
     debug: ${MAIL_DEBUG:false}
     verification-expiration: ${MAIL_VERIFICATION_EXPIRATION:900}
-    verification-send-cooldown: ${MAIL_VERIFICATION_SEND_COOLDOWN:60}
+    send-cooldown: ${MAIL_VERIFICATION_SEND_COOLDOWN:60}
     password-reset-expiration: 900
-    password-reset-send-cooldown: 60
   security:
     jwt:
       expires-in: 900
@@ -87,9 +101,6 @@ singularity:
     login-attempt-limit:
       ip-limit: 1000
       ip-time-window: 1
-    two-factor:
-      recovery-code-length: 10
-      recovery-code-count: 6
   ui:
     base-url: ${UI_BASE_URL}
     icon-url: ${ICON_URL}

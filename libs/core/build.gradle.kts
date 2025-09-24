@@ -38,7 +38,7 @@ repositories {
 
 val kotlinVersion = "2.0.21"
 val kotlinxVersion = "1.10.1"
-val springBootVersion = "3.5.3"
+val springBootVersion = "3.5.5"
 val bucket4jVersion = "8.14.0"
 
 dependencies {
@@ -52,6 +52,7 @@ dependencies {
     api("org.springframework.security:spring-security-config")
     api("org.springframework.security:spring-security-oauth2-resource-server")
     api("org.springframework.security:spring-security-oauth2-jose")
+    api("org.springframework.boot:spring-boot-starter-oauth2-client")
 
     // File Storage
     implementation(platform("software.amazon.awssdk:bom:2.27.21"))

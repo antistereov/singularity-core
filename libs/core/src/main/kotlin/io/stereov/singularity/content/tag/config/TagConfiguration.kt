@@ -3,8 +3,11 @@ package io.stereov.singularity.content.tag.config
 import io.stereov.singularity.content.core.config.ContentConfiguration
 import io.stereov.singularity.content.core.properties.ContentProperties
 import io.stereov.singularity.content.tag.controller.TagController
+import io.stereov.singularity.content.tag.mapper.TagMapper
 import io.stereov.singularity.content.tag.repository.TagRepository
 import io.stereov.singularity.content.tag.service.TagService
+import io.stereov.singularity.global.properties.AppProperties
+import io.stereov.singularity.translate.service.TranslateService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean
@@ -26,15 +29,36 @@ class TagConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun tagController(service: TagService): TagController {
-        return TagController(service)
+    fun tagController(
+        service: TagService,
+        tagMapper: TagMapper
+    ): TagController {
+        return TagController(service, tagMapper)
     }
+
+    // Mapper
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun tagMapper(translationService: TranslateService) = TagMapper(translationService)
 
     // Service
 
     @Bean
     @ConditionalOnMissingBean
-    fun tagService(repository: TagRepository, reactiveMongoTemplate: ReactiveMongoTemplate, contentProperties: ContentProperties): TagService {
-        return TagService(repository, reactiveMongoTemplate, contentProperties)
+    fun tagService(
+        repository: TagRepository,
+        reactiveMongoTemplate: ReactiveMongoTemplate,
+        contentProperties: ContentProperties,
+        tagMapper: TagMapper,
+        appProperties: AppProperties
+    ): TagService {
+        return TagService(
+            repository,
+            reactiveMongoTemplate,
+            contentProperties,
+            tagMapper,
+            appProperties
+        )
     }
 }

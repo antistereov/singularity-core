@@ -17,6 +17,16 @@ spring:
     restart:
       enabled: false
       additional-paths: src/main
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id: ${GITHUB_OAUTH2_CLIENT_ID}
+            client-secret: ${GITHUB_OAUTH2_CLIENT_SECRET}
+            scope:
+              - user:email
+              - read:user
 
 logging:
   level:
@@ -31,6 +41,13 @@ singularity:
       database-directory: .data/demo/geolocation
       account-id: ${MAXMIND_ACCOUNT_ID}
       license-key: ${MAXMIND_LICENSE_KEY}
+    two-factor:
+      totp:
+        recovery-code:
+          length: 10
+          count: 6
+    oauth2:
+      enable: true
   app:
     name: TestApplication
     base-url: ${BACKEND_BASE_URL:http://localhost:8000}
@@ -39,7 +56,9 @@ singularity:
     create-root-user: false
     root-email: root@example.com
     root-password: very-secure-root-password
-    enable-mail: false
+    default-locale: en
+  email:
+    enable: false
   file:
     storage:
       type: local
@@ -62,8 +81,5 @@ singularity:
     login-attempt-limit:
       ip-limit: 10000
       ip-time-window: 1
-    two-factor:
-      recovery-code-length: 10
-      recovery-code-count: 6
   ui:
     base-url: ${UI_BASE_URL:http://localhost:3000}

@@ -2,17 +2,18 @@ package io.stereov.singularity.content.tag.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.content.translate.model.Language
+import io.stereov.singularity.content.core.properties.ContentProperties
 import io.stereov.singularity.content.tag.dto.CreateTagMultiLangRequest
 import io.stereov.singularity.content.tag.dto.CreateTagRequest
 import io.stereov.singularity.content.tag.dto.UpdateTagRequest
 import io.stereov.singularity.content.tag.exception.model.InvalidUpdateTagRequest
 import io.stereov.singularity.content.tag.exception.model.TagKeyExistsException
+import io.stereov.singularity.content.tag.mapper.TagMapper
 import io.stereov.singularity.content.tag.model.TagDocument
 import io.stereov.singularity.content.tag.model.TagTranslation
 import io.stereov.singularity.content.tag.repository.TagRepository
-import io.stereov.singularity.content.core.properties.ContentProperties
 import io.stereov.singularity.global.exception.model.DocumentNotFoundException
+import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.global.util.getFieldContainsCriteria
 import jakarta.annotation.PostConstruct
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -21,12 +22,15 @@ import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.find
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 class TagService(
     private val repository: TagRepository,
     private val reactiveMongoTemplate: ReactiveMongoTemplate,
     private val contentProperties: ContentProperties,
+    private val tagMapper: TagMapper,
+    private val appProperties: AppProperties,
 ) {
 
     @PostConstruct
@@ -51,7 +55,7 @@ class TagService(
 
         if (existsByKey(req.key)) throw TagKeyExistsException(req.key)
 
-        return save(TagDocument(req))
+        return save(tagMapper.createTag(req))
     }
 
     suspend fun create(req: CreateTagMultiLangRequest): TagDocument {
@@ -59,7 +63,7 @@ class TagService(
 
         if (existsByKey(req.key)) throw TagKeyExistsException(req.key)
 
-        return save(TagDocument(req))
+        return save(tagMapper.createTag(req))
     }
 
     suspend fun save(tag: TagDocument): TagDocument {
@@ -81,10 +85,12 @@ class TagService(
         return repository.existsByKey(name)
     }
 
-    suspend fun findByNameContains(substring: String, lang: Language): List<TagDocument> {
+    suspend fun findByNameContains(substring: String, locale: Locale?): List<TagDocument> {
         logger.debug { "Finding tags with name containing \"$substring\"" }
 
-        val field = "${TagDocument::translations.name}.$lang.${TagTranslation::name.name}"
+        val actualLocale = locale ?: appProperties.locale
+
+        val field = "${TagDocument::translations.name}.$actualLocale.${TagTranslation::name.name}"
 
         val criteria = getFieldContainsCriteria(field, substring)
 
@@ -98,27 +104,21 @@ class TagService(
         logger.debug { "Updating tag with key \"$key\"" }
 
         val tag = findByKey(key)
-        val updatedTranslations = mutableMapOf<Language, TagTranslation>()
+        val updatedTranslations = mutableMapOf<Locale, TagTranslation>()
 
-        req.translations.forEach { (lang, updateReq) ->
-            val existing = tag.translations[lang]
+        req.translations.forEach { (locale, updateReq) ->
+            val existing = tag.translations[locale]
 
             if (existing != null) {
-                updatedTranslations.put(
-                    lang,
-                    TagTranslation(
-                        updateReq.name ?: existing.name,
-                        updateReq.description ?: existing.description
-                    )
+                updatedTranslations[locale] = TagTranslation(
+                    updateReq.name ?: existing.name,
+                    updateReq.description ?: existing.description
                 )
             } else {
-                updatedTranslations.put(
-                    lang,
-                    TagTranslation(
-                        updateReq.name
-                            ?: throw InvalidUpdateTagRequest("Failed to add new translation $lang for tag \"$key\": tag name not specified"),
-                        updateReq.description ?: ""
-                    )
+                updatedTranslations[locale] = TagTranslation(
+                    updateReq.name
+                        ?: throw InvalidUpdateTagRequest("Failed to add new translation $locale for tag \"$key\": tag name not specified"),
+                    updateReq.description ?: ""
                 )
             }
         }

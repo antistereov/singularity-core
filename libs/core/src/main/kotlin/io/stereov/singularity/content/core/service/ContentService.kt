@@ -2,13 +2,13 @@ package io.stereov.singularity.content.core.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.stereov.singularity.auth.core.exception.model.NotAuthorizedException
-import io.stereov.singularity.auth.core.model.AccessType
-import io.stereov.singularity.auth.core.service.AuthenticationService
+import io.stereov.singularity.auth.core.model.token.AccessType
+import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.content.core.model.ContentAccessRole
 import io.stereov.singularity.content.core.model.ContentDocument
 import io.stereov.singularity.content.core.repository.ContentRepository
 import io.stereov.singularity.global.exception.model.DocumentNotFoundException
-import io.stereov.singularity.user.group.model.KnownGroups
+import io.stereov.singularity.auth.group.model.KnownGroups
 import org.bson.types.ObjectId
 import java.time.Instant
 
@@ -16,7 +16,7 @@ interface ContentService<T: ContentDocument<T>>  {
 
     val repository: ContentRepository<T>
     val contentClass: Class<T>
-    val authenticationService: AuthenticationService
+    val authorizationService: AuthorizationService
 
     val logger: KLogger
 
@@ -79,13 +79,13 @@ interface ContentService<T: ContentDocument<T>>  {
     suspend fun requireEditorGroupMembership() {
         logger.debug { "Validate that user belongs to Editor group" }
 
-        authenticationService.requireGroupMembership(KnownGroups.EDITOR)
+        authorizationService.requireGroupMembership(KnownGroups.EDITOR)
     }
 
     suspend fun requireAuthorization(content: T, role: ContentAccessRole): T {
         logger.debug { "Validating that user has role \"$role\" in ${contentClass.simpleName} with key \"${content.key}\"" }
 
-        val user = authenticationService.getCurrentUser()
+        val user = authorizationService.getCurrentUser()
 
         if (!content.hasAccess(user, role)) throw NotAuthorizedException("User does not have sufficient permission to perform this action. Required role: $role")
 

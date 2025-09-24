@@ -1,5 +1,7 @@
 package io.stereov.singularity.ratelimit.filter
 
+import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
+import io.stereov.singularity.global.util.getClientIp
 import io.stereov.singularity.ratelimit.excpetion.model.TooManyRequestsException
 import io.stereov.singularity.ratelimit.service.RateLimitService
 import org.springframework.http.HttpStatus
@@ -19,7 +21,8 @@ import reactor.core.publisher.Mono
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
 class RateLimitFilter(
-    private val rateLimitService: RateLimitService
+    private val rateLimitService: RateLimitService,
+    private val geolocationProperties: GeolocationProperties
 ) : WebFilter {
 
     /**
@@ -32,13 +35,13 @@ class RateLimitFilter(
      */
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
         return Mono.defer {
-            val clientIp = exchange.request.remoteAddress?.address?.hostAddress ?: "unknown"
+            val clientIp = exchange.request.getClientIp(geolocationProperties.realIpHeader) ?: "unknown"
             val path = exchange.request.path.toString()
-            val isLoginAttempt = path.contains("/api/user/login") ||
-                    path.contains("/api/user/2fa/recovery") ||
-                    path.contains("/api/user/mail/reset-password") ||
-                    path.contains("/api/user/2fa/verify-step-up") ||
-                    path.contains("/api/user/2fa/verify-login")
+            val isLoginAttempt = path.contains("/api/auth/login") ||
+                    path.contains("/api/auth/2fa/recovery") ||
+                    path.contains("/api/auth/password/reset") ||
+                    path.contains("/api/auth/2fa/step-up") ||
+                    path.contains("/api/auth/2fa/login")
 
             rateLimitService.checkIpRateLimit(clientIp)
                 .then(rateLimitService.checkUserRateLimit())

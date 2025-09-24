@@ -2,42 +2,32 @@ package io.stereov.singularity.user.core.model
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.auth.core.exception.model.WrongIdentityProviderException
+import io.stereov.singularity.auth.core.model.IdentityProvider
+import io.stereov.singularity.auth.core.model.SessionInfo
+import io.stereov.singularity.auth.guest.exception.model.GuestCannotPerformThisActionException
+import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
 import io.stereov.singularity.database.core.model.SensitiveDocument
 import io.stereov.singularity.database.encryption.model.Encrypted
-import io.stereov.singularity.global.exception.model.InvalidDocumentException
-import io.stereov.singularity.global.exception.model.MissingFunctionParameterException
 import io.stereov.singularity.database.hash.model.SearchableHash
 import io.stereov.singularity.database.hash.model.SecureHash
+import io.stereov.singularity.global.exception.model.InvalidDocumentException
+import io.stereov.singularity.global.exception.model.MissingFunctionParameterException
+import io.stereov.singularity.user.core.model.identity.HashedUserIdentity
+import io.stereov.singularity.user.core.model.identity.UserIdentity
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Transient
 import java.time.Instant
+import java.util.*
 
-/**
- * # The User Document
-
- * @author <a href="https://github.com/antistereov">antistereov</a>
- */
 data class UserDocument(
     private var _id: ObjectId? = null,
-    var password: SecureHash,
     val created: Instant = Instant.now(),
     var lastActive: Instant = Instant.now(),
+    val roles: MutableSet<Role>,
+    val groups: MutableSet<String>,
     override var sensitive: SensitiveUserData,
 ) : SensitiveDocument<SensitiveUserData> {
-
-    constructor(
-        id: ObjectId? = null,
-        password: SecureHash,
-        created: Instant = Instant.now(),
-        lastActive: Instant = Instant.now(),
-        name: String,
-        email: String,
-        roles: MutableSet<Role> = mutableSetOf(Role.USER),
-        groups: MutableSet<String> = mutableSetOf(),
-        security: UserSecurityDetails = UserSecurityDetails(),
-        devices: MutableList<DeviceInfo> = mutableListOf(),
-        avatarFileKey: String? = null,
-    ): this(id, password, created, lastActive, SensitiveUserData(name, email, roles, groups, security, devices, avatarFileKey))
 
     @get:Transient
     private val logger: KLogger
@@ -61,15 +51,64 @@ data class UserDocument(
     val fileStoragePath: String
         get() = "users/$id"
 
+    @get:Transient
+    val twoFactorEnabled: Boolean
+        get() = sensitive.security.twoFactor.enabled
+
+    @get:Transient
+    val twoFactorMethods: List<TwoFactorMethod>
+        get() = sensitive.security.twoFactor.methods
+
+    @get:Transient
+    val password: SecureHash?
+        get() = sensitive.identities[IdentityProvider.PASSWORD]?.password
+
+    @get:Transient
+    val preferredTwoFactorMethod: TwoFactorMethod?
+        get() = if (twoFactorEnabled) sensitive.security.twoFactor.preferred else null
+
+    /**
+     * Check if user authenticated using password and return [SecureHash] if so.
+     *
+     * @throws WrongIdentityProviderException If the user authenticated using a different method.
+     * @throws InvalidDocumentException If the user authenticated using password but no password is set.
+     */
+    fun validateLoginTypeAndGetPassword(): SecureHash {
+        if (!sensitive.identities.containsKey(IdentityProvider.PASSWORD)) {
+            throw WrongIdentityProviderException("Authentication via password failed: user did not set up authentication using username and password")
+        }
+
+        return password ?: throw InvalidDocumentException("No password is set for user $id")
+    }
+
+
     override fun toEncryptedDocument(
         encryptedSensitiveData: Encrypted<SensitiveUserData>,
-        otherValues: List<Any>
+        otherValues: List<Any?>
     ): EncryptedUserDocument {
-        val hashedEmail = otherValues[0] as? SearchableHash
-            ?: throw MissingFunctionParameterException("Please provide the hashed email as parameter.")
+        val hashedEmail = if (isGuest) null else {
+            runCatching { otherValues[0] as SearchableHash }
+                .getOrElse { e -> throw MissingFunctionParameterException("Please provide the hashed email as parameter.", e) }
+        }
+
+        val hashedIdentitiesParameter = runCatching { otherValues[1] as Map<*, *> }
+            .getOrElse { e ->  throw MissingFunctionParameterException("Please provide the list of hashed user identities as a parameter", e) }
+        val hashedIdentities = hashedIdentitiesParameter
+            .map { (key, value) ->
+                val keyString = runCatching { key as String }
+                    .getOrElse { e -> throw MissingFunctionParameterException(
+                        "Failed to convert the key to a String. " +
+                                "Please provide a map of String and HashedUserIdentity", e) }
+                val hashedIdentity = runCatching { value as HashedUserIdentity }
+                    .getOrElse { e -> throw MissingFunctionParameterException(
+                        "Failed to convert the identity to a HashedUserIdentity. " +
+                                "Please provide a map of String and HashedUserIdentity", e) }
+
+                keyString to hashedIdentity
+            }.toMap()
 
         return EncryptedUserDocument(
-            _id, hashedEmail, password, created, lastActive, encryptedSensitiveData
+            _id, hashedEmail, hashedIdentities, roles, groups, created, lastActive, encryptedSensitiveData
         )
     }
 
@@ -83,12 +122,14 @@ data class UserDocument(
      *
      * @return The updated [UserDocument].
      */
-    fun setupTwoFactorAuth(secret: String, recoveryCodes: List<SecureHash>): UserDocument {
+    fun setupTotp(secret: String, recoveryCodes: List<SecureHash>): UserDocument {
         logger.debug { "Setting up two factor authentication" }
 
-        this.sensitive.security.twoFactor.enabled = true
-        this.sensitive.security.twoFactor.secret = secret
-        this.sensitive.security.twoFactor.recoveryCodes = recoveryCodes.toMutableList()
+        this.sensitive.security.twoFactor.totp.enabled = true
+        this.sensitive.security.twoFactor.totp.secret = secret
+        this.sensitive.security.twoFactor.totp.recoveryCodes = recoveryCodes.toMutableList()
+
+        this.sensitive.security.twoFactor.preferred = TwoFactorMethod.TOTP
 
         return this
     }
@@ -100,60 +141,64 @@ data class UserDocument(
      *
      * @return The updated [UserDocument].
      */
-    fun disableTwoFactorAuth(): UserDocument {
+    fun disableTotp(): UserDocument {
         logger.debug { "Disabling two factor authentication" }
 
-        this.sensitive.security.twoFactor.enabled = false
-        this.sensitive.security.twoFactor.secret = null
-        this.sensitive.security.twoFactor.recoveryCodes = mutableListOf()
+        this.sensitive.security.twoFactor.totp.enabled = false
+        this.sensitive.security.twoFactor.totp.secret = null
+        this.sensitive.security.twoFactor.totp.recoveryCodes = mutableListOf()
+
+        this.sensitive.security.twoFactor.preferred = TwoFactorMethod.EMAIL
 
         return this
     }
 
     /**
-     * Add or update a device for the user.
+     * Add or update a session for the user.
      *
-     * This method adds a new device or updates an existing device in the user's device list.
+     * This method adds a new session or updates an existing session in the user's session list.
      *
-     * @param deviceInfo The device information to add or update.
+     * @param sessionInfo The session information to add or update.
      *
      * @return The updated [UserDocument].
      */
-    fun addOrUpdateDevice(deviceInfo: DeviceInfo): UserDocument {
-        logger.debug { "Adding or updating device ${deviceInfo.id}" }
+    fun addOrUpdatesession(sessionId: UUID, sessionInfo: SessionInfo): UserDocument {
+        logger.debug { "Adding or updating session $sessionId" }
 
-        removeDevice(deviceInfo.id)
-        this.sensitive.devices.add(deviceInfo)
+        removeSession(sessionId)
+        this.sensitive.sessions[sessionId] = sessionInfo
 
         return this
     }
 
     /**
-     * Remove a device from the user's device list.
+     * Remove a session from the user's session list.
      *
-     * This method removes a device from the user's device list based on the device ID.
+     * This method removes a session from the user's session list based on the session ID.
      *
-     * @param deviceId The ID of the device to remove.
+     * @param sessionId The ID of the session to remove.
      *
      * @return The updated [UserDocument].
      */
-    fun removeDevice(deviceId: String): UserDocument {
-        logger.debug { "Removing device $deviceId" }
+    fun removeSession(sessionId: UUID): UserDocument {
+        logger.debug { "Removing session $sessionId" }
 
-        this.sensitive.devices.removeAll { device -> device.id == deviceId }
+        this.sensitive.sessions.remove(sessionId)
 
         return this
     }
 
     /**
-     * Clear all devices from the user's device list.
+     * Clear all sessions from the user's session list.
      *
-     * This method removes all devices from the user's device list.
+     * This method removes all sessions from the user's session list.
      */
-    fun clearDevices() {
-        logger.debug { "Clearing devices" }
+    fun clearSessions(): UserDocument {
+        logger.debug { "Clearing sessions" }
 
-        this.sensitive.devices.clear()
+        sensitive.sessions.clear()
+
+        return this
     }
 
     /**
@@ -166,7 +211,7 @@ data class UserDocument(
      * @return The updated list of roles.
      */
     fun addRole(role: Role): UserDocument {
-        this.sensitive.roles.add(role)
+        roles.add(role)
         return this
     }
 
@@ -182,5 +227,79 @@ data class UserDocument(
 
         this.lastActive = Instant.now()
         return this
+    }
+
+    fun requireNotGuestAndGetEmail(): String {
+        if (isGuest) throw GuestCannotPerformThisActionException("This action cannot be performed as a GUEST")
+
+        return sensitive.email
+            ?: throw InvalidDocumentException("No email saved for USER")
+    }
+
+    val isGuest: Boolean
+        get() = if (roles.contains(Role.GUEST)) {
+            if (roles.size == 1) true
+            else throw InvalidDocumentException("Account does have roles $roles although it is a GUEST account.")
+        } else false
+
+    companion object {
+
+        fun ofPassword(
+            id: ObjectId? = null,
+            password: SecureHash,
+            created: Instant = Instant.now(),
+            lastActive: Instant = Instant.now(),
+            name: String,
+            email: String,
+            roles: MutableSet<Role> = mutableSetOf(Role.USER),
+            groups: MutableSet<String> = mutableSetOf(),
+            email2faEnabled: Boolean,
+            mailTwoFactorCodeExpiresIn: Long,
+            sessions: MutableMap<UUID, SessionInfo> = mutableMapOf(),
+            avatarFileKey: String? = null,
+        ) = UserDocument(
+            id,
+            created,
+            lastActive,
+            roles,
+            groups,
+            SensitiveUserData(
+                name,
+                email,
+                mutableMapOf(IdentityProvider.PASSWORD to UserIdentity.ofPassword(password)),
+                UserSecurityDetails(email2faEnabled, mailTwoFactorCodeExpiresIn),
+                sessions,
+                avatarFileKey
+            )
+        )
+
+        fun ofIdentityProvider(
+            id: ObjectId? = null,
+            provider: String,
+            principalId: String,
+            created: Instant = Instant.now(),
+            lastActive: Instant = Instant.now(),
+            name: String,
+            email: String,
+            roles: MutableSet<Role> = mutableSetOf(Role.USER),
+            groups: MutableSet<String> = mutableSetOf(),
+            mailTwoFactorCodeExpiresIn: Long,
+            sessions: MutableMap<UUID, SessionInfo> = mutableMapOf(),
+            avatarFileKey: String? = null,
+        ) = UserDocument(
+            id,
+            created,
+            lastActive,
+            roles,
+            groups,
+            SensitiveUserData(
+                name,
+                email,
+                mutableMapOf(provider to UserIdentity.ofProvider(principalId)),
+                UserSecurityDetails(false, mailTwoFactorCodeExpiresIn, true),
+                sessions,
+                avatarFileKey
+            )
+        )
     }
 }

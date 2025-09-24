@@ -2,7 +2,7 @@ package io.stereov.singularity.ratelimit.config
 
 import io.github.bucket4j.redis.lettuce.cas.LettuceBasedProxyManager
 import io.stereov.singularity.auth.core.config.AuthenticationConfiguration
-import io.stereov.singularity.auth.core.service.AuthenticationService
+import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.ratelimit.excpetion.handler.RateLimitExceptionHandler
 import io.stereov.singularity.ratelimit.properties.LoginAttemptLimitProperties
@@ -32,12 +32,12 @@ class RateLimitConfiguration {
     @Bean
     @ConditionalOnMissingBean
     fun rateLimitService(
-        authenticationService: AuthenticationService,
+        authorizationService: AuthorizationService,
         proxyManager: LettuceBasedProxyManager<String>,
         rateLimitProperties: RateLimitProperties,
         loginAttemptLimitProperties: LoginAttemptLimitProperties,
     ): RateLimitService {
-        return RateLimitService(authenticationService, proxyManager, rateLimitProperties, loginAttemptLimitProperties)
+        return RateLimitService(authorizationService, proxyManager, rateLimitProperties, loginAttemptLimitProperties)
     }
 
     // Exception Handler

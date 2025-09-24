@@ -4,7 +4,7 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.user.core.exception.UserException
-import io.stereov.singularity.user.core.exception.model.EmailAlreadyExistsException
+import io.stereov.singularity.user.core.exception.model.EmailAlreadyTakenException
 import io.stereov.singularity.user.core.exception.model.InvalidRoleException
 import io.stereov.singularity.user.core.exception.model.NoAppInfoFoundException
 import io.stereov.singularity.user.core.exception.model.UserDoesNotExistException
@@ -36,7 +36,7 @@ class UserExceptionHandler {
 
         val status = when (ex) {
             is UserDoesNotExistException -> HttpStatus.UNAUTHORIZED
-            is EmailAlreadyExistsException -> HttpStatus.CONFLICT
+            is EmailAlreadyTakenException -> HttpStatus.CONFLICT
             is InvalidRoleException -> HttpStatus.INTERNAL_SERVER_ERROR
             is NoAppInfoFoundException -> HttpStatus.NOT_FOUND
             else -> HttpStatus.INTERNAL_SERVER_ERROR

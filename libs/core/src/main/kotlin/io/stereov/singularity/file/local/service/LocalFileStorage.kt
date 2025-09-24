@@ -1,7 +1,7 @@
 package io.stereov.singularity.file.local.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.auth.core.model.AccessType
+import io.stereov.singularity.auth.core.model.token.AccessType
 import io.stereov.singularity.file.core.model.FileMetadataDocument
 import io.stereov.singularity.file.core.service.FileMetadataService
 import io.stereov.singularity.file.core.service.FileStorage

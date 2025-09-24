@@ -1,9 +1,8 @@
 package io.stereov.singularity.content.article.controller
 
-import io.stereov.singularity.global.util.Constants
-import io.stereov.singularity.user.group.model.KnownGroups
-import io.stereov.singularity.user.core.model.Role
+import io.stereov.singularity.auth.group.model.KnownGroups
 import io.stereov.singularity.test.BaseContentTest
+import io.stereov.singularity.user.core.model.Role
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -17,7 +16,7 @@ class ArticleControllerIntegrationTest : BaseContentTest() {
 
         webTestClient.put()
             .uri("/api/content/articles/${article.key}/trusted?trusted=false")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus()
             .isForbidden
@@ -32,7 +31,7 @@ class ArticleControllerIntegrationTest : BaseContentTest() {
 
         webTestClient.put()
             .uri("/api/content/articles/${article.key}/trusted?trusted=true")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus()
             .isOk

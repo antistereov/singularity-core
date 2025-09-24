@@ -23,6 +23,4 @@ data class UiProperties(
     val contactPath: String = "/contact",
     val legalNoticePath: String = "/legal-notice",
     val privacyPolicyPath: String = "/privacy-policy",
-    val emailVerificationPath: String = "/auth/verify-email",
-    val passwordResetPath: String = "/auth/reset-password",
 )

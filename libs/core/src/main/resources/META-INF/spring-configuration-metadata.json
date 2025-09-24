@@ -11,9 +11,34 @@
       "sourceType": "io.stereov.singularity.auth.core.properties.AuthProperties"
     },
     {
+      "name": "singularity.auth.email-verification",
+      "type": "io.stereov.singularity.auth.core.properties.EmailVerificationProperties",
+      "sourceType": "io.stereov.singularity.auth.core.properties.EmailVerificationProperties"
+    },
+    {
+      "name": "singularity.auth.password-reset",
+      "type": "io.stereov.singularity.auth.core.properties.PasswordResetProperties",
+      "sourceType": "io.stereov.singularity.auth.core.properties.PasswordResetProperties"
+    },
+    {
       "name": "singularity.auth.geolocation",
       "type": "io.stereov.singularity.auth.geolocation.properties.GeolocationProperties",
       "sourceType": "io.stereov.singularity.auth.geolocation.properties.GeolocationProperties"
+    },
+    {
+      "name": "singularity.auth.oauth2",
+      "type": "io.stereov.singularity.auth.oauth2.properties.OAuth2Properties",
+      "sourceType": "io.stereov.singularity.auth.oauth2.properties.OAuth2Properties"
+    },
+    {
+      "name": "singularity.content",
+      "type": "io.stereov.singularity.content.core.properties.ContentProperties",
+      "sourceType": "io.stereov.singularity.content.core.properties.ContentProperties"
+    },
+    {
+      "name": "singularity.email",
+      "type": "io.stereov.singularity.email.core.properties.EmailProperties",
+      "sourceType": "io.stereov.singularity.email.core.properties.EmailProperties"
     },
     {
       "name": "singularity.file.storage",
@@ -29,11 +54,6 @@
       "name": "singularity.file.storage.s3",
       "type": "io.stereov.singularity.file.s3.properties.S3Properties",
       "sourceType": "io.stereov.singularity.file.s3.properties.S3Properties"
-    },
-    {
-      "name": "singularity.mail",
-      "type": "io.stereov.singularity.mail.core.properties.MailProperties",
-      "sourceType": "io.stereov.singularity.mail.core.properties.MailProperties"
     },
     {
       "name": "singularity.secrets",
@@ -66,9 +86,19 @@
       "sourceType": "io.stereov.singularity.ratelimit.properties.RateLimitProperties"
     },
     {
-      "name": "singularity.security.two-factor",
-      "type": "io.stereov.singularity.auth.twofactor.properties.TwoFactorAuthProperties",
-      "sourceType": "io.stereov.singularity.auth.twofactor.properties.TwoFactorAuthProperties"
+      "name": "singularity.security.two-factor.totp.recovery-code",
+      "type": "io.stereov.singularity.auth.twofactor.properties.TotpRecoveryCodeProperties",
+      "sourceType": "io.stereov.singularity.auth.twofactor.properties.TotpRecoveryCodeProperties"
+    },
+    {
+      "name": "singularity.security.two-factor.email.code",
+      "type": "io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties",
+      "sourceType": "io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties"
+    },
+    {
+      "name": "singularity.security.two-factor.email",
+      "type": "io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailProperties",
+      "sourceType": "io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailProperties"
     },
     {
       "name": "singularity.ui",
@@ -124,11 +154,11 @@
       "description": "Enable HTTPS and secure cookies for the application. Please set this to true in a production setup."
     },
     {
-      "name": "singularity.app.enable-mail",
-      "type": "java.lang.Boolean",
-      "sourceType": "io.stereov.singularity.global.properties.AppProperties",
-      "defaultValue": false,
-      "description": "Enable mails for email verification, password resets and much more. Make sure to configure your email server."
+      "name": "singularity.app.default-locale",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.translate.properties.TranslateProperties",
+      "description": "The applications default locale. Provide a valid language tag.",
+      "defaultValue": "en"
     },
     {
       "name": "singularity.app.groups",
@@ -167,6 +197,20 @@
       "sourceType": "io.stereov.singularity.auth.core.properties.AuthProperties",
       "description": "If header authentication is allowed, this property controls the precedence: if true, the Authorization header is preferred over HTTP-only cookies.",
       "default": true
+    },
+    {
+      "name": "singularity.auth.email-verification.uri",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.auth.core.properties.EmailVerificationProperties",
+      "defaultValue": "http://localhost:8000/auth/verify-email",
+      "description": "The URI that will included in the verification email that leads to the email verification page in your frontend application."
+    },
+    {
+      "name": "singularity.auth.password-reset.uri",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.auth.core.properties.PasswordResetProperties",
+      "defaultValue": "http://localhost:8000/auth/reset-password",
+      "description": "The URI that will be included in the password reset email that leads to the password reset page in your frontend application."
     },
     {
       "name": "singularity.auth.geolocation.enabled",
@@ -214,6 +258,121 @@
       "type": "java.lang.String",
       "sourceType": "io.stereov.singularity.auth.geolocation.properties.GeolocationProperties",
       "description": "The license key of your maxmind account. Required to download the GeoLite2-City database to resolve your geolocation."
+    },
+    {
+      "name": "singularity.auth.oauth2.enable",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.stereov.singularity.auth.oauth2.properties.OAuth2Properties",
+      "description": "Allow authentication using OAuth2 identity providers. Disabled by default.",
+      "defaultValue": false
+    },
+    {
+      "name": "singularity.auth.oauth2.error-redirect-uri",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.auth.oauth2.properties.OAuth2Properties",
+      "description": "The URI the user will be redirected to if there was an error in the OAuth2 flow.",
+      "defaultValue": "http://localhost:8000/auth/oauth2/error"
+    },
+    {
+      "name": "singularity.auth.two-factor.totp.recovery-code.count",
+      "type": "java.lang.Integer",
+      "sourceType": "io.stereov.singularity.auth.twofactor.properties.TotpRecoveryCodeProperties",
+      "defaultValue": 6,
+      "description": "The number of recovery codes to generate. Every code can only be used once. Default is 6."
+    },
+    {
+      "name": "singularity.auth.two-factor.email.enable-by-default",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailProperties",
+      "defaultValue": true,
+      "description": "Enable email as 2FA method be enabled by default for new users. Has an effect only if `singularity.email.enable` is `true`."
+    },
+    {
+      "name": "singularity.auth.two-factor.email.code.expires-in",
+      "type": "java.lang.Long",
+      "sourceType": "io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties",
+      "defaultValue": 900,
+      "description": "The number of seconds the 2FA code sent by email is valid."
+    },
+    {
+      "name": "singularity.content.enable",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.stereov.singularity.content.core.properties.ContentProperties",
+      "description": "Enable content management.",
+      "defaultValue": true
+    },
+    {
+      "name": "singularity.email.enable",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.stereov.singularity.email.core.properties.EmailProperties",
+      "defaultValue": false,
+      "description": "Enable mails for email verification, 2FA, password resets and much more. Make sure to configure your email server."
+    },
+    {
+      "name": "singularity.email.debug",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.stereov.singularity.email.core.properties.EmailProperties",
+      "defaultValue": false,
+      "description": "Enable debug mode for email sending. This will log the email content to the console."
+    },
+    {
+      "name": "singularity.email.email",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.email.core.properties.EmailProperties",
+      "description": "The email address used to send emails. This is the 'from' address."
+    },
+    {
+      "name": "singularity.email.host",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.email.core.properties.EmailProperties",
+      "defaultValue": "smtp.example.com"
+    },
+    {
+      "name": "singularity.email.password",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.email.core.properties.EmailProperties",
+      "description": "The password for the email account used to send emails."
+    },
+    {
+      "name": "singularity.email.send-cooldown",
+      "type": "java.lang.Long",
+      "sourceType": "io.stereov.singularity.email.core.properties.EmailProperties",
+      "defaultValue": 60,
+      "description": "Cooldown period in seconds for sending the same email."
+    },
+    {
+      "name": "singularity.email.port",
+      "type": "java.lang.Integer",
+      "sourceType": "io.stereov.singularity.email.core.properties.EmailProperties",
+      "defaultValue": 587,
+      "description": "The port used for sending emails. Default is 587."
+    },
+    {
+      "name": "singularity.email.smtp-auth",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.stereov.singularity.email.core.properties.EmailProperties",
+      "defaultValue": true,
+      "description": "Enable SMTP authentication for sending emails."
+    },
+    {
+      "name": "singularity.email.smtp-starttls",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.stereov.singularity.email.core.properties.EmailProperties",
+      "defaultValue": true,
+      "description": "Enable STARTTLS for secure email transmission."
+    },
+    {
+      "name": "singularity.email.transport-protocol",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.email.core.properties.EmailProperties",
+      "defaultValue": "smtp",
+      "description": "The transport protocol used for sending emails. Default is 'smtp'."
+    },
+    {
+      "name": "singularity.email.username",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.email.core.properties.EmailProperties",
+      "description": "The username for the email account used to send emails."
     },
     {
       "name": "singularity.file.storage.type",
@@ -283,93 +442,6 @@
       "defaultValue": false
     },
     {
-      "name": "singularity.mail.debug",
-      "type": "java.lang.Boolean",
-      "sourceType": "io.stereov.singularity.mail.core.properties.MailProperties",
-      "defaultValue": false,
-      "description": "Enable debug mode for email sending. This will log the email content to the console."
-    },
-    {
-      "name": "singularity.mail.email",
-      "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.mail.core.properties.MailProperties",
-      "description": "The email address used to send emails. This is the 'from' address."
-    },
-    {
-      "name": "singularity.mail.host",
-      "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.mail.core.properties.MailProperties",
-      "defaultValue": "smtp.example.com"
-    },
-    {
-      "name": "singularity.mail.password",
-      "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.mail.core.properties.MailProperties",
-      "description": "The password for the email account used to send emails."
-    },
-    {
-      "name": "singularity.mail.password-reset-expiration",
-      "type": "java.lang.Long",
-      "sourceType": "io.stereov.singularity.mail.core.properties.MailProperties",
-      "defaultValue": 900,
-      "description": "Expiration time for the password reset token in seconds. Default is 15 minutes."
-    },
-    {
-      "name": "singularity.mail.password-reset-send-cooldown",
-      "type": "java.lang.Long",
-      "sourceType": "io.stereov.singularity.mail.core.properties.MailProperties",
-      "defaultValue": 60,
-      "description": "Cooldown period in seconds for sending password reset emails."
-    },
-    {
-      "name": "singularity.mail.port",
-      "type": "java.lang.Integer",
-      "sourceType": "io.stereov.singularity.mail.core.properties.MailProperties",
-      "defaultValue": 587,
-      "description": "The port used for sending emails. Default is 587."
-    },
-    {
-      "name": "singularity.mail.smtp-auth",
-      "type": "java.lang.Boolean",
-      "sourceType": "io.stereov.singularity.mail.core.properties.MailProperties",
-      "defaultValue": true,
-      "description": "Enable SMTP authentication for sending emails."
-    },
-    {
-      "name": "singularity.mail.smtp-starttls",
-      "type": "java.lang.Boolean",
-      "sourceType": "io.stereov.singularity.mail.core.properties.MailProperties",
-      "defaultValue": true,
-      "description": "Enable STARTTLS for secure email transmission."
-    },
-    {
-      "name": "singularity.mail.transport-protocol",
-      "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.mail.core.properties.MailProperties",
-      "defaultValue": "smtp",
-      "description": "The transport protocol used for sending emails. Default is 'smtp'."
-    },
-    {
-      "name": "singularity.mail.username",
-      "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.mail.core.properties.MailProperties",
-      "description": "The username for the email account used to send emails."
-    },
-    {
-      "name": "singularity.mail.verification-expiration",
-      "type": "java.lang.Long",
-      "sourceType": "io.stereov.singularity.mail.core.properties.MailProperties",
-      "defaultValue": 900,
-      "description": "Expiration time for the verification token in seconds. Default is 15 minutes."
-    },
-    {
-      "name": "singularity.mail.verification-send-cooldown",
-      "type": "java.lang.Long",
-      "sourceType": "io.stereov.singularity.mail.core.properties.MailProperties",
-      "defaultValue": 60,
-      "description": "Cooldown period in seconds for sending verification emails."
-    },
-    {
       "name": "singularity.secrets.store",
       "type": "io.stereov.singularity.secrets.core.properties.SecretStoreImplementation",
       "sourceType": "io.stereov.singularity.secrets.core.properties.SecretStoreProperties",
@@ -436,7 +508,14 @@
       "type": "java.lang.Long",
       "sourceType": "io.stereov.singularity.auth.jwt.properties.JwtProperties",
       "defaultValue": 900,
-      "description": "Expiration time for the JWT token in seconds. Default is 15 minutes."
+      "description": "Expiration time for JWT tokens in seconds. Default is 15 minutes."
+    },
+    {
+      "name": "singularity.security.jwt.refresh-expires-in",
+      "type": "java.lang.Long",
+      "sourceType": "io.stereov.singularity.auth.jwt.properties.JwtProperties",
+      "defaultValue": 788400,
+      "description": "Expiration time for refresh tokens in seconds. Default is about three months."
     },
     {
       "name": "singularity.security.rate-limit.ip-limit",
@@ -481,18 +560,11 @@
       "description": "Time window in minutes for the IP limit."
     },
     {
-      "name": "singularity.security.two-factor.recovery-code-length",
+      "name": "singularity.security.two-factor.totp.recovery-code.length",
       "type": "java.lang.Integer",
-      "sourceType": "io.stereov.singularity.auth.twofactor.properties.TwoFactorAuthProperties",
+      "sourceType": "io.stereov.singularity.auth.twofactor.properties.TotpRecoveryCodeProperties",
       "defaultValue": 10,
-      "description": "Length of the recovery code. Default is 10 characters."
-    },
-    {
-      "name": "singularity.security.two-factor.recovery-code-count",
-      "type": "java.lang.Integer",
-      "sourceType": "io.stereov.singularity.auth.twofactor.properties.TwoFactorAuthProperties",
-      "defaultValue": 6,
-      "description": "Count of recovery codes to generate. Default is 6."
+      "description": "Length of the recovery code that can be used to log in if a user lost access to their second factor. Default is 10 characters."
     },
     {
       "name": "singularity.ui.base-url",
@@ -534,20 +606,6 @@
       "sourceType": "io.stereov.singularity.global.properties.AppProperties",
       "defaultValue": "/privacy-policy",
       "description": "Path to the privacy policy page."
-    },
-    {
-      "name": "singularity.ui.password-reset-path",
-      "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.mail.core.properties.MailProperties",
-      "defaultValue": "/auth/reset-password",
-      "description": "The path to the password reset page in your frontend application."
-    },
-    {
-      "name": "singularity.ui.email-verification-path",
-      "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.mail.core.properties.MailProperties",
-      "defaultValue": "/auth/verify-email",
-      "description": "The path to the verification page in your frontend application."
     }
   ],
   "hints": []

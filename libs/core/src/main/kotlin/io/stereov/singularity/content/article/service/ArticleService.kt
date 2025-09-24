@@ -2,10 +2,11 @@ package io.stereov.singularity.content.article.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.auth.core.service.AuthenticationService
-import io.stereov.singularity.content.article.dto.ArticleOverviewResponse
-import io.stereov.singularity.content.article.dto.ArticleResponse
-import io.stereov.singularity.content.article.dto.FullArticleResponse
+import io.stereov.singularity.auth.core.service.AuthorizationService
+import io.stereov.singularity.content.article.dto.response.ArticleOverviewResponse
+import io.stereov.singularity.content.article.dto.response.ArticleResponse
+import io.stereov.singularity.content.article.dto.response.FullArticleResponse
+import io.stereov.singularity.content.article.mapper.ArticleMapper
 import io.stereov.singularity.content.article.model.Article
 import io.stereov.singularity.content.article.model.ArticleState
 import io.stereov.singularity.content.article.repository.ArticleRepository
@@ -13,9 +14,11 @@ import io.stereov.singularity.content.core.component.AccessCriteria
 import io.stereov.singularity.content.core.dto.ContentAccessDetailsResponse
 import io.stereov.singularity.content.core.model.ContentAccessRole
 import io.stereov.singularity.content.core.service.ContentService
+import io.stereov.singularity.content.tag.mapper.TagMapper
 import io.stereov.singularity.content.tag.service.TagService
-import io.stereov.singularity.content.translate.model.Language
 import io.stereov.singularity.file.core.service.FileStorage
+import io.stereov.singularity.translate.service.TranslateService
+import io.stereov.singularity.user.core.mapper.UserMapper
 import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.service.UserService
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -27,16 +30,21 @@ import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 class ArticleService(
     override val repository: ArticleRepository,
     private val userService: UserService,
-    override val authenticationService: AuthenticationService,
+    override val authorizationService: AuthorizationService,
     private val tagService: TagService,
     private val reactiveMongoTemplate: ReactiveMongoTemplate,
     private val accessCriteria: AccessCriteria,
     private val fileStorage: FileStorage,
+    private val userMapper: UserMapper,
+    private val articleMapper: ArticleMapper,
+    private val tagMapper: TagMapper,
+    private val translateService: TranslateService
 ) : ContentService<Article> {
 
     override val logger: KLogger = KotlinLogging.logger {}
@@ -44,22 +52,22 @@ class ArticleService(
 
     private val isPublished = Criteria.where(Article::state.name).`is`(ArticleState.PUBLISHED.toString())
 
-    suspend fun getFullArticleResponseByKey(key: String, lang: Language): FullArticleResponse {
-        return fullArticledResponseFrom(findAuthorizedByKey(key, ContentAccessRole.VIEWER), lang)
+    suspend fun getFullArticleResponseByKey(key: String, locale: Locale?): FullArticleResponse {
+        return fullArticledResponseFrom(findAuthorizedByKey(key, ContentAccessRole.VIEWER), locale)
     }
 
-    suspend fun articleOverviewFrom(article: Article, lang: Language): ArticleOverviewResponse {
-        return fullArticledResponseFrom(article, lang).toOverview()
+    suspend fun articleOverviewFrom(article: Article, locale: Locale?): ArticleOverviewResponse {
+        return articleMapper.createArticleOverview(fullArticledResponseFrom(article, locale))
     }
 
-    suspend fun fullArticledResponseFrom(article: Article, lang: Language, owner: UserDocument? = null): FullArticleResponse {
-        val currentUser = authenticationService.getCurrentUserOrNull()
+    suspend fun fullArticledResponseFrom(article: Article, locale: Locale?, owner: UserDocument? = null): FullArticleResponse {
+        val currentUser = authorizationService.getCurrentUserOrNull()
 
         val actualOwner = owner ?: userService.findById(article.access.ownerId)
         val access = ContentAccessDetailsResponse.create(article.access, currentUser)
-        val (articleLang, translation) = article.translate(lang)
+        val (articleLang, translation) = translateService.translate(article, locale)
 
-        val tags = article.tags.map { key -> tagService.findByKey(key).toResponse(articleLang) }
+        val tags = article.tags.map { key -> tagMapper.createTagResponse(tagService.findByKey(key), articleLang) }
 
         val image = article.imageKey?.let { fileStorage.metadataResponseByKeyOrNull(it) }
 
@@ -69,14 +77,14 @@ class ArticleService(
             createdAt = article.createdAt,
             publishedAt = article.publishedAt,
             updatedAt = article.updatedAt,
-            owner = userService.createOverview(actualOwner),
+            owner = userMapper.toOverview(actualOwner),
             path = article.path,
             state = article.state,
             colors = article.colors,
             image = image,
             trusted = article.trusted,
             access = access,
-            lang = articleLang,
+            locale = articleLang,
             title = translation.title,
             summary = translation.summary,
             content = translation.content,
@@ -84,7 +92,7 @@ class ArticleService(
         )
     }
 
-    suspend fun getArticles(pageable: Pageable, tags: List<String>, lang: Language): Page<ArticleOverviewResponse> {
+    suspend fun getArticles(pageable: Pageable, tags: List<String>, locale: Locale?): Page<ArticleOverviewResponse> {
         val criteria = if (tags.isEmpty()) {
             accessCriteria.getViewCriteria()
         } else {
@@ -106,7 +114,7 @@ class ArticleService(
             .awaitFirstOrNull()
             ?: emptyList()
 
-        val overviews = content.map { articleOverviewFrom(it, lang) }
+        val overviews = content.map { articleOverviewFrom(it, locale) }
 
         return PageImpl(overviews, pageable, totalCount)
     }
@@ -114,7 +122,7 @@ class ArticleService(
     suspend fun getAccessibleArticles(
         limit: Long = 10,
         afterId: String? = null,
-        lang: Language
+        locale: Locale?
     ): ArticleResponse {
         logger.debug { "Getting accessible articles limit=$limit${afterId?.let { " after $it" } ?: ""}" }
 
@@ -148,6 +156,6 @@ class ArticleService(
             ).awaitFirstOrNull() ?: 0
         } else 0
 
-        return ArticleResponse(articles.map { articleOverviewFrom(it, lang) }, remainingCount)
+        return ArticleResponse(articles.map { articleOverviewFrom(it, locale) }, remainingCount)
     }
 }

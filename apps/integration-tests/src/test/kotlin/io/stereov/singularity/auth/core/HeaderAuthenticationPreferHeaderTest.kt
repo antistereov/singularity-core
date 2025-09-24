@@ -1,6 +1,5 @@
-package io.stereov.singularity.auth.core.core
+package io.stereov.singularity.auth.core
 
-import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.test.BaseSpringBootTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
@@ -40,8 +39,8 @@ class HeaderAuthenticationPreferHeaderTest : BaseSpringBootTest() {
         val user = registerUser()
 
         webTestClient.get()
-            .uri("/api/user/me")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, "invalid")
+            .uri("/api/users/me")
+            .accessTokenCookie("invalid")
             .header(HttpHeaders.AUTHORIZATION, "Bearer ${user.accessToken}")
             .exchange()
             .expectStatus().isOk
@@ -50,8 +49,8 @@ class HeaderAuthenticationPreferHeaderTest : BaseSpringBootTest() {
         val user = registerUser()
 
         webTestClient.get()
-            .uri("/api/user/me")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .uri("/api/users/me")
+            .accessTokenCookie(user.accessToken)
             .header(HttpHeaders.AUTHORIZATION, "Bearer invalid")
             .exchange()
             .expectStatus().isUnauthorized
@@ -60,15 +59,15 @@ class HeaderAuthenticationPreferHeaderTest : BaseSpringBootTest() {
         val user = registerUser()
 
         webTestClient.get()
-            .uri("/api/user/me")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+            .uri("/api/users/me")
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isOk
     }
     @Test fun `should prefer header token and fall back to cookie token with invalid token`() = runTest {
         webTestClient.get()
-            .uri("/api/user/me")
-            .cookie(Constants.ACCESS_TOKEN_COOKIE, "invalid")
+            .uri("/api/users/me")
+            .accessTokenCookie("invalid")
             .exchange()
             .expectStatus().isUnauthorized
     }

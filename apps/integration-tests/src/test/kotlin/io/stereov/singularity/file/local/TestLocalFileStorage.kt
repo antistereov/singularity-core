@@ -8,7 +8,6 @@ import io.stereov.singularity.file.local.properties.LocalFileStorageProperties
 import io.stereov.singularity.file.local.service.LocalFileStorage
 import io.stereov.singularity.file.util.MockFilePart
 import io.stereov.singularity.global.exception.model.DocumentNotFoundException
-import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
@@ -66,7 +65,7 @@ class TestLocalFileStorage : BaseIntegrationTest() {
 
     @Test
     fun `should upload public file`() = runTest {
-        runFileTest { file, metadata, _ ->
+        runFileTest { _, metadata, _ ->
             val file = File(properties.fileDirectory, metadata.key)
 
             assertTrue(file.exists())
@@ -101,7 +100,7 @@ class TestLocalFileStorage : BaseIntegrationTest() {
 
             webTestClient.get()
                 .uri("/api/assets/${metadata.key}")
-                .cookie(Constants.ACCESS_TOKEN_COOKIE, user.accessToken)
+                .accessTokenCookie(user.accessToken)
                 .exchange()
                 .expectStatus().isOk
                 .expectHeader().contentType(MediaType.IMAGE_JPEG)
@@ -114,7 +113,7 @@ class TestLocalFileStorage : BaseIntegrationTest() {
         }
     }
     @Test fun `should not serve private file publicly`() = runTest {
-        runFileTest(false) { file, metadata, user ->
+        runFileTest(false) { _, metadata, _ ->
 
             webTestClient.get()
                 .uri("/api/assets/${metadata.key}")
@@ -123,13 +122,13 @@ class TestLocalFileStorage : BaseIntegrationTest() {
         }
     }
     @Test fun `should not serve private file to non-owner`() = runTest {
-        val anotherUser = registerUser(email = "another@email.com")
+        val anotherUser = registerUser(emailSuffix = "another@email.com")
 
-        runFileTest(false) { file, metadata, user ->
+        runFileTest(false) { _, metadata, _ ->
 
             webTestClient.get()
                 .uri("/api/assets/${metadata.key}")
-                .cookie(Constants.ACCESS_TOKEN_COOKIE, anotherUser.accessToken)
+                .accessTokenCookie(anotherUser.accessToken)
                 .exchange()
                 .expectStatus().isForbidden
         }
@@ -154,7 +153,7 @@ class TestLocalFileStorage : BaseIntegrationTest() {
             .expectStatus().isNotFound
     }
     @Test fun `returns not found when no database entry is removed but file exists`() = runTest {
-        runFileTest { file, metadata, user ->
+        runFileTest { file, metadata, _ ->
             metadataService.deleteByKey(metadata.key)
 
             webTestClient.get()
@@ -167,7 +166,7 @@ class TestLocalFileStorage : BaseIntegrationTest() {
         }
     }
     @Test fun `returns not found when no file is deleted but db entry exists`() = runTest {
-        runFileTest { file, metadata, user ->
+        runFileTest { file, metadata, _ ->
             file.delete()
 
             webTestClient.get()
@@ -181,7 +180,7 @@ class TestLocalFileStorage : BaseIntegrationTest() {
     }
 
     @Test fun `creates response with correct url`() = runTest {
-        runFileTest { file, metadata, user ->
+        runFileTest { file, metadata, _ ->
             val response = storage.metadataResponseByKey(metadata.key)
 
             val relativeUri = URI(response.url).path
@@ -201,7 +200,7 @@ class TestLocalFileStorage : BaseIntegrationTest() {
         }
     }
     @Test fun `creates response with correct url when in subdirectory`() = runTest {
-        runFileTest(key = "sub/dir/test-image.jpg") { file, metadata, user ->
+        runFileTest(key = "sub/dir/test-image.jpg") { file, metadata, _ ->
             val response = storage.metadataResponseByKey(metadata.key)
 
             val relativeUri = URI(response.url).path
@@ -222,7 +221,7 @@ class TestLocalFileStorage : BaseIntegrationTest() {
     }
 
     @Test fun `remove works`() = runTest {
-        runFileTest { file, metadata, user ->
+        runFileTest { file, metadata, _ ->
             storage.remove(metadata.key)
 
             assertFalse(metadataService.existsByKey(metadata.key))
@@ -237,7 +236,7 @@ class TestLocalFileStorage : BaseIntegrationTest() {
     @Test fun `exists works`() = runTest {
         assertFalse(storage.exists("just-a-key"))
 
-        runFileTest { file, metadata, user ->
+        runFileTest { _, metadata, _ ->
             assertTrue(storage.exists(metadata.key))
         }
     }

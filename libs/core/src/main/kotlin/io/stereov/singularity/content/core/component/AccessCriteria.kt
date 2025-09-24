@@ -1,18 +1,17 @@
 package io.stereov.singularity.content.core.component
 
-import io.stereov.singularity.auth.core.model.AccessType
-import io.stereov.singularity.auth.core.service.AuthenticationService
+import io.stereov.singularity.auth.core.model.token.AccessType
+import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.content.core.model.ContentAccessDetails
 import io.stereov.singularity.content.core.model.ContentAccessPermissions
 import io.stereov.singularity.content.core.model.ContentDocument
-import io.stereov.singularity.user.core.model.UserDocument
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.stereotype.Component
 
 @Component
 class AccessCriteria(
-    private val authenticationService: AuthenticationService
+    private val authorizationService: AuthorizationService
 ) {
 
     private final val accessField = ContentDocument<*>::access.name
@@ -39,23 +38,25 @@ class AccessCriteria(
     private fun canEditUser(userId: ObjectId) = Criteria().andOperator(Criteria.where(canEditUsersField).`in`(userId.toHexString()), isShared)
     private fun isAdminUser(userId: ObjectId) = Criteria.where(isAdminUsersField).`in`(userId.toHexString())
 
-    private fun canViewGroup(user: UserDocument) = Criteria.where(canViewGroupsField).`in`(user.sensitive.groups)
-    private fun canEditGroup(user: UserDocument) = Criteria.where(canEditGroupsField).`in`(user.sensitive.groups)
-    private fun isAdminGroup(user: UserDocument) = Criteria.where(isAdminGroupsField).`in`(user.sensitive.groups)
+    private fun canViewGroup(groups: Set<String>) = Criteria.where(canViewGroupsField).`in`(groups)
+    private fun canEditGroup(groups: Set<String>) = Criteria.where(canEditGroupsField).`in`(groups)
+    private fun isAdminGroup(groups: Set<String>) = Criteria.where(isAdminGroupsField).`in`(groups)
 
     suspend fun getViewCriteria(): Criteria {
-        val user = authenticationService.getCurrentUserOrNull()
+        val userId = authorizationService.getCurrentUserIdOrNull()
 
-        return if (user != null) {
+        return if (userId != null) {
+            val groups = authorizationService.getGroups()
+
             Criteria().orOperator(
                 isPublic,
-                canViewUser(user.id),
-                canEditUser(user.id),
-                isAdminUser(user.id),
-                canViewGroup(user),
-                canEditGroup(user),
-                isAdminGroup(user),
-                isOwner(user.id)
+                canViewUser(userId),
+                canEditUser(userId),
+                isAdminUser(userId),
+                canViewGroup(groups),
+                canEditGroup(groups),
+                isAdminGroup(groups),
+                isOwner(userId)
             )
         } else isPublic
     }

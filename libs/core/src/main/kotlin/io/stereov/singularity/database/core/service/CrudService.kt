@@ -1,11 +1,15 @@
 package io.stereov.singularity.database.core.service
 
 import io.github.oshai.kotlinlogging.KLogger
+import io.stereov.singularity.global.exception.model.DocumentNotFoundException
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.awaitFirstOrElse
+import org.bson.types.ObjectId
 import org.springframework.data.domain.*
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 
 interface CrudService<T: Any> {
 
@@ -13,7 +17,51 @@ interface CrudService<T: Any> {
 
     val collectionClass: Class<T>
     val reactiveMongoTemplate: ReactiveMongoTemplate
+    val repository: CoroutineCrudRepository<T, ObjectId>
 
+    suspend fun findByIdOrNull(id: ObjectId): T? {
+        logger.debug { "Finding ${collectionClass.name} by ID $id" }
+
+        return repository.findById(id)
+    }
+
+    suspend fun findById(id: ObjectId): T {
+        return findByIdOrNull(id) ?: throw DocumentNotFoundException("No ${collectionClass.name} with ID $id found")
+    }
+
+    suspend fun existsById(id: ObjectId): Boolean {
+        logger.debug { "Checking if ${collectionClass.name} exists by ID $id" }
+
+        return repository.existsById(id)
+    }
+
+    @Suppress("UNUSED")
+    suspend fun deleteById(id: ObjectId) {
+        logger.debug { "Deleting ${collectionClass.name} by ID $id" }
+
+        return repository.deleteById(id)
+    }
+
+    suspend fun deleteAll() {
+        logger.debug { "Deleting all ${collectionClass.name}" }
+
+        return repository.deleteAll()
+    }
+
+    suspend fun save(doc: T): T {
+        logger.debug { "Saving ${collectionClass.name}" }
+
+        return repository.save(doc)
+    }
+
+    @Suppress("UNUSED")
+    suspend fun saveAll(docs: Collection<T>): List<T> {
+        logger.debug { "Saving multiple ${collectionClass.name}s" }
+
+        return repository.saveAll(docs).toList()
+    }
+
+    @Suppress("UNUSED")
     suspend fun findAllPaginated(page: Int, size: Int, sort: List<String>, criteria: Criteria? = null): Page<T> {
 
         val pageable = PageRequest.of(page, size, Sort.by(sort.map { item ->

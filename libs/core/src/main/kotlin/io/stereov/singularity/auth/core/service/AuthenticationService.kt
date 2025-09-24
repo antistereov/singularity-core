@@ -2,144 +2,134 @@ package io.stereov.singularity.auth.core.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.auth.core.cache.AccessTokenCache
+import io.stereov.singularity.auth.core.dto.request.LoginRequest
+import io.stereov.singularity.auth.core.dto.request.RegisterUserRequest
+import io.stereov.singularity.auth.core.dto.request.StepUpRequest
 import io.stereov.singularity.auth.core.exception.AuthException
-import io.stereov.singularity.auth.core.exception.model.InvalidPrincipalException
-import io.stereov.singularity.auth.core.exception.model.NotAuthorizedException
-import io.stereov.singularity.auth.core.model.CustomAuthenticationToken
-import io.stereov.singularity.auth.core.model.ErrorAuthenticationToken
-import io.stereov.singularity.auth.jwt.exception.TokenException
-import io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException
-import io.stereov.singularity.user.core.model.Role
+import io.stereov.singularity.auth.core.exception.model.InvalidCredentialsException
+import io.stereov.singularity.auth.core.exception.model.UserAlreadyAuthenticatedException
+import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties
+import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailProperties
+import io.stereov.singularity.database.hash.service.HashService
+import io.stereov.singularity.email.core.properties.EmailProperties
+import io.stereov.singularity.global.exception.model.MissingRequestParameterException
+import io.stereov.singularity.user.core.exception.model.EmailAlreadyTakenException
 import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.service.UserService
-import kotlinx.coroutines.reactive.awaitFirstOrNull
-import org.bson.types.ObjectId
-import org.springframework.security.core.context.ReactiveSecurityContextHolder
-import org.springframework.security.core.context.SecurityContext
 import org.springframework.stereotype.Service
+import java.util.*
 
-/**
- * # Service for managing authentication-related operations.
- *
- * This service provides methods to retrieve the current user's ID, user document, and device ID.
- *
- * It uses the [UserService] to interact with user data and the [ReactiveSecurityContextHolder]
- * to access the security context and authentication information.
- *
- * @author <a href="https://github.com/antistereov">antistereov</a>
- */
 @Service
-class AuthenticationService {
+class AuthenticationService(
+    private val userService: UserService,
+    private val hashService: HashService,
+    private val authorizationService: AuthorizationService,
+    private val sessionService: SessionService,
+    private val accessTokenCache: AccessTokenCache,
+    private val emailVerificationService: EmailVerificationService,
+    private val factorMailCodeProperties: TwoFactorEmailCodeProperties,
+    private val emailProperties: EmailProperties,
+    private val twoFactorEmailProperties: TwoFactorEmailProperties
+) {
 
     private val logger: KLogger
         get() = KotlinLogging.logger {}
 
     /**
-     * Get the ID of the currently authenticated user.
+     * Logs in a user and returns the user document.
      *
-     * @throws InvalidPrincipalException If the security context or authentication is missing.
-     * @throws InvalidTokenException If the authentication does not contain the necessary properties.
+     * @param payload The login request containing the user's email and password.
+     *
+     * @return The [UserDocument] of the logged-in user.
+     *
+     * @throws InvalidCredentialsException If the email or password is invalid.
+     * @throws io.stereov.singularity.auth.core.exception.AuthException If the user document does not contain an ID.
      */
-    suspend fun getCurrentUserId(): ObjectId {
-        logger.debug {"Extracting user ID." }
+    suspend fun login(payload: LoginRequest): UserDocument {
+        logger.debug { "Logging in user ${payload.email}" }
 
-        val auth = getCurrentAuthentication()
-        return auth.user.id
-    }
+        if (authorizationService.isAuthenticated())
+            throw UserAlreadyAuthenticatedException("Login failed: user is already authenticated")
 
-    suspend fun getCurrentUserOrNull(): UserDocument? {
-        return try {
-            getCurrentUser()
-        } catch (_: TokenException) {
-            null
-        } catch (_: AuthException) {
-            null
+        val user = userService.findByEmailOrNull(payload.email)
+            ?: throw InvalidCredentialsException()
+
+        val password = user.validateLoginTypeAndGetPassword()
+
+        if (!hashService.checkBcrypt(payload.password, password)) {
+            throw InvalidCredentialsException()
         }
+
+        return userService.save(user)
     }
 
     /**
-     * Get the currently authenticated user document.
+     * Registers a new user and returns the user document.
      *
-     * @throws InvalidPrincipalException If the security context or authentication is missing.
-     * @throws InvalidTokenException If the authentication does not contain the necessary properties.
+     * @param payload The registration request containing the user's email, password, and name.
+     *
+     * @return The [UserDocument] of the registered user.
+     *
+     * @throws EmailAlreadyTakenException If the email already exists in the system.
+     * @throws io.stereov.singularity.auth.core.exception.AuthException If the user document does not contain an ID.
      */
-    suspend fun getCurrentUser(): UserDocument {
-        logger.debug { "Extracting current user" }
+    suspend fun register(payload: RegisterUserRequest, sendEmail: Boolean, locale: Locale?): UserDocument {
+        logger.debug { "Registering user ${payload.email}" }
 
-        return getCurrentAuthentication().user
-    }
+        if (authorizationService.isAuthenticated())
+            throw UserAlreadyAuthenticatedException("Register failed: user is already authenticated")
 
-    /**
-     * Get the ID of the currently authenticated device.
-     *
-     * @throws InvalidPrincipalException If the security context or authentication is missing.
-     * @throws InvalidTokenException If the authentication does not contain the necessary properties.
-     */
-    suspend fun getCurrentDeviceId(): String {
-        logger.debug { "Extracting device ID" }
-
-        val auth = getCurrentAuthentication()
-        return auth.deviceId
-    }
-
-    /**
-     * Get the ID of the currently authenticated token.
-     *
-     * @throws InvalidPrincipalException If the security context or authentication is missing.
-     * @throws InvalidTokenException If the authentication does not contain the necessary properties.
-     */
-    suspend fun getCurrentTokenId(): String {
-        logger.debug { "Extracting token ID" }
-
-        val auth = getCurrentAuthentication()
-        return auth.tokenId
-    }
-
-    /**
-     * Validate the authority of the current user.
-     * It throws a [NotAuthorizedException] if the user does not have the required role.
-     *
-     * @param role The required role.
-     *
-     * @throws NotAuthorizedException If the user does not have the required role.
-     */
-    suspend fun requireRole(role: Role) {
-        logger.debug { "Validating authorization" }
-
-        val valid = this.getCurrentUser().sensitive.roles.contains(role)
-
-        if (!valid) throw NotAuthorizedException("User does not have sufficient permission: User does not have role $role")
-    }
-
-    suspend fun requireGroupMembership(groupKey: String) {
-        logger.debug { "Validating that the current user is part of the group \"$groupKey\"" }
-
-        val user = getCurrentUser()
-
-        if (!user.sensitive.groups.contains(groupKey) && !user.sensitive.roles.contains(Role.ADMIN)) {
-            throw NotAuthorizedException("User does not have sufficient permission: User does not belong to group \"$groupKey\"")
+        if (userService.existsByEmail(payload.email)) {
+            throw EmailAlreadyTakenException("Failed to register user ${payload.email}")
         }
+
+        val userDocument = UserDocument.ofPassword(
+            email = payload.email,
+            password = hashService.hashBcrypt(payload.password),
+            name = payload.name,
+            email2faEnabled = emailProperties.enable && twoFactorEmailProperties.enableByDefault,
+            mailTwoFactorCodeExpiresIn = factorMailCodeProperties.expiresIn
+        )
+
+        val savedUserDocument = userService.save(userDocument)
+
+        if (sendEmail && emailProperties.enable) emailVerificationService.sendVerificationEmail(savedUserDocument, locale)
+
+        return savedUserDocument
     }
 
-    /**
-     * Get the current authentication token.
-     *
-     * This method retrieves the current authentication token from the security context.
-     *
-     * @throws InvalidPrincipalException If the security context or authentication is missing.
-     * @throws InvalidTokenException If the authentication does not contain the necessary properties.
-     */
-    private suspend fun getCurrentAuthentication(): CustomAuthenticationToken {
-        val securityContext: SecurityContext = ReactiveSecurityContextHolder.getContext().awaitFirstOrNull()
-            ?: throw InvalidPrincipalException("No security context found.")
+    suspend fun logout(): UserDocument {
+        logger.debug { "Logging out user" }
 
-        val authentication = securityContext.authentication
-            ?: throw InvalidTokenException("Authentication is missing.")
+        val userId = authorizationService.getCurrentUserId()
+        val tokenId = authorizationService.getCurrentTokenId()
+        val sessionId = authorizationService.getCurrentSessionId()
 
-        return when ( authentication) {
-            is CustomAuthenticationToken -> authentication
-            is ErrorAuthenticationToken -> throw authentication.error
-            else -> throw InvalidTokenException("Unknown authentication type: ${authentication::class.simpleName}")
+        accessTokenCache.invalidateToken(userId, sessionId, tokenId)
+
+        return sessionService.deleteSession(sessionId)
+    }
+
+    suspend fun stepUp(req: StepUpRequest?): UserDocument {
+        logger.debug { "Executing step up" }
+
+        val user = authorizationService.getCurrentUser()
+        val sessionId = authorizationService.getCurrentSessionId()
+
+        if (!user.sensitive.sessions.containsKey(sessionId)) {
+            throw AuthException("Step up failed: trying to execute for step up for invalid session, user logged out or revoked session")
         }
+
+        if (user.isGuest) return user
+
+        val password = user.validateLoginTypeAndGetPassword()
+        if (req?.password == null)
+            throw MissingRequestParameterException("User is not GUEST, therefore a password is required")
+        if (!hashService.checkBcrypt(req.password, password)) {
+            throw InvalidCredentialsException()
+        }
+
+        return user
     }
 }

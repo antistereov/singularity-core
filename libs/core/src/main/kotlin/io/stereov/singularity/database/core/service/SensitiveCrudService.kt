@@ -10,6 +10,7 @@ import io.stereov.singularity.global.exception.model.DocumentNotFoundException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.toList
 import org.bson.types.ObjectId
 
 interface SensitiveCrudService<S, D: SensitiveDocument<S>, E: EncryptedSensitiveDocument<S>> {
@@ -21,13 +22,20 @@ interface SensitiveCrudService<S, D: SensitiveDocument<S>, E: EncryptedSensitive
 
 
     @Suppress("UNCHECKED_CAST")
-    suspend fun encrypt(document: D, otherValues: List<Any> = emptyList()): E {
+    suspend fun encrypt(document: D, otherValues: List<Any?> = emptyList()): E {
         return this.encryptionService.encrypt(document) as E
     }
 
     @Suppress("UNCHECKED_CAST")
-    suspend fun decrypt(encrypted: E, otherValues: List<Any> = emptyList()): D {
+    suspend fun decrypt(encrypted: E, otherValues: List<Any?> = emptyList()): D {
         return encryptionService.decrypt(encrypted, otherValues, clazz) as D
+    }
+
+    @Suppress("UNUSED")
+    suspend fun existsById(id: ObjectId): Boolean {
+        logger.debug { "Checking if document with ID $id exists" }
+
+        return repository.existsById(id)
     }
 
     suspend fun findById(id: ObjectId): D {
@@ -68,6 +76,16 @@ interface SensitiveCrudService<S, D: SensitiveDocument<S>, E: EncryptedSensitive
         this.logger.debug { "Successfully saved user" }
 
         return this.decrypt(savedDoc)
+    }
+
+    suspend fun saveAll(documents: List<D>): List<D> {
+        logger.debug { "Saving all documents" }
+
+        val encryptedDocs = documents.map { encrypt(it) }
+        val savedDocs = repository.saveAll(encryptedDocs)
+
+        return savedDocs.map { decrypt(it) }
+            .toList()
     }
 
     suspend fun deleteById(id: ObjectId) {

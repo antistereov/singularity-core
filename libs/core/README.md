@@ -10,9 +10,6 @@
   <a href="https://github.com/antistereov/singularity-core?tab=GPL-3.0-1-ov-file">
     <img src="https://img.shields.io/github/license/antistereov/singularity-core?logo=gnu" alt="License">
   </a>
-  <a href="https://singularity.stereov.io/swagger">
-    <img src="https://img.shields.io/badge/API%20Docs-Swagger-85EA2D?logo=swagger" alt="Swagger UI">
-  </a>
 </p>
 
 <p align="center">
@@ -78,7 +75,9 @@ Add the dependency to your `build.gradle.kts`, `build.gradle` or `pom.xml` if us
 
 **For Gradle with Kotlin DSL:**
 ```kotlin
-implementation("io.stereov.singularity:core:<version>") // Check the maven status batch for the latest version
+dependencies {
+    implementation("io.stereov.singularity:core:<version>") // Check the maven status batch for the latest version
+}
 ```
 
 **For Gradle with Groovy:**
