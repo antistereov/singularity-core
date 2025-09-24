@@ -208,9 +208,9 @@ class TwoFactorAuthenticationController(
         exchange: ServerWebExchange
     ): ResponseEntity<StepUpResponse> {
         val user = twoFactorAuthService.validateTwoFactor(exchange, req)
-        val sessionId = authorizationService.getCurrentSessionId()
+        val sessionId = authorizationService.getSessionId()
 
-        if (user.id != authorizationService.getCurrentUserId())
+        if (user.id != authorizationService.getUserId())
             throw InvalidTokenException("TwoFactorAuthenticationToken does not match AccessToken")
 
         val stepUpToken = stepUpTokenService.create(user.id, sessionId)

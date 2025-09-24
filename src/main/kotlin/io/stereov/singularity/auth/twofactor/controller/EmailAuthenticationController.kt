@@ -121,7 +121,7 @@ class EmailAuthenticationController(
         @RequestParam locale: Locale?,
         exchange: ServerWebExchange,
     ): ResponseEntity<MailSendResponse> {
-        val userId = authorizationService.getCurrentUserIdOrNull()
+        val userId = authorizationService.getUserIdOrNull()
             ?: twoFactorAuthenticationTokenService.extract(exchange).userId
 
         emailAuthenticationService.sendMail(
@@ -269,7 +269,7 @@ class EmailAuthenticationController(
     suspend fun getRemainingEmailTwoFactorCooldown(
         exchange: ServerWebExchange
     ): ResponseEntity<MailCooldownResponse> {
-        val userId = authorizationService.getCurrentUserIdOrNull()
+        val userId = authorizationService.getUserIdOrNull()
             ?: twoFactorAuthenticationTokenService.extract(exchange).userId
 
         val remainingCooldown = emailAuthenticationService.getRemainingCooldown(userId)

@@ -40,7 +40,7 @@ class UserMapper(
             user.preferredTwoFactorMethod,
             user.twoFactorMethods,
             avatarMetadata,
-            user.created.toString(),
+            user.createdAt.toString(),
             user.groups
         )
     }

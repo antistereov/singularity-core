@@ -5,16 +5,18 @@ import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.content.core.service.ContentService
 import io.stereov.singularity.file.core.model.FileMetadataDocument
 import io.stereov.singularity.file.core.repository.FileMetadataRepository
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.stereotype.Service
 
 @Service
 class FileMetadataService(
     override val repository: FileMetadataRepository,
     override val authorizationService: AuthorizationService,
+    override val reactiveMongoTemplate: ReactiveMongoTemplate
 ) : ContentService<FileMetadataDocument> {
 
     override val logger = KotlinLogging.logger {}
-    override val contentClass = FileMetadataDocument::class.java
+    override val collectionClazz = FileMetadataDocument::class.java
 
 
 }

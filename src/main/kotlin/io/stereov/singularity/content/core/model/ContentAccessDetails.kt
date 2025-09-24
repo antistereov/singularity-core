@@ -1,10 +1,10 @@
 package io.stereov.singularity.content.core.model
 
 import io.stereov.singularity.auth.core.model.token.AccessType
+import io.stereov.singularity.auth.core.model.token.CustomAuthenticationToken
 import io.stereov.singularity.content.core.dto.ChangeContentVisibilityRequest
 import io.stereov.singularity.content.core.dto.ContentAccessDetailsResponse
 import io.stereov.singularity.user.core.model.Role
-import io.stereov.singularity.user.core.model.UserDocument
 import org.bson.types.ObjectId
 
 data class ContentAccessDetails(
@@ -47,17 +47,17 @@ data class ContentAccessDetails(
         }
     }
 
-    fun hasAccess(user: UserDocument, role: ContentAccessRole): Boolean {
-        val isAdmin = user.roles.contains(Role.ADMIN)
+    fun hasAccess(authentication: CustomAuthenticationToken, role: ContentAccessRole): Boolean {
+        val isAdmin = authentication.roles.contains(Role.ADMIN)
 
-        val userIsAdmin = hasAccess(ContentAccessSubject.USER, user.id.toString(), ContentAccessRole.ADMIN)
-        val groupIsAdmin = user.groups.any { groupId -> hasAccess(ContentAccessSubject.GROUP, groupId, ContentAccessRole.ADMIN) }
+        val userIsAdmin = hasAccess(ContentAccessSubject.USER, authentication.userId.toString(), ContentAccessRole.ADMIN)
+        val groupIsAdmin = authentication.groups.any { groupId -> hasAccess(ContentAccessSubject.GROUP, groupId, ContentAccessRole.ADMIN) }
 
-        val userIsEditor = hasAccess(ContentAccessSubject.USER, user.id.toString(), ContentAccessRole.EDITOR)
-        val groupIsEditor = user.groups.any { groupId -> hasAccess(ContentAccessSubject.GROUP, groupId, ContentAccessRole.EDITOR) }
+        val userIsEditor = hasAccess(ContentAccessSubject.USER, authentication.userId.toString(), ContentAccessRole.EDITOR)
+        val groupIsEditor = authentication.groups.any { groupId -> hasAccess(ContentAccessSubject.GROUP, groupId, ContentAccessRole.EDITOR) }
 
-        val userIsViewer = hasAccess(ContentAccessSubject.USER, user.id.toString(), ContentAccessRole.VIEWER)
-        val groupIsViewer = user.groups.any { groupId -> hasAccess(ContentAccessSubject.GROUP, groupId, ContentAccessRole.VIEWER) }
+        val userIsViewer = hasAccess(ContentAccessSubject.USER, authentication.userId.toString(), ContentAccessRole.VIEWER)
+        val groupIsViewer = authentication.groups.any { groupId -> hasAccess(ContentAccessSubject.GROUP, groupId, ContentAccessRole.VIEWER) }
 
         val isPublic = visibility == AccessType.PUBLIC
 

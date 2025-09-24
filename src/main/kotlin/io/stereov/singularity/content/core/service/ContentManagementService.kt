@@ -52,7 +52,7 @@ interface ContentManagementService<T: ContentDocument<T>> {
     ): ExtendedContentAccessDetailsResponse {
         logger.debug { "Inviting user with email \"${req.email}\" to content with key \"$key\" as ${req.role}" }
 
-        val user = authorizationService.getCurrentUser()
+        val user = authorizationService.getUser()
         val content = contentService.findAuthorizedByKey(key, ContentAccessRole.ADMIN)
         val invitation = invitationService.invite(
             email = req.email,

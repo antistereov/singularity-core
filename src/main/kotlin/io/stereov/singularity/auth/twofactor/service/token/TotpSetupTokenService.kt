@@ -43,7 +43,7 @@ class TotpSetupTokenService(
 
         val jwt = jwtService.decodeJwt(token, tokenType)
 
-        val userId = authorizationService.getCurrentUserId()
+        val userId = authorizationService.getUserId()
         val subject = jwt.subject?.let { ObjectId(it) }
 
         if (subject != userId) {

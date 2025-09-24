@@ -1,7 +1,7 @@
 package io.stereov.singularity.user.core.model
 
-import io.stereov.singularity.database.core.model.EncryptedSensitiveDocument
 import io.stereov.singularity.database.encryption.model.Encrypted
+import io.stereov.singularity.database.encryption.model.EncryptedSensitiveDocument
 import io.stereov.singularity.database.hash.model.SearchableHash
 import io.stereov.singularity.user.core.model.identity.HashedUserIdentity
 import org.bson.types.ObjectId
@@ -19,9 +19,4 @@ data class EncryptedUserDocument(
     val created: Instant = Instant.now(),
     var lastActive: Instant = Instant.now(),
     override var sensitive: Encrypted<SensitiveUserData>,
-)  : EncryptedSensitiveDocument<SensitiveUserData> {
-
-    override fun toSensitiveDocument(decrypted: SensitiveUserData, otherValues: List<Any?>) : UserDocument {
-        return UserDocument(_id, created, lastActive, roles, groups,decrypted)
-    }
-}
+)  : EncryptedSensitiveDocument<SensitiveUserData>

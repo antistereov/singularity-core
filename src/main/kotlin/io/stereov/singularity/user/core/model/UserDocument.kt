@@ -7,13 +7,9 @@ import io.stereov.singularity.auth.core.model.IdentityProvider
 import io.stereov.singularity.auth.core.model.SessionInfo
 import io.stereov.singularity.auth.guest.exception.model.GuestCannotPerformThisActionException
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
-import io.stereov.singularity.database.core.model.SensitiveDocument
-import io.stereov.singularity.database.encryption.model.Encrypted
-import io.stereov.singularity.database.hash.model.SearchableHash
-import io.stereov.singularity.database.hash.model.SecureHash
+import io.stereov.singularity.database.encryption.model.SensitiveDocument
+import io.stereov.singularity.database.hash.model.Hash
 import io.stereov.singularity.global.exception.model.InvalidDocumentException
-import io.stereov.singularity.global.exception.model.MissingFunctionParameterException
-import io.stereov.singularity.user.core.model.identity.HashedUserIdentity
 import io.stereov.singularity.user.core.model.identity.UserIdentity
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Transient
@@ -21,8 +17,8 @@ import java.time.Instant
 import java.util.*
 
 data class UserDocument(
-    private var _id: ObjectId? = null,
-    val created: Instant = Instant.now(),
+    var _id: ObjectId? = null,
+    val createdAt: Instant = Instant.now(),
     var lastActive: Instant = Instant.now(),
     val roles: MutableSet<Role>,
     val groups: MutableSet<String>,
@@ -60,7 +56,7 @@ data class UserDocument(
         get() = sensitive.security.twoFactor.methods
 
     @get:Transient
-    val password: SecureHash?
+    val password: Hash?
         get() = sensitive.identities[IdentityProvider.PASSWORD]?.password
 
     @get:Transient
@@ -68,48 +64,17 @@ data class UserDocument(
         get() = if (twoFactorEnabled) sensitive.security.twoFactor.preferred else null
 
     /**
-     * Check if user authenticated using password and return [SecureHash] if so.
+     * Check if user authenticated using password and return [Hash] if so.
      *
      * @throws WrongIdentityProviderException If the user authenticated using a different method.
      * @throws InvalidDocumentException If the user authenticated using password but no password is set.
      */
-    fun validateLoginTypeAndGetPassword(): SecureHash {
+    fun validateLoginTypeAndGetPassword(): Hash {
         if (!sensitive.identities.containsKey(IdentityProvider.PASSWORD)) {
             throw WrongIdentityProviderException("Authentication via password failed: user did not set up authentication using username and password")
         }
 
         return password ?: throw InvalidDocumentException("No password is set for user $id")
-    }
-
-
-    override fun toEncryptedDocument(
-        encryptedSensitiveData: Encrypted<SensitiveUserData>,
-        otherValues: List<Any?>
-    ): EncryptedUserDocument {
-        val hashedEmail = if (isGuest) null else {
-            runCatching { otherValues[0] as SearchableHash }
-                .getOrElse { e -> throw MissingFunctionParameterException("Please provide the hashed email as parameter.", e) }
-        }
-
-        val hashedIdentitiesParameter = runCatching { otherValues[1] as Map<*, *> }
-            .getOrElse { e ->  throw MissingFunctionParameterException("Please provide the list of hashed user identities as a parameter", e) }
-        val hashedIdentities = hashedIdentitiesParameter
-            .map { (key, value) ->
-                val keyString = runCatching { key as String }
-                    .getOrElse { e -> throw MissingFunctionParameterException(
-                        "Failed to convert the key to a String. " +
-                                "Please provide a map of String and HashedUserIdentity", e) }
-                val hashedIdentity = runCatching { value as HashedUserIdentity }
-                    .getOrElse { e -> throw MissingFunctionParameterException(
-                        "Failed to convert the identity to a HashedUserIdentity. " +
-                                "Please provide a map of String and HashedUserIdentity", e) }
-
-                keyString to hashedIdentity
-            }.toMap()
-
-        return EncryptedUserDocument(
-            _id, hashedEmail, hashedIdentities, roles, groups, created, lastActive, encryptedSensitiveData
-        )
     }
 
     /**
@@ -122,7 +87,7 @@ data class UserDocument(
      *
      * @return The updated [UserDocument].
      */
-    fun setupTotp(secret: String, recoveryCodes: List<SecureHash>): UserDocument {
+    fun setupTotp(secret: String, recoveryCodes: List<Hash>): UserDocument {
         logger.debug { "Setting up two factor authentication" }
 
         this.sensitive.security.twoFactor.totp.enabled = true
@@ -246,7 +211,7 @@ data class UserDocument(
 
         fun ofPassword(
             id: ObjectId? = null,
-            password: SecureHash,
+            password: Hash,
             created: Instant = Instant.now(),
             lastActive: Instant = Instant.now(),
             name: String,

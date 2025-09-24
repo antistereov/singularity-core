@@ -1,6 +1,6 @@
-package io.stereov.singularity.database.core.repository
+package io.stereov.singularity.database.encryption.repository
 
-import io.stereov.singularity.database.core.model.EncryptedSensitiveDocument
+import io.stereov.singularity.database.encryption.model.EncryptedSensitiveDocument
 import org.bson.types.ObjectId
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 

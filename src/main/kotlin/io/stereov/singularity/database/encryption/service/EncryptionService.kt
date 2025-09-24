@@ -3,8 +3,6 @@ package io.stereov.singularity.database.encryption.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.database.core.model.EncryptedSensitiveDocument
-import io.stereov.singularity.database.core.model.SensitiveDocument
 import io.stereov.singularity.database.encryption.model.Encrypted
 import io.stereov.singularity.secrets.core.component.SecretStore
 import kotlinx.coroutines.Dispatchers
@@ -24,31 +22,12 @@ class EncryptionService(
     private val logger: KLogger
         get() = KotlinLogging.logger {}
 
-    suspend fun <S, D: SensitiveDocument<S>> encrypt(
-        document: D,
-        otherValues: List<Any?> = emptyList()
-    ): EncryptedSensitiveDocument<S> {
-        val wrapped = wrap(document.sensitive)
-
-        return document.toEncryptedDocument(wrapped, otherValues)
-    }
-
-    suspend fun <S, E: EncryptedSensitiveDocument<S>> decrypt(
-        encryptedDocument: E,
-        otherValues: List<Any?> = emptyList(),
-        clazz: Class<S>
-    ): SensitiveDocument<S> {
-        val unwrapped = unwrap(encryptedDocument.sensitive, clazz)
-
-        return encryptedDocument.toSensitiveDocument(unwrapped, otherValues)
-    }
-
-    private suspend fun <T> wrap(value: T): Encrypted<T> = withContext(Dispatchers.IO) {
+    suspend fun <T> wrap(value: T): Encrypted<T> = withContext(Dispatchers.IO) {
         val jsonStr = objectMapper.writeValueAsString(value)
         encrypt(jsonStr)
     }
 
-    private suspend fun <T> unwrap(encrypted: Encrypted<T>, clazz: Class<T>): T = withContext(Dispatchers.IO) {
+    suspend fun <T> unwrap(encrypted: Encrypted<T>, clazz: Class<T>): T = withContext(Dispatchers.IO) {
         val decryptedJson = decrypt(encrypted)
         objectMapper.readValue(decryptedJson, clazz)
     }

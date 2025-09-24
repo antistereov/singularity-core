@@ -55,7 +55,7 @@ class RateLimitService(
      *
      * @return a Mono<Void> that completes if the user is within the rate limit or emits an error if the limit is exceeded
      */
-    fun checkUserRateLimit() = mono { authorizationService.getCurrentUserId() }
+    fun checkUserRateLimit() = mono { authorizationService.getUserId() }
         .onErrorResume { Mono.empty() }
         .flatMap { userId ->
             val userBucket = resolveBucket(

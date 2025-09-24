@@ -41,7 +41,7 @@ class IdentityProviderService(
 
         authorizationService.requireStepUp()
 
-        val user = authorizationService.getCurrentUser()
+        val user = authorizationService.getUser()
 
         if (user.isGuest)
             throw GuestCannotPerformThisActionException("Guests cannot add a password identity this way. They need to be converted to a user.")
@@ -139,7 +139,7 @@ class IdentityProviderService(
 
         authorizationService.requireStepUp()
 
-        val user = authorizationService.getCurrentUser()
+        val user = authorizationService.getUser()
         val identities = user.sensitive.identities
 
         if (provider == IdentityProvider.PASSWORD)
