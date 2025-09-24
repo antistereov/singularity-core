@@ -23,7 +23,7 @@ docker compose up -d
 
 This will start a preconfigured instance of Redis.
 It also includes a preconfigured instance of MongoDB which is the database *Singularity* uses.
-You can learn more about the database [here](./database/configuration.md).
+You can learn more about the database [here](database/connection.md).
 
 :::note
 You can learn more about Docker and how to use it [here](https://docs.docker.com/).

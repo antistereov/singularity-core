@@ -471,7 +471,7 @@ class AuthenticationController(
                 )
         }
 
-        val sessionId = authorizationService.getCurrentSessionId()
+        val sessionId = authorizationService.getSessionId()
         val stepUpToken = stepUpTokenService.create(user.id, sessionId)
 
         val res = StepUpResponse(
@@ -519,8 +519,8 @@ class AuthenticationController(
         ]
     )
     suspend fun getAuthenticationStatus(exchange: ServerWebExchange): ResponseEntity<AuthenticationStatusResponse> {
-        val authorizedUserId = authorizationService.getCurrentUserIdOrNull()
-        val currentSessionId = authorizationService.getCurrentSessionIdOrNull()
+        val authorizedUserId = authorizationService.getUserIdOrNull()
+        val currentSessionId = authorizationService.getSessionIdOrNull()
         val twoFactorToken = runCatching { twoFactorAuthenticationTokenService.extract(exchange) }.getOrNull()
 
         val authorized = authorizedUserId != null

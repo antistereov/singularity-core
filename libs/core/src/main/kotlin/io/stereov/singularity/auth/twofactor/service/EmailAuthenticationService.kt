@@ -140,7 +140,7 @@ class EmailAuthenticationService(
     suspend fun enable(req: EnableEmailTwoFactorMethodRequest): UserDocument {
         logger.debug { "Enabling email as 2FA method" }
 
-        val user = authorizationService.getCurrentUser()
+        val user = authorizationService.getUser()
         authorizationService.requireStepUp()
 
         if (!user.sensitive.identities.contains(IdentityProvider.PASSWORD))
@@ -165,7 +165,7 @@ class EmailAuthenticationService(
     suspend fun disable(): UserDocument {
         logger.debug { "Disabling email as 2FA method" }
 
-        val user = authorizationService.getCurrentUser()
+        val user = authorizationService.getUser()
         authorizationService.requireStepUp()
 
         if (!user.sensitive.security.twoFactor.email.enabled)

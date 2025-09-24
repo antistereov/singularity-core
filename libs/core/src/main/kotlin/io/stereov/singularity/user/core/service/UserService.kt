@@ -1,9 +1,10 @@
 package io.stereov.singularity.user.core.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.database.core.service.SensitiveCrudService
+import io.stereov.singularity.database.encryption.model.Encrypted
 import io.stereov.singularity.database.encryption.service.EncryptionSecretService
 import io.stereov.singularity.database.encryption.service.EncryptionService
+import io.stereov.singularity.database.encryption.service.SensitiveCrudService
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.user.core.exception.model.UserDoesNotExistException
 import io.stereov.singularity.user.core.model.EncryptedUserDocument
@@ -14,34 +15,29 @@ import io.stereov.singularity.user.core.model.identity.HashedUserIdentity
 import io.stereov.singularity.user.core.repository.UserRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onCompletion
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.stereotype.Service
 
-/**
- * # Service for managing user accounts.
- *
- * This service provides methods to find, save, and delete user accounts.
- * It interacts with the [UserRepository] to perform database operations.
- *
- * @author <a href="https://github.com/antistereov">antistereov</a>
- */
 @Service
 class UserService(
     override val repository: UserRepository,
     override val encryptionService: EncryptionService,
+    override val reactiveMongoTemplate: ReactiveMongoTemplate,
     private val hashService: HashService,
     override val encryptionSecretService: EncryptionSecretService,
-) : SensitiveCrudService<SensitiveUserData, UserDocument, EncryptedUserDocument> {
+) : SensitiveCrudService<SensitiveUserData, UserDocument, EncryptedUserDocument>() {
 
     override val logger = KotlinLogging.logger {}
-    override val clazz = SensitiveUserData::class.java
+    override val sensitiveClazz = SensitiveUserData::class.java
+    override val encryptedDocumentClazz= EncryptedUserDocument::class.java
 
-    override suspend fun encrypt(document: UserDocument, otherValues: List<Any?>): EncryptedUserDocument {
-
-        if (otherValues.getOrNull(0) == true || otherValues.getOrNull(0) == null) document.updateLastActive()
+    override suspend fun doEncrypt(
+        document: UserDocument,
+        encryptedSensitive: Encrypted<SensitiveUserData>,
+    ): EncryptedUserDocument {
 
         val hashedEmail = document.sensitive.email?.let { hashService.hashSearchableHmacSha256(it) }
-        val hashedPrincipalId = document.sensitive.identities
+        val hashedIdentities = document.sensitive.identities
             .map { (provider, identity) ->
                 val hashedUserIdentity = HashedUserIdentity(
                     password = identity.password,
@@ -49,24 +45,32 @@ class UserService(
                 )
                 provider to hashedUserIdentity
             }.toMap()
-        return this.encryptionService.encrypt(document, listOf(hashedEmail, hashedPrincipalId)) as EncryptedUserDocument
+
+
+        return EncryptedUserDocument(
+            document._id,
+            hashedEmail,
+            hashedIdentities,
+            document.roles,
+            document.groups,
+            document.createdAt,
+            document.lastActive,
+            encryptedSensitive
+        )
     }
 
-    override suspend fun rotateSecret() {
-        logger.debug { "Rotating encryption secrets for users" }
-
-        this.repository.findAll()
-            .map {
-                if (it.sensitive.secretKey == encryptionSecretService.getCurrentSecret().key) {
-                    logger.debug { "Skipping rotation of user document ${it._id}: Encryption secret did not change" }
-                    return@map it
-                }
-
-                this.logger.debug { "Rotating key of user document ${it._id}" }
-                this.repository.save(this.encrypt(this.decrypt(it), listOf(false)))
-            }
-            .onCompletion { logger.debug { "Key successfully rotated" } }
-            .collect {}
+    override suspend fun doDecrypt(
+        encrypted: EncryptedUserDocument,
+        decryptedSensitive: SensitiveUserData,
+    ): UserDocument {
+        return UserDocument(
+            encrypted._id,
+            encrypted.created,
+            encrypted.lastActive,
+            encrypted.roles,
+            encrypted.groups,
+            decryptedSensitive
+        )
     }
 
     /**

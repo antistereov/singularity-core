@@ -1,5 +1,5 @@
 package io.stereov.singularity.database.hash.model
 
-data class SecureHash(
+data class Hash(
     val data: String
 )

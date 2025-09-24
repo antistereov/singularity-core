@@ -10,7 +10,7 @@ import io.stereov.singularity.auth.group.mapper.GroupMapper
 import io.stereov.singularity.auth.group.model.GroupDocument
 import io.stereov.singularity.auth.group.model.GroupTranslation
 import io.stereov.singularity.auth.group.repository.GroupRepository
-import io.stereov.singularity.database.core.service.TranslatableCrudService
+import io.stereov.singularity.translate.service.TranslatableCrudService
 import io.stereov.singularity.global.exception.model.DocumentNotFoundException
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.user.core.model.Role
@@ -33,7 +33,7 @@ class GroupService(
 ) : TranslatableCrudService<GroupTranslation, GroupDocument> {
 
     override val logger = KotlinLogging.logger {}
-    override val collectionClass = GroupDocument::class.java
+    override val collectionClazz = GroupDocument::class.java
     override val contentClass = GroupTranslation::class.java
 
     @PostConstruct

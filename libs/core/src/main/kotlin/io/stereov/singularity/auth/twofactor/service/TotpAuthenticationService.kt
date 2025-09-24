@@ -52,7 +52,7 @@ class TotpAuthenticationService(
     suspend fun getTotpDetails(): TwoFactorSetupResponse {
         logger.debug { "Setting up two factor authentication" }
 
-        val user = authorizationService.getCurrentUser()
+        val user = authorizationService.getUser()
         authorizationService.requireStepUp()
         if (!user.sensitive.identities.containsKey(IdentityProvider.PASSWORD)) {
             throw MissingPasswordIdentityException("Cannot set up TOTP: user did not configured sign in using password.")
@@ -83,7 +83,7 @@ class TotpAuthenticationService(
      * @return The updated user document.
      */
     suspend fun validateSetup(token: String, code: Int): UserResponse {
-        val user = authorizationService.getCurrentUser()
+        val user = authorizationService.getUser()
         val setupToken = setupTokenService.validate(token)
 
         if (!user.sensitive.identities.containsKey(IdentityProvider.PASSWORD)) {
@@ -165,7 +165,7 @@ class TotpAuthenticationService(
         logger.debug { "Disabling 2FA" }
 
         authorizationService.requireStepUp()
-        val user = authorizationService.getCurrentUser()
+        val user = authorizationService.getUser()
 
         if (!user.sensitive.security.twoFactor.totp.enabled) {
             throw TwoFactorMethodDisabledException(TwoFactorMethod.TOTP)

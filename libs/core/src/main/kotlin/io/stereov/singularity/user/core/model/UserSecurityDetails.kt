@@ -1,7 +1,7 @@
 package io.stereov.singularity.user.core.model
 
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
-import io.stereov.singularity.database.hash.model.SecureHash
+import io.stereov.singularity.database.hash.model.Hash
 import io.stereov.singularity.global.util.Random
 import java.time.Instant
 
@@ -46,7 +46,7 @@ data class UserSecurityDetails(
         data class TotpDetails(
             var enabled: Boolean = false,
             var secret: String? = null,
-            var recoveryCodes: MutableList<SecureHash> = mutableListOf()
+            var recoveryCodes: MutableList<Hash> = mutableListOf()
         )
 
         data class MailTwoFactorDetails(

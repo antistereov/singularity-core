@@ -24,7 +24,7 @@ class GuestMapper() {
         avatarFileKey: String? = null,
     ) = UserDocument(
         _id = id,
-        created = created,
+        createdAt = created,
         lastActive = lastActive,
         roles = mutableSetOf(Role.GUEST),
         groups = mutableSetOf(),

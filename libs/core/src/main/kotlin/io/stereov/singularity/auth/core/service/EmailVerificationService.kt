@@ -93,7 +93,7 @@ class EmailVerificationService(
     suspend fun getRemainingCooldown(): MailCooldownResponse {
         logger.debug { "Getting remaining email verification cooldown" }
 
-        val userId = authorizationService.getCurrentUserId()
+        val userId = authorizationService.getUserId()
         val cooldown = getRemainingCooldown(userId)
 
         return MailCooldownResponse(cooldown)
@@ -107,7 +107,7 @@ class EmailVerificationService(
     suspend fun sendEmailVerificationToken(locale: Locale?) {
         logger.debug { "Sending email verification token" }
 
-        val user = authorizationService.getCurrentUser()
+        val user = authorizationService.getUser()
 
         if (user.isGuest)
             throw GuestCannotPerformThisActionException("Guests cannot verify their email since no email is specified")

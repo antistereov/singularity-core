@@ -69,7 +69,7 @@ class TwoFactorAuthenticationService(
     suspend fun updatePreferredMethod(req: ChangePreferredTwoFactorMethodRequest): UserDocument {
         logger.debug { "Changing preferred 2FA method to ${req.method}" }
 
-        val user = authorizationService.getCurrentUser()
+        val user = authorizationService.getUser()
         authorizationService.requireStepUp()
 
         if (!user.sensitive.identities.containsKey(IdentityProvider.PASSWORD))

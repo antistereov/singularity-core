@@ -84,6 +84,7 @@ class RefreshTokenService(
             },
         )
 
+        user.updateLastActive()
         user.addOrUpdatesession(sessionId, sessionInfo)
         userService.save(user)
     }

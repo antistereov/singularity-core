@@ -41,6 +41,7 @@ class UserSettingsService(
         logger.debug { "Changing email" }
 
         val user = authorizationService.getCurrentUser()
+
         authorizationService.requireStepUp()
 
         if (userService.existsByEmail(payload.newEmail)) {

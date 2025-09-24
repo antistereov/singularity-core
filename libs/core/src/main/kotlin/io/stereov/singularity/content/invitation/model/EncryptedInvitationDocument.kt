@@ -1,8 +1,7 @@
 package io.stereov.singularity.content.invitation.model
 
-import io.stereov.singularity.database.core.model.EncryptedSensitiveDocument
-import io.stereov.singularity.database.core.model.SensitiveDocument
 import io.stereov.singularity.database.encryption.model.Encrypted
+import io.stereov.singularity.database.encryption.model.EncryptedSensitiveDocument
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
@@ -13,17 +12,4 @@ data class EncryptedInvitationDocument(
     val issuedAt: Instant = Instant.now(),
     val expiresAt: Instant,
     override val sensitive: Encrypted<SensitiveInvitationData>
-) : EncryptedSensitiveDocument<SensitiveInvitationData> {
-
-    override fun toSensitiveDocument(
-        decrypted: SensitiveInvitationData,
-        otherValues: List<Any?>
-    ): SensitiveDocument<SensitiveInvitationData> {
-        return InvitationDocument(
-            _id,
-            issuedAt,
-            expiresAt,
-            decrypted
-        )
-    }
-}
+) : EncryptedSensitiveDocument<SensitiveInvitationData>

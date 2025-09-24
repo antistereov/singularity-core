@@ -2,7 +2,7 @@ package io.stereov.singularity.secrets.core.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.admin.core.dto.RotationStatusResponse
-import io.stereov.singularity.database.core.service.SensitiveCrudService
+import io.stereov.singularity.database.encryption.service.SensitiveCrudService
 import jakarta.annotation.PostConstruct
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

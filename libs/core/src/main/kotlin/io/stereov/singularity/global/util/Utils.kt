@@ -1,6 +1,8 @@
 package io.stereov.singularity.global.util
 
 import com.github.slugify.Slugify
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.http.server.reactive.ServerHttpRequest
 
@@ -18,4 +20,9 @@ fun ServerHttpRequest.getClientIp(preferredHeader: String = "X-Real-IP"): String
         ?: headers["X-Real-IP"]?.firstOrNull()
         ?: headers["X-Forwarded-For"]?.firstOrNull()?.split(",")?.firstOrNull()
         ?: remoteAddress?.address?.hostAddress
+}
+
+suspend fun <S, T> Page<T>.mapContent(map: suspend (content: T) -> S): Page<S> {
+    val mappedContent = this.content.map { map(it) }
+    return PageImpl(mappedContent, this.pageable, this.totalElements)
 }

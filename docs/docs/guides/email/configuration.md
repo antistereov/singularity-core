@@ -19,6 +19,6 @@ Therefore, we decided to disable it by default to allow fast onboarding without 
 
 You can choose to enable it any time. But make sure to configure it correctly.
 
-| Property                    | Type      | Description                                                                                                    | Default |
-|-----------------------------|-----------|----------------------------------------------------------------------------------------------------------------|---------|
-| singularity.app.enable-mail | `Boolean` | Enable emails for email verification, password resets and much more. Make sure to configure your email server. | `false` |
+| Property                 | Type      | Description                                                                                                    | Default |
+|--------------------------|-----------|----------------------------------------------------------------------------------------------------------------|---------|
+| singularity.email.enable | `Boolean` | Enable emails for email verification, password resets and much more. Make sure to configure your email server. | `false` |

@@ -60,7 +60,7 @@ class IdentityProviderController(
         ]
     )
     suspend fun getIdentityProviders(): ResponseEntity<List<IdentityProviderResponse>> {
-        val identityProviders = authorizationService.getCurrentUser().sensitive.identities
+        val identityProviders = authorizationService.getUser().sensitive.identities
             .map { IdentityProviderResponse(it.key) }
 
         return ResponseEntity.ok(identityProviders)

@@ -1,11 +1,10 @@
 package io.stereov.singularity.user.core.controller
 
 import io.stereov.singularity.auth.core.service.AuthorizationService
-import io.stereov.singularity.file.core.dto.FileMetadataResponse
-import io.stereov.singularity.file.core.exception.model.FileNotFoundException
-import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.model.OpenApiConstants
+import io.stereov.singularity.global.util.mapContent
+import io.stereov.singularity.user.core.dto.response.UserOverviewResponse
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.core.mapper.UserMapper
 import io.stereov.singularity.user.core.service.UserService
@@ -16,6 +15,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.bson.types.ObjectId
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -32,7 +33,6 @@ class UserController(
     private val userService: UserService,
     private val authorizationService: AuthorizationService,
     private val userMapper: UserMapper,
-    private val fileStorage: FileStorage
 ) {
 
     @GetMapping("/me")
@@ -57,21 +57,28 @@ class UserController(
         ]
     )
     suspend fun getUser(): ResponseEntity<UserResponse> {
-        val user = authorizationService.getCurrentUser()
+        val user = authorizationService.getUser()
 
         return ResponseEntity.ok(userMapper.toResponse(user))
     }
 
-    @GetMapping("/{id}/avatar")
-    suspend fun getAvatar(
+    @GetMapping("/{id}")
+    suspend fun getUser(
         @PathVariable id: ObjectId
-    ): ResponseEntity<FileMetadataResponse> {
+    ): ResponseEntity<UserOverviewResponse> {
 
         val user = userService.findById(id)
-        val file = user.sensitive.avatarFileKey
-            ?.let { fileStorage.metadataResponseByKey(it) }
-            ?: throw FileNotFoundException(file = null, "No avatar set for user")
 
-        return ResponseEntity.ok().body(file)
+        return ResponseEntity.ok().body(userMapper.toOverview(user))
+    }
+
+    @GetMapping
+    suspend fun getUsers(
+        pageable: Pageable
+    ): ResponseEntity<Page<UserOverviewResponse>> {
+
+        val users = userService.findAllPaginated(pageable)
+        return ResponseEntity.ok()
+            .body(users.mapContent { userMapper.toOverview(it) })
     }
 }

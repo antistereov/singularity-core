@@ -48,7 +48,7 @@ class ArticleManagementService(
         logger.debug { "Creating article with title ${req.title}" }
 
         contentService.requireEditorGroupMembership()
-        val user = authorizationService.getCurrentUser()
+        val user = authorizationService.getUser()
 
         val key = getUniqueKey(req.title.toSlug())
 
@@ -147,7 +147,7 @@ class ArticleManagementService(
         logger.debug { "Changing image of article with key \"$key\"" }
 
         val article = contentService.findAuthorizedByKey(key, ContentAccessRole.EDITOR)
-        val userId = authorizationService.getCurrentUserId()
+        val userId = authorizationService.getUserId()
 
         val currentImage = article.imageKey
 

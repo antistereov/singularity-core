@@ -1,7 +1,7 @@
 package io.stereov.singularity.database.hash.service
 
 import io.stereov.singularity.database.hash.model.SearchableHash
-import io.stereov.singularity.database.hash.model.SecureHash
+import io.stereov.singularity.database.hash.model.Hash
 import org.springframework.security.crypto.bcrypt.BCrypt
 import org.springframework.stereotype.Service
 import java.util.*
@@ -30,7 +30,7 @@ class HashService(
      *
      * @return True if the input matches the hash, false otherwise.
      */
-    fun checkBcrypt(input: String, hash: SecureHash): Boolean {
+    fun checkBcrypt(input: String, hash: Hash): Boolean {
         return BCrypt.checkpw(input, hash.data)
     }
 
@@ -41,8 +41,8 @@ class HashService(
      *
      * @return The hashed string.
      */
-    fun hashBcrypt(input: String): SecureHash {
-        return SecureHash(BCrypt.hashpw(input, BCrypt.gensalt(10)))
+    fun hashBcrypt(input: String): Hash {
+        return Hash(BCrypt.hashpw(input, BCrypt.gensalt(10)))
     }
 
     suspend fun hashSearchableHmacSha256(input: String): SearchableHash {

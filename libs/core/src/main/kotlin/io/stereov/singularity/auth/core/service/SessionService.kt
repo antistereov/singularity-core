@@ -22,7 +22,7 @@ class SessionService(
     suspend fun getSessions(): Map<UUID, SessionInfo> {
         logger.debug { "Getting session" }
 
-        return authorizationService.getCurrentUser().sensitive.sessions
+        return authorizationService.getUser().sensitive.sessions
     }
 
     /**
@@ -35,7 +35,7 @@ class SessionService(
     suspend fun deleteSession(sessionId: UUID): UserDocument {
         logger.debug { "Deleting session $sessionId" }
 
-        val user = authorizationService.getCurrentUser()
+        val user = authorizationService.getUser()
         accessTokenCache.invalidateSessionTokens(user.id, sessionId)
 
         user.removeSession(sessionId)
@@ -52,7 +52,7 @@ class SessionService(
     suspend fun deleteAllSessions(): UserDocument {
         logger.debug { "Logging out all sessions" }
 
-        val user = authorizationService.getCurrentUser()
+        val user = authorizationService.getUser()
         accessTokenCache.invalidateAllTokens(user.id)
         user.clearSessions()
 
