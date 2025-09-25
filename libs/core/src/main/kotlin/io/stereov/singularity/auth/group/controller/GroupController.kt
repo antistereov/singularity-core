@@ -261,11 +261,6 @@ class GroupController(
                 responseCode = "403",
                 description = "`AccessToken` does permit [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles) access.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "409",
-                description = "A group with this key already exists.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
     )

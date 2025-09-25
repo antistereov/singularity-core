@@ -5,9 +5,6 @@ import io.swagger.v3.oas.annotations.media.Schema
 import java.util.*
 
 data class UpdateGroupRequest(
-    @field:Schema(description = "The updated group key. If empty, no change will be made")
-    val key: String?,
-
     @field:Schema(
         description = "A map of locale to group translation. The translations will be added or updated.",
         example = """

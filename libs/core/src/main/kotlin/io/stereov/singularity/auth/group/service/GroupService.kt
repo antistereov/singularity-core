@@ -10,9 +10,9 @@ import io.stereov.singularity.auth.group.mapper.GroupMapper
 import io.stereov.singularity.auth.group.model.GroupDocument
 import io.stereov.singularity.auth.group.model.GroupTranslation
 import io.stereov.singularity.auth.group.repository.GroupRepository
-import io.stereov.singularity.translate.service.TranslatableCrudService
 import io.stereov.singularity.global.exception.model.DocumentNotFoundException
 import io.stereov.singularity.global.properties.AppProperties
+import io.stereov.singularity.translate.service.TranslatableCrudService
 import io.stereov.singularity.user.core.model.Role
 import io.stereov.singularity.user.core.service.UserService
 import jakarta.annotation.PostConstruct
@@ -101,22 +101,6 @@ class GroupService(
 
         if (!group.translations.containsKey(appProperties.locale))
             throw InvalidGroupTranslationException("Failed to update group: default locale ${appProperties.locale} is not contained in translations")
-
-        if (key == req.key || req.key == null) return save(group)
-
-        if (existsByKey(req.key)) throw GroupKeyExistsException("Failed to update group: a group with key ${req.key} already exists")
-
-        group.key = req.key
-
-        userService.findAllByGroupContaining(key)
-            .asFlux()
-            .map { user ->
-                user.groups.remove(key)
-                user.groups.add(req.key)
-                user
-            }
-            .buffer(1000)
-            .collect { users -> userService.saveAll(users) }
 
         return save(group)
     }

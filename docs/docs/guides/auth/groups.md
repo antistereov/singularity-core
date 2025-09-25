@@ -25,6 +25,11 @@ Managing groups and their members can only be done by users with the `ADMIN` rol
 
 ## Managing Groups
 
+:::info Group Keys
+The group's `key` cannot be changed once created.
+This is necessary to maintain consistency in the database.
+:::
+
 ### Creating Groups
 
 You can create a new group with a `key`, and translations of name and descriptions through the endpoint
