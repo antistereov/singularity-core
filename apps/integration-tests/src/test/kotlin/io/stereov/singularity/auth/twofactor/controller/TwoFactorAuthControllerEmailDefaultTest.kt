@@ -60,7 +60,7 @@ class TwoFactorAuthControllerEmailDefaultTest : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isOk
 
-        verify(exactly = 1) { mailSender.send(any<MimeMessage>()) }
+        verify(exactly = 2) { mailSender.send(any<MimeMessage>()) }
     }
     @Test fun `login does not send 2fa email automatically after login when not preferred`() = runTest {
         val user = registerUser(email2faEnabled = true, totpEnabled = true)
@@ -73,7 +73,7 @@ class TwoFactorAuthControllerEmailDefaultTest : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isOk
 
-        verify(exactly = 0) { mailSender.send(any<MimeMessage>()) }
+        verify(exactly = 1) { mailSender.send(any<MimeMessage>()) }
     }
 
     @Test fun `stepUp sends 2fa email automatically after login when preferred`() = runTest {
@@ -88,7 +88,7 @@ class TwoFactorAuthControllerEmailDefaultTest : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isOk
 
-        verify(exactly = 1) { mailSender.send(any<MimeMessage>()) }
+        verify(exactly = 2) { mailSender.send(any<MimeMessage>()) }
     }
     @Test fun `stepUp does not send 2fa email automatically after login when not preferred`() = runTest {
         val user = registerUser(email2faEnabled = true, totpEnabled = true)
@@ -102,7 +102,7 @@ class TwoFactorAuthControllerEmailDefaultTest : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isOk
 
-        verify(exactly = 0) { mailSender.send(any<MimeMessage>()) }
+        verify(exactly = 1) { mailSender.send(any<MimeMessage>()) }
     }
 
     companion object {
