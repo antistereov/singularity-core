@@ -3,7 +3,10 @@ package io.stereov.singularity.auth.oauth2.service
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.model.IdentityProvider
+import io.stereov.singularity.auth.core.model.SecurityAlertType
+import io.stereov.singularity.auth.core.properties.SecurityAlertProperties
 import io.stereov.singularity.auth.core.service.AuthorizationService
+import io.stereov.singularity.auth.core.service.SecurityAlertService
 import io.stereov.singularity.auth.core.service.token.AccessTokenService
 import io.stereov.singularity.auth.core.service.token.StepUpTokenService
 import io.stereov.singularity.auth.guest.exception.model.GuestCannotPerformThisActionException
@@ -15,6 +18,7 @@ import io.stereov.singularity.auth.oauth2.exception.model.PasswordIdentityAlread
 import io.stereov.singularity.auth.oauth2.model.OAuth2ErrorCode
 import io.stereov.singularity.auth.oauth2.service.token.OAuth2ProviderConnectionTokenService
 import io.stereov.singularity.database.hash.service.HashService
+import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.global.exception.model.DocumentNotFoundException
 import io.stereov.singularity.user.core.model.Role
 import io.stereov.singularity.user.core.model.UserDocument
@@ -22,6 +26,7 @@ import io.stereov.singularity.user.core.model.identity.UserIdentity
 import io.stereov.singularity.user.core.service.UserService
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ServerWebExchange
+import java.util.*
 
 @Service
 class IdentityProviderService(
@@ -31,7 +36,10 @@ class IdentityProviderService(
     private val hashService: HashService,
     private val accessTokenCache: AccessTokenCache,
     private val accessTokenService: AccessTokenService,
-    private val stepUpTokenService: StepUpTokenService
+    private val stepUpTokenService: StepUpTokenService,
+    private val emailProperties: EmailProperties,
+    private val securityAlertService: SecurityAlertService,
+    private val securityAlertProperties: SecurityAlertProperties
 ) {
 
     private val logger = KotlinLogging.logger {}
@@ -62,8 +70,9 @@ class IdentityProviderService(
         principalId: String,
         oauth2ProviderConnectionTokenValue: String,
         stepUpTokenValue: String?,
-        exchange: ServerWebExchange
-    ): UserDocument {
+        exchange: ServerWebExchange,
+        locale: Locale?
+    ): Pair<UserDocument, OAuth2AuthenticationService.OAuth2Action> {
         logger.debug { "Connecting a new OAuth2 provider $provider to user" }
 
         val accessToken = accessTokenService.extractOrOAuth2FlowException(exchange)
@@ -119,8 +128,9 @@ class IdentityProviderService(
                 "The provided OAuth2ProviderConnectionToken does not match the requested provider.")
 
         user.sensitive.identities[provider] = UserIdentity.ofProvider(principalId)
+        val isGuest = user.isGuest
 
-        if (user.isGuest) {
+        if (isGuest) {
             if (userService.existsByEmail(email))
                 throw OAuth2FlowException(OAuth2ErrorCode.EMAIL_ALREADY_REGISTERED,
                     "Failed to convert guest to user via OAuth2 provider: email is already registered")
@@ -131,10 +141,20 @@ class IdentityProviderService(
             accessTokenCache.invalidateAllTokens(user.id)
         }
 
-        return userService.save(user)
+        val savedUser = userService.save(user)
+
+        if (emailProperties.enable && securityAlertProperties.oauth2ProviderConnected && !isGuest) {
+            securityAlertService.send(savedUser, locale, SecurityAlertType.OAUTH_CONNECTED, provider)
+        }
+        val action = when (isGuest) {
+            true -> OAuth2AuthenticationService.OAuth2Action.GUEST_CONVERSION
+            false -> OAuth2AuthenticationService.OAuth2Action.CONNECTION
+        }
+
+        return savedUser to action
     }
 
-    suspend fun disconnect(provider: String): UserDocument {
+    suspend fun disconnect(provider: String, locale: Locale?): UserDocument {
         logger.debug { "Disconnecting provider $provider from user" }
 
         authorizationService.requireStepUp()
@@ -153,6 +173,12 @@ class IdentityProviderService(
 
         identities.remove(provider)
 
-        return userService.save(user)
+        val savedUser = userService.save(user)
+
+        if (emailProperties.enable && securityAlertProperties.oauth2ProviderDisconnected) {
+            securityAlertService.send(savedUser, locale, SecurityAlertType.OAUTH_DISCONNECTED, provider)
+        }
+
+        return savedUser
     }
 }

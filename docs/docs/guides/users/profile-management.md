@@ -22,7 +22,7 @@ This includes personal details and connected identity providers.
 
 ### Profile Update
 
-This action is accessible to all authenticated users and can be requested through [`POST /api/auth/users/me`](../../api/update-authorized-user.api.mdx).
+This action is accessible to all authenticated users and can be requested through [`PUT /api/auth/users/me`](../../api/update-authorized-user.api.mdx).
 
 You can update various fields of your profile, such as your username or other non-sensitive information.
 
@@ -37,7 +37,7 @@ Your new email address will undergo a verification process.
 If email is enabled, a verification token will be sent to the new address. 
 The change will only be finalized once the token is verified. If email is disabled, the change is instant.
 
-This can be requested through [`POST /api/auth/users/me/email`](../../api/change-email-of-authorized-user.api.mdx).
+This can be requested through [`PUT /api/auth/users/me/email`](../../api/change-email-of-authorized-user.api.mdx).
 
 ### Password Management
 
@@ -48,7 +48,7 @@ both an [`AccessToken`](../auth/tokens.md#access-token) and a [`StepUpToken`](..
 
 You can set a new password for your account, which must meet the specified password policy 
 (minimum length, character types, etc.).
-This can be requested through [`POST /api/auth/users/me/password`](../../api/change-password-of-authorized-user.api.mdx).
+This can be requested through [`PUT /api/auth/users/me/password`](../../api/change-password-of-authorized-user.api.mdx).
 
 ### Avatar Management
 
@@ -57,7 +57,7 @@ You can manage your user avatar through two separate actions.
 #### Updating the Avatar
 
 You can upload a new image to be used as your profile picture.
-This can be requested through [`POST /api/auth/users/me/avatar`](../../api/set-avatar-of-authorized-user.api.mdx).
+This can be requested through [`PUT /api/auth/users/me/avatar`](../../api/set-avatar-of-authorized-user.api.mdx).
 
 #### Deleting the Avatar
 

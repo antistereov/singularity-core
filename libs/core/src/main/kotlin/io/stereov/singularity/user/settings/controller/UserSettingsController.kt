@@ -88,6 +88,15 @@ class UserSettingsController(
             
             You can find more information about profile management [here](https://singularity.stereov.io/docs/guides/users/profile-management).
             
+            **Locale:**
+            
+            A locale can be specified for this request. 
+            The email will be sent in the specified locale.
+            You can learn more about locale in emails [here](https://singularity.stereov.io/docs/guides/email/templates).
+            
+            If no locale is specified, the applications default locale will be used.
+            You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
+            
             **Tokens:**
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
             - A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
@@ -137,6 +146,15 @@ class UserSettingsController(
             **Requirements:**
             - The `password` must be at least 8 characters long and include at least one uppercase letter, 
               one lowercase letter, one number, and one special character (!@#$%^&*()_+={}[]|\:;'"<>,.?/).
+              
+            **Locale:**
+            
+            A locale can be specified for this request. 
+            The email will be sent in the specified locale.
+            You can learn more about locale in emails [here](https://singularity.stereov.io/docs/guides/email/templates).
+            
+            If no locale is specified, the applications default locale will be used.
+            You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
             
             **Tokens:**
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
@@ -169,9 +187,10 @@ class UserSettingsController(
     )
     @PutMapping("/password")
     suspend fun changePasswordOfAuthorizedUser(
-        @RequestBody @Valid payload: ChangePasswordRequest
+        @RequestBody @Valid payload: ChangePasswordRequest,
+        @RequestParam locale: Locale?
     ): ResponseEntity<UserResponse> {
-        val user = userSettingsService.changePassword(payload)
+        val user = userSettingsService.changePassword(payload, locale)
 
         return ResponseEntity.ok().body(
             userMapper.toResponse(user)

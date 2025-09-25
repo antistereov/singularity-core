@@ -140,12 +140,25 @@ class EmailAuthenticationController(
             
             Learn more about email as 2FA method [here](https://singularity.stereov.io/docs/guides/auth/two-factor#email).
             
+            A [security alert](https://singularity.stereov.io/docs/guides/auth/security-alerts#2fa-specific-alerts)
+            will be sent to the user's email if this setting is enabled and
+            email is [enabled and configured correctly](https://singularity.stereov.io/docs/guides/email/configuration).
+            
             **Requirements:**
             - The user can authenticate using password. 2FA will not work with OAuth2. 
               The OAuth2 provider will validate the second factor if the user enabled it for the provider.
             
             **Note:** If [email is enabled](https://singularity.stereov.io/docs/guides/email/configuration) in your application,
             email is 2FA method will be enabled by default for every user that registers with a password.
+            
+            **Locale:**
+            
+            A locale can be specified for this request. 
+            The email will be sent in the specified locale.
+            You can learn more about locale in emails [here](https://singularity.stereov.io/docs/guides/email/templates).
+            
+            If no locale is specified, the applications default locale will be used.
+            You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
             
             **Tokens:**
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
@@ -183,10 +196,11 @@ class EmailAuthenticationController(
         ]
     )
     suspend fun enableEmailAsTwoFactorMethod(
-        @RequestBody payload: EnableEmailTwoFactorMethodRequest
+        @RequestBody payload: EnableEmailTwoFactorMethodRequest,
+        @RequestParam locale: Locale?
     ): ResponseEntity<UserResponse> {
         return ResponseEntity.ok(
-            userMapper.toResponse(emailAuthenticationService.enable(payload))
+            userMapper.toResponse(emailAuthenticationService.enable(payload, locale))
         )
     }
 
@@ -197,6 +211,19 @@ class EmailAuthenticationController(
             Disable email as 2FA method.
             
             Learn more about email as 2FA method [here](https://singularity.stereov.io/docs/guides/auth/two-factor#email).
+            
+            A [security alert](https://singularity.stereov.io/docs/guides/auth/security-alerts#2fa-specific-alerts)
+            will be sent to the user's email if this setting is enabled and
+            email is [enabled and configured correctly](https://singularity.stereov.io/docs/guides/email/configuration).
+            
+            **Locale:**
+            
+            A locale can be specified for this request. 
+            The email will be sent in the specified locale.
+            You can learn more about locale in emails [here](https://singularity.stereov.io/docs/guides/email/templates).
+            
+            If no locale is specified, the applications default locale will be used.
+            You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
             
             **Tokens:**
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
@@ -228,9 +255,11 @@ class EmailAuthenticationController(
             ),
         ]
     )
-    suspend fun disableEmailAsTwoFactorMethod(): ResponseEntity<UserResponse> {
+    suspend fun disableEmailAsTwoFactorMethod(
+        @RequestParam locale: Locale?
+    ): ResponseEntity<UserResponse> {
         return ResponseEntity.ok(
-            userMapper.toResponse(emailAuthenticationService.disable())
+            userMapper.toResponse(emailAuthenticationService.disable(locale))
         )
     }
 

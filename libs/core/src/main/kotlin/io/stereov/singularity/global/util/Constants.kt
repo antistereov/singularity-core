@@ -6,6 +6,7 @@ object Constants {
     const val JWT_SESSION_CLAIM = "session"
     const val JWT_BROWSER_CLAIM = "browser"
     const val JWT_OS_CLAIM = "os"
+    const val JWT_LOCALE_CLAIM = "locale"
     const val JWT_OAUTH2_PROVIDER_CLAIM = "oauth2_provider"
     const val TWO_FACTOR_SECRET_CLAIM = "2fa_secret"
     const val TWO_FACTOR_RECOVERY_CLAIM = "2fa_recovery"

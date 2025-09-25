@@ -70,6 +70,33 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
         val foundUser = userService.findByEmail(newEmail)
         assertEquals(user.info.id, foundUser.id)
     }
+    @Test fun `changeEmail changes email when old is verified`() = runTest {
+        val newEmail = "new@email.com"
+        val user = registerUser()
+        user.info.sensitive.security.email.verified = true
+        userService.save(user.info)
+
+        webTestClient.put()
+            .uri("/api/users/me/email")
+            .accessTokenCookie(user.accessToken)
+            .stepUpTokenCookie(user.stepUpToken)
+            .bodyValue(ChangeEmailRequest(newEmail))
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(UserResponse::class.java)
+            .returnResult()
+            .responseBody
+
+        val token = emailVerificationTokenService.create(user.info.id, newEmail, user.info.sensitive.security.email.verificationSecret)
+
+        webTestClient.post()
+            .uri("/api/auth/email/verification?token=$token")
+            .exchange()
+            .expectStatus().isOk
+
+        val foundUser = userService.findByEmail(newEmail)
+        assertEquals(user.info.id, foundUser.id)
+    }
     @Test fun `changeEmail requires authentication`() = runTest {
         val oldEmail = "old@email.com"
         val newEmail = "new@email.com"

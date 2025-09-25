@@ -131,15 +131,18 @@ paths:
       tags:
       - Authentication
       summary: Login
-      description: "Authenticates a user with `email` and `password`.\n\n**Optional\
-        \ session data:**\n- The `session` object can be included in the request body.\n\
-        - Inside the `session` object, you can provide the following optional fields:\n\
-        \    - `browser`: The name of the browser used (e.g., \"Chrome\", \"Firefox\"\
-        ).\n    - `os`: The operating system of the device (e.g., \"Windows\", \"\
-        macOS\", \"Android\").\n\nThis information helps users identify and manage\
-        \ authorized sessions, improving overall account security.\n\n**2FA:**\n\n\
-        If the user enabled 2FA, the user will not be authenticated immediately. \n\
-        Instead, a [`TwoFactorAuthenticationToken`](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token)\
+      description: "Authenticates a user with `email` and `password`.\n\nA [login\
+        \ alert](https://singularity.stereov.io/docs/guides/auth/security-alerts#core-identity-alerts)\
+        \ \nwill be sent to the user's email if this setting is enabled\nemail is\
+        \ [enabled and configured correctly](https://singularity.stereov.io/docs/guides/email/configuration).\n\
+        \n**Optional session data:**\n- The `session` object can be included in the\
+        \ request body.\n- Inside the `session` object, you can provide the following\
+        \ optional fields:\n    - `browser`: The name of the browser used (e.g., \"\
+        Chrome\", \"Firefox\").\n    - `os`: The operating system of the device (e.g.,\
+        \ \"Windows\", \"macOS\", \"Android\").\n\nThis information helps users identify\
+        \ and manage authorized sessions, improving overall account security.\n\n\
+        **2FA:**\n\nIf the user enabled 2FA, the user will not be authenticated immediately.\
+        \ \nInstead, a [`TwoFactorAuthenticationToken`](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token)\
         \ \nis set as HTTP-only cookie and returned in the response body\nif [header\
         \ authentication](https://singularity.stereov.io/docs/guides/auth/authentication#header-authentication)\
         \ is enabled.\n\nYou can complete the login through the endpoint [`POST /api/auth/2fa/login`](https://singularity.stereov.io/docs/api/complete-login).\n\
@@ -446,6 +449,11 @@ paths:
         \ as request parameter.\nYou can find more information about this [here](https://singularity.stereov.io/docs/guides/auth/authentication#password-reset).\n\
         \nIf successful, the user can log in using the new password afterwards.\n\n\
         You can resend this email through the endpoint [`POST /api/auth/password/reset-request`](https://singularity.stereov.io/docs/api/send-password-reset-email).\n\
+        \n**Locale:**\n\nA locale can be specified for this request. \nThe email will\
+        \ be sent in the specified locale.\nYou can learn more about locale in emails\
+        \ [here](https://singularity.stereov.io/docs/guides/email/templates).\n\n\
+        If no locale is specified, the applications default locale will be used.\n\
+        You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).\n\
         \n**Note:** If email is disabled, there is no way to reset the password."
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/authentication#password-reset
@@ -454,6 +462,11 @@ paths:
       - name: token
         in: query
         required: true
+        schema:
+          type: string
+      - name: locale
+        in: query
+        required: false
         schema:
           type: string
       requestBody:
@@ -594,20 +607,21 @@ paths:
       tags:
       - Authentication
       summary: Verify Email
-      description: |-
-        Verify the user's email address using the `token` the user received a email verification email.
-        You can find more information about this [here](https://singularity.stereov.io/docs/guides/auth/authentication#email-verification).
-
-        When registering a user and [email is enabled in your application](https://singularity.stereov.io/docs/guides/email/configuration)
-        an email containing a link is sent to the user's email address.
-        This link should point to the frontend of your application.
-        Your frontend should extract the token from the URL and send it to this endpoint with the
-        token as request parameter.
-        You can find more information about this [here](https://singularity.stereov.io/docs/guides/auth/authentication#email-verification).
-
-        You can resend this email through the endpoint [`POST /api/auth/email/verification/send`](https://singularity.stereov.io/docs/api/send-email-verification-email).
-
-        **Note:** If email is disabled, there is no way to verify a user's email address.
+      description: "Verify the user's email address using the `token` the user received\
+        \ a email verification email.\nYou can find more information about this [here](https://singularity.stereov.io/docs/guides/auth/authentication#email-verification).\n\
+        \nWhen registering a user and [email is enabled in your application](https://singularity.stereov.io/docs/guides/email/configuration)\n\
+        an email containing a link is sent to the user's email address.\nThis link\
+        \ should point to the frontend of your application.\nYour frontend should\
+        \ extract the token from the URL and send it to this endpoint with the\ntoken\
+        \ as request parameter.\nYou can find more information about this [here](https://singularity.stereov.io/docs/guides/auth/authentication#email-verification).\n\
+        \nYou can resend this email through the endpoint [`POST /api/auth/email/verification/send`](https://singularity.stereov.io/docs/api/send-email-verification-email).\n\
+        \n**Locale:**\n\nA locale can be specified for this request. \nThe email will\
+        \ be sent in the specified locale.\nYou can learn more about locale in emails\
+        \ [here](https://singularity.stereov.io/docs/guides/email/templates).\n\n\
+        If no locale is specified, the applications default locale will be used.\n\
+        You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).\n\
+        \n**Note:** If email is disabled, there is no way to verify a user's email\
+        \ address."
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/docs/auth/authentication#email-verification
       operationId: verifyEmail
@@ -615,6 +629,11 @@ paths:
       - name: token
         in: query
         required: true
+        schema:
+          type: string
+      - name: locale
+        in: query
+        required: false
         schema:
           type: string
       responses:
@@ -916,15 +935,29 @@ paths:
       description: "Complete the TOTP setup `token` from [`GET /api/auth/2fa/setup`](https://singularity.stereov.io/docs/api/get-totp-setup-details)\
         \ \nand a TOTP code from an authenticator app.\n\nYou can learn more about\
         \ this [here](https://singularity.stereov.io/docs/guides/auth/two-factor#setup).\n\
+        \nA [security alert](https://singularity.stereov.io/docs/guides/auth/security-alerts#2fa-specific-alerts)\n\
+        will be sent to the user's email if this setting is enabled and\nemail is\
+        \ [enabled and configured correctly](https://singularity.stereov.io/docs/guides/email/configuration).\n\
         \n**Requirements:**\n- The user can authenticate using password. 2FA will\
         \ not work with OAuth2. \n  The OAuth2 provider will validate the second factor\
-        \ if the user enabled it for the provider.\n  \n**Tokens:**\n- A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
+        \ if the user enabled it for the provider.\n  \n**Locale:**\n\nA locale can\
+        \ be specified for this request. \nThe email will be sent in the specified\
+        \ locale.\nYou can learn more about locale in emails [here](https://singularity.stereov.io/docs/guides/email/templates).\n\
+        \nIf no locale is specified, the applications default locale will be used.\n\
+        You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).\n\
+        \n**Tokens:**\n- A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
         \ is required.\n- A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)\n\
         \  is required. This token should match user and session contained in the\
         \ `AccessToken`."
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/two-factor#setup
       operationId: enableTotpAsTwoFactorMethod
+      parameters:
+      - name: locale
+        in: query
+        required: false
+        schema:
+          type: string
       requestBody:
         content:
           application/json:
@@ -967,18 +1000,28 @@ paths:
       tags:
       - Two-Factor Authentication
       summary: Disable TOTP as 2FA Method
-      description: |-
-        Disable TOTP for the current user.
-
-        You can learn more about this [here](https://singularity.stereov.io/docs/guides/auth/two-factor#setup).
-
-        **Tokens:**
-        - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
-        - A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
-          is required. This token should match user and session contained in the `AccessToken`.
+      description: "Disable TOTP for the current user.\n\nA [security alert](https://singularity.stereov.io/docs/guides/auth/security-alerts#2fa-specific-alerts)\n\
+        will be sent to the user's email if this setting is enabled and\nemail is\
+        \ [enabled and configured correctly](https://singularity.stereov.io/docs/guides/email/configuration).\n\
+        \nYou can learn more about this [here](https://singularity.stereov.io/docs/guides/auth/two-factor#setup).\n\
+        \n**Locale:**\n\nA locale can be specified for this request. \nThe email will\
+        \ be sent in the specified locale.\nYou can learn more about locale in emails\
+        \ [here](https://singularity.stereov.io/docs/guides/email/templates).\n\n\
+        If no locale is specified, the applications default locale will be used.\n\
+        You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).\n\
+        \n**Tokens:**\n- A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
+        \ is required.\n- A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)\n\
+        \  is required. This token should match user and session contained in the\
+        \ `AccessToken`."
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/two-factor#disable
       operationId: disableTotpAsTwoFactorMethod
+      parameters:
+      - name: locale
+        in: query
+        required: false
+        schema:
+          type: string
       responses:
         "200":
           description: Success.
@@ -1147,17 +1190,31 @@ paths:
       summary: Enable Email as 2FA Method
       description: "Enable email as 2FA method.\n\nLearn more about email as 2FA method\
         \ [here](https://singularity.stereov.io/docs/guides/auth/two-factor#email).\n\
+        \nA [security alert](https://singularity.stereov.io/docs/guides/auth/security-alerts#2fa-specific-alerts)\n\
+        will be sent to the user's email if this setting is enabled and\nemail is\
+        \ [enabled and configured correctly](https://singularity.stereov.io/docs/guides/email/configuration).\n\
         \n**Requirements:**\n- The user can authenticate using password. 2FA will\
         \ not work with OAuth2. \n  The OAuth2 provider will validate the second factor\
         \ if the user enabled it for the provider.\n\n**Note:** If [email is enabled](https://singularity.stereov.io/docs/guides/email/configuration)\
         \ in your application,\nemail is 2FA method will be enabled by default for\
-        \ every user that registers with a password.\n\n**Tokens:**\n- A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
+        \ every user that registers with a password.\n\n**Locale:**\n\nA locale can\
+        \ be specified for this request. \nThe email will be sent in the specified\
+        \ locale.\nYou can learn more about locale in emails [here](https://singularity.stereov.io/docs/guides/email/templates).\n\
+        \nIf no locale is specified, the applications default locale will be used.\n\
+        You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).\n\
+        \n**Tokens:**\n- A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
         \ is required.\n- A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)\n\
         \  is required. This token should match user and session contained in the\
         \ `AccessToken`."
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/two-factor#setup-1
       operationId: enableEmailAsTwoFactorMethod
+      parameters:
+      - name: locale
+        in: query
+        required: false
+        schema:
+          type: string
       requestBody:
         content:
           application/json:
@@ -1200,18 +1257,29 @@ paths:
       tags:
       - Two-Factor Authentication
       summary: Disable Email as 2FA Method
-      description: |-
-        Disable email as 2FA method.
-
-        Learn more about email as 2FA method [here](https://singularity.stereov.io/docs/guides/auth/two-factor#email).
-
-        **Tokens:**
-        - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
-        - A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
-          is required. This token should match user and session contained in the `AccessToken`.
+      description: "Disable email as 2FA method.\n\nLearn more about email as 2FA\
+        \ method [here](https://singularity.stereov.io/docs/guides/auth/two-factor#email).\n\
+        \nA [security alert](https://singularity.stereov.io/docs/guides/auth/security-alerts#2fa-specific-alerts)\n\
+        will be sent to the user's email if this setting is enabled and\nemail is\
+        \ [enabled and configured correctly](https://singularity.stereov.io/docs/guides/email/configuration).\n\
+        \n**Locale:**\n\nA locale can be specified for this request. \nThe email will\
+        \ be sent in the specified locale.\nYou can learn more about locale in emails\
+        \ [here](https://singularity.stereov.io/docs/guides/email/templates).\n\n\
+        If no locale is specified, the applications default locale will be used.\n\
+        You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).\n\
+        \n**Tokens:**\n- A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
+        \ is required.\n- A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)\n\
+        \  is required. This token should match user and session contained in the\
+        \ `AccessToken`."
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/two-factor#disable-1
       operationId: disableEmailAsTwoFactorMethod
+      parameters:
+      - name: locale
+        in: query
+        required: false
+        schema:
+          type: string
       responses:
         "200":
           description: Updated user information.
@@ -1315,6 +1383,10 @@ paths:
         **Requirements:**
         - You are not allowed to delete the password identity or the only existing identity.
 
+        A [security alert](https://singularity.stereov.io/docs/guides/auth/security-alerts#oauth2-specific-alerts)
+        will be sent to the user's email if this setting is enabled and
+        email is [enabled and configured correctly](https://singularity.stereov.io/docs/guides/email/configuration).
+
         **Tokens:**
         - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
         - A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
@@ -1326,6 +1398,11 @@ paths:
       - name: provider
         in: path
         required: true
+        schema:
+          type: string
+      - name: locale
+        in: query
+        required: false
         schema:
           type: string
       responses:
@@ -1568,6 +1645,12 @@ paths:
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/oauth2#1-retrieving-a-session-token
       operationId: generateSessionToken
+      parameters:
+      - name: locale
+        in: query
+        required: false
+        schema:
+          type: string
       requestBody:
         content:
           application/json:
@@ -2571,24 +2654,23 @@ paths:
       tags:
       - Profile Management
       summary: Change Email
-      description: |-
-        Change the email of the currently authenticated user.
-
-        If [email is enabled](https://singularity.stereov.io/docs/guides/email/configuration),
-        the user needs to verify this email address with a token that is sent to the new email address.
-        Only then the email is changed in the database.
-        If email is disabled, the email will be changed immediately.
-
-        **Requirements:**
-        - The `email` should be a valid email address (e.g., "test@example.com")
-          that is not associated to an existing account.
-
-        You can find more information about profile management [here](https://singularity.stereov.io/docs/guides/users/profile-management).
-
-        **Tokens:**
-        - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
-        - A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
-          is required. This token should match user and session contained in the `AccessToken`.
+      description: "Change the email of the currently authenticated user.\n\nIf [email\
+        \ is enabled](https://singularity.stereov.io/docs/guides/email/configuration),\n\
+        the user needs to verify this email address with a token that is sent to the\
+        \ new email address.\nOnly then the email is changed in the database.\nIf\
+        \ email is disabled, the email will be changed immediately.\n\n**Requirements:**\n\
+        - The `email` should be a valid email address (e.g., \"test@example.com\"\
+        )\n  that is not associated to an existing account.\n\nYou can find more information\
+        \ about profile management [here](https://singularity.stereov.io/docs/guides/users/profile-management).\n\
+        \n**Locale:**\n\nA locale can be specified for this request. \nThe email will\
+        \ be sent in the specified locale.\nYou can learn more about locale in emails\
+        \ [here](https://singularity.stereov.io/docs/guides/email/templates).\n\n\
+        If no locale is specified, the applications default locale will be used.\n\
+        You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).\n\
+        \n**Tokens:**\n- A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
+        \ is required.\n- A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)\n\
+        \  is required. This token should match user and session contained in the\
+        \ `AccessToken`."
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/users/profile-management
       operationId: changeEmailOfAuthorizedUser
@@ -2637,14 +2719,24 @@ paths:
         \ can find more information about profile management [here](https://singularity.stereov.io/docs/guides/users/profile-management).\n\
         \n**Requirements:**\n- The `password` must be at least 8 characters long and\
         \ include at least one uppercase letter, \n  one lowercase letter, one number,\
-        \ and one special character (!@#$%^&*()_+={}[]|\\:;'\"<>,.?/).\n\n**Tokens:**\n\
-        - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
+        \ and one special character (!@#$%^&*()_+={}[]|\\:;'\"<>,.?/).\n  \n**Locale:**\n\
+        \nA locale can be specified for this request. \nThe email will be sent in\
+        \ the specified locale.\nYou can learn more about locale in emails [here](https://singularity.stereov.io/docs/guides/email/templates).\n\
+        \nIf no locale is specified, the applications default locale will be used.\n\
+        You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).\n\
+        \n**Tokens:**\n- A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
         \ is required.\n- A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)\n\
         \  is required. This token should match user and session contained in the\
         \ `AccessToken`."
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/users/profile-management
       operationId: changePasswordOfAuthorizedUser
+      parameters:
+      - name: locale
+        in: query
+        required: false
+        schema:
+          type: string
       requestBody:
         content:
           application/json:
@@ -4527,13 +4619,13 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
-        numberOfElements:
-          type: integer
-          format: int32
         first:
           type: boolean
         last:
           type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
         empty:
           type: boolean
     PageableObject:
@@ -4596,13 +4688,13 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
-        numberOfElements:
-          type: integer
-          format: int32
         first:
           type: boolean
         last:
           type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
         empty:
           type: boolean
     KeyContainsResponse:
@@ -4694,13 +4786,13 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
-        numberOfElements:
-          type: integer
-          format: int32
         first:
           type: boolean
         last:
           type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
         empty:
           type: boolean
     ArticleResponse:

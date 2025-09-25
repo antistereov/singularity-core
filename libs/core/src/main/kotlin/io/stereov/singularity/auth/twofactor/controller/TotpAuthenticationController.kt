@@ -118,10 +118,23 @@ class TotpAuthenticationController(
             
             You can learn more about this [here](https://singularity.stereov.io/docs/guides/auth/two-factor#setup).
             
+            A [security alert](https://singularity.stereov.io/docs/guides/auth/security-alerts#2fa-specific-alerts)
+            will be sent to the user's email if this setting is enabled and
+            email is [enabled and configured correctly](https://singularity.stereov.io/docs/guides/email/configuration).
+            
             **Requirements:**
             - The user can authenticate using password. 2FA will not work with OAuth2. 
               The OAuth2 provider will validate the second factor if the user enabled it for the provider.
               
+            **Locale:**
+            
+            A locale can be specified for this request. 
+            The email will be sent in the specified locale.
+            You can learn more about locale in emails [here](https://singularity.stereov.io/docs/guides/email/templates).
+            
+            If no locale is specified, the applications default locale will be used.
+            You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
+            
             **Tokens:**
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
             - A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
@@ -158,10 +171,11 @@ class TotpAuthenticationController(
         ]
     )
     suspend fun enableTotpAsTwoFactorMethod(
-        @RequestBody setupRequest: TwoFactorVerifySetupRequest
+        @RequestBody setupRequest: TwoFactorVerifySetupRequest,
+        @RequestParam locale: Locale?
     ): ResponseEntity<UserResponse> {
         return ResponseEntity.ok(
-            totpAuthenticationService.validateSetup(setupRequest.token, setupRequest.code)
+            totpAuthenticationService.validateSetup(setupRequest.token, setupRequest.code, locale)
         )
     }
 
@@ -171,7 +185,20 @@ class TotpAuthenticationController(
         description = """
             Disable TOTP for the current user.
             
+            A [security alert](https://singularity.stereov.io/docs/guides/auth/security-alerts#2fa-specific-alerts)
+            will be sent to the user's email if this setting is enabled and
+            email is [enabled and configured correctly](https://singularity.stereov.io/docs/guides/email/configuration).
+            
             You can learn more about this [here](https://singularity.stereov.io/docs/guides/auth/two-factor#setup).
+            
+            **Locale:**
+            
+            A locale can be specified for this request. 
+            The email will be sent in the specified locale.
+            You can learn more about locale in emails [here](https://singularity.stereov.io/docs/guides/email/templates).
+            
+            If no locale is specified, the applications default locale will be used.
+            You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
             
             **Tokens:**
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
@@ -203,8 +230,10 @@ class TotpAuthenticationController(
             )
         ]
     )
-    suspend fun disableTotpAsTwoFactorMethod(): ResponseEntity<UserResponse> {
-        return ResponseEntity.ok(totpAuthenticationService.disable())
+    suspend fun disableTotpAsTwoFactorMethod(
+        @RequestParam locale: Locale?
+    ): ResponseEntity<UserResponse> {
+        return ResponseEntity.ok(totpAuthenticationService.disable(locale))
     }
 
     @PostMapping("/recover")

@@ -1,0 +1,23 @@
+<div style="margin-bottom: 1rem;">
+    <p>{{ login_alert.greeting | translate }}</p>
+    <p>{{ login_alert.message.1 | translate }}</p>
+</div>
+
+<div style="border: 1px solid #ccc; padding: 1rem; margin-bottom: 1.5rem; border-radius: 0.375rem;">
+    <h3 style="margin-top: 0; font-size: 1.25rem;">{{ security_login.details.header | translate }}</h3>
+    <table style="width: 100%; border-collapse: collapse;">
+        <tr>
+            <td style="padding: 0.25rem 0; font-weight: 500;">{{ security_login.details.location | translate }}:</td>
+            <td style="padding: 0.25rem 0; text-align: right;"><strong>{{ login_location }}</strong></td>
+        </tr>
+        <tr>
+            <td style="padding: 0.25rem 0; font-weight: 500;">{{ security_login.details.device | translate }}:</td>
+            <td style="padding: 0.25rem 0; text-align: right;"><strong>{{ login_device }}</strong></td>
+        </tr>
+    </table>
+</div>
+
+<div>
+    <p style="margin-top: 1.5rem;">{{ security_login.message.2 | translate }}</p>
+    <p>{{ security_login.warning | translate }}</p>
+</div>

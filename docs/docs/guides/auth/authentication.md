@@ -117,6 +117,12 @@ an HTTP-only cookie with [`AccessToken`](./tokens#access-token) and [`RefreshTok
 If [header authentication](./authentication#header-authentication) is enabled,
 access token and refresh token will be returned in the response body.
 
+:::info
+A [login alert](./security-alerts.md#core-identity-alerts)
+will be sent to the user's email if this setting is enabled and 
+email is [enabled and configured correctly](../email/configuration.md).
+:::
+
 ### 2FA
 
 If the user enabled [2FA](./two-factor), 

@@ -52,3 +52,62 @@ tasks.register("updateDocusaurusOpenApiDocs") {
         }
     }
 }
+
+tasks.named("updateDocusaurusOpenApiDocs") {
+    // This ensures that 'replaceDocsLinks' is run immediately after
+    // 'updateDocusaurusOpenApiDocs' completes successfully.
+    finalizedBy("replaceDocsLinks")
+}
+open class ReplaceStringTask : DefaultTask() {
+
+    // Define properties for task inputs
+    // The target directory path is relative to the project directory
+    @Input
+    var targetDirPath: String = "../../docs/docs/api"
+
+    @Input
+    var findString: String = "https://singularity.stereov.io/docs/"
+
+    @Input
+    var replaceString: String = "../../docs/"
+
+    init {
+        group = "documentation"
+        description = "Replaces specified strings in files within a target directory."
+    }
+
+    @TaskAction
+    fun replaceStrings() {
+        val targetDir = project.file(targetDirPath)
+
+        if (!targetDir.isDirectory) {
+            logger.warn("Target directory not found: ${targetDir.absolutePath}. Skipping task.")
+            return
+        }
+
+        // The findString needs to be escaped for regex if it contains special characters like '/'
+        // Groovy/Java/Kotlin's replaceAll uses regex for the search pattern.
+        val escapedFindString = findString.replace("/", "\\/")
+            .replace(".", "\\.") // Escaping '.' just in case
+            .replace(":", "\\:") // Escaping ':' just in case
+
+        project.fileTree(targetDir).files.forEach { file ->
+            if (file.isFile) {
+                logger.info("Processing file: ${file.name}")
+
+                val originalText = file.readText(Charsets.UTF_8)
+                val newText = originalText.replace(Regex(escapedFindString), replaceString)
+
+                if (originalText != newText) {
+                    file.writeText(newText, Charsets.UTF_8)
+                    logger.lifecycle("  -> Replaced occurrences in ${file.name}")
+                } else {
+                    logger.info("  -> No changes needed in ${file.name}")
+                }
+            }
+        }
+    }
+}
+
+// Register the custom task
+tasks.register<ReplaceStringTask>("replaceDocsLinks")

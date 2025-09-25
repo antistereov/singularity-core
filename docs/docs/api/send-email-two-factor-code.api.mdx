@@ -38,7 +38,7 @@ import Heading from "@theme/Heading";
 
 Send an email containing a 2FA code to the user.
 
-Learn more about email as 2FA method [here](https://singularity.stereov.io/docs/guides/auth/two-factor#email).
+Learn more about email as 2FA method [here](../../docs/guides/auth/two-factor#email).
 
 This endpoint is used to send a 2FA email code for enabling email as a 2FA method
 and to resend 2FA codes when authenticating user that already enabled email as a 2FA method.
@@ -47,7 +47,7 @@ and to resend 2FA codes when authenticating user that already enabled email as a
 
 If email is the preferred 2FA method, an email will be sent automatically after successful authentication
 with the user's password.
-You can learn more about preferred 2FA methods [here](https://singularity.stereov.io/docs/guides/auth/two-factor#changing-the-preferred-method).
+You can learn more about preferred 2FA methods [here](../../docs/guides/auth/two-factor#changing-the-preferred-method).
 
 **Requirements:**
 - The user can authenticate using password. 2FA will not work with OAuth2. 
@@ -57,25 +57,25 @@ You can learn more about preferred 2FA methods [here](https://singularity.stereo
 
 A locale can be specified for this request. 
 The email will be sent in the specified locale.
-You can learn more about locale in emails [here](https://singularity.stereov.io/docs/guides/email/templates).
+You can learn more about locale in emails [here](../../docs/guides/email/templates).
 
 If no locale is specified, the applications default locale will be used.
-You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
+You can learn more about configuring the default locale [here](../../docs/guides/configuration).
 
 **Tokens:**
 
 There are two options: 
 1. If email as a 2FA method is disabled, you can request an email with a token to enable it.
-   In this case you need a valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token).
+   In this case you need a valid [`AccessToken`](../../docs/guides/auth/tokens#access-token).
    If email is already enabled, this request will return `400 - BAD REQUEST`.
 2. If email as 2FA method is already enabled, you can request a 2FA email code with a valid
-   [`TwoFactorAuthenticationToken`](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token).
+   [`TwoFactorAuthenticationToken`](../../docs/guides/auth/tokens#two-factor-authentication-token).
    
 **Note:** After each email, a cooldown will be started.
 When the cooldown is active, no new email can be sent.
 You can request the remaining cooldown throw the endpoint 
-[`GET /api/auth/2fa/email/cooldown`](https://singularity.stereov.io/docs/api/get-remaining-email-two-factor-cooldown).
-The cooldown can be configured [here](https://singularity.stereov.io/docs/guides/email/configuration).
+[`GET /api/auth/2fa/email/cooldown`](../../docs/api/get-remaining-email-two-factor-cooldown).
+The cooldown can be configured [here](../../docs/guides/email/configuration).
 
 <Heading
   id={"request"}

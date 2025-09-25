@@ -59,6 +59,12 @@ Validate the setup with [`POST /api/auth/2fa/setup`](../../api/enable-totp-as-tw
 You need to send the token and the correct TOTP code.
 If the setup was successful, you will get the updated user information with 2FA enabled.
 
+:::info
+A [security alert](./security-alerts.md#2fa-specific-alerts)
+will be sent to the user's email if this setting is enabled and
+email is [enabled and configured correctly](../email/configuration.md).
+:::
+
 :::note
 When the setup was successful,
 TOTP will be configured as preferred 2FA method.
@@ -123,6 +129,12 @@ Disabling TOTP is a critical setting, therefore a [`StepUpToken`](./tokens#step-
 
 TOTP can be disabled through the endpoint [`DELETE /api/auth/2fa/totp`](../../api/disable-totp-as-two-factor-method.api.mdx)
 using a valid [`AccessToken`](./tokens#access-token) and [`StepUpToken`](./tokens#step-up-token).
+
+:::info
+A [security alert](./security-alerts.md#2fa-specific-alerts)
+will be sent to the user's email if this setting is enabled and
+email is [enabled and configured correctly](../email/configuration.md).
+:::
 
 ### Recovery
 
@@ -196,6 +208,12 @@ Therefore, a [`StepUpToken`](./tokens#step-up-token) is required.
 You can validate and enable email as a 2FA method through the endpoint
 [`/api/auth/2fa/email/enable`](../../api/enable-email-as-two-factor-method.api.mdx)
 using your [`AccessToken`](./tokens#access-token) and [`StepUpToken`](./tokens#step-up-token).
+
+:::info
+A [security alert](./security-alerts.md#2fa-specific-alerts)
+will be sent to the user's email if this setting is enabled and
+email is [enabled and configured correctly](../email/configuration.md).
+:::
 
 ### Login
 
@@ -277,6 +295,11 @@ Disabling email as a 2FA method is a critical setting, therefore a [`StepUpToken
 TOTP can be disabled through the endpoint [`DELETE /api/auth/2fa/email`](../../api/disable-email-as-two-factor-method.api.mdx)
 using a valid [`AccessToken`](./tokens#access-token) and [`StepUpToken`](./tokens#step-up-token).
 
+:::info
+A [security alert](./security-alerts.md#2fa-specific-alerts)
+will be sent to the user's email if this setting is enabled and
+email is [enabled and configured correctly](../email/configuration.md).
+:::
 
 ### Configuration
 

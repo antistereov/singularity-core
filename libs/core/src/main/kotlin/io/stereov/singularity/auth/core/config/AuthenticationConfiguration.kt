@@ -13,6 +13,7 @@ import io.stereov.singularity.auth.core.mapper.SessionMapper
 import io.stereov.singularity.auth.core.properties.AuthProperties
 import io.stereov.singularity.auth.core.properties.EmailVerificationProperties
 import io.stereov.singularity.auth.core.properties.PasswordResetProperties
+import io.stereov.singularity.auth.core.properties.SecurityAlertProperties
 import io.stereov.singularity.auth.core.service.*
 import io.stereov.singularity.auth.core.service.token.*
 import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
@@ -52,7 +53,8 @@ import org.springframework.data.redis.core.ReactiveRedisTemplate
 @EnableConfigurationProperties(
     AuthProperties::class,
     EmailVerificationProperties::class,
-    PasswordResetProperties::class
+    PasswordResetProperties::class,
+    SecurityAlertProperties::class
 )
 class AuthenticationConfiguration {
 
@@ -95,6 +97,9 @@ class AuthenticationConfiguration {
         stepUpTokenService: StepUpTokenService,
         twoFactorAuthenticationService: TwoFactorAuthenticationService,
         authorizationService: AuthorizationService,
+        loginAlertService: LoginAlertService,
+        securityAlertProperties: SecurityAlertProperties,
+        emailProperties: EmailProperties,
 
         ): AuthenticationController {
         return AuthenticationController(
@@ -109,7 +114,10 @@ class AuthenticationConfiguration {
             userService,
             stepUpTokenService,
             twoFactorAuthenticationService,
-            authorizationService
+            authorizationService,
+            loginAlertService,
+            securityAlertProperties,
+            emailProperties
         )
     }
     
@@ -257,7 +265,7 @@ class AuthenticationConfiguration {
             emailVerificationService,
             twoFactorEmailCodeProperties,
             emailProperties,
-            twoFactorEmailProperties
+            twoFactorEmailProperties,
         )
     }
 
@@ -283,7 +291,9 @@ class AuthenticationConfiguration {
         translateService: TranslateService,
         emailService: EmailService,
         templateService: TemplateService,
-        appProperties: AppProperties
+        appProperties: AppProperties,
+        securityAlertProperties: SecurityAlertProperties,
+        securityAlertService: SecurityAlertService
     ) = EmailVerificationService(
         userService,
         authorizationService,
@@ -295,7 +305,23 @@ class AuthenticationConfiguration {
         translateService,
         emailService,
         templateService,
-        appProperties
+        appProperties,
+        securityAlertService,
+        securityAlertProperties,
+    )
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun loginAlertService(
+        appProperties: AppProperties,
+        translateService: TranslateService,
+        emailService: EmailService,
+        templateService: TemplateService
+    ) = LoginAlertService(
+        appProperties,
+        translateService,
+        emailService,
+        templateService
     )
     
     @Bean
@@ -311,7 +337,9 @@ class AuthenticationConfiguration {
         emailService: EmailService,
         templateService: TemplateService,
         accessTokenCache: AccessTokenCache,
-        appProperties: AppProperties
+        appProperties: AppProperties,
+        securityAlertService: SecurityAlertService,
+        securityAlertProperties: SecurityAlertProperties
     ) = PasswordResetService(
         userService,
         passwordResetTokenService,
@@ -323,7 +351,23 @@ class AuthenticationConfiguration {
         emailService,
         templateService,
         accessTokenCache,
-        appProperties
+        appProperties,
+        securityAlertService,
+        securityAlertProperties
+    )
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun securityAlertService(
+        appProperties: AppProperties,
+        translateService: TranslateService,
+        emailService: EmailService,
+        templateService: TemplateService
+    ) = SecurityAlertService(
+        appProperties,
+        translateService,
+        emailService,
+        templateService
     )
 
     @Bean

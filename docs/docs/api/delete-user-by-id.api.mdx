@@ -38,11 +38,11 @@ import Heading from "@theme/Heading";
 
 Delete a User with given ID.
 
-You can find more information about user management [here](https://singularity.stereov.io/docs/guides/users/managing-users).
+You can find more information about user management [here](../../docs/guides/users/managing-users).
 
 **Tokens:**
-- A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
-  with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
+- A valid [`AccessToken`](../../docs/guides/auth/tokens#access-token)
+  with [`ADMIN`](../../docs/guides/auth/roles#admins) permissions is required.
 
 <Heading
   id={"request"}
@@ -68,7 +68,7 @@ You can find more information about user management [here](https://singularity.s
 <StatusCodes
   id={undefined}
   label={undefined}
-  responses={{"200":{"description":"The users.","content":{"*/*":{"schema":{"type":"object","properties":{"success":{"type":"boolean"}},"required":["success"],"title":"SuccessResponse"}}}},"401":{"description":"Invalid or expired AccessToken.","content":{"*/*":{"schema":{"type":"object","properties":{"timestamp":{"type":"string","format":"date-time"},"status":{"type":"integer","format":"int32"},"error":{"type":"string"},"message":{"type":"string"},"path":{"type":"string"}},"required":["error","status","timestamp"],"title":"ErrorResponse"}}}},"403":{"description":"AccessToken does permit [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) access.","content":{"*/*":{"schema":{"type":"object","properties":{"timestamp":{"type":"string","format":"date-time"},"status":{"type":"integer","format":"int32"},"error":{"type":"string"},"message":{"type":"string"},"path":{"type":"string"}},"required":["error","status","timestamp"],"title":"ErrorResponse"}}}}}}
+  responses={{"200":{"description":"The users.","content":{"*/*":{"schema":{"type":"object","properties":{"success":{"type":"boolean"}},"required":["success"],"title":"SuccessResponse"}}}},"401":{"description":"Invalid or expired AccessToken.","content":{"*/*":{"schema":{"type":"object","properties":{"timestamp":{"type":"string","format":"date-time"},"status":{"type":"integer","format":"int32"},"error":{"type":"string"},"message":{"type":"string"},"path":{"type":"string"}},"required":["error","status","timestamp"],"title":"ErrorResponse"}}}},"403":{"description":"AccessToken does permit [`ADMIN`](../../docs/guides/auth/roles#admins) access.","content":{"*/*":{"schema":{"type":"object","properties":{"timestamp":{"type":"string","format":"date-time"},"status":{"type":"integer","format":"int32"},"error":{"type":"string"},"message":{"type":"string"},"path":{"type":"string"}},"required":["error","status","timestamp"],"title":"ErrorResponse"}}}}}}
 >
   
 </StatusCodes>
