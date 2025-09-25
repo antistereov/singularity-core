@@ -2,30 +2,41 @@ package io.stereov.singularity.content.core.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.stereov.singularity.auth.core.service.AuthorizationService
-import io.stereov.singularity.content.core.dto.*
+import io.stereov.singularity.content.core.dto.request.AcceptInvitationToContentRequest
+import io.stereov.singularity.content.core.dto.request.ChangeContentTagsRequest
+import io.stereov.singularity.content.core.dto.request.ChangeContentVisibilityRequest
+import io.stereov.singularity.content.core.dto.request.InviteUserToContentRequest
+import io.stereov.singularity.content.core.dto.response.ContentResponse
+import io.stereov.singularity.content.core.dto.response.ExtendedContentAccessDetailsResponse
+import io.stereov.singularity.content.core.dto.response.UserContentAccessDetails
 import io.stereov.singularity.content.core.model.ContentAccessRole
 import io.stereov.singularity.content.core.model.ContentAccessSubject
 import io.stereov.singularity.content.core.model.ContentDocument
 import io.stereov.singularity.content.invitation.exception.model.InvalidInvitationException
 import io.stereov.singularity.content.invitation.model.InvitationDocument
 import io.stereov.singularity.content.invitation.service.InvitationService
+import io.stereov.singularity.translate.model.TranslateKey
+import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.user.core.mapper.UserMapper
+import io.stereov.singularity.user.core.model.Role
 import io.stereov.singularity.user.core.service.UserService
 import org.bson.types.ObjectId
 import java.util.*
 
-interface ContentManagementService<T: ContentDocument<T>> {
+abstract class ContentManagementService<T: ContentDocument<T>>() {
 
-    val userService: UserService
-    val contentService: ContentService<T>
-    val authorizationService: AuthorizationService
-    val invitationService: InvitationService
-    val acceptPath: String
-    val userMapper: UserMapper
+    abstract val userService: UserService
+    abstract val contentService: ContentService<T>
+    abstract val authorizationService: AuthorizationService
+    abstract val invitationService: InvitationService
+    abstract val userMapper: UserMapper
+    abstract val contentKey: String
+    abstract val translateService: TranslateService
 
-    val logger: KLogger
+    abstract val logger: KLogger
 
-    suspend fun changeVisibility(key: String, req: ChangeContentVisibilityRequest): T {
+    abstract suspend fun changeVisibility(key: String, req: ChangeContentVisibilityRequest, locale: Locale?): ContentResponse<T>
+    protected suspend fun doChangeVisibility(key: String, req: ChangeContentVisibilityRequest): T {
         logger.debug { "Changing visibility of key \"$key\"" }
 
         val content = contentService.findAuthorizedByKey(key, ContentAccessRole.ADMIN)
@@ -35,7 +46,8 @@ interface ContentManagementService<T: ContentDocument<T>> {
         return contentService.save(content)
     }
 
-    suspend fun changeTags(key: String, req: ChangeContentTagsRequest): T {
+    abstract suspend fun changeTags(key: String, req: ChangeContentTagsRequest, locale: Locale?): ContentResponse<T>
+    protected suspend fun doChangeTags(key: String, req: ChangeContentTagsRequest): T {
         logger.debug { "Changing tags of key \"$key\"" }
 
         val content = contentService.findAuthorizedByKey(key, ContentAccessRole.EDITOR)
@@ -44,17 +56,30 @@ interface ContentManagementService<T: ContentDocument<T>> {
         return contentService.save(content)
     }
 
-    suspend fun inviteUser(
+    abstract suspend fun inviteUser(key: String, req: InviteUserToContentRequest, locale: Locale?): ExtendedContentAccessDetailsResponse
+    protected suspend fun doInviteUser(
         key: String,
         req: InviteUserToContentRequest,
-        invitedTo: String,
+        title: String,
+        url: String,
         locale: Locale?,
     ): ExtendedContentAccessDetailsResponse {
         logger.debug { "Inviting user with email \"${req.email}\" to content with key \"$key\" as ${req.role}" }
 
+        val actualLocale = locale ?: translateService.defaultLocale
+        val acceptPath = "/api/content/invitations/$contentKey/accept"
+
+        val inviteToRole = translateService.translateResourceKey(
+            TranslateKey(
+                "role.${req.role.toString().lowercase()}"
+            ), "i18n/content/invitation", actualLocale)
+        val resource = translateService.translateResourceKey(TranslateKey("resource.${contentKey}"), "i18n/content/article", actualLocale)
         val user = authorizationService.getUser()
         val content = contentService.findAuthorizedByKey(key, ContentAccessRole.ADMIN)
-        val invitation = invitationService.invite(
+        val ref = "<a href=\"$url\" style=\"color: black;\">$title</a>"
+        val invitedTo = "$inviteToRole $resource $ref"
+
+         val invitation = invitationService.invite(
             email = req.email,
             inviterName = user.sensitive.name,
             invitedTo = invitedTo,
@@ -68,7 +93,8 @@ interface ContentManagementService<T: ContentDocument<T>> {
         return extendedContentAccessDetails(contentService.save(content))
     }
 
-    suspend fun acceptInvitation(req: AcceptInvitationToContentRequest): T {
+    abstract suspend fun acceptInvitation(req: AcceptInvitationToContentRequest, locale: Locale?): ContentResponse<T>
+    protected suspend fun doAcceptInvitation(req: AcceptInvitationToContentRequest): T {
         logger.debug { "Accepting invitation" }
 
         val invitation = invitationService.accept(req.token)
@@ -96,7 +122,18 @@ interface ContentManagementService<T: ContentDocument<T>> {
         return contentService.save(content)
     }
 
-    suspend fun delete(key: String) {
+    abstract suspend fun setTrustedState(key: String, trusted: Boolean, locale: Locale?): ContentResponse<T>
+    protected suspend fun doSetTrustedState(key: String, trusted: Boolean): T {
+        logger.debug { "Setting trusted state" }
+        authorizationService.requireRole(Role.ADMIN)
+
+        val content = contentService.findAuthorizedByKey(key, ContentAccessRole.EDITOR)
+
+        content.trusted = trusted
+        return contentService.save(content)
+    }
+
+    suspend fun deleteByKey(key: String) {
         logger.debug { "Deleting content with key \"$key\"" }
 
         val content = contentService.findAuthorizedByKey(key, ContentAccessRole.ADMIN)

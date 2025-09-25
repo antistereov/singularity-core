@@ -6,20 +6,21 @@ import io.stereov.singularity.content.article.dto.request.*
 import io.stereov.singularity.content.article.dto.response.FullArticleResponse
 import io.stereov.singularity.content.article.mapper.ArticleMapper
 import io.stereov.singularity.content.article.model.Article
-import io.stereov.singularity.content.core.dto.*
+import io.stereov.singularity.content.core.dto.request.AcceptInvitationToContentRequest
+import io.stereov.singularity.content.core.dto.request.ChangeContentTagsRequest
+import io.stereov.singularity.content.core.dto.request.ChangeContentVisibilityRequest
+import io.stereov.singularity.content.core.dto.request.InviteUserToContentRequest
+import io.stereov.singularity.content.core.dto.response.ExtendedContentAccessDetailsResponse
 import io.stereov.singularity.content.core.model.ContentAccessRole
 import io.stereov.singularity.content.core.service.ContentManagementService
 import io.stereov.singularity.content.invitation.service.InvitationService
 import io.stereov.singularity.file.core.exception.model.UnsupportedMediaTypeException
 import io.stereov.singularity.file.core.service.FileStorage
-import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.global.util.toSlug
 import io.stereov.singularity.translate.exception.model.TranslationForLangMissingException
-import io.stereov.singularity.translate.model.TranslateKey
 import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.user.core.mapper.UserMapper
-import io.stereov.singularity.user.core.model.Role
 import io.stereov.singularity.user.core.service.UserService
 import org.bson.types.ObjectId
 import org.springframework.http.MediaType
@@ -32,17 +33,16 @@ class ArticleManagementService(
     override val contentService: ArticleService,
     override val authorizationService: AuthorizationService,
     override val invitationService: InvitationService,
-    private val fileStorage: FileStorage,
-    private val translateService: TranslateService,
-    private val uiProperties: UiProperties,
+    override val translateService: TranslateService,
     override val userService: UserService,
     override val userMapper: UserMapper,
+    private val fileStorage: FileStorage,
+    private val uiProperties: UiProperties,
     private val articleMapper: ArticleMapper,
-    private val appProperties: AppProperties
-) : ContentManagementService<Article> {
+) : ContentManagementService<Article>() {
 
     override val logger = KotlinLogging.logger {}
-    override val acceptPath = "/articles/invite/accept"
+    override val contentKey = "articles"
 
     suspend fun create(req: CreateArticleRequest, locale: Locale?): FullArticleResponse {
         logger.debug { "Creating article with title ${req.title}" }
@@ -55,45 +55,28 @@ class ArticleManagementService(
         val article = articleMapper.createArticle(req, key, user.id)
         val savedArticle = contentService.save(article)
 
-        return contentService.fullArticledResponseFrom(savedArticle, locale,user)
+        return articleMapper.createFullResponse(savedArticle, locale,user)
     }
 
-    suspend fun setTrustedState(key: String, trusted: Boolean): Article {
-        logger.debug { "Setting trusted state" }
-        authorizationService.requireRole(Role.ADMIN)
-
-        val article = contentService.findAuthorizedByKey(key, ContentAccessRole.EDITOR)
-
-        article.trusted = trusted
-        return contentService.save(article)
+    override suspend fun setTrustedState(key: String, trusted: Boolean, locale: Locale?): FullArticleResponse {
+        return articleMapper.createFullResponse(doSetTrustedState(key, trusted), locale)
     }
 
-    suspend fun inviteUser(key: String, req: InviteUserToContentRequest, locale: Locale?): ExtendedContentAccessDetailsResponse {
+    override suspend fun inviteUser(key: String, req: InviteUserToContentRequest, locale: Locale?): ExtendedContentAccessDetailsResponse {
         logger.debug { "Inviting user with email \"${req.email}\" to role ${req.role} on article with key \"$key\"" }
 
-        val actualLocale = locale ?: appProperties.locale
-
         val article = contentService.findAuthorizedByKey(key, ContentAccessRole.EDITOR)
+        val title = translateService.translate(article, locale).translation.title
+        val url = "${uiProperties.baseUrl.removeSuffix("/")}/${article.path.removePrefix("/")}"
 
-        val inviteToRole = translateService.translateResourceKey(
-            TranslateKey(
-                "invitation.role.${req.role.toString().lowercase()}"
-            ), "i18n/content/article", actualLocale)
-        val action = translateService.translateResourceKey(TranslateKey("invitation.action"), "i18n/content/article", actualLocale)
-        val articleTitle = translateService.translate(article, locale).translation.title
-        val articleRef = "<a href=\"${uiProperties.baseUrl}/${article.path.removePrefix("/")}\" style=\"color: black;\">$articleTitle</a>"
-
-        val invitedTo = "$inviteToRole $action $articleRef"
-
-        return inviteUser(key, req, invitedTo, locale)
+        return doInviteUser(key, req, title, url, locale)
     }
 
-    suspend fun acceptInvitationAndGetFullArticle(req: AcceptInvitationToContentRequest, locale: Locale?): FullArticleResponse {
+    override suspend fun acceptInvitation(req: AcceptInvitationToContentRequest, locale: Locale?): FullArticleResponse {
         logger.debug { "Accepting invitation" }
 
-        val article = acceptInvitation(req)
-
-        return contentService.fullArticledResponseFrom(article, locale)
+        val article = doAcceptInvitation(req)
+        return articleMapper.createFullResponse(article, locale)
     }
 
     suspend fun changeHeader(key: String, req: ChangeArticleHeaderRequest, locale: Locale?): FullArticleResponse {
@@ -111,7 +94,7 @@ class ArticleManagementService(
 
         val updatedArticle = contentService.save(article)
 
-        return contentService.fullArticledResponseFrom(updatedArticle, locale)
+        return articleMapper.createFullResponse(updatedArticle, locale)
     }
 
     suspend fun changeSummary(key: String, req: ChangeArticleSummaryRequest, locale: Locale?): FullArticleResponse {
@@ -125,7 +108,7 @@ class ArticleManagementService(
 
         val updatedArticle = contentService.save(article)
 
-        return contentService.fullArticledResponseFrom(updatedArticle, locale)
+        return articleMapper.createFullResponse(updatedArticle, locale)
     }
 
     suspend fun changeContent(key: String, req: ChangeArticleContentRequest, locale: Locale?): FullArticleResponse {
@@ -140,7 +123,7 @@ class ArticleManagementService(
 
         val updatedArticle = contentService.save(article)
 
-        return contentService.fullArticledResponseFrom(updatedArticle, locale)
+        return articleMapper.createFullResponse(updatedArticle, locale)
     }
 
     suspend fun changeImage(key: String, file: FilePart, locale: Locale?): FullArticleResponse {
@@ -172,7 +155,7 @@ class ArticleManagementService(
 
         val updatedArticle = contentService.save(article)
 
-        return contentService.fullArticledResponseFrom(updatedArticle, locale)
+        return articleMapper.createFullResponse(updatedArticle, locale)
     }
 
     suspend fun changeState(key: String, req: ChangeArticleStateRequest, locale: Locale?): FullArticleResponse {
@@ -183,23 +166,21 @@ class ArticleManagementService(
 
         val updatedArticle = contentService.save(article)
 
-        return contentService.fullArticledResponseFrom(updatedArticle, locale)
+        return articleMapper.createFullResponse(updatedArticle, locale)
     }
 
-    suspend fun changeTags(key: String, req: ChangeContentTagsRequest, locale: Locale?): FullArticleResponse {
+    override suspend fun changeTags(key: String, req: ChangeContentTagsRequest, locale: Locale?): FullArticleResponse {
         logger.debug { "Changing tags of article with key \"$key\"" }
 
-        val article = changeTags(key, req)
-
-        return contentService.fullArticledResponseFrom(article, locale)
+        val article = doChangeTags(key, req)
+        return articleMapper.createFullResponse(article, locale)
     }
 
-    suspend fun changeVisibility(key: String, req: ChangeContentVisibilityRequest, locale: Locale?): FullArticleResponse {
+    override suspend fun changeVisibility(key: String, req: ChangeContentVisibilityRequest, locale: Locale?): FullArticleResponse {
         logger.debug { "Changing visibility of article with key \"$key\"" }
 
-        val article = changeVisibility(key, req)
-
-        return contentService.fullArticledResponseFrom(article, locale)
+        val article = doChangeVisibility(key, req)
+        return articleMapper.createFullResponse(article, locale)
     }
 
     private suspend fun getUniqueKey(baseKey: String, id: ObjectId? = null): String {

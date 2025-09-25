@@ -112,7 +112,7 @@ dependencies {
     implementation("com.github.slugify:slugify:3.0.7")
 
     // Documentation
-    api("org.springdoc:springdoc-openapi-starter-webflux-api:2.8.9")
+    api("org.springdoc:springdoc-openapi-starter-webflux-api:2.8.13")
 }
 
 configurations.all {

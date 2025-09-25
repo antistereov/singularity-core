@@ -96,7 +96,7 @@ class InvitationService(
             "accept_token" to token.value
         )
         val template = TemplateBuilder
-            .fromResource("templates/mail/invitation.html")
+            .fromResource("templates/email/invitation.html")
             .translate("i18n/core/email", actualLocale)
             .replacePlaceholders(templateService.getPlaceholders(placeholders))
             .build()

@@ -64,28 +64,27 @@ abstract class FileStorage {
 
         val metadata = metadataService.findByKeyOrNull(key) ?: return null
 
-        return metadata.toResponse()
+        return createResponse(metadata)
     }
 
     suspend fun metadataResponseByKey(key: String): FileMetadataResponse {
         return metadataResponseByKeyOrNull(key) ?: throw FileNotFoundException(file = null, msg = "File with key \"$key not found")
     }
 
-    private suspend fun FileMetadataDocument.toResponse(): FileMetadataResponse {
+    suspend fun createResponse(doc: FileMetadataDocument): FileMetadataResponse {
         return FileMetadataResponse(
-            id = this.id,
-            key = this.key,
-            createdAt = this.createdAt,
-            updatedAt = this.updatedAt,
-            access = this.access,
-            contentType = this.contentType.toString(),
-            url = doGetUrl(this.key),
-            size = this.size,
-            trusted = this.trusted,
-            tags = this.tags
+            id = doc.id,
+            key = doc.key,
+            createdAt = doc.createdAt,
+            updatedAt = doc.updatedAt,
+            access = doc.access,
+            contentType = doc.contentType.toString(),
+            url = doGetUrl(doc.key),
+            size = doc.size,
+            trusted = doc.trusted,
+            tags = doc.tags
         )
     }
-
 
     protected abstract suspend fun doUpload(userId: ObjectId, filePart: FilePart, key: String, public: Boolean, contentType: MediaType): FileMetadataDocument
     protected abstract suspend fun doExists(key: String): Boolean

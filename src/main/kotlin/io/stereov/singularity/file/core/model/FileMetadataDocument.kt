@@ -19,9 +19,9 @@ data class FileMetadataDocument(
     override val createdAt: Instant = Instant.now(),
     override var updatedAt: Instant = Instant.now(),
     override var access: ContentAccessDetails,
-    private val _contentType: String,
+    val _contentType: String,
     val size: Long,
-    override val trusted: Boolean = false,
+    override var trusted: Boolean = false,
     override var tags: MutableSet<String> = mutableSetOf()
 ) : ContentDocument<FileMetadataDocument> {
 

@@ -1,14 +1,38 @@
 package io.stereov.singularity.global.util
 
 import com.github.slugify.Slugify
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageImpl
-import org.springframework.data.mongodb.core.query.Criteria
+import io.stereov.singularity.translate.model.Translatable
+import org.springframework.data.domain.*
 import org.springframework.http.server.reactive.ServerHttpRequest
+import java.util.*
+import kotlin.reflect.KProperty
 
-fun getFieldContainsCriteria(field: String, substring: String): Criteria {
-    val regexPattern = ".*${Regex.escape(substring)}.*"
-    return Criteria.where(field).regex(regexPattern, "i")
+fun Pageable.withLocalizedSort(
+    locale: Locale,
+    translatableProperties: List<KProperty<*>>
+): Pageable {
+    val translatableFieldNames = translatableProperties.map { it.name }.toSet()
+
+    return this.withLocalizedSort(locale, translatableFieldNames)
+}
+
+fun Pageable.withLocalizedSort(
+    locale: Locale,
+    translatableFields: Set<String>
+): Pageable {
+    val translatedSort = this.sort.map { order ->
+        val originalProperty = order.property
+        val actualProperty = if (translatableFields.contains(originalProperty)) {
+            "${Translatable<*>::translations.name}.${locale}.$originalProperty"
+        } else {
+            originalProperty
+        }
+
+        Sort.Order(order.direction, actualProperty)
+    }
+
+    val newSort = Sort.by(translatedSort.toList())
+    return PageRequest.of(this.pageNumber, this.pageSize, newSort)
 }
 
 fun String.toSlug(): String {

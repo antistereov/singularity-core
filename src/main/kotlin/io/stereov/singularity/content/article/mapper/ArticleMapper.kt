@@ -1,5 +1,6 @@
 package io.stereov.singularity.content.article.mapper
 
+import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.content.article.dto.request.CreateArticleRequest
 import io.stereov.singularity.content.article.dto.response.ArticleOverviewResponse
 import io.stereov.singularity.content.article.dto.response.FullArticleResponse
@@ -7,8 +8,16 @@ import io.stereov.singularity.content.article.model.Article
 import io.stereov.singularity.content.article.model.ArticleColors
 import io.stereov.singularity.content.article.model.ArticleState
 import io.stereov.singularity.content.article.model.ArticleTranslation
+import io.stereov.singularity.content.core.dto.response.ContentAccessDetailsResponse
 import io.stereov.singularity.content.core.model.ContentAccessDetails
+import io.stereov.singularity.content.tag.mapper.TagMapper
+import io.stereov.singularity.content.tag.service.TagService
+import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.global.properties.AppProperties
+import io.stereov.singularity.translate.service.TranslateService
+import io.stereov.singularity.user.core.mapper.UserMapper
+import io.stereov.singularity.user.core.model.UserDocument
+import io.stereov.singularity.user.core.service.UserService
 import org.bson.types.ObjectId
 import org.springframework.stereotype.Component
 import java.time.Instant
@@ -16,10 +25,17 @@ import java.util.*
 
 @Component
 class ArticleMapper(
-    private val appProperties: AppProperties
+    private val appProperties: AppProperties,
+    private val authorizationService: AuthorizationService,
+    private val userService: UserService,
+    private val translateService: TranslateService,
+    private val tagMapper: TagMapper,
+    private val tagService: TagService,
+    private val fileStorage: FileStorage,
+    private val userMapper: UserMapper
 ) {
 
-    fun createArticleOverview(article: FullArticleResponse): ArticleOverviewResponse {
+    fun createOverview(article: FullArticleResponse): ArticleOverviewResponse {
         return ArticleOverviewResponse(
             id = article.id,
             key = article.key,
@@ -81,5 +97,41 @@ class ArticleMapper(
             translations = translations,
             primaryLocale = actualLocale
         )
+    }
+
+    suspend fun createFullResponse(article: Article, locale: Locale?, owner: UserDocument? = null): FullArticleResponse {
+        val currentUser = authorizationService.getAuthenticationOrNull()
+
+        val actualOwner = owner ?: userService.findById(article.access.ownerId)
+        val access = ContentAccessDetailsResponse.create(article.access, currentUser)
+        val (articleLang, translation) = translateService.translate(article, locale)
+
+        val tags = article.tags.map { key -> tagMapper.createTagResponse(tagService.findByKey(key), articleLang) }
+
+        val image = article.imageKey?.let { fileStorage.metadataResponseByKeyOrNull(it) }
+
+        return FullArticleResponse(
+            id = article.id,
+            key = article.key,
+            createdAt = article.createdAt,
+            publishedAt = article.publishedAt,
+            updatedAt = article.updatedAt,
+            owner = userMapper.toOverview(actualOwner),
+            path = article.path,
+            state = article.state,
+            colors = article.colors,
+            image = image,
+            trusted = article.trusted,
+            access = access,
+            locale = articleLang,
+            title = translation.title,
+            summary = translation.summary,
+            content = translation.content,
+            tags = tags
+        )
+    }
+
+    suspend fun createOverview(article: Article, locale: Locale?): ArticleOverviewResponse {
+        return createOverview(createFullResponse(article, locale))
     }
 }
