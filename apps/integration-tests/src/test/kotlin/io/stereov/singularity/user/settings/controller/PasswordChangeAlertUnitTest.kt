@@ -77,8 +77,6 @@ class PasswordChangeAlertUnitTest : BaseSecurityAlertTest() {
             .expectStatus()
             .isOk
 
-        val updatedUser = userService.findById(user.info.id)
-
         coVerify(exactly = 1) { securityAlertService.send(any(), anyNullable(), any(), anyNullable(), any()) }
         assertEquals(Locale.ENGLISH, localeSlot.captured)
         assert(userSlot.isCaptured)

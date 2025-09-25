@@ -114,7 +114,7 @@ class OAuth2AlertDisabledTest : BaseOAuth2FlowTest() {
             .create(registeredUser.info.id, registeredUser.sessionId, "github")
 
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
-        val res = webTestClient.get().uri(redirectUri)
+        webTestClient.get().uri(redirectUri)
             .cookie("SESSION", sessionCookie)
             .accessTokenCookie(registeredUser.accessToken)
             .oauth2ConnectionCookie(providerConnectionToken)
