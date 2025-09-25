@@ -3,8 +3,10 @@ package io.stereov.singularity.user.settings.config
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.component.CookieCreator
 import io.stereov.singularity.auth.core.config.AuthenticationConfiguration
+import io.stereov.singularity.auth.core.properties.SecurityAlertProperties
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.core.service.EmailVerificationService
+import io.stereov.singularity.auth.core.service.SecurityAlertService
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.file.core.service.FileStorage
@@ -44,7 +46,9 @@ class UserSettingsConfiguration {
         fileStorage: FileStorage,
         accessTokenCache: AccessTokenCache,
         userMapper: UserMapper,
-        emailProperties: EmailProperties
+        emailProperties: EmailProperties,
+        securityAlertProperties: SecurityAlertProperties,
+        securityAlertService: SecurityAlertService
     ) = UserSettingsService(
         authService,
         emailVerificationService,
@@ -53,6 +57,8 @@ class UserSettingsConfiguration {
         fileStorage,
         accessTokenCache,
         userMapper,
-        emailProperties
+        emailProperties,
+        securityAlertProperties,
+        securityAlertService
     )
 }

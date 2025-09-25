@@ -19,6 +19,7 @@ import jakarta.validation.Valid
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.util.*
 
 @RestController
 @RequestMapping("/api/auth/providers")
@@ -127,6 +128,10 @@ class IdentityProviderController(
             **Requirements:**
             - You are not allowed to delete the password identity or the only existing identity.
             
+            A [security alert](https://singularity.stereov.io/docs/guides/auth/security-alerts#oauth2-specific-alerts)
+            will be sent to the user's email if this setting is enabled and
+            email is [enabled and configured correctly](https://singularity.stereov.io/docs/guides/email/configuration).
+            
             **Tokens:**
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
             - A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
@@ -162,8 +167,11 @@ class IdentityProviderController(
             ),
         ]
     )
-    suspend fun deleteIdentityProvider(@PathVariable provider: String): ResponseEntity<UserResponse> {
-        val user = identityProviderService.disconnect(provider)
+    suspend fun deleteIdentityProvider(
+        @PathVariable provider: String,
+        @RequestParam locale: Locale?
+    ): ResponseEntity<UserResponse> {
+        val user = identityProviderService.disconnect(provider, locale)
 
         return ResponseEntity.ok(userMapper.toResponse(user))
     }

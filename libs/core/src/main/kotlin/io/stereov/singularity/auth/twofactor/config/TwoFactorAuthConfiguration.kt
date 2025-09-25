@@ -5,7 +5,9 @@ import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.component.CookieCreator
 import io.stereov.singularity.auth.core.component.TokenValueExtractor
 import io.stereov.singularity.auth.core.properties.AuthProperties
+import io.stereov.singularity.auth.core.properties.SecurityAlertProperties
 import io.stereov.singularity.auth.core.service.AuthorizationService
+import io.stereov.singularity.auth.core.service.SecurityAlertService
 import io.stereov.singularity.auth.core.service.token.AccessTokenService
 import io.stereov.singularity.auth.core.service.token.RefreshTokenService
 import io.stereov.singularity.auth.core.service.token.SessionTokenService
@@ -162,7 +164,8 @@ class TwoFactorAuthConfiguration {
         emailProperties: EmailProperties,
         authorizationService: AuthorizationService,
         accessTokenCache: AccessTokenCache,
-        appProperties: AppProperties
+        appProperties: AppProperties, securityAlertProperties: SecurityAlertProperties,
+        securityAlertService: SecurityAlertService
     ) = EmailAuthenticationService(
         twoFactorEmailCodeProperties,
         userService,
@@ -173,7 +176,9 @@ class TwoFactorAuthConfiguration {
         emailProperties,
         authorizationService,
         accessTokenCache,
-        appProperties
+        appProperties,
+        securityAlertProperties,
+        securityAlertService
     )
     
     @Bean
@@ -187,7 +192,10 @@ class TwoFactorAuthConfiguration {
         userService: UserService,
         accessTokenCache: AccessTokenCache,
         userMapper: UserMapper,
-        twoFactorAuthTokenService: TwoFactorAuthenticationTokenService
+        twoFactorAuthTokenService: TwoFactorAuthenticationTokenService,
+        securityAlertProperties: SecurityAlertProperties,
+        securityAlertService: SecurityAlertService,
+        emailProperties: EmailProperties
     ) = TotpAuthenticationService(
         totpService,
         authorizationService,
@@ -197,7 +205,10 @@ class TwoFactorAuthConfiguration {
         userService,
         accessTokenCache,
         userMapper,
-        twoFactorAuthTokenService
+        twoFactorAuthTokenService,
+        securityAlertProperties,
+        securityAlertService,
+        emailProperties
     )
 
     @Bean

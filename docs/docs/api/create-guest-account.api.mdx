@@ -1,7 +1,7 @@
 ---
 id: create-guest-account
 title: "Create Guest Account"
-description: "Create a new [`GUEST`](https://singularity.stereov.io/docs/guides/auth/roles#guests) account."
+description: "Create a new [`GUEST`](../../docs/guides/auth/roles#guests) account."
 sidebar_label: "Create Guest Account"
 hide_title: true
 hide_table_of_contents: true
@@ -36,9 +36,9 @@ import Heading from "@theme/Heading";
 
 
 
-Create a new [`GUEST`](https://singularity.stereov.io/docs/guides/auth/roles#guests) account.
+Create a new [`GUEST`](../../docs/guides/auth/roles#guests) account.
 
-You can learn more about `GUEST` accounts [here](https://singularity.stereov.io/docs/guides/roles#guests).
+You can learn more about `GUEST` accounts [here](../../docs/guides/roles#guests).
 
 **Optional session data:**
 - The `session` object can be included in the request body.
@@ -50,12 +50,12 @@ This information helps users identify and manage authorized sessions, improving 
 
 **Tokens:**
 
-If successful, [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) and 
-[`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token) 
+If successful, [`AccessToken`](../../docs/guides/auth/tokens#access-token) and 
+[`RefreshToken`](../../docs/guides/auth/tokens#refresh-token) 
 will automatically be set as HTTP-only cookies.
-If [header authentication](https://singularity.stereov.io/docs/guides/auth/authentication#header-authentication) is enabled,
-[`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) and 
-[`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)
+If [header authentication](../../docs/guides/auth/authentication#header-authentication) is enabled,
+[`AccessToken`](../../docs/guides/auth/tokens#access-token) and 
+[`RefreshToken`](../../docs/guides/auth/tokens#refresh-token)
 will be returned in the response body and can be used as 
 bearer tokens in the authorization header for upcoming requests.
 

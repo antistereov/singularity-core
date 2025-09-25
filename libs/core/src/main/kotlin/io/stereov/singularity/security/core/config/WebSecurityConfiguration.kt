@@ -3,6 +3,8 @@ package io.stereov.singularity.security.core.config
 import io.stereov.singularity.auth.core.component.CookieCreator
 import io.stereov.singularity.auth.core.filter.AuthenticationFilter
 import io.stereov.singularity.auth.core.properties.AuthProperties
+import io.stereov.singularity.auth.core.properties.SecurityAlertProperties
+import io.stereov.singularity.auth.core.service.LoginAlertService
 import io.stereov.singularity.auth.core.service.token.AccessTokenService
 import io.stereov.singularity.auth.core.service.token.RefreshTokenService
 import io.stereov.singularity.auth.core.service.token.SessionTokenService
@@ -15,6 +17,7 @@ import io.stereov.singularity.auth.oauth2.component.CustomOAuth2AuthorizationReq
 import io.stereov.singularity.auth.oauth2.properties.OAuth2Properties
 import io.stereov.singularity.auth.oauth2.service.OAuth2AuthenticationService
 import io.stereov.singularity.auth.oauth2.service.token.OAuth2StateTokenService
+import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.global.filter.LoggingFilter
 import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.ratelimit.filter.RateLimitFilter
@@ -96,6 +99,9 @@ class WebSecurityConfiguration {
         oAuth2Properties: OAuth2Properties,
         stepUpTokenService: StepUpTokenService,
         oAuth2StateTokenService: OAuth2StateTokenService,
+        emailProperties: EmailProperties,
+        securityAlertProperties: SecurityAlertProperties,
+        loginAlertService: LoginAlertService,
     ): SecurityWebFilterChain {
         return http
             .csrf { it.disable() }
@@ -139,7 +145,10 @@ class WebSecurityConfiguration {
                         cookieCreator,
                         oAuth2Properties,
                         stepUpTokenService,
-                        oAuth2StateTokenService
+                        oAuth2StateTokenService,
+                        emailProperties,
+                        securityAlertProperties,
+                        loginAlertService
                     )
                 )
             }

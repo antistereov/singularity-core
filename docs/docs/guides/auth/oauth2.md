@@ -182,6 +182,12 @@ the server automatically tries to connect the new provider to the current user.
 
 If successful, the user will be connected to the new provider.
 
+:::info
+A [security alert](./security-alerts.md#oauth2-specific-alerts)
+will be sent to the user's email if this setting is enabled and
+email is [enabled and configured correctly](../email/configuration.md).
+:::
+
 ### Adding Password Authentication
 
 If a user registered using an OAuth2 provider,
@@ -197,6 +203,12 @@ If successful, the user can now log in using his new password.
 If a user connected multiple provider,
 it is possible to disconnect providers through the endpoint
 [`DELETE /api/auth/providers/<provider-name>`](../../api/delete-identity-provider.api.mdx).
+
+:::info
+A [security alert](./security-alerts.md#oauth2-specific-alerts)
+will be sent to the user's email if this setting is enabled and
+email is [enabled and configured correctly](../email/configuration.md).
+:::
 
 :::warning
 You are not allowed to disconnect the password identity.

@@ -11,6 +11,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ServerWebExchange
+import java.util.*
 
 @Service
 @ConditionalOnProperty("singularity.auth.oauth2.enable", matchIfMissing = false)
@@ -21,6 +22,10 @@ class OAuth2AuthenticationService(
     private val accessTokenService: AccessTokenService,
 ) {
 
+    enum class OAuth2Action {
+        LOGIN, CONNECTION, REGISTRATION, GUEST_CONVERSION
+    }
+
     private val logger = KotlinLogging.logger {}
 
      suspend fun findOrCreateUser(
@@ -28,8 +33,9 @@ class OAuth2AuthenticationService(
          oauth2ProviderConnectionTokenValue: String?,
          stepUpTokenValue: String?,
          exchange: ServerWebExchange,
-         stepUp: Boolean
-     ): UserDocument {
+         stepUp: Boolean,
+         locale: Locale?
+     ): Pair<UserDocument, OAuth2Action> {
          logger.debug { "Finding or creating user after OAuth2 authentication" }
 
          val provider = oauth2Authentication.authorizedClientRegistrationId
@@ -50,11 +56,11 @@ class OAuth2AuthenticationService(
          val authenticated = runCatching { accessTokenService.extract(exchange) }.isSuccess
 
          val existingUser = userService.findByIdentityOrNull(provider, principalId)
-         if (existingUser != null) return handleLogin(existingUser, authenticated, stepUp)
+         if (existingUser != null) return handleLogin(existingUser, authenticated, stepUp) to OAuth2Action.LOGIN
 
          return when (oauth2ProviderConnectionTokenValue != null) {
-             true -> handleConnection(email, provider, principalId, oauth2ProviderConnectionTokenValue, stepUpTokenValue, exchange)
-             false -> handleRegistration(name, email, provider, principalId, authenticated)
+             true -> handleConnection(email, provider, principalId, oauth2ProviderConnectionTokenValue, stepUpTokenValue, exchange, locale)
+             false -> handleRegistration(name, email, provider, principalId, authenticated) to OAuth2Action.REGISTRATION
          }
     }
 
@@ -100,8 +106,9 @@ class OAuth2AuthenticationService(
         principalId: String,
         oauth2ProviderConnectionToken: String,
         stepUpTokenValue: String?,
-        exchange: ServerWebExchange
-    ): UserDocument {
+        exchange: ServerWebExchange,
+        locale: Locale?
+    ): Pair<UserDocument, OAuth2Action> {
         logger.debug { "Handling connection" }
 
         return identityProviderService.connect(
@@ -110,7 +117,8 @@ class OAuth2AuthenticationService(
             principalId,
             oauth2ProviderConnectionToken,
             stepUpTokenValue,
-            exchange
+            exchange,
+            locale
         )
     }
 }

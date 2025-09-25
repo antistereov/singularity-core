@@ -8,7 +8,9 @@ import io.stereov.singularity.auth.core.dto.response.MailCooldownResponse
 import io.stereov.singularity.auth.core.exception.AuthException
 import io.stereov.singularity.auth.core.exception.model.WrongIdentityProviderException
 import io.stereov.singularity.auth.core.model.IdentityProvider
+import io.stereov.singularity.auth.core.model.SecurityAlertType
 import io.stereov.singularity.auth.core.properties.PasswordResetProperties
+import io.stereov.singularity.auth.core.properties.SecurityAlertProperties
 import io.stereov.singularity.auth.core.service.token.PasswordResetTokenService
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.email.core.exception.model.EmailCooldownException
@@ -42,7 +44,9 @@ class PasswordResetService(
     private val emailService: EmailService,
     private val templateService: TemplateService,
     private val accessTokenCache: AccessTokenCache,
-    private val appProperties: AppProperties
+    private val appProperties: AppProperties,
+    private val securityAlertService: SecurityAlertService,
+    private val securityAlertProperties: SecurityAlertProperties
 ) {
 
     private val logger = KotlinLogging.logger {}
@@ -59,7 +63,7 @@ class PasswordResetService(
         }
     }
 
-    suspend fun resetPassword(token: String, req: ResetPasswordRequest) {
+    suspend fun resetPassword(token: String, req: ResetPasswordRequest, locale: Locale?) {
         logger.debug { "Resetting password "}
 
         val resetToken = passwordResetTokenService.extract(token)
@@ -81,7 +85,11 @@ class PasswordResetService(
         user.clearSessions()
         accessTokenCache.invalidateAllTokens(user.id)
 
-        userService.save(user)
+        val updatedUser = userService.save(user)
+
+        if (emailProperties.enable && securityAlertProperties.passwordChanged) {
+            securityAlertService.send(updatedUser, locale, SecurityAlertType.PASSWORD_CHANGED)
+        }
     }
 
     suspend fun getRemainingCooldown(req: SendPasswordResetRequest): MailCooldownResponse {

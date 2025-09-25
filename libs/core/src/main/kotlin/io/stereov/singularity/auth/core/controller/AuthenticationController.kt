@@ -10,8 +10,10 @@ import io.stereov.singularity.auth.core.dto.request.StepUpRequest
 import io.stereov.singularity.auth.core.dto.response.*
 import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.auth.core.properties.AuthProperties
+import io.stereov.singularity.auth.core.properties.SecurityAlertProperties
 import io.stereov.singularity.auth.core.service.AuthenticationService
 import io.stereov.singularity.auth.core.service.AuthorizationService
+import io.stereov.singularity.auth.core.service.LoginAlertService
 import io.stereov.singularity.auth.core.service.token.AccessTokenService
 import io.stereov.singularity.auth.core.service.token.RefreshTokenService
 import io.stereov.singularity.auth.core.service.token.StepUpTokenService
@@ -21,6 +23,8 @@ import io.stereov.singularity.auth.oauth2.model.token.OAuth2TokenType
 import io.stereov.singularity.auth.twofactor.model.token.TwoFactorTokenType
 import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthenticationService
 import io.stereov.singularity.auth.twofactor.service.token.TwoFactorAuthenticationTokenService
+import io.stereov.singularity.email.core.properties.EmailProperties
+import io.stereov.singularity.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.global.model.SuccessResponse
@@ -58,6 +62,9 @@ class AuthenticationController(
     private val stepUpTokenService: StepUpTokenService,
     private val twoFactorAuthenticationService: TwoFactorAuthenticationService,
     private val authorizationService: AuthorizationService,
+    private val loginAlertService: LoginAlertService,
+    private val securityAlertProperties: SecurityAlertProperties,
+    private val emailProperties: EmailProperties,
 ) {
 
     private val logger: KLogger
@@ -158,6 +165,10 @@ class AuthenticationController(
         summary = "Login",
         description = """
             Authenticates a user with `email` and `password`.
+            
+            A [login alert](https://singularity.stereov.io/docs/guides/auth/security-alerts#core-identity-alerts) 
+            will be sent to the user's email if this setting is enabled
+            email is [enabled and configured correctly](https://singularity.stereov.io/docs/guides/email/configuration).
             
             **Optional session data:**
             - The `session` object can be included in the request body.
@@ -266,6 +277,13 @@ class AuthenticationController(
             preferredTwoFactorMethod = null,
             location = geoLocationService.getLocationOrNull(exchange.request)
         )
+
+        val session = user.sensitive.sessions[sessionId]
+            ?: throw InvalidDocumentException("New session was not stored in document")
+        if (securityAlertProperties.login && emailProperties.enable) {
+            loginAlertService.send(user, locale, session)
+
+        }
 
         return ResponseEntity.ok()
             .header("Set-Cookie", cookieCreator.createCookie(accessToken).toString())

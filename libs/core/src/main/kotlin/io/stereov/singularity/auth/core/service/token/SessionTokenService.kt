@@ -12,6 +12,7 @@ import org.springframework.security.oauth2.jwt.JwtClaimsSet
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ServerWebExchange
 import java.time.Instant
+import java.util.*
 
 @Service
 class SessionTokenService(
@@ -23,7 +24,7 @@ class SessionTokenService(
     private val logger = KotlinLogging.logger {}
     val tokenType = "session"
 
-    suspend fun create(sessionInfo: SessionInfoRequest? = null, issuedAt: Instant = Instant.now()): SessionToken {
+    suspend fun create(sessionInfo: SessionInfoRequest? = null, issuedAt: Instant = Instant.now(), locale: Locale? = null): SessionToken {
         logger.debug { "Creating session token" }
 
         val claims = JwtClaimsSet.builder()
@@ -36,10 +37,13 @@ class SessionTokenService(
         if (sessionInfo?.os != null) {
             claims.claim(Constants.JWT_OS_CLAIM, sessionInfo.os)
         }
+        if (locale != null) {
+            claims.claim(Constants.JWT_LOCALE_CLAIM, locale.toLanguageTag())
+        }
 
         val jwt = jwtService.encodeJwt(claims.build(), tokenType)
 
-        return SessionToken(sessionInfo?.browser, sessionInfo?.os, jwt)
+        return SessionToken(sessionInfo?.browser, sessionInfo?.os, locale, jwt)
     }
 
     suspend fun extract(exchange: ServerWebExchange): SessionToken {
@@ -55,7 +59,9 @@ class SessionTokenService(
         val jwt = jwtService.decodeJwt(tokenValue, tokenType)
         val browser = jwt.claims[Constants.JWT_BROWSER_CLAIM] as? String
         val os = jwt.claims[Constants.JWT_OS_CLAIM] as? String
+        val locale = (jwt.claims[Constants.JWT_LOCALE_CLAIM] as? String)
+            ?.let { Locale.forLanguageTag(it) }
 
-        return SessionToken(browser, os, jwt)
+        return SessionToken(browser, os, locale, jwt)
     }
 }

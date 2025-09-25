@@ -37,6 +37,7 @@ class CustomOAuth2AuthorizationRequestResolver(
     ): OAuth2AuthorizationRequest {
         val redirectUri = exchange.request.queryParams.getFirst(Constants.REDIRECT_URI_PARAMETER)
         val stepUp = exchange.request.queryParams.getFirst(Constants.STEP_UP_PARAMETER).toBoolean()
+        val locale = exchange.request.queryParams.getFirst("locale")
 
         val oAuth2StateToken = oAuth2StateTokenService.create(
             request.state,

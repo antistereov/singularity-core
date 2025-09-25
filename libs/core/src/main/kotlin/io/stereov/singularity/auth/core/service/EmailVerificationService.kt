@@ -4,7 +4,9 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.dto.response.MailCooldownResponse
 import io.stereov.singularity.auth.core.exception.AuthException
 import io.stereov.singularity.auth.core.exception.model.EmailAlreadyVerifiedException
+import io.stereov.singularity.auth.core.model.SecurityAlertType
 import io.stereov.singularity.auth.core.properties.EmailVerificationProperties
+import io.stereov.singularity.auth.core.properties.SecurityAlertProperties
 import io.stereov.singularity.auth.core.service.token.EmailVerificationTokenService
 import io.stereov.singularity.auth.guest.exception.model.GuestCannotPerformThisActionException
 import io.stereov.singularity.email.core.exception.model.EmailCooldownException
@@ -40,7 +42,9 @@ class EmailVerificationService(
     private val translateService: TranslateService,
     private val emailService: EmailService,
     private val templateService: TemplateService,
-    private val appProperties: AppProperties
+    private val appProperties: AppProperties,
+    private val securityAlertService: SecurityAlertService,
+    private val securityAlertProperties: SecurityAlertProperties
 ) {
 
     private val logger = KotlinLogging.logger {}
@@ -54,7 +58,7 @@ class EmailVerificationService(
      *
      * @return The updated user information.
      */
-    suspend fun verifyEmail(token: String): UserResponse {
+    suspend fun verifyEmail(token: String, locale: Locale?): UserResponse {
         logger.debug { "Verifying email" }
 
         val verificationToken = emailVerificationTokenService.extract(token)
@@ -64,23 +68,31 @@ class EmailVerificationService(
         if (user.isGuest)
             throw GuestCannotPerformThisActionException("Guests cannot verify their email since no email is specified")
 
-        if (user.sensitive.security.email.verified)
-            throw EmailAlreadyVerifiedException("Email is already verified")
-
         if (user.sensitive.email == null)
             throw InvalidDocumentException("No email specified")
 
         val savedSecret = user.sensitive.security.email.verificationSecret
 
-        return if (verificationToken.secret == savedSecret) {
-            user.sensitive.security.email.verified = true
-            user.sensitive.email = verificationToken.email
-            val savedUser = userService.save(user)
+        if (verificationToken.secret != savedSecret) throw AuthException("Authentication token does not match")
 
-            userMapper.toResponse(savedUser)
-        } else {
-            throw AuthException("Authentication token does not match")
+        val oldEmail = user.sensitive.email
+        val newEmail = verificationToken.email
+        val isEmailUpdate = oldEmail != newEmail
+
+        if (isEmailUpdate) {
+            user.sensitive.email = newEmail
+        } else if (user.sensitive.security.email.verified) {
+            throw EmailAlreadyVerifiedException("Email is already verified")
         }
+
+        user.sensitive.security.email.verified = true
+        val savedUser = userService.save(user)
+
+        if (isEmailUpdate && emailProperties.enable && securityAlertProperties.emailChanged) {
+            securityAlertService.send(savedUser, locale, SecurityAlertType.EMAIL_CHANGED, oldEmail = oldEmail, newEmail = newEmail)
+        }
+
+        return userMapper.toResponse(savedUser)
     }
 
     /**
