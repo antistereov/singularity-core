@@ -3,7 +3,6 @@ package io.stereov.singularity.content.article.controller
 import io.stereov.singularity.auth.core.model.token.AccessType
 import io.stereov.singularity.auth.group.model.KnownGroups
 import io.stereov.singularity.content.article.dto.response.ArticleOverviewResponse
-import io.stereov.singularity.content.article.helper.ArticlesResponse
 import io.stereov.singularity.content.article.model.ArticleState
 import io.stereov.singularity.content.core.model.ContentAccessRole
 import io.stereov.singularity.content.core.model.ContentAccessSubject
@@ -275,17 +274,17 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         articleService.save(article)
 
         val res = webTestClient.get()
-            .uri("$articleBasePath/scroll")
+            .uri("$articleBasePath?sort=createdAt,desc&state=published")
             .exchange()
-            .expectBody(ArticlesResponse::class.java)
+            .expectBody(ArticleOverviewPage::class.java)
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        assertEquals(0, res.remainingCount)
-        assertEquals(1, res.articles.size)
-        assertEquals(article.id, res.articles.first().id)
+        assertEquals(1, res.totalElements)
+        assertEquals(1, res.content.size)
+        assertEquals(article.id, res.content.first().id)
     }
     @Test fun `getLatestArticles works with draft`() = runTest {
         val article = save()
@@ -294,16 +293,16 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         articleService.save(article)
 
         val res = webTestClient.get()
-            .uri("$articleBasePath/scroll")
+            .uri("$articleBasePath?sort=createdAt,desc&state=published")
             .exchange()
-            .expectBody(ArticlesResponse::class.java)
+            .expectBody(ArticleOverviewPage::class.java)
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        assertEquals(0, res.remainingCount)
-        assertEquals(0, res.articles.size)
+        assertEquals(0, res.totalElements)
+        assertEquals(0, res.content.size)
     }
     @Test fun `getLatestArticles works with archived`() = runTest {
         val article = save()
@@ -312,16 +311,16 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         articleService.save(article)
 
         val res = webTestClient.get()
-            .uri("$articleBasePath/scroll")
+            .uri("$articleBasePath?sort=createdAt,desc&state=published")
             .exchange()
-            .expectBody(ArticlesResponse::class.java)
+            .expectBody(ArticleOverviewPage::class.java)
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        assertEquals(0, res.remainingCount)
-        assertEquals(0, res.articles.size)
+        assertEquals(0, res.totalElements)
+        assertEquals(0, res.content.size)
     }
     @Test fun `getLatestArticles works with shared`() = runTest {
         val article = save()
@@ -330,16 +329,16 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         articleService.save(article)
 
         val res = webTestClient.get()
-            .uri("$articleBasePath/scroll")
+            .uri("$articleBasePath?sort=createdAt,desc&state=published")
             .exchange()
-            .expectBody(ArticlesResponse::class.java)
+            .expectBody(ArticleOverviewPage::class.java)
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        assertEquals(0, res.remainingCount)
-        assertEquals(0, res.articles.size)
+        assertEquals(0, res.totalElements)
+        assertEquals(0, res.content.size)
     }
     @Test fun `getLatestArticles works with private`() = runTest {
         val article = save()
@@ -348,16 +347,16 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         articleService.save(article)
 
         val res = webTestClient.get()
-            .uri("$articleBasePath/scroll")
+            .uri("$articleBasePath?sort=createdAt,desc&state=published")
             .exchange()
-            .expectBody(ArticlesResponse::class.java)
+            .expectBody(ArticleOverviewPage::class.java)
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        assertEquals(0, res.remainingCount)
-        assertEquals(0, res.articles.size)
+        assertEquals(0, res.totalElements)
+        assertEquals(0, res.content.size)
     }
     @Test fun `getLatestArticles works with creator`() = runTest {
         val user = registerUser(groups = listOf(KnownGroups.EDITOR))
@@ -368,18 +367,18 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         articleService.save(article)
 
         val res = webTestClient.get()
-            .uri("$articleBasePath/scroll")
+            .uri("$articleBasePath?sort=createdAt,desc&state=published")
             .accessTokenCookie(user.accessToken)
             .exchange()
-            .expectBody(ArticlesResponse::class.java)
+            .expectBody(ArticleOverviewPage::class.java)
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        assertEquals(0, res.remainingCount)
-        assertEquals(1, res.articles.size)
-        assertEquals(article.id, res.articles.first().id)
+        assertEquals(1, res.totalElements)
+        assertEquals(1, res.content.size)
+        assertEquals(article.id, res.content.first().id)
     }
     @Test fun `getLatestArticles works with user viewer`() = runTest {
         val user = registerUser(emailSuffix = "another@email.com")
@@ -389,18 +388,18 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         articleService.save(article)
 
         val res = webTestClient.get()
-            .uri("$articleBasePath/scroll")
+            .uri("$articleBasePath?sort=createdAt,desc&state=published")
             .accessTokenCookie(user.accessToken)
             .exchange()
-            .expectBody(ArticlesResponse::class.java)
+            .expectBody(ArticleOverviewPage::class.java)
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        assertEquals(0, res.remainingCount)
-        assertEquals(1, res.articles.size)
-        assertEquals(article.id, res.articles.first().id)
+        assertEquals(1, res.totalElements)
+        assertEquals(1, res.content.size)
+        assertEquals(article.id, res.content.first().id)
     }
     @Test fun `getLatestArticles works with user editor`() = runTest {
         val user = registerUser(emailSuffix = "another@email.com")
@@ -410,18 +409,18 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         articleService.save(article)
 
         val res = webTestClient.get()
-            .uri("$articleBasePath/scroll")
+            .uri("$articleBasePath?sort=createdAt,desc&state=published")
             .accessTokenCookie(user.accessToken)
             .exchange()
-            .expectBody(ArticlesResponse::class.java)
+            .expectBody(ArticleOverviewPage::class.java)
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        assertEquals(0, res.remainingCount)
-        assertEquals(1, res.articles.size)
-        assertEquals(article.id, res.articles.first().id)
+        assertEquals(1, res.totalElements)
+        assertEquals(1, res.content.size)
+        assertEquals(article.id, res.content.first().id)
     }
     @Test fun `getLatestArticles works with user admin`() = runTest {
         val user = registerUser(emailSuffix = "another@email.com")
@@ -431,18 +430,18 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         articleService.save(article)
 
         val res = webTestClient.get()
-            .uri("$articleBasePath/scroll")
+            .uri("$articleBasePath?sort=createdAt,desc&state=published")
             .accessTokenCookie(user.accessToken)
             .exchange()
-            .expectBody(ArticlesResponse::class.java)
+            .expectBody(ArticleOverviewPage::class.java)
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        assertEquals(0, res.remainingCount)
-        assertEquals(1, res.articles.size)
-        assertEquals(article.id, res.articles.first().id)
+        assertEquals(1, res.totalElements)
+        assertEquals(1, res.content.size)
+        assertEquals(article.id, res.content.first().id)
     }
     @Test fun `getLatestArticles works with group viewer`() = runTest {
         val group = createGroup()
@@ -453,18 +452,18 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         articleService.save(article)
 
         val res = webTestClient.get()
-            .uri("$articleBasePath/scroll")
+            .uri("$articleBasePath?sort=createdAt,desc&state=published")
             .accessTokenCookie(user.accessToken)
             .exchange()
-            .expectBody(ArticlesResponse::class.java)
+            .expectBody(ArticleOverviewPage::class.java)
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        assertEquals(0, res.remainingCount)
-        assertEquals(1, res.articles.size)
-        assertEquals(article.id, res.articles.first().id)
+        assertEquals(1, res.totalElements)
+        assertEquals(1, res.content.size)
+        assertEquals(article.id, res.content.first().id)
     }
     @Test fun `getLatestArticles works with group editor`() = runTest {
         val group = createGroup()
@@ -475,18 +474,18 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         articleService.save(article)
 
         val res = webTestClient.get()
-            .uri("$articleBasePath/scroll")
+            .uri("$articleBasePath?sort=createdAt,desc&state=published")
             .accessTokenCookie(user.accessToken)
             .exchange()
-            .expectBody(ArticlesResponse::class.java)
+            .expectBody(ArticleOverviewPage::class.java)
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        assertEquals(0, res.remainingCount)
-        assertEquals(1, res.articles.size)
-        assertEquals(article.id, res.articles.first().id)
+        assertEquals(1, res.totalElements)
+        assertEquals(1, res.content.size)
+        assertEquals(article.id, res.content.first().id)
     }
     @Test fun `getLatestArticles works with group admin`() = runTest {
         val group = createGroup()
@@ -497,17 +496,17 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         articleService.save(article)
 
         val res = webTestClient.get()
-            .uri("$articleBasePath/scroll")
+            .uri("$articleBasePath?sort=createdAt,desc&state=published")
             .accessTokenCookie(user.accessToken)
             .exchange()
-            .expectBody(ArticlesResponse::class.java)
+            .expectBody(ArticleOverviewPage::class.java)
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        assertEquals(0, res.remainingCount)
-        assertEquals(1, res.articles.size)
-        assertEquals(article.id, res.articles.first().id)
+        assertEquals(1, res.totalElements)
+        assertEquals(1, res.content.size)
+        assertEquals(article.id, res.content.first().id)
     }
 }

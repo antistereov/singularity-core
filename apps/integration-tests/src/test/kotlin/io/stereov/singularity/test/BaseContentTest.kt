@@ -34,7 +34,7 @@ class BaseContentTest : BaseIntegrationTest() {
         val actualUser = creator ?: registerUser(groups = listOf(KnownGroups.EDITOR))
         val req = CreateArticleRequest(Locale.ENGLISH, title ?: "test", "", "")
         val res = webTestClient.post()
-            .uri("/api/content/articles/create")
+            .uri("/api/content/articles")
             .accessTokenCookie(actualUser.accessToken)
             .bodyValue(req)
             .exchange()
