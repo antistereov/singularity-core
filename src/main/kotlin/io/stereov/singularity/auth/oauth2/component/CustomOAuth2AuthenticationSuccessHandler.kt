@@ -4,6 +4,8 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.component.CookieCreator
 import io.stereov.singularity.auth.core.model.token.SessionToken
 import io.stereov.singularity.auth.core.model.token.SessionTokenType
+import io.stereov.singularity.auth.core.properties.SecurityAlertProperties
+import io.stereov.singularity.auth.core.service.LoginAlertService
 import io.stereov.singularity.auth.core.service.token.AccessTokenService
 import io.stereov.singularity.auth.core.service.token.RefreshTokenService
 import io.stereov.singularity.auth.core.service.token.SessionTokenService
@@ -16,6 +18,7 @@ import io.stereov.singularity.auth.oauth2.model.token.OAuth2TokenType
 import io.stereov.singularity.auth.oauth2.properties.OAuth2Properties
 import io.stereov.singularity.auth.oauth2.service.OAuth2AuthenticationService
 import io.stereov.singularity.auth.oauth2.service.token.OAuth2StateTokenService
+import io.stereov.singularity.email.core.properties.EmailProperties
 import kotlinx.coroutines.reactor.mono
 import org.apache.http.client.utils.URIBuilder
 import org.springframework.http.HttpStatus
@@ -36,7 +39,10 @@ class CustomOAuth2AuthenticationSuccessHandler(
     private val cookieCreator: CookieCreator,
     private val oAuth2Properties: OAuth2Properties,
     private val stepUpTokenService: StepUpTokenService,
-    private val oAuth2StateTokenService: OAuth2StateTokenService
+    private val oAuth2StateTokenService: OAuth2StateTokenService,
+    private val emailProperties: EmailProperties,
+    private val securityAlertProperties: SecurityAlertProperties,
+    private val loginAlertService: LoginAlertService
 ) : ServerAuthenticationSuccessHandler {
 
     private val logger = KotlinLogging.logger {}
@@ -96,7 +102,14 @@ class CustomOAuth2AuthenticationSuccessHandler(
         val oauth2ProviderConnectionToken = exchange.request.cookies.getFirst(OAuth2TokenType.ProviderConnection.COOKIE_NAME)?.value
         val stepUpTokenValue = exchange.request.cookies.getFirst(SessionTokenType.StepUp.COOKIE_NAME)?.value
 
-        val user = oAuth2AuthenticationService.findOrCreateUser(oauth2Authentication, oauth2ProviderConnectionToken, stepUpTokenValue, exchange, state.stepUp)
+        val (user, action) = oAuth2AuthenticationService.findOrCreateUser(
+            oauth2Authentication,
+            oauth2ProviderConnectionToken,
+            stepUpTokenValue,
+            exchange,
+            state.stepUp,
+            sessionToken.locale
+        )
         val accessToken = accessTokenService.create(user, sessionId)
         val refreshToken = refreshTokenService.create(user, sessionId, sessionToken.toSessionInfoRequest(), exchange)
 
@@ -116,6 +129,13 @@ class CustomOAuth2AuthenticationSuccessHandler(
         exchange.response.headers.add(SessionTokenType.Refresh.HEADER, refreshToken.value)
         exchange.response.cookies.add(SessionTokenType.Access.COOKIE_NAME, cookieCreator.createCookie(accessToken))
         exchange.response.cookies.add(SessionTokenType.Refresh.COOKIE_NAME, cookieCreator.createCookie(refreshToken))
+
+        if (action == OAuth2AuthenticationService.OAuth2Action.LOGIN && !state.stepUp
+            && emailProperties.enable && securityAlertProperties.login) {
+            val session = user.sensitive.sessions[sessionId]
+                ?: throw OAuth2FlowException(OAuth2ErrorCode.SERVER_ERROR, "Current session is not saved")
+            loginAlertService.send(user, sessionToken.locale, session)
+        }
 
         if (state.redirectUri != null) {
             exchange.response.statusCode = HttpStatus.FOUND

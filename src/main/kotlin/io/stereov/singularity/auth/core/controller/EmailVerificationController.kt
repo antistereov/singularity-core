@@ -42,6 +42,15 @@ class EmailVerificationController(
             
             You can resend this email through the endpoint [`POST /api/auth/email/verification/send`](https://singularity.stereov.io/docs/api/send-email-verification-email).
 
+            **Locale:**
+            
+            A locale can be specified for this request. 
+            The email will be sent in the specified locale.
+            You can learn more about locale in emails [here](https://singularity.stereov.io/docs/guides/email/templates).
+            
+            If no locale is specified, the applications default locale will be used.
+            You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
+
             **Note:** If email is disabled, there is no way to verify a user's email address.
         """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/docs/auth/authentication#email-verification"),
@@ -62,8 +71,11 @@ class EmailVerificationController(
             )
         ]
     )
-    suspend fun verifyEmail(@RequestParam token: String): ResponseEntity<UserResponse> {
-        val authInfo = emailVerificationService.verifyEmail(token)
+    suspend fun verifyEmail(
+        @RequestParam token: String,
+        @RequestParam locale: Locale?
+    ): ResponseEntity<UserResponse> {
+        val authInfo = emailVerificationService.verifyEmail(token, locale)
 
         return ResponseEntity.ok()
             .body(authInfo)

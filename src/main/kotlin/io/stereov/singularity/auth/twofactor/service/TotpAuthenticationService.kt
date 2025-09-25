@@ -5,7 +5,10 @@ import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.exception.AuthException
 import io.stereov.singularity.auth.core.exception.model.TwoFactorMethodDisabledException
 import io.stereov.singularity.auth.core.model.IdentityProvider
+import io.stereov.singularity.auth.core.model.SecurityAlertType
+import io.stereov.singularity.auth.core.properties.SecurityAlertProperties
 import io.stereov.singularity.auth.core.service.AuthorizationService
+import io.stereov.singularity.auth.core.service.SecurityAlertService
 import io.stereov.singularity.auth.twofactor.dto.response.TwoFactorSetupResponse
 import io.stereov.singularity.auth.twofactor.exception.model.CannotDisableOnly2FAMethodException
 import io.stereov.singularity.auth.twofactor.exception.model.InvalidTwoFactorCodeException
@@ -16,6 +19,7 @@ import io.stereov.singularity.auth.twofactor.properties.TotpRecoveryCodeProperti
 import io.stereov.singularity.auth.twofactor.service.token.TotpSetupTokenService
 import io.stereov.singularity.auth.twofactor.service.token.TwoFactorAuthenticationTokenService
 import io.stereov.singularity.database.hash.service.HashService
+import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.user.core.dto.response.UserResponse
@@ -24,6 +28,7 @@ import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.service.UserService
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ServerWebExchange
+import java.util.*
 
 @Service
 class TotpAuthenticationService(
@@ -35,7 +40,10 @@ class TotpAuthenticationService(
     private val userService: UserService,
     private val accessTokenCache: AccessTokenCache,
     private val userMapper: UserMapper,
-    private val twoFactorAuthTokenService: TwoFactorAuthenticationTokenService
+    private val twoFactorAuthTokenService: TwoFactorAuthenticationTokenService,
+    private val securityAlertProperties: SecurityAlertProperties,
+    private val securityAlertService: SecurityAlertService,
+    private val emailProperties: EmailProperties
 ) {
 
     private val logger = KotlinLogging.logger {}
@@ -82,7 +90,7 @@ class TotpAuthenticationService(
      *
      * @return The updated user document.
      */
-    suspend fun validateSetup(token: String, code: Int): UserResponse {
+    suspend fun validateSetup(token: String, code: Int, locale: Locale?): UserResponse {
         val user = authorizationService.getUser()
         val setupToken = setupTokenService.validate(token)
 
@@ -109,6 +117,15 @@ class TotpAuthenticationService(
 
         val savedUser = userService.save(user)
         accessTokenCache.invalidateAllTokens(user.id)
+
+        if (securityAlertProperties.twoFactorAdded && emailProperties.enable) {
+            securityAlertService.send(
+                user,
+                locale,
+                SecurityAlertType.TWO_FACTOR_ADDED,
+                twoFactorMethod = TwoFactorMethod.TOTP
+            )
+        }
 
         return userMapper.toResponse(savedUser)
     }
@@ -161,7 +178,7 @@ class TotpAuthenticationService(
      *
      * @return The updated user document.
      */
-    suspend fun disable(): UserResponse {
+    suspend fun disable(locale: Locale?): UserResponse {
         logger.debug { "Disabling 2FA" }
 
         authorizationService.requireStepUp()
@@ -177,6 +194,15 @@ class TotpAuthenticationService(
         user.disableTotp()
 
         val savedUser = userService.save(user)
+
+        if (securityAlertProperties.twoFactorRemoved && emailProperties.enable) {
+            securityAlertService.send(
+                user,
+                locale,
+                SecurityAlertType.TWO_FACTOR_REMOVED,
+                twoFactorMethod = TwoFactorMethod.TOTP
+            )
+        }
 
         return userMapper.toResponse(savedUser)
     }

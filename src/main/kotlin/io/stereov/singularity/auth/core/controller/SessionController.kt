@@ -91,9 +91,10 @@ class SessionController(
         ]
     )
     suspend fun generateSessionToken(
-        @RequestBody sessionInfo: SessionInfoRequest?
+        @RequestBody sessionInfo: SessionInfoRequest?,
+        @RequestParam locale: Locale?
     ): ResponseEntity<GenerateSessionTokenResponse> {
-        val token = sessionTokenService.create(sessionInfo)
+        val token = sessionTokenService.create(sessionInfo, locale = locale)
 
         return ResponseEntity.ok()
             .header("Set-Cookie", cookieCreator.createCookie(token).toString())

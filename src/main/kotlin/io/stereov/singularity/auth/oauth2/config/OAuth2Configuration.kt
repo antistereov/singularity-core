@@ -3,7 +3,9 @@ package io.stereov.singularity.auth.oauth2.config
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.component.CookieCreator
 import io.stereov.singularity.auth.core.properties.AuthProperties
+import io.stereov.singularity.auth.core.properties.SecurityAlertProperties
 import io.stereov.singularity.auth.core.service.AuthorizationService
+import io.stereov.singularity.auth.core.service.SecurityAlertService
 import io.stereov.singularity.auth.core.service.token.AccessTokenService
 import io.stereov.singularity.auth.core.service.token.StepUpTokenService
 import io.stereov.singularity.auth.jwt.properties.JwtProperties
@@ -18,6 +20,7 @@ import io.stereov.singularity.auth.oauth2.service.token.OAuth2ProviderConnection
 import io.stereov.singularity.auth.oauth2.service.token.OAuth2StateTokenService
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties
 import io.stereov.singularity.database.hash.service.HashService
+import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.user.core.mapper.UserMapper
 import io.stereov.singularity.user.core.service.UserService
@@ -82,7 +85,8 @@ class OAuth2Configuration {
         hashService: HashService,
         accessTokenCache: AccessTokenCache,
         accessTokenService: AccessTokenService,
-        stepUpTokenService: StepUpTokenService
+        stepUpTokenService: StepUpTokenService, emailProperties: EmailProperties,
+        securityAlertService: SecurityAlertService, securityAlertProperties: SecurityAlertProperties
     ) = IdentityProviderService(
         userService,
         oAuth2ProviderConnectionTokenService,
@@ -90,7 +94,10 @@ class OAuth2Configuration {
         hashService,
         accessTokenCache,
         accessTokenService,
-        stepUpTokenService
+        stepUpTokenService,
+        emailProperties,
+        securityAlertService,
+        securityAlertProperties
     )
     
     @Bean

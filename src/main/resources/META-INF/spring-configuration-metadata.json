@@ -21,6 +21,11 @@
       "sourceType": "io.stereov.singularity.auth.core.properties.PasswordResetProperties"
     },
     {
+      "name": "singularity.auth.security-alert",
+      "type": "io.stereov.singularity.auth.core.properties.SecurityAlertProperties",
+      "sourceType": "io.stereov.singularity.auth.core.properties.SecurityAlertProperties"
+    },
+    {
       "name": "singularity.auth.geolocation",
       "type": "io.stereov.singularity.auth.geolocation.properties.GeolocationProperties",
       "sourceType": "io.stereov.singularity.auth.geolocation.properties.GeolocationProperties"
@@ -211,6 +216,55 @@
       "sourceType": "io.stereov.singularity.auth.core.properties.PasswordResetProperties",
       "defaultValue": "http://localhost:8000/auth/reset-password",
       "description": "The URI that will be included in the password reset email that leads to the password reset page in your frontend application."
+    },
+    {
+      "name": "singularity.auth.security-alert.login",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.stereov.singularity.auth.core.properties.SecurityAlertProperties",
+      "defaultValue": true,
+      "description": "Enable automated email alerts for new logins. Email needs to be enabled and configured in the application."
+    },
+    {
+      "name": "singularity.auth.security-alert.email-changed",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.stereov.singularity.auth.core.properties.SecurityAlertProperties",
+      "defaultValue": true,
+      "description": "Enable automated email alerts for an email change. Email needs to be enabled and configured in the application."
+    },
+    {
+      "name": "singularity.auth.security-alert.password-changed",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.stereov.singularity.auth.core.properties.SecurityAlertProperties",
+      "defaultValue": true,
+      "description": "Enable automated email alerts for a password change. Email needs to be enabled and configured in the application."
+    },
+    {
+      "name": "singularity.auth.security-alert.two-factor-added",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.stereov.singularity.auth.core.properties.SecurityAlertProperties",
+      "defaultValue": true,
+      "description": "Enable automated email alerts for the addition of a new 2FA method. Email needs to be enabled and configured in the application."
+    },
+    {
+      "name": "singularity.auth.security-alert.two-factor-removed",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.stereov.singularity.auth.core.properties.SecurityAlertProperties",
+      "defaultValue": true,
+      "description": "Enable automated email alerts for the removal of an existing 2FA method. Email needs to be enabled and configured in the application."
+    },
+    {
+      "name": "singularity.auth.security-alert.oauth2-provider-connected",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.stereov.singularity.auth.core.properties.SecurityAlertProperties",
+      "defaultValue": true,
+      "description": "Enable automated email alerts for the connection of a new OAuth2 provider. Email needs to be enabled and configured in the application."
+    },
+    {
+      "name": "singularity.auth.security-alert.oauth2-provider-disconnected",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.stereov.singularity.auth.core.properties.SecurityAlertProperties",
+      "defaultValue": true,
+      "description": "Enable automated email alerts for the disconnection of an existing OAuth2 provider. Email needs to be enabled and configured in the application."
     },
     {
       "name": "singularity.auth.geolocation.enabled",

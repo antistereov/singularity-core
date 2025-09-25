@@ -45,6 +45,15 @@ class PasswordResetController(
             If successful, the user can log in using the new password afterwards.
             
             You can resend this email through the endpoint [`POST /api/auth/password/reset-request`](https://singularity.stereov.io/docs/api/send-password-reset-email).
+            
+            **Locale:**
+            
+            A locale can be specified for this request. 
+            The email will be sent in the specified locale.
+            You can learn more about locale in emails [here](https://singularity.stereov.io/docs/guides/email/templates).
+            
+            If no locale is specified, the applications default locale will be used.
+            You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
 
             **Note:** If email is disabled, there is no way to reset the password.
         """,
@@ -68,9 +77,10 @@ class PasswordResetController(
     )
     suspend fun resetPassword(
         @RequestParam token: String,
-        @RequestBody req: ResetPasswordRequest
+        @RequestBody req: ResetPasswordRequest,
+        @RequestParam locale: Locale?
     ): ResponseEntity<SuccessResponse> {
-        passwordResetService.resetPassword(token, req)
+        passwordResetService.resetPassword(token, req, locale)
 
         return ResponseEntity.ok()
             .body(SuccessResponse())

@@ -4,8 +4,11 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.exception.model.WrongIdentityProviderException
 import io.stereov.singularity.auth.core.model.IdentityProvider
+import io.stereov.singularity.auth.core.model.SecurityAlertType
+import io.stereov.singularity.auth.core.properties.SecurityAlertProperties
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.core.service.EmailVerificationService
+import io.stereov.singularity.auth.core.service.SecurityAlertService
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.file.core.exception.model.UnsupportedMediaTypeException
@@ -32,7 +35,9 @@ class UserSettingsService(
     private val fileStorage: FileStorage,
     private val accessTokenCache: AccessTokenCache,
     private val userMapper: UserMapper,
-    private val emailProperties: EmailProperties
+    private val emailProperties: EmailProperties,
+    private val securityAlertProperties: SecurityAlertProperties,
+    private val securityAlertService: SecurityAlertService
 ) {
 
     private val logger = KotlinLogging.logger {}
@@ -58,7 +63,7 @@ class UserSettingsService(
         return userService.save(user)
     }
 
-    suspend fun changePassword(payload: ChangePasswordRequest): UserDocument {
+    suspend fun changePassword(payload: ChangePasswordRequest, locale: Locale?): UserDocument {
         logger.debug { "Changing password" }
 
         val user = authorizationService.getUser()
@@ -69,7 +74,13 @@ class UserSettingsService(
 
         passwordProvider.password = hashService.hashBcrypt(payload.newPassword)
 
-        return userService.save(user)
+        val updatedUser = userService.save(user)
+
+        if (emailProperties.enable && securityAlertProperties.passwordChanged) {
+            securityAlertService.send(updatedUser, locale, SecurityAlertType.PASSWORD_CHANGED)
+        }
+
+        return updatedUser
     }
 
     suspend fun changeUser(payload: ChangeUserRequest): UserDocument {
