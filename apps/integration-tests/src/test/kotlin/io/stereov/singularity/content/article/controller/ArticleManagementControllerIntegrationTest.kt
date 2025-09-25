@@ -3,7 +3,7 @@ package io.stereov.singularity.content.article.controller
 import io.stereov.singularity.auth.core.model.token.AccessType
 import io.stereov.singularity.auth.group.model.KnownGroups
 import io.stereov.singularity.content.article.dto.response.ArticleOverviewResponse
-import io.stereov.singularity.content.article.dto.response.ArticleResponse
+import io.stereov.singularity.content.article.helper.ArticlesResponse
 import io.stereov.singularity.content.article.model.ArticleState
 import io.stereov.singularity.content.core.model.ContentAccessRole
 import io.stereov.singularity.content.core.model.ContentAccessSubject
@@ -277,7 +277,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         val res = webTestClient.get()
             .uri("$articleBasePath/scroll")
             .exchange()
-            .expectBody(ArticleResponse::class.java)
+            .expectBody(ArticlesResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -296,7 +296,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         val res = webTestClient.get()
             .uri("$articleBasePath/scroll")
             .exchange()
-            .expectBody(ArticleResponse::class.java)
+            .expectBody(ArticlesResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -314,7 +314,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         val res = webTestClient.get()
             .uri("$articleBasePath/scroll")
             .exchange()
-            .expectBody(ArticleResponse::class.java)
+            .expectBody(ArticlesResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -332,7 +332,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         val res = webTestClient.get()
             .uri("$articleBasePath/scroll")
             .exchange()
-            .expectBody(ArticleResponse::class.java)
+            .expectBody(ArticlesResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -350,7 +350,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         val res = webTestClient.get()
             .uri("$articleBasePath/scroll")
             .exchange()
-            .expectBody(ArticleResponse::class.java)
+            .expectBody(ArticlesResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -371,7 +371,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
             .uri("$articleBasePath/scroll")
             .accessTokenCookie(user.accessToken)
             .exchange()
-            .expectBody(ArticleResponse::class.java)
+            .expectBody(ArticlesResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -392,7 +392,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
             .uri("$articleBasePath/scroll")
             .accessTokenCookie(user.accessToken)
             .exchange()
-            .expectBody(ArticleResponse::class.java)
+            .expectBody(ArticlesResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -413,7 +413,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
             .uri("$articleBasePath/scroll")
             .accessTokenCookie(user.accessToken)
             .exchange()
-            .expectBody(ArticleResponse::class.java)
+            .expectBody(ArticlesResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -434,7 +434,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
             .uri("$articleBasePath/scroll")
             .accessTokenCookie(user.accessToken)
             .exchange()
-            .expectBody(ArticleResponse::class.java)
+            .expectBody(ArticlesResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -456,7 +456,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
             .uri("$articleBasePath/scroll")
             .accessTokenCookie(user.accessToken)
             .exchange()
-            .expectBody(ArticleResponse::class.java)
+            .expectBody(ArticlesResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -478,7 +478,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
             .uri("$articleBasePath/scroll")
             .accessTokenCookie(user.accessToken)
             .exchange()
-            .expectBody(ArticleResponse::class.java)
+            .expectBody(ArticlesResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -500,7 +500,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
             .uri("$articleBasePath/scroll")
             .accessTokenCookie(user.accessToken)
             .exchange()
-            .expectBody(ArticleResponse::class.java)
+            .expectBody(ArticlesResponse::class.java)
             .returnResult()
             .responseBody
 

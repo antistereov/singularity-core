@@ -101,12 +101,13 @@ import org.springframework.context.annotation.Bean
 
 class OpenApiConfig() {
 
+
     @Bean
     fun customize(): OpenApiCustomizer = OpenApiCustomizer { openApi ->
         trimIndents(openApi)
-        sortEndpoints(openApi)
-        sortTags(openApi)
         sortSecurityRequirements(openApi)
+        sortTags(openApi)
+        sortEndpoints(openApi)
     }
 
     private fun trimIndents(openApi: OpenAPI) {

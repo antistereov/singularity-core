@@ -4,17 +4,20 @@ import io.stereov.singularity.auth.core.exception.model.NotAuthorizedException
 import io.stereov.singularity.auth.core.model.token.AccessType
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.group.model.KnownGroups
+import io.stereov.singularity.content.core.component.AccessCriteria
 import io.stereov.singularity.content.core.model.ContentAccessRole
 import io.stereov.singularity.content.core.model.ContentDocument
 import io.stereov.singularity.content.core.repository.ContentRepository
 import io.stereov.singularity.database.core.service.CrudService
 import io.stereov.singularity.global.exception.model.DocumentNotFoundException
+import io.stereov.singularity.translate.service.TranslateService
 
-interface ContentService<T: ContentDocument<T>> : CrudService<T>  {
+abstract class ContentService<T: ContentDocument<T>> : CrudService<T>  {
 
-    override val repository: ContentRepository<T>
-    val authorizationService: AuthorizationService
-    
+    abstract override val repository: ContentRepository<T>
+    abstract val authorizationService: AuthorizationService
+    abstract val translateService: TranslateService
+    abstract val accessCriteria: AccessCriteria
 
     suspend fun findByKeyOrNull(key: String): T? {
         logger.debug { "Fining ${collectionClazz.simpleName} by key \"$key\"" }

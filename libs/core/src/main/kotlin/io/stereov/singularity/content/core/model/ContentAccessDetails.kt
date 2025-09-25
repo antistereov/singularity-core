@@ -2,8 +2,8 @@ package io.stereov.singularity.content.core.model
 
 import io.stereov.singularity.auth.core.model.token.AccessType
 import io.stereov.singularity.auth.core.model.token.CustomAuthenticationToken
-import io.stereov.singularity.content.core.dto.ChangeContentVisibilityRequest
-import io.stereov.singularity.content.core.dto.ContentAccessDetailsResponse
+import io.stereov.singularity.content.core.dto.request.ChangeContentVisibilityRequest
+import io.stereov.singularity.content.core.dto.response.ContentAccessDetailsResponse
 import io.stereov.singularity.user.core.model.Role
 import org.bson.types.ObjectId
 

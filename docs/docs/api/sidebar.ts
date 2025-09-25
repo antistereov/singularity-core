@@ -431,6 +431,47 @@ const sidebar: SidebarsConfig = {
     },
     {
       type: "category",
+      label: "content-management-controller",
+      link: {
+        type: "generated-index",
+        title: "content-management-controller",
+        slug: "/category/api/content-management-controller",
+      },
+      items: [
+        {
+          type: "doc",
+          id: "api/change-visibility",
+          label: "changeVisibility",
+          className: "api-method put",
+        },
+        {
+          type: "doc",
+          id: "api/set-trusted-state",
+          label: "setTrustedState",
+          className: "api-method put",
+        },
+        {
+          type: "doc",
+          id: "api/change-tags",
+          label: "changeTags",
+          className: "api-method put",
+        },
+        {
+          type: "doc",
+          id: "api/get-extended-access-details",
+          label: "getExtendedAccessDetails",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "api/delete-content-by-key",
+          label: "deleteContentByKey",
+          className: "api-method delete",
+        },
+      ],
+    },
+    {
+      type: "category",
       label: "tag-controller",
       link: {
         type: "generated-index",
@@ -481,24 +522,6 @@ const sidebar: SidebarsConfig = {
       items: [
         {
           type: "doc",
-          id: "api/change-visibility",
-          label: "changeVisibility",
-          className: "api-method put",
-        },
-        {
-          type: "doc",
-          id: "api/set-trusted-state",
-          label: "setTrustedState",
-          className: "api-method put",
-        },
-        {
-          type: "doc",
-          id: "api/change-tags",
-          label: "changeTags",
-          className: "api-method put",
-        },
-        {
-          type: "doc",
           id: "api/change-summary",
           label: "changeSummary",
           className: "api-method put",
@@ -529,6 +552,23 @@ const sidebar: SidebarsConfig = {
         },
         {
           type: "doc",
+          id: "api/create-article",
+          label: "createArticle",
+          className: "api-method post",
+        },
+      ],
+    },
+    {
+      type: "category",
+      label: "invitation-controller",
+      link: {
+        type: "generated-index",
+        title: "invitation-controller",
+        slug: "/category/api/invitation-controller",
+      },
+      items: [
+        {
+          type: "doc",
           id: "api/invite-user",
           label: "inviteUser",
           className: "api-method post",
@@ -541,15 +581,9 @@ const sidebar: SidebarsConfig = {
         },
         {
           type: "doc",
-          id: "api/create-article",
-          label: "createArticle",
-          className: "api-method post",
-        },
-        {
-          type: "doc",
-          id: "api/get-extended-access-details",
-          label: "getExtendedAccessDetails",
-          className: "api-method get",
+          id: "api/delete-invitation",
+          label: "deleteInvitation",
+          className: "api-method delete",
         },
       ],
     },
@@ -574,28 +608,28 @@ const sidebar: SidebarsConfig = {
           label: "getArticleByKey",
           className: "api-method get",
         },
-        {
-          type: "doc",
-          id: "api/get-latest-articles",
-          label: "getLatestArticles",
-          className: "api-method get",
-        },
       ],
     },
     {
       type: "category",
-      label: "invitation-controller",
+      label: "file-metadata-controller",
       link: {
         type: "generated-index",
-        title: "invitation-controller",
-        slug: "/category/api/invitation-controller",
+        title: "file-metadata-controller",
+        slug: "/category/api/file-metadata-controller",
       },
       items: [
         {
           type: "doc",
-          id: "api/delete-invitation",
-          label: "deleteInvitation",
-          className: "api-method delete",
+          id: "api/get-files",
+          label: "getFiles",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "api/get-file-by-key",
+          label: "getFileByKey",
+          className: "api-method get",
         },
       ],
     },

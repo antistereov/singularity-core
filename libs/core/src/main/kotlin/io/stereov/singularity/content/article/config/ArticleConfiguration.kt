@@ -52,7 +52,25 @@ class ArticleConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun articleMapper(appProperties: AppProperties) = ArticleMapper(appProperties)
+    fun articleMapper(
+        appProperties: AppProperties,
+        authorizationService: AuthorizationService,
+        userService: UserService,
+        translateService: TranslateService,
+        tagMapper: TagMapper,
+        tagService: TagService,
+        fileStorage: FileStorage,
+        userMapper: UserMapper
+    ) = ArticleMapper(
+        appProperties,
+        authorizationService,
+        userService,
+        translateService,
+        tagMapper,
+        tagService,
+        fileStorage,
+        userMapper
+    )
 
     // Service
 
@@ -60,29 +78,19 @@ class ArticleConfiguration {
     @ConditionalOnMissingBean
     fun articleService(
         articleRepository: ArticleRepository,
-        userService: UserService,
         authorizationService: AuthorizationService,
-        tagService: TagService,
         reactiveMongoTemplate: ReactiveMongoTemplate,
         accessCriteria: AccessCriteria,
-        fileStorage: FileStorage,
-        userMapper: UserMapper,
         articleMapper: ArticleMapper,
-        tagMapper: TagMapper,
         translateService: TranslateService
     ): ArticleService {
         return ArticleService(
             articleRepository,
-            userService,
             authorizationService,
-            tagService,
             reactiveMongoTemplate,
             accessCriteria,
-            fileStorage,
-            userMapper,
-            articleMapper,
-            tagMapper,
-            translateService
+            translateService,
+            articleMapper
         )
     }
 
@@ -98,19 +106,17 @@ class ArticleConfiguration {
         userService: UserService,
         userMapper: UserMapper,
         articleMapper: ArticleMapper,
-        appProperties: AppProperties
     ): ArticleManagementService {
         return ArticleManagementService(
             articleService,
             authorizationService,
             invitationService,
-            fileStorage,
             translateService,
-            uiProperties,
             userService,
             userMapper,
+            fileStorage,
+            uiProperties,
             articleMapper,
-            appProperties
         )
     }
 }

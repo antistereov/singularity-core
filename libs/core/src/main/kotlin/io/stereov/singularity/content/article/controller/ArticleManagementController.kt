@@ -1,15 +1,8 @@
 package io.stereov.singularity.content.article.controller
 
-import io.stereov.singularity.content.article.dto.*
-import io.stereov.singularity.content.article.dto.request.ChangeArticleContentRequest
-import io.stereov.singularity.content.article.dto.request.ChangeArticleHeaderRequest
-import io.stereov.singularity.content.article.dto.request.ChangeArticleStateRequest
-import io.stereov.singularity.content.article.dto.request.ChangeArticleSummaryRequest
-import io.stereov.singularity.content.article.dto.request.CreateArticleRequest
-import io.stereov.singularity.content.article.dto.response.ArticleTrustedResponse
+import io.stereov.singularity.content.article.dto.request.*
 import io.stereov.singularity.content.article.dto.response.FullArticleResponse
 import io.stereov.singularity.content.article.service.ArticleManagementService
-import io.stereov.singularity.content.core.dto.*
 import org.springframework.http.ResponseEntity
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.web.bind.annotation.*
@@ -21,21 +14,13 @@ class ArticleManagementController(
     private val service: ArticleManagementService
 ) {
 
-    @PostMapping("/create")
+    @PostMapping
     suspend fun createArticle(
         @RequestBody req: CreateArticleRequest,
         @RequestParam locale: Locale?
     ): ResponseEntity<FullArticleResponse> {
         return ResponseEntity.ok(
             service.create(req, locale)
-        )
-    }
-
-    @PutMapping("/{key}/trusted")
-    suspend fun setTrustedState(@PathVariable key: String, @RequestParam trusted: Boolean): ResponseEntity<ArticleTrustedResponse> {
-        service.setTrustedState(key, trusted)
-        return ResponseEntity.ok(
-            ArticleTrustedResponse(trusted)
         )
     }
 
@@ -84,47 +69,5 @@ class ArticleManagementController(
         @RequestParam locale: Locale?
     ): ResponseEntity<FullArticleResponse> {
         return ResponseEntity.ok(service.changeState(key, req, locale))
-    }
-
-    @PutMapping("/{key}/tags")
-    suspend fun changeTags(
-        @PathVariable key: String,
-        @RequestBody req: ChangeContentTagsRequest,
-        @RequestParam locale: Locale?
-    ): ResponseEntity<FullArticleResponse> {
-        return ResponseEntity.ok(service.changeTags(key, req, locale))
-    }
-
-    @PutMapping("/{key}/visibility")
-    suspend fun changeVisibility(
-        @PathVariable key: String,
-        @RequestBody req: ChangeContentVisibilityRequest,
-        @RequestParam locale: Locale?
-    ): ResponseEntity<FullArticleResponse> {
-        return ResponseEntity.ok(service.changeVisibility(key, req, locale))
-    }
-
-    @PostMapping("/{key}/invite")
-    suspend fun inviteUser(
-        @PathVariable key: String,
-        @RequestBody req: InviteUserToContentRequest,
-        @RequestParam locale: Locale?
-    ): ResponseEntity<ExtendedContentAccessDetailsResponse> {
-        return ResponseEntity.ok(service.inviteUser(key, req, locale))
-    }
-
-    @PostMapping("/invite/accept")
-    suspend fun acceptInvitation(
-        @RequestBody req: AcceptInvitationToContentRequest,
-        @RequestParam locale: Locale?
-    ): ResponseEntity<FullArticleResponse> {
-        return ResponseEntity.ok(service.acceptInvitationAndGetFullArticle(req, locale))
-    }
-
-    @GetMapping("/{key}/access")
-    suspend fun getExtendedAccessDetails(
-        @PathVariable key: String
-    ): ResponseEntity<ExtendedContentAccessDetailsResponse> {
-        return ResponseEntity.ok(service.extendedContentAccessDetails(key))
     }
 }

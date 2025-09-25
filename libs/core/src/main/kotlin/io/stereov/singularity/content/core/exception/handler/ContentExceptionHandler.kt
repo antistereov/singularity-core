@@ -2,6 +2,7 @@ package io.stereov.singularity.content.core.exception.handler
 
 import io.stereov.singularity.content.core.exception.ContentException
 import io.stereov.singularity.content.core.exception.model.ContentKeyExistsException
+import io.stereov.singularity.content.core.exception.model.ContentTypeNotFoundException
 import io.stereov.singularity.global.exception.BaseExceptionHandler
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ControllerAdvice
@@ -13,6 +14,7 @@ class ContentExceptionHandler : BaseExceptionHandler<ContentException> {
 
     override fun getHttpStatus(ex: ContentException) = when (ex) {
         is ContentKeyExistsException -> HttpStatus.CONFLICT
+        is ContentTypeNotFoundException -> HttpStatus.NOT_FOUND
         else -> HttpStatus.INTERNAL_SERVER_ERROR
     }
 

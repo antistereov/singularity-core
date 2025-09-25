@@ -14,7 +14,7 @@ import io.stereov.singularity.content.tag.model.TagTranslation
 import io.stereov.singularity.content.tag.repository.TagRepository
 import io.stereov.singularity.global.exception.model.DocumentNotFoundException
 import io.stereov.singularity.global.properties.AppProperties
-import io.stereov.singularity.global.util.getFieldContainsCriteria
+import io.stereov.singularity.global.util.CriteriaBuilder
 import jakarta.annotation.PostConstruct
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.runBlocking
@@ -89,12 +89,13 @@ class TagService(
         logger.debug { "Finding tags with name containing \"$substring\"" }
 
         val actualLocale = locale ?: appProperties.locale
+        val query = CriteriaBuilder()
+            .fieldContains(TagTranslation::name, substring, actualLocale)
+            .build()
+            ?.let { Query(it) }
+            ?: Query()
 
-        val field = "${TagDocument::translations.name}.$actualLocale.${TagTranslation::name.name}"
-
-        val criteria = getFieldContainsCriteria(field, substring)
-
-        return reactiveMongoTemplate.find<TagDocument>(Query.query(criteria))
+        return reactiveMongoTemplate.find<TagDocument>(query)
             .collectList()
             .awaitFirstOrNull()
             ?: emptyList()

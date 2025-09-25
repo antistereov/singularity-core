@@ -2177,12 +2177,6 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-        "409":
-          description: A group with this key already exists.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader:
         - adminScope
@@ -2463,11 +2457,25 @@ paths:
         url: https://singularity.stereov.io/docs/guides/users/managing-users
       operationId: getUsers
       parameters:
-      - name: pageable
+      - name: page
         in: query
-        required: true
+        required: false
         schema:
-          $ref: "#/components/schemas/Pageable"
+          type: integer
+          format: int32
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
       - name: email
         in: query
         required: false
@@ -2840,6 +2848,116 @@ paths:
       security:
       - accessTokenHeader: []
       - accessTokenCookie: []
+  /api/content/{contentType}/{key}/visibility:
+    put:
+      tags:
+      - content-management-controller
+      operationId: changeVisibility
+      parameters:
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: contentType
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: locale
+        in: query
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangeContentVisibilityRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ContentResponseObject"
+      security:
+      - {}
+      - {}
+  /api/content/{contentType}/{key}/trusted:
+    put:
+      tags:
+      - content-management-controller
+      operationId: setTrustedState
+      parameters:
+      - name: contentType
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: trusted
+        in: query
+        required: true
+        schema:
+          type: boolean
+      - name: locale
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ContentResponseObject"
+      security:
+      - {}
+      - {}
+  /api/content/{contentType}/{key}/tags:
+    put:
+      tags:
+      - content-management-controller
+      operationId: changeTags
+      parameters:
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: contentType
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: locale
+        in: query
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangeContentTagsRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ContentResponseObject"
+      security:
+      - {}
+      - {}
   /api/content/tags/{key}:
     get:
       tags:
@@ -2914,96 +3032,6 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/SuccessResponse"
-      security:
-      - {}
-      - {}
-  /api/content/articles/{key}/visibility:
-    put:
-      tags:
-      - article-management-controller
-      operationId: changeVisibility
-      parameters:
-      - name: key
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: locale
-        in: query
-        required: false
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ChangeContentVisibilityRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/FullArticleResponse"
-      security:
-      - {}
-      - {}
-  /api/content/articles/{key}/trusted:
-    put:
-      tags:
-      - article-management-controller
-      operationId: setTrustedState
-      parameters:
-      - name: key
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: trusted
-        in: query
-        required: true
-        schema:
-          type: boolean
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ArticleTrustedResponse"
-      security:
-      - {}
-      - {}
-  /api/content/articles/{key}/tags:
-    put:
-      tags:
-      - article-management-controller
-      operationId: changeTags
-      parameters:
-      - name: key
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: locale
-        in: query
-        required: false
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ChangeContentTagsRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/FullArticleResponse"
       security:
       - {}
       - {}
@@ -3259,13 +3287,18 @@ paths:
       security:
       - {}
       - {}
-  /api/content/articles/{key}/invite:
+  /api/content/invitations/{contentType}/{key}:
     post:
       tags:
-      - article-management-controller
+      - invitation-controller
       operationId: inviteUser
       parameters:
       - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: contentType
         in: path
         required: true
         schema:
@@ -3291,12 +3324,17 @@ paths:
       security:
       - {}
       - {}
-  /api/content/articles/invite/accept:
+  /api/content/invitations/{contentType}/accept:
     post:
       tags:
-      - article-management-controller
+      - invitation-controller
       operationId: acceptInvitation
       parameters:
+      - name: contentType
+        in: path
+        required: true
+        schema:
+          type: string
       - name: locale
         in: query
         required: false
@@ -3314,11 +3352,116 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/FullArticleResponse"
+                $ref: "#/components/schemas/ContentResponseObject"
       security:
       - {}
       - {}
-  /api/content/articles/create:
+  /api/content/articles:
+    get:
+      tags:
+      - article-controller
+      operationId: getArticles
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+      - name: tags
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+      - name: title
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: content
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: state
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: roles
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          uniqueItems: true
+      - name: createdAtBefore
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: createdAtAfter
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: updatedAtBefore
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: updatedAtAfter
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: publishedAtBefore
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: publishedAtAfter
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: locale
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageArticleOverviewResponse"
+      security:
+      - {}
+      - {}
     post:
       tags:
       - article-management-controller
@@ -3386,11 +3529,37 @@ paths:
         - adminScope
       - accessTokenCookie:
         - adminScope
-  /api/content/articles:
+  /api/content/{contentType}/{key}/access:
     get:
       tags:
-      - article-controller
-      operationId: getArticles
+      - content-management-controller
+      operationId: getExtendedAccessDetails
+      parameters:
+      - name: contentType
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ExtendedContentAccessDetailsResponse"
+      security:
+      - {}
+      - {}
+  /api/content/files:
+    get:
+      tags:
+      - file-metadata-controller
+      operationId: getFiles
       parameters:
       - name: page
         in: query
@@ -3404,6 +3573,13 @@ paths:
         schema:
           type: integer
           format: int32
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
       - name: tags
         in: query
         required: false
@@ -3411,9 +3587,62 @@ paths:
           type: array
           items:
             type: string
-      - name: locale
+      - name: roles
         in: query
         required: false
+        schema:
+          type: array
+          items:
+            type: string
+          uniqueItems: true
+      - name: contentType
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: createdAtBefore
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: createdAtAfter
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: updatedAtBefore
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: updatedAtAfter
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date-time
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageFileMetadataResponse"
+      security:
+      - {}
+      - {}
+  /api/content/files/{key}:
+    get:
+      tags:
+      - file-metadata-controller
+      operationId: getFileByKey
+      parameters:
+      - name: key
+        in: path
+        required: true
         schema:
           type: string
       responses:
@@ -3422,7 +3651,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/PageArticleOverviewResponse"
+                $ref: "#/components/schemas/FileMetadataResponse"
       security:
       - {}
       - {}
@@ -3452,12 +3681,17 @@ paths:
       security:
       - {}
       - {}
-  /api/content/articles/{key}/access:
-    get:
+  /api/content/{contentType}/{key}:
+    delete:
       tags:
-      - article-management-controller
-      operationId: getExtendedAccessDetails
+      - content-management-controller
+      operationId: deleteContentByKey
       parameters:
+      - name: contentType
+        in: path
+        required: true
+        schema:
+          type: string
       - name: key
         in: path
         required: true
@@ -3469,43 +3703,11 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/ExtendedContentAccessDetailsResponse"
+                $ref: "#/components/schemas/SuccessResponse"
       security:
       - {}
       - {}
-  /api/content/articles/scroll:
-    get:
-      tags:
-      - article-controller
-      operationId: getLatestArticles
-      parameters:
-      - name: limit
-        in: query
-        required: false
-        schema:
-          type: integer
-          format: int64
-      - name: after
-        in: query
-        required: false
-        schema:
-          type: string
-      - name: locale
-        in: query
-        required: false
-        schema:
-          type: string
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ArticleResponse"
-      security:
-      - {}
-      - {}
-  /api/invite/{id}:
+  /api/content/invitations/{id}:
     delete:
       tags:
       - invitation-controller
@@ -3734,6 +3936,7 @@ components:
       properties:
         newEmail:
           type: string
+          format: email
           minLength: 1
       required:
       - newEmail
@@ -3750,9 +3953,6 @@ components:
     UpdateGroupRequest:
       type: object
       properties:
-        key:
-          type: string
-          description: "The updated group key. If empty, no change will be made"
         translations:
           type: object
           additionalProperties:
@@ -3777,40 +3977,6 @@ components:
       - translations
       - translationsToDelete
     GroupResponse:
-      type: object
-      properties:
-        key:
-          type: string
-        locale:
-          type: string
-        name:
-          type: string
-        description:
-          type: string
-      required:
-      - description
-      - key
-      - locale
-      - name
-    TagTranslationUpdateRequest:
-      type: object
-      properties:
-        name:
-          type: string
-        description:
-          type: string
-    UpdateTagRequest:
-      type: object
-      properties:
-        key:
-          type: string
-        translations:
-          type: object
-          additionalProperties:
-            $ref: "#/components/schemas/TagTranslationUpdateRequest"
-      required:
-      - translations
-    TagResponse:
       type: object
       properties:
         key:
@@ -3855,6 +4021,61 @@ components:
       - sharedGroups
       - sharedUsers
       - visibility
+    ContentResponseObject: {}
+    ChangeContentTagsRequest:
+      type: object
+      properties:
+        tags:
+          type: array
+          items:
+            type: string
+          uniqueItems: true
+      required:
+      - tags
+    TagTranslationUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+    UpdateTagRequest:
+      type: object
+      properties:
+        key:
+          type: string
+        translations:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/TagTranslationUpdateRequest"
+      required:
+      - translations
+    TagResponse:
+      type: object
+      properties:
+        key:
+          type: string
+        locale:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+      required:
+      - description
+      - key
+      - locale
+      - name
+    ChangeArticleSummaryRequest:
+      type: object
+      properties:
+        locale:
+          type: string
+        summary:
+          type: string
+      required:
+      - locale
+      - summary
     ArticleColors:
       type: object
       properties:
@@ -3971,33 +4192,6 @@ components:
       - id
       - name
       - roles
-    ArticleTrustedResponse:
-      type: object
-      properties:
-        trusted:
-          type: boolean
-      required:
-      - trusted
-    ChangeContentTagsRequest:
-      type: object
-      properties:
-        tags:
-          type: array
-          items:
-            type: string
-          uniqueItems: true
-      required:
-      - tags
-    ChangeArticleSummaryRequest:
-      type: object
-      properties:
-        locale:
-          type: string
-        summary:
-          type: string
-      required:
-      - locale
-      - summary
     ChangeArticleStateRequest:
       type: object
       properties:
@@ -4162,6 +4356,7 @@ components:
       properties:
         email:
           type: string
+          format: email
           description: The user's unique email address.
           example: jane.doe@example.com
           minLength: 1
@@ -4357,6 +4552,7 @@ components:
       properties:
         email:
           type: string
+          format: email
           description: The user's unique email address.
           example: jane.doe@example.com
           minLength: 1
@@ -4440,6 +4636,7 @@ components:
       properties:
         email:
           type: string
+          format: email
           minLength: 1
       required:
       - email
@@ -4581,21 +4778,6 @@ components:
           type: string
       required:
       - code
-    Pageable:
-      type: object
-      properties:
-        page:
-          type: integer
-          format: int32
-          minimum: 0
-        size:
-          type: integer
-          format: int32
-          minimum: 1
-        sort:
-          type: array
-          items:
-            type: string
     PageUserOverviewResponse:
       type: object
       properties:
@@ -4607,6 +4789,10 @@ components:
           format: int32
         pageable:
           $ref: "#/components/schemas/PageableObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
         size:
           type: integer
           format: int32
@@ -4619,10 +4805,6 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
-        first:
-          type: boolean
-        last:
-          type: boolean
         numberOfElements:
           type: integer
           format: int32
@@ -4676,6 +4858,10 @@ components:
           format: int32
         pageable:
           $ref: "#/components/schemas/PageableObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
         size:
           type: integer
           format: int32
@@ -4688,10 +4874,6 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
-        first:
-          type: boolean
-        last:
-          type: boolean
         numberOfElements:
           type: integer
           format: int32
@@ -4710,6 +4892,38 @@ components:
       required:
       - size
       - tags
+    PageFileMetadataResponse:
+      type: object
+      properties:
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
+        size:
+          type: integer
+          format: int32
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/FileMetadataResponse"
+        number:
+          type: integer
+          format: int32
+        sort:
+          $ref: "#/components/schemas/SortObject"
+        numberOfElements:
+          type: integer
+          format: int32
+        empty:
+          type: boolean
     ArticleOverviewResponse:
       type: object
       properties:
@@ -4774,6 +4988,10 @@ components:
           format: int32
         pageable:
           $ref: "#/components/schemas/PageableObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
         size:
           type: integer
           format: int32
@@ -4786,28 +5004,11 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
-        first:
-          type: boolean
-        last:
-          type: boolean
         numberOfElements:
           type: integer
           format: int32
         empty:
           type: boolean
-    ArticleResponse:
-      type: object
-      properties:
-        articles:
-          type: array
-          items:
-            $ref: "#/components/schemas/ArticleOverviewResponse"
-        remainingCount:
-          type: integer
-          format: int64
-      required:
-      - articles
-      - remainingCount
     AuthenticationStatusResponse:
       type: object
       properties:

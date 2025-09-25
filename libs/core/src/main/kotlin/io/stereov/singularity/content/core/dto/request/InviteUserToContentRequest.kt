@@ -1,4 +1,4 @@
-package io.stereov.singularity.content.core.dto
+package io.stereov.singularity.content.core.dto.request
 
 import io.stereov.singularity.content.core.model.ContentAccessRole
 

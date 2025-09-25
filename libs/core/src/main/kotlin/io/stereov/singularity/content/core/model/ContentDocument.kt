@@ -11,7 +11,7 @@ interface ContentDocument<T: ContentDocument<T>> {
     val createdAt: Instant
     var updatedAt: Instant
     var access: ContentAccessDetails
-    val trusted: Boolean
+    var trusted: Boolean
     var tags: MutableSet<String>
 
     @Suppress("UNCHECKED_CAST")

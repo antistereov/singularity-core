@@ -1,7 +1,9 @@
 package io.stereov.singularity.file.core.dto
 
+import io.stereov.singularity.content.core.dto.response.ContentResponse
 import io.stereov.singularity.content.core.model.ContentAccessDetails
 import io.stereov.singularity.content.core.model.ContentDocument
+import io.stereov.singularity.file.core.model.FileMetadataDocument
 import org.bson.types.ObjectId
 import java.time.Instant
 
@@ -14,6 +16,6 @@ data class FileMetadataResponse(
     val contentType: String,
     val url: String,
     val size: Long,
-    override val trusted: Boolean = false,
+    override var trusted: Boolean = false,
     override var tags: MutableSet<String> = mutableSetOf()
-) : ContentDocument<FileMetadataResponse>
+) : ContentDocument<FileMetadataResponse>, ContentResponse<FileMetadataDocument>

@@ -1,4 +1,4 @@
-package io.stereov.singularity.content.core.dto
+package io.stereov.singularity.content.core.dto.response
 
 import io.stereov.singularity.auth.core.model.token.AccessType
 import io.stereov.singularity.content.core.model.ContentAccessDetails

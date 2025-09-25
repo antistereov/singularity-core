@@ -4,6 +4,7 @@ import io.stereov.singularity.auth.core.model.token.AccessType
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.content.core.model.ContentAccessDetails
 import io.stereov.singularity.content.core.model.ContentAccessPermissions
+import io.stereov.singularity.content.core.model.ContentAccessRole
 import io.stereov.singularity.content.core.model.ContentDocument
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.query.Criteria
@@ -42,22 +43,53 @@ class AccessCriteria(
     private fun canEditGroup(groups: Set<String>) = Criteria.where(canEditGroupsField).`in`(groups)
     private fun isAdminGroup(groups: Set<String>) = Criteria.where(isAdminGroupsField).`in`(groups)
 
-    suspend fun getViewCriteria(): Criteria {
+    suspend fun getAccessCriteria(roles: Set<String> = emptySet()): Criteria {
         val userId = authorizationService.getUserIdOrNull()
+            ?: return if (roles.isEmpty() || roles.any { runCatching { ContentAccessRole.fromString(it) }.getOrNull() == ContentAccessRole.VIEWER }) {
+                isPublic
+            } else {
+                Criteria.where("_id").`is`("")
+            }
 
-        return if (userId != null) {
-            val groups = authorizationService.getGroups()
+        val groups = authorizationService.getGroups()
 
-            Criteria().orOperator(
-                isPublic,
-                canViewUser(userId),
-                canEditUser(userId),
-                isAdminUser(userId),
-                canViewGroup(groups),
-                canEditGroup(groups),
-                isAdminGroup(groups),
-                isOwner(userId)
-            )
-        } else isPublic
+        val allAccessCriteria = Criteria().orOperator(
+            isOwner(userId),
+            isAdminGroup(groups),
+            isAdminUser(userId),
+            canEditGroup(groups),
+            canEditUser(userId),
+            canViewGroup(groups),
+            canViewUser(userId),
+            isPublic
+        )
+
+        if (roles.isEmpty()) return allAccessCriteria
+
+        val criteriaList = mutableSetOf<Criteria>()
+        if (roles.any { runCatching { ContentAccessRole.fromString(it) }.getOrNull() == ContentAccessRole.VIEWER }) {
+            criteriaList.add(canViewGroup(groups))
+            criteriaList.add(canViewUser(userId))
+            criteriaList.add(isPublic)
+        }
+        if (roles.any { runCatching { ContentAccessRole.fromString(it) }.getOrNull() == ContentAccessRole.EDITOR }) {
+            criteriaList.add(canEditGroup(groups))
+            criteriaList.add(canEditUser(userId))
+        }
+        if (roles.any { runCatching { ContentAccessRole.fromString(it) }.getOrNull() == ContentAccessRole.ADMIN }) {
+            criteriaList.add(isAdminGroup(groups))
+            criteriaList.add(isAdminUser(userId))
+        }
+        if (roles.any { it.equals("owner", true) }) {
+            criteriaList.add(isOwner(userId))
+        }
+
+        if (criteriaList.isEmpty()) {
+            return Criteria.where("_id").`is`("")
+        }
+
+        val userFilterCriteria = Criteria().orOperator(*criteriaList.toTypedArray())
+
+        return Criteria().andOperator(allAccessCriteria, userFilterCriteria)
     }
 }
