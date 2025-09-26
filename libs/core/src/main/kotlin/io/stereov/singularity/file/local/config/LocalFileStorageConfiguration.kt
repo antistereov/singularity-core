@@ -1,6 +1,8 @@
 package io.stereov.singularity.file.local.config
 
 import io.stereov.singularity.file.core.config.StorageConfiguration
+import io.stereov.singularity.file.core.mapper.FileMetadataMapper
+import io.stereov.singularity.file.core.properties.StorageProperties
 import io.stereov.singularity.file.core.service.FileMetadataService
 import io.stereov.singularity.file.local.controller.LocalFileStorageController
 import io.stereov.singularity.file.local.properties.LocalFileStorageProperties
@@ -25,11 +27,23 @@ class LocalFileStorageConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun fileStorage(properties: LocalFileStorageProperties, appProperties: AppProperties, metadataService: FileMetadataService): LocalFileStorage {
+    fun fileMetadataMapper() = FileMetadataMapper()
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun fileStorage(
+        properties: LocalFileStorageProperties,
+        appProperties: AppProperties,
+        metadataService: FileMetadataService,
+        fileMetadataMapper: FileMetadataMapper,
+        storageProperties: StorageProperties
+    ): LocalFileStorage {
         return LocalFileStorage(
             properties,
             appProperties,
-            metadataService
+            metadataService,
+            fileMetadataMapper,
+            storageProperties
         )
     }
 

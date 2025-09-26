@@ -13,6 +13,7 @@ import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.file.core.exception.model.UnsupportedMediaTypeException
 import io.stereov.singularity.file.core.service.FileStorage
+import io.stereov.singularity.file.image.service.ImageStore
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.core.exception.model.EmailAlreadyTakenException
 import io.stereov.singularity.user.core.mapper.UserMapper
@@ -24,6 +25,7 @@ import io.stereov.singularity.user.settings.dto.request.ChangeUserRequest
 import org.springframework.http.MediaType
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
+import org.springframework.web.server.ServerWebExchange
 import java.util.*
 
 @Service
@@ -37,7 +39,8 @@ class UserSettingsService(
     private val userMapper: UserMapper,
     private val emailProperties: EmailProperties,
     private val securityAlertProperties: SecurityAlertProperties,
-    private val securityAlertService: SecurityAlertService
+    private val securityAlertService: SecurityAlertService,
+    private val imageStore: ImageStore
 ) {
 
     private val logger = KotlinLogging.logger {}
@@ -91,7 +94,7 @@ class UserSettingsService(
         return userService.save(user)
     }
 
-    suspend fun setAvatar(file: FilePart): UserResponse {
+    suspend fun setAvatar(file: FilePart, exchange: ServerWebExchange): UserResponse {
         val user = authorizationService.getUser()
 
         val currentAvatar = user.sensitive.avatarFileKey
@@ -109,10 +112,8 @@ class UserSettingsService(
             throw UnsupportedMediaTypeException("Unsupported file type: $contentType")
         }
 
-        userService.save(user)
-
-        user.sensitive.avatarFileKey = fileStorage
-            .upload(user.id, file, "${user.fileStoragePath}/avatar", true)
+        user.sensitive.avatarFileKey = imageStore
+            .upload(user.id, file, "${user.fileStoragePath}/avatar", true, exchange)
             .key
 
         val savedUser = userService.save(user)

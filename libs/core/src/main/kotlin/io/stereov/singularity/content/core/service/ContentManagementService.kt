@@ -3,7 +3,6 @@ package io.stereov.singularity.content.core.service
 import io.github.oshai.kotlinlogging.KLogger
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.content.core.dto.request.AcceptInvitationToContentRequest
-import io.stereov.singularity.content.core.dto.request.ChangeContentTagsRequest
 import io.stereov.singularity.content.core.dto.request.ChangeContentVisibilityRequest
 import io.stereov.singularity.content.core.dto.request.InviteUserToContentRequest
 import io.stereov.singularity.content.core.dto.response.ContentResponse
@@ -42,16 +41,6 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
         val content = contentService.findAuthorizedByKey(key, ContentAccessRole.ADMIN)
 
         content.access.update(req)
-
-        return contentService.save(content)
-    }
-
-    abstract suspend fun changeTags(key: String, req: ChangeContentTagsRequest, locale: Locale?): ContentResponse<T>
-    protected suspend fun doChangeTags(key: String, req: ChangeContentTagsRequest): T {
-        logger.debug { "Changing tags of key \"$key\"" }
-
-        val content = contentService.findAuthorizedByKey(key, ContentAccessRole.EDITOR)
-        content.tags = req.tags
 
         return contentService.save(content)
     }

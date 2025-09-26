@@ -6,9 +6,7 @@ import io.stereov.singularity.file.core.service.FileMetadataService
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.global.model.PageableRequest
 import io.stereov.singularity.global.util.mapContent
-import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.time.Instant

@@ -10,6 +10,7 @@ import io.stereov.singularity.auth.core.service.SecurityAlertService
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.file.core.service.FileStorage
+import io.stereov.singularity.file.image.service.ImageStore
 import io.stereov.singularity.user.core.mapper.UserMapper
 import io.stereov.singularity.user.core.service.UserService
 import io.stereov.singularity.user.settings.controller.UserSettingsController
@@ -48,7 +49,8 @@ class UserSettingsConfiguration {
         userMapper: UserMapper,
         emailProperties: EmailProperties,
         securityAlertProperties: SecurityAlertProperties,
-        securityAlertService: SecurityAlertService
+        securityAlertService: SecurityAlertService,
+        imageStore: ImageStore
     ) = UserSettingsService(
         authService,
         emailVerificationService,
@@ -59,6 +61,7 @@ class UserSettingsConfiguration {
         userMapper,
         emailProperties,
         securityAlertProperties,
-        securityAlertService
+        securityAlertService,
+        imageStore
     )
 }

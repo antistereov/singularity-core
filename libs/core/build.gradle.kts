@@ -98,6 +98,11 @@ dependencies {
     // Compression
     api("org.apache.commons:commons-compress:1.28.0")
 
+    // Image Scaling
+    api("com.sksamuel.scrimage:scrimage-core:4.3.5")
+    api("com.sksamuel.scrimage:scrimage-formats-extra:4.3.5")
+    api("com.sksamuel.scrimage:scrimage-webp:4.3.5")
+
     // Serialization and Validation
     api("org.springframework.boot:spring-boot-starter-validation")
     api("com.fasterxml.jackson.module:jackson-module-kotlin")

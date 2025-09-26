@@ -3,6 +3,8 @@ package io.stereov.singularity.user.settings.controller
 import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
 import io.stereov.singularity.auth.core.model.token.SessionTokenType
+import io.stereov.singularity.file.core.model.FileKey
+import io.stereov.singularity.file.core.model.FileUploadRequest
 import io.stereov.singularity.file.util.MockFilePart
 import io.stereov.singularity.test.BaseMailIntegrationTest
 import io.stereov.singularity.user.core.dto.response.UserResponse
@@ -608,7 +610,14 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
         val user = registerUser()
         val accessToken = user.accessToken
 
-        fileStorage.upload(user.info.id, MockFilePart(ClassPathResource("files/test-image.jpg").file), "avatar", true)
+        val key = FileKey("avatar")
+        val request = FileUploadRequest.FilePart(
+            key = key,
+            data = MockFilePart(ClassPathResource("files/test-image.jpg").file),
+            contentLength = 50000,
+            contentType = org.springframework.http.MediaType.IMAGE_JPEG.toString()
+        )
+        fileStorage.upload(ownerId = user.info.id, key = key, isPublic = true, file = request)
 
         webTestClient.delete()
             .uri("/api/users/me/avatar")

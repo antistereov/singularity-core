@@ -2,7 +2,7 @@
 sidebar_position: 1
 ---
 
-# Basics
+# Introduction
 
 :::note
 This guide assumes familiarity with the [Spring Framework](https://spring.io).  
@@ -72,6 +72,7 @@ singularity:
   file:
     storage:
       type: LOCAL # Or S3
+      max-file-size: 5242880 # maximum file size in Bytes
 ```
 
 ### Step 2: Use the File Storage Service
@@ -106,3 +107,10 @@ class MyFileService(
     }
 }
 ```
+
+## Configuration
+
+| Property                               | Type            | Description                                                                                                                                                                     | Default value |
+|----------------------------------------|-----------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
+| singularity.file.storage.type          | `LOCAL` or `S3` | The implementation of the file storage. The available options are [`S3`](s3.md) and [`LOCAL`](local.md). Check out the respective documentation for more configuration options. | `true`        |
+| singularity.file.storage.max-file-size | `Long`          | The maximum file size. Default is 5MB.                                                                                                                                          | `5242880`     |

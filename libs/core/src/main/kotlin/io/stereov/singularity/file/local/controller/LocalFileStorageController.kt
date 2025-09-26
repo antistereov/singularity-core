@@ -6,12 +6,14 @@ import io.stereov.singularity.content.core.model.ContentAccessRole
 import io.stereov.singularity.file.core.exception.model.FileNotFoundException
 import io.stereov.singularity.file.core.service.FileMetadataService
 import io.stereov.singularity.file.local.properties.LocalFileStorageProperties
+import io.stereov.singularity.global.exception.model.InvalidDocumentException
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.core.io.buffer.DataBufferUtils
 import org.springframework.core.io.buffer.DefaultDataBufferFactory
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping
@@ -51,7 +53,7 @@ class LocalFileStorageController(
         val baseFileDir = Paths.get(properties.fileDirectory).toAbsolutePath().normalize()
         val filePath = Paths.get(properties.fileDirectory).resolve(key).normalize().absolute()
 
-        val metadata = metadataService.findByKeyOrNull(key)
+        val metadata = metadataService.findFileByKeyOrNull(key)
 
         if (metadata == null) {
             filePath.toFile().delete()
@@ -59,14 +61,16 @@ class LocalFileStorageController(
         }
 
         if (!filePath.exists()) {
-            metadataService.deleteByKey(key)
+            metadataService.deleteFileByKey(key)
             throw FileNotFoundException(filePath.toFile())
         }
+
+        val rendition = metadata.renditions[key]
+            ?: throw InvalidDocumentException("Metadata does not contain rendition with key $key although it was found by this key")
 
         if (!filePath.startsWith(baseFileDir)) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid path access: trying to access file $filePath outside of specified directory ${properties.fileDirectory}")
         }
-
 
         if (metadata.access.visibility != AccessType.PUBLIC) {
             metadataService.requireAuthorization(metadata, ContentAccessRole.VIEWER)
@@ -74,7 +78,7 @@ class LocalFileStorageController(
 
         return ResponseEntity.ok()
             .header(HttpHeaders.CONTENT_LENGTH, Files.size(filePath).toString())
-            .contentType(metadata.contentType)
+            .contentType(MediaType.parseMediaType(rendition.contentType))
             .body(DataBufferUtils.read(filePath, DefaultDataBufferFactory(), 4096))
     }
 }

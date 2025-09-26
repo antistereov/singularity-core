@@ -194,7 +194,6 @@ class GroupControllerTest() : BaseIntegrationTest() {
                     Locale.ENGLISH to GroupTranslation("Pilots", "People who fly"),
                     Locale.GERMAN to GroupTranslation("Piloten", "Menschen, die fliegen")
                 ),
-                Locale.ENGLISH
         ))
         groupRepository.save(GroupDocument(
             null,
@@ -203,7 +202,6 @@ class GroupControllerTest() : BaseIntegrationTest() {
                     Locale.ENGLISH to GroupTranslation("Passengers", "People who don't fly"),
                     Locale.GERMAN to GroupTranslation("Passagiere", "Menschen, die nicht fliegen")
                 ),
-            Locale.ENGLISH
         ))
 
         val res = webTestClient.get()
@@ -321,7 +319,6 @@ class GroupControllerTest() : BaseIntegrationTest() {
                 Locale.ENGLISH to GroupTranslation("Pilots", "People who fly"),
                 Locale.GERMAN to GroupTranslation("Piloten", "Menschen, die fliegen")
             ),
-            Locale.ENGLISH
         ))
 
         val pilots = webTestClient.get()
@@ -399,7 +396,6 @@ class GroupControllerTest() : BaseIntegrationTest() {
                 Locale.ENGLISH to GroupTranslation("Pilots", "People who fly"),
                 Locale.GERMAN to GroupTranslation("Piloten", "Menschen, die fliegen")
             ),
-            appProperties.locale
         )
 
         groupRepository.save(group)
@@ -455,7 +451,6 @@ class GroupControllerTest() : BaseIntegrationTest() {
             mutableMapOf(
                 Locale.ENGLISH to GroupTranslation("Pilots", "People who fly"),
             ),
-            appProperties.locale
         )
 
         groupRepository.save(group)
@@ -497,7 +492,6 @@ class GroupControllerTest() : BaseIntegrationTest() {
                 Locale.ENGLISH to GroupTranslation("Pilots", "People who fly"),
                 Locale.GERMAN to GroupTranslation("Piloten", "Menschen, die fliegen")
             ),
-            appProperties.locale
         ))
 
         val req = UpdateGroupRequest(
@@ -525,7 +519,6 @@ class GroupControllerTest() : BaseIntegrationTest() {
                 Locale.ENGLISH to GroupTranslation("Pilots", "People who fly"),
                 Locale.GERMAN to GroupTranslation("Piloten", "Menschen, die fliegen")
             ),
-            appProperties.locale
         )
 
         groupRepository.save(group)
@@ -553,7 +546,6 @@ class GroupControllerTest() : BaseIntegrationTest() {
                 Locale.ENGLISH to GroupTranslation("Pilots", "People who fly"),
                 Locale.GERMAN to GroupTranslation("Piloten", "Menschen, die fliegen")
             ),
-            appProperties.locale
         )
 
         groupRepository.save(group)
@@ -582,7 +574,6 @@ class GroupControllerTest() : BaseIntegrationTest() {
                 Locale.ENGLISH to GroupTranslation("Pilots", "People who fly"),
                 Locale.GERMAN to GroupTranslation("Piloten", "Menschen, die fliegen")
             ),
-            appProperties.locale
         )
 
         groupRepository.save(group)
@@ -605,7 +596,6 @@ class GroupControllerTest() : BaseIntegrationTest() {
                 Locale.ENGLISH to GroupTranslation("Pilots", "People who fly"),
                 Locale.GERMAN to GroupTranslation("Piloten", "Menschen, die fliegen")
             ),
-            appProperties.locale
         ))
 
         webTestClient.delete()
@@ -631,7 +621,6 @@ class GroupControllerTest() : BaseIntegrationTest() {
                 Locale.ENGLISH to GroupTranslation("Pilots", "People who fly"),
                 Locale.GERMAN to GroupTranslation("Piloten", "Menschen, die fliegen")
             ),
-            appProperties.locale
         ))
 
         webTestClient.delete()
@@ -656,7 +645,6 @@ class GroupControllerTest() : BaseIntegrationTest() {
                 Locale.ENGLISH to GroupTranslation("Pilots", "People who fly"),
                 Locale.GERMAN to GroupTranslation("Piloten", "Menschen, die fliegen")
             ),
-            appProperties.locale
         ))
 
         webTestClient.delete()
@@ -683,7 +671,6 @@ class GroupControllerTest() : BaseIntegrationTest() {
                 Locale.ENGLISH to GroupTranslation("Pilots", "People who fly"),
                 Locale.GERMAN to GroupTranslation("Piloten", "Menschen, die fliegen")
             ),
-            appProperties.locale
         ))
 
         webTestClient.delete()

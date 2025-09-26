@@ -36,7 +36,6 @@ import io.stereov.singularity.cache.service.CacheService
 import io.stereov.singularity.database.encryption.service.EncryptionSecretService
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.file.core.service.FileStorage
-import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.test.config.MockConfig
 import io.stereov.singularity.user.core.model.Role
 import io.stereov.singularity.user.core.model.UserDocument
@@ -112,8 +111,6 @@ class BaseSpringBootTest() {
     @LocalServerPort
     lateinit var port: String
 
-    @Autowired
-    lateinit var appProperties: AppProperties
 
     @BeforeEach
     fun setupWebTestClient() {
@@ -193,7 +190,7 @@ class BaseSpringBootTest() {
     )
 
     suspend fun createGroup(key: String = "test-group"): GroupDocument {
-        val group = GroupDocument(key = key, translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Test")), primaryLocale = Locale.ENGLISH)
+        val group = GroupDocument(key = key, translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Test")))
         return groupService.save(group)
     }
 

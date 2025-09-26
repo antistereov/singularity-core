@@ -1,18 +1,20 @@
 package io.stereov.singularity.file.local.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.auth.core.model.token.AccessType
-import io.stereov.singularity.file.core.model.FileMetadataDocument
+import io.stereov.singularity.file.core.exception.model.FileKeyAlreadyTakenException
+import io.stereov.singularity.file.core.mapper.FileMetadataMapper
+import io.stereov.singularity.file.core.model.FileUploadRequest
+import io.stereov.singularity.file.core.model.FileUploadResponse
+import io.stereov.singularity.file.core.properties.StorageProperties
 import io.stereov.singularity.file.core.service.FileMetadataService
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.file.local.properties.LocalFileStorageProperties
 import io.stereov.singularity.global.properties.AppProperties
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.reactor.awaitSingleOrNull
-import org.bson.types.ObjectId
+import kotlinx.coroutines.withContext
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Primary
-import org.springframework.http.MediaType
-import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
 import java.nio.file.Files
 import java.nio.file.Path
@@ -25,6 +27,8 @@ class LocalFileStorage(
     private val properties: LocalFileStorageProperties,
     override val appProperties: AppProperties,
     override val metadataService: FileMetadataService,
+    override val metadataMapper: FileMetadataMapper,
+    override val storageProperties: StorageProperties
 ) : FileStorage() {
 
     val apiPath = "/api/assets/"
@@ -39,28 +43,51 @@ class LocalFileStorage(
     }
 
     override suspend fun doUpload(
-        userId: ObjectId,
-        filePart: FilePart,
-        key: String,
-        public: Boolean,
-        contentType: MediaType
-    ): FileMetadataDocument {
-        logger.debug { "Uploading file of content type $contentType to path \"$key\"" }
+        req: FileUploadRequest
+    ): FileUploadResponse {
+        logger.debug { "Uploading file of content type ${req.contentType} to path \"${req.key}\"" }
 
-        val filePath = baseDir.resolve(key)
+        if (exists(req.key)) throw FileKeyAlreadyTakenException("File with key ${req.key} already exists")
+        return when (req) {
+            is FileUploadRequest.FilePart -> doUploadFilePart(req)
+            is FileUploadRequest.ByteArray -> doUploadByteArray(req)
+        }
+    }
 
-        Files.createDirectories(filePath.parent)
-        filePart.transferTo(filePath).awaitSingleOrNull()
+    private suspend fun doUploadFilePart(req: FileUploadRequest.FilePart): FileUploadResponse {
+        val filePath = baseDir.resolve(req.key.key)
 
-        val size = Files.size(filePath)
+        return withContext(Dispatchers.IO) {
+            Files.createDirectories(filePath.parent)
+            req.data.transferTo(filePath).awaitSingleOrNull()
+            val size = Files.size(filePath)
 
-        return FileMetadataDocument(
-            ownerId = userId,
-            key = key,
-            contentType = contentType,
-            accessType = if (public) AccessType.PUBLIC else AccessType.PRIVATE,
-            size = size
-        )
+            FileUploadResponse(
+                contentType = req.contentType,
+                size = size,
+                key = req.key.key,
+                width = req.width,
+                height = req.height
+            )
+        }
+    }
+    private suspend fun doUploadByteArray(req: FileUploadRequest.ByteArray): FileUploadResponse {
+        if (exists(req.key)) throw FileKeyAlreadyTakenException("File with key ${req.key} already exists")
+        val filePath = baseDir.resolve(req.key.key)
+
+        return withContext(Dispatchers.IO) {
+            Files.createDirectories(filePath.parent)
+            Files.write(filePath, req.data)
+            val size = Files.size(filePath)
+
+            FileUploadResponse(
+                contentType = req.contentType,
+                size = size,
+                key = req.key.key,
+                width = req.width,
+                height = req.height
+            )
+        }
     }
 
     override suspend fun doExists(key: String): Boolean {

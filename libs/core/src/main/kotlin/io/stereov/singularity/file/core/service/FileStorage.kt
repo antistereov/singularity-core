@@ -3,38 +3,76 @@ package io.stereov.singularity.file.core.service
 import io.github.oshai.kotlinlogging.KLogger
 import io.stereov.singularity.file.core.dto.FileMetadataResponse
 import io.stereov.singularity.file.core.exception.model.FileNotFoundException
+import io.stereov.singularity.file.core.mapper.FileMetadataMapper
+import io.stereov.singularity.file.core.model.FileKey
 import io.stereov.singularity.file.core.model.FileMetadataDocument
+import io.stereov.singularity.file.core.model.FileUploadRequest
+import io.stereov.singularity.file.core.model.FileUploadResponse
+import io.stereov.singularity.file.core.properties.StorageProperties
 import io.stereov.singularity.global.properties.AppProperties
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import org.bson.types.ObjectId
-import org.springframework.http.MediaType
-import org.springframework.http.codec.multipart.FilePart
-import java.util.*
 
 abstract class FileStorage {
 
     abstract val metadataService: FileMetadataService
     abstract val appProperties: AppProperties
     abstract val logger: KLogger
+    abstract val metadataMapper: FileMetadataMapper
+    abstract val storageProperties: StorageProperties
 
-    suspend fun upload(userId: ObjectId, filePart: FilePart, key: String, public: Boolean): FileMetadataDocument {
-        val extension = filePart.filename().substringAfterLast(".", "")
-        val filename = key.substringBeforeLast(".", key)
+    suspend fun upload(
+        key: FileKey,
+        file: FileUploadRequest,
+        ownerId: ObjectId,
+        isPublic: Boolean,
+    ): FileMetadataResponse {
+        storageProperties.validateContentLength(file.contentLength)
+        val upload = doUpload(file)
 
-        val actualKey = if (extension.isBlank()) {
-            "${appProperties.slug}/$filename-${UUID.randomUUID()}"
-        } else {
-            "${appProperties.slug}/$filename-${UUID.randomUUID()}.$extension"
+        val doc = metadataService.save(FileMetadataDocument(
+            id = null,
+            key = key.key,
+            ownerId = ownerId,
+            isPublic = isPublic,
+            renditions = mapOf(FileMetadataDocument.ORIGINAL_RENDITION to metadataMapper.rendition(upload)),
+        ))
+        return createResponse(doc)
+    }
+    suspend fun uploadMultipleRenditions(
+        ownerId: ObjectId,
+        key: FileKey,
+        isPublic: Boolean,
+        files: Map<String, FileUploadRequest>,
+    ): FileMetadataResponse {
+        files.values.forEach { storageProperties.validateContentLength(it.contentLength) }
+
+        val deferredUploads: Map<String, Deferred<FileUploadResponse>> = coroutineScope {
+            files.mapValues { (_, file) ->
+                async { doUpload(file) }
+            }
+        }
+        val uploads: Map<String, FileUploadResponse> = deferredUploads.mapValues { (_, job) ->
+            job.await()
         }
 
-        val contentType = filePart.headers().contentType ?: MediaType.APPLICATION_OCTET_STREAM
-
-        val document = doUpload(userId, filePart, actualKey, public, contentType)
-        return metadataService.save(document)
+        val doc = metadataService.save(FileMetadataDocument(
+            id = null,
+            key = key.key,
+            ownerId = ownerId,
+            isPublic = isPublic,
+            renditions = uploads.map { (id, upload) -> id to metadataMapper.rendition(upload) }.toMap()
+        ))
+        return createResponse(doc)
     }
+
+    suspend fun exists(key: FileKey) = exists(key.key)
     suspend fun exists(key: String): Boolean {
         logger.debug { "Checking existence of file with key \"$key\"" }
 
-        val existsInDb = metadataService.existsByKey(key)
+        val existsInDb = metadataService.existsFileByKey(key)
         val existsAsFile = doExists(key)
         val exists = existsInDb && existsAsFile
 
@@ -52,41 +90,36 @@ abstract class FileStorage {
 
         return exists
     }
+    suspend fun remove(key: FileKey) = remove(key.key)
     suspend fun remove(key: String) {
         logger.debug { "Removing file with key \"$key\"" }
 
-        metadataService.deleteByKey(key)
+        metadataService.deleteFileByKey(key)
         doRemove(key)
     }
 
     suspend fun metadataResponseByKeyOrNull(key: String): FileMetadataResponse? {
         logger.debug { "Creating metadata response for file with key \"$key\"" }
 
-        val metadata = metadataService.findByKeyOrNull(key) ?: return null
+        val doc = metadataService.findByKeyOrNull(key) ?: return null
 
-        return createResponse(metadata)
+        return createResponse(doc)
     }
 
     suspend fun metadataResponseByKey(key: String): FileMetadataResponse {
-        return metadataResponseByKeyOrNull(key) ?: throw FileNotFoundException(file = null, msg = "File with key \"$key not found")
+        return metadataResponseByKeyOrNull(key)
+            ?: throw FileNotFoundException(file = null, msg = "File with key \"$key not found")
     }
 
     suspend fun createResponse(doc: FileMetadataDocument): FileMetadataResponse {
-        return FileMetadataResponse(
-            id = doc.id,
-            key = doc.key,
-            createdAt = doc.createdAt,
-            updatedAt = doc.updatedAt,
-            access = doc.access,
-            contentType = doc.contentType.toString(),
-            url = doGetUrl(doc.key),
-            size = doc.size,
-            trusted = doc.trusted,
-            tags = doc.tags
+        return metadataMapper.metadataResponse(
+            doc = doc,
+            renditions = doc.renditions.map { (id, rend) ->
+                id to metadataMapper.renditionResponse(rend, doGetUrl(rend.key)) }.toMap()
         )
     }
 
-    protected abstract suspend fun doUpload(userId: ObjectId, filePart: FilePart, key: String, public: Boolean, contentType: MediaType): FileMetadataDocument
+    protected abstract suspend fun doUpload(req: FileUploadRequest): FileUploadResponse
     protected abstract suspend fun doExists(key: String): Boolean
     protected abstract suspend fun doRemove(key: String)
     protected abstract suspend fun doGetUrl(key: String): String

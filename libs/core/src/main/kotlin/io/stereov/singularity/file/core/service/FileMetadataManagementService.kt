@@ -3,7 +3,6 @@ package io.stereov.singularity.file.core.service
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.content.core.dto.request.AcceptInvitationToContentRequest
-import io.stereov.singularity.content.core.dto.request.ChangeContentTagsRequest
 import io.stereov.singularity.content.core.dto.request.ChangeContentVisibilityRequest
 import io.stereov.singularity.content.core.dto.request.InviteUserToContentRequest
 import io.stereov.singularity.content.core.dto.response.ContentResponse
@@ -11,6 +10,7 @@ import io.stereov.singularity.content.core.dto.response.ExtendedContentAccessDet
 import io.stereov.singularity.content.core.service.ContentManagementService
 import io.stereov.singularity.content.invitation.service.InvitationService
 import io.stereov.singularity.file.core.model.FileMetadataDocument
+import io.stereov.singularity.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.user.core.mapper.UserMapper
 import io.stereov.singularity.user.core.service.UserService
@@ -39,21 +39,16 @@ class FileMetadataManagementService(
         return fileStorage.createResponse(doChangeVisibility(key, req))
     }
 
-    override suspend fun changeTags(
-        key: String,
-        req: ChangeContentTagsRequest,
-        locale: Locale?
-    ): ContentResponse<FileMetadataDocument> {
-        return fileStorage.createResponse(doChangeTags(key, req))
-    }
-
     override suspend fun inviteUser(
         key: String,
         req: InviteUserToContentRequest,
         locale: Locale?
     ): ExtendedContentAccessDetailsResponse {
         val metadata = fileStorage.metadataResponseByKey(key)
-        return doInviteUser(key, req, metadata.key, metadata.url, locale)
+        val url = metadata.renditions[FileMetadataDocument.ORIGINAL_RENDITION]?.url
+            ?: metadata.renditions.values.firstOrNull()?.url
+            ?: throw InvalidDocumentException("No renditions saved for file with key $key")
+        return doInviteUser(key, req, metadata.key, url, locale)
     }
 
     override suspend fun acceptInvitation(

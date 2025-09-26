@@ -2,6 +2,7 @@ package io.stereov.singularity.global.util
 
 import io.stereov.singularity.translate.model.Translatable
 import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.isEqualTo
 import java.util.*
 import kotlin.reflect.KProperty
@@ -16,6 +17,10 @@ class CriteriaBuilder(
         return if (criteriaList.isNotEmpty()) {
             Criteria().andOperator(*criteriaList.toTypedArray())
         } else null
+    }
+
+    fun query(): Query {
+        return build()?.let { Query(it) } ?: Query()
     }
 
     private fun getFieldName(field: String, locale: Locale? = null) = when(locale) {
@@ -68,12 +73,21 @@ class CriteriaBuilder(
     fun isIn(field: KProperty<*>, collection: Collection<*>?, locale: Locale? = null): CriteriaBuilder {
         return isIn(field.name, collection, locale)
     }
+    fun hasElement(field: String, value: Any?, locale: Locale? = null): CriteriaBuilder {
+        if (value == null) return this
+        criteriaList.add(Criteria.where(getFieldName(field, locale)).`is`(value))
+
+        return this
+    }
+    fun hasElement(field: KProperty<*>, value: Any?, locale: Locale? = null): CriteriaBuilder {
+        return hasElement(field.name, value, locale)
+    }
     fun existsAny(values: Collection<*>?, prefix: String? = null, locale: Locale? = null): CriteriaBuilder {
         if (values.isNullOrEmpty()) return this
         val actualPrefix = prefix?.let { it.removeSuffix(".") + "." }
         val criteria = Criteria().orOperator(
             *values.map { value ->
-                val actualField = "${actualPrefix ?: ""}$value"
+                val actualField = getFieldName("${actualPrefix ?: ""}$value", locale)
                 Criteria.where(actualField).exists(true)
             }.toTypedArray()
         )

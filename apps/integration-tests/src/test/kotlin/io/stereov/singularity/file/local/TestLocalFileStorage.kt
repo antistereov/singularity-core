@@ -1,6 +1,8 @@
 package io.stereov.singularity.file.local
 
-import io.stereov.singularity.file.core.model.FileMetadataDocument
+import io.stereov.singularity.file.core.dto.FileMetadataResponse
+import io.stereov.singularity.file.core.model.FileKey
+import io.stereov.singularity.file.core.model.FileUploadRequest
 import io.stereov.singularity.file.core.service.FileMetadataService
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.file.local.controller.LocalFileStorageController
@@ -22,6 +24,7 @@ import org.springframework.core.io.ClassPathResource
 import org.springframework.http.MediaType
 import java.io.File
 import java.net.URI
+import java.nio.file.Files
 import java.time.temporal.ChronoUnit
 
 class TestLocalFileStorage : BaseIntegrationTest() {
@@ -40,13 +43,19 @@ class TestLocalFileStorage : BaseIntegrationTest() {
         metadataService.deleteAll()
     }
 
-    suspend fun runFileTest(public: Boolean = true, key: String = "test-image.jpg", method: suspend (file: File, metadata: FileMetadataDocument, user: TestRegisterResponse) -> Unit) = runTest {
+    suspend fun runFileTest(public: Boolean = true, key: String = "test-image.jpg", method: suspend (file: File, metadata: FileMetadataResponse, user: TestRegisterResponse) -> Unit) = runTest {
         val user = registerUser()
         val file = ClassPathResource("files/test-image.jpg").file
         val filePart = MockFilePart(file)
-        val key = key
+        val key = FileKey(key)
 
-        val metadata = storage.upload(user.info.id, filePart, key, public)
+        val request = FileUploadRequest.FilePart(
+            key = key,
+            contentType = MediaType.IMAGE_JPEG.toString(),
+            contentLength = Files.size(file.toPath()),
+            filePart
+        )
+        val metadata = storage.upload(ownerId = user.info.id, key = key, isPublic = public, file = request)
 
         val uploadedFile = File(properties.fileDirectory, metadata.key)
         method(uploadedFile, metadata, user)
@@ -69,7 +78,7 @@ class TestLocalFileStorage : BaseIntegrationTest() {
             val file = File(properties.fileDirectory, metadata.key)
 
             assertTrue(file.exists())
-            val savedMetadata = metadataService.findByKey(metadata.key)
+            val savedMetadata = fileStorage.metadataResponseByKey(metadata.key)
 
             val metadataWithMillis = metadata.copy(
                 createdAt = metadata.createdAt.truncatedTo(ChronoUnit.MILLIS),
@@ -183,9 +192,9 @@ class TestLocalFileStorage : BaseIntegrationTest() {
         runFileTest { file, metadata, _ ->
             val response = storage.metadataResponseByKey(metadata.key)
 
-            val relativeUri = URI(response.url).path
+            val relativeUri = URI(response.renditions.values.first().url).path
 
-            assertThat(response.url).isEqualTo("http://localhost:8000/api/assets/${metadata.key}")
+            assertThat(response.renditions.values.first().url).isEqualTo("http://localhost:8000/api/assets/${metadata.key}")
 
             webTestClient.get()
                 .uri(relativeUri)
@@ -203,9 +212,9 @@ class TestLocalFileStorage : BaseIntegrationTest() {
         runFileTest(key = "sub/dir/test-image.jpg") { file, metadata, _ ->
             val response = storage.metadataResponseByKey(metadata.key)
 
-            val relativeUri = URI(response.url).path
+            val relativeUri = URI(response.renditions.values.first().url).path
 
-            assertThat(response.url).isEqualTo("http://localhost:8000/api/assets/${metadata.key}")
+            assertThat(response.renditions.values.first().url).isEqualTo("http://localhost:8000/api/assets/${metadata.key}")
 
             webTestClient.get()
                 .uri(relativeUri)
