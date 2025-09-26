@@ -1,6 +1,7 @@
 package io.stereov.singularity.file.core.properties
 
 import io.stereov.singularity.file.core.exception.model.FileTooLargeException
+import io.stereov.singularity.file.core.exception.model.FileUploadException
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.web.server.ServerWebExchange
 
@@ -18,7 +19,7 @@ data class StorageProperties(
 
     fun validateContentLength(contentLength: Long) {
         if (contentLength < 0) {
-            throw IllegalArgumentException("Missing Content-Length header")
+            throw FileUploadException("Missing Content-Length header")
         }
 
         if (contentLength > maxFileSize) {

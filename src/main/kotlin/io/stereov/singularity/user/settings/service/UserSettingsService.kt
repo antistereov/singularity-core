@@ -113,7 +113,7 @@ class UserSettingsService(
         }
 
         user.sensitive.avatarFileKey = imageStore
-            .upload(user.id, file, "${user.fileStoragePath}/avatar", true, exchange)
+            .upload(user.id, file, "${user.fileStoragePath}/avatar", true)
             .key
 
         val savedUser = userService.save(user)

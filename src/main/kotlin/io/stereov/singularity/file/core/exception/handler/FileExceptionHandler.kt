@@ -17,6 +17,7 @@ class FileExceptionHandler : BaseExceptionHandler<FileException> {
         is FileNotFoundException -> HttpStatus.NOT_FOUND
         is FileSecurityException -> HttpStatus.FORBIDDEN
         is FileTooLargeException -> HttpStatus.REQUEST_ENTITY_TOO_LARGE
+        is FileUploadException -> HttpStatus.BAD_REQUEST
         is UnsupportedMediaTypeException -> HttpStatus.BAD_REQUEST
         else -> HttpStatus.INTERNAL_SERVER_ERROR
     }

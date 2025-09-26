@@ -57,7 +57,6 @@ class TagService(
 
     suspend fun create(req: CreateTagRequest): TagDocument {
         logger.debug { "Creating tag with key ${req.key}" }
-        authorizationService.requireRole(Role.ADMIN)
         if (existsByKey(req.key)) throw TagKeyExistsException(req.key)
 
         return save(tagMapper.createTag(req))
