@@ -25,7 +25,6 @@ import io.stereov.singularity.user.settings.dto.request.ChangeUserRequest
 import org.springframework.http.MediaType
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
-import org.springframework.web.server.ServerWebExchange
 import java.util.*
 
 @Service
@@ -94,7 +93,7 @@ class UserSettingsService(
         return userService.save(user)
     }
 
-    suspend fun setAvatar(file: FilePart, exchange: ServerWebExchange): UserResponse {
+    suspend fun setAvatar(file: FilePart): UserResponse {
         val user = authorizationService.getUser()
 
         val currentAvatar = user.sensitive.avatarFileKey

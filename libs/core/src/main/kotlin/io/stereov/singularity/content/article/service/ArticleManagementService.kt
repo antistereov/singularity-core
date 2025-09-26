@@ -27,7 +27,6 @@ import io.stereov.singularity.user.core.service.UserService
 import org.bson.types.ObjectId
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
-import org.springframework.web.server.ServerWebExchange
 import java.util.*
 
 @Service
@@ -126,7 +125,7 @@ class ArticleManagementService(
         }
     }
 
-    suspend fun changeImage(key: String, file: FilePart, locale: Locale?, exchange: ServerWebExchange): FullArticleResponse {
+    suspend fun changeImage(key: String, file: FilePart, locale: Locale?): FullArticleResponse {
         logger.debug { "Changing image of article with key \"$key\"" }
 
         val article = contentService.findAuthorizedByKey(key, ContentAccessRole.EDITOR)
