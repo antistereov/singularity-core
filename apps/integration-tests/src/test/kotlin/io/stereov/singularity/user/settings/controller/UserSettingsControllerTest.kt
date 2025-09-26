@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.client.MultipartBodyBuilder
 import java.time.Instant
 import java.util.*
@@ -568,7 +569,11 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .accessTokenCookie(accessToken)
             .bodyValue(
                 MultipartBodyBuilder().apply {
-                    part("file", ClassPathResource("files/test-image.jpg"))
+                    part(
+                        "file",
+                        ClassPathResource("files/test-image.jpg"),
+                        MediaType.IMAGE_JPEG,
+                    )
                 }.build()
             )
             .exchange()

@@ -20,7 +20,6 @@ import org.bson.types.ObjectId
 import org.springframework.http.MediaType
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
-import org.springframework.web.server.ServerWebExchange
 
 @Service
 class ImageStore(
@@ -38,11 +37,10 @@ class ImageStore(
         file: FilePart,
         key: String,
         isPublic: Boolean,
-        exchange: ServerWebExchange
     ): FileMetadataResponse {
         logger.debug { "Uploading image with key $key" }
 
-        storageProperties.validateContentLength(exchange)
+        storageProperties.validateContentLength(file.headers().contentLength)
 
         val allowedMediaTypes = listOf(MediaType.IMAGE_JPEG, MediaType.IMAGE_GIF, MediaType.IMAGE_PNG)
         val webpMediaType = MediaType.parseMediaType("image/webp")

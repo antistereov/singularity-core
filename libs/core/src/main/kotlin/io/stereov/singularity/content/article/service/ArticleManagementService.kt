@@ -139,7 +139,7 @@ class ArticleManagementService(
         }
         val imageKey = Article.basePath.removePrefix("/") + "/" + article.key
 
-        val image = imageStore.upload(userId, file, imageKey,  true, exchange,)
+        val image = imageStore.upload(userId, file, imageKey,  true)
         article.imageKey = image.key
 
         val updatedArticle = contentService.save(article)
