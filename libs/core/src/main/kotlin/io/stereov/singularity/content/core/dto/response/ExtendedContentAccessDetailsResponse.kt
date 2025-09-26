@@ -18,9 +18,9 @@ data class ExtendedContentAccessDetailsResponse(
     companion object {
         fun create(contentAccessDetails: ContentAccessDetails, invitations: List<InvitationDocument>, users: List<UserContentAccessDetails>): ExtendedContentAccessDetailsResponse {
             val groups = mutableMapOf<String, ContentAccessRole>()
-            contentAccessDetails.groups.viewer.forEach { group -> groups.put(group, ContentAccessRole.VIEWER) }
-            contentAccessDetails.groups.editor.forEach { group -> groups.put(group, ContentAccessRole.EDITOR) }
-            contentAccessDetails.groups.admin.forEach { group -> groups.put(group, ContentAccessRole.ADMIN) }
+            contentAccessDetails.groups.viewer.forEach { group -> groups[group] = ContentAccessRole.VIEWER }
+            contentAccessDetails.groups.editor.forEach { group -> groups[group] = ContentAccessRole.EDITOR }
+            contentAccessDetails.groups.maintainer.forEach { group -> groups[group] = ContentAccessRole.MAINTAINER }
 
             return ExtendedContentAccessDetailsResponse(
                 ownerId = contentAccessDetails.ownerId,

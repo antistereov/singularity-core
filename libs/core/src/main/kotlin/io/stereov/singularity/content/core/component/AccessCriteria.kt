@@ -23,12 +23,12 @@ class AccessCriteria(
     private final val userPermissionsField = "$accessField.${ContentAccessDetails::users.name}"
     private final val canViewUsersField: String = "$userPermissionsField.${ContentAccessPermissions::viewer.name}"
     private final val canEditUsersField = "$userPermissionsField.${ContentAccessPermissions::editor.name}"
-    private final val isAdminUsersField = "$userPermissionsField.${ContentAccessPermissions::admin.name}"
+    private final val isMaintainerUsersField = "$userPermissionsField.${ContentAccessPermissions::maintainer.name}"
 
     private final val groupPermissionsField = "$accessField.${ContentAccessDetails::groups.name}"
     private final val canViewGroupsField = "$groupPermissionsField.${ContentAccessPermissions::viewer.name}"
     private final val canEditGroupsField = "$groupPermissionsField.${ContentAccessPermissions::editor.name}"
-    private final val isAdminGroupsField = "$groupPermissionsField.${ContentAccessPermissions::admin.name}"
+    private final val isMaintainerGroupsField = "$groupPermissionsField.${ContentAccessPermissions::maintainer.name}"
 
     private final val isPublic = Criteria.where(visibilityField).`is`(AccessType.PUBLIC.toString())
     private final val isShared = Criteria.where(visibilityField).`is`(AccessType.SHARED.toString())
@@ -37,11 +37,11 @@ class AccessCriteria(
 
     private fun canViewUser(userId: ObjectId) = Criteria().andOperator(Criteria.where(canViewUsersField).`in`(userId.toHexString()), isShared)
     private fun canEditUser(userId: ObjectId) = Criteria().andOperator(Criteria.where(canEditUsersField).`in`(userId.toHexString()), isShared)
-    private fun isAdminUser(userId: ObjectId) = Criteria.where(isAdminUsersField).`in`(userId.toHexString())
+    private fun isMaintainerUser(userId: ObjectId) = Criteria.where(isMaintainerUsersField).`in`(userId.toHexString())
 
     private fun canViewGroup(groups: Set<String>) = Criteria.where(canViewGroupsField).`in`(groups)
     private fun canEditGroup(groups: Set<String>) = Criteria.where(canEditGroupsField).`in`(groups)
-    private fun isAdminGroup(groups: Set<String>) = Criteria.where(isAdminGroupsField).`in`(groups)
+    private fun isMaintainerGroup(groups: Set<String>) = Criteria.where(isMaintainerGroupsField).`in`(groups)
 
     suspend fun getAccessCriteria(roles: Set<String> = emptySet()): Criteria {
         val userId = authorizationService.getUserIdOrNull()
@@ -55,8 +55,8 @@ class AccessCriteria(
 
         val allAccessCriteria = Criteria().orOperator(
             isOwner(userId),
-            isAdminGroup(groups),
-            isAdminUser(userId),
+            isMaintainerGroup(groups),
+            isMaintainerUser(userId),
             canEditGroup(groups),
             canEditUser(userId),
             canViewGroup(groups),
@@ -76,9 +76,9 @@ class AccessCriteria(
             criteriaList.add(canEditGroup(groups))
             criteriaList.add(canEditUser(userId))
         }
-        if (roles.any { runCatching { ContentAccessRole.fromString(it) }.getOrNull() == ContentAccessRole.ADMIN }) {
-            criteriaList.add(isAdminGroup(groups))
-            criteriaList.add(isAdminUser(userId))
+        if (roles.any { runCatching { ContentAccessRole.fromString(it) }.getOrNull() == ContentAccessRole.MAINTAINER }) {
+            criteriaList.add(isMaintainerGroup(groups))
+            criteriaList.add(isMaintainerUser(userId))
         }
         if (roles.any { it.equals("owner", true) }) {
             criteriaList.add(isOwner(userId))

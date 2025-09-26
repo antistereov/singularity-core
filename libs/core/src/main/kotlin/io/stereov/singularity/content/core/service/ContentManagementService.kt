@@ -38,7 +38,7 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
     protected suspend fun doChangeVisibility(key: String, req: ChangeContentVisibilityRequest): T {
         logger.debug { "Changing visibility of key \"$key\"" }
 
-        val content = contentService.findAuthorizedByKey(key, ContentAccessRole.ADMIN)
+        val content = contentService.findAuthorizedByKey(key, ContentAccessRole.MAINTAINER)
 
         content.access.update(req)
 
@@ -64,7 +64,7 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
             ), "i18n/content/invitation", actualLocale)
         val resource = translateService.translateResourceKey(TranslateKey("resource.${contentKey}"), "i18n/content/article", actualLocale)
         val user = authorizationService.getUser()
-        val content = contentService.findAuthorizedByKey(key, ContentAccessRole.ADMIN)
+        val content = contentService.findAuthorizedByKey(key, ContentAccessRole.MAINTAINER)
         val ref = "<a href=\"$url\" style=\"color: black;\">$title</a>"
         val invitedTo = "$inviteToRole $resource $ref"
 
@@ -125,7 +125,7 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
     suspend fun deleteByKey(key: String) {
         logger.debug { "Deleting content with key \"$key\"" }
 
-        val content = contentService.findAuthorizedByKey(key, ContentAccessRole.ADMIN)
+        val content = contentService.findAuthorizedByKey(key, ContentAccessRole.MAINTAINER)
 
         contentService.deleteById(content.id)
     }
@@ -154,13 +154,13 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
 
         val users = mutableListOf<UserContentAccessDetails>()
 
-        content.access.users.admin.forEach { id ->
+        content.access.users.maintainer.forEach { id ->
             val foundUser = userService.findByIdOrNull(ObjectId(id))
 
             if (foundUser != null) {
-                users.add(UserContentAccessDetails(userMapper.toOverview(foundUser), ContentAccessRole.ADMIN))
+                users.add(UserContentAccessDetails(userMapper.toOverview(foundUser), ContentAccessRole.MAINTAINER))
             } else {
-                content.access.users.admin.remove(id)
+                content.access.users.maintainer.remove(id)
             }
         }
 

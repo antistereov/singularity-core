@@ -50,8 +50,8 @@ data class ContentAccessDetails(
     fun hasAccess(authentication: CustomAuthenticationToken, role: ContentAccessRole): Boolean {
         val isAdmin = authentication.roles.contains(Role.ADMIN)
 
-        val userIsAdmin = hasAccess(ContentAccessSubject.USER, authentication.userId.toString(), ContentAccessRole.ADMIN)
-        val groupIsAdmin = authentication.groups.any { groupId -> hasAccess(ContentAccessSubject.GROUP, groupId, ContentAccessRole.ADMIN) }
+        val userIsAdmin = hasAccess(ContentAccessSubject.USER, authentication.userId.toString(), ContentAccessRole.MAINTAINER)
+        val groupIsAdmin = authentication.groups.any { groupId -> hasAccess(ContentAccessSubject.GROUP, groupId, ContentAccessRole.MAINTAINER) }
 
         val userIsEditor = hasAccess(ContentAccessSubject.USER, authentication.userId.toString(), ContentAccessRole.EDITOR)
         val groupIsEditor = authentication.groups.any { groupId -> hasAccess(ContentAccessSubject.GROUP, groupId, ContentAccessRole.EDITOR) }
@@ -64,7 +64,7 @@ data class ContentAccessDetails(
         return when (role) {
             ContentAccessRole.VIEWER -> isAdmin || userIsAdmin || groupIsAdmin || userIsEditor || groupIsEditor || userIsViewer || groupIsViewer || isPublic
             ContentAccessRole.EDITOR ->  isAdmin || userIsAdmin || groupIsAdmin || userIsEditor || groupIsEditor
-            ContentAccessRole.ADMIN -> isAdmin || userIsAdmin || groupIsAdmin
+            ContentAccessRole.MAINTAINER -> isAdmin || userIsAdmin || groupIsAdmin
         }
     }
 
