@@ -16,7 +16,7 @@ data class ContentAccessDetailsResponse(
     companion object {
         fun create(contentAccessDetails: ContentAccessDetails, authentication: CustomAuthenticationToken?): ContentAccessDetailsResponse {
             val canEdit = authentication?.let { contentAccessDetails.hasAccess(authentication, ContentAccessRole.EDITOR) } ?: false
-            val canDelete = authentication?.let { contentAccessDetails.hasAccess(authentication, ContentAccessRole.ADMIN) } ?: false
+            val canDelete = authentication?.let { contentAccessDetails.hasAccess(authentication, ContentAccessRole.MAINTAINER) } ?: false
 
             return ContentAccessDetailsResponse(
                 ownerId = contentAccessDetails.ownerId,
