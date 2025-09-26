@@ -3,6 +3,7 @@ package io.stereov.singularity.file.core.service
 import io.github.oshai.kotlinlogging.KLogger
 import io.stereov.singularity.file.core.dto.FileMetadataResponse
 import io.stereov.singularity.file.core.exception.model.FileNotFoundException
+import io.stereov.singularity.file.core.exception.model.UnsupportedMediaTypeException
 import io.stereov.singularity.file.core.mapper.FileMetadataMapper
 import io.stereov.singularity.file.core.model.FileKey
 import io.stereov.singularity.file.core.model.FileMetadataDocument
@@ -14,6 +15,7 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.bson.types.ObjectId
+import org.springframework.http.codec.multipart.FilePart
 
 abstract class FileStorage {
 
@@ -25,12 +27,20 @@ abstract class FileStorage {
 
     suspend fun upload(
         key: FileKey,
-        file: FileUploadRequest,
+        file: FilePart,
         ownerId: ObjectId,
         isPublic: Boolean,
     ): FileMetadataResponse {
-        storageProperties.validateContentLength(file.contentLength)
-        val upload = doUpload(file)
+        storageProperties.validateContentLength(file.headers().contentLength)
+        val contentType = file.headers().contentType?.toString()
+            ?: throw UnsupportedMediaTypeException("Upload failed: no content type is specified")
+        val req = FileUploadRequest.FilePart(
+            key = key,
+            contentType = contentType,
+            contentLength = file.headers().contentLength,
+            data = file,
+        )
+        val upload = doUpload(req)
 
         val doc = metadataService.save(FileMetadataDocument(
             id = null,
@@ -41,11 +51,12 @@ abstract class FileStorage {
         ))
         return createResponse(doc)
     }
+
     suspend fun uploadMultipleRenditions(
-        ownerId: ObjectId,
         key: FileKey,
-        isPublic: Boolean,
         files: Map<String, FileUploadRequest>,
+        ownerId: ObjectId,
+        isPublic: Boolean,
     ): FileMetadataResponse {
         files.values.forEach { storageProperties.validateContentLength(it.contentLength) }
 
@@ -72,7 +83,7 @@ abstract class FileStorage {
     suspend fun exists(key: String): Boolean {
         logger.debug { "Checking existence of file with key \"$key\"" }
 
-        val existsInDb = metadataService.existsFileByKey(key)
+        val existsInDb = metadataService.existsByKey(key)
         val existsAsFile = doExists(key)
         val exists = existsInDb && existsAsFile
 
@@ -90,22 +101,23 @@ abstract class FileStorage {
 
         return exists
     }
+
     suspend fun remove(key: FileKey) = remove(key.key)
     suspend fun remove(key: String) {
         logger.debug { "Removing file with key \"$key\"" }
 
-        metadataService.deleteFileByKey(key)
+        metadataService.deleteByKey(key)
         doRemove(key)
     }
 
     suspend fun metadataResponseByKeyOrNull(key: String): FileMetadataResponse? {
         logger.debug { "Creating metadata response for file with key \"$key\"" }
 
-        val doc = metadataService.findByKeyOrNull(key) ?: return null
+        val doc = metadataService.findByKeyOrNull(key)
+            ?: return null
 
         return createResponse(doc)
     }
-
     suspend fun metadataResponseByKey(key: String): FileMetadataResponse {
         return metadataResponseByKeyOrNull(key)
             ?: throw FileNotFoundException(file = null, msg = "File with key \"$key not found")

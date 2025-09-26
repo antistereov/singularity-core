@@ -53,7 +53,7 @@ class LocalFileStorageController(
         val baseFileDir = Paths.get(properties.fileDirectory).toAbsolutePath().normalize()
         val filePath = Paths.get(properties.fileDirectory).resolve(key).normalize().absolute()
 
-        val metadata = metadataService.findFileByKeyOrNull(key)
+        val metadata = metadataService.findRenditionByKeyOrNull(key)
 
         if (metadata == null) {
             filePath.toFile().delete()
@@ -61,11 +61,11 @@ class LocalFileStorageController(
         }
 
         if (!filePath.exists()) {
-            metadataService.deleteFileByKey(key)
+            metadataService.deleteRenditionByKey(key)
             throw FileNotFoundException(filePath.toFile())
         }
 
-        val rendition = metadata.renditions[key]
+        val rendition = metadata.renditions.values.firstOrNull { it.key == key }
             ?: throw InvalidDocumentException("Metadata does not contain rendition with key $key although it was found by this key")
 
         if (!filePath.startsWith(baseFileDir)) {

@@ -139,7 +139,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
     @Test fun `getArticles works with user admin`() = runTest {
         val user = registerUser(emailSuffix = "another@email.com")
         val article = save()
-        article.share(ContentAccessSubject.USER, user.info.id.toHexString(), ContentAccessRole.ADMIN)
+        article.share(ContentAccessSubject.USER, user.info.id.toHexString(), ContentAccessRole.MAINTAINER)
         articleService.save(article)
 
         val res = webTestClient.get()
@@ -200,7 +200,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         val group = createGroup()
         val user = registerUser(emailSuffix = "another@email.com", groups = listOf(group.key))
         val article = save()
-        article.share(ContentAccessSubject.GROUP, user.info.groups.first(), ContentAccessRole.ADMIN)
+        article.share(ContentAccessSubject.GROUP, user.info.groups.first(), ContentAccessRole.MAINTAINER)
         articleService.save(article)
 
         val res = webTestClient.get()
@@ -425,7 +425,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
     @Test fun `getLatestArticles works with user admin`() = runTest {
         val user = registerUser(emailSuffix = "another@email.com")
         val article = save()
-        article.share(ContentAccessSubject.USER, user.info.id.toHexString(), ContentAccessRole.ADMIN)
+        article.share(ContentAccessSubject.USER, user.info.id.toHexString(), ContentAccessRole.MAINTAINER)
         article.state = ArticleState.PUBLISHED
         articleService.save(article)
 
@@ -491,7 +491,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         val group = createGroup()
         val user = registerUser(emailSuffix = "another@email.com", groups = listOf(group.key))
         val article = save()
-        article.share(ContentAccessSubject.GROUP, user.info.groups.first(), ContentAccessRole.ADMIN)
+        article.share(ContentAccessSubject.GROUP, user.info.groups.first(), ContentAccessRole.MAINTAINER)
         article.state = ArticleState.PUBLISHED
         articleService.save(article)
 

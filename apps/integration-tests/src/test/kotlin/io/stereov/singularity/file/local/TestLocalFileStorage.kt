@@ -2,7 +2,6 @@ package io.stereov.singularity.file.local
 
 import io.stereov.singularity.file.core.dto.FileMetadataResponse
 import io.stereov.singularity.file.core.model.FileKey
-import io.stereov.singularity.file.core.model.FileUploadRequest
 import io.stereov.singularity.file.core.service.FileMetadataService
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.file.local.controller.LocalFileStorageController
@@ -24,7 +23,6 @@ import org.springframework.core.io.ClassPathResource
 import org.springframework.http.MediaType
 import java.io.File
 import java.net.URI
-import java.nio.file.Files
 import java.time.temporal.ChronoUnit
 
 class TestLocalFileStorage : BaseIntegrationTest() {
@@ -48,14 +46,7 @@ class TestLocalFileStorage : BaseIntegrationTest() {
         val file = ClassPathResource("files/test-image.jpg").file
         val filePart = MockFilePart(file)
         val key = FileKey(key)
-
-        val request = FileUploadRequest.FilePart(
-            key = key,
-            contentType = MediaType.IMAGE_JPEG.toString(),
-            contentLength = Files.size(file.toPath()),
-            filePart
-        )
-        val metadata = storage.upload(ownerId = user.info.id, key = key, isPublic = public, file = request)
+        val metadata = storage.upload(ownerId = user.info.id, key = key, isPublic = public, file = filePart)
 
         val uploadedFile = File(properties.fileDirectory, metadata.key)
         method(uploadedFile, metadata, user)
@@ -240,7 +231,7 @@ class TestLocalFileStorage : BaseIntegrationTest() {
         }
     }
     @Test fun `remove does nothing when key not existing`() = runTest {
-        storage.remove("just-a-key")
+        fileStorage.remove("just-a-key")
     }
     @Test fun `exists works`() = runTest {
         assertFalse(storage.exists("just-a-key"))

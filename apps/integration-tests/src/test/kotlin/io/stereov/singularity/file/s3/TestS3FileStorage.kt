@@ -5,7 +5,6 @@ import io.minio.MinioClient
 import io.stereov.singularity.file.core.dto.FileMetadataResponse
 import io.stereov.singularity.file.core.model.FileKey
 import io.stereov.singularity.file.core.model.FileMetadataDocument
-import io.stereov.singularity.file.core.model.FileUploadRequest
 import io.stereov.singularity.file.core.properties.StorageType
 import io.stereov.singularity.file.core.service.FileMetadataService
 import io.stereov.singularity.file.core.service.FileStorage
@@ -32,7 +31,6 @@ import org.testcontainers.containers.MongoDBContainer
 import org.testcontainers.utility.DockerImageName
 import java.io.File
 import java.net.URI
-import java.nio.file.Files
 import java.time.temporal.ChronoUnit
 
 class TestS3FileStorage : BaseSpringBootTest() {
@@ -54,18 +52,11 @@ class TestS3FileStorage : BaseSpringBootTest() {
         val file = ClassPathResource("files/test-image.jpg").file
         val filePart = MockFilePart(file)
         val key = FileKey(file.name)
-
-        val request = FileUploadRequest.FilePart(
-            key = key,
-            contentType = MediaType.IMAGE_JPEG.toString(),
-            contentLength = Files.size(file.toPath()),
-            filePart
-        )
-        val metadata = storage.upload(ownerId = user.info.id, key = key, isPublic = public, file = request)
+        val metadata = storage.upload(ownerId = user.info.id, key = key, isPublic = public, file = filePart)
 
         method(file, metadata, user)
 
-        storage.remove(metadata.key)
+        runCatching { storage.remove(metadata.key) }.getOrNull()
     }
 
     @Test fun `should initialize beans correctly`() {
@@ -119,7 +110,7 @@ class TestS3FileStorage : BaseSpringBootTest() {
         }
     }
     @Test fun `remove does nothing when key not existing`() = runTest {
-        storage.remove("just-a-key")
+        fileStorage.remove("just-a-key")
     }
     @Test fun `exists works`() = runTest {
         assertFalse(storage.exists("just-a-key"))

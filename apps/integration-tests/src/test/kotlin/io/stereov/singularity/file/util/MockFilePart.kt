@@ -9,6 +9,7 @@ import org.springframework.http.codec.multipart.FilePart
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.io.File
+import java.nio.file.Files
 import java.nio.file.Path
 
 class MockFilePart(
@@ -18,6 +19,7 @@ class MockFilePart(
     override fun name() = "file"
     override fun headers() = HttpHeaders().apply {
         contentType = MediaType.IMAGE_JPEG
+        contentLength = Files.size(resource.toPath())
     }
 
     override fun content(): Flux<DataBuffer?> = DataBufferUtils.read(resource.toPath(), DefaultDataBufferFactory(), 4096)
