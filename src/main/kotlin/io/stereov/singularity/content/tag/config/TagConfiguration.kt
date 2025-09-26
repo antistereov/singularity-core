@@ -1,5 +1,6 @@
 package io.stereov.singularity.content.tag.config
 
+import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.content.core.config.ContentConfiguration
 import io.stereov.singularity.content.core.properties.ContentProperties
 import io.stereov.singularity.content.tag.controller.TagController
@@ -51,14 +52,16 @@ class TagConfiguration {
         reactiveMongoTemplate: ReactiveMongoTemplate,
         contentProperties: ContentProperties,
         tagMapper: TagMapper,
-        appProperties: AppProperties
+        appProperties: AppProperties,
+        authorizationService: AuthorizationService
     ): TagService {
         return TagService(
             repository,
             reactiveMongoTemplate,
             contentProperties,
             tagMapper,
-            appProperties
+            appProperties,
+            authorizationService
         )
     }
 }

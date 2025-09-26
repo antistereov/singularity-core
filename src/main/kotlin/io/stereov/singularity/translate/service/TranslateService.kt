@@ -72,7 +72,6 @@ class TranslateService(
     private fun <C> Translatable<C>.getDefaultTranslation(): Translation<C> {
 
         return findBestMatchingTranslation(appProperties.locale)
-            ?: findBestMatchingTranslation(primaryLocale)
             ?: throw DocumentNotFoundException("The requested item does not contain any translations")
     }
 }

@@ -15,6 +15,7 @@ import io.stereov.singularity.auth.twofactor.controller.EmailAuthenticationContr
 import io.stereov.singularity.auth.twofactor.controller.TotpAuthenticationController
 import io.stereov.singularity.auth.twofactor.controller.TwoFactorAuthenticationController
 import io.stereov.singularity.auth.twofactor.model.token.TwoFactorTokenType
+import io.stereov.singularity.content.tag.controller.TagController
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.user.core.controller.UserController
 import io.stereov.singularity.user.settings.controller.UserSettingsController
@@ -137,6 +138,8 @@ class OpenApiConfig() {
             "Groups",
             "Manging Users",
             "Profile Management",
+            "Tags",
+            "Invitations"
         )
 
         val sortedTags = mutableListOf<Tag>()
@@ -254,6 +257,16 @@ class OpenApiConfig() {
             UserSettingsController::setAvatarOfAuthorizedUser.name,
             UserSettingsController::deleteAvatarOfAuthorizedUser.name,
             UserSettingsController::deleteAuthorizedUser.name
+        ))
+
+        // Tags
+
+        sortedOperationIds.addAll(listOf(
+            TagController::createTag.name,
+            TagController::findTagByKey.name,
+            TagController::findTags.name,
+            TagController::updateTag.name,
+            TagController::deleteTag.name,
         ))
 
         val allOperations = mutableListOf<Triple<String, PathItem.HttpMethod, Operation>>()

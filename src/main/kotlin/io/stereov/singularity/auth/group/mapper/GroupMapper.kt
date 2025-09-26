@@ -17,7 +17,6 @@ class GroupMapper(
         return GroupDocument(
             key = req.key,
             translations = req.translations,
-            primaryLocale = translateService.defaultLocale
         )
     }
 
