@@ -32,33 +32,33 @@ class FileMetadataService(
     override val logger = KotlinLogging.logger {}
     override val collectionClazz = FileMetadataDocument::class.java
 
-    private suspend fun fileKeyQuery(key: String, authorized: Boolean = false): Query {
+    private suspend fun renditionQuery(key: String, authorized: Boolean = false): Query {
         val criteria = CriteriaBuilder()
             .hasElement(FileMetadataDocument::renditionKeys, key)
         if (authorized) criteria.add(accessCriteria.getAccessCriteria())
         return criteria.query()
     }
 
-    suspend fun findFileByKeyOrNull(key: String): FileMetadataDocument? {
+    suspend fun findRenditionByKeyOrNull(key: String): FileMetadataDocument? {
         logger.debug { "Finding file with key $key" }
-        return reactiveMongoTemplate.find<FileMetadataDocument>(fileKeyQuery(key))
+        return reactiveMongoTemplate.find<FileMetadataDocument>(renditionQuery(key))
             .awaitFirstOrNull()
     }
-    suspend fun findFileByKey(key: String): FileMetadataDocument {
-        return findFileByKeyOrNull(key)
+    suspend fun findRenditionByKey(key: String): FileMetadataDocument {
+        return findRenditionByKeyOrNull(key)
             ?: throw DocumentNotFoundException("No file with key $key found")
     }
 
     suspend fun existsFileByKey(key: String): Boolean {
         logger.debug { "Checking existence of file with key $key" }
-        return reactiveMongoTemplate.exists<FileMetadataDocument>(fileKeyQuery(key))
+        return reactiveMongoTemplate.exists<FileMetadataDocument>(renditionQuery(key))
             .awaitFirst()
     }
 
-    suspend fun deleteFileByKey(key: String) {
+    suspend fun deleteRenditionByKey(key: String) {
         logger.debug { "Deleting file with key $key" }
 
-        val metadata = findFileByKey(key)
+        val metadata = findRenditionByKey(key)
 
         if (metadata.renditionKeys.size == 1) {
             logger.debug { "Deleting metadata document because the only rendition is deleted" }
@@ -66,7 +66,7 @@ class FileMetadataService(
             return
         }
 
-        metadata.renditions = metadata.renditions.minus(key)
+        metadata.renditions = metadata.renditions.filter { (_,v) -> v.key != key }
         save(metadata)
     }
 
