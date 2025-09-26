@@ -8,7 +8,6 @@ import io.stereov.singularity.content.article.service.ArticleManagementService
 import org.springframework.http.ResponseEntity
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.server.ServerWebExchange
 import java.util.*
 
 @RestController
@@ -40,11 +39,10 @@ class ArticleManagementController(
     suspend fun changeImage(
         @PathVariable key: String,
         @RequestPart file: FilePart,
-        @RequestParam locale: Locale?,
-        exchange: ServerWebExchange
+        @RequestParam locale: Locale?
     ): ResponseEntity<FullArticleResponse> {
         return ResponseEntity.ok().body(
-            service.changeImage(key, file, locale, exchange)
+            service.changeImage(key, file, locale)
         )
     }
 

@@ -22,7 +22,6 @@ import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.server.ServerWebExchange
 import java.util.*
 
 @RestController
@@ -264,10 +263,9 @@ class UserSettingsController(
     )
     suspend fun setAvatarOfAuthorizedUser(
         @RequestPart file: FilePart,
-        exchange: ServerWebExchange
     ): ResponseEntity<UserResponse> {
         return ResponseEntity.ok().body(
-            userSettingsService.setAvatar(file, exchange)
+            userSettingsService.setAvatar(file)
         )
     }
 
