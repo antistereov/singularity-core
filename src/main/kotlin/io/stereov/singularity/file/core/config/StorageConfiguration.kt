@@ -2,6 +2,7 @@ package io.stereov.singularity.file.core.config
 
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.content.core.component.AccessCriteria
+import io.stereov.singularity.file.core.component.DataBufferPublisher
 import io.stereov.singularity.file.core.controller.FileMetadataController
 import io.stereov.singularity.file.core.exception.handler.FileExceptionHandler
 import io.stereov.singularity.file.core.properties.StorageProperties
@@ -27,6 +28,12 @@ import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRep
 @EnableReactiveMongoRepositories(basePackageClasses = [FileMetadataRepository::class])
 @EnableConfigurationProperties(StorageProperties::class)
 class StorageConfiguration {
+
+    // Component
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun dataBufferPublisher() = DataBufferPublisher()
 
     // Controller
 

@@ -13,9 +13,7 @@ data class FileMetadataResponse(
     override val createdAt: Instant = Instant.now(),
     override var updatedAt: Instant = Instant.now(),
     override var access: ContentAccessDetails,
-    val contentType: String,
-    val url: String,
-    val size: Long,
-    override var trusted: Boolean = false,
-    override var tags: MutableSet<String> = mutableSetOf()
+    val renditions: Map<String, FileRenditionResponse>,
+    override var trusted: Boolean,
+    override var tags: MutableSet<String>
 ) : ContentDocument<FileMetadataResponse>, ContentResponse<FileMetadataDocument>

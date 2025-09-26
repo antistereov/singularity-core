@@ -24,6 +24,7 @@ io.stereov.singularity.database.hash.config.HashConfiguration
 
 io.stereov.singularity.file.core.config.StorageConfiguration
 io.stereov.singularity.file.local.config.LocalFileStorageConfiguration
+io.stereov.singularity.file.image.config.ImageConfiguration
 io.stereov.singularity.file.s3.config.S3Configuration
 
 io.stereov.singularity.global.config.ApplicationConfiguration

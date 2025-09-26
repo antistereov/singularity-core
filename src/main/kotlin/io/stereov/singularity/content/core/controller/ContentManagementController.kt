@@ -1,6 +1,5 @@
 package io.stereov.singularity.content.core.controller
 
-import io.stereov.singularity.content.core.dto.request.ChangeContentTagsRequest
 import io.stereov.singularity.content.core.dto.request.ChangeContentVisibilityRequest
 import io.stereov.singularity.content.core.dto.response.ContentResponse
 import io.stereov.singularity.content.core.dto.response.ExtendedContentAccessDetailsResponse
@@ -16,18 +15,6 @@ import java.util.*
 class ContentManagementController(
     private val context: ApplicationContext
 ) {
-
-    @PutMapping("/{contentType}/{key}/tags")
-    suspend fun changeTags(
-        @PathVariable key: String,
-        @PathVariable contentType: String,
-        @RequestBody req: ChangeContentTagsRequest,
-        @RequestParam locale: Locale?
-    ): ResponseEntity<out ContentResponse<*>> {
-        return ResponseEntity.ok(
-            context.findContentManagementService(contentType).changeTags(key, req, locale)
-        )
-    }
 
     @PutMapping("/{contentType}/{key}/visibility")
     suspend fun changeVisibility(

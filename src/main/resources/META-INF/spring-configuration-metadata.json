@@ -51,6 +51,11 @@
       "sourceType": "io.stereov.singularity.file.core.properties.StorageProperties"
     },
     {
+      "name": "singularity.file.storage.image",
+      "type": "io.stereov.singularity.file.image.properties.ImageProperties",
+      "sourceType": "io.stereov.singularity.file.image.properties.ImageProperties"
+    },
+    {
       "name": "singularity.file.storage.local",
       "type": "io.stereov.singularity.file.local.properties.LocalFileStorageProperties",
       "sourceType": "io.stereov.singularity.file.local.properties.LocalFileStorageProperties"
@@ -430,10 +435,38 @@
     },
     {
       "name": "singularity.file.storage.type",
-      "type": "io.stereov.singularity.file.core.properties.StorageType",
+      "type": "io.stereov.singularity.file.core.properties.StorageProperties",
       "sourceType": "io.stereov.singularity.file.s3.properties.S3Properties",
       "description": "The type of storage you prefer. Default is local.",
       "defaultValue": "local"
+    },
+    {
+      "name": "singularity.file.storage.max-file-size",
+      "type": "java.lang.Long",
+      "sourceType": "io.stereov.singularity.file.core.properties.StorageProperties",
+      "description": "The maximum file size.",
+      "defaultValue": "local"
+    },
+    {
+      "name": "singularity.file.storage.image.small",
+      "type": "java.lang.Int",
+      "sourceType": "io.stereov.singularity.file.image.properties.ImageProperties",
+      "description": "The size for small images.",
+      "defaultValue": 400
+    },
+    {
+      "name": "singularity.file.storage.image.medium",
+      "type": "java.lang.Int",
+      "sourceType": "io.stereov.singularity.file.image.properties.ImageProperties",
+      "description": "The size for medium images.",
+      "defaultValue": 800
+    },
+    {
+      "name": "singularity.file.storage.image.large",
+      "type": "java.lang.Int",
+      "sourceType": "io.stereov.singularity.file.image.properties.ImageProperties",
+      "description": "The size for large images.",
+      "defaultValue": 1920
     },
     {
       "name": "singularity.file.storage.local.file-directory",

@@ -19,7 +19,7 @@ abstract class ContentService<T: ContentDocument<T>> : CrudService<T>  {
     abstract val translateService: TranslateService
     abstract val accessCriteria: AccessCriteria
 
-    suspend fun findByKeyOrNull(key: String): T? {
+    open suspend fun findByKeyOrNull(key: String): T? {
         logger.debug { "Fining ${collectionClazz.simpleName} by key \"$key\"" }
 
         return repository.findByKey(key)
@@ -29,13 +29,13 @@ abstract class ContentService<T: ContentDocument<T>> : CrudService<T>  {
         return findByKeyOrNull(key) ?: throw DocumentNotFoundException("No ${collectionClazz.simpleName} with key \"$key\" found")
     }
 
-    suspend fun deleteByKey(key: String) {
+    open suspend fun deleteByKey(key: String) {
         logger.debug { "Deleting ${collectionClazz.simpleName} with key \"$key\"" }
 
         return repository.deleteByKey(key)
     }
 
-    suspend fun existsByKey(key: String): Boolean {
+    open suspend fun existsByKey(key: String): Boolean {
         logger.debug { "Checking if ${collectionClazz.simpleName} with key \"$key\" exists" }
 
         return repository.existsByKey(key)
@@ -71,7 +71,7 @@ abstract class ContentService<T: ContentDocument<T>> : CrudService<T>  {
      *
      * @throws NotAuthorizedException if the user does not have sufficient permissions.
      */
-    suspend fun findAuthorizedByKey(key: String, role: ContentAccessRole): T {
+    open suspend fun findAuthorizedByKey(key: String, role: ContentAccessRole): T {
         logger.debug { "Finding ${collectionClazz.simpleName} by key \"$key\" and validating permission: $role" }
 
         val content = findByKey(key)

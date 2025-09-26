@@ -1,6 +1,9 @@
 package io.stereov.singularity.file.s3.config
 
+import io.stereov.singularity.file.core.component.DataBufferPublisher
 import io.stereov.singularity.file.core.config.StorageConfiguration
+import io.stereov.singularity.file.core.mapper.FileMetadataMapper
+import io.stereov.singularity.file.core.properties.StorageProperties
 import io.stereov.singularity.file.core.service.FileMetadataService
 import io.stereov.singularity.file.s3.properties.S3Properties
 import io.stereov.singularity.file.s3.service.S3FileStorage
@@ -63,13 +66,25 @@ class S3Configuration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun fileStorage(s3Properties: S3Properties, s3AsyncClient: S3AsyncClient, s3Presigner: S3Presigner, appProperties: AppProperties, metadataService: FileMetadataService): S3FileStorage {
+    fun fileStorage(
+        s3Properties: S3Properties,
+        s3AsyncClient: S3AsyncClient,
+        s3Presigner: S3Presigner,
+        appProperties: AppProperties,
+        metadataService: FileMetadataService,
+        metadataMapper: FileMetadataMapper,
+        dataBufferPublisher: DataBufferPublisher,
+        storageProperties: StorageProperties
+    ): S3FileStorage {
         return S3FileStorage(
             s3Properties,
             s3AsyncClient,
             s3Presigner,
             appProperties,
-            metadataService
+            metadataService,
+            metadataMapper,
+            dataBufferPublisher,
+            storageProperties
         )
     }
 }
