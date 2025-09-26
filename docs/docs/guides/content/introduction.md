@@ -2,7 +2,7 @@
 sidebar_position: 1
 ---
 
-# Configuration
+# Introduction
 
 :::note
 This guide assumes familiarity with the [Spring Framework](https://spring.io).  

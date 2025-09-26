@@ -73,7 +73,6 @@ class ArticleMapper(
             trusted = false,
             access = ContentAccessDetails(ownerId),
             translations = translations,
-            primaryLocale = req.locale
         )
     }
 
@@ -95,7 +94,6 @@ class ArticleMapper(
             trusted = dto.trusted,
             access = ContentAccessDetails.create(dto.access, dto.owner.id),
             translations = translations,
-            primaryLocale = actualLocale
         )
     }
 

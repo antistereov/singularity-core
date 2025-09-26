@@ -26,7 +26,6 @@ data class Article(
     override var trusted: Boolean,
     override var tags: MutableSet<String> = mutableSetOf(),
     override val translations: MutableMap<Locale, ArticleTranslation> = mutableMapOf(),
-    override val primaryLocale: Locale
 ) : ContentDocument<Article>, Translatable<ArticleTranslation> {
 
     override val id: ObjectId

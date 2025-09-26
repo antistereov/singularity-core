@@ -61,7 +61,6 @@ interface CrudService<T: Any> {
         return repository.saveAll(docs).toList()
     }
 
-    @Suppress("UNUSED")
     suspend fun findAllPaginated(page: Int, size: Int, sort: List<String>, criteria: Criteria? = null): Page<T> {
 
         val pageable = PageRequest.of(page, size, Sort.by(sort.map { item ->

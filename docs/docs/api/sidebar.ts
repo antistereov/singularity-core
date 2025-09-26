@@ -379,6 +379,76 @@ const sidebar: SidebarsConfig = {
     },
     {
       type: "category",
+      label: "Tags",
+      link: {
+        type: "generated-index",
+        title: "Tags",
+        slug: "/category/api/tags",
+      },
+      items: [
+        {
+          type: "doc",
+          id: "api/find-tags",
+          label: "Find Tags",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "api/create-tag",
+          label: "Create Tag",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "api/find-tag-by-key",
+          label: "Find Tag By Key",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "api/update-tag",
+          label: "Update Tag",
+          className: "api-method put",
+        },
+        {
+          type: "doc",
+          id: "api/delete-tag",
+          label: "Delete Tag",
+          className: "api-method delete",
+        },
+      ],
+    },
+    {
+      type: "category",
+      label: "Invitations",
+      link: {
+        type: "generated-index",
+        title: "Invitations",
+        slug: "/category/api/invitations",
+      },
+      items: [
+        {
+          type: "doc",
+          id: "api/invite-user",
+          label: "Invite User",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "api/accept-invitation",
+          label: "Accept Invitation",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "api/delete-invitation",
+          label: "Delete Invitation",
+          className: "api-method delete",
+        },
+      ],
+    },
+    {
+      type: "category",
       label: "Security",
       link: {
         type: "generated-index",
@@ -472,47 +542,6 @@ const sidebar: SidebarsConfig = {
     },
     {
       type: "category",
-      label: "tag-controller",
-      link: {
-        type: "generated-index",
-        title: "tag-controller",
-        slug: "/category/api/tag-controller",
-      },
-      items: [
-        {
-          type: "doc",
-          id: "api/find-tag-by-key",
-          label: "findTagByKey",
-          className: "api-method get",
-        },
-        {
-          type: "doc",
-          id: "api/update-tag",
-          label: "updateTag",
-          className: "api-method put",
-        },
-        {
-          type: "doc",
-          id: "api/delete-tag",
-          label: "deleteTag",
-          className: "api-method delete",
-        },
-        {
-          type: "doc",
-          id: "api/find-tag-by-key-contains",
-          label: "findTagByKeyContains",
-          className: "api-method get",
-        },
-        {
-          type: "doc",
-          id: "api/create-tag",
-          label: "createTag",
-          className: "api-method post",
-        },
-      ],
-    },
-    {
-      type: "category",
       label: "article-management-controller",
       link: {
         type: "generated-index",
@@ -555,35 +584,6 @@ const sidebar: SidebarsConfig = {
           id: "api/create-article",
           label: "createArticle",
           className: "api-method post",
-        },
-      ],
-    },
-    {
-      type: "category",
-      label: "invitation-controller",
-      link: {
-        type: "generated-index",
-        title: "invitation-controller",
-        slug: "/category/api/invitation-controller",
-      },
-      items: [
-        {
-          type: "doc",
-          id: "api/invite-user",
-          label: "inviteUser",
-          className: "api-method post",
-        },
-        {
-          type: "doc",
-          id: "api/accept-invitation",
-          label: "acceptInvitation",
-          className: "api-method post",
-        },
-        {
-          type: "doc",
-          id: "api/delete-invitation",
-          label: "deleteInvitation",
-          className: "api-method delete",
         },
       ],
     },

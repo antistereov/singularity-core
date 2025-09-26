@@ -43,6 +43,10 @@ tags:
   description: Operation related to group and member management.
 - name: Profile Management
   description: Operations related to user settings.
+- name: Tags
+  description: Operations related to tags.
+- name: Invitations
+  description: Operations related to invitations.
 - name: Security
   description: Operations related to managing the servers security.
 - name: Managing Users
@@ -2848,6 +2852,310 @@ paths:
       security:
       - accessTokenHeader: []
       - accessTokenCookie: []
+  /api/content/tags:
+    get:
+      tags:
+      - Tags
+      summary: Find Tags
+      description: |-
+        Find and filter existing tags.
+
+        You can find more information about tags [here](https://singularity.stereov.io/docs/guides/content/tags).
+
+        **Locale:**
+        Tags can have multiple translations for `name` and `description`.
+        You can specify a `locale` to get the corresponding translation.
+
+        If no locale is specified, the applications default locale will be used.
+        You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/content/tags
+      operationId: findTags
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+      - name: key
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: name
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: description
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: locale
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: The tags.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageTagResponse"
+      security:
+      - {}
+      - {}
+    post:
+      tags:
+      - Tags
+      summary: Create Tag
+      description: |-
+        Create a new tag.
+
+        You can find more information about tags [here](https://singularity.stereov.io/docs/guides/content/tags).
+
+        **Locale:**
+        Tags can have multiple translations for `name` and `description`.
+        You can specify a `locale` to get the corresponding translation.
+
+        If no locale is specified, the applications default locale will be used.
+        You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
+
+        **Tokens:**
+        - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
+          with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/content/tags
+      operationId: createTag
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTagRequest"
+        required: true
+      responses:
+        "200":
+          description: The newly created tag.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TagResponse"
+        "401":
+          description: Invalid or expired `AccessToken`.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: "`AccessToken` does permit [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins)\
+            \ access."
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: A tag with the given `key` already exists.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader:
+        - adminScope
+      - accessTokenCookie:
+        - adminScope
+  /api/content/tags/{key}:
+    get:
+      tags:
+      - Tags
+      summary: Find Tag By Key
+      description: |-
+        Find a tag by given `key`.
+
+        You can find more information about tags [here](https://singularity.stereov.io/docs/guides/content/tags).
+
+        **Locale:**
+        Tags can have multiple translations for `name` and `description`.
+        You can specify a `locale` to get the corresponding translation.
+
+        If no locale is specified, the applications default locale will be used.
+        You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/content/tags
+      operationId: findTagByKey
+      parameters:
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: locale
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: The tag with `key`.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TagResponse"
+        "404":
+          description: No tag with given key exists.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - {}
+      - {}
+    put:
+      tags:
+      - Tags
+      summary: Update Tag
+      description: |-
+        Update the tag with the given `key`.
+
+        You can find more information about tags [here](https://singularity.stereov.io/docs/guides/content/tags).
+
+        **Locale:**
+        Tags can have multiple translations for `name` and `description`.
+        The request body can take multiple translations.
+
+        The `locale` query parameter specifies the translation that will be returned.
+        If no locale is specified, the applications default locale will be used.
+        You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
+
+        **Tokens:**
+        - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
+          with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/content/tags
+      operationId: updateTag
+      parameters:
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: locale
+        in: query
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTagRequest"
+        required: true
+      responses:
+        "200":
+          description: The updated tag
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TagResponse"
+        "401":
+          description: Invalid or expired `AccessToken`.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: "`AccessToken` does permit [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins)\
+            \ access."
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: No tag with `key` found.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader:
+        - adminScope
+      - accessTokenCookie:
+        - adminScope
+    delete:
+      tags:
+      - Tags
+      summary: Delete Tag
+      description: |-
+        Delete the tag with the given `key`.
+
+        You can find more information about tags [here](https://singularity.stereov.io/docs/guides/content/tags).
+
+        **Locale:**
+        Tags can have multiple translations for `name` and `description`.
+        You can specify a `locale` to get the corresponding translation.
+
+        If no locale is specified, the applications default locale will be used.
+        You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
+
+        **Tokens:**
+        - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
+          with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/content/tags
+      operationId: deleteTag
+      parameters:
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: The updated tag
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "401":
+          description: Invalid or expired `AccessToken`.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: "`AccessToken` does permit [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins)\
+            \ access."
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: No tag with `key` found.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader:
+        - adminScope
+      - accessTokenCookie:
+        - adminScope
   /api/content/{contentType}/{key}/visibility:
     put:
       tags:
@@ -2955,83 +3263,6 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ContentResponseObject"
-      security:
-      - {}
-      - {}
-  /api/content/tags/{key}:
-    get:
-      tags:
-      - tag-controller
-      operationId: findTagByKey
-      parameters:
-      - name: key
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: locale
-        in: query
-        required: false
-        schema:
-          type: string
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/TagResponse"
-      security:
-      - {}
-      - {}
-    put:
-      tags:
-      - tag-controller
-      operationId: updateTag
-      parameters:
-      - name: key
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: locale
-        in: query
-        required: false
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UpdateTagRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/TagResponse"
-      security:
-      - {}
-      - {}
-    delete:
-      tags:
-      - tag-controller
-      operationId: deleteTag
-      parameters:
-      - name: key
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/SuccessResponse"
       security:
       - {}
       - {}
@@ -3241,56 +3472,23 @@ paths:
         - adminScope
       - accessTokenCookie:
         - adminScope
-  /api/content/tags:
-    get:
-      tags:
-      - tag-controller
-      operationId: findTagByKeyContains
-      parameters:
-      - name: substring
-        in: query
-        required: true
-        schema:
-          type: string
-      - name: locale
-        in: query
-        required: false
-        schema:
-          type: string
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/KeyContainsResponse"
-      security:
-      - {}
-      - {}
-    post:
-      tags:
-      - tag-controller
-      operationId: createTag
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateTagRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/TagResponse"
-      security:
-      - {}
-      - {}
   /api/content/invitations/{contentType}/{key}:
     post:
       tags:
-      - invitation-controller
+      - Invitations
+      summary: Invite User
+      description: "Invite a user to access or edit a content resource.\n\nYou can\
+        \ find more information about invitations and content [here](https://singularity.stereov.io/docs/guides/content/invitations).\n\
+        \n**Locale:**\n\nA locale can be specified for this request. \nThe email will\
+        \ be sent in the specified locale.\nYou can learn more about locale in emails\
+        \ [here](https://singularity.stereov.io/docs/guides/email/templates).\n\n\
+        If no locale is specified, the applications default locale will be used.\n\
+        You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).\n\
+        \n**Tokens:**\n- A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\n\
+        \  with [`ADMIN`](https://singularity.stereov.io/docs/guides/content/access-roles#admin)\
+        \ access on this resource is required."
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/content/invitations
       operationId: inviteUser
       parameters:
       - name: key
@@ -3316,18 +3514,44 @@ paths:
         required: true
       responses:
         "200":
-          description: OK
+          description: The updated content access details of the resource.
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ExtendedContentAccessDetailsResponse"
+        "401":
+          description: Invalid or expired `AccessToken`.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: "AccessToken does permit [`ADMIN`](https://singularity.stereov.io/docs/guides/content/access-roles#admins)\
+            \ access on this resource."
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
-      - {}
-      - {}
+      - accessTokenHeader:
+        - adminScope
+      - accessTokenCookie:
+        - adminScope
   /api/content/invitations/{contentType}/accept:
     post:
       tags:
-      - invitation-controller
+      - Invitations
+      summary: Accept Invitation
+      description: "Accept an invitation from a user to access or edit a content resource.\n\
+        \nYou can find more information about invitations and content [here](https://singularity.stereov.io/docs/guides/content/invitations).\n\
+        \n**Locale:**\n\nA locale can be specified for this request. \nThe given resource\
+        \ will be returned in the specified `locale`.\n\nIf no locale is specified,\
+        \ the applications default locale will be used.\nYou can learn more about\
+        \ configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).\n\
+        \n**Tokens:**\n- A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
+        \ is required."
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/content/invitations
       operationId: acceptInvitation
       parameters:
       - name: contentType
@@ -3348,14 +3572,20 @@ paths:
         required: true
       responses:
         "200":
-          description: OK
+          description: "The content resource, the user was invited to."
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ContentResponseObject"
+        "401":
+          description: '`AccessToken` or invitation `token` are invalid or expired.'
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
-      - {}
-      - {}
+      - accessTokenHeader: []
+      - accessTokenCookie: []
   /api/content/articles:
     get:
       tags:
@@ -3710,7 +3940,20 @@ paths:
   /api/content/invitations/{id}:
     delete:
       tags:
-      - invitation-controller
+      - Invitations
+      summary: Delete Invitation
+      description: |-
+        Delete and invalidate an existing invitation.
+
+        You can find more information about invitations and content [here](https://singularity.stereov.io/docs/guides/content/invitations).
+
+        **Note:** Expired invitations will be deleted automatically.
+
+        **Tokens:**
+        - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
+          with [`ADMIN`](https://singularity.stereov.io/docs/guides/content/access-roles#admin) access on this resource is required.
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/content/invitations
       operationId: deleteInvitation
       parameters:
       - name: id
@@ -3720,14 +3963,35 @@ paths:
           $ref: "#/components/schemas/ObjectId"
       responses:
         "200":
-          description: OK
+          description: Success.
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/SuccessResponse"
+        "401":
+          description: Invalid or expired `AccessToken`.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: "AccessToken does permit [`ADMIN`](https://singularity.stereov.io/docs/guides/content/access-roles#admins)\
+            \ access on this resource."
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: No invitation with given `id` found.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
-      - {}
-      - {}
+      - accessTokenHeader:
+        - adminScope
+      - accessTokenCookie:
+        - adminScope
 components:
   schemas:
     ErrorResponse:
@@ -4042,8 +4306,6 @@ components:
     UpdateTagRequest:
       type: object
       properties:
-        key:
-          type: string
         translations:
           type: object
           additionalProperties:
@@ -4789,10 +5051,6 @@ components:
           format: int32
         pageable:
           $ref: "#/components/schemas/PageableObject"
-        first:
-          type: boolean
-        last:
-          type: boolean
         size:
           type: integer
           format: int32
@@ -4805,6 +5063,10 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
         numberOfElements:
           type: integer
           format: int32
@@ -4858,10 +5120,6 @@ components:
           format: int32
         pageable:
           $ref: "#/components/schemas/PageableObject"
-        first:
-          type: boolean
-        last:
-          type: boolean
         size:
           type: integer
           format: int32
@@ -4874,24 +5132,47 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
         numberOfElements:
           type: integer
           format: int32
         empty:
           type: boolean
-    KeyContainsResponse:
+    PageTagResponse:
       type: object
       properties:
-        tags:
-          type: array
-          items:
-            $ref: "#/components/schemas/TagResponse"
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
         size:
           type: integer
           format: int32
-      required:
-      - size
-      - tags
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/TagResponse"
+        number:
+          type: integer
+          format: int32
+        sort:
+          $ref: "#/components/schemas/SortObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
+        empty:
+          type: boolean
     PageFileMetadataResponse:
       type: object
       properties:
@@ -4903,10 +5184,6 @@ components:
           format: int32
         pageable:
           $ref: "#/components/schemas/PageableObject"
-        first:
-          type: boolean
-        last:
-          type: boolean
         size:
           type: integer
           format: int32
@@ -4919,6 +5196,10 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
         numberOfElements:
           type: integer
           format: int32
@@ -4988,10 +5269,6 @@ components:
           format: int32
         pageable:
           $ref: "#/components/schemas/PageableObject"
-        first:
-          type: boolean
-        last:
-          type: boolean
         size:
           type: integer
           format: int32
@@ -5004,6 +5281,10 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
         numberOfElements:
           type: integer
           format: int32
