@@ -14,12 +14,6 @@ It's designed to handle different storage backends and ensure data consistency b
 
 ## Core Concepts
 
-#### `FileMetadataDocument` 
-
-This is the core data model for file metadata. 
-It stores a unique ID, a developer-friendly key, a unique ID, a content type, file size, and access details. 
-The `FileMetadataDocument` is stored in a MongoDB collection.
-
 #### `FileStorage`
 
 This is an abstract class that defines the core logic for managing files, 
@@ -27,17 +21,17 @@ including `upload`, `exists`, and `remove` operations.
 It provides a consistent interface for different storage implementations (e.g., S3, local). 
 It also includes a consistency check to ensure the file's metadata in the database matches the actual file in storage.
 
-#### `FileMetadataService`
+#### `FileMetadataDocument`
 
-This service manages the `FileMetadataDocument` in the MongoDB database. 
-It handles operations like saving, finding, and deleting file metadata.
+This is the core data model for file metadata.
+It stores a unique ID, a developer-friendly key, a unique ID, a content type, file size, and access details.
+The `FileMetadataDocument` is stored in a MongoDB collection.
 
-## Usage
+:::note File Metadata
+You can learn more on how to access and change file metadata [here](./metadata.md).
+:::
 
-The file storage system is designed to be pluggable,
-allowing you to choose the storage backend that best fits your needs. 
-
-### Key Operations
+## Key Operations
 
 #### `upload`
 This method handles the file upload process. 
@@ -59,54 +53,48 @@ It removes the file from the storage backend and then deletes the `FileMetadataD
 This method retrieves a `FileMetadataDocument` by its key and converts it into a `FileMetadataResponse`, 
 which includes a URL to access the file.
 
-### Step 1: Configure File Storage
+### File Key
 
-To configure your file storage backend, you must specify the `type` in your `application.yml` file.
-The available options are [`S3`](s3.md) and [`LOCAL`](local.md).
+**`FileKey`s** help you to create a unique key to identify your files.
 
-The local file storage is already preconfigured and can be used out of the box.
-Check out the [configuration options](local.md#configuration) for local file storage.
+A `FileKey` can be created based on 
+* a`prefix` (e.g. `user/123456`),
+* a `filename` (e.g. `avatar`),
+* a `suffix` (e.g. `small`) and 
+* an `extension` (e.g. `jpeg`).
 
-```yaml
-singularity:
-  file:
-    storage:
-      type: LOCAL # Or S3
-      max-file-size: 5242880 # maximum file size in Bytes
-```
-
-### Step 2: Use the File Storage Service
-
-You can inject the `FileStorage` interface into any service or component. 
-Based on your configuration, *Singularity* uses the right implementation.
-You can then use its methods to manage your files.
+A `UUID` will be attached to make the key unique to prevent **cache busting**.
 
 ```kotlin
-@Service
-class MyFileService(
-    private val fileStorage: fileStorage // Inject the FileStorage interface
-) {
-    suspend fun uploadFile(userId: ObjectId, file: FilePart, key: String) {
-        // Upload the file and get its metadata
-        val metadata: FileMetadataDocument = fileStorage.upload(
-            userId = userId,
-            filePart = file,
-            key = key,
-            public = true
-        )
-    }
-
-    suspend fun checkFile(key: String): Boolean {
-        // Check if a file exists
-        return fileStorage.exists(key)
-    }
-
-    suspend fun getFileMetadata(key: String): FileMetadataResponse? {
-        // Get file metadata and URL
-        return fileStorage.metadataResponseByKeyOrNull(key)
-    }
-}
+val fileKey = FileKey(
+    prefix = "user/123456",
+    filename = "avatar",
+    suffix = "small",
+    extension = "jpeg"
+)
 ```
+
+This will result in `/user/123456/avatar_small-3bb2c18c-xxx.jpeg`.
+
+### Renditions
+
+It is possible to store multiple **renditions** of a file, e.g. a compressed version and the original.
+The [image store](./images.md) automatically creates a small, medium and large rendition of the image.
+If only one rendition is stored, it will be stored as `original`.
+
+:::warning
+It is important to distinguish **rendition keys** with the **key of file metadata**.
+
+* The `key` of the **file metadata** is a **content key** which is used to control access for example.
+  _(You can learn more [here](../content/introduction.md))_.
+* The `key` of a **rendition** is a **file storage key**. The file will be identified by this key.
+
+**One rendition:** If the file is uploaded through `upload`, both keys will be the same.
+
+**Multiple renditions:** If multiple renditions are uploaded through `uploadMultipleRenditions`,
+it is only possible to delete the whole collection through the key that you specified in the upload.
+You can only access the renditions through the file metadata.
+:::
 
 ## Configuration
 
