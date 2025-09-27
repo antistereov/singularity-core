@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component
 @Component
 class FileMetadataMapper {
 
-    fun renditionResponse(rendition: FileRendition, url: String) = FileRenditionResponse(
+    fun toRenditionResponse(rendition: FileRendition, url: String) = FileRenditionResponse(
         size = rendition.size,
         contentType = rendition.contentType,
         key = rendition.key,
@@ -19,7 +19,7 @@ class FileMetadataMapper {
         url = url,
     )
 
-    fun rendition(upload: FileUploadResponse) = FileRendition(
+    fun toRendition(upload: FileUploadResponse) = FileRendition(
         size = upload.size,
         contentType = upload.contentType,
         key = upload.key,
@@ -27,7 +27,7 @@ class FileMetadataMapper {
         height = upload.height,
     )
 
-    fun metadataResponse(doc: FileMetadataDocument, renditions: Map<String, FileRenditionResponse>): FileMetadataResponse {
+    fun toMetadataResponse(doc: FileMetadataDocument, renditions: Map<String, FileRenditionResponse>): FileMetadataResponse {
 
         return FileMetadataResponse(
             id = doc.id,
@@ -38,6 +38,29 @@ class FileMetadataMapper {
             renditions = renditions,
             trusted = doc.trusted,
             tags = doc.tags
+        )
+    }
+
+    fun toDocument(res: FileMetadataResponse): FileMetadataDocument {
+        return FileMetadataDocument(
+            _id = res.id,
+            key = res.key,
+            createdAt = res.createdAt,
+            updatedAt = res.updatedAt,
+            access = res.access,
+            renditions = res.renditions.map { (key, value) ->
+                key to FileRendition(
+                    value.key,
+                    value.size,
+                    value.contentType,
+                    value.height,
+                    value.width
+                )
+            }.toMap(),
+            renditionKeys = res.renditions.keys,
+            contentTypes = res.renditions.values.map { it.contentType }.toSet(),
+            trusted = res.trusted,
+            tags = res.tags
         )
     }
 }

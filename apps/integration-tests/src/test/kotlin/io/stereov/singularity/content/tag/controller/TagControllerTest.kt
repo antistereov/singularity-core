@@ -16,7 +16,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.domain.PageImpl
 import org.springframework.http.HttpStatus
 import org.springframework.test.web.reactive.server.returnResult
 import java.util.*
@@ -194,10 +193,40 @@ class TagControllerTest() : BaseIntegrationTest() {
         ))
 
         val res = webTestClient.get()
+            .uri("/api/content/tags")
+            .exchange()
+            .expectStatus().isOk
+            .returnResult<TagPage>()
+            .responseBody
+            .awaitFirstOrNull()
+
+        requireNotNull(res)
+
+        assertEquals(2, res.totalElements)
+        assertTrue(res.content.any { it.key == tag1.key})
+        assertTrue(res.content.any { it.key == tag2.key})
+    }
+    @Test fun `find works with name`() = runTest {
+        val tag1 = tagService.save(TagDocument(
+            key = "test1",
+            translations = mutableMapOf(
+                Locale.ENGLISH to TagTranslation("Test1", "Desc"),
+                Locale.GERMAN to TagTranslation("TestDeutsch1")
+            )
+        ))
+        tagService.save(TagDocument(
+            key = "test2",
+            translations = mutableMapOf(
+                Locale.ENGLISH to TagTranslation("Test2"),
+                Locale.GERMAN to TagTranslation("TestDeutsch2")
+            )
+        ))
+
+        val res = webTestClient.get()
             .uri("/api/content/tags?name=1")
             .exchange()
             .expectStatus().isOk
-            .returnResult<PageImpl<TagResponse>>()
+            .returnResult<TagPage>()
             .responseBody
             .awaitFirstOrNull()
 
@@ -205,6 +234,107 @@ class TagControllerTest() : BaseIntegrationTest() {
 
         assertEquals(1, res.totalElements)
         assertEquals(tag1.key, res.content.first().key)
+    }
+    @Test fun `find works with key`() = runTest {
+        val tag1 = tagService.save(TagDocument(
+            key = "test1",
+            translations = mutableMapOf(
+                Locale.ENGLISH to TagTranslation("Test1", "Desc"),
+                Locale.GERMAN to TagTranslation("TestDeutsch1")
+            )
+        ))
+        tagService.save(TagDocument(
+            key = "test2",
+            translations = mutableMapOf(
+                Locale.ENGLISH to TagTranslation("Test2"),
+                Locale.GERMAN to TagTranslation("TestDeutsch2")
+            )
+        ))
+
+        val res = webTestClient.get()
+            .uri("/api/content/tags?key=1")
+            .exchange()
+            .expectStatus().isOk
+            .returnResult<TagPage>()
+            .responseBody
+            .awaitFirstOrNull()
+
+        requireNotNull(res)
+
+        assertEquals(1, res.totalElements)
+        assertEquals(tag1.key, res.content.first().key)
+    }
+    @Test fun `find works with description`() = runTest {
+        val tag1 = tagService.save(TagDocument(
+            key = "test1",
+            translations = mutableMapOf(
+                Locale.ENGLISH to TagTranslation("Test1", "Desc1"),
+                Locale.GERMAN to TagTranslation("TestDeutsch1")
+            )
+        ))
+        tagService.save(TagDocument(
+            key = "test2",
+            translations = mutableMapOf(
+                Locale.ENGLISH to TagTranslation("Test2"),
+                Locale.GERMAN to TagTranslation("TestDeutsch2")
+            )
+        ))
+
+        val res = webTestClient.get()
+            .uri("/api/content/tags?description=1")
+            .exchange()
+            .expectStatus().isOk
+            .returnResult<TagPage>()
+            .responseBody
+            .awaitFirstOrNull()
+
+        requireNotNull(res)
+
+        assertEquals(1, res.totalElements)
+        assertEquals(tag1.key, res.content.first().key)
+    }
+    @Test fun `find works with another locale`() = runTest {
+        val tag1 = tagService.save(TagDocument(
+            key = "test1",
+            translations = mutableMapOf(
+                Locale.ENGLISH to TagTranslation("Test1", "Desc"),
+                Locale.GERMAN to TagTranslation("TestDeutsch1")
+            )
+        ))
+        tagService.save(TagDocument(
+            key = "test2",
+            translations = mutableMapOf(
+                Locale.ENGLISH to TagTranslation("Test2"),
+                Locale.GERMAN to TagTranslation("TestDeutsch2")
+            )
+        ))
+
+        val res = webTestClient.get()
+            .uri("/api/content/tags?name=Deutsch1&locale=de")
+            .exchange()
+            .expectStatus().isOk
+            .returnResult<TagPage>()
+            .responseBody
+            .awaitFirstOrNull()
+
+        requireNotNull(res)
+
+        assertEquals(1, res.totalElements)
+        assertEquals(tag1.key, res.content.first().key)
+    }
+    @Test fun `find works with nothing`() = runTest {
+
+        val res = webTestClient.get()
+            .uri("/api/content/tags")
+            .exchange()
+            .expectStatus().isOk
+            .returnResult<TagPage>()
+            .responseBody
+            .awaitFirstOrNull()
+
+        requireNotNull(res)
+
+        assertEquals(0, res.totalElements)
     }
 
     @Test fun `update works`() = runTest {
@@ -217,10 +347,11 @@ class TagControllerTest() : BaseIntegrationTest() {
             )
         ))
 
-        val req = UpdateTagRequest(mapOf(
-            Locale.ENGLISH to UpdateTagRequest.TagTranslationUpdateRequest(null, "New"),
-            Locale.JAPANESE to UpdateTagRequest.TagTranslationUpdateRequest("TagJap", "TagJ")
-        ))
+        val req = UpdateTagRequest(
+            name = null,
+            description = "New",
+            Locale.ENGLISH,
+        )
 
         val res = webTestClient.patch()
             .uri("/api/content/tags/${tag.key}")
@@ -239,8 +370,6 @@ class TagControllerTest() : BaseIntegrationTest() {
         assertEquals("Test", res.name)
         assertEquals("Test", updatedTag.translations[Locale.ENGLISH]?.name)
         assertEquals("New", updatedTag.translations[Locale.ENGLISH]?.description)
-        assertEquals("TagJap", updatedTag.translations[Locale.JAPANESE]?.name)
-        assertEquals("TagJ", updatedTag.translations[Locale.JAPANESE]?.description)
         assertEquals("TestDeutsch", updatedTag.translations[Locale.GERMAN]?.name)
         assertEquals("", updatedTag.translations[Locale.GERMAN]?.description)
 
@@ -255,10 +384,11 @@ class TagControllerTest() : BaseIntegrationTest() {
             )
         ))
 
-        val req = UpdateTagRequest(mapOf(
-            Locale.ENGLISH to UpdateTagRequest.TagTranslationUpdateRequest(null, "New"),
-            Locale.JAPANESE to UpdateTagRequest.TagTranslationUpdateRequest(null, "TagJ")
-        ))
+        val req = UpdateTagRequest(
+            name = null,
+            description = "TagJ",
+            Locale.JAPANESE
+        )
 
         webTestClient.patch()
             .uri("/api/content/tags/${tag.key}")
@@ -285,10 +415,11 @@ class TagControllerTest() : BaseIntegrationTest() {
             )
         ))
 
-        val req = UpdateTagRequest(mapOf(
-            Locale.ENGLISH to UpdateTagRequest.TagTranslationUpdateRequest(null, "New"),
-            Locale.JAPANESE to UpdateTagRequest.TagTranslationUpdateRequest("TagJap", "TagJ")
-        ))
+        val req = UpdateTagRequest(
+            name = "TagJap",
+            description = "TagJ",
+            Locale.JAPANESE
+        )
 
         val res = webTestClient.patch()
             .uri("/api/content/tags/${tag.key}?locale=de")
@@ -306,7 +437,7 @@ class TagControllerTest() : BaseIntegrationTest() {
         assertEquals(tagMapper.createTagResponse(updatedTag, Locale.GERMAN), res)
         assertEquals("TestDeutsch", res.name)
         assertEquals("Test", updatedTag.translations[Locale.ENGLISH]?.name)
-        assertEquals("New", updatedTag.translations[Locale.ENGLISH]?.description)
+        assertEquals("", updatedTag.translations[Locale.ENGLISH]?.description)
         assertEquals("TagJap", updatedTag.translations[Locale.JAPANESE]?.name)
         assertEquals("TagJ", updatedTag.translations[Locale.JAPANESE]?.description)
         assertEquals("TestDeutsch", updatedTag.translations[Locale.GERMAN]?.name)
@@ -322,10 +453,11 @@ class TagControllerTest() : BaseIntegrationTest() {
             )
         ))
 
-        val req = UpdateTagRequest(mapOf(
-            Locale.ENGLISH to UpdateTagRequest.TagTranslationUpdateRequest(null, "New"),
-            Locale.JAPANESE to UpdateTagRequest.TagTranslationUpdateRequest("TagJap", "TagJ")
-        ))
+        val req = UpdateTagRequest(
+            name = "TagJap",
+            description = "TagJ",
+            Locale.JAPANESE
+        )
 
         webTestClient.patch()
             .uri("/api/content/tags/${tag.key}")
@@ -351,10 +483,11 @@ class TagControllerTest() : BaseIntegrationTest() {
             )
         ))
 
-        val req = UpdateTagRequest(mapOf(
-            Locale.ENGLISH to UpdateTagRequest.TagTranslationUpdateRequest(null, "New"),
-            Locale.JAPANESE to UpdateTagRequest.TagTranslationUpdateRequest("TagJap", "TagJ")
-        ))
+        val req = UpdateTagRequest(
+            name = "TagJap",
+            description = "TagJ",
+            Locale.JAPANESE
+        )
 
         webTestClient.patch()
             .uri("/api/content/tags/${tag.key}")
@@ -405,10 +538,11 @@ class TagControllerTest() : BaseIntegrationTest() {
             )
         ))
 
-        val req = UpdateTagRequest(mapOf(
-            Locale.ENGLISH to UpdateTagRequest.TagTranslationUpdateRequest(null, "New"),
-            Locale.JAPANESE to UpdateTagRequest.TagTranslationUpdateRequest("TagJap", "TagJ")
-        ))
+        val req = UpdateTagRequest(
+            name = "TagJap",
+            description = "TagJ",
+            Locale.JAPANESE
+        )
 
         webTestClient.patch()
             .uri("/api/content/tags/tag")

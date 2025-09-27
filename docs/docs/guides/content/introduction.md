@@ -9,6 +9,20 @@ This guide assumes familiarity with the [Spring Framework](https://spring.io).
 If you are new to Spring, we recommend starting with their [official guides](https://spring.io/quickstart) to get up to speed.
 :::
 
+*Singularity* provides a very flexible framework to create custom content objects.
+**Articles** come out-of-the-box.
+
+## Configuration
+
+You need to set the URL pattern for content in your frontend.
+
+| Property                        | Type     | Description                                                                                                                                          | Default value                                              |
+|---------------------------------|----------|------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------|
+| singularity.content.content-url | `String` | The URL of content objects in your frontend. Please use the placeholders {contentType} and {contentKey} which will be autofilled by the application. | `http://localhost:4200/content/{contentType}/{contentKey}` |
+
+Let's say you set this property to `https://example.com/content/{contentType}/{contentKey}`.
+The `article` with a `key` of `my-cool-article` should be available in your frontend on the url
+`https://example.com/content/articles/my-cool-article`.
 
 ## Core Content Object Structure
 

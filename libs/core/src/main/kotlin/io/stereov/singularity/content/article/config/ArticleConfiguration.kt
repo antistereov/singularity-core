@@ -10,13 +10,13 @@ import io.stereov.singularity.content.article.service.ArticleManagementService
 import io.stereov.singularity.content.article.service.ArticleService
 import io.stereov.singularity.content.core.component.AccessCriteria
 import io.stereov.singularity.content.core.config.ContentConfiguration
+import io.stereov.singularity.content.core.properties.ContentProperties
 import io.stereov.singularity.content.invitation.service.InvitationService
 import io.stereov.singularity.content.tag.mapper.TagMapper
 import io.stereov.singularity.content.tag.service.TagService
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.file.image.service.ImageStore
 import io.stereov.singularity.global.properties.AppProperties
-import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.user.core.mapper.UserMapper
 import io.stereov.singularity.user.core.service.UserService
@@ -112,11 +112,11 @@ class ArticleConfiguration {
         invitationService: InvitationService,
         fileStorage: FileStorage,
         translateService: TranslateService,
-        uiProperties: UiProperties,
         userService: UserService,
         userMapper: UserMapper,
         articleMapper: ArticleMapper,
         imageStore: ImageStore,
+        contentProperties: ContentProperties
     ): ArticleManagementService {
         return ArticleManagementService(
             articleService,
@@ -126,9 +126,9 @@ class ArticleConfiguration {
             userService,
             userMapper,
             fileStorage,
-            uiProperties,
             articleMapper,
             imageStore,
+            contentProperties
         )
     }
 }

@@ -17,11 +17,11 @@ import io.stereov.singularity.content.core.dto.request.UpdateOwnerRequest
 import io.stereov.singularity.content.core.dto.response.ContentResponse
 import io.stereov.singularity.content.core.dto.response.ExtendedContentAccessDetailsResponse
 import io.stereov.singularity.content.core.model.ContentAccessRole
+import io.stereov.singularity.content.core.properties.ContentProperties
 import io.stereov.singularity.content.core.service.ContentManagementService
 import io.stereov.singularity.content.invitation.service.InvitationService
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.file.image.service.ImageStore
-import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.global.util.toSlug
 import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.user.core.mapper.UserMapper
@@ -42,9 +42,9 @@ class ArticleManagementService(
     override val userService: UserService,
     override val userMapper: UserMapper,
     private val fileStorage: FileStorage,
-    private val uiProperties: UiProperties,
     private val articleMapper: ArticleMapper,
     private val imageStore: ImageStore,
+    private val contentProperties: ContentProperties,
 ) : ContentManagementService<Article>() {
 
     override val logger = KotlinLogging.logger {}
@@ -53,7 +53,7 @@ class ArticleManagementService(
     suspend fun create(req: CreateArticleRequest, locale: Locale?): FullArticleResponse {
         logger.debug { "Creating article with title ${req.title}" }
 
-        contentService.requireEditorGroupMembership()
+        contentService.requireContributerGroupMembership()
         val user = authorizationService.getUser()
 
         val key = getUniqueKey(req.title.toSlug())
@@ -71,10 +71,11 @@ class ArticleManagementService(
     override suspend fun inviteUser(key: String, req: InviteUserToContentRequest, locale: Locale?): ExtendedContentAccessDetailsResponse {
         logger.debug { "Inviting user with email \"${req.email}\" to role ${req.role} on article with key \"$key\"" }
 
-        val article = contentService.findAuthorizedByKey(key, ContentAccessRole.EDITOR)
+        val article = contentService.findByKey(key)
         val title = translateService.translate(article, locale).translation.title
-        val url = "${uiProperties.baseUrl.removeSuffix("/")}/${article.path.removePrefix("/")}"
-
+        val url = contentProperties.contentUrl
+            .replace("{contentType}", "articles")
+            .replace("{contentKey}", key)
         return doInviteUser(key, req, title, url, locale)
     }
 

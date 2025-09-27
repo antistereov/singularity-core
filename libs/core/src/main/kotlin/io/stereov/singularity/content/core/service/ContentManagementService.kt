@@ -95,6 +95,11 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
             ?: throw InvalidInvitationException("No key claim found in invitation")
         val roleString = invitation.sensitive.claims["role"] as? String
             ?: throw InvalidInvitationException("No role claim found in invitation")
+        val invitedContentType = invitation.sensitive.claims["contentType"] as? String
+
+        if (invitedContentType != contentType)
+            throw InvalidInvitationException("Invitation does not belong to requested content type")
+
         val role = try {
             ContentAccessRole.fromString(roleString)
         } catch (_: Exception) {
@@ -104,9 +109,9 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
         val email = invitation.sensitive.email
 
         val user = userService.findByEmailOrNull(email)
-            ?: throw InvalidInvitationException("No user exists with email from invitation")
+            ?: throw DocumentNotFoundException("No user exists with email from invitation")
         val content = contentService.findByKeyOrNull(key)
-            ?: throw InvalidInvitationException("No content matched key from invitation")
+            ?: throw DocumentNotFoundException("No content matched key from invitation")
 
         content.share(ContentAccessSubject.USER, user.id.toString(), role)
         content.removeInvitation(invitation.id)
@@ -161,6 +166,12 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
         val content = contentService.findByKey(key)
 
         return extendedContentAccessDetails(content)
+    }
+
+    suspend fun deleteInvitation(contentKey: String, invitationId: ObjectId): T {
+        val content = contentService.findAuthorizedByKey(contentKey, ContentAccessRole.MAINTAINER)
+        content.access.invitations.remove(invitationId)
+        return contentService.save(content)
     }
 
     suspend fun extendedContentAccessDetails(content: T): ExtendedContentAccessDetailsResponse {

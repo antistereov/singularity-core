@@ -5,10 +5,10 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.just
 import io.stereov.singularity.test.config.MockMailSenderConfig
+import jakarta.mail.internet.MimeMessage
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
-import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
@@ -24,7 +24,7 @@ class BaseMailIntegrationTest : BaseIntegrationTest() {
     @BeforeEach
     fun init() {
         clearMocks(mailSender)
-        every { mailSender.send(any<SimpleMailMessage>()) } just Runs
+        every { mailSender.send(any<MimeMessage>()) } just Runs
     }
 
     companion object {

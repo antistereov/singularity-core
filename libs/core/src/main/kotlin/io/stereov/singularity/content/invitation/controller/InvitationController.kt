@@ -59,7 +59,11 @@ class InvitationController(
         responses = [
             ApiResponse(
                 responseCode = "200",
-                description = "The updated content access details of the object.",
+                description = "The content object the user was invited to. The response depends on the content object. " +
+                        "For [articles](https://singularity.stereov.io/docs/guides/content/articles) " +
+                        "it will return [`FullArticleResponse`](https://singularity.stereov.io/docs/api/schemas/fullarticleresponse)" +
+                        "and for [file metadata](https://singularity.stereov.io/docs/guides/file-storage/metadata) it will return " +
+                        "[`FileMetadataResponse`](https://singularity.stereov.io/docs/api/schemas/filemetadataresponse).",
             ),
             ApiResponse(
                 responseCode = "401",
@@ -70,7 +74,12 @@ class InvitationController(
                 responseCode = "403",
                 description = "AccessToken does permit [`MAINTAINER`](https://singularity.stereov.io/docs/guides/content/introduction#object-specific-roles-shared-state) access on this object.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            )
+            ),
+            ApiResponse(
+                responseCode = "404",
+                description = "No content object with `key` found.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
         ]
     )
     suspend fun inviteUserToContentObject(
@@ -114,7 +123,12 @@ class InvitationController(
                 responseCode = "401",
                 description = "Invitation `token` is invalid or expired.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            )
+            ),
+            ApiResponse(
+                responseCode = "404",
+                description = "No content object with `key` or no user with `userId` contained in invitation found",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
         ]
     )
     suspend fun acceptInvitationToContentObject(
@@ -163,13 +177,13 @@ class InvitationController(
             ),
             ApiResponse(
                 responseCode = "404",
-                description = "No invitation with given `id` found.",
+                description = "No invitation with given `id` found or no content document with `key` contained in invitation found.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
     )
     suspend fun deleteInvitationToContentObjectById(@PathVariable id: ObjectId): ResponseEntity<SuccessResponse> {
-        service.deleteById(id)
+        service.deleteInvitationById(id)
         return ResponseEntity.ok(SuccessResponse(true))
     }
 

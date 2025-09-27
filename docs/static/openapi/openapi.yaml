@@ -4126,7 +4126,11 @@ paths:
         required: true
       responses:
         "200":
-          description: The updated content access details of the object.
+          description: "The content object the user was invited to. The response depends\
+            \ on the content object. For [articles](https://singularity.stereov.io/docs/guides/content/articles)\
+            \ it will return [`FullArticleResponse`](https://singularity.stereov.io/docs/api/schemas/fullarticleresponse)and\
+            \ for [file metadata](https://singularity.stereov.io/docs/guides/file-storage/metadata)\
+            \ it will return [`FileMetadataResponse`](https://singularity.stereov.io/docs/api/schemas/filemetadataresponse)."
           content:
             '*/*':
               schema:
@@ -5387,10 +5391,6 @@ components:
           format: int32
         pageable:
           $ref: "#/components/schemas/PageableObject"
-        first:
-          type: boolean
-        last:
-          type: boolean
         size:
           type: integer
           format: int32
@@ -5406,6 +5406,10 @@ components:
         numberOfElements:
           type: integer
           format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
         empty:
           type: boolean
     PageableObject:
@@ -5456,10 +5460,6 @@ components:
           format: int32
         pageable:
           $ref: "#/components/schemas/PageableObject"
-        first:
-          type: boolean
-        last:
-          type: boolean
         size:
           type: integer
           format: int32
@@ -5475,6 +5475,10 @@ components:
         numberOfElements:
           type: integer
           format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
         empty:
           type: boolean
     PageTagResponse:
@@ -5488,10 +5492,6 @@ components:
           format: int32
         pageable:
           $ref: "#/components/schemas/PageableObject"
-        first:
-          type: boolean
-        last:
-          type: boolean
         size:
           type: integer
           format: int32
@@ -5507,6 +5507,10 @@ components:
         numberOfElements:
           type: integer
           format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
         empty:
           type: boolean
     PageFileMetadataResponse:
@@ -5520,10 +5524,6 @@ components:
           format: int32
         pageable:
           $ref: "#/components/schemas/PageableObject"
-        first:
-          type: boolean
-        last:
-          type: boolean
         size:
           type: integer
           format: int32
@@ -5539,6 +5539,10 @@ components:
         numberOfElements:
           type: integer
           format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
         empty:
           type: boolean
     ArticleOverviewResponse:
@@ -5605,10 +5609,6 @@ components:
           format: int32
         pageable:
           $ref: "#/components/schemas/PageableObject"
-        first:
-          type: boolean
-        last:
-          type: boolean
         size:
           type: integer
           format: int32
@@ -5624,6 +5624,10 @@ components:
         numberOfElements:
           type: integer
           format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
         empty:
           type: boolean
     AuthenticationStatusResponse:

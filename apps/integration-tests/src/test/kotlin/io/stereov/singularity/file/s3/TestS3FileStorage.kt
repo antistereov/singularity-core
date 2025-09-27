@@ -131,7 +131,7 @@ class TestS3FileStorage : BaseSpringBootTest() {
         val user = registerUser()
         val file = ClassPathResource("files/test-image.jpg").file
         val filePart = MockFilePart(file)
-        val key = FileKey("file1", extension = "jpg")
+        val key = FileKey("file1", extension = "jpg").key
 
         val req1 = FileUploadRequest.FilePartUpload(
             key = FileKey("file1_small", extension = "jpg"),
@@ -169,7 +169,7 @@ class TestS3FileStorage : BaseSpringBootTest() {
                 assertThat(it.responseBody).isEqualTo(file.readBytes())
             }
 
-        assertTrue(metadataService.existsByKey(key.key))
+        assertTrue(metadataService.existsByKey(key))
         assertTrue(metadataService.existsRenditionByKey(req1.key.key))
         assertTrue(metadataService.existsRenditionByKey(req2.key.key))
     }
@@ -210,7 +210,7 @@ class TestS3FileStorage : BaseSpringBootTest() {
             data = filePart,
         )
 
-        val upload = storage.uploadMultipleRenditions(key, mapOf("1" to req1, "2" to req2), user.info.id, true)
+        val upload = storage.uploadMultipleRenditions(key.key, mapOf("1" to req1, "2" to req2), user.info.id, true)
 
         webTestClient.get()
             .uri(upload.renditions["1"]!!.url)

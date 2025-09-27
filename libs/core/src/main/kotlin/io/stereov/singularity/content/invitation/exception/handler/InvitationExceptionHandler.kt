@@ -1,8 +1,8 @@
 package io.stereov.singularity.content.invitation.exception.handler
 
-import io.stereov.singularity.global.exception.BaseExceptionHandler
 import io.stereov.singularity.content.invitation.exception.InvitationException
 import io.stereov.singularity.content.invitation.exception.model.InvalidInvitationException
+import io.stereov.singularity.global.exception.BaseExceptionHandler
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -12,7 +12,7 @@ import org.springframework.web.server.ServerWebExchange
 class InvitationExceptionHandler : BaseExceptionHandler<InvitationException> {
 
     override fun getHttpStatus(ex: InvitationException) = when (ex) {
-        is InvalidInvitationException -> HttpStatus.FORBIDDEN
+        is InvalidInvitationException -> HttpStatus.UNAUTHORIZED
         else -> HttpStatus.INTERNAL_SERVER_ERROR
     }
 

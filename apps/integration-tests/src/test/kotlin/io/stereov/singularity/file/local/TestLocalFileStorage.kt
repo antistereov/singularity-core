@@ -154,7 +154,7 @@ class TestLocalFileStorage : BaseIntegrationTest() {
         val user = registerUser()
         val file = ClassPathResource("files/test-image.jpg").file
         val filePart = MockFilePart(file)
-        val key = FileKey("file1", extension = "jpg")
+        val key = "file1.jpg"
 
         val req1 = FileUploadRequest.FilePartUpload(
             key = FileKey("file1_small", extension = "jpg"),
@@ -176,11 +176,11 @@ class TestLocalFileStorage : BaseIntegrationTest() {
 
         assertTrue { file1.exists() }
         assertTrue { file2.exists() }
-        assertFalse { File(properties.fileDirectory, key.key).exists() }
+        assertFalse { File(properties.fileDirectory, key).exists() }
         assertThat(file1.readBytes()).isEqualTo(file.readBytes())
         assertThat(file2.readBytes()).isEqualTo(file.readBytes())
 
-        assertTrue(metadataService.existsByKey(key.key))
+        assertTrue(metadataService.existsByKey(key))
         assertTrue(metadataService.existsRenditionByKey(req1.key.key))
         assertTrue(metadataService.existsRenditionByKey(req2.key.key))
     }
@@ -288,7 +288,7 @@ class TestLocalFileStorage : BaseIntegrationTest() {
         val user = registerUser()
         val file = ClassPathResource("files/test-image.jpg").file
         val filePart = MockFilePart(file)
-        val key = FileKey("file1", extension = "jpg")
+        val key = "file1.jpg"
 
         val req1 = FileUploadRequest.FilePartUpload(
             key = FileKey("file1_small", extension = "jpg"),
@@ -307,7 +307,7 @@ class TestLocalFileStorage : BaseIntegrationTest() {
 
         val file1 = File(properties.fileDirectory, req1.key.key)
         val file2 = File(properties.fileDirectory, req2.key.key)
-        val nonExisting = File(properties.fileDirectory, key.key)
+        val nonExisting = File(properties.fileDirectory, key)
 
         assertTrue { file1.exists() }
         assertTrue { file2.exists() }
@@ -315,7 +315,7 @@ class TestLocalFileStorage : BaseIntegrationTest() {
         assertThat(file1.readBytes()).isEqualTo(file.readBytes())
         assertThat(file2.readBytes()).isEqualTo(file.readBytes())
 
-        assertTrue(metadataService.existsByKey(key.key))
+        assertTrue(metadataService.existsByKey(key))
         assertTrue(metadataService.existsRenditionByKey(req1.key.key))
         assertTrue(metadataService.existsRenditionByKey(req2.key.key))
 
@@ -324,7 +324,7 @@ class TestLocalFileStorage : BaseIntegrationTest() {
         assertFalse { file1.exists() }
         assertFalse { file2.exists() }
         assertFalse { nonExisting.exists() }
-        assertFalse(metadataService.existsByKey(key.key))
+        assertFalse(metadataService.existsByKey(key))
         assertFalse(metadataService.existsRenditionByKey(req1.key.key))
         assertFalse(metadataService.existsRenditionByKey(req2.key.key))
     }
@@ -342,7 +342,7 @@ class TestLocalFileStorage : BaseIntegrationTest() {
         val user = registerUser()
         val file = ClassPathResource("files/test-image.jpg").file
         val filePart = MockFilePart(file)
-        val key = FileKey("file1", extension = "jpg")
+        val key = "file1.jpg"
 
         val req1 = FileUploadRequest.FilePartUpload(
             key = FileKey("file1_small", extension = "jpg"),
@@ -361,7 +361,7 @@ class TestLocalFileStorage : BaseIntegrationTest() {
 
         val file1 = File(properties.fileDirectory, req1.key.key)
         val file2 = File(properties.fileDirectory, req2.key.key)
-        val nonExisting = File(properties.fileDirectory, key.key)
+        val nonExisting = File(properties.fileDirectory, key)
 
         assertTrue { file1.exists() }
         assertTrue { file2.exists() }
@@ -369,17 +369,17 @@ class TestLocalFileStorage : BaseIntegrationTest() {
         assertThat(file1.readBytes()).isEqualTo(file.readBytes())
         assertThat(file2.readBytes()).isEqualTo(file.readBytes())
 
-        assertTrue(metadataService.existsByKey(key.key))
+        assertTrue(metadataService.existsByKey(key))
         assertTrue(metadataService.existsRenditionByKey(req1.key.key))
         assertTrue(metadataService.existsRenditionByKey(req2.key.key))
 
         file1.delete()
-        fileStorage.exists(key.key)
+        fileStorage.exists(key)
 
         assertFalse { file1.exists() }
         assertFalse { file2.exists() }
         assertFalse { nonExisting.exists() }
-        assertFalse(metadataService.existsByKey(key.key))
+        assertFalse(metadataService.existsByKey(key))
         assertFalse(metadataService.existsRenditionByKey(req1.key.key))
         assertFalse(metadataService.existsRenditionByKey(req2.key.key))
     }

@@ -49,6 +49,7 @@ data class ContentAccessDetails(
 
     fun hasAccess(authentication: CustomAuthenticationToken, role: ContentAccessRole): Boolean {
         val isAdmin = authentication.roles.contains(Role.ADMIN)
+        val isOwner = authentication.userId == ownerId
 
         val userIsMaintainer = hasAccess(ContentAccessSubject.USER, authentication.userId.toString(), ContentAccessRole.MAINTAINER)
         val groupIsMaintainer = authentication.groups.any { groupId -> hasAccess(ContentAccessSubject.GROUP, groupId, ContentAccessRole.MAINTAINER) }
@@ -62,9 +63,9 @@ data class ContentAccessDetails(
         val isPublic = visibility == AccessType.PUBLIC
 
         return when (role) {
-            ContentAccessRole.VIEWER -> isAdmin || userIsMaintainer || groupIsMaintainer || userIsEditor || groupIsEditor || userIsViewer || groupIsViewer || isPublic
-            ContentAccessRole.EDITOR ->  isAdmin || userIsMaintainer || groupIsMaintainer || userIsEditor || groupIsEditor
-            ContentAccessRole.MAINTAINER -> isAdmin || userIsMaintainer || groupIsMaintainer
+            ContentAccessRole.VIEWER -> isAdmin || isOwner || userIsMaintainer || groupIsMaintainer || userIsEditor || groupIsEditor || userIsViewer || groupIsViewer || isPublic
+            ContentAccessRole.EDITOR ->  isAdmin || isOwner || userIsMaintainer || groupIsMaintainer || userIsEditor || groupIsEditor
+            ContentAccessRole.MAINTAINER -> isAdmin || isOwner || userIsMaintainer || groupIsMaintainer
         }
     }
 

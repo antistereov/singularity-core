@@ -11,6 +11,10 @@ This guide demonstrates how to create a new content type, `CoolStuff`, by integr
 
 It is possible to **invite** users to view, edit or maintain a content object.
 
+:::warning Email
+For application to work, email needs to be [enabled](../email/configuration.md) in your application.
+:::
+
 ## Configuration
 
 | Property                                                 | Type      | Description                                                                                                                                                     | Default value                                                                |

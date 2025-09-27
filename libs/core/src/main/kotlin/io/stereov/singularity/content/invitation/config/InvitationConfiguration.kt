@@ -14,7 +14,6 @@ import io.stereov.singularity.email.core.service.EmailService
 import io.stereov.singularity.email.template.service.TemplateService
 import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.global.properties.AppProperties
-import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.user.core.service.UserService
 import org.springframework.boot.autoconfigure.AutoConfiguration
@@ -49,8 +48,9 @@ class InvitationConfiguration {
         emailService: EmailService,
         translateService: TranslateService,
         userService: UserService,
-        uiProperties: UiProperties,
-        appProperties: AppProperties, invitationProperties: InvitationProperties
+        appProperties: AppProperties,
+        invitationProperties: InvitationProperties,
+        applicationContext: ApplicationContext
     ): InvitationService {
         return InvitationService(
             repository,
@@ -62,9 +62,9 @@ class InvitationConfiguration {
             emailService,
             translateService,
             userService,
-            uiProperties,
             appProperties,
-            invitationProperties
+            invitationProperties,
+            applicationContext
         )
     }
 
