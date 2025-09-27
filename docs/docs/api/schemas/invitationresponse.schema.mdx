@@ -1,0 +1,33 @@
+---
+id: invitationresponse
+title: "InvitationResponse"
+description: ""
+sidebar_label: "InvitationResponse"
+hide_title: true
+hide_table_of_contents: true
+schema: true
+sample: {"id":{"timestamp":0,"date":"2024-07-29T15:51:28.071Z"},"issuedAt":"2024-07-29T15:51:28.071Z","expiresAt":"2024-07-29T15:51:28.071Z","email":"string","claims":{}}
+custom_edit_url: null
+---
+
+import Schema from "@theme/Schema";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"InvitationResponse"}
+>
+</Heading>
+
+
+
+
+
+<Schema
+  schema={{"type":"object","properties":{"id":{"type":"object","properties":{"timestamp":{"type":"integer","format":"int32"},"date":{"type":"string","format":"date-time"}},"title":"ObjectId"},"issuedAt":{"type":"string","format":"date-time"},"expiresAt":{"type":"string","format":"date-time"},"email":{"type":"string"},"claims":{"type":"object","additionalProperties":{}}},"required":["claims","email","expiresAt","id","issuedAt"],"title":"InvitationResponse"}}
+  schemaType={"response"}
+>
+  
+</Schema>
+            

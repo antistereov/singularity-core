@@ -42,7 +42,7 @@ class EmailVerificationController(
             
             You can resend this email through the endpoint [`POST /api/auth/email/verification/send`](https://singularity.stereov.io/docs/api/send-email-verification-email).
 
-            **Locale:**
+            ### Locale
             
             A locale can be specified for this request. 
             The email will be sent in the specified locale.
@@ -51,7 +51,7 @@ class EmailVerificationController(
             If no locale is specified, the applications default locale will be used.
             You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
 
-            **Note:** If email is disabled, there is no way to verify a user's email address.
+            >**Note:** If email is disabled, there is no way to verify a user's email address.
         """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/docs/auth/authentication#email-verification"),
         responses = [
@@ -89,7 +89,7 @@ class EmailVerificationController(
             
             You can find more information about email verification [here](https://singularity.stereov.io/docs/guides/auth/authentication#email-verification).
             
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
         """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/docs/auth/authentication#email-verification"),
@@ -131,9 +131,9 @@ class EmailVerificationController(
             
             You can perform the verification using the token through the endpoint [`POST /api/auth/email/verification`](https://singularity.stereov.io/docs/api/verify-email).
             
-            **Note:** If email is disabled, there is no way to verify a user's email address.
+            >**Note:** If email is disabled, there is no way to verify a user's email address.
             
-            **Locale:**
+            ### Locale
             
             A locale can be specified for this request. 
             The email will be sent in the specified locale.
@@ -142,13 +142,13 @@ class EmailVerificationController(
             If no locale is specified, the applications default locale will be used.
             You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
 
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
             
-            **Note:** After each email, a cooldown will be started.
-            You can check the status of the cooldown through the endpoint [`GET /api/auth/email/verification/cooldown`](https://singularity.stereov.io/docs/api/get-remaining-email-verification-cooldown).
-            When the cooldown is active, no new verification email can be sent.
-            The cooldown can be configured [here](https://singularity.stereov.io/docs/guides/email/configuration).
+            >**Note:** After each email, a cooldown will be started.
+            >You can check the status of the cooldown through the endpoint [`GET /api/auth/email/verification/cooldown`](https://singularity.stereov.io/docs/api/get-remaining-email-verification-cooldown).
+            >When the cooldown is active, no new verification email can be sent.
+            >The cooldown can be configured [here](https://singularity.stereov.io/docs/guides/email/configuration).
         """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/docs/auth/authentication#email-verification"),
         security = [

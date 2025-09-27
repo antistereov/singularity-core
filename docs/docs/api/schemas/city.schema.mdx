@@ -1,0 +1,33 @@
+---
+id: city
+title: "City"
+description: ""
+sidebar_label: "City"
+hide_title: true
+hide_table_of_contents: true
+schema: true
+sample: {"confidence":0,"geoname_id":0,"names":{}}
+custom_edit_url: null
+---
+
+import Schema from "@theme/Schema";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"City"}
+>
+</Heading>
+
+
+
+
+
+<Schema
+  schema={{"type":"object","properties":{"confidence":{"type":"integer","format":"int32"},"geoname_id":{"type":"integer","format":"int64"},"names":{"type":"object","additionalProperties":{"type":"string"}}},"title":"City"}}
+  schemaType={"response"}
+>
+  
+</Schema>
+            

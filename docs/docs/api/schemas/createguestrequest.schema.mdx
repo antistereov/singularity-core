@@ -1,0 +1,33 @@
+---
+id: createguestrequest
+title: "CreateGuestRequest"
+description: ""
+sidebar_label: "CreateGuestRequest"
+hide_title: true
+hide_table_of_contents: true
+schema: true
+sample: {"name":"string","session":{"browser":"Chrome","os":"WIndows"}}
+custom_edit_url: null
+---
+
+import Schema from "@theme/Schema";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"CreateGuestRequest"}
+>
+</Heading>
+
+
+
+
+
+<Schema
+  schema={{"type":"object","properties":{"name":{"type":"string"},"session":{"type":"object","properties":{"browser":{"type":"string","description":"The name of the browser used.","example":"Chrome"},"os":{"type":"string","description":"The operating system of the device.","example":"WIndows"}},"title":"SessionInfoRequest"}},"required":["name"],"title":"CreateGuestRequest"}}
+  schemaType={"response"}
+>
+  
+</Schema>
+            

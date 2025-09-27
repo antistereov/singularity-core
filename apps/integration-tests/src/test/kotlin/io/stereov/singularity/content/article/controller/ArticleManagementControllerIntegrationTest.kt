@@ -79,7 +79,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         assertEquals(0, res.totalElements)
     }
     @Test fun `getArticles works with creator`() = runTest {
-        val user = registerUser(groups = listOf(KnownGroups.EDITOR))
+        val user = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
         val article = save(creator = user)
         article.access.visibility = AccessType.PRIVATE
 
@@ -217,7 +217,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         assertEquals(article.id, res.content.first().id)
     }
     @Test fun `getArticles correctly filters tags`() = runTest {
-        val user = registerUser(groups = listOf(KnownGroups.EDITOR))
+        val user = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
         val article = save(creator = user)
         val tag = tagService.create(CreateTagRequest("test", name = "Test", locale = null))
 
@@ -240,7 +240,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         assertEquals(article.id, res.content.first().id)
     }
     @Test fun `getArticles correctly filters when multiple tags`() = runTest {
-        val user = registerUser(groups = listOf(KnownGroups.EDITOR))
+        val user = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
         val article = save(creator = user)
         val tag = tagService.create(CreateTagRequest("test", name = "Test", locale = null))
         val anotherTag = tagService.create(CreateTagRequest("test2", name = "Another Test", locale = null))
@@ -359,7 +359,7 @@ class ArticleManagementControllerIntegrationTest : BaseContentTest() {
         assertEquals(0, res.content.size)
     }
     @Test fun `getLatestArticles works with creator`() = runTest {
-        val user = registerUser(groups = listOf(KnownGroups.EDITOR))
+        val user = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
         val article = save(creator = user)
         article.access.visibility = AccessType.PRIVATE
         article.state = ArticleState.PUBLISHED

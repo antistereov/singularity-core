@@ -1,0 +1,33 @@
+---
+id: totprecoveryrequest
+title: "TotpRecoveryRequest"
+description: ""
+sidebar_label: "TotpRecoveryRequest"
+hide_title: true
+hide_table_of_contents: true
+schema: true
+sample: {"code":"string","session":{"browser":"Chrome","os":"WIndows"}}
+custom_edit_url: null
+---
+
+import Schema from "@theme/Schema";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"TotpRecoveryRequest"}
+>
+</Heading>
+
+
+
+
+
+<Schema
+  schema={{"type":"object","properties":{"code":{"type":"string"},"session":{"type":"object","properties":{"browser":{"type":"string","description":"The name of the browser used.","example":"Chrome"},"os":{"type":"string","description":"The operating system of the device.","example":"WIndows"}},"title":"SessionInfoRequest"}},"required":["code"],"title":"TotpRecoveryRequest"}}
+  schemaType={"response"}
+>
+  
+</Schema>
+            

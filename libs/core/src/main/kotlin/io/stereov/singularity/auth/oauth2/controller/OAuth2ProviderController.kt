@@ -42,7 +42,7 @@ class OAuth2ProviderController(
             You can learn more about connecting OAuth2 providers to existing accounts 
             [here](https://singularity.stereov.io/docs/guides/auth/oauth2#connecting-an-oauth2-provider-to-an-existing-account).
             
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
             - A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
               is required. This token should match user and session contained in the `AccessToken`.

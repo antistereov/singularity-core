@@ -1,0 +1,33 @@
+---
+id: contentaccessdetailsresponse
+title: "ContentAccessDetailsResponse"
+description: ""
+sidebar_label: "ContentAccessDetailsResponse"
+hide_title: true
+hide_table_of_contents: true
+schema: true
+sample: {"ownerId":{"timestamp":0,"date":"2024-07-29T15:51:28.071Z"},"visibility":"PRIVATE","canEdit":true,"canDelete":true}
+custom_edit_url: null
+---
+
+import Schema from "@theme/Schema";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"ContentAccessDetailsResponse"}
+>
+</Heading>
+
+
+
+
+
+<Schema
+  schema={{"type":"object","properties":{"ownerId":{"type":"object","properties":{"timestamp":{"type":"integer","format":"int32"},"date":{"type":"string","format":"date-time"}},"title":"ObjectId"},"visibility":{"type":"string","enum":["PRIVATE","PUBLIC","SHARED"]},"canEdit":{"type":"boolean"},"canDelete":{"type":"boolean"}},"required":["canDelete","canEdit","ownerId","visibility"],"title":"ContentAccessDetailsResponse"}}
+  schemaType={"response"}
+>
+  
+</Schema>
+            

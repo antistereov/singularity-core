@@ -28,7 +28,7 @@ class BaseContentTest : BaseIntegrationTest() {
     }
 
     suspend fun save(creator: TestRegisterResponse? = null, title: String? = null): Article {
-        val actualUser = creator ?: registerUser(groups = listOf(KnownGroups.EDITOR))
+        val actualUser = creator ?: registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
         val req = CreateArticleRequest(Locale.ENGLISH, title ?: "test", "", "")
         val res = webTestClient.post()
             .uri("/api/content/articles")

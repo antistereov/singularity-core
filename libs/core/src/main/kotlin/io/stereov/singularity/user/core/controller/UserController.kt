@@ -85,7 +85,7 @@ class UserController(
             * **`lastActiveAfter`:** A date the users should be last active after.
             * **`lastActiveBefore`:** A date the users should be last active before.
             
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
               with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
         """,
@@ -151,7 +151,7 @@ class UserController(
             
             You can find more information about user management [here](https://singularity.stereov.io/docs/guides/users/managing-users).
             
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
               with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
         """,

@@ -15,7 +15,12 @@ import io.stereov.singularity.auth.twofactor.controller.EmailAuthenticationContr
 import io.stereov.singularity.auth.twofactor.controller.TotpAuthenticationController
 import io.stereov.singularity.auth.twofactor.controller.TwoFactorAuthenticationController
 import io.stereov.singularity.auth.twofactor.model.token.TwoFactorTokenType
+import io.stereov.singularity.content.article.controller.ArticleController
+import io.stereov.singularity.content.article.controller.ArticleManagementController
+import io.stereov.singularity.content.core.controller.ContentManagementController
+import io.stereov.singularity.content.invitation.controller.InvitationController
 import io.stereov.singularity.content.tag.controller.TagController
+import io.stereov.singularity.file.core.controller.FileMetadataController
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.user.core.controller.UserController
 import io.stereov.singularity.user.settings.controller.UserSettingsController
@@ -136,10 +141,14 @@ class OpenApiConfig() {
             "Sessions",
             "Roles",
             "Groups",
-            "Manging Users",
+            "Managing Users",
             "Profile Management",
+            "Security",
+            "Articles",
+            "File Metadata",
+            "Content Management",
+            "Invitations",
             "Tags",
-            "Invitations"
         )
 
         val sortedTags = mutableListOf<Tag>()
@@ -259,14 +268,52 @@ class OpenApiConfig() {
             UserSettingsController::deleteAuthorizedUser.name
         ))
 
+        // Articles
+
+        sortedOperationIds.addAll(listOf(
+            ArticleManagementController::createArticle.name,
+
+            ArticleController::getArticleByKey.name,
+            ArticleController::getArticles.name,
+
+            ArticleManagementController::updateArticle.name,
+            ArticleManagementController::updateArticleState.name,
+            ArticleManagementController::updateArticleImage.name,
+        ))
+
+        // File Metadata
+
+        sortedOperationIds.addAll(listOf(
+            FileMetadataController::getFileMetadataByKey.name,
+            FileMetadataController::getFileMetadata.name,
+        ))
+
+        // Content Management
+
+        sortedOperationIds.addAll(listOf(
+            ContentManagementController::getContentObjectAccessDetails.name,
+            ContentManagementController::updateContentObjectOwner.name,
+            ContentManagementController::updateContentObjectAccess.name,
+            ContentManagementController::updateContentObjectTrustedState.name,
+            ContentManagementController::deleteContentObjectByKey.name
+        ))
+
         // Tags
 
         sortedOperationIds.addAll(listOf(
             TagController::createTag.name,
-            TagController::findTagByKey.name,
-            TagController::findTags.name,
+            TagController::getTagByKey.name,
+            TagController::getTags.name,
             TagController::updateTag.name,
             TagController::deleteTag.name,
+        ))
+
+        // Invitations
+
+        sortedOperationIds.addAll(listOf(
+            InvitationController::inviteUserToContentObject.name,
+            InvitationController::acceptInvitationToContentObject.name,
+            InvitationController::deleteInvitationToContentObjectById.name
         ))
 
         val allOperations = mutableListOf<Triple<String, PathItem.HttpMethod, Operation>>()

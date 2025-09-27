@@ -11,8 +11,10 @@ import io.stereov.singularity.content.article.mapper.ArticleMapper
 import io.stereov.singularity.content.article.model.Article
 import io.stereov.singularity.content.article.model.ArticleTranslation
 import io.stereov.singularity.content.core.dto.request.AcceptInvitationToContentRequest
-import io.stereov.singularity.content.core.dto.request.ChangeContentVisibilityRequest
 import io.stereov.singularity.content.core.dto.request.InviteUserToContentRequest
+import io.stereov.singularity.content.core.dto.request.UpdateContentVisibilityRequest
+import io.stereov.singularity.content.core.dto.request.UpdateOwnerRequest
+import io.stereov.singularity.content.core.dto.response.ContentResponse
 import io.stereov.singularity.content.core.dto.response.ExtendedContentAccessDetailsResponse
 import io.stereov.singularity.content.core.model.ContentAccessRole
 import io.stereov.singularity.content.core.service.ContentManagementService
@@ -25,11 +27,13 @@ import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.user.core.mapper.UserMapper
 import io.stereov.singularity.user.core.service.UserService
 import org.bson.types.ObjectId
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
+@ConditionalOnProperty(prefix = "singularity.content.articles", value = ["enable"], havingValue = "true", matchIfMissing = true)
 class ArticleManagementService(
     override val contentService: ArticleService,
     override val authorizationService: AuthorizationService,
@@ -44,7 +48,7 @@ class ArticleManagementService(
 ) : ContentManagementService<Article>() {
 
     override val logger = KotlinLogging.logger {}
-    override val contentKey = "articles"
+    override val contentType = "articles"
 
     suspend fun create(req: CreateArticleRequest, locale: Locale?): FullArticleResponse {
         logger.debug { "Creating article with title ${req.title}" }
@@ -156,7 +160,7 @@ class ArticleManagementService(
         return articleMapper.createFullResponse(updatedArticle, locale)
     }
 
-    override suspend fun changeVisibility(key: String, req: ChangeContentVisibilityRequest, locale: Locale?): FullArticleResponse {
+    override suspend fun changeVisibility(key: String, req: UpdateContentVisibilityRequest, locale: Locale?): FullArticleResponse {
         logger.debug { "Changing visibility of article with key \"$key\"" }
 
         val article = doChangeVisibility(key, req)
@@ -169,6 +173,12 @@ class ArticleManagementService(
         return if (id != existingArticle.id) {
             "$baseKey-${UUID.randomUUID().toString().substring(0, 8)}"
         } else baseKey
+    }
+
+    override suspend fun updateOwner(key: String, req: UpdateOwnerRequest, locale: Locale?): ContentResponse<Article> {
+        val article = doUpdateOwner(key, req)
+
+        return articleMapper.createFullResponse(article, locale)
     }
 
 }

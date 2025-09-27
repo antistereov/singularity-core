@@ -1,0 +1,33 @@
+---
+id: twofactorsetupresponse
+title: "TwoFactorSetupResponse"
+description: ""
+sidebar_label: "TwoFactorSetupResponse"
+hide_title: true
+hide_table_of_contents: true
+schema: true
+sample: {"secret":"string","totpAuthUrl":"string","recoveryCodes":["string"],"token":"string"}
+custom_edit_url: null
+---
+
+import Schema from "@theme/Schema";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"TwoFactorSetupResponse"}
+>
+</Heading>
+
+
+
+
+
+<Schema
+  schema={{"type":"object","properties":{"secret":{"type":"string"},"totpAuthUrl":{"type":"string"},"recoveryCodes":{"type":"array","items":{"type":"string"}},"token":{"type":"string"}},"required":["recoveryCodes","secret","token","totpAuthUrl"],"title":"TwoFactorSetupResponse"}}
+  schemaType={"response"}
+>
+  
+</Schema>
+            

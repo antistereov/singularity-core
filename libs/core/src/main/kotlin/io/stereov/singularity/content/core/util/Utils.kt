@@ -8,6 +8,6 @@ import org.springframework.context.ApplicationContext
 fun ApplicationContext.findContentManagementService(contentType: String): ContentManagementService<*> {
     return this.getBeansOfType<ContentManagementService<*>>()
         .values
-        .firstOrNull { it.contentKey.contentEquals(contentType, true) }
+        .firstOrNull { it.contentType.contentEquals(contentType, true) }
         ?: throw ContentTypeNotFoundException(contentType)
 }

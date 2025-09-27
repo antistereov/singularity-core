@@ -40,7 +40,7 @@ class IdentityProviderController(
             Users can connect multiple OAuth2 providers to their account.
             You can learn more about this [here](https://singularity.stereov.io/docs/guides/auth/oauth2).
             
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
         """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/oauth2#getting-connected-providers"),
@@ -75,10 +75,10 @@ class IdentityProviderController(
             
             You can learn more about this [here](https://singularity.stereov.io/docs/guides/auth/oauth2#adding-password-authentication).
             
-            **Requirements:**
+            ### Requirements
             - The user registered via an OAuth2 provider.
             
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
             - A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
               is required. This token should match user and session contained in the `AccessToken`.
@@ -125,14 +125,14 @@ class IdentityProviderController(
         description = """
             Delete an identity provider from the connected identity providers of the current user.
             
-            **Requirements:**
+            ### Requirements
             - You are not allowed to delete the password identity or the only existing identity.
             
             A [security alert](https://singularity.stereov.io/docs/guides/auth/security-alerts#oauth2-specific-alerts)
             will be sent to the user's email if this setting is enabled and
             email is [enabled and configured correctly](https://singularity.stereov.io/docs/guides/email/configuration).
             
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
             - A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
               is required. This token should match user and session contained in the `AccessToken`.

@@ -1,0 +1,33 @@
+---
+id: creategrouprequest
+title: "CreateGroupRequest"
+description: ""
+sidebar_label: "CreateGroupRequest"
+hide_title: true
+hide_table_of_contents: true
+schema: true
+sample: {"key":"pilots","translations":{"en":{"name":"Pilots","description":"People who can fly"},"de":{"name":"Piloten","description":"Personen, die fliegen können"}}}
+custom_edit_url: null
+---
+
+import Schema from "@theme/Schema";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"CreateGroupRequest"}
+>
+</Heading>
+
+
+
+
+
+<Schema
+  schema={{"type":"object","properties":{"key":{"type":"string","description":"A unique key for the group.","example":"pilots"},"translations":{"type":"object","additionalProperties":{"type":"object","properties":{"name":{"type":"string"},"description":{"type":"string"}},"required":["description","name"],"title":"GroupTranslation"},"description":"A map of locale to group translation.","example":{"en":{"name":"Pilots","description":"People who can fly"},"de":{"name":"Piloten","description":"Personen, die fliegen können"}}}},"required":["key","translations"],"title":"CreateGroupRequest"}}
+  schemaType={"response"}
+>
+  
+</Schema>
+            

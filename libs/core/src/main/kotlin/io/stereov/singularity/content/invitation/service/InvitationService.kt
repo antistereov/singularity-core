@@ -5,6 +5,7 @@ import io.stereov.singularity.content.invitation.exception.model.InvalidInvitati
 import io.stereov.singularity.content.invitation.model.EncryptedInvitationDocument
 import io.stereov.singularity.content.invitation.model.InvitationDocument
 import io.stereov.singularity.content.invitation.model.SensitiveInvitationData
+import io.stereov.singularity.content.invitation.properties.InvitationProperties
 import io.stereov.singularity.content.invitation.repository.InvitationRepository
 import io.stereov.singularity.database.encryption.model.Encrypted
 import io.stereov.singularity.database.encryption.service.EncryptionSecretService
@@ -40,6 +41,7 @@ class InvitationService(
     private val userService: UserService,
     private val uiProperties: UiProperties,
     private val appProperties: AppProperties,
+    private val invitationProperties: InvitationProperties,
 ) : SensitiveCrudService<SensitiveInvitationData, InvitationDocument, EncryptedInvitationDocument>() {
 
     override val encryptedDocumentClazz = EncryptedInvitationDocument::class.java
@@ -71,16 +73,21 @@ class InvitationService(
     }
 
     suspend fun invite(
+        contentType: String,
+        contentKey: String,
         email: String,
         inviterName: String,
         invitedTo: String,
-        acceptPath: String,
         claims: Map<String, Any>,
         issuedAt: Instant = Instant.now(),
         expiresInSeconds: Long = 60 * 60 * 24 * 7, // 1 week
         locale : Locale?,
     ): InvitationDocument {
         logger.debug { "Inviting \"$email\" with claims: $claims" }
+
+        val acceptUrl = invitationProperties.acceptUrl
+            .replace("{contentType}", contentType)
+            .replace("{contentKey}", contentKey)
 
         val actualLocale = locale ?: appProperties.locale
 
@@ -92,7 +99,7 @@ class InvitationService(
             "inviter_name" to inviterName,
             "invited_to" to invitedTo,
             "expiration_days" to (expiresInSeconds / 60 / 60 / 24).toInt(),
-            "accept_url" to uiProperties.baseUrl.removeSuffix("/") + "/" + acceptPath.removePrefix("/"),
+            "accept_url" to acceptUrl,
             "accept_token" to token.value
         )
         val template = TemplateBuilder
@@ -101,8 +108,9 @@ class InvitationService(
             .replacePlaceholders(templateService.getPlaceholders(placeholders))
             .build()
 
-        // TODO: Register user when invited
-        if (userService.existsByEmail(email)) emailService.sendEmail(email, subject, template, actualLocale)
+        if (userService.existsByEmail(email) || invitationProperties.allowUnregisterdUsers) {
+            emailService.sendEmail(email, subject, template, actualLocale)
+        }
 
         return invitation
     }

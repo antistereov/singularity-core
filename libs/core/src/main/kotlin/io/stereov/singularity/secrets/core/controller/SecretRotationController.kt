@@ -36,7 +36,7 @@ class SecretRotationController(
             
             You can learn more about key rotation [here](https://singularity.stereov.io/docs/guides/secret-store/basics#secret-rotation).
             
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
               with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
         """,
@@ -77,7 +77,7 @@ class SecretRotationController(
             
             You can learn more about key rotation [here](https://singularity.stereov.io/docs/guides/secret-store/basics#secret-rotation).
             
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
               with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
         """,

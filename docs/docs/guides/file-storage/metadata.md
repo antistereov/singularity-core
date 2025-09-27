@@ -26,7 +26,7 @@ These endpoints return only the metadata that is accessible by the requester.
 You can learn more [here](../content/introduction.md#authorization-logic).
 :::
 
-* You can request a file metadata file a file's `key` through the endpoint
+* You can request a file metadata by its `key` through the endpoint
   [`GET /api/content/files/{key}`](../../api/get-file-metadata-by-key.api.mdx).
 * You can request and filter file metadata through the endpoint
   [`GET /api/content/files`](../../api/get-file-metadata.api.mdx).
@@ -54,7 +54,7 @@ The **access** can be updated through the endpoint:
 
 The **trusted state** can be updated through the endpoint
 * **Endpoint:**  [`PUT /api/content/files/{key}/trusted`](../../api/update-content-object-trusted-state.api.mdx)
-* **Requirements:** Only [`ADMIN`](../auth/roles.md#admins) can perform this action.
+* **Requirements:** Only [`ADMIN`](../auth/roles.md#admins)s can perform this action.
 
 ### Deleting File Metadata
 

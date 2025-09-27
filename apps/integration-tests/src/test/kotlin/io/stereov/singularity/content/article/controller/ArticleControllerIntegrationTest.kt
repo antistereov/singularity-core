@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test
 class ArticleControllerIntegrationTest : BaseContentTest() {
 
     @Test fun `setTrusted can only be called by an admin`() = runTest {
-        val user = registerUser(groups = listOf(KnownGroups.EDITOR))
+        val user = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
         val article = save(creator = user)
 
         webTestClient.put()
@@ -24,7 +24,7 @@ class ArticleControllerIntegrationTest : BaseContentTest() {
     }
 
     @Test fun `setTrusted can works`() = runTest {
-        val user = registerUser(roles = listOf(Role.USER, Role.ADMIN), groups = listOf(KnownGroups.EDITOR))
+        val user = registerUser(roles = listOf(Role.USER, Role.ADMIN), groups = listOf(KnownGroups.CONTRIBUTOR))
         val article = save(creator = user)
 
         assertFalse(articleService.findByKey(article.key).trusted)

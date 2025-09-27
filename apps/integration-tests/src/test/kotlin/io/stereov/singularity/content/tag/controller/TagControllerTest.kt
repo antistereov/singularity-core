@@ -27,7 +27,7 @@ class TagControllerTest() : BaseIntegrationTest() {
     lateinit var tagMapper: TagMapper
 
     @Test fun `create works`() = runTest {
-        val user = registerUser(groups = listOf(KnownGroups.EDITOR))
+        val user = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
 
         val res = webTestClient.post()
             .uri("/api/content/tags")
@@ -48,7 +48,7 @@ class TagControllerTest() : BaseIntegrationTest() {
         assertThat(tagMapper.createTagResponse(foundTag, null)).isEqualTo(res)
     }
     @Test fun `create works with another locale`() = runTest {
-        val user = registerUser(groups = listOf(KnownGroups.EDITOR))
+        val user = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
 
         val res = webTestClient.post()
             .uri("/api/content/tags")
@@ -69,7 +69,7 @@ class TagControllerTest() : BaseIntegrationTest() {
         assertThat(tagMapper.createTagResponse(foundTag, null)).isEqualTo(res)
     }
     @Test fun `create requires new key`() = runTest {
-        val user = registerUser(groups = listOf(KnownGroups.EDITOR))
+        val user = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
 
         tagService.create(CreateTagRequest("test", name = "Test", description = "Test", locale = null))
 
@@ -112,7 +112,7 @@ class TagControllerTest() : BaseIntegrationTest() {
         assertTrue(tagService.findAll().toList().isEmpty())
     }
     @Test fun `create requires body`() = runTest {
-        val user = registerUser(groups = listOf(KnownGroups.EDITOR))
+        val user = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
 
         val res = webTestClient.post()
             .uri("/api/content/tags")
@@ -208,7 +208,7 @@ class TagControllerTest() : BaseIntegrationTest() {
     }
 
     @Test fun `update works`() = runTest {
-        val user = registerUser(groups = listOf(KnownGroups.EDITOR))
+        val user = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
         val tag = tagService.save(TagDocument(
             key = "test",
             translations = mutableMapOf(
@@ -246,7 +246,7 @@ class TagControllerTest() : BaseIntegrationTest() {
 
     }
     @Test fun `update with new lang requires title`() = runTest {
-        val user = registerUser(groups = listOf(KnownGroups.EDITOR))
+        val user = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
         val tag = tagService.save(TagDocument(
             key = "test",
             translations = mutableMapOf(
@@ -276,7 +276,7 @@ class TagControllerTest() : BaseIntegrationTest() {
         assertEquals("", updatedTag.translations[Locale.GERMAN]?.description)
     }
     @Test fun `update works with another locale`() = runTest {
-        val user = registerUser(groups = listOf(KnownGroups.EDITOR))
+        val user = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
         val tag = tagService.save(TagDocument(
             key = "test",
             translations = mutableMapOf(
@@ -372,7 +372,7 @@ class TagControllerTest() : BaseIntegrationTest() {
         assertEquals("", updatedTag.translations[Locale.GERMAN]?.description)
     }
     @Test fun `update requires body`() = runTest {
-        val user = registerUser(groups = listOf(KnownGroups.EDITOR))
+        val user = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
         val tag = tagService.save(TagDocument(
             key = "test",
             translations = mutableMapOf(
@@ -396,7 +396,7 @@ class TagControllerTest() : BaseIntegrationTest() {
         assertEquals("", updatedTag.translations[Locale.GERMAN]?.description)
     }
     @Test fun `update requires tag`() = runTest {
-        val user = registerUser(groups = listOf(KnownGroups.EDITOR))
+        val user = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
         val tag = tagService.save(TagDocument(
             key = "test",
             translations = mutableMapOf(
@@ -427,7 +427,7 @@ class TagControllerTest() : BaseIntegrationTest() {
     }
 
     @Test fun `delete works`() = runTest {
-        val user = registerUser(groups = listOf(KnownGroups.EDITOR))
+        val user = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
         val tag = tagService.save(TagDocument(
             key = "test",
             translations = mutableMapOf(
@@ -479,7 +479,7 @@ class TagControllerTest() : BaseIntegrationTest() {
         assertFalse(tagService.findAll().toList().isEmpty())
     }
     @Test fun `delete requires tag`() = runTest {
-        val user = registerUser(groups = listOf(KnownGroups.EDITOR))
+        val user = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
         tagService.save(TagDocument(
             key = "test",
             translations = mutableMapOf(

@@ -1,0 +1,33 @@
+---
+id: locationinfo
+title: "LocationInfo"
+description: ""
+sidebar_label: "LocationInfo"
+hide_title: true
+hide_table_of_contents: true
+schema: true
+sample: {"latitude":0,"longitude":0,"cityName":"string","countryCode":"string"}
+custom_edit_url: null
+---
+
+import Schema from "@theme/Schema";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"LocationInfo"}
+>
+</Heading>
+
+
+
+
+
+<Schema
+  schema={{"type":"object","properties":{"latitude":{"type":"number","format":"double"},"longitude":{"type":"number","format":"double"},"cityName":{"type":"string"},"countryCode":{"type":"string"}},"required":["countryCode","latitude","longitude"],"title":"LocationInfo"}}
+  schemaType={"response"}
+>
+  
+</Schema>
+            
