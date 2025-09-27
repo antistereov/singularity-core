@@ -104,22 +104,21 @@ class TagService(
 
         val tag = findByKey(key)
         val updatedTranslations = mutableMapOf<Locale, TagTranslation>()
+        val actualLocale = req.locale ?: appProperties.locale
 
-        req.translations.forEach { (locale, updateReq) ->
-            val existing = tag.translations[locale]
+        val existing = tag.translations[actualLocale]
 
-            if (existing != null) {
-                updatedTranslations[locale] = TagTranslation(
-                    updateReq.name ?: existing.name,
-                    updateReq.description ?: existing.description
-                )
-            } else {
-                updatedTranslations[locale] = TagTranslation(
-                    updateReq.name
-                        ?: throw InvalidUpdateTagRequest("Failed to add new translation $locale for tag \"$key\": tag name not specified"),
-                    updateReq.description ?: ""
-                )
-            }
+        if (existing != null) {
+            updatedTranslations[actualLocale] = TagTranslation(
+                req.name ?: existing.name,
+                req.description ?: existing.description
+            )
+        } else {
+            updatedTranslations[actualLocale] = TagTranslation(
+                req.name
+                    ?: throw InvalidUpdateTagRequest("Failed to add new translation $actualLocale for tag \"$key\": tag name not specified"),
+                req.description ?: ""
+            )
         }
 
         tag.translations.putAll(updatedTranslations)

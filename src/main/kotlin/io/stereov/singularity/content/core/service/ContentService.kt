@@ -49,7 +49,7 @@ abstract class ContentService<T: ContentDocument<T>> : CrudService<T>  {
     suspend fun requireEditorGroupMembership() {
         logger.debug { "Validate that user belongs to Editor group" }
 
-        authorizationService.requireGroupMembership(KnownGroups.EDITOR)
+        authorizationService.requireGroupMembership(KnownGroups.CONTRIBUTOR)
     }
 
     suspend fun requireAuthorization(content: T, role: ContentAccessRole): T {

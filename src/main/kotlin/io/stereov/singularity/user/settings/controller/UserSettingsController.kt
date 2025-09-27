@@ -45,7 +45,7 @@ class UserSettingsController(
             
             You can find more information about profile management [here](https://singularity.stereov.io/docs/guides/users/profile-management).
             
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
         """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/users/profile-management"),
@@ -82,13 +82,13 @@ class UserSettingsController(
             Only then the email is changed in the database.
             If email is disabled, the email will be changed immediately.
             
-            **Requirements:**
+            ### Requirements
             - The `email` should be a valid email address (e.g., "test@example.com")
               that is not associated to an existing account.
             
             You can find more information about profile management [here](https://singularity.stereov.io/docs/guides/users/profile-management).
             
-            **Locale:**
+            ### Locale
             
             A locale can be specified for this request. 
             The email will be sent in the specified locale.
@@ -97,7 +97,7 @@ class UserSettingsController(
             If no locale is specified, the applications default locale will be used.
             You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
             
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
             - A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
               is required. This token should match user and session contained in the `AccessToken`.
@@ -143,11 +143,11 @@ class UserSettingsController(
             
             You can find more information about profile management [here](https://singularity.stereov.io/docs/guides/users/profile-management).
             
-            **Requirements:**
+            ### Requirements
             - The `password` must be at least 8 characters long and include at least one uppercase letter, 
               one lowercase letter, one number, and one special character (!@#$%^&*()_+={}[]|\:;'"<>,.?/).
               
-            **Locale:**
+            ### Locale
             
             A locale can be specified for this request. 
             The email will be sent in the specified locale.
@@ -156,7 +156,7 @@ class UserSettingsController(
             If no locale is specified, the applications default locale will be used.
             You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
             
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
             - A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
               is required. This token should match user and session contained in the `AccessToken`.
@@ -205,7 +205,7 @@ class UserSettingsController(
             
             You can find more information about profile management [here](https://singularity.stereov.io/docs/guides/users/profile-management).
             
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
         """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/users/profile-management"),
@@ -241,7 +241,7 @@ class UserSettingsController(
             
             You can find more information about profile management [here](https://singularity.stereov.io/docs/guides/users/profile-management).
             
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
         """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/users/profile-management"),
@@ -277,7 +277,7 @@ class UserSettingsController(
             
             You can find more information about profile management [here](https://singularity.stereov.io/docs/guides/users/profile-management).
             
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
         """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/users/profile-management"),
@@ -311,7 +311,7 @@ class UserSettingsController(
             
             You can find more information about profile management [here](https://singularity.stereov.io/docs/guides/users/profile-management).
             
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
             - A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
               is required. This token should match user and session contained in the `AccessToken`.

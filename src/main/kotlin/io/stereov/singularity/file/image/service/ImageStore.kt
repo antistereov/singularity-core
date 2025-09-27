@@ -97,7 +97,7 @@ class ImageStore(
         }
 
         return fileStorage.uploadMultipleRenditions(
-            FileKey(filename = key),
+            FileKey(filename = key).key,
             files = filesToUpload,
             ownerId,
             isPublic,

@@ -30,7 +30,7 @@ class AdminController(
             
             You can find more information about roles [here](https://singularity.stereov.io/docs/guides/auth/roles).
             
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
               with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
         """,
@@ -71,7 +71,7 @@ class AdminController(
             
             You can find more information about roles [here](https://singularity.stereov.io/docs/guides/auth/roles).
             
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
               with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
         """,

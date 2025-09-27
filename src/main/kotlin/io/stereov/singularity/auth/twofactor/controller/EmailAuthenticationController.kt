@@ -48,17 +48,17 @@ class EmailAuthenticationController(
             This endpoint is used to send a 2FA email code for enabling email as a 2FA method
             and to resend 2FA codes when authenticating user that already enabled email as a 2FA method.
             
-            **Note:** Each request will generate a new code and invalidate all old codes.
+            >**Note:** Each request will generate a new code and invalidate all old codes.
             
             If email is the preferred 2FA method, an email will be sent automatically after successful authentication
             with the user's password.
             You can learn more about preferred 2FA methods [here](https://singularity.stereov.io/docs/guides/auth/two-factor#changing-the-preferred-method).
             
-            **Requirements:**
+            ### Requirements
             - The user can authenticate using password. 2FA will not work with OAuth2. 
               The OAuth2 provider will validate the second factor if the user enabled it for the provider.
               
-            **Locale:**
+            ### Locale
             
             A locale can be specified for this request. 
             The email will be sent in the specified locale.
@@ -67,7 +67,7 @@ class EmailAuthenticationController(
             If no locale is specified, the applications default locale will be used.
             You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
             
-            **Tokens:**
+            ### Tokens
             
             There are two options: 
             1. If email as a 2FA method is disabled, you can request an email with a token to enable it.
@@ -76,11 +76,11 @@ class EmailAuthenticationController(
             2. If email as 2FA method is already enabled, you can request a 2FA email code with a valid
                [`TwoFactorAuthenticationToken`](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token).
                
-            **Note:** After each email, a cooldown will be started.
-            When the cooldown is active, no new email can be sent.
-            You can request the remaining cooldown throw the endpoint 
-            [`GET /api/auth/2fa/email/cooldown`](https://singularity.stereov.io/docs/api/get-remaining-email-two-factor-cooldown).
-            The cooldown can be configured [here](https://singularity.stereov.io/docs/guides/email/configuration).
+            >**Note:** After each email, a cooldown will be started.
+            >When the cooldown is active, no new email can be sent.
+            >You can request the remaining cooldown throw the endpoint 
+            >[`GET /api/auth/2fa/email/cooldown`](https://singularity.stereov.io/docs/api/get-remaining-email-two-factor-cooldown).
+            >The cooldown can be configured [here](https://singularity.stereov.io/docs/guides/email/configuration).
         """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/two-factor#sending-a-2fa-code-via-email"),
         security = [
@@ -144,14 +144,14 @@ class EmailAuthenticationController(
             will be sent to the user's email if this setting is enabled and
             email is [enabled and configured correctly](https://singularity.stereov.io/docs/guides/email/configuration).
             
-            **Requirements:**
+            ### Requirements
             - The user can authenticate using password. 2FA will not work with OAuth2. 
               The OAuth2 provider will validate the second factor if the user enabled it for the provider.
             
-            **Note:** If [email is enabled](https://singularity.stereov.io/docs/guides/email/configuration) in your application,
-            email is 2FA method will be enabled by default for every user that registers with a password.
+            >**Note:** If [email is enabled](https://singularity.stereov.io/docs/guides/email/configuration) in your application,
+            >email is 2FA method will be enabled by default for every user that registers with a password.
             
-            **Locale:**
+            ### Locale
             
             A locale can be specified for this request. 
             The email will be sent in the specified locale.
@@ -160,7 +160,7 @@ class EmailAuthenticationController(
             If no locale is specified, the applications default locale will be used.
             You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
             
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
             - A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
               is required. This token should match user and session contained in the `AccessToken`.
@@ -216,7 +216,7 @@ class EmailAuthenticationController(
             will be sent to the user's email if this setting is enabled and
             email is [enabled and configured correctly](https://singularity.stereov.io/docs/guides/email/configuration).
             
-            **Locale:**
+            ### Locale
             
             A locale can be specified for this request. 
             The email will be sent in the specified locale.
@@ -225,7 +225,7 @@ class EmailAuthenticationController(
             If no locale is specified, the applications default locale will be used.
             You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
             
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
             - A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
               is required. This token should match user and session contained in the `AccessToken`.
@@ -271,7 +271,7 @@ class EmailAuthenticationController(
             
             Learn more about email as 2FA method [here](https://singularity.stereov.io/docs/guides/auth/two-factor#email).
             
-            **Tokens:**
+            ### Tokens
             - Requires either a valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
               or [`TwoFactorAuthenticationToken`](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token).
         """,

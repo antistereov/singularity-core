@@ -23,22 +23,22 @@ import org.springframework.web.bind.annotation.*
 import java.util.*
 
 @RestController
-@RequestMapping("api/content/invitations")
+@RequestMapping("api/content")
 @Tag(name = "Invitations", description = "Operations related to invitations.")
 class InvitationController(
     private val service: InvitationService,
     private val context: ApplicationContext,
 ) {
 
-    @PostMapping("/{contentType}/{key}")
+    @PostMapping("/{contentType}/invitations/{key}")
     @Operation(
         summary = "Invite User",
         description = """
-            Invite a user to access or edit a content resource.
+            Invite a user to access or edit a content object.
             
             You can find more information about invitations and content [here](https://singularity.stereov.io/docs/guides/content/invitations).
             
-            **Locale:**
+            ### Locale
             
             A locale can be specified for this request. 
             The email will be sent in the specified locale.
@@ -47,20 +47,19 @@ class InvitationController(
             If no locale is specified, the applications default locale will be used.
             You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
             
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
-              with [`MAINTAINER`](https://singularity.stereov.io/docs/guides/content/access-roles#maintainer) access on this resource is required.
+              with [`MAINTAINER`](https://singularity.stereov.io/docs/guides/content/introduction#object-specific-roles-shared-state) access on this object is required.
         """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/content/invitations"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER, scopes = [OpenApiConstants.MAINTAINER_SCOPE]),
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE, scopes = [OpenApiConstants.MAINTAINER_SCOPE]),
-
         ],
         responses = [
             ApiResponse(
                 responseCode = "200",
-                description = "The updated content access details of the resource.",
+                description = "The updated content access details of the object.",
             ),
             ApiResponse(
                 responseCode = "401",
@@ -69,12 +68,12 @@ class InvitationController(
             ),
             ApiResponse(
                 responseCode = "403",
-                description = "AccessToken does permit [`ADMIN`](https://singularity.stereov.io/docs/guides/content/access-roles#admins) access on this resource.",
+                description = "AccessToken does permit [`MAINTAINER`](https://singularity.stereov.io/docs/guides/content/introduction#object-specific-roles-shared-state) access on this object.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
     )
-    suspend fun inviteUser(
+    suspend fun inviteUserToContentObject(
         @PathVariable key: String,
         @PathVariable contentType: String,
         @RequestBody req: InviteUserToContentRequest,
@@ -85,43 +84,40 @@ class InvitationController(
         )
     }
 
-    @PostMapping("/{contentType}/accept")
+    @PostMapping("/{contentType}/invitations/accept")
     @Operation(
         summary = "Accept Invitation",
         description = """
-            Accept an invitation from a user to access or edit a content resource.
+            Accept an invitation from a user to access or edit a content object.
             
             You can find more information about invitations and content [here](https://singularity.stereov.io/docs/guides/content/invitations).
             
-            **Locale:**
+            ### Locale
             
             A locale can be specified for this request. 
-            The given resource will be returned in the specified `locale`.
+            The given object will be returned in the specified `locale`.
             
             If no locale is specified, the applications default locale will be used.
             You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
-            
-            **Tokens:**
-            - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
         """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/content/invitations"),
-        security = [
-            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER),
-            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE),
-        ],
         responses = [
             ApiResponse(
                 responseCode = "200",
-                description = "The content resource, the user was invited to.",
+                description = "The content object the user was invited to. The response depends on the content object. " +
+                        "For [articles](https://singularity.stereov.io/docs/guides/content/articles) " +
+                        "it will return [`FullArticleResponse`](https://singularity.stereov.io/docs/api/schemas/fullarticleresponse)" +
+                        "and for [file metadata](https://singularity.stereov.io/docs/guides/file-storage/metadata) it will return " +
+                        "[`FileMetadataResponse`](https://singularity.stereov.io/docs/api/schemas/filemetadataresponse).",
             ),
             ApiResponse(
                 responseCode = "401",
-                description = "`AccessToken` or invitation `token` are invalid or expired.",
+                description = "Invitation `token` is invalid or expired.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
     )
-    suspend fun acceptInvitation(
+    suspend fun acceptInvitationToContentObject(
         @PathVariable contentType: String,
         @RequestBody req: AcceptInvitationToContentRequest,
         @RequestParam locale: Locale?
@@ -131,7 +127,7 @@ class InvitationController(
         )
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/invitations/{id}")
     @Operation(
         summary = "Delete Invitation",
         description = """
@@ -139,11 +135,11 @@ class InvitationController(
             
             You can find more information about invitations and content [here](https://singularity.stereov.io/docs/guides/content/invitations).
             
-            **Note:** Expired invitations will be deleted automatically.
+            >**Note:** Expired invitations will be deleted automatically.
             
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
-              with [`MAINTAINER`](https://singularity.stereov.io/docs/guides/content/access-roles#maintainer) access on this resource is required.
+              with [`MAINTAINER`](https://singularity.stereov.io/docs/guides/content/introduction#object-specific-roles-shared-state) access on this object is required.
         """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/content/invitations"),
         security = [
@@ -162,7 +158,7 @@ class InvitationController(
             ),
             ApiResponse(
                 responseCode = "403",
-                description = "AccessToken does permit [`MAINTAINER`](https://singularity.stereov.io/docs/guides/content/access-roles#maintainer) access on this resource.",
+                description = "AccessToken does permit [`MAINTAINER`](https://singularity.stereov.io/docs/guides/content/introduction#object-specific-roles-shared-state) access on this object.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
             ApiResponse(
@@ -172,7 +168,7 @@ class InvitationController(
             )
         ]
     )
-    suspend fun deleteInvitation(@PathVariable id: ObjectId): ResponseEntity<SuccessResponse> {
+    suspend fun deleteInvitationToContentObjectById(@PathVariable id: ObjectId): ResponseEntity<SuccessResponse> {
         service.deleteById(id)
         return ResponseEntity.ok(SuccessResponse(true))
     }

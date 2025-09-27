@@ -12,7 +12,7 @@ import org.springframework.web.server.ServerWebExchange
 class FileExceptionHandler : BaseExceptionHandler<FileException> {
 
     override fun getHttpStatus(ex: FileException) = when (ex) {
-        is DeleteFailedException -> HttpStatus.INTERNAL_SERVER_ERROR
+        is DeletingMetadataIsForbiddenException -> HttpStatus.BAD_REQUEST
         is FileKeyAlreadyTakenException -> HttpStatus.CONFLICT
         is FileNotFoundException -> HttpStatus.NOT_FOUND
         is FileSecurityException -> HttpStatus.FORBIDDEN

@@ -2,13 +2,13 @@ package io.stereov.singularity.content.core.model
 
 import io.stereov.singularity.auth.core.model.token.AccessType
 import io.stereov.singularity.auth.core.model.token.CustomAuthenticationToken
-import io.stereov.singularity.content.core.dto.request.ChangeContentVisibilityRequest
+import io.stereov.singularity.content.core.dto.request.UpdateContentVisibilityRequest
 import io.stereov.singularity.content.core.dto.response.ContentAccessDetailsResponse
 import io.stereov.singularity.user.core.model.Role
 import org.bson.types.ObjectId
 
 data class ContentAccessDetails(
-    val ownerId: ObjectId,
+    var ownerId: ObjectId,
     var visibility: AccessType = AccessType.PRIVATE,
     val users: ContentAccessPermissions = ContentAccessPermissions(),
     val groups: ContentAccessPermissions = ContentAccessPermissions(),
@@ -50,8 +50,8 @@ data class ContentAccessDetails(
     fun hasAccess(authentication: CustomAuthenticationToken, role: ContentAccessRole): Boolean {
         val isAdmin = authentication.roles.contains(Role.ADMIN)
 
-        val userIsAdmin = hasAccess(ContentAccessSubject.USER, authentication.userId.toString(), ContentAccessRole.MAINTAINER)
-        val groupIsAdmin = authentication.groups.any { groupId -> hasAccess(ContentAccessSubject.GROUP, groupId, ContentAccessRole.MAINTAINER) }
+        val userIsMaintainer = hasAccess(ContentAccessSubject.USER, authentication.userId.toString(), ContentAccessRole.MAINTAINER)
+        val groupIsMaintainer = authentication.groups.any { groupId -> hasAccess(ContentAccessSubject.GROUP, groupId, ContentAccessRole.MAINTAINER) }
 
         val userIsEditor = hasAccess(ContentAccessSubject.USER, authentication.userId.toString(), ContentAccessRole.EDITOR)
         val groupIsEditor = authentication.groups.any { groupId -> hasAccess(ContentAccessSubject.GROUP, groupId, ContentAccessRole.EDITOR) }
@@ -62,9 +62,9 @@ data class ContentAccessDetails(
         val isPublic = visibility == AccessType.PUBLIC
 
         return when (role) {
-            ContentAccessRole.VIEWER -> isAdmin || userIsAdmin || groupIsAdmin || userIsEditor || groupIsEditor || userIsViewer || groupIsViewer || isPublic
-            ContentAccessRole.EDITOR ->  isAdmin || userIsAdmin || groupIsAdmin || userIsEditor || groupIsEditor
-            ContentAccessRole.MAINTAINER -> isAdmin || userIsAdmin || groupIsAdmin
+            ContentAccessRole.VIEWER -> isAdmin || userIsMaintainer || groupIsMaintainer || userIsEditor || groupIsEditor || userIsViewer || groupIsViewer || isPublic
+            ContentAccessRole.EDITOR ->  isAdmin || userIsMaintainer || groupIsMaintainer || userIsEditor || groupIsEditor
+            ContentAccessRole.MAINTAINER -> isAdmin || userIsMaintainer || groupIsMaintainer
         }
     }
 
@@ -81,7 +81,7 @@ data class ContentAccessDetails(
         return this
     }
 
-    fun update(req: ChangeContentVisibilityRequest): ContentAccessDetails {
+    fun update(req: UpdateContentVisibilityRequest): ContentAccessDetails {
         return when (req.visibility) {
             AccessType.PRIVATE -> makePrivate()
             AccessType.PUBLIC -> {
@@ -93,6 +93,10 @@ data class ContentAccessDetails(
             AccessType.SHARED -> {
                 visibility = AccessType.SHARED
                 updateShared(req.sharedUsers, req.sharedGroups)
+
+                if (req.sharedUsers.isEmpty() && req.sharedGroups.isEmpty()) {
+                    visibility = AccessType.PRIVATE
+                }
 
                 return this
             }

@@ -53,7 +53,7 @@ abstract class FileStorage {
     }
 
     suspend fun uploadMultipleRenditions(
-        key: FileKey,
+        key: String,
         files: Map<String, FileUploadRequest>,
         ownerId: ObjectId,
         isPublic: Boolean,
@@ -71,7 +71,7 @@ abstract class FileStorage {
 
         val doc = metadataService.save(FileMetadataDocument(
             id = null,
-            key = key.key,
+            key = key,
             ownerId = ownerId,
             isPublic = isPublic,
             renditions = uploads.map { (id, upload) -> id to metadataMapper.rendition(upload) }.toMap()

@@ -27,10 +27,6 @@ class LocalFileStorageConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun fileMetadataMapper() = FileMetadataMapper()
-
-    @Bean
-    @ConditionalOnMissingBean
     fun fileStorage(
         properties: LocalFileStorageProperties,
         appProperties: AppProperties,

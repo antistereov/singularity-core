@@ -41,21 +41,21 @@ class TagController(
             
             You can find more information about tags [here](https://singularity.stereov.io/docs/guides/content/tags).
             
-            **Locale:**
-            Tags can have multiple translations for `name` and `description`.
-            You can specify a `locale` to get the corresponding translation.
+            ### Locale
+            The `locale` in the request body specifies which translation should be created.
+            The `locale` query parameter specifies which translation should be returned.
             
             If no locale is specified, the applications default locale will be used.
             You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
-            
-            **Tokens:**
+
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
-              from a member of the [`EDITOR`](https://singularity.stereov.io/docs/guides/content/access-roles#editor) group.
+              from a member of the [`CONTRIBUTOR`](https://singularity.stereov.io/docs/guides/content/introduction#global-server-group-contributor) group.
         """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/content/tags"),
         security = [
-            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER, scopes = [OpenApiConstants.EDITOR_SCOPE]),
-            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE, scopes = [OpenApiConstants.EDITOR_SCOPE]),
+            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER, scopes = [OpenApiConstants.CONTRIBUTOR_SCOPE]),
+            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE, scopes = [OpenApiConstants.CONTRIBUTOR_SCOPE]),
 
         ],
         responses = [
@@ -71,7 +71,7 @@ class TagController(
             ApiResponse(
                 responseCode = "403",
                 description = "`AccessToken` does not contain group membership " +
-                        "[`EDITOR`](https://singularity.stereov.io/docs/guides/content/access-roles#editor) access.",
+                        "[`CONTRIBUTOR`](https://singularity.stereov.io/docs/guides/content/introduction#global-server-group-contributor) access.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
             ApiResponse(
@@ -82,7 +82,7 @@ class TagController(
         ]
     )
     suspend fun createTag(@RequestBody req: CreateTagRequest): ResponseEntity<TagResponse> {
-        authorizationService.requireGroupMembership(KnownGroups.EDITOR)
+        authorizationService.requireGroupMembership(KnownGroups.CONTRIBUTOR)
         return ResponseEntity.ok(
             tagMapper.createTagResponse(service.create(req), req.locale)
         )
@@ -90,13 +90,13 @@ class TagController(
 
     @GetMapping("/{key}")
     @Operation(
-        summary = "Find Tag By Key",
+        summary = "Get Tag By Key",
         description = """
-            Find a tag by given `key`.
+            Get a tag by given `key`.
             
             You can find more information about tags [here](https://singularity.stereov.io/docs/guides/content/tags).
             
-            **Locale:**
+            ### Locale
             Tags can have multiple translations for `name` and `description`.
             You can specify a `locale` to get the corresponding translation.
             
@@ -116,7 +116,7 @@ class TagController(
             ),
         ]
     )
-    suspend fun findTagByKey(
+    suspend fun getTagByKey(
         @PathVariable key: String,
         @RequestParam locale: Locale?
     ): ResponseEntity<TagResponse> {
@@ -127,13 +127,13 @@ class TagController(
 
     @GetMapping
     @Operation(
-        summary = "Find Tags",
+        summary = "Get Tags",
         description = """
-            Find and filter existing tags.
+            Get and filter existing tags.
             
             You can find more information about tags [here](https://singularity.stereov.io/docs/guides/content/tags).
             
-            **Locale:**
+            ### Locale
             Tags can have multiple translations for `name` and `description`.
             You can specify a `locale` to get the corresponding translation.
             
@@ -148,7 +148,7 @@ class TagController(
             ),
         ]
     )
-    suspend fun findTags(
+    suspend fun getTags(
         @RequestParam page: Int = 0,
         @RequestParam size: Int = 10,
         @RequestParam sort: List<String> = emptyList(),
@@ -176,22 +176,22 @@ class TagController(
             
             You can find more information about tags [here](https://singularity.stereov.io/docs/guides/content/tags).
             
-            **Locale:**
-            Tags can have multiple translations for `name` and `description`.
-            The request body can take multiple translations.
+            ### Locale
+            The `locale` in the request body specifies which translation should be updated.
+            The `locale` query parameter specifies which translation should be returned.
             
             The `locale` query parameter specifies the translation that will be returned.
             If no locale is specified, the applications default locale will be used.
             You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
             
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
-              from a member of the [`EDITOR`](https://singularity.stereov.io/docs/guides/content/access-roles#editor) group.
+              from a member of the [`CONTRIBUTOR`](https://singularity.stereov.io/docs/guides/content/introduction#global-server-group-contributor) group.
         """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/content/tags"),
         security = [
-            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER, scopes = [OpenApiConstants.EDITOR_SCOPE]),
-            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE, scopes = [OpenApiConstants.EDITOR_SCOPE]),
+            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER, scopes = [OpenApiConstants.CONTRIBUTOR_SCOPE]),
+            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE, scopes = [OpenApiConstants.CONTRIBUTOR_SCOPE]),
 
         ],
         responses = [
@@ -207,7 +207,7 @@ class TagController(
             ApiResponse(
                 responseCode = "403",
                 description = "`AccessToken` does not contain group membership " +
-                        "[`EDITOR`](https://singularity.stereov.io/docs/guides/content/access-roles#editor) access.",
+                        "[`CONTRIBUTOR`](https://singularity.stereov.io/docs/guides/content/introduction#global-server-group-contributor) access.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
             ApiResponse(
@@ -222,7 +222,7 @@ class TagController(
         @RequestBody req: UpdateTagRequest,
         @RequestParam locale: Locale?
     ): ResponseEntity<TagResponse> {
-        authorizationService.requireGroupMembership(KnownGroups.EDITOR)
+        authorizationService.requireGroupMembership(KnownGroups.CONTRIBUTOR)
         return ResponseEntity.ok(tagMapper.createTagResponse(service.updateTag(key, req), locale))
     }
 
@@ -233,21 +233,21 @@ class TagController(
             
             You can find more information about tags [here](https://singularity.stereov.io/docs/guides/content/tags).
             
-            **Locale:**
+            ### Locale
             Tags can have multiple translations for `name` and `description`.
             You can specify a `locale` to get the corresponding translation.
             
             If no locale is specified, the applications default locale will be used.
             You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
             
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
-              from a member of the [`EDITOR`](https://singularity.stereov.io/docs/guides/content/access-roles#editor) group.
+              from a member of the [`CONTRIBUTOR`](https://singularity.stereov.io/docs/guides/content/introduction#global-server-group-contributor) group.
         """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/content/tags"),
         security = [
-            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER, scopes = [OpenApiConstants.EDITOR_SCOPE]),
-            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE, scopes = [OpenApiConstants.EDITOR_SCOPE]),
+            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER, scopes = [OpenApiConstants.CONTRIBUTOR_SCOPE]),
+            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE, scopes = [OpenApiConstants.CONTRIBUTOR_SCOPE]),
 
         ],
         responses = [
@@ -263,7 +263,7 @@ class TagController(
             ApiResponse(
                 responseCode = "403",
                 description = "`AccessToken` does not contain group membership " +
-                        "[`EDITOR`](https://singularity.stereov.io/docs/guides/content/access-roles#editor) access.",
+                        "[`CONTRIBUTOR`](https://singularity.stereov.io/docs/guides/content/introduction#global-server-group-contributor) access.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
             ApiResponse(
@@ -275,7 +275,7 @@ class TagController(
     )
     @DeleteMapping("/{key}")
     suspend fun deleteTag(@PathVariable key: String): ResponseEntity<SuccessResponse> {
-        authorizationService.requireGroupMembership(KnownGroups.EDITOR)
+        authorizationService.requireGroupMembership(KnownGroups.CONTRIBUTOR)
         service.deleteByKey(key)
         return ResponseEntity.ok(SuccessResponse())
     }

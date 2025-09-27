@@ -46,7 +46,7 @@ class SessionController(
             
             You can learn more about sessions [here](https://singularity.stereov.io/docs/guides/auth/sessions).
             
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
         """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/sessions#active-sessions"),
@@ -110,7 +110,7 @@ class SessionController(
             
             You can learn more about sessions [here](https://singularity.stereov.io/docs/guides/auth/sessions).
             
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
         """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/sessions#invalidating-a-specific-session"),
@@ -148,7 +148,7 @@ class SessionController(
             
             You can learn more about sessions [here](https://singularity.stereov.io/docs/guides/auth/sessions).
             
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
         """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/sessions#invalidating-all-session"),

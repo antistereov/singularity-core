@@ -40,7 +40,7 @@ class ContentConfiguration {
     @PostConstruct
     fun checkManagementServices() {
         val servicesWithKeys = context.getBeansOfType<ContentManagementService<*>>().values
-            .map { service -> service to service.contentKey }
+            .map { service -> service to service.contentType }
         val servicesGroupedByKey = servicesWithKeys.groupBy { it.second }
         val duplicateKeyEntries = servicesGroupedByKey
             .filter { (_, list) -> list.size > 1 }

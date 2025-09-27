@@ -58,7 +58,7 @@ class GuestController(
         
             This information helps users identify and manage authorized sessions, improving overall account security.
             
-            **Tokens:**
+            ### Tokens
             
             If successful, [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) and 
             [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token) 
@@ -118,7 +118,7 @@ class GuestController(
             
             You can learn more about `GUEST` accounts [here](https://singularity.stereov.io/docs/guides/roles#guests).
             
-            **Requirements:**
+            ### Requirements
             - The `email` should be a valid email address (e.g., "test@example.com")
               that is not associated to an existing account.
             - The `password` must be at least 8 characters long and include at least one uppercase letter, 
@@ -132,7 +132,7 @@ class GuestController(
         
             This information helps users identify and manage authorized sessions, improving overall account security.
             
-            **Locale:**
+            ### Locale
             
             A locale can be specified for this request. 
             This will be used for the email verification email.
@@ -141,7 +141,7 @@ class GuestController(
             If no locale is specified, the applications default locale will be used.
             You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
             
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
               of a `GUEST` is required.
             - If successful, the tokens of the `GUEST` account become invalid.

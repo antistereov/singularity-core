@@ -17,6 +17,7 @@ import io.stereov.singularity.global.util.CriteriaBuilder
 import io.stereov.singularity.global.util.mapContent
 import io.stereov.singularity.global.util.withLocalizedSort
 import io.stereov.singularity.translate.service.TranslateService
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
@@ -25,6 +26,7 @@ import java.time.Instant
 import java.util.*
 
 @Service
+@ConditionalOnProperty(prefix = "singularity.content.articles", value = ["enable"], havingValue = "true", matchIfMissing = true)
 class ArticleService(
     override val repository: ArticleRepository,
     override val authorizationService: AuthorizationService,

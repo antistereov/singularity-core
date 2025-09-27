@@ -1,10 +1,12 @@
 package io.stereov.singularity.content.core.service
 
 import io.github.oshai.kotlinlogging.KLogger
+import io.stereov.singularity.auth.core.exception.model.NotAuthorizedException
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.content.core.dto.request.AcceptInvitationToContentRequest
-import io.stereov.singularity.content.core.dto.request.ChangeContentVisibilityRequest
 import io.stereov.singularity.content.core.dto.request.InviteUserToContentRequest
+import io.stereov.singularity.content.core.dto.request.UpdateContentVisibilityRequest
+import io.stereov.singularity.content.core.dto.request.UpdateOwnerRequest
 import io.stereov.singularity.content.core.dto.response.ContentResponse
 import io.stereov.singularity.content.core.dto.response.ExtendedContentAccessDetailsResponse
 import io.stereov.singularity.content.core.dto.response.UserContentAccessDetails
@@ -14,6 +16,7 @@ import io.stereov.singularity.content.core.model.ContentDocument
 import io.stereov.singularity.content.invitation.exception.model.InvalidInvitationException
 import io.stereov.singularity.content.invitation.model.InvitationDocument
 import io.stereov.singularity.content.invitation.service.InvitationService
+import io.stereov.singularity.global.exception.model.DocumentNotFoundException
 import io.stereov.singularity.translate.model.TranslateKey
 import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.user.core.mapper.UserMapper
@@ -29,13 +32,13 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
     abstract val authorizationService: AuthorizationService
     abstract val invitationService: InvitationService
     abstract val userMapper: UserMapper
-    abstract val contentKey: String
     abstract val translateService: TranslateService
 
+    abstract val contentType: String
     abstract val logger: KLogger
 
-    abstract suspend fun changeVisibility(key: String, req: ChangeContentVisibilityRequest, locale: Locale?): ContentResponse<T>
-    protected suspend fun doChangeVisibility(key: String, req: ChangeContentVisibilityRequest): T {
+    abstract suspend fun changeVisibility(key: String, req: UpdateContentVisibilityRequest, locale: Locale?): ContentResponse<T>
+    protected suspend fun doChangeVisibility(key: String, req: UpdateContentVisibilityRequest): T {
         logger.debug { "Changing visibility of key \"$key\"" }
 
         val content = contentService.findAuthorizedByKey(key, ContentAccessRole.MAINTAINER)
@@ -56,26 +59,26 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
         logger.debug { "Inviting user with email \"${req.email}\" to content with key \"$key\" as ${req.role}" }
 
         val actualLocale = locale ?: translateService.defaultLocale
-        val acceptPath = "/api/content/invitations/$contentKey/accept"
 
         val inviteToRole = translateService.translateResourceKey(
             TranslateKey(
                 "role.${req.role.toString().lowercase()}"
             ), "i18n/content/invitation", actualLocale)
-        val resource = translateService.translateResourceKey(TranslateKey("resource.${contentKey}"), "i18n/content/article", actualLocale)
+        val resource = translateService.translateResourceKey(TranslateKey("resource.${contentType}"), "i18n/content/article", actualLocale)
         val user = authorizationService.getUser()
         val content = contentService.findAuthorizedByKey(key, ContentAccessRole.MAINTAINER)
         val ref = "<a href=\"$url\" style=\"color: black;\">$title</a>"
         val invitedTo = "$inviteToRole $resource $ref"
 
          val invitation = invitationService.invite(
-            email = req.email,
-            inviterName = user.sensitive.name,
-            invitedTo = invitedTo,
-            acceptPath = acceptPath,
-            claims = mapOf("key" to key, "role" to req.role),
-            locale = locale
-        )
+             contentType = contentType,
+             contentKey = key,
+             email = req.email,
+             inviterName = user.sensitive.name,
+             invitedTo = invitedTo,
+             claims = mapOf("key" to key, "role" to req.role),
+             locale = locale
+         )
 
         content.addInvitation(invitation)
 
@@ -122,7 +125,29 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
         return contentService.save(content)
     }
 
-    suspend fun deleteByKey(key: String) {
+    abstract suspend fun updateOwner(key: String, req: UpdateOwnerRequest, locale: Locale?): ContentResponse<T>
+    protected suspend fun doUpdateOwner(key: String, req: UpdateOwnerRequest): T {
+        logger.debug { "Updating owner of ${contentService.collectionClazz} with key $key to ${req.newOwnerId}" }
+
+        val currentUser = authorizationService.getUser()
+        val content = contentService.findByKey(key)
+
+        if (content.access.ownerId != currentUser.id) {
+            throw NotAuthorizedException("Changing owner failed: only the owner can update the owner of this resource")
+        }
+
+        if (!userService.existsById(req.newOwnerId)) {
+            throw DocumentNotFoundException("No user with ID ${req.newOwnerId} found")
+        }
+
+        content.access.share(ContentAccessSubject.USER, content.access.ownerId.toString(), ContentAccessRole.MAINTAINER)
+
+        content.access.ownerId = req.newOwnerId
+
+        return contentService.save(content)
+    }
+
+    open suspend fun deleteByKey(key: String) {
         logger.debug { "Deleting content with key \"$key\"" }
 
         val content = contentService.findAuthorizedByKey(key, ContentAccessRole.MAINTAINER)

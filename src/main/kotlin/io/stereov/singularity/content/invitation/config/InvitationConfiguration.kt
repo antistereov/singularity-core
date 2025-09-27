@@ -3,6 +3,7 @@ package io.stereov.singularity.content.invitation.config
 import io.stereov.singularity.auth.jwt.service.JwtService
 import io.stereov.singularity.content.invitation.controller.InvitationController
 import io.stereov.singularity.content.invitation.exception.handler.InvitationExceptionHandler
+import io.stereov.singularity.content.invitation.properties.InvitationProperties
 import io.stereov.singularity.content.invitation.repository.InvitationRepository
 import io.stereov.singularity.content.invitation.service.InvitationService
 import io.stereov.singularity.content.invitation.service.InvitationTokenService
@@ -18,6 +19,7 @@ import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.user.core.service.UserService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
+import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
@@ -30,6 +32,7 @@ import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRep
     ]
 )
 @EnableReactiveMongoRepositories(basePackageClasses = [InvitationRepository::class])
+@EnableConfigurationProperties(InvitationProperties::class)
 class InvitationConfiguration {
 
     // Service
@@ -47,7 +50,7 @@ class InvitationConfiguration {
         translateService: TranslateService,
         userService: UserService,
         uiProperties: UiProperties,
-        appProperties: AppProperties
+        appProperties: AppProperties, invitationProperties: InvitationProperties
     ): InvitationService {
         return InvitationService(
             repository,
@@ -60,7 +63,8 @@ class InvitationConfiguration {
             translateService,
             userService,
             uiProperties,
-            appProperties
+            appProperties,
+            invitationProperties
         )
     }
 

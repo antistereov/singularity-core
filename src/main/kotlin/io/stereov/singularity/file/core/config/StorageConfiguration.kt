@@ -5,6 +5,7 @@ import io.stereov.singularity.content.core.component.AccessCriteria
 import io.stereov.singularity.file.core.component.DataBufferPublisher
 import io.stereov.singularity.file.core.controller.FileMetadataController
 import io.stereov.singularity.file.core.exception.handler.FileExceptionHandler
+import io.stereov.singularity.file.core.mapper.FileMetadataMapper
 import io.stereov.singularity.file.core.properties.StorageProperties
 import io.stereov.singularity.file.core.repository.FileMetadataRepository
 import io.stereov.singularity.file.core.service.FileMetadataService
@@ -46,6 +47,12 @@ class StorageConfiguration {
         fileMetadataService,
         fileStorage
     )
+
+    // Mapper
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun fileMetadataMapper() = FileMetadataMapper()
 
     // Service
 

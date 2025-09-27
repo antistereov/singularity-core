@@ -32,10 +32,10 @@ class GroupMemberController(
             
             You can find more information about groups [here](https://singularity.stereov.io/docs/guides/auth/groups).
             
-            **Note:** Invalidates all [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
-            because they would contain the wrong group information.
+            >**Note:** Invalidates all [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
+            >because they would contain the wrong group information.
             
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
               with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
         """,
@@ -84,10 +84,10 @@ class GroupMemberController(
             
             You can find more information about groups [here](https://singularity.stereov.io/docs/guides/auth/groups).
             
-            **Note:** Invalidates all [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
-            because they would contain the wrong group information.
+            >**Note:** Invalidates all [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
+            >because they would contain the wrong group information.
             
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
               with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
         """,

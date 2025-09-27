@@ -40,19 +40,19 @@ class GroupController(
             
             You can find more information about groups [here](https://singularity.stereov.io/docs/guides/auth/groups).
             
-            **Locale:**
+            ### Locale
             
             Group names and descriptions can be specified in multiples languages.
             These can be set when [creating](https://singularity.stereov.io/docs/guides/auth/groups#creating-groups)
             groups or through [updates](https://singularity.stereov.io/docs/guides/auth/groups#updating-groups).
             
-            **Note:** A translation for the application's default locale must exist.
-            You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
+            >**Note:** A translation for the application's default locale must exist.
+            >You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
             
-            The `locale` request parameter specifies in which language the information should be returned.
-            If no locale is specified, the application's default locale will be used.
+            The `locale` in the request body specifies which translation should be created.
+            The `locale` query parameter specifies which translation should be returned.
             
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
               with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
             """,
@@ -107,7 +107,7 @@ class GroupController(
             
             You can find more information about groups [here](https://singularity.stereov.io/docs/guides/auth/groups).
             
-            **Locale:**
+            ### Locale
             
             Group names and descriptions can be specified in multiples languages.
             These can be set when [creating](https://singularity.stereov.io/docs/guides/auth/groups#creating-groups)
@@ -117,7 +117,7 @@ class GroupController(
             If no locale is specified, the applications default locale will be used.
             You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
             
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
               with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
         """,
@@ -167,7 +167,7 @@ class GroupController(
             
             You can find more information about groups [here](https://singularity.stereov.io/docs/guides/auth/groups).
             
-            **Locale:**
+            ### Locale
             
             Group names and descriptions can be specified in multiples languages.
             These can be set when [creating](https://singularity.stereov.io/docs/guides/auth/groups#creating-groups)
@@ -177,7 +177,7 @@ class GroupController(
             If no locale is specified, the applications default locale will be used.
             You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
             
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
               with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
         """,
@@ -223,16 +223,19 @@ class GroupController(
             
             You can find more information about groups [here](https://singularity.stereov.io/docs/guides/auth/groups).
             
-            **Locale:**
+            ### Locale
             
             Group names and descriptions can be specified in multiples languages.
             These can be set when [creating](https://singularity.stereov.io/docs/guides/auth/groups#creating-groups)
             groups or through [updates](https://singularity.stereov.io/docs/guides/auth/groups#updating-groups).
             
-            **Note:** A translation for the application's default locale must exist.
-            You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
+            >**Note:** A translation for the application's default locale must exist.
+            >You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
             
-            **Tokens:**
+            The `locale` in the request body specifies which translation should be created.
+            The `locale` query parameter specifies which translation should be returned.
+            
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
               with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
         """,
@@ -282,7 +285,7 @@ class GroupController(
             
             You can find more information about groups [here](https://singularity.stereov.io/docs/guides/auth/groups).
             
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
               with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
         """,

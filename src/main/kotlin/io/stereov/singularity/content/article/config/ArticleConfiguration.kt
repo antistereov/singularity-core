@@ -4,6 +4,7 @@ import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.content.article.controller.ArticleController
 import io.stereov.singularity.content.article.controller.ArticleManagementController
 import io.stereov.singularity.content.article.mapper.ArticleMapper
+import io.stereov.singularity.content.article.properties.ArticleProperties
 import io.stereov.singularity.content.article.repository.ArticleRepository
 import io.stereov.singularity.content.article.service.ArticleManagementService
 import io.stereov.singularity.content.article.service.ArticleService
@@ -21,6 +22,8 @@ import io.stereov.singularity.user.core.mapper.UserMapper
 import io.stereov.singularity.user.core.service.UserService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
@@ -33,6 +36,8 @@ import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRep
     ]
 )
 @EnableReactiveMongoRepositories(basePackageClasses = [ArticleRepository::class])
+@ConditionalOnProperty(prefix = "singularity.content.articles", value = ["enable"], havingValue = "true", matchIfMissing = true)
+@EnableConfigurationProperties(ArticleProperties::class)
 class ArticleConfiguration {
 
     // Controller
