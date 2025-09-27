@@ -23,7 +23,7 @@ sealed interface FileUploadRequest {
         override val key: FileKey,
         override val contentType: String,
         override val contentLength: Long,
-        override val data: kotlin.ByteArray,
+        override val data: ByteArray,
         override val width: Int? = null,
         override val height: Int? = null
     ) : FileUploadRequest {

@@ -58,7 +58,6 @@ class TagConfiguration {
         contentProperties: ContentProperties,
         tagMapper: TagMapper,
         appProperties: AppProperties,
-        authorizationService: AuthorizationService
     ): TagService {
         return TagService(
             repository,
@@ -66,7 +65,6 @@ class TagConfiguration {
             contentProperties,
             tagMapper,
             appProperties,
-            authorizationService
         )
     }
 }
