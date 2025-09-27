@@ -13,13 +13,17 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 class MockFilePart(
-    private val resource: File
+    private val resource: File,
+    private val length: Long? = null,
+    private val setLength: Boolean = true
 ) : FilePart {
     override fun filename(): String = resource.name
     override fun name() = "file"
     override fun headers() = HttpHeaders().apply {
         contentType = MediaType.IMAGE_JPEG
-        contentLength = Files.size(resource.toPath())
+        if (setLength) {
+            contentLength = length ?: Files.size(resource.toPath())
+        }
     }
 
     override fun content(): Flux<DataBuffer?> = DataBufferUtils.read(resource.toPath(), DefaultDataBufferFactory(), 4096)

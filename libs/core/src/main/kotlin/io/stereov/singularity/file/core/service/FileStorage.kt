@@ -34,7 +34,7 @@ abstract class FileStorage {
         storageProperties.validateContentLength(file.headers().contentLength)
         val contentType = file.headers().contentType?.toString()
             ?: throw UnsupportedMediaTypeException("Upload failed: no content type is specified")
-        val req = FileUploadRequest.FilePart(
+        val req = FileUploadRequest.FilePartUpload(
             key = key,
             contentType = contentType,
             contentLength = file.headers().contentLength,
@@ -83,31 +83,41 @@ abstract class FileStorage {
     suspend fun exists(key: String): Boolean {
         logger.debug { "Checking existence of file with key \"$key\"" }
 
-        val existsInDb = metadataService.existsByKey(key)
-        val existsAsFile = doExists(key)
-        val exists = existsInDb && existsAsFile
+        val metadata = metadataService.findByKeyOrNull(key)
 
-        if (!existsInDb && existsAsFile) {
-            logger.warn { "No metadata for file with key \"$key\" found in database but file exists. It will be removed now to maintain consistency." }
-            remove(key)
+        if (metadata == null) {
+            logger.warn { "No metadata for file with key \"$key\" found in database but file exists. " +
+                    "It will be removed now to maintain consistency." }
+            doRemove(key)
             return false
         }
 
-        if (!existsAsFile && existsInDb) {
-            logger.warn { "No file found with key \"$key\" but metadata found in database. The metadata will be removed from the database to maintain consistency."}
-            remove(key)
-            return false
+        metadata.renditions.values.map {rendition ->
+            val renditionExists = doExists(rendition.key)
+            if (!renditionExists) {
+                logger.warn { "No file found with key \"$key\" but metadata found in database. " +
+                        "The metadata will be removed from the database to maintain consistency."}
+
+                metadata.renditions.values.forEach { rendition ->
+                    doRemove(rendition.key)
+                }
+                metadataService.deleteByKey(key)
+                return false
+            }
         }
 
-        return exists
+        return true
     }
 
     suspend fun remove(key: FileKey) = remove(key.key)
     suspend fun remove(key: String) {
         logger.debug { "Removing file with key \"$key\"" }
 
+        val metadata = metadataService.findByKey(key)
+        metadata.renditions.values.forEach { rendition ->
+            doRemove(rendition.key)
+        }
         metadataService.deleteByKey(key)
-        doRemove(key)
     }
 
     suspend fun metadataResponseByKeyOrNull(key: String): FileMetadataResponse? {

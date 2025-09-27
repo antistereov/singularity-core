@@ -17,7 +17,6 @@ import io.stereov.singularity.database.core.service.CrudService
 import io.stereov.singularity.global.exception.model.DocumentNotFoundException
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.global.util.CriteriaBuilder
-import io.stereov.singularity.user.core.model.Role
 import jakarta.annotation.PostConstruct
 import kotlinx.coroutines.runBlocking
 import org.springframework.data.domain.Page
@@ -105,8 +104,6 @@ class TagService(
     suspend fun updateTag(key: String, req: UpdateTagRequest): TagDocument {
         logger.debug { "Updating tag with key \"$key\"" }
 
-        authorizationService.requireRole(Role.ADMIN)
-
         val tag = findByKey(key)
         val updatedTranslations = mutableMapOf<Locale, TagTranslation>()
 
@@ -132,11 +129,10 @@ class TagService(
         return save(tag)
     }
 
-    suspend fun deleteByKey(key: String): Boolean {
+    suspend fun deleteByKey(key: String) {
         logger.debug { "Deleting tag with key \"$key\"" }
 
-        authorizationService.requireRole(Role.ADMIN)
-
-        return repository.deleteByKey(key)
+        if (!existsByKey(key)) throw DocumentNotFoundException("No tag with key $key found")
+        repository.deleteByKey(key)
     }
 }

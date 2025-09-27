@@ -6,5 +6,4 @@ sidebar_position: 2
 
 ## Viewer
 ## Editor
-## Admin
-
+## Maintainer

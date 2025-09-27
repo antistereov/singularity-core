@@ -2,6 +2,7 @@ package io.stereov.singularity.database.core.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.stereov.singularity.global.exception.model.DocumentNotFoundException
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.awaitFirstOrElse
 import org.bson.types.ObjectId
@@ -59,6 +60,10 @@ interface CrudService<T: Any> {
         logger.debug { "Saving multiple ${collectionClazz.name}s" }
 
         return repository.saveAll(docs).toList()
+    }
+
+    suspend fun findAll(): Flow<T> {
+        return repository.findAll()
     }
 
     suspend fun findAllPaginated(page: Int, size: Int, sort: List<String>, criteria: Criteria? = null): Page<T> {

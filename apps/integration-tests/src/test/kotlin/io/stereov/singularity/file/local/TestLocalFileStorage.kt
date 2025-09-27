@@ -1,7 +1,11 @@
 package io.stereov.singularity.file.local
 
+import io.stereov.singularity.auth.geolocation.GeoIpDatabaseServiceTest.Companion.file
 import io.stereov.singularity.file.core.dto.FileMetadataResponse
+import io.stereov.singularity.file.core.exception.model.FileTooLargeException
+import io.stereov.singularity.file.core.exception.model.FileUploadException
 import io.stereov.singularity.file.core.model.FileKey
+import io.stereov.singularity.file.core.model.FileUploadRequest
 import io.stereov.singularity.file.core.service.FileMetadataService
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.file.local.controller.LocalFileStorageController
@@ -23,7 +27,9 @@ import org.springframework.core.io.ClassPathResource
 import org.springframework.http.MediaType
 import java.io.File
 import java.net.URI
+import java.nio.file.Files
 import java.time.temporal.ChronoUnit
+import kotlin.math.pow
 
 class TestLocalFileStorage : BaseIntegrationTest() {
 
@@ -63,8 +69,7 @@ class TestLocalFileStorage : BaseIntegrationTest() {
         assertThat(fileStorage).isOfAnyClassIn(LocalFileStorage::class.java)
     }
 
-    @Test
-    fun `should upload public file`() = runTest {
+    @Test fun `should upload public file`() = runTest {
         runFileTest { _, metadata, _ ->
             val file = File(properties.fileDirectory, metadata.key)
 
@@ -78,7 +83,19 @@ class TestLocalFileStorage : BaseIntegrationTest() {
             assertEquals(metadataWithMillis, savedMetadata)
         }
     }
+    @Test fun `should upload throw error when file too large`() = runTest {
+        val user = registerUser()
+        val filePart = MockFilePart(file, 10.0.pow(1000).toLong())
+        val key = FileKey("key")
+        assertThrows<FileTooLargeException> { storage.upload(ownerId = user.info.id, key = key, isPublic = true, file = filePart) }
 
+    }
+    @Test fun `should upload throw error when content length not set`() = runTest {
+        val user = registerUser()
+        val filePart = MockFilePart(file, setLength = false)
+        val key = FileKey("key")
+        assertThrows<FileUploadException> { storage.upload(ownerId = user.info.id, key = key, isPublic = true, file = filePart) }
+    }
     @Test fun `should serve public file`() = runTest {
         runFileTest { file, metadata, _ ->
 
@@ -132,6 +149,40 @@ class TestLocalFileStorage : BaseIntegrationTest() {
                 .exchange()
                 .expectStatus().isForbidden
         }
+    }
+    @Test fun `should upload multiple renditions`() = runTest {
+        val user = registerUser()
+        val file = ClassPathResource("files/test-image.jpg").file
+        val filePart = MockFilePart(file)
+        val key = FileKey("file1", extension = "jpg")
+
+        val req1 = FileUploadRequest.FilePartUpload(
+            key = FileKey("file1_small", extension = "jpg"),
+            contentType = MediaType.IMAGE_JPEG.toString(),
+            contentLength = Files.size(file.toPath()),
+            data = filePart,
+        )
+        val req2 = FileUploadRequest.FilePartUpload(
+            key = FileKey("file2_small", extension = "jpg"),
+            contentType = MediaType.IMAGE_JPEG.toString(),
+            contentLength = Files.size(file.toPath()),
+            data = filePart,
+        )
+
+        storage.uploadMultipleRenditions(key, mapOf("1" to req1, "2" to req2), user.info.id, true)
+
+        val file1 = File(properties.fileDirectory, req1.key.key)
+        val file2 = File(properties.fileDirectory, req2.key.key)
+
+        assertTrue { file1.exists() }
+        assertTrue { file2.exists() }
+        assertFalse { File(properties.fileDirectory, key.key).exists() }
+        assertThat(file1.readBytes()).isEqualTo(file.readBytes())
+        assertThat(file2.readBytes()).isEqualTo(file.readBytes())
+
+        assertTrue(metadataService.existsByKey(key.key))
+        assertTrue(metadataService.existsRenditionByKey(req1.key.key))
+        assertTrue(metadataService.existsRenditionByKey(req2.key.key))
     }
 
     @Test fun `requires key`() = runTest {
@@ -231,13 +282,116 @@ class TestLocalFileStorage : BaseIntegrationTest() {
         }
     }
     @Test fun `remove does nothing when key not existing`() = runTest {
-        fileStorage.remove("just-a-key")
+        assertThrows<DocumentNotFoundException> { fileStorage.remove("just-a-key") }
     }
+    @Test fun `remove should remove multiple renditions`() = runTest {
+        val user = registerUser()
+        val file = ClassPathResource("files/test-image.jpg").file
+        val filePart = MockFilePart(file)
+        val key = FileKey("file1", extension = "jpg")
+
+        val req1 = FileUploadRequest.FilePartUpload(
+            key = FileKey("file1_small", extension = "jpg"),
+            contentType = MediaType.IMAGE_JPEG.toString(),
+            contentLength = Files.size(file.toPath()),
+            data = filePart,
+        )
+        val req2 = FileUploadRequest.FilePartUpload(
+            key = FileKey("file2_small", extension = "jpg"),
+            contentType = MediaType.IMAGE_JPEG.toString(),
+            contentLength = Files.size(file.toPath()),
+            data = filePart,
+        )
+
+        storage.uploadMultipleRenditions(key, mapOf("1" to req1, "2" to req2), user.info.id, true)
+
+        val file1 = File(properties.fileDirectory, req1.key.key)
+        val file2 = File(properties.fileDirectory, req2.key.key)
+        val nonExisting = File(properties.fileDirectory, key.key)
+
+        assertTrue { file1.exists() }
+        assertTrue { file2.exists() }
+        assertFalse { nonExisting.exists() }
+        assertThat(file1.readBytes()).isEqualTo(file.readBytes())
+        assertThat(file2.readBytes()).isEqualTo(file.readBytes())
+
+        assertTrue(metadataService.existsByKey(key.key))
+        assertTrue(metadataService.existsRenditionByKey(req1.key.key))
+        assertTrue(metadataService.existsRenditionByKey(req2.key.key))
+
+        fileStorage.remove(key)
+
+        assertFalse { file1.exists() }
+        assertFalse { file2.exists() }
+        assertFalse { nonExisting.exists() }
+        assertFalse(metadataService.existsByKey(key.key))
+        assertFalse(metadataService.existsRenditionByKey(req1.key.key))
+        assertFalse(metadataService.existsRenditionByKey(req2.key.key))
+    }
+
     @Test fun `exists works`() = runTest {
         assertFalse(storage.exists("just-a-key"))
 
         runFileTest { _, metadata, _ ->
             assertTrue(storage.exists(metadata.key))
+            storage.remove(metadata.key)
+            assertFalse(storage.exists(metadata.key))
+        }
+    }
+    @Test fun `exists removes metadata when file not found`() = runTest {
+        val user = registerUser()
+        val file = ClassPathResource("files/test-image.jpg").file
+        val filePart = MockFilePart(file)
+        val key = FileKey("file1", extension = "jpg")
+
+        val req1 = FileUploadRequest.FilePartUpload(
+            key = FileKey("file1_small", extension = "jpg"),
+            contentType = MediaType.IMAGE_JPEG.toString(),
+            contentLength = Files.size(file.toPath()),
+            data = filePart,
+        )
+        val req2 = FileUploadRequest.FilePartUpload(
+            key = FileKey("file2_small", extension = "jpg"),
+            contentType = MediaType.IMAGE_JPEG.toString(),
+            contentLength = Files.size(file.toPath()),
+            data = filePart,
+        )
+
+        storage.uploadMultipleRenditions(key, mapOf("1" to req1, "2" to req2), user.info.id, true)
+
+        val file1 = File(properties.fileDirectory, req1.key.key)
+        val file2 = File(properties.fileDirectory, req2.key.key)
+        val nonExisting = File(properties.fileDirectory, key.key)
+
+        assertTrue { file1.exists() }
+        assertTrue { file2.exists() }
+        assertFalse { nonExisting.exists() }
+        assertThat(file1.readBytes()).isEqualTo(file.readBytes())
+        assertThat(file2.readBytes()).isEqualTo(file.readBytes())
+
+        assertTrue(metadataService.existsByKey(key.key))
+        assertTrue(metadataService.existsRenditionByKey(req1.key.key))
+        assertTrue(metadataService.existsRenditionByKey(req2.key.key))
+
+        file1.delete()
+        fileStorage.exists(key.key)
+
+        assertFalse { file1.exists() }
+        assertFalse { file2.exists() }
+        assertFalse { nonExisting.exists() }
+        assertFalse(metadataService.existsByKey(key.key))
+        assertFalse(metadataService.existsRenditionByKey(req1.key.key))
+        assertFalse(metadataService.existsRenditionByKey(req2.key.key))
+    }
+    @Test fun `exists removes file when metadata not found`() = runTest {
+        runFileTest { file, metadata, _ ->
+            assertTrue(storage.exists(metadata.key))
+
+            metadataService.deleteByKey(metadata.key)
+            storage.exists(metadata.key)
+
+            assertFalse { file.exists() }
+            assertFalse(storage.exists(metadata.key))
         }
     }
 }

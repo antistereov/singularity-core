@@ -33,9 +33,12 @@ import io.stereov.singularity.auth.twofactor.service.TotpService
 import io.stereov.singularity.auth.twofactor.service.token.TotpSetupTokenService
 import io.stereov.singularity.auth.twofactor.service.token.TwoFactorAuthenticationTokenService
 import io.stereov.singularity.cache.service.CacheService
+import io.stereov.singularity.content.tag.service.TagService
 import io.stereov.singularity.database.encryption.service.EncryptionSecretService
 import io.stereov.singularity.database.hash.service.HashService
+import io.stereov.singularity.file.core.properties.StorageProperties
 import io.stereov.singularity.file.core.service.FileStorage
+import io.stereov.singularity.file.image.properties.ImageProperties
 import io.stereov.singularity.test.config.MockConfig
 import io.stereov.singularity.user.core.model.Role
 import io.stereov.singularity.user.core.model.UserDocument
@@ -63,6 +66,15 @@ import java.util.concurrent.atomic.AtomicInteger
 )
 @Import(MockConfig::class)
 class BaseSpringBootTest() {
+
+    @Autowired
+    lateinit var tagService: TagService
+
+    @Autowired
+    lateinit var imageProperties: ImageProperties
+
+    @Autowired
+    lateinit var storageProperties: StorageProperties
 
     @Autowired
     lateinit var userRepository: UserRepository
@@ -157,6 +169,7 @@ class BaseSpringBootTest() {
         cacheService.deleteAll()
         groupRepository.deleteAll()
         counter.set(0)
+        tagService.deleteAll()
     }
 
     @BeforeEach

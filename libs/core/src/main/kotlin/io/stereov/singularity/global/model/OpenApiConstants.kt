@@ -15,4 +15,6 @@ object OpenApiConstants {
     const val STEP_UP_TOKEN_COOKIE = "stepUpTokenCookie"
 
     const val ADMIN_SCOPE = "adminScope"
+    const val EDITOR_SCOPE = "editorScope"
+    const val MAINTAINER_SCOPE = "maintainerScope"
 }

@@ -6,7 +6,6 @@ import io.stereov.singularity.content.article.dto.response.FullArticleResponse
 import io.stereov.singularity.content.article.mapper.ArticleMapper
 import io.stereov.singularity.content.article.model.Article
 import io.stereov.singularity.content.article.service.ArticleService
-import io.stereov.singularity.content.tag.service.TagService
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach
 import org.springframework.beans.factory.annotation.Autowired
@@ -14,8 +13,6 @@ import java.util.*
 
 class BaseContentTest : BaseIntegrationTest() {
 
-    @Autowired
-    lateinit var tagService: TagService
     final val contentBasePath = "$basePath/content"
 
     @Autowired

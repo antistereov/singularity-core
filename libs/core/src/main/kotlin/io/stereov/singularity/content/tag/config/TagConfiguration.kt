@@ -32,9 +32,14 @@ class TagConfiguration {
     @ConditionalOnMissingBean
     fun tagController(
         service: TagService,
-        tagMapper: TagMapper
+        tagMapper: TagMapper,
+        authorizationService: AuthorizationService
     ): TagController {
-        return TagController(service, tagMapper)
+        return TagController(
+            service,
+            tagMapper,
+            authorizationService
+        )
     }
 
     // Mapper
