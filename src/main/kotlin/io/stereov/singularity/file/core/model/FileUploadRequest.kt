@@ -1,5 +1,7 @@
 package io.stereov.singularity.file.core.model
 
+import org.springframework.http.codec.multipart.FilePart
+
 sealed interface FileUploadRequest {
     val key: FileKey
     val contentType: String
@@ -8,16 +10,16 @@ sealed interface FileUploadRequest {
     val width: Int?
     val height: Int?
 
-    data class FilePart(
+    data class FilePartUpload(
         override val key: FileKey,
         override val contentType: String,
         override val contentLength: Long,
-        override val data: org.springframework.http.codec.multipart.FilePart,
+        override val data: FilePart,
         override val width: Int? = null,
         override val height: Int? = null
     ) : FileUploadRequest
 
-    data class ByteArray(
+    data class ByteArrayUpload(
         override val key: FileKey,
         override val contentType: String,
         override val contentLength: Long,
@@ -29,7 +31,7 @@ sealed interface FileUploadRequest {
             if (this === other) return true
             if (javaClass != other?.javaClass) return false
 
-            other as ByteArray
+            other as ByteArrayUpload
 
             if (key != other.key) return false
             if (contentType != other.contentType) return false

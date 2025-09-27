@@ -1,5 +1,7 @@
 package io.stereov.singularity.content.tag.controller
 
+import io.stereov.singularity.auth.core.service.AuthorizationService
+import io.stereov.singularity.auth.group.model.KnownGroups
 import io.stereov.singularity.content.tag.dto.CreateTagRequest
 import io.stereov.singularity.content.tag.dto.TagResponse
 import io.stereov.singularity.content.tag.dto.UpdateTagRequest
@@ -27,7 +29,8 @@ import java.util.*
 @Tag(name = "Tags", description = "Operations related to tags.")
 class TagController(
     private val service: TagService,
-    private val tagMapper: TagMapper
+    private val tagMapper: TagMapper,
+    private val authorizationService: AuthorizationService
 ) {
 
     @PostMapping
@@ -47,12 +50,12 @@ class TagController(
             
             **Tokens:**
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
-              with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
+              from a member of the [`EDITOR`](https://singularity.stereov.io/docs/guides/content/access-roles#editor) group.
         """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/content/tags"),
         security = [
-            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER, scopes = [OpenApiConstants.ADMIN_SCOPE]),
-            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE, scopes = [OpenApiConstants.ADMIN_SCOPE]),
+            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER, scopes = [OpenApiConstants.EDITOR_SCOPE]),
+            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE, scopes = [OpenApiConstants.EDITOR_SCOPE]),
 
         ],
         responses = [
@@ -67,7 +70,8 @@ class TagController(
             ),
             ApiResponse(
                 responseCode = "403",
-                description = "`AccessToken` does permit [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) access.",
+                description = "`AccessToken` does not contain group membership " +
+                        "[`EDITOR`](https://singularity.stereov.io/docs/guides/content/access-roles#editor) access.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
             ApiResponse(
@@ -78,6 +82,7 @@ class TagController(
         ]
     )
     suspend fun createTag(@RequestBody req: CreateTagRequest): ResponseEntity<TagResponse> {
+        authorizationService.requireGroupMembership(KnownGroups.EDITOR)
         return ResponseEntity.ok(
             tagMapper.createTagResponse(service.create(req), req.locale)
         )
@@ -163,7 +168,7 @@ class TagController(
         return ResponseEntity.ok(res.mapContent { tagMapper.createTagResponse(it, locale) })
     }
 
-    @PutMapping("/{key}")
+    @PatchMapping("/{key}")
     @Operation(
         summary = "Update Tag",
         description = """
@@ -181,12 +186,12 @@ class TagController(
             
             **Tokens:**
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
-              with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
+              from a member of the [`EDITOR`](https://singularity.stereov.io/docs/guides/content/access-roles#editor) group.
         """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/content/tags"),
         security = [
-            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER, scopes = [OpenApiConstants.ADMIN_SCOPE]),
-            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE, scopes = [OpenApiConstants.ADMIN_SCOPE]),
+            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER, scopes = [OpenApiConstants.EDITOR_SCOPE]),
+            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE, scopes = [OpenApiConstants.EDITOR_SCOPE]),
 
         ],
         responses = [
@@ -201,7 +206,8 @@ class TagController(
             ),
             ApiResponse(
                 responseCode = "403",
-                description = "`AccessToken` does permit [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) access.",
+                description = "`AccessToken` does not contain group membership " +
+                        "[`EDITOR`](https://singularity.stereov.io/docs/guides/content/access-roles#editor) access.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
             ApiResponse(
@@ -216,6 +222,7 @@ class TagController(
         @RequestBody req: UpdateTagRequest,
         @RequestParam locale: Locale?
     ): ResponseEntity<TagResponse> {
+        authorizationService.requireGroupMembership(KnownGroups.EDITOR)
         return ResponseEntity.ok(tagMapper.createTagResponse(service.updateTag(key, req), locale))
     }
 
@@ -235,12 +242,12 @@ class TagController(
             
             **Tokens:**
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
-              with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
+              from a member of the [`EDITOR`](https://singularity.stereov.io/docs/guides/content/access-roles#editor) group.
         """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/content/tags"),
         security = [
-            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER, scopes = [OpenApiConstants.ADMIN_SCOPE]),
-            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE, scopes = [OpenApiConstants.ADMIN_SCOPE]),
+            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER, scopes = [OpenApiConstants.EDITOR_SCOPE]),
+            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE, scopes = [OpenApiConstants.EDITOR_SCOPE]),
 
         ],
         responses = [
@@ -255,7 +262,8 @@ class TagController(
             ),
             ApiResponse(
                 responseCode = "403",
-                description = "`AccessToken` does permit [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) access.",
+                description = "`AccessToken` does not contain group membership " +
+                        "[`EDITOR`](https://singularity.stereov.io/docs/guides/content/access-roles#editor) access.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
             ApiResponse(
@@ -267,7 +275,9 @@ class TagController(
     )
     @DeleteMapping("/{key}")
     suspend fun deleteTag(@PathVariable key: String): ResponseEntity<SuccessResponse> {
-        return ResponseEntity.ok(SuccessResponse(service.deleteByKey(key)))
+        authorizationService.requireGroupMembership(KnownGroups.EDITOR)
+        service.deleteByKey(key)
+        return ResponseEntity.ok(SuccessResponse())
     }
 
 }

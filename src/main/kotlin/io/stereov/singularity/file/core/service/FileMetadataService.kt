@@ -49,14 +49,14 @@ class FileMetadataService(
             ?: throw DocumentNotFoundException("No file with key $key found")
     }
 
-    suspend fun existsFileByKey(key: String): Boolean {
+    suspend fun existsRenditionByKey(key: String): Boolean {
         logger.debug { "Checking existence of file with key $key" }
         return reactiveMongoTemplate.exists<FileMetadataDocument>(renditionQuery(key))
             .awaitFirst()
     }
 
     suspend fun deleteRenditionByKey(key: String) {
-        logger.debug { "Deleting file with key $key" }
+        logger.debug { "Deleting rendition with key $key" }
 
         val metadata = findRenditionByKey(key)
 

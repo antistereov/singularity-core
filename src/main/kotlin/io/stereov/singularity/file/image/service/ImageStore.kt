@@ -86,7 +86,7 @@ class ImageStore(
         )
 
         if (imageProperties.storeOriginal) {
-            filesToUpload[FileMetadataDocument.ORIGINAL_RENDITION] = FileUploadRequest.ByteArray(
+            filesToUpload[FileMetadataDocument.ORIGINAL_RENDITION] = FileUploadRequest.ByteArrayUpload(
                 key = FileKey(filename = key, extension = originalExtension),
                 contentType = contentType.toString(),
                 data = imageBytes,
@@ -110,7 +110,7 @@ class ImageStore(
         val resized = originalImage.resize(size)
         val resizedBytes = resized.bytes(webpWriter)
 
-        return FileUploadRequest.ByteArray(
+        return FileUploadRequest.ByteArrayUpload(
             key = fileKey,
             contentType = mediaType,
             data = resizedBytes,

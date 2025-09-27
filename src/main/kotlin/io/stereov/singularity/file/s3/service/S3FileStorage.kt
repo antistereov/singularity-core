@@ -46,12 +46,12 @@ class S3FileStorage(
         if (exists(req.key)) throw FileKeyAlreadyTakenException("File with key ${req.key} already exists")
 
         return when (req) {
-            is FileUploadRequest.FilePart -> doUploadFilePart(req)
-            is FileUploadRequest.ByteArray -> doUploadByteArray(req)
+            is FileUploadRequest.FilePartUpload -> doUploadFilePart(req)
+            is FileUploadRequest.ByteArrayUpload -> doUploadByteArray(req)
         }
     }
 
-    private suspend fun doUploadFilePart(req: FileUploadRequest.FilePart): FileUploadResponse {
+    private suspend fun doUploadFilePart(req: FileUploadRequest.FilePartUpload): FileUploadResponse {
         val publisher = dataBufferPublisher.toFlux(req.data.content())
 
         val putRequest = PutObjectRequest.builder()
@@ -75,7 +75,7 @@ class S3FileStorage(
         )
     }
 
-    private suspend fun doUploadByteArray(req: FileUploadRequest.ByteArray): FileUploadResponse {
+    private suspend fun doUploadByteArray(req: FileUploadRequest.ByteArrayUpload): FileUploadResponse {
         val size = req.data.size.toLong()
 
         val putRequest = PutObjectRequest.builder()

@@ -49,12 +49,12 @@ class LocalFileStorage(
 
         if (exists(req.key)) throw FileKeyAlreadyTakenException("File with key ${req.key} already exists")
         return when (req) {
-            is FileUploadRequest.FilePart -> doUploadFilePart(req)
-            is FileUploadRequest.ByteArray -> doUploadByteArray(req)
+            is FileUploadRequest.FilePartUpload -> doUploadFilePart(req)
+            is FileUploadRequest.ByteArrayUpload -> doUploadByteArray(req)
         }
     }
 
-    private suspend fun doUploadFilePart(req: FileUploadRequest.FilePart): FileUploadResponse {
+    private suspend fun doUploadFilePart(req: FileUploadRequest.FilePartUpload): FileUploadResponse {
         val filePath = baseDir.resolve(req.key.key)
 
         return withContext(Dispatchers.IO) {
@@ -71,7 +71,7 @@ class LocalFileStorage(
             )
         }
     }
-    private suspend fun doUploadByteArray(req: FileUploadRequest.ByteArray): FileUploadResponse {
+    private suspend fun doUploadByteArray(req: FileUploadRequest.ByteArrayUpload): FileUploadResponse {
         if (exists(req.key)) throw FileKeyAlreadyTakenException("File with key ${req.key} already exists")
         val filePath = baseDir.resolve(req.key.key)
 

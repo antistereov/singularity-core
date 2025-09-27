@@ -49,12 +49,12 @@ class InvitationController(
             
             **Tokens:**
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
-              with [`ADMIN`](https://singularity.stereov.io/docs/guides/content/access-roles#admin) access on this resource is required.
+              with [`MAINTAINER`](https://singularity.stereov.io/docs/guides/content/access-roles#maintainer) access on this resource is required.
         """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/content/invitations"),
         security = [
-            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER, scopes = [OpenApiConstants.ADMIN_SCOPE]),
-            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE, scopes = [OpenApiConstants.ADMIN_SCOPE]),
+            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER, scopes = [OpenApiConstants.MAINTAINER_SCOPE]),
+            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE, scopes = [OpenApiConstants.MAINTAINER_SCOPE]),
 
         ],
         responses = [
@@ -143,12 +143,12 @@ class InvitationController(
             
             **Tokens:**
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
-              with [`ADMIN`](https://singularity.stereov.io/docs/guides/content/access-roles#admin) access on this resource is required.
+              with [`MAINTAINER`](https://singularity.stereov.io/docs/guides/content/access-roles#maintainer) access on this resource is required.
         """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/content/invitations"),
         security = [
-            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER, scopes = [OpenApiConstants.ADMIN_SCOPE]),
-            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE, scopes = [OpenApiConstants.ADMIN_SCOPE]),
+            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER, scopes = [OpenApiConstants.MAINTAINER_SCOPE]),
+            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE, scopes = [OpenApiConstants.MAINTAINER_SCOPE]),
         ],
         responses = [
             ApiResponse(
@@ -162,7 +162,7 @@ class InvitationController(
             ),
             ApiResponse(
                 responseCode = "403",
-                description = "AccessToken does permit [`ADMIN`](https://singularity.stereov.io/docs/guides/content/access-roles#admins) access on this resource.",
+                description = "AccessToken does permit [`MAINTAINER`](https://singularity.stereov.io/docs/guides/content/access-roles#maintainer) access on this resource.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
             ApiResponse(
