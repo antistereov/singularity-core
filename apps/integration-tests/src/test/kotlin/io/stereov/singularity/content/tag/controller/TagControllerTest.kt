@@ -73,7 +73,7 @@ class TagControllerTest() : BaseIntegrationTest() {
 
         tagService.create(CreateTagRequest("test", name = "Test", description = "Test", locale = null))
 
-        val res = webTestClient.post()
+        webTestClient.post()
             .uri("/api/content/tags")
             .accessTokenCookie(user.accessToken)
             .bodyValue(CreateTagRequest("test", name = "Test", description = "Test", locale = null))
@@ -171,7 +171,7 @@ class TagControllerTest() : BaseIntegrationTest() {
     }
     @Test fun `findByKey needs tag`() = runTest {
 
-        val res = webTestClient.get()
+        webTestClient.get()
             .uri("/api/content/tags/tag")
             .exchange()
             .expectStatus().isNotFound

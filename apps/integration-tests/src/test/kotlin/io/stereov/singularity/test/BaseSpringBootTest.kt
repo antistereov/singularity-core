@@ -36,9 +36,7 @@ import io.stereov.singularity.cache.service.CacheService
 import io.stereov.singularity.content.tag.service.TagService
 import io.stereov.singularity.database.encryption.service.EncryptionSecretService
 import io.stereov.singularity.database.hash.service.HashService
-import io.stereov.singularity.file.core.properties.StorageProperties
 import io.stereov.singularity.file.core.service.FileStorage
-import io.stereov.singularity.file.image.properties.ImageProperties
 import io.stereov.singularity.test.config.MockConfig
 import io.stereov.singularity.user.core.model.Role
 import io.stereov.singularity.user.core.model.UserDocument
@@ -69,12 +67,6 @@ class BaseSpringBootTest() {
 
     @Autowired
     lateinit var tagService: TagService
-
-    @Autowired
-    lateinit var imageProperties: ImageProperties
-
-    @Autowired
-    lateinit var storageProperties: StorageProperties
 
     @Autowired
     lateinit var userRepository: UserRepository

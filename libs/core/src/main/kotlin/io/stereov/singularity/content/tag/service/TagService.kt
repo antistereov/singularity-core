@@ -2,7 +2,6 @@ package io.stereov.singularity.content.tag.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.content.core.properties.ContentProperties
 import io.stereov.singularity.content.tag.dto.CreateTagMultiLangRequest
 import io.stereov.singularity.content.tag.dto.CreateTagRequest
@@ -32,7 +31,6 @@ class TagService(
     private val contentProperties: ContentProperties,
     private val tagMapper: TagMapper,
     private val appProperties: AppProperties,
-    private val authorizationService: AuthorizationService,
 ) : CrudService<TagDocument> {
 
     override val collectionClazz = TagDocument::class.java
