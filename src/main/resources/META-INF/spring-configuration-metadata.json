@@ -366,6 +366,13 @@
       "description": "Enable articles."
     },
     {
+      "name": "singularity.content.contentUrl",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.stereov.singularity.content.article.properties.ArticleProperties",
+      "defaultValue": "http://localhost:4200/content/{contentType}/{contentKey}",
+      "description": "The URL of content objects in your frontend. Please use the placeholders {contentType} and {contentKey} which will be autofilled by the application."
+    },
+    {
       "name": "singularity.content.invitations.accept-url",
       "type": "java.lang.String",
       "sourceType": "io.stereov.singularity.content.invitation.properties.InvitationProperties",

@@ -46,7 +46,7 @@ abstract class ContentService<T: ContentDocument<T>> : CrudService<T>  {
      *
      * @throws NotAuthorizedException if the user does not have sufficient permissions.
      */
-    suspend fun requireEditorGroupMembership() {
+    suspend fun requireContributerGroupMembership() {
         logger.debug { "Validate that user belongs to Editor group" }
 
         authorizationService.requireGroupMembership(KnownGroups.CONTRIBUTOR)

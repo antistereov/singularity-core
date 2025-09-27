@@ -47,7 +47,7 @@ abstract class FileStorage {
             key = key.key,
             ownerId = ownerId,
             isPublic = isPublic,
-            renditions = mapOf(FileMetadataDocument.ORIGINAL_RENDITION to metadataMapper.rendition(upload)),
+            renditions = mapOf(FileMetadataDocument.ORIGINAL_RENDITION to metadataMapper.toRendition(upload)),
         ))
         return createResponse(doc)
     }
@@ -74,7 +74,7 @@ abstract class FileStorage {
             key = key,
             ownerId = ownerId,
             isPublic = isPublic,
-            renditions = uploads.map { (id, upload) -> id to metadataMapper.rendition(upload) }.toMap()
+            renditions = uploads.map { (id, upload) -> id to metadataMapper.toRendition(upload) }.toMap()
         ))
         return createResponse(doc)
     }
@@ -134,10 +134,10 @@ abstract class FileStorage {
     }
 
     suspend fun createResponse(doc: FileMetadataDocument): FileMetadataResponse {
-        return metadataMapper.metadataResponse(
+        return metadataMapper.toMetadataResponse(
             doc = doc,
             renditions = doc.renditions.map { (id, rend) ->
-                id to metadataMapper.renditionResponse(rend, doGetUrl(rend.key)) }.toMap()
+                id to metadataMapper.toRenditionResponse(rend, doGetUrl(rend.key)) }.toMap()
         )
     }
 
