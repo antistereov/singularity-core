@@ -140,6 +140,8 @@ class UserSettingsService(
 
         authorizationService.requireStepUp()
         val userId = authorizationService.getUserId()
+        val user = userService.findById(userId)
+        user.sensitive.avatarFileKey?.let { fileStorage.remove(it) }
         accessTokenCache.invalidateAllTokens(userId)
 
         userService.deleteById(userId)

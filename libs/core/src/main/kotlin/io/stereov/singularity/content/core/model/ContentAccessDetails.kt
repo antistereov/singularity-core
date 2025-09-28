@@ -2,7 +2,7 @@ package io.stereov.singularity.content.core.model
 
 import io.stereov.singularity.auth.core.model.token.AccessType
 import io.stereov.singularity.auth.core.model.token.CustomAuthenticationToken
-import io.stereov.singularity.content.core.dto.request.UpdateContentVisibilityRequest
+import io.stereov.singularity.content.core.dto.request.UpdateContentAccessRequest
 import io.stereov.singularity.content.core.dto.response.ContentAccessDetailsResponse
 import io.stereov.singularity.user.core.model.Role
 import org.bson.types.ObjectId
@@ -82,8 +82,8 @@ data class ContentAccessDetails(
         return this
     }
 
-    fun update(req: UpdateContentVisibilityRequest): ContentAccessDetails {
-        return when (req.visibility) {
+    fun update(req: UpdateContentAccessRequest): ContentAccessDetails {
+        return when (req.accessType) {
             AccessType.PRIVATE -> makePrivate()
             AccessType.PUBLIC -> {
                 visibility = AccessType.PUBLIC

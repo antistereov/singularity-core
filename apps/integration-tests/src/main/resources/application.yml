@@ -34,7 +34,6 @@ spring:
 logging:
   level:
     io.stereov: DEBUG
-    org.springframework.security: TRACE
 
 singularity:
   app:

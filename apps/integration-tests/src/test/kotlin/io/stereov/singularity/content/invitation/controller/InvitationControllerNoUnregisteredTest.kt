@@ -21,7 +21,7 @@ class InvitationControllerNoUnregisteredTest : BaseArticleTest() {
 
     @Test fun `it should not send email`() = runTest {
         val owner = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
-        val article = saveArticle(creator = owner)
+        val article = saveArticle(owner = owner)
 
         webTestClient.post()
             .uri("/api/content/articles/invitations/${article.key}")

@@ -9,15 +9,16 @@ import io.stereov.singularity.content.article.dto.response.FullArticleResponse
 import io.stereov.singularity.content.article.exception.model.InvalidArticleRequestException
 import io.stereov.singularity.content.article.mapper.ArticleMapper
 import io.stereov.singularity.content.article.model.Article
+import io.stereov.singularity.content.article.model.ArticleColors
+import io.stereov.singularity.content.article.model.ArticleState
 import io.stereov.singularity.content.article.model.ArticleTranslation
 import io.stereov.singularity.content.core.dto.request.AcceptInvitationToContentRequest
 import io.stereov.singularity.content.core.dto.request.InviteUserToContentRequest
-import io.stereov.singularity.content.core.dto.request.UpdateContentVisibilityRequest
+import io.stereov.singularity.content.core.dto.request.UpdateContentAccessRequest
 import io.stereov.singularity.content.core.dto.request.UpdateOwnerRequest
-import io.stereov.singularity.content.core.dto.response.ContentResponse
 import io.stereov.singularity.content.core.dto.response.ExtendedContentAccessDetailsResponse
+import io.stereov.singularity.content.core.model.ContentAccessDetails
 import io.stereov.singularity.content.core.model.ContentAccessRole
-import io.stereov.singularity.content.core.properties.ContentProperties
 import io.stereov.singularity.content.core.service.ContentManagementService
 import io.stereov.singularity.content.invitation.service.InvitationService
 import io.stereov.singularity.file.core.service.FileStorage
@@ -30,6 +31,7 @@ import org.bson.types.ObjectId
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
+import java.time.Instant
 import java.util.*
 
 @Service
@@ -44,11 +46,10 @@ class ArticleManagementService(
     private val fileStorage: FileStorage,
     private val articleMapper: ArticleMapper,
     private val imageStore: ImageStore,
-    private val contentProperties: ContentProperties,
 ) : ContentManagementService<Article>() {
 
     override val logger = KotlinLogging.logger {}
-    override val contentType = "articles"
+    override val contentType = Article.CONTENT_TYPE
 
     suspend fun create(req: CreateArticleRequest, locale: Locale?): FullArticleResponse {
         logger.debug { "Creating article with title ${req.title}" }
@@ -56,12 +57,31 @@ class ArticleManagementService(
         contentService.requireContributerGroupMembership()
         val user = authorizationService.getUser()
 
-        val key = getUniqueKey(req.title.toSlug())
+        val key = getUniqueKey(req.title.toSlug(), null)
 
-        val article = articleMapper.createArticle(req, key, user.id)
+        val article = createArticle(req, key, user.id)
         val savedArticle = contentService.save(article)
 
         return articleMapper.createFullResponse(savedArticle, locale,user)
+    }
+
+    private fun createArticle(req: CreateArticleRequest, key: String, ownerId: ObjectId): Article {
+        val translations = mutableMapOf(req.locale to ArticleTranslation(req.title, req.summary, req.content))
+
+        return Article(
+            _id = null,
+            key = key,
+            createdAt = Instant.now(),
+            publishedAt = null,
+            updatedAt = Instant.now(),
+            path = contentService.getUri(key).path,
+            state = ArticleState.DRAFT,
+            colors = ArticleColors(),
+            imageKey = null,
+            trusted = false,
+            access = ContentAccessDetails(ownerId),
+            translations = translations,
+        )
     }
 
     override suspend fun setTrustedState(key: String, trusted: Boolean, locale: Locale?): FullArticleResponse {
@@ -73,10 +93,8 @@ class ArticleManagementService(
 
         val article = contentService.findByKey(key)
         val title = translateService.translate(article, locale).translation.title
-        val url = contentProperties.contentUrl
-            .replace("{contentType}", "articles")
-            .replace("{contentKey}", key)
-        return doInviteUser(key, req, title, url, locale)
+
+        return doInviteUser(key, req, title, contentService.getUri(key).toString(), locale)
     }
 
     override suspend fun acceptInvitation(req: AcceptInvitationToContentRequest, locale: Locale?): FullArticleResponse {
@@ -91,35 +109,38 @@ class ArticleManagementService(
 
         val article = contentService.findAuthorizedByKey(key, ContentAccessRole.EDITOR)
 
-        article.updateTranslation(req, locale)
+        article.updateTranslation(req)
 
         val uniqueKey = translateService
             .translate(article, translateService.defaultLocale)
             .translation.title
+            .toSlug()
+            .let { getUniqueKey(it, article.id) }
 
         article.key = uniqueKey
-        article.path = "${Article.basePath}/$uniqueKey"
+        article.path = contentService.getUri(uniqueKey).path
         req.colors?.let { colors ->
             colors.text?.let { article.colors.text = colors.text }
             colors.background?.let { article.colors.background = colors.background }
         }
+        req.tags?.let { article.tags = it }
 
         val updatedArticle = contentService.save(article)
 
         return articleMapper.createFullResponse(updatedArticle, locale)
     }
 
-    private fun Article.updateTranslation(req: UpdateArticleRequest, locale: Locale?) {
+    private fun Article.updateTranslation(req: UpdateArticleRequest) {
         if (req.title == "") throw InvalidArticleRequestException("The title cannot be an empty string")
 
-        val translation = this.translations[req.locale]
+        val translation = translations[req.locale]
         if (translation  != null) {
             req.title?.let { translation.title = it }
             req.summary?.let { translation.summary = it }
             req.content?.let { translation.content = it }
         } else {
             if (req.title == null)
-                throw InvalidArticleRequestException("Failed to create translation $locale: " +
+                throw InvalidArticleRequestException("Failed to create translation ${req.locale}: " +
                         "when adding a new translation, the article title must not be null")
 
             this.translations[req.locale] = ArticleTranslation(
@@ -141,7 +162,7 @@ class ArticleManagementService(
         if (currentImage != null) {
             fileStorage.remove(currentImage)
         }
-        val imageKey = Article.basePath.removePrefix("/") + "/" + article.key
+        val imageKey = contentService.getUri(key).path.removePrefix("/") + "/" + article.key
 
         val image = imageStore.upload(userId, file, imageKey,  true)
         article.imageKey = image.key
@@ -161,14 +182,14 @@ class ArticleManagementService(
         return articleMapper.createFullResponse(updatedArticle, locale)
     }
 
-    override suspend fun changeVisibility(key: String, req: UpdateContentVisibilityRequest, locale: Locale?): FullArticleResponse {
+    override suspend fun updateAccess(key: String, req: UpdateContentAccessRequest, locale: Locale?): FullArticleResponse {
         logger.debug { "Changing visibility of article with key \"$key\"" }
 
-        val article = doChangeVisibility(key, req)
+        val article = doUpdateAccess(key, req)
         return articleMapper.createFullResponse(article, locale)
     }
 
-    private suspend fun getUniqueKey(baseKey: String, id: ObjectId? = null): String {
+    private suspend fun getUniqueKey(baseKey: String, id: ObjectId?): String {
         val existingArticle = contentService.findByKeyOrNull(baseKey) ?: return baseKey
 
         return if (id != existingArticle.id) {
@@ -176,10 +197,16 @@ class ArticleManagementService(
         } else baseKey
     }
 
-    override suspend fun updateOwner(key: String, req: UpdateOwnerRequest, locale: Locale?): ContentResponse<Article> {
+    override suspend fun updateOwner(key: String, req: UpdateOwnerRequest, locale: Locale?): FullArticleResponse {
         val article = doUpdateOwner(key, req)
 
         return articleMapper.createFullResponse(article, locale)
+    }
+
+    override suspend fun deleteByKey(key: String) {
+        val article = contentService.findByKey(key)
+        article.imageKey?.let { fileStorage.remove(it) }
+        super.deleteByKey(key)
     }
 
 }

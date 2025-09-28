@@ -12,6 +12,7 @@ import io.stereov.singularity.content.article.model.ArticleTranslation
 import io.stereov.singularity.content.article.repository.ArticleRepository
 import io.stereov.singularity.content.core.component.AccessCriteria
 import io.stereov.singularity.content.core.model.ContentAccessRole
+import io.stereov.singularity.content.core.properties.ContentProperties
 import io.stereov.singularity.content.core.service.ContentService
 import io.stereov.singularity.global.util.CriteriaBuilder
 import io.stereov.singularity.global.util.mapContent
@@ -34,10 +35,12 @@ class ArticleService(
     override val accessCriteria: AccessCriteria,
     override val translateService: TranslateService,
     private val articleMapper: ArticleMapper,
+    override val contentProperties: ContentProperties
 ) : ContentService<Article>() {
 
     override val logger: KLogger = KotlinLogging.logger {}
     override val collectionClazz: Class<Article> = Article::class.java
+    override val contentType = Article.CONTENT_TYPE
 
     suspend fun getResponseByKey(key: String, locale: Locale?): FullArticleResponse {
         return articleMapper.createFullResponse(findAuthorizedByKey(key, ContentAccessRole.VIEWER), locale)

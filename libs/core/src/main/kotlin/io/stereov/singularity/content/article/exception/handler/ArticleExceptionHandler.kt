@@ -14,7 +14,7 @@ import org.springframework.web.server.ServerWebExchange
 class ArticleExceptionHandler : BaseExceptionHandler<ArticleException> {
 
     override fun getHttpStatus(ex: ArticleException) = when (ex) {
-        is InvalidArticleRequestException -> HttpStatus.FORBIDDEN
+        is InvalidArticleRequestException -> HttpStatus.BAD_REQUEST
         else -> HttpStatus.INTERNAL_SERVER_ERROR
     }
 

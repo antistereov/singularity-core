@@ -2,6 +2,7 @@ package io.stereov.singularity.file.core.config
 
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.content.core.component.AccessCriteria
+import io.stereov.singularity.content.core.properties.ContentProperties
 import io.stereov.singularity.file.core.component.DataBufferPublisher
 import io.stereov.singularity.file.core.controller.FileMetadataController
 import io.stereov.singularity.file.core.exception.handler.FileExceptionHandler
@@ -63,14 +64,16 @@ class StorageConfiguration {
         authorizationService: AuthorizationService,
         reactiveMongoTemplate: ReactiveMongoTemplate,
         translateService: TranslateService,
-        accessCriteria: AccessCriteria
+        accessCriteria: AccessCriteria,
+        contentProperties: ContentProperties
     ): FileMetadataService {
         return FileMetadataService(
             repository,
             authorizationService,
             reactiveMongoTemplate,
             translateService,
-            accessCriteria
+            accessCriteria,
+            contentProperties
         )
     }
 

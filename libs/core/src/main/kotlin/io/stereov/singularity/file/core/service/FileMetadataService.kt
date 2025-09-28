@@ -3,6 +3,7 @@ package io.stereov.singularity.file.core.service
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.content.core.component.AccessCriteria
+import io.stereov.singularity.content.core.properties.ContentProperties
 import io.stereov.singularity.content.core.service.ContentService
 import io.stereov.singularity.file.core.model.FileMetadataDocument
 import io.stereov.singularity.file.core.repository.FileMetadataRepository
@@ -26,11 +27,13 @@ class FileMetadataService(
     override val authorizationService: AuthorizationService,
     override val reactiveMongoTemplate: ReactiveMongoTemplate,
     override val translateService: TranslateService,
-    override val accessCriteria: AccessCriteria
+    override val accessCriteria: AccessCriteria,
+    override val contentProperties: ContentProperties
 ) : ContentService<FileMetadataDocument>() {
 
     override val logger = KotlinLogging.logger {}
     override val collectionClazz = FileMetadataDocument::class.java
+    override val contentType = FileMetadataDocument.CONTENT_TYPE
 
     private suspend fun renditionQuery(key: String, authorized: Boolean = false): Query {
         val criteria = CriteriaBuilder()

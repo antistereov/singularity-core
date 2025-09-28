@@ -1,18 +1,29 @@
 package io.stereov.singularity.user.core.controller
 
 import io.stereov.singularity.auth.core.model.IdentityProvider
+import io.stereov.singularity.file.core.model.FileMetadataDocument
+import io.stereov.singularity.file.image.properties.ImageProperties
+import io.stereov.singularity.file.local.properties.LocalFileStorageProperties
 import io.stereov.singularity.test.BaseIntegrationTest
 import io.stereov.singularity.user.core.dto.response.UserOverviewResponse
+import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.core.model.Role
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.core.io.ClassPathResource
+import org.springframework.http.MediaType
+import org.springframework.http.client.MultipartBodyBuilder
 import org.springframework.web.util.UriComponentsBuilder
+import java.io.File
 import java.time.Instant
 
 class UserControllerTest() : BaseIntegrationTest() {
+
+    @Autowired
+    lateinit var localFileStorageProperties: LocalFileStorageProperties
 
     data class UserOverviewPage(
         val content: List<UserOverviewResponse> = emptyList(),
@@ -64,6 +75,58 @@ class UserControllerTest() : BaseIntegrationTest() {
             .expectStatus().isOk
 
         assertTrue(userService.findAll().toList().isEmpty())
+
+    }
+    @Test fun `deleteById deletes avatar`() = runTest {
+        val user = registerUser(roles = listOf(Role.USER, Role.ADMIN))
+
+        val file = ClassPathResource("files/test-image.jpg")
+        val res = webTestClient.put()
+            .uri("/api/users/me/avatar")
+            .accessTokenCookie(user.accessToken)
+            .bodyValue(
+                MultipartBodyBuilder().apply {
+                    part(
+                        "file",
+                        file,
+                        MediaType.IMAGE_JPEG,
+                    )
+                }.build()
+            )
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(UserResponse::class.java)
+            .returnResult()
+            .responseBody
+
+        webTestClient.delete()
+            .uri("/api/users/${user.info.id}")
+            .accessTokenCookie(user.accessToken)
+            .exchange()
+            .expectStatus().isOk
+
+        assertTrue(userService.findAll().toList().isEmpty())
+
+        val imageRenditionsOld = requireNotNull(res?.avatar).renditions
+
+        // Small
+        val small1 = requireNotNull(imageRenditionsOld[ImageProperties::small.name])
+        val smallFile1 = File(localFileStorageProperties.fileDirectory, small1.key)
+        assertFalse(smallFile1.exists())
+        // Medium
+        val medium1 = requireNotNull(imageRenditionsOld[ImageProperties::medium.name])
+        val mediumFile1 = File(localFileStorageProperties.fileDirectory, medium1.key)
+        assertFalse(mediumFile1.exists())
+
+        // Large
+        val large1 = requireNotNull(imageRenditionsOld[ImageProperties::large.name])
+        val largeFile1 = File(localFileStorageProperties.fileDirectory, large1.key)
+        assertFalse(largeFile1.exists())
+
+        // Original
+        val original1 = requireNotNull(imageRenditionsOld[FileMetadataDocument.ORIGINAL_RENDITION])
+        val originalFile1 = File(localFileStorageProperties.fileDirectory, original1.key)
+        assertFalse(originalFile1.exists())
 
     }
     @Test fun `deleteById needs user with id`() = runTest {

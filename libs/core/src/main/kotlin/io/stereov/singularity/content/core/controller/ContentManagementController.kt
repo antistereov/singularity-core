@@ -1,6 +1,6 @@
 package io.stereov.singularity.content.core.controller
 
-import io.stereov.singularity.content.core.dto.request.UpdateContentVisibilityRequest
+import io.stereov.singularity.content.core.dto.request.UpdateContentAccessRequest
 import io.stereov.singularity.content.core.dto.request.UpdateOwnerRequest
 import io.stereov.singularity.content.core.dto.response.ContentResponse
 import io.stereov.singularity.content.core.dto.response.ExtendedContentAccessDetailsResponse
@@ -77,17 +77,22 @@ class ContentManagementController(
                 responseCode = "403",
                 description = "AccessToken does permit [`MAINTAINER`](https://singularity.stereov.io/docs/guides/content/introduction#object-specific-roles-shared-state) access on this content object.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            )
+            ),
+            ApiResponse(
+                responseCode = "404",
+                description = "Content object with `key` not found.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
         ]
     )
     suspend fun updateContentObjectAccess(
         @PathVariable key: String,
         @PathVariable contentType: String,
-        @RequestBody req: UpdateContentVisibilityRequest,
+        @RequestBody req: UpdateContentAccessRequest,
         @RequestParam locale: Locale?
     ): ResponseEntity<out ContentResponse<*>> {
         return ResponseEntity.ok(
-            context.findContentManagementService(contentType).changeVisibility(key, req, locale)
+            context.findContentManagementService(contentType).updateAccess(key, req, locale)
         )
     }
 
@@ -139,7 +144,12 @@ class ContentManagementController(
                 responseCode = "403",
                 description = "AccessToken does permit [`MAINTAINER`](https://singularity.stereov.io/docs/guides/content/introduction#object-specific-roles-shared-state) access on this resource.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            )
+            ),
+            ApiResponse(
+                responseCode = "404",
+                description = "Content object with `key` not found.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
         ]
     )
     suspend fun getContentObjectAccessDetails(
@@ -195,7 +205,12 @@ class ContentManagementController(
                 responseCode = "403",
                 description = "AccessToken does permit [`MAINTAINER`](https://singularity.stereov.io/docs/guides/content/introduction#object-specific-roles-shared-state) access on this resource.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            )
+            ),
+            ApiResponse(
+                responseCode = "404",
+                description = "Content object with `key` not found.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
         ]
     )
     suspend fun deleteContentObjectByKey(
@@ -257,7 +272,12 @@ class ContentManagementController(
                 responseCode = "403",
                 description = "AccessToken does permit [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) access on the server.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            )
+            ),
+            ApiResponse(
+                responseCode = "404",
+                description = "Content object with `key` not found.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
         ]
     )
     suspend fun updateContentObjectTrustedState(
@@ -322,13 +342,18 @@ class ContentManagementController(
                 responseCode = "403",
                 description = "AccessToken does is not of the owner of the content object.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            )
+            ),
+            ApiResponse(
+                responseCode = "404",
+                description = "Content object with `key` not found.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
         ]
     )
     suspend fun updateContentObjectOwner(
         @PathVariable contentType: String,
         @PathVariable key: String,
-        @RequestParam req: UpdateOwnerRequest,
+        @RequestBody req: UpdateOwnerRequest,
         @RequestParam locale: Locale?
     ): ResponseEntity<ContentResponse<*>> {
         val res = context.findContentManagementService(contentType).updateOwner(key, req, locale)

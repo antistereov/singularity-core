@@ -2,6 +2,7 @@ package io.stereov.singularity.file.image
 
 import io.stereov.singularity.file.core.exception.model.FileTooLargeException
 import io.stereov.singularity.file.core.exception.model.FileUploadException
+import io.stereov.singularity.file.core.exception.model.UnsupportedMediaTypeException
 import io.stereov.singularity.file.core.model.FileKey
 import io.stereov.singularity.file.core.model.FileMetadataDocument
 import io.stereov.singularity.file.image.properties.ImageProperties
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ClassPathResource
+import org.springframework.http.MediaType
 import java.io.File
 import kotlin.math.pow
 
@@ -59,5 +61,21 @@ class ImageStoreTest : BaseIntegrationTest() {
         val key = FileKey("key")
 
         assertThrows<FileUploadException> { imageStore.upload(user.info.id, filePart, key.key, true) }
+    }
+    @Test fun `save image throws when wrong content type`() = runTest {
+        val user = registerUser()
+        val file = ClassPathResource("files/test-image.jpg").file
+        val filePart = MockFilePart(file, type = MediaType.APPLICATION_JSON)
+        val key = FileKey("key")
+
+        assertThrows<UnsupportedMediaTypeException> { imageStore.upload(user.info.id, filePart, key.key, true) }
+    }
+    @Test fun `save image throws when wrong content type not set`() = runTest {
+        val user = registerUser()
+        val file = ClassPathResource("files/test-image.jpg").file
+        val filePart = MockFilePart(file, setType = false)
+        val key = FileKey("key")
+
+        assertThrows<UnsupportedMediaTypeException> { imageStore.upload(user.info.id, filePart, key.key, true) }
     }
 }

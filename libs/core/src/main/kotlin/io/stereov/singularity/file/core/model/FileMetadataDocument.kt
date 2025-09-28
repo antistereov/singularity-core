@@ -54,5 +54,6 @@ data class FileMetadataDocument(
 
     companion object {
         const val ORIGINAL_RENDITION = "original"
+        const val CONTENT_TYPE = "files"
     }
 }
