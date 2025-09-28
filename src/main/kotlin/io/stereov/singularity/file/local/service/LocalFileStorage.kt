@@ -1,7 +1,6 @@
 package io.stereov.singularity.file.local.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.file.core.exception.model.FileKeyAlreadyTakenException
 import io.stereov.singularity.file.core.mapper.FileMetadataMapper
 import io.stereov.singularity.file.core.model.FileUploadRequest
 import io.stereov.singularity.file.core.model.FileUploadResponse
@@ -42,12 +41,11 @@ class LocalFileStorage(
         return baseDir.resolve(key)
     }
 
-    override suspend fun doUpload(
+    override suspend fun uploadRendition(
         req: FileUploadRequest
     ): FileUploadResponse {
         logger.debug { "Uploading file of content type ${req.contentType} to path \"${req.key}\"" }
 
-        if (exists(req.key)) throw FileKeyAlreadyTakenException("File with key ${req.key} already exists")
         return when (req) {
             is FileUploadRequest.FilePartUpload -> doUploadFilePart(req)
             is FileUploadRequest.ByteArrayUpload -> doUploadByteArray(req)
@@ -72,7 +70,6 @@ class LocalFileStorage(
         }
     }
     private suspend fun doUploadByteArray(req: FileUploadRequest.ByteArrayUpload): FileUploadResponse {
-        if (exists(req.key)) throw FileKeyAlreadyTakenException("File with key ${req.key} already exists")
         val filePath = baseDir.resolve(req.key.key)
 
         return withContext(Dispatchers.IO) {
@@ -90,7 +87,7 @@ class LocalFileStorage(
         }
     }
 
-    override suspend fun doExists(key: String): Boolean {
+    override suspend fun renditionExists(key: String): Boolean {
         logger.debug { "Checking if file with path \"$key\" exists" }
 
         val filePath = getFilePath(key)
@@ -98,7 +95,7 @@ class LocalFileStorage(
         return Files.exists(filePath)
     }
 
-    override suspend fun doRemove(key: String) {
+    override suspend fun removeRendition(key: String) {
         logger.debug { "Removing local file in path \"$key\"" }
 
         val filePath = getFilePath(key)
@@ -110,7 +107,7 @@ class LocalFileStorage(
         }
     }
 
-    override suspend fun doGetUrl(key: String): String {
+    override suspend fun getRenditionUrl(key: String): String {
         return "${appProperties.baseUrl}${apiPath}${key}"
     }
 }

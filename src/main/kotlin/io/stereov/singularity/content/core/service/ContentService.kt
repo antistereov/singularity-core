@@ -20,7 +20,7 @@ abstract class ContentService<T: ContentDocument<T>> : CrudService<T>  {
     abstract val accessCriteria: AccessCriteria
 
     open suspend fun findByKeyOrNull(key: String): T? {
-        logger.debug { "Fining ${collectionClazz.simpleName} by key \"$key\"" }
+        logger.debug { "Finding ${collectionClazz.simpleName} by key \"$key\"" }
 
         return repository.findByKey(key)
     }

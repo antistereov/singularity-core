@@ -2,6 +2,7 @@ package io.stereov.singularity.file.core.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.stereov.singularity.file.core.dto.FileMetadataResponse
+import io.stereov.singularity.file.core.exception.model.FileKeyAlreadyTakenException
 import io.stereov.singularity.file.core.exception.model.FileNotFoundException
 import io.stereov.singularity.file.core.exception.model.UnsupportedMediaTypeException
 import io.stereov.singularity.file.core.mapper.FileMetadataMapper
@@ -40,7 +41,9 @@ abstract class FileStorage {
             contentLength = file.headers().contentLength,
             data = file,
         )
-        val upload = doUpload(req)
+        if (metadataService.existsRenditionByKey(req.key.key))
+            throw FileKeyAlreadyTakenException("File with key ${req.key} already exists")
+        val upload = uploadRendition(req)
 
         val doc = metadataService.save(FileMetadataDocument(
             id = null,
@@ -58,11 +61,15 @@ abstract class FileStorage {
         ownerId: ObjectId,
         isPublic: Boolean,
     ): FileMetadataResponse {
-        files.values.forEach { storageProperties.validateContentLength(it.contentLength) }
+        files.values.forEach {
+            storageProperties.validateContentLength(it.contentLength)
+            if (metadataService.existsRenditionByKey(it.key.key))
+                throw FileKeyAlreadyTakenException("File with key ${it.key} already exists")
+        }
 
         val deferredUploads: Map<String, Deferred<FileUploadResponse>> = coroutineScope {
             files.mapValues { (_, file) ->
-                async { doUpload(file) }
+                async { uploadRendition(file) }
             }
         }
         val uploads: Map<String, FileUploadResponse> = deferredUploads.mapValues { (_, job) ->
@@ -88,18 +95,18 @@ abstract class FileStorage {
         if (metadata == null) {
             logger.warn { "No metadata for file with key \"$key\" found in database but file exists. " +
                     "It will be removed now to maintain consistency." }
-            doRemove(key)
+            removeRendition(key)
             return false
         }
 
         metadata.renditions.values.map {rendition ->
-            val renditionExists = doExists(rendition.key)
+            val renditionExists = renditionExists(rendition.key)
             if (!renditionExists) {
                 logger.warn { "No file found with key \"$key\" but metadata found in database. " +
                         "The metadata will be removed from the database to maintain consistency."}
 
                 metadata.renditions.values.forEach { rendition ->
-                    doRemove(rendition.key)
+                    removeRendition(rendition.key)
                 }
                 metadataService.deleteByKey(key)
                 return false
@@ -115,7 +122,7 @@ abstract class FileStorage {
 
         val metadata = metadataService.findByKey(key)
         metadata.renditions.values.forEach { rendition ->
-            doRemove(rendition.key)
+            removeRendition(rendition.key)
         }
         metadataService.deleteByKey(key)
     }
@@ -137,12 +144,12 @@ abstract class FileStorage {
         return metadataMapper.toMetadataResponse(
             doc = doc,
             renditions = doc.renditions.map { (id, rend) ->
-                id to metadataMapper.toRenditionResponse(rend, doGetUrl(rend.key)) }.toMap()
+                id to metadataMapper.toRenditionResponse(rend, getRenditionUrl(rend.key)) }.toMap()
         )
     }
 
-    protected abstract suspend fun doUpload(req: FileUploadRequest): FileUploadResponse
-    protected abstract suspend fun doExists(key: String): Boolean
-    protected abstract suspend fun doRemove(key: String)
-    protected abstract suspend fun doGetUrl(key: String): String
+    protected abstract suspend fun uploadRendition(req: FileUploadRequest): FileUploadResponse
+    protected abstract suspend fun renditionExists(key: String): Boolean
+    protected abstract suspend fun removeRendition(key: String)
+    protected abstract suspend fun getRenditionUrl(key: String): String
 }
