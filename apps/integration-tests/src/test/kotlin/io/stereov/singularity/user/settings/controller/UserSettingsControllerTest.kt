@@ -3,8 +3,9 @@ package io.stereov.singularity.user.settings.controller
 import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
 import io.stereov.singularity.auth.core.model.token.SessionTokenType
-import io.stereov.singularity.file.core.model.FileKey
-import io.stereov.singularity.file.util.MockFilePart
+import io.stereov.singularity.file.core.model.FileMetadataDocument
+import io.stereov.singularity.file.image.properties.ImageProperties
+import io.stereov.singularity.file.local.properties.LocalFileStorageProperties
 import io.stereov.singularity.test.BaseMailIntegrationTest
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.settings.dto.request.ChangeEmailRequest
@@ -12,17 +13,24 @@ import io.stereov.singularity.user.settings.dto.request.ChangePasswordRequest
 import io.stereov.singularity.user.settings.dto.request.ChangeUserRequest
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.client.MultipartBodyBuilder
+import java.io.File
+import java.net.URI
 import java.time.Instant
 import java.util.*
 
 class UserSettingsControllerTest() : BaseMailIntegrationTest() {
+
+    @Autowired
+    lateinit var localFileStorageProperties: LocalFileStorageProperties
 
     @Test fun `get returns user account`() = runTest {
         val user = registerUser()
@@ -563,15 +571,16 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
     @Test fun `setAvatar works`() = runTest {
         val user = registerUser()
         val accessToken = user.accessToken
+        val file = ClassPathResource("files/test-image.jpg")
 
-        webTestClient.put()
+        val res = webTestClient.put()
             .uri("/api/users/me/avatar")
             .accessTokenCookie(accessToken)
             .bodyValue(
                 MultipartBodyBuilder().apply {
                     part(
                         "file",
-                        ClassPathResource("files/test-image.jpg"),
+                        file,
                         MediaType.IMAGE_JPEG,
                     )
                 }.build()
@@ -581,6 +590,67 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .expectBody(UserResponse::class.java)
             .returnResult()
             .responseBody
+
+        val imageRenditions = requireNotNull(res?.avatar).renditions
+
+        // Small
+        val small = requireNotNull(imageRenditions[ImageProperties::small.name])
+        val smallFile = File(localFileStorageProperties.fileDirectory, small.key)
+        assertTrue(smallFile.exists())
+        webTestClient.get()
+            .uri(URI.create(small.url).path)
+            .exchange()
+            .expectStatus().isOk
+            .expectHeader().contentType(MediaType.parseMediaType("image/webp"))
+            .expectHeader().contentLength(smallFile.length())
+            .expectBody()
+            .consumeWith {
+                assertThat(it.responseBody).isEqualTo(smallFile.readBytes())
+            }
+        // Medium
+        val medium = requireNotNull(imageRenditions[ImageProperties::medium.name])
+        val mediumFile = File(localFileStorageProperties.fileDirectory, medium.key)
+        assertTrue(mediumFile.exists())
+        webTestClient.get()
+            .uri(URI.create(medium.url).path)
+            .exchange()
+            .expectStatus().isOk
+            .expectHeader().contentType(MediaType.parseMediaType("image/webp"))
+            .expectHeader().contentLength(mediumFile.length())
+            .expectBody()
+            .consumeWith {
+                assertThat(it.responseBody).isEqualTo(mediumFile.readBytes())
+            }
+
+        // Large
+        val large = requireNotNull(imageRenditions[ImageProperties::large.name])
+        val largeFile = File(localFileStorageProperties.fileDirectory, large.key)
+        assertTrue(largeFile.exists())
+        webTestClient.get()
+            .uri(URI.create(large.url).path)
+            .exchange()
+            .expectStatus().isOk
+            .expectHeader().contentType(MediaType.parseMediaType("image/webp"))
+            .expectHeader().contentLength(largeFile.length())
+            .expectBody()
+            .consumeWith {
+                assertThat(it.responseBody).isEqualTo(largeFile.readBytes())
+            }
+
+        // Original
+        val original = requireNotNull(imageRenditions[FileMetadataDocument.ORIGINAL_RENDITION])
+        val originalFile = File(localFileStorageProperties.fileDirectory, original.key)
+        assertTrue(largeFile.exists())
+        webTestClient.get()
+            .uri(URI.create(original.url).path)
+            .exchange()
+            .expectStatus().isOk
+            .expectHeader().contentType(MediaType.IMAGE_JPEG)
+            .expectHeader().contentLength(originalFile.length())
+            .expectBody()
+            .consumeWith {
+                assertThat(it.responseBody).isEqualTo(file.file.readBytes())
+            }
     }
     @Test fun `setAvatar requires authentication`() = runTest {
         val user = registerUser()
@@ -613,15 +683,49 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
     @Test fun `deleteAvatar works`() = runTest {
         val user = registerUser()
         val accessToken = user.accessToken
+        val file = ClassPathResource("files/test-image.jpg")
 
-        val key = FileKey("avatar")
-        fileStorage.upload(ownerId = user.info.id, key = key, isPublic = true, file = MockFilePart(ClassPathResource("files/test-image.jpg").file))
-
+        val res = webTestClient.put()
+            .uri("/api/users/me/avatar")
+            .accessTokenCookie(accessToken)
+            .bodyValue(
+                MultipartBodyBuilder().apply {
+                    part(
+                        "file",
+                        file,
+                        MediaType.IMAGE_JPEG,
+                    )
+                }.build()
+            )
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(UserResponse::class.java)
+            .returnResult()
+            .responseBody
         webTestClient.delete()
             .uri("/api/users/me/avatar")
             .accessTokenCookie(accessToken)
             .exchange()
             .expectStatus().isOk
+
+        val imageRenditions = requireNotNull(res?.avatar).renditions
+
+        // Small
+        val small = requireNotNull(imageRenditions[ImageProperties::small.name])
+        val smallFile = File(localFileStorageProperties.fileDirectory, small.key)
+        assertFalse(smallFile.exists())
+        // Medium
+        val medium = requireNotNull(imageRenditions[ImageProperties::medium.name])
+        val mediumFile = File(localFileStorageProperties.fileDirectory, medium.key)
+        assertFalse(mediumFile.exists())
+        // Large
+        val large = requireNotNull(imageRenditions[ImageProperties::large.name])
+        val largeFile = File(localFileStorageProperties.fileDirectory, large.key)
+        assertFalse(largeFile.exists())
+        // Original
+        val original = requireNotNull(imageRenditions[FileMetadataDocument.ORIGINAL_RENDITION])
+        val originalFile = File(localFileStorageProperties.fileDirectory, original.key)
+        assertFalse(originalFile.exists())
 
         val foundUser = userService.findById(user.info.id)
         assertNull(foundUser.sensitive.avatarFileKey)

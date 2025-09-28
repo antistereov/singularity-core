@@ -70,7 +70,6 @@ import java.util.concurrent.atomic.AtomicInteger
 @Import(MockConfig::class)
 class BaseSpringBootTest() {
 
-
     @Autowired
     lateinit var fileMetadataManagementService: FileMetadataManagementService
 

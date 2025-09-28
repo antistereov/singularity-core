@@ -3,7 +3,6 @@ package io.stereov.singularity.file.s3.service
 import com.nimbusds.jose.util.StandardCharset
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.file.core.component.DataBufferPublisher
-import io.stereov.singularity.file.core.exception.model.FileKeyAlreadyTakenException
 import io.stereov.singularity.file.core.mapper.FileMetadataMapper
 import io.stereov.singularity.file.core.model.FileUploadRequest
 import io.stereov.singularity.file.core.model.FileUploadResponse
@@ -41,10 +40,8 @@ class S3FileStorage(
 
     override val logger = KotlinLogging.logger {}
 
-    override suspend fun doUpload(req: FileUploadRequest): FileUploadResponse {
+    override suspend fun uploadRendition(req: FileUploadRequest): FileUploadResponse {
         logger.debug { "Uploading file: \"${req.key}\" as $${req.contentType}" }
-        if (exists(req.key)) throw FileKeyAlreadyTakenException("File with key ${req.key} already exists")
-
         return when (req) {
             is FileUploadRequest.FilePartUpload -> doUploadFilePart(req)
             is FileUploadRequest.ByteArrayUpload -> doUploadByteArray(req)
@@ -98,7 +95,7 @@ class S3FileStorage(
         )
     }
 
-    override suspend fun doExists(key: String): Boolean {
+    override suspend fun renditionExists(key: String): Boolean {
         logger.debug { "Checking existence of file: $key" }
 
         return try {
@@ -109,7 +106,7 @@ class S3FileStorage(
         }
     }
 
-    override suspend fun doRemove(key: String) {
+    override suspend fun removeRendition(key: String) {
         logger.debug { "Removing file: $key" }
 
         s3Client.deleteObject {
@@ -117,7 +114,7 @@ class S3FileStorage(
         }.await()
     }
 
-    override suspend fun doGetUrl(key: String): String {
+    override suspend fun getRenditionUrl(key: String): String {
         val getObjectRequest = GetObjectRequest.builder()
             .bucket(s3Properties.bucket)
             .key(key)
