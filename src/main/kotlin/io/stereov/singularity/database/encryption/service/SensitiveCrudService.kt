@@ -108,7 +108,7 @@ abstract class SensitiveCrudService<SensitiveData, DecryptedDocument: SensitiveD
             .toList()
     }
 
-    suspend fun deleteById(id: ObjectId) {
+    open suspend fun deleteById(id: ObjectId) {
         logger.debug { "Deleting document by ID $id" }
 
         repository.deleteById(id)

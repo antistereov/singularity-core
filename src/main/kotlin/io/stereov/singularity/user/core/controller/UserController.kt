@@ -1,7 +1,7 @@
 package io.stereov.singularity.user.core.controller
 
 import io.stereov.singularity.auth.core.service.AuthorizationService
-import io.stereov.singularity.global.exception.model.DocumentNotFoundException
+import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.global.model.PageableRequest
@@ -34,6 +34,7 @@ class UserController(
     private val userService: UserService,
     private val authorizationService: AuthorizationService,
     private val userMapper: UserMapper,
+    private val fileStorage: FileStorage,
 ) {
 
     @GetMapping("/{id}")
@@ -184,7 +185,8 @@ class UserController(
 
         authorizationService.requireRole(Role.ADMIN)
 
-        if (!userService.existsById(id)) throw DocumentNotFoundException("Deletion failed: no such user exists")
+        val user = userService.findById(id)
+        user.sensitive.avatarFileKey?.let { fileStorage.remove(it) }
         userService.deleteById(id)
 
         return ResponseEntity.ok(SuccessResponse())

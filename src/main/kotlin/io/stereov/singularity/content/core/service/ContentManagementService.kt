@@ -5,7 +5,7 @@ import io.stereov.singularity.auth.core.exception.model.NotAuthorizedException
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.content.core.dto.request.AcceptInvitationToContentRequest
 import io.stereov.singularity.content.core.dto.request.InviteUserToContentRequest
-import io.stereov.singularity.content.core.dto.request.UpdateContentVisibilityRequest
+import io.stereov.singularity.content.core.dto.request.UpdateContentAccessRequest
 import io.stereov.singularity.content.core.dto.request.UpdateOwnerRequest
 import io.stereov.singularity.content.core.dto.response.ContentResponse
 import io.stereov.singularity.content.core.dto.response.ExtendedContentAccessDetailsResponse
@@ -37,9 +37,9 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
     abstract val contentType: String
     abstract val logger: KLogger
 
-    abstract suspend fun changeVisibility(key: String, req: UpdateContentVisibilityRequest, locale: Locale?): ContentResponse<T>
-    protected suspend fun doChangeVisibility(key: String, req: UpdateContentVisibilityRequest): T {
-        logger.debug { "Changing visibility of key \"$key\"" }
+    abstract suspend fun updateAccess(key: String, req: UpdateContentAccessRequest, locale: Locale?): ContentResponse<T>
+    protected suspend fun doUpdateAccess(key: String, req: UpdateContentAccessRequest): T {
+        logger.debug { "Updating access of key \"$key\"" }
 
         val content = contentService.findAuthorizedByKey(key, ContentAccessRole.MAINTAINER)
 
@@ -132,7 +132,7 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
 
     abstract suspend fun updateOwner(key: String, req: UpdateOwnerRequest, locale: Locale?): ContentResponse<T>
     protected suspend fun doUpdateOwner(key: String, req: UpdateOwnerRequest): T {
-        logger.debug { "Updating owner of ${contentService.collectionClazz} with key $key to ${req.newOwnerId}" }
+        logger.debug { "Updating owner of ${contentService.collectionClazz.simpleName} with key $key to ${req.newOwnerId}" }
 
         val currentUser = authorizationService.getUser()
         val content = contentService.findByKey(key)

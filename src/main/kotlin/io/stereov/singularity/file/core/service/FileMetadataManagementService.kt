@@ -4,7 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.content.core.dto.request.AcceptInvitationToContentRequest
 import io.stereov.singularity.content.core.dto.request.InviteUserToContentRequest
-import io.stereov.singularity.content.core.dto.request.UpdateContentVisibilityRequest
+import io.stereov.singularity.content.core.dto.request.UpdateContentAccessRequest
 import io.stereov.singularity.content.core.dto.request.UpdateOwnerRequest
 import io.stereov.singularity.content.core.dto.response.ContentResponse
 import io.stereov.singularity.content.core.dto.response.ExtendedContentAccessDetailsResponse
@@ -30,15 +30,15 @@ class FileMetadataManagementService(
     private val fileStorage: FileStorage
 ) : ContentManagementService<FileMetadataDocument>() {
 
-    override val contentType = "files"
+    override val contentType = FileMetadataDocument.CONTENT_TYPE
     override val logger = KotlinLogging.logger {}
 
-    override suspend fun changeVisibility(
+    override suspend fun updateAccess(
         key: String,
-        req: UpdateContentVisibilityRequest,
+        req: UpdateContentAccessRequest,
         locale: Locale?
     ): ContentResponse<FileMetadataDocument> {
-        return fileStorage.createResponse(doChangeVisibility(key, req))
+        return fileStorage.createResponse(doUpdateAccess(key, req))
     }
 
     override suspend fun inviteUser(

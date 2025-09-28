@@ -32,7 +32,7 @@ data class Article(
         get() = _id ?: throw InvalidDocumentException("No id found")
 
     companion object {
-        val basePath: String
-            get() = "/articles"
+        const val CONTENT_TYPE = "articles"
     }
+
 }

@@ -70,7 +70,7 @@ class ArticleConfiguration {
         tagMapper: TagMapper,
         tagService: TagService,
         fileStorage: FileStorage,
-        userMapper: UserMapper
+        userMapper: UserMapper,
     ) = ArticleMapper(
         appProperties,
         authorizationService,
@@ -79,7 +79,7 @@ class ArticleConfiguration {
         tagMapper,
         tagService,
         fileStorage,
-        userMapper
+        userMapper,
     )
 
     // Service
@@ -92,7 +92,8 @@ class ArticleConfiguration {
         reactiveMongoTemplate: ReactiveMongoTemplate,
         accessCriteria: AccessCriteria,
         articleMapper: ArticleMapper,
-        translateService: TranslateService
+        translateService: TranslateService,
+        contentProperties: ContentProperties
     ): ArticleService {
         return ArticleService(
             articleRepository,
@@ -100,7 +101,8 @@ class ArticleConfiguration {
             reactiveMongoTemplate,
             accessCriteria,
             translateService,
-            articleMapper
+            articleMapper,
+            contentProperties
         )
     }
 
@@ -116,7 +118,6 @@ class ArticleConfiguration {
         userMapper: UserMapper,
         articleMapper: ArticleMapper,
         imageStore: ImageStore,
-        contentProperties: ContentProperties
     ): ArticleManagementService {
         return ArticleManagementService(
             articleService,
@@ -128,7 +129,6 @@ class ArticleConfiguration {
             fileStorage,
             articleMapper,
             imageStore,
-            contentProperties
         )
     }
 }

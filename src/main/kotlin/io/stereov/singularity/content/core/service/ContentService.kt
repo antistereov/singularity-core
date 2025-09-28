@@ -7,10 +7,14 @@ import io.stereov.singularity.auth.group.model.KnownGroups
 import io.stereov.singularity.content.core.component.AccessCriteria
 import io.stereov.singularity.content.core.model.ContentAccessRole
 import io.stereov.singularity.content.core.model.ContentDocument
+import io.stereov.singularity.content.core.properties.ContentProperties
 import io.stereov.singularity.content.core.repository.ContentRepository
 import io.stereov.singularity.database.core.service.CrudService
 import io.stereov.singularity.global.exception.model.DocumentNotFoundException
 import io.stereov.singularity.translate.service.TranslateService
+import java.net.URI
+import java.net.URL
+import java.time.Instant
 
 abstract class ContentService<T: ContentDocument<T>> : CrudService<T>  {
 
@@ -18,6 +22,14 @@ abstract class ContentService<T: ContentDocument<T>> : CrudService<T>  {
     abstract val authorizationService: AuthorizationService
     abstract val translateService: TranslateService
     abstract val accessCriteria: AccessCriteria
+    abstract val contentProperties: ContentProperties
+    abstract val contentType: String
+
+    fun getUri(key: String): URL = URI.create(
+        contentProperties.contentUrl
+            .replace("{contentType}", contentType)
+            .replace("{contentKey}", key)
+    ).toURL()
 
     open suspend fun findByKeyOrNull(key: String): T? {
         logger.debug { "Finding ${collectionClazz.simpleName} by key \"$key\"" }
@@ -61,6 +73,11 @@ abstract class ContentService<T: ContentDocument<T>> : CrudService<T>  {
             throw NotAuthorizedException("User does not have sufficient permission to perform this action. Required role: $role")
 
         return content
+    }
+
+    override suspend fun save(doc: T): T {
+        doc.updatedAt = Instant.now()
+        return super.save(doc)
     }
 
     /**

@@ -6,5 +6,4 @@ import java.util.*
 data class CreateTagMultiLangRequest(
     val key: String,
     val translations: MutableMap<Locale, TagTranslation>,
-    val primaryLocale: Locale,
 )

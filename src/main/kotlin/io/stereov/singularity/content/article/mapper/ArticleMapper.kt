@@ -1,12 +1,9 @@
 package io.stereov.singularity.content.article.mapper
 
 import io.stereov.singularity.auth.core.service.AuthorizationService
-import io.stereov.singularity.content.article.dto.request.CreateArticleRequest
 import io.stereov.singularity.content.article.dto.response.ArticleOverviewResponse
 import io.stereov.singularity.content.article.dto.response.FullArticleResponse
 import io.stereov.singularity.content.article.model.Article
-import io.stereov.singularity.content.article.model.ArticleColors
-import io.stereov.singularity.content.article.model.ArticleState
 import io.stereov.singularity.content.article.model.ArticleTranslation
 import io.stereov.singularity.content.core.dto.response.ContentAccessDetailsResponse
 import io.stereov.singularity.content.core.model.ContentAccessDetails
@@ -18,10 +15,8 @@ import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.user.core.mapper.UserMapper
 import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.service.UserService
-import org.bson.types.ObjectId
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
-import java.time.Instant
 import java.util.*
 
 @Component
@@ -34,7 +29,7 @@ class ArticleMapper(
     private val tagMapper: TagMapper,
     private val tagService: TagService,
     private val fileStorage: FileStorage,
-    private val userMapper: UserMapper
+    private val userMapper: UserMapper,
 ) {
 
     fun createOverview(article: FullArticleResponse): ArticleOverviewResponse {
@@ -53,28 +48,6 @@ class ArticleMapper(
             summary = article.summary,
             access = article.access,
             tags = article.tags
-        )
-    }
-
-    val basePath: String
-        get() = "/articles"
-
-    fun createArticle(req: CreateArticleRequest, key: String, ownerId: ObjectId): Article {
-        val translations = mutableMapOf(req.locale to ArticleTranslation(req.title, req.summary, req.content))
-
-        return Article(
-            _id = null,
-            key = key,
-            createdAt = Instant.now(),
-            publishedAt = null,
-            updatedAt = Instant.now(),
-            path = "$basePath/$key",
-            state = ArticleState.DRAFT,
-            colors = ArticleColors(),
-            imageKey = null,
-            trusted = false,
-            access = ContentAccessDetails(ownerId),
-            translations = translations,
         )
     }
 
