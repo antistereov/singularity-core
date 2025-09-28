@@ -1,6 +1,7 @@
 package io.stereov.singularity.content.article.config
 
 import io.stereov.singularity.auth.core.service.AuthorizationService
+import io.stereov.singularity.auth.group.service.GroupService
 import io.stereov.singularity.content.article.controller.ArticleController
 import io.stereov.singularity.content.article.controller.ArticleManagementController
 import io.stereov.singularity.content.article.mapper.ArticleMapper
@@ -118,6 +119,7 @@ class ArticleConfiguration {
         userMapper: UserMapper,
         articleMapper: ArticleMapper,
         imageStore: ImageStore,
+        groupService: GroupService
     ): ArticleManagementService {
         return ArticleManagementService(
             articleService,
@@ -129,6 +131,7 @@ class ArticleConfiguration {
             fileStorage,
             articleMapper,
             imageStore,
+            groupService
         )
     }
 }

@@ -15,10 +15,10 @@ import java.util.*
 data class Article(
     @Id private val _id: ObjectId? = null,
     @Indexed(unique = true) override var key: String,
-    override val createdAt: Instant = Instant.now(),
+    override var createdAt: Instant = Instant.now(),
     override var updatedAt: Instant = Instant.now(),
     override var access: ContentAccessDetails,
-    val publishedAt: Instant? = null,
+    var publishedAt: Instant? = null,
     var path: String,
     var state: ArticleState = ArticleState.DRAFT,
     var colors: ArticleColors = ArticleColors(),

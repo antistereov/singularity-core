@@ -2,6 +2,7 @@ package io.stereov.singularity.content.article.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.service.AuthorizationService
+import io.stereov.singularity.auth.group.service.GroupService
 import io.stereov.singularity.content.article.dto.request.ChangeArticleStateRequest
 import io.stereov.singularity.content.article.dto.request.CreateArticleRequest
 import io.stereov.singularity.content.article.dto.request.UpdateArticleRequest
@@ -46,6 +47,7 @@ class ArticleManagementService(
     private val fileStorage: FileStorage,
     private val articleMapper: ArticleMapper,
     private val imageStore: ImageStore,
+    override val groupService: GroupService
 ) : ContentManagementService<Article>() {
 
     override val logger = KotlinLogging.logger {}
@@ -57,6 +59,8 @@ class ArticleManagementService(
         contentService.requireContributerGroupMembership()
         val user = authorizationService.getUser()
 
+        if (req.title.isBlank())
+            throw InvalidArticleRequestException("Title cannot be blank")
         val key = getUniqueKey(req.title.toSlug(), null)
 
         val article = createArticle(req, key, user.id)

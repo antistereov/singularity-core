@@ -5,6 +5,7 @@ import io.stereov.singularity.auth.group.model.GroupDocument
 import io.stereov.singularity.auth.group.model.GroupTranslation
 import io.stereov.singularity.auth.group.model.KnownGroups
 import io.stereov.singularity.content.article.dto.request.ChangeArticleStateRequest
+import io.stereov.singularity.content.article.dto.request.CreateArticleRequest
 import io.stereov.singularity.content.article.dto.request.UpdateArticleRequest
 import io.stereov.singularity.content.article.dto.response.FullArticleResponse
 import io.stereov.singularity.content.article.model.Article
@@ -18,6 +19,7 @@ import io.stereov.singularity.file.image.properties.ImageProperties
 import io.stereov.singularity.file.local.properties.LocalFileStorageProperties
 import io.stereov.singularity.test.BaseArticleTest
 import io.stereov.singularity.user.core.model.Role
+import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.test.runTest
@@ -39,6 +41,200 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
 
     @Autowired
     lateinit var localFileStorageProperties: LocalFileStorageProperties
+
+    @Test fun `create works`() = runTest {
+        val owner = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
+        val req = CreateArticleRequest(
+            locale = Locale.ENGLISH,
+            title = "New Title",
+            summary = "Cool Summary",
+            content = "Cool Content"
+        )
+
+        val res = webTestClient.post()
+            .uri("/api/content/articles")
+            .bodyValue(req)
+            .accessTokenCookie(owner.accessToken)
+            .exchange()
+            .expectStatus().isOk
+            .returnResult<FullArticleResponse>()
+            .responseBody
+            .awaitFirst()
+
+        assertEquals(req.title, res.title)
+        assertEquals("new-title", res.key)
+        assertEquals(req.summary, res.summary)
+        assertEquals(req.content, res.content)
+
+        val article = articleService.findByKey(res.key)
+        assertEquals(AccessType.PRIVATE, article.access.visibility)
+        assertEquals(owner.info.id, article.access.ownerId)
+        assertTrue(article.access.users.isEmpty())
+        assertTrue(article.access.groups.isEmpty())
+        val translation = requireNotNull(article.translations[Locale.ENGLISH])
+        assertEquals(req.title, translation.title)
+        assertEquals(req.content, translation.content)
+        assertEquals(req.summary, translation.summary)
+    }
+    @Test fun `create works with another locale`() = runTest {
+        val owner = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
+        val req = CreateArticleRequest(
+            locale = Locale.GERMAN,
+            title = "New Title",
+            summary = "Cool Summary",
+            content = "Cool Content"
+        )
+
+        val res = webTestClient.post()
+            .uri("/api/content/articles?locale=de")
+            .bodyValue(req)
+            .accessTokenCookie(owner.accessToken)
+            .exchange()
+            .expectStatus().isOk
+            .returnResult<FullArticleResponse>()
+            .responseBody
+            .awaitFirst()
+
+        assertEquals(req.title, res.title)
+        assertEquals("new-title", res.key)
+        assertEquals(req.summary, res.summary)
+        assertEquals(req.content, res.content)
+
+        val article = articleService.findByKey(res.key)
+        assertEquals(AccessType.PRIVATE, article.access.visibility)
+        assertEquals(owner.info.id, article.access.ownerId)
+        assertTrue(article.access.users.isEmpty())
+        assertTrue(article.access.groups.isEmpty())
+        val translation = requireNotNull(article.translations[Locale.GERMAN])
+        assertEquals(req.title, translation.title)
+        assertEquals(req.content, translation.content)
+        assertEquals(req.summary, translation.summary)
+    }
+    @Test fun `create works with same title`() = runTest {
+        val owner = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
+        val req = CreateArticleRequest(
+            locale = Locale.ENGLISH,
+            title = "New Title",
+            summary = "Cool Summary",
+            content = "Cool Content"
+        )
+
+        val res = webTestClient.post()
+            .uri("/api/content/articles")
+            .bodyValue(req)
+            .accessTokenCookie(owner.accessToken)
+            .exchange()
+            .expectStatus().isOk
+            .returnResult<FullArticleResponse>()
+            .responseBody
+            .awaitFirst()
+
+        assertEquals(req.title, res.title)
+        assertEquals("new-title", res.key)
+        assertEquals(req.summary, res.summary)
+        assertEquals(req.content, res.content)
+
+        val article = articleService.findByKey(res.key)
+        assertEquals(AccessType.PRIVATE, article.access.visibility)
+        assertEquals(owner.info.id, article.access.ownerId)
+        assertTrue(article.access.users.isEmpty())
+        assertTrue(article.access.groups.isEmpty())
+        val translation = requireNotNull(article.translations[Locale.ENGLISH])
+        assertEquals(req.title, translation.title)
+        assertEquals(req.content, translation.content)
+        assertEquals(req.summary, translation.summary)
+
+        val res1 = webTestClient.post()
+            .uri("/api/content/articles")
+            .bodyValue(req)
+            .accessTokenCookie(owner.accessToken)
+            .exchange()
+            .expectStatus().isOk
+            .returnResult<FullArticleResponse>()
+            .responseBody
+            .awaitFirst()
+
+        assertEquals(req.title, res1.title)
+        assertTrue(res1.key.contains("new-title"))
+        assertNotEquals(res1.key, res.key)
+        assertEquals(req.summary, res1.summary)
+        assertEquals(req.content, res1.content)
+
+        val article1 = articleService.findByKey(res.key)
+        assertEquals(AccessType.PRIVATE, article1.access.visibility)
+        assertEquals(owner.info.id, article1.access.ownerId)
+        assertTrue(article1.access.users.isEmpty())
+        assertTrue(article1.access.groups.isEmpty())
+        val translation1 = requireNotNull(article.translations[Locale.ENGLISH])
+        assertEquals(req.title, translation1.title)
+        assertEquals(req.content, translation1.content)
+        assertEquals(req.summary, translation1.summary)
+
+        assertEquals(2, articleService.findAll().count())
+    }
+    @Test fun `create requires contributor group`() = runTest {
+        val owner = registerUser()
+        val req = CreateArticleRequest(
+            locale = Locale.ENGLISH,
+            title = "New Title",
+            summary = "Cool Summary",
+            content = "Cool Content"
+        )
+
+        webTestClient.post()
+            .uri("/api/content/articles")
+            .bodyValue(req)
+            .accessTokenCookie(owner.accessToken)
+            .exchange()
+            .expectStatus().isForbidden
+
+        assertTrue(articleService.findAll().toList().isEmpty())
+    }
+    @Test fun `create requires authentication`() = runTest {
+        val req = CreateArticleRequest(
+            locale = Locale.ENGLISH,
+            title = "New Title",
+            summary = "Cool Summary",
+            content = "Cool Content"
+        )
+
+        webTestClient.post()
+            .uri("/api/content/articles")
+            .bodyValue(req)
+            .exchange()
+            .expectStatus().isUnauthorized
+
+        assertTrue(articleService.findAll().toList().isEmpty())
+    }
+    @Test fun `create requires unempty title`() = runTest {
+        val owner = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
+        val req = CreateArticleRequest(
+            locale = Locale.ENGLISH,
+            title = "  ",
+            summary = "Cool Summary",
+            content = "Cool Content"
+        )
+
+        webTestClient.post()
+            .uri("/api/content/articles")
+            .bodyValue(req)
+            .accessTokenCookie(owner.accessToken)
+            .exchange()
+            .expectStatus().isBadRequest
+
+        assertTrue(articleService.findAll().toList().isEmpty())
+    }
+    @Test fun `create requires body`() = runTest {
+        val owner = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
+
+        webTestClient.post()
+            .uri("/api/content/articles")
+            .accessTokenCookie(owner.accessToken)
+            .exchange()
+            .expectStatus().isBadRequest
+
+        assertTrue(articleService.findAll().toList().isEmpty())
+    }
 
     @Test fun `update works with title`() = runTest {
         val owner = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
@@ -1064,6 +1260,8 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertNothingChanged(article)
     }
 
+    // Get accessible
+
     @Test fun `update access works`() = runTest {
         val owner = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
         val article = saveArticle(owner = owner)
@@ -1378,7 +1576,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertEquals(article.trusted, updatedArticle.trusted)
         assertEquals(article.tags, updatedArticle.tags)
     }
-    @Test fun `update access changes private to shared when somebody is in there`() = runTest {
+    @Test fun `update access will stay private when somebody is in there`() = runTest {
         val owner = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
         val article = saveArticle(owner = owner)
         val maintainer = registerUser()
@@ -1448,13 +1646,13 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertEquals(article.publishedAt?.truncatedTo(ChronoUnit.MILLIS), updatedArticle.publishedAt)
         assertTrue(article.updatedAt.isBefore(updatedArticle.updatedAt))
         assertEquals(article.access.ownerId, updatedArticle.access.ownerId)
-        assertEquals(AccessType.SHARED, updatedArticle.access.visibility)
-        assertTrue(updatedArticle.access.users.maintainer.contains(maintainer.info.id.toString()))
-        assertTrue(updatedArticle.access.users.editor.contains(editor.info.id.toString()))
-        assertTrue(updatedArticle.access.users.viewer.contains(viewer.info.id.toString()))
-        assertTrue(updatedArticle.access.groups.maintainer.contains(maintainerGroup.key))
-        assertTrue(updatedArticle.access.groups.editor.contains(editorGroup.key))
-        assertTrue(updatedArticle.access.groups.viewer.contains(viewerGroup.key))
+        assertEquals(AccessType.PRIVATE, updatedArticle.access.visibility)
+        assertTrue(updatedArticle.access.users.maintainer.isEmpty())
+        assertTrue(updatedArticle.access.users.editor.isEmpty())
+        assertTrue(updatedArticle.access.users.viewer.isEmpty())
+        assertTrue(updatedArticle.access.groups.maintainer.isEmpty())
+        assertTrue(updatedArticle.access.groups.editor.isEmpty())
+        assertTrue(updatedArticle.access.groups.viewer.isEmpty())
         assertEquals(contentProperties.contentUrl.substringAfter(uiProperties.baseUrl)
             .replace("{contentType}", Article.CONTENT_TYPE)
             .replace("{contentKey}", key),
@@ -1795,6 +1993,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         val newOwner = registerUser()
 
         val req = UpdateOwnerRequest(newOwner.info.id)
+        assertTrue(userService.existsById(newOwner.info.id))
 
         val res = webTestClient.put()
             .uri("/api/content/articles/${article.key}/owner")
