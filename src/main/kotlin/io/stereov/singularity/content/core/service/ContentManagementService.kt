@@ -3,6 +3,7 @@ package io.stereov.singularity.content.core.service
 import io.github.oshai.kotlinlogging.KLogger
 import io.stereov.singularity.auth.core.exception.model.NotAuthorizedException
 import io.stereov.singularity.auth.core.service.AuthorizationService
+import io.stereov.singularity.auth.group.service.GroupService
 import io.stereov.singularity.content.core.dto.request.AcceptInvitationToContentRequest
 import io.stereov.singularity.content.core.dto.request.InviteUserToContentRequest
 import io.stereov.singularity.content.core.dto.request.UpdateContentAccessRequest
@@ -33,6 +34,7 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
     abstract val invitationService: InvitationService
     abstract val userMapper: UserMapper
     abstract val translateService: TranslateService
+    abstract val groupService: GroupService
 
     abstract val contentType: String
     abstract val logger: KLogger
@@ -42,6 +44,16 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
         logger.debug { "Updating access of key \"$key\"" }
 
         val content = contentService.findAuthorizedByKey(key, ContentAccessRole.MAINTAINER)
+        req.sharedGroups.forEach { (group, _) ->
+            if (!groupService.existsByKey(group)) {
+                throw DocumentNotFoundException("No group with key $group found")
+            }
+        }
+        req.sharedUsers.forEach { (user, _) ->
+            if (!userService.existsById(user)) {
+                throw DocumentNotFoundException("No user with ID $user found")
+            }
+        }
 
         content.access.update(req)
 

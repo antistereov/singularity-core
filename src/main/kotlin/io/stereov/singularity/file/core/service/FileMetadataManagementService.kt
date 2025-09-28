@@ -2,6 +2,7 @@ package io.stereov.singularity.file.core.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.service.AuthorizationService
+import io.stereov.singularity.auth.group.service.GroupService
 import io.stereov.singularity.content.core.dto.request.AcceptInvitationToContentRequest
 import io.stereov.singularity.content.core.dto.request.InviteUserToContentRequest
 import io.stereov.singularity.content.core.dto.request.UpdateContentAccessRequest
@@ -27,7 +28,8 @@ class FileMetadataManagementService(
     override val invitationService: InvitationService,
     override val userMapper: UserMapper,
     override val translateService: TranslateService,
-    private val fileStorage: FileStorage
+    private val fileStorage: FileStorage,
+    override val groupService: GroupService
 ) : ContentManagementService<FileMetadataDocument>() {
 
     override val contentType = FileMetadataDocument.CONTENT_TYPE
