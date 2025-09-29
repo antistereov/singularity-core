@@ -33,7 +33,6 @@ class TagMapper(
             _id = null,
             key = req.key,
             translations = mutableMapOf(locale to TagTranslation(req.name, req.description ?: "")),
-            primaryLocale = locale
         )
     }
 
@@ -42,7 +41,6 @@ class TagMapper(
             _id = null,
             key = req.key,
             translations = req.translations,
-            primaryLocale = req.primaryLocale
         )
     }
 }

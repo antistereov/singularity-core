@@ -1,0 +1,33 @@
+---
+id: pageableobject
+title: "PageableObject"
+description: ""
+sidebar_label: "PageableObject"
+hide_title: true
+hide_table_of_contents: true
+schema: true
+sample: {"unpaged":true,"paged":true,"pageNumber":0,"pageSize":0,"offset":0,"sort":{"unsorted":true,"sorted":true,"empty":true}}
+custom_edit_url: null
+---
+
+import Schema from "@theme/Schema";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"PageableObject"}
+>
+</Heading>
+
+
+
+
+
+<Schema
+  schema={{"type":"object","properties":{"unpaged":{"type":"boolean"},"paged":{"type":"boolean"},"pageNumber":{"type":"integer","format":"int32"},"pageSize":{"type":"integer","format":"int32"},"offset":{"type":"integer","format":"int64"},"sort":{"type":"object","properties":{"unsorted":{"type":"boolean"},"sorted":{"type":"boolean"},"empty":{"type":"boolean"}},"title":"SortObject"}},"title":"PageableObject"}}
+  schemaType={"response"}
+>
+  
+</Schema>
+            

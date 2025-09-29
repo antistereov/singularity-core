@@ -2,13 +2,20 @@ package io.stereov.singularity.file.s3
 
 import io.minio.MakeBucketArgs
 import io.minio.MinioClient
+import io.stereov.singularity.auth.geolocation.GeoIpDatabaseServiceTest.Companion.file
+import io.stereov.singularity.file.core.dto.FileMetadataResponse
+import io.stereov.singularity.file.core.exception.model.FileTooLargeException
+import io.stereov.singularity.file.core.exception.model.FileUploadException
+import io.stereov.singularity.file.core.model.FileKey
 import io.stereov.singularity.file.core.model.FileMetadataDocument
+import io.stereov.singularity.file.core.model.FileUploadRequest
 import io.stereov.singularity.file.core.properties.StorageType
 import io.stereov.singularity.file.core.service.FileMetadataService
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.file.s3.properties.S3Properties
 import io.stereov.singularity.file.s3.service.S3FileStorage
 import io.stereov.singularity.file.util.MockFilePart
+import io.stereov.singularity.global.exception.model.DocumentNotFoundException
 import io.stereov.singularity.test.BaseSpringBootTest
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
@@ -17,6 +24,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.getBean
 import org.springframework.core.io.ClassPathResource
@@ -29,7 +37,9 @@ import org.testcontainers.containers.MongoDBContainer
 import org.testcontainers.utility.DockerImageName
 import java.io.File
 import java.net.URI
+import java.nio.file.Files
 import java.time.temporal.ChronoUnit
+import kotlin.math.pow
 
 class TestS3FileStorage : BaseSpringBootTest() {
 
@@ -45,17 +55,16 @@ class TestS3FileStorage : BaseSpringBootTest() {
         metadataService.deleteAll()
     }
 
-    suspend fun runFileTest(public: Boolean = true, method: suspend (file: File, metadata: FileMetadataDocument, user: TestRegisterResponse) -> Unit) = runTest {
+    suspend fun runFileTest(public: Boolean = true, method: suspend (file: File, metadata: FileMetadataResponse, user: TestRegisterResponse) -> Unit) = runTest {
         val user = registerUser()
         val file = ClassPathResource("files/test-image.jpg").file
         val filePart = MockFilePart(file)
-        val key = file.name
-
-        val metadata = storage.upload(user.info.id, filePart, key, public)
+        val key = FileKey(file.name)
+        val metadata = storage.upload(ownerId = user.info.id, key = key, isPublic = public, file = filePart)
 
         method(file, metadata, user)
 
-        storage.remove(metadata.key)
+        runCatching { storage.remove(metadata.key) }.getOrNull()
     }
 
     @Test fun `should initialize beans correctly`() {
@@ -67,22 +76,47 @@ class TestS3FileStorage : BaseSpringBootTest() {
     }
 
     @Test fun `should upload public file`() = runTest {
-        runFileTest { file, metadata, _ ->
-            val savedMetadata = metadataService.findByKey(metadata.key)
+        runFileTest { _, metadata, _ ->
+            val savedMetadata = fileStorage.metadataResponseByKey(metadata.key)
 
             val metadataWithMillis = metadata.copy(
                 createdAt = metadata.createdAt.truncatedTo(ChronoUnit.MILLIS),
                 updatedAt = metadata.updatedAt.truncatedTo(ChronoUnit.MILLIS)
             )
             assertEquals(metadataWithMillis, savedMetadata)
+
+            val all = metadataService.findAllPaginated(0, 10, emptyList(), null)
+            println(all)
+
+            assertTrue(metadataService.existsByKey(metadata.key))
+            assertTrue(metadataService.existsRenditionByKey(metadata.key))
         }
     }
+    @Test fun `should upload throw error when file too large`() = runTest {
+        val user = registerUser()
+        val filePart = MockFilePart(file, 10.0.pow(1000).toLong())
+        val key = FileKey("key")
+        assertThrows<FileTooLargeException> {
+            storage.upload(
+                ownerId = user.info.id,
+                key = key,
+                isPublic = true,
+                file = filePart
+            )
+        }
+
+    }
+    @Test fun `should upload throw error when content length not set`() = runTest {
+        val user = registerUser()
+        val filePart = MockFilePart(file, setLength = false)
+        val key = FileKey("key")
+        assertThrows<FileUploadException> { storage.upload(ownerId = user.info.id, key = key, isPublic = true, file = filePart) }
+    }
     @Test fun `creates response with correct url`() = runTest {
-        runFileTest { file, metadata, user ->
-            val response = storage.metadataResponseByKey(metadata.key)
+        runFileTest { file, metadata, _ ->
 
             webTestClient.get()
-                .uri(response.url)
+                .uri(metadata.renditions[FileMetadataDocument.ORIGINAL_RENDITION]!!.url)
                 .exchange()
                 .expectStatus().isOk
                 .expectHeader().contentType(MediaType.IMAGE_JPEG)
@@ -93,22 +127,137 @@ class TestS3FileStorage : BaseSpringBootTest() {
                 }
         }
     }
+    @Test fun `should upload multiple renditions`() = runTest {
+        val user = registerUser()
+        val file = ClassPathResource("files/test-image.jpg").file
+        val filePart = MockFilePart(file)
+        val key = FileKey("file1", extension = "jpg").key
+
+        val req1 = FileUploadRequest.FilePartUpload(
+            key = FileKey("file1_small", extension = "jpg"),
+            contentType = MediaType.IMAGE_JPEG.toString(),
+            contentLength = Files.size(file.toPath()),
+            data = filePart,
+        )
+        val req2 = FileUploadRequest.FilePartUpload(
+            key = FileKey("file2_small", extension = "jpg"),
+            contentType = MediaType.IMAGE_JPEG.toString(),
+            contentLength = Files.size(file.toPath()),
+            data = filePart,
+        )
+
+        val upload = storage.uploadMultipleRenditions(key, mapOf("1" to req1, "2" to req2), user.info.id, true)
+
+        webTestClient.get()
+            .uri(upload.renditions["1"]!!.url)
+            .exchange()
+            .expectStatus().isOk
+            .expectHeader().contentType(MediaType.IMAGE_JPEG)
+            .expectHeader().contentLength(file.length())
+            .expectBody()
+            .consumeWith {
+                assertThat(it.responseBody).isEqualTo(file.readBytes())
+            }
+        webTestClient.get()
+            .uri(upload.renditions["2"]!!.url)
+            .exchange()
+            .expectStatus().isOk
+            .expectHeader().contentType(MediaType.IMAGE_JPEG)
+            .expectHeader().contentLength(file.length())
+            .expectBody()
+            .consumeWith {
+                assertThat(it.responseBody).isEqualTo(file.readBytes())
+            }
+
+        assertTrue(metadataService.existsByKey(key))
+        assertTrue(metadataService.existsRenditionByKey(req1.key.key))
+        assertTrue(metadataService.existsRenditionByKey(req2.key.key))
+    }
 
     @Test fun `remove works`() = runTest {
-        runFileTest { file, metadata, user ->
+        runFileTest { _, metadata, _ ->
             storage.remove(metadata.key)
 
+            webTestClient.get()
+                .uri(metadata.renditions[FileMetadataDocument.ORIGINAL_RENDITION]!!.url)
+                .exchange()
+                .expectStatus().isNotFound
+
             assertFalse(metadataService.existsByKey(metadata.key))
+            assertFalse(metadataService.existsRenditionByKey(metadata.key))
             assertFalse(storage.exists(metadata.key))
         }
     }
     @Test fun `remove does nothing when key not existing`() = runTest {
-        storage.remove("just-a-key")
+        assertThrows<DocumentNotFoundException> { fileStorage.remove("just-a-key") }
     }
+    @Test fun `should removes multiple renditions`() = runTest {
+        val user = registerUser()
+        val file = ClassPathResource("files/test-image.jpg").file
+        val filePart = MockFilePart(file)
+        val key = FileKey("file1", extension = "jpg")
+
+        val req1 = FileUploadRequest.FilePartUpload(
+            key = FileKey("file1_small", extension = "jpg"),
+            contentType = MediaType.IMAGE_JPEG.toString(),
+            contentLength = Files.size(file.toPath()),
+            data = filePart,
+        )
+        val req2 = FileUploadRequest.FilePartUpload(
+            key = FileKey("file2_small", extension = "jpg"),
+            contentType = MediaType.IMAGE_JPEG.toString(),
+            contentLength = Files.size(file.toPath()),
+            data = filePart,
+        )
+
+        val upload = storage.uploadMultipleRenditions(key.key, mapOf("1" to req1, "2" to req2), user.info.id, true)
+
+        webTestClient.get()
+            .uri(upload.renditions["1"]!!.url)
+            .exchange()
+            .expectStatus().isOk
+            .expectHeader().contentType(MediaType.IMAGE_JPEG)
+            .expectHeader().contentLength(file.length())
+            .expectBody()
+            .consumeWith {
+                assertThat(it.responseBody).isEqualTo(file.readBytes())
+            }
+        webTestClient.get()
+            .uri(upload.renditions["2"]!!.url)
+            .exchange()
+            .expectStatus().isOk
+            .expectHeader().contentType(MediaType.IMAGE_JPEG)
+            .expectHeader().contentLength(file.length())
+            .expectBody()
+            .consumeWith {
+                assertThat(it.responseBody).isEqualTo(file.readBytes())
+            }
+
+        assertTrue(metadataService.existsByKey(key.key))
+        assertTrue(metadataService.existsRenditionByKey(req1.key.key))
+        assertTrue(metadataService.existsRenditionByKey(req2.key.key))
+
+        fileStorage.remove(key)
+
+        webTestClient.get()
+            .uri(upload.renditions["1"]!!.url)
+            .exchange()
+            .expectStatus().isNotFound
+
+        webTestClient.get()
+            .uri(upload.renditions["2"]!!.url)
+            .exchange()
+            .expectStatus().isNotFound
+
+        assertFalse(metadataService.existsByKey(key.key))
+        assertFalse(metadataService.existsRenditionByKey(req1.key.key))
+        assertFalse(metadataService.existsRenditionByKey(req2.key.key))
+    }
+
     @Test fun `exists works`() = runTest {
         assertFalse(storage.exists("just-a-key"))
 
-        runFileTest { file, metadata, user ->
+        runFileTest { _, metadata, _ ->
             assertTrue(storage.exists(metadata.key))
         }
     }

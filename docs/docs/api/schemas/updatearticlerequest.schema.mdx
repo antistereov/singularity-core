@@ -1,0 +1,33 @@
+---
+id: updatearticlerequest
+title: "UpdateArticleRequest"
+description: ""
+sidebar_label: "UpdateArticleRequest"
+hide_title: true
+hide_table_of_contents: true
+schema: true
+sample: {"title":"string","summary":"string","content":"string","colors":{"text":"string","background":"string"},"tags":["string"],"locale":"string"}
+custom_edit_url: null
+---
+
+import Schema from "@theme/Schema";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"UpdateArticleRequest"}
+>
+</Heading>
+
+
+
+
+
+<Schema
+  schema={{"type":"object","properties":{"title":{"type":"string"},"summary":{"type":"string"},"content":{"type":"string"},"colors":{"type":"object","properties":{"text":{"type":"string"},"background":{"type":"string"}},"title":"ArticleColors"},"tags":{"type":"array","items":{"type":"string"},"uniqueItems":true},"locale":{"type":"string"}},"required":["locale"],"title":"UpdateArticleRequest"}}
+  schemaType={"response"}
+>
+  
+</Schema>
+            

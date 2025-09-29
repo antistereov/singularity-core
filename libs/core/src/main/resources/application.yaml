@@ -13,3 +13,7 @@ springdoc:
     path: "/api/openapi"
   swagger-ui:
     enabled: false
+singularity:
+  content:
+    articles:
+      enable: true

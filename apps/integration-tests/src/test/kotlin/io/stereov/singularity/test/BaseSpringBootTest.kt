@@ -33,10 +33,15 @@ import io.stereov.singularity.auth.twofactor.service.TotpService
 import io.stereov.singularity.auth.twofactor.service.token.TotpSetupTokenService
 import io.stereov.singularity.auth.twofactor.service.token.TwoFactorAuthenticationTokenService
 import io.stereov.singularity.cache.service.CacheService
+import io.stereov.singularity.content.core.properties.ContentProperties
+import io.stereov.singularity.content.invitation.service.InvitationService
+import io.stereov.singularity.content.invitation.service.InvitationTokenService
+import io.stereov.singularity.content.tag.service.TagService
 import io.stereov.singularity.database.encryption.service.EncryptionSecretService
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.global.properties.AppProperties
+import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.test.config.MockConfig
 import io.stereov.singularity.user.core.model.Role
 import io.stereov.singularity.user.core.model.UserDocument
@@ -64,6 +69,25 @@ import java.util.concurrent.atomic.AtomicInteger
 )
 @Import(MockConfig::class)
 class BaseSpringBootTest() {
+
+    @Autowired
+    lateinit var uiProperties: UiProperties
+
+    @Autowired
+    lateinit var contentProperties: ContentProperties
+
+    @Autowired
+    lateinit var appProperties: AppProperties
+
+
+    @Autowired
+    lateinit var invitationTokenService: InvitationTokenService
+
+    @Autowired
+    lateinit var invitationService: InvitationService
+
+    @Autowired
+    lateinit var tagService: TagService
 
     @Autowired
     lateinit var userRepository: UserRepository
@@ -112,8 +136,6 @@ class BaseSpringBootTest() {
     @LocalServerPort
     lateinit var port: String
 
-    @Autowired
-    lateinit var appProperties: AppProperties
 
     @BeforeEach
     fun setupWebTestClient() {
@@ -160,6 +182,8 @@ class BaseSpringBootTest() {
         cacheService.deleteAll()
         groupRepository.deleteAll()
         counter.set(0)
+        tagService.deleteAll()
+        invitationService.deleteAll()
     }
 
     @BeforeEach
@@ -193,7 +217,7 @@ class BaseSpringBootTest() {
     )
 
     suspend fun createGroup(key: String = "test-group"): GroupDocument {
-        val group = GroupDocument(key = key, translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Test")), primaryLocale = Locale.ENGLISH)
+        val group = GroupDocument(key = key, translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Test")))
         return groupService.save(group)
     }
 

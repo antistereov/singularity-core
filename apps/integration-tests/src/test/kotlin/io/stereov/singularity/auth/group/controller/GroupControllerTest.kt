@@ -194,7 +194,6 @@ class GroupControllerTest() : BaseIntegrationTest() {
                     Locale.ENGLISH to GroupTranslation("Pilots", "People who fly"),
                     Locale.GERMAN to GroupTranslation("Piloten", "Menschen, die fliegen")
                 ),
-                Locale.ENGLISH
         ))
         groupRepository.save(GroupDocument(
             null,
@@ -203,7 +202,6 @@ class GroupControllerTest() : BaseIntegrationTest() {
                     Locale.ENGLISH to GroupTranslation("Passengers", "People who don't fly"),
                     Locale.GERMAN to GroupTranslation("Passagiere", "Menschen, die nicht fliegen")
                 ),
-            Locale.ENGLISH
         ))
 
         val res = webTestClient.get()
@@ -321,7 +319,6 @@ class GroupControllerTest() : BaseIntegrationTest() {
                 Locale.ENGLISH to GroupTranslation("Pilots", "People who fly"),
                 Locale.GERMAN to GroupTranslation("Piloten", "Menschen, die fliegen")
             ),
-            Locale.ENGLISH
         ))
 
         val pilots = webTestClient.get()
@@ -399,13 +396,11 @@ class GroupControllerTest() : BaseIntegrationTest() {
                 Locale.ENGLISH to GroupTranslation("Pilots", "People who fly"),
                 Locale.GERMAN to GroupTranslation("Piloten", "Menschen, die fliegen")
             ),
-            appProperties.locale
         )
 
         groupRepository.save(group)
 
         val req = UpdateGroupRequest(
-            key = null,
             translations = mutableMapOf(
                 Locale.ENGLISH to GroupTranslation("PilotsNew", "People who flyNew")
             ),
@@ -456,13 +451,11 @@ class GroupControllerTest() : BaseIntegrationTest() {
             mutableMapOf(
                 Locale.ENGLISH to GroupTranslation("Pilots", "People who fly"),
             ),
-            appProperties.locale
         )
 
         groupRepository.save(group)
 
         val req = UpdateGroupRequest(
-            key = null,
             translations = mutableMapOf(
                 Locale.ENGLISH to GroupTranslation("PilotsNew", "People who flyNew")
             ),
@@ -489,95 +482,6 @@ class GroupControllerTest() : BaseIntegrationTest() {
         Assertions.assertEquals(req.translations[Locale.ENGLISH]!!.name, updatedGroup.translations[Locale.ENGLISH]!!.name)
         Assertions.assertEquals(req.translations[Locale.ENGLISH]!!.description, updatedGroup.translations[Locale.ENGLISH]!!.description)
     }
-    @Test fun `updateGroup key works`() = runTest {
-        val admin = createAdmin()
-        val user = registerUser(groups = listOf("pilots"))
-
-        val group =  groupRepository.save(GroupDocument(
-            null,
-            "pilots",
-            mutableMapOf(
-                Locale.ENGLISH to GroupTranslation("Pilots", "People who fly"),
-                Locale.GERMAN to GroupTranslation("Piloten", "Menschen, die fliegen")
-            ),
-            appProperties.locale
-        ))
-
-        val req = UpdateGroupRequest(
-            key = "new-pilots",
-            translations = mutableMapOf(),
-            translationsToDelete = setOf(),
-        )
-
-        val res = webTestClient.put()
-            .uri("/api/groups/pilots")
-            .bodyValue(req)
-            .accessTokenCookie(admin.accessToken)
-            .exchange()
-            .expectStatus().isOk
-            .expectBody(GroupResponse::class.java)
-            .returnResult()
-            .responseBody
-
-        requireNotNull(res)
-
-        Assertions.assertEquals(req.key, res.key)
-
-        val updatedGroup = groupService.findByKey(req.key!!)
-
-        Assertions.assertEquals(req.key, updatedGroup.key)
-        Assertions.assertEquals(group.id, updatedGroup.id)
-        Assertions.assertEquals(group.translations, updatedGroup.translations)
-
-        val updatedUser = userService.findById(user.info.id)
-        Assertions.assertEquals(setOf("new-pilots"), updatedUser.groups)
-    }
-    @Test fun `updateGroup requires unique key`() = runTest {
-        val admin = createAdmin()
-        val user = registerUser(groups = listOf("pilots"))
-
-        groupRepository.save(GroupDocument(
-            null,
-            "pilots",
-            mutableMapOf(
-                Locale.ENGLISH to GroupTranslation("Pilots", "People who fly"),
-                Locale.GERMAN to GroupTranslation("Piloten", "Menschen, die fliegen")
-            ),
-            appProperties.locale
-        ))
-        val group = groupRepository.save(GroupDocument(
-            null,
-            "new-pilots",
-            mutableMapOf(
-                Locale.ENGLISH to GroupTranslation("Pilots", "People who fly"),
-                Locale.GERMAN to GroupTranslation("Piloten", "Menschen, die fliegen")
-            ),
-            appProperties.locale
-        ))
-
-        val req = UpdateGroupRequest(
-            key = "new-pilots",
-            translations = mutableMapOf(),
-            translationsToDelete = setOf(),
-        )
-
-        webTestClient.put()
-            .uri("/api/groups/pilots")
-            .bodyValue(req)
-            .accessTokenCookie(admin.accessToken)
-            .exchange()
-            .expectStatus().isEqualTo(HttpStatus.CONFLICT)
-
-
-        val updatedGroup = groupService.findByKey(req.key!!)
-
-        Assertions.assertEquals(req.key, updatedGroup.key)
-        Assertions.assertEquals(group.id, updatedGroup.id)
-        Assertions.assertEquals(group.translations, updatedGroup.translations)
-
-        val updatedUser = userService.findById(user.info.id)
-        Assertions.assertEquals(setOf("pilots"), updatedUser.groups)
-    }
     @Test fun `updateGroup default locale needs translation`() = runTest {
         val admin = createAdmin()
 
@@ -588,11 +492,9 @@ class GroupControllerTest() : BaseIntegrationTest() {
                 Locale.ENGLISH to GroupTranslation("Pilots", "People who fly"),
                 Locale.GERMAN to GroupTranslation("Piloten", "Menschen, die fliegen")
             ),
-            appProperties.locale
         ))
 
         val req = UpdateGroupRequest(
-            "pilots",
             translationsToDelete = setOf(Locale.ENGLISH),
             translations = mutableMapOf()
         )
@@ -604,9 +506,8 @@ class GroupControllerTest() : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isBadRequest
 
-        val updatedGroup = groupService.findByKey(req.key!!)
+        val updatedGroup = groupService.findByKey(group.key)
 
-        Assertions.assertEquals(req.key, updatedGroup.key)
         Assertions.assertEquals(group.id, updatedGroup.id)
         Assertions.assertEquals(group.translations, updatedGroup.translations)
     }
@@ -618,13 +519,11 @@ class GroupControllerTest() : BaseIntegrationTest() {
                 Locale.ENGLISH to GroupTranslation("Pilots", "People who fly"),
                 Locale.GERMAN to GroupTranslation("Piloten", "Menschen, die fliegen")
             ),
-            appProperties.locale
         )
 
         groupRepository.save(group)
 
         val req = UpdateGroupRequest(
-            key = null,
             translations = mutableMapOf(
                 Locale.ENGLISH to GroupTranslation("PilotsNew", "People who flyNew")
             ),
@@ -647,13 +546,11 @@ class GroupControllerTest() : BaseIntegrationTest() {
                 Locale.ENGLISH to GroupTranslation("Pilots", "People who fly"),
                 Locale.GERMAN to GroupTranslation("Piloten", "Menschen, die fliegen")
             ),
-            appProperties.locale
         )
 
         groupRepository.save(group)
 
         val req = UpdateGroupRequest(
-            key = null,
             translations = mutableMapOf(
                 Locale.ENGLISH to GroupTranslation("PilotsNew", "People who flyNew")
             ),
@@ -677,7 +574,6 @@ class GroupControllerTest() : BaseIntegrationTest() {
                 Locale.ENGLISH to GroupTranslation("Pilots", "People who fly"),
                 Locale.GERMAN to GroupTranslation("Piloten", "Menschen, die fliegen")
             ),
-            appProperties.locale
         )
 
         groupRepository.save(group)
@@ -700,7 +596,6 @@ class GroupControllerTest() : BaseIntegrationTest() {
                 Locale.ENGLISH to GroupTranslation("Pilots", "People who fly"),
                 Locale.GERMAN to GroupTranslation("Piloten", "Menschen, die fliegen")
             ),
-            appProperties.locale
         ))
 
         webTestClient.delete()
@@ -726,7 +621,6 @@ class GroupControllerTest() : BaseIntegrationTest() {
                 Locale.ENGLISH to GroupTranslation("Pilots", "People who fly"),
                 Locale.GERMAN to GroupTranslation("Piloten", "Menschen, die fliegen")
             ),
-            appProperties.locale
         ))
 
         webTestClient.delete()
@@ -751,7 +645,6 @@ class GroupControllerTest() : BaseIntegrationTest() {
                 Locale.ENGLISH to GroupTranslation("Pilots", "People who fly"),
                 Locale.GERMAN to GroupTranslation("Piloten", "Menschen, die fliegen")
             ),
-            appProperties.locale
         ))
 
         webTestClient.delete()
@@ -778,7 +671,6 @@ class GroupControllerTest() : BaseIntegrationTest() {
                 Locale.ENGLISH to GroupTranslation("Pilots", "People who fly"),
                 Locale.GERMAN to GroupTranslation("Piloten", "Menschen, die fliegen")
             ),
-            appProperties.locale
         ))
 
         webTestClient.delete()

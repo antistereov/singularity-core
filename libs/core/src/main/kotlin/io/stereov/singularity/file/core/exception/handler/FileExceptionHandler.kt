@@ -1,10 +1,7 @@
 package io.stereov.singularity.file.core.exception.handler
 
 import io.stereov.singularity.file.core.exception.FileException
-import io.stereov.singularity.file.core.exception.model.DeleteFailedException
-import io.stereov.singularity.file.core.exception.model.FileNotFoundException
-import io.stereov.singularity.file.core.exception.model.FileSecurityException
-import io.stereov.singularity.file.core.exception.model.UnsupportedMediaTypeException
+import io.stereov.singularity.file.core.exception.model.*
 import io.stereov.singularity.global.exception.BaseExceptionHandler
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ControllerAdvice
@@ -15,10 +12,13 @@ import org.springframework.web.server.ServerWebExchange
 class FileExceptionHandler : BaseExceptionHandler<FileException> {
 
     override fun getHttpStatus(ex: FileException) = when (ex) {
-        is DeleteFailedException -> HttpStatus.INTERNAL_SERVER_ERROR
+        is DeletingMetadataIsForbiddenException -> HttpStatus.BAD_REQUEST
+        is FileKeyAlreadyTakenException -> HttpStatus.CONFLICT
         is FileNotFoundException -> HttpStatus.NOT_FOUND
         is FileSecurityException -> HttpStatus.FORBIDDEN
-        is UnsupportedMediaTypeException -> HttpStatus.BAD_REQUEST
+        is FileTooLargeException -> HttpStatus.REQUEST_ENTITY_TOO_LARGE
+        is FileUploadException -> HttpStatus.BAD_REQUEST
+        is UnsupportedMediaTypeException -> HttpStatus.UNSUPPORTED_MEDIA_TYPE
         else -> HttpStatus.INTERNAL_SERVER_ERROR
     }
 

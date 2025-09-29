@@ -13,8 +13,6 @@ import org.testcontainers.utility.DockerImageName
 @Import(MockMailSenderConfig::class)
 class BaseIntegrationTest : BaseSpringBootTest() {
 
-    final val basePath = "/api"
-
     companion object {
         val mongoDBContainer = MongoDBContainer("mongo:latest").apply {
             start()

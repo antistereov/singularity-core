@@ -61,7 +61,7 @@ class TwoFactorAuthenticationController(
             
             You can learn more about the login flow [here](https://singularity.stereov.io/docs/guides/auth/authentication#login).
             
-            **Requirements:**
+            ### Requirements
             - User authenticated using their password through [`POST /api/auth/login`](https://singularity.stereov.io/docs/api/login).
             - At least one of [email](https://singularity.stereov.io/docs/guides/auth/two-factor#email) or [TOTP](https://singularity.stereov.io/docs/guides/auth/two-factor#totp) as 2FA methods should be enabled.
             - An `email` or `totp` 2FA code is present for an enabled 2FA method.
@@ -76,7 +76,7 @@ class TwoFactorAuthenticationController(
         
             This information helps users identify and manage authorized sessions, improving overall account security.
             
-            **Tokens:**
+            ### Tokens
             - A valid [`TwoFactorAuthenticationToken`](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token)
               is required. This token will be set automatically as HTTP-only cookie through [`POST /api/auth/login`](https://singularity.stereov.io/docs/api/login)
               or can be retrieved from the response and set as header manually if [header authentication](https://singularity.stereov.io/docs/guides/authentication#header-authentication) 
@@ -159,14 +159,14 @@ class TwoFactorAuthenticationController(
             
             You can learn more about the step-up flow [here](https://singularity.stereov.io/docs/guides/auth/authentication#step-up).
             
-            **Requirements:**
+            ### Requirements
             - User authenticated using their password through [`POST /api/auth/step-up`](https://singularity.stereov.io/docs/api/step-up).
             - At least one of [email](https://singularity.stereov.io/docs/guides/auth/two-factor#email) or [TOTP](https://singularity.stereov.io/docs/guides/auth/two-factor#totp) as 2FA methods should be enabled.
             - An `email` or `totp` 2FA code is present for an enabled 2FA method.
               Check out [email](https://singularity.stereov.io/docs/guides/auth/two-factor#email) and [TOTP](https://singularity.stereov.io/docs/guides/auth/two-factor#totp)
               to learn how to retrieve a 2FA code.
             
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
             - A valid [`TwoFactorAuthenticationToken`](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token)
               is required. This token should match user and session contained in the `AccessToken`.
@@ -228,12 +228,12 @@ class TwoFactorAuthenticationController(
             
             You can learn more about 2FA methods [here](https://singularity.stereov.io/docs/guides/auth/two-factor).
             
-            **Requirements:**
+            ### Requirements
             - The user can authenticate using password. 2FA will not work with OAuth2. 
               The OAuth2 provider will validate the second factor if the user enabled it for the provider.
             - At least one of [email](https://singularity.stereov.io/docs/guides/auth/two-factor#email) or [TOTP](https://singularity.stereov.io/docs/guides/auth/two-factor#totp) as 2FA methods should be enabled.
             
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
             - A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
               is required. This token should match user and session contained in the `AccessToken`.

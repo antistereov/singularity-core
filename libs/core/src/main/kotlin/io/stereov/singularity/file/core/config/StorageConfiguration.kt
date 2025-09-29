@@ -1,11 +1,16 @@
 package io.stereov.singularity.file.core.config
 
 import io.stereov.singularity.auth.core.service.AuthorizationService
+import io.stereov.singularity.content.core.component.AccessCriteria
+import io.stereov.singularity.content.core.properties.ContentProperties
+import io.stereov.singularity.file.core.component.DataBufferPublisher
 import io.stereov.singularity.file.core.exception.handler.FileExceptionHandler
+import io.stereov.singularity.file.core.mapper.FileMetadataMapper
 import io.stereov.singularity.file.core.properties.StorageProperties
 import io.stereov.singularity.file.core.repository.FileMetadataRepository
 import io.stereov.singularity.file.core.service.FileMetadataService
 import io.stereov.singularity.global.config.ApplicationConfiguration
+import io.stereov.singularity.translate.service.TranslateService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -24,6 +29,18 @@ import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRep
 @EnableConfigurationProperties(StorageProperties::class)
 class StorageConfiguration {
 
+    // Component
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun dataBufferPublisher() = DataBufferPublisher()
+
+    // Mapper
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun fileMetadataMapper() = FileMetadataMapper()
+
     // Service
 
     @Bean
@@ -31,12 +48,18 @@ class StorageConfiguration {
     fun fileMetaDataService(
         repository: FileMetadataRepository,
         authorizationService: AuthorizationService,
-        reactiveMongoTemplate: ReactiveMongoTemplate
+        reactiveMongoTemplate: ReactiveMongoTemplate,
+        translateService: TranslateService,
+        accessCriteria: AccessCriteria,
+        contentProperties: ContentProperties
     ): FileMetadataService {
         return FileMetadataService(
             repository,
             authorizationService,
-            reactiveMongoTemplate
+            reactiveMongoTemplate,
+            translateService,
+            accessCriteria,
+            contentProperties
         )
     }
 

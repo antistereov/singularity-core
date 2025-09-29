@@ -1,0 +1,33 @@
+---
+id: updategrouprequest
+title: "UpdateGroupRequest"
+description: ""
+sidebar_label: "UpdateGroupRequest"
+hide_title: true
+hide_table_of_contents: true
+schema: true
+sample: {"translations":{"en":{"name":"Pilots","description":"People who can fly"},"de":{"name":"Piloten","description":"Personen, die fliegen können"}},"translationsToDelete":"en"}
+custom_edit_url: null
+---
+
+import Schema from "@theme/Schema";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"UpdateGroupRequest"}
+>
+</Heading>
+
+
+
+
+
+<Schema
+  schema={{"type":"object","properties":{"translations":{"type":"object","additionalProperties":{"type":"object","properties":{"name":{"type":"string"},"description":{"type":"string"}},"required":["description","name"],"title":"GroupTranslation"},"description":"A map of locale to group translation. The translations will be added or updated.","example":{"en":{"name":"Pilots","description":"People who can fly"},"de":{"name":"Piloten","description":"Personen, die fliegen können"}}},"translationsToDelete":{"type":"array","description":"The translations to delete.","example":"en","items":{"type":"string"},"uniqueItems":true}},"required":["translations","translationsToDelete"],"title":"UpdateGroupRequest"}}
+  schemaType={"response"}
+>
+  
+</Schema>
+            

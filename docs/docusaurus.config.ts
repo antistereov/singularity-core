@@ -2,6 +2,8 @@ import {themes as prismThemes} from 'prism-react-renderer';
 import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 import type * as OpenApiPlugin from "docusaurus-plugin-openapi-docs";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
@@ -46,7 +48,9 @@ const config: Config = {
                 },
                 docs: {
                     sidebarPath: './sidebars.ts',
-                    docItemComponent: "@theme/ApiItem"
+                    docItemComponent: "@theme/ApiItem",
+                    remarkPlugins: [remarkMath],
+                    rehypePlugins: [rehypeKatex],
                 },
                 blog: false,
             } satisfies Preset.Options
@@ -62,6 +66,7 @@ const config: Config = {
                     singularity: {
                         specPath: "static/openapi/openapi.yaml",
                         outputDir: "docs/api",
+                        showSchemas: true,
                         sidebarOptions: {
                             groupPathsBy: "tag",
                             categoryLinkSource: "auto",

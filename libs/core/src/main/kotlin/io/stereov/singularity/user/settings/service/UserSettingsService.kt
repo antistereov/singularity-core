@@ -13,6 +13,7 @@ import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.file.core.exception.model.UnsupportedMediaTypeException
 import io.stereov.singularity.file.core.service.FileStorage
+import io.stereov.singularity.file.image.service.ImageStore
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.core.exception.model.EmailAlreadyTakenException
 import io.stereov.singularity.user.core.mapper.UserMapper
@@ -37,7 +38,8 @@ class UserSettingsService(
     private val userMapper: UserMapper,
     private val emailProperties: EmailProperties,
     private val securityAlertProperties: SecurityAlertProperties,
-    private val securityAlertService: SecurityAlertService
+    private val securityAlertService: SecurityAlertService,
+    private val imageStore: ImageStore
 ) {
 
     private val logger = KotlinLogging.logger {}
@@ -109,9 +111,7 @@ class UserSettingsService(
             throw UnsupportedMediaTypeException("Unsupported file type: $contentType")
         }
 
-        userService.save(user)
-
-        user.sensitive.avatarFileKey = fileStorage
+        user.sensitive.avatarFileKey = imageStore
             .upload(user.id, file, "${user.fileStoragePath}/avatar", true)
             .key
 
@@ -140,6 +140,8 @@ class UserSettingsService(
 
         authorizationService.requireStepUp()
         val userId = authorizationService.getUserId()
+        val user = userService.findById(userId)
+        user.sensitive.avatarFileKey?.let { fileStorage.remove(it) }
         accessTokenCache.invalidateAllTokens(userId)
 
         userService.deleteById(userId)

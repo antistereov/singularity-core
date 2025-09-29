@@ -1,25 +1,30 @@
 package io.stereov.singularity.content.article.config
 
 import io.stereov.singularity.auth.core.service.AuthorizationService
+import io.stereov.singularity.auth.group.service.GroupService
 import io.stereov.singularity.content.article.controller.ArticleController
 import io.stereov.singularity.content.article.controller.ArticleManagementController
 import io.stereov.singularity.content.article.mapper.ArticleMapper
+import io.stereov.singularity.content.article.properties.ArticleProperties
 import io.stereov.singularity.content.article.repository.ArticleRepository
 import io.stereov.singularity.content.article.service.ArticleManagementService
 import io.stereov.singularity.content.article.service.ArticleService
 import io.stereov.singularity.content.core.component.AccessCriteria
 import io.stereov.singularity.content.core.config.ContentConfiguration
+import io.stereov.singularity.content.core.properties.ContentProperties
 import io.stereov.singularity.content.invitation.service.InvitationService
 import io.stereov.singularity.content.tag.mapper.TagMapper
 import io.stereov.singularity.content.tag.service.TagService
 import io.stereov.singularity.file.core.service.FileStorage
+import io.stereov.singularity.file.image.service.ImageStore
 import io.stereov.singularity.global.properties.AppProperties
-import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.user.core.mapper.UserMapper
 import io.stereov.singularity.user.core.service.UserService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
@@ -32,6 +37,8 @@ import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRep
     ]
 )
 @EnableReactiveMongoRepositories(basePackageClasses = [ArticleRepository::class])
+@ConditionalOnProperty(prefix = "singularity.content.articles", value = ["enable"], havingValue = "true", matchIfMissing = true)
+@EnableConfigurationProperties(ArticleProperties::class)
 class ArticleConfiguration {
 
     // Controller
@@ -44,15 +51,37 @@ class ArticleConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun articleManagementController(articleManagementService: ArticleManagementService): ArticleManagementController {
-        return ArticleManagementController(articleManagementService)
+    fun articleManagementController(
+        articleManagementService: ArticleManagementService,
+    ): ArticleManagementController {
+        return ArticleManagementController(
+            articleManagementService,
+        )
     }
 
     // Mapper
 
     @Bean
     @ConditionalOnMissingBean
-    fun articleMapper(appProperties: AppProperties) = ArticleMapper(appProperties)
+    fun articleMapper(
+        appProperties: AppProperties,
+        authorizationService: AuthorizationService,
+        userService: UserService,
+        translateService: TranslateService,
+        tagMapper: TagMapper,
+        tagService: TagService,
+        fileStorage: FileStorage,
+        userMapper: UserMapper,
+    ) = ArticleMapper(
+        appProperties,
+        authorizationService,
+        userService,
+        translateService,
+        tagMapper,
+        tagService,
+        fileStorage,
+        userMapper,
+    )
 
     // Service
 
@@ -60,29 +89,21 @@ class ArticleConfiguration {
     @ConditionalOnMissingBean
     fun articleService(
         articleRepository: ArticleRepository,
-        userService: UserService,
         authorizationService: AuthorizationService,
-        tagService: TagService,
         reactiveMongoTemplate: ReactiveMongoTemplate,
         accessCriteria: AccessCriteria,
-        fileStorage: FileStorage,
-        userMapper: UserMapper,
         articleMapper: ArticleMapper,
-        tagMapper: TagMapper,
-        translateService: TranslateService
+        translateService: TranslateService,
+        contentProperties: ContentProperties
     ): ArticleService {
         return ArticleService(
             articleRepository,
-            userService,
             authorizationService,
-            tagService,
             reactiveMongoTemplate,
             accessCriteria,
-            fileStorage,
-            userMapper,
+            translateService,
             articleMapper,
-            tagMapper,
-            translateService
+            contentProperties
         )
     }
 
@@ -94,23 +115,23 @@ class ArticleConfiguration {
         invitationService: InvitationService,
         fileStorage: FileStorage,
         translateService: TranslateService,
-        uiProperties: UiProperties,
         userService: UserService,
         userMapper: UserMapper,
         articleMapper: ArticleMapper,
-        appProperties: AppProperties
+        imageStore: ImageStore,
+        groupService: GroupService
     ): ArticleManagementService {
         return ArticleManagementService(
             articleService,
             authorizationService,
             invitationService,
-            fileStorage,
             translateService,
-            uiProperties,
             userService,
             userMapper,
+            fileStorage,
             articleMapper,
-            appProperties
+            imageStore,
+            groupService
         )
     }
 }

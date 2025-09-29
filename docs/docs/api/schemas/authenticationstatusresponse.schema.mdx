@@ -1,0 +1,33 @@
+---
+id: authenticationstatusresponse
+title: "AuthenticationStatusResponse"
+description: ""
+sidebar_label: "AuthenticationStatusResponse"
+hide_title: true
+hide_table_of_contents: true
+schema: true
+sample: {"authenticated":true,"stepUp":true,"emailVerified":true,"twoFactorRequired":true,"preferredTwoFactorMethod":"totp","twoFactorMethods":["totp"]}
+custom_edit_url: null
+---
+
+import Schema from "@theme/Schema";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"AuthenticationStatusResponse"}
+>
+</Heading>
+
+
+
+
+
+<Schema
+  schema={{"type":"object","properties":{"authenticated":{"type":"boolean"},"stepUp":{"type":"boolean"},"emailVerified":{"type":"boolean"},"twoFactorRequired":{"type":"boolean"},"preferredTwoFactorMethod":{"type":"string","enum":["totp","mail"]},"twoFactorMethods":{"type":"array","items":{"type":"string","enum":["totp","mail"]}}},"required":["authenticated","stepUp","twoFactorRequired"],"title":"AuthenticationStatusResponse"}}
+  schemaType={"response"}
+>
+  
+</Schema>
+            

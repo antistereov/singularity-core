@@ -2,19 +2,17 @@ package io.stereov.singularity.file.s3.service
 
 import com.nimbusds.jose.util.StandardCharset
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.auth.core.model.token.AccessType
-import io.stereov.singularity.file.core.model.FileMetadataDocument
+import io.stereov.singularity.file.core.component.DataBufferPublisher
+import io.stereov.singularity.file.core.mapper.FileMetadataMapper
+import io.stereov.singularity.file.core.model.FileUploadRequest
+import io.stereov.singularity.file.core.model.FileUploadResponse
+import io.stereov.singularity.file.core.properties.StorageProperties
 import io.stereov.singularity.file.core.service.FileMetadataService
 import io.stereov.singularity.file.core.service.FileStorage
-import io.stereov.singularity.file.core.util.DataBufferPublisher
 import io.stereov.singularity.file.s3.properties.S3Properties
 import io.stereov.singularity.global.properties.AppProperties
 import kotlinx.coroutines.future.await
-import kotlinx.coroutines.reactive.awaitSingle
-import org.bson.types.ObjectId
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
-import org.springframework.http.MediaType
-import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
 import software.amazon.awssdk.core.async.AsyncRequestBody
 import software.amazon.awssdk.services.s3.S3AsyncClient
@@ -35,35 +33,29 @@ class S3FileStorage(
     private val s3Presigner: S3Presigner,
     override val appProperties: AppProperties,
     override val metadataService: FileMetadataService,
+    override val metadataMapper: FileMetadataMapper,
+    private val dataBufferPublisher: DataBufferPublisher,
+    override val storageProperties: StorageProperties
 ) : FileStorage() {
 
     override val logger = KotlinLogging.logger {}
 
-    /**
-     * Upload a file to the S3 storage.
-     *
-     * @param userId The ID of the user who performs the upload.
-     * @param filePart The file that should be uploaded.
-     * @param key The key to the file will get in the storage.
-     * @param public Whether the file should be publicly accessible.
-     *
-     * @return [FileMetadataDocument] The metadata of the resulting upload.
-     */
-    override suspend fun doUpload(userId: ObjectId, filePart: FilePart, key: String, public: Boolean, contentType: MediaType): FileMetadataDocument {
-        logger.debug { "Uploading file: \"${filePart.filename()}\" as $contentType" }
+    override suspend fun uploadRendition(req: FileUploadRequest): FileUploadResponse {
+        logger.debug { "Uploading file: \"${req.key}\" as $${req.contentType}" }
+        return when (req) {
+            is FileUploadRequest.FilePartUpload -> doUploadFilePart(req)
+            is FileUploadRequest.ByteArrayUpload -> doUploadByteArray(req)
+        }
+    }
 
-        val publisher = DataBufferPublisher(filePart.content()).toFlux()
-
-        val size = filePart.content()
-            .map { it.readableByteCount() }
-            .reduce(0L) { acc, bytes -> acc + bytes }
-            .awaitSingle()
+    private suspend fun doUploadFilePart(req: FileUploadRequest.FilePartUpload): FileUploadResponse {
+        val publisher = dataBufferPublisher.toFlux(req.data.content())
 
         val putRequest = PutObjectRequest.builder()
             .bucket(s3Properties.bucket)
-            .key(key)
-            .contentLength(size)
-            .contentType(contentType.toString())
+            .key(req.key.key)
+            .contentLength(req.contentLength)
+            .contentType(req.contentType)
             .acl(ObjectCannedACL.PRIVATE)
             .build()
 
@@ -71,16 +63,39 @@ class S3FileStorage(
 
         s3Client.putObject(putRequest, requestBody).await()
 
-        return FileMetadataDocument(
-            ownerId = userId,
-            key = key,
-            contentType = contentType,
-            accessType = if (public) AccessType.PUBLIC else AccessType.SHARED,
-            size = size
+        return FileUploadResponse(
+            key = req.key.key,
+            contentType = req.contentType,
+            size = req.contentLength,
+            width = req.width,
+            height = req.height
         )
     }
 
-    override suspend fun doExists(key: String): Boolean {
+    private suspend fun doUploadByteArray(req: FileUploadRequest.ByteArrayUpload): FileUploadResponse {
+        val size = req.data.size.toLong()
+
+        val putRequest = PutObjectRequest.builder()
+            .bucket(s3Properties.bucket)
+            .key(req.key.key)
+            .contentLength(size)
+            .contentType(req.contentType)
+            .acl(ObjectCannedACL.PRIVATE)
+            .build()
+
+        val requestBody = AsyncRequestBody.fromBytes(req.data)
+        s3Client.putObject(putRequest, requestBody).await()
+
+        return FileUploadResponse(
+            key = req.key.key,
+            contentType = req.contentType,
+            size = size,
+            width = req.width,
+            height = req.height
+        )
+    }
+
+    override suspend fun renditionExists(key: String): Boolean {
         logger.debug { "Checking existence of file: $key" }
 
         return try {
@@ -91,7 +106,7 @@ class S3FileStorage(
         }
     }
 
-    override suspend fun doRemove(key: String) {
+    override suspend fun removeRendition(key: String) {
         logger.debug { "Removing file: $key" }
 
         s3Client.deleteObject {
@@ -99,7 +114,7 @@ class S3FileStorage(
         }.await()
     }
 
-    override suspend fun doGetUrl(key: String): String {
+    override suspend fun getRenditionUrl(key: String): String {
         val getObjectRequest = GetObjectRequest.builder()
             .bucket(s3Properties.bucket)
             .key(key)

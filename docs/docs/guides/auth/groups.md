@@ -17,13 +17,24 @@ You can learn more on how to secure endpoints by requiring a group membership [h
 :::
 
 A **Group** is uniquely identified by a `key`.
-You can save a name and a description in multiple languages to the database.
+You can save a name and a description in multiple [translations](../content/i18n.md) to the database.
 
 :::info
 Managing groups and their members can only be done by users with the `ADMIN` role.
 :::
 
 ## Managing Groups
+
+:::info Group Keys
+The group's `key` cannot be changed once created.
+This is necessary to maintain consistency in the database.
+:::
+
+:::info `contributor`
+The `contributor` group will always be included by default.
+This group is necessary for managing content. 
+You can learn more [here](../content/introduction.md#global-server-group-contributor).
+:::
 
 ### Creating Groups
 

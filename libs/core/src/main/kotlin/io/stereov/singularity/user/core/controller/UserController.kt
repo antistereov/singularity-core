@@ -1,9 +1,10 @@
 package io.stereov.singularity.user.core.controller
 
 import io.stereov.singularity.auth.core.service.AuthorizationService
-import io.stereov.singularity.global.exception.model.DocumentNotFoundException
+import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.model.OpenApiConstants
+import io.stereov.singularity.global.model.PageableRequest
 import io.stereov.singularity.global.model.SuccessResponse
 import io.stereov.singularity.global.util.mapContent
 import io.stereov.singularity.user.core.dto.response.UserOverviewResponse
@@ -19,7 +20,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.bson.types.ObjectId
 import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.time.Instant
@@ -34,6 +34,7 @@ class UserController(
     private val userService: UserService,
     private val authorizationService: AuthorizationService,
     private val userMapper: UserMapper,
+    private val fileStorage: FileStorage,
 ) {
 
     @GetMapping("/{id}")
@@ -85,7 +86,7 @@ class UserController(
             * **`lastActiveAfter`:** A date the users should be last active after.
             * **`lastActiveBefore`:** A date the users should be last active before.
             
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
               with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
         """,
@@ -113,7 +114,9 @@ class UserController(
         ]
     )
     suspend fun getUsers(
-        pageable: Pageable,
+        @RequestParam page: Int = 0,
+        @RequestParam size: Int = 10,
+        @RequestParam sort: List<String> = emptyList(),
         @RequestParam(required = false) email: String?,
         @RequestParam(required = false) roles: Set<String>?,
         @RequestParam(required = false) groups: Set<String>?,
@@ -126,7 +129,7 @@ class UserController(
         authorizationService.requireRole(Role.ADMIN)
 
         val users = userService.findAllPaginated(
-            pageable = pageable,
+            pageable = PageableRequest(page, size, sort).toPageable(),
             email = email,
             roles = roles?.map { Role.fromString(it) }?.toSet(),
             groups = groups,
@@ -149,7 +152,7 @@ class UserController(
             
             You can find more information about user management [here](https://singularity.stereov.io/docs/guides/users/managing-users).
             
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
               with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
         """,
@@ -182,7 +185,8 @@ class UserController(
 
         authorizationService.requireRole(Role.ADMIN)
 
-        if (!userService.existsById(id)) throw DocumentNotFoundException("Deletion failed: no such user exists")
+        val user = userService.findById(id)
+        user.sensitive.avatarFileKey?.let { fileStorage.remove(it) }
         userService.deleteById(id)
 
         return ResponseEntity.ok(SuccessResponse())

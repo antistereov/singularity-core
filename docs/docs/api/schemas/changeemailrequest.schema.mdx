@@ -1,0 +1,33 @@
+---
+id: changeemailrequest
+title: "ChangeEmailRequest"
+description: ""
+sidebar_label: "ChangeEmailRequest"
+hide_title: true
+hide_table_of_contents: true
+schema: true
+sample: {"newEmail":"user@example.com"}
+custom_edit_url: null
+---
+
+import Schema from "@theme/Schema";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"ChangeEmailRequest"}
+>
+</Heading>
+
+
+
+
+
+<Schema
+  schema={{"type":"object","properties":{"newEmail":{"type":"string","format":"email","minLength":1}},"required":["newEmail"],"title":"ChangeEmailRequest"}}
+  schemaType={"response"}
+>
+  
+</Schema>
+            

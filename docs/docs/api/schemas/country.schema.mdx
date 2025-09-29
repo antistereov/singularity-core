@@ -1,0 +1,33 @@
+---
+id: country
+title: "Country"
+description: ""
+sidebar_label: "Country"
+hide_title: true
+hide_table_of_contents: true
+schema: true
+sample: {"confidence":0,"geoname_id":0,"is_in_european_union":true,"iso_code":"string","names":{}}
+custom_edit_url: null
+---
+
+import Schema from "@theme/Schema";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Country"}
+>
+</Heading>
+
+
+
+
+
+<Schema
+  schema={{"type":"object","properties":{"confidence":{"type":"integer","format":"int32"},"geoname_id":{"type":"integer","format":"int64"},"is_in_european_union":{"type":"boolean"},"iso_code":{"type":"string"},"names":{"type":"object","additionalProperties":{"type":"string"}}},"title":"Country"}}
+  schemaType={"response"}
+>
+  
+</Schema>
+            

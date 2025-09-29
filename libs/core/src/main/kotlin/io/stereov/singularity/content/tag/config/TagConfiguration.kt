@@ -1,5 +1,6 @@
 package io.stereov.singularity.content.tag.config
 
+import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.content.core.config.ContentConfiguration
 import io.stereov.singularity.content.core.properties.ContentProperties
 import io.stereov.singularity.content.tag.controller.TagController
@@ -31,9 +32,14 @@ class TagConfiguration {
     @ConditionalOnMissingBean
     fun tagController(
         service: TagService,
-        tagMapper: TagMapper
+        tagMapper: TagMapper,
+        authorizationService: AuthorizationService
     ): TagController {
-        return TagController(service, tagMapper)
+        return TagController(
+            service,
+            tagMapper,
+            authorizationService
+        )
     }
 
     // Mapper
@@ -51,14 +57,14 @@ class TagConfiguration {
         reactiveMongoTemplate: ReactiveMongoTemplate,
         contentProperties: ContentProperties,
         tagMapper: TagMapper,
-        appProperties: AppProperties
+        appProperties: AppProperties,
     ): TagService {
         return TagService(
             repository,
             reactiveMongoTemplate,
             contentProperties,
             tagMapper,
-            appProperties
+            appProperties,
         )
     }
 }

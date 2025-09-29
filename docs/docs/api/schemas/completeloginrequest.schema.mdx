@@ -1,0 +1,33 @@
+---
+id: completeloginrequest
+title: "CompleteLoginRequest"
+description: ""
+sidebar_label: "CompleteLoginRequest"
+hide_title: true
+hide_table_of_contents: true
+schema: true
+sample: {"email":"string","totp":0,"session":{"browser":"Chrome","os":"WIndows"}}
+custom_edit_url: null
+---
+
+import Schema from "@theme/Schema";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"CompleteLoginRequest"}
+>
+</Heading>
+
+
+
+
+
+<Schema
+  schema={{"type":"object","properties":{"email":{"type":"string"},"totp":{"type":"integer","format":"int32"},"session":{"type":"object","properties":{"browser":{"type":"string","description":"The name of the browser used.","example":"Chrome"},"os":{"type":"string","description":"The operating system of the device.","example":"WIndows"}},"title":"SessionInfoRequest"}},"title":"CompleteLoginRequest"}}
+  schemaType={"response"}
+>
+  
+</Schema>
+            

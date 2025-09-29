@@ -76,7 +76,7 @@ class AuthenticationController(
         description = """
             Registers a new user account with `email`, `password`, and `name`.
         
-            **Requirements:**
+            ### Requirements
             - The `email` should be a valid email address (e.g., "test@example.com")
               that is not associated to an existing account.
             - The `password` must be at least 8 characters long and include at least one uppercase letter, 
@@ -90,7 +90,7 @@ class AuthenticationController(
         
             This information helps users identify and manage authorized sessions, improving overall account security.
             
-            **Locale:**
+            ### Locale
             
             A locale can be specified for this request. 
             This will be used for the email verification email.
@@ -99,7 +99,7 @@ class AuthenticationController(
             If no locale is specified, the applications default locale will be used.
             You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
             
-            **Tokens:**
+            ### Tokens
             
             If successful, [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) and 
             [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token) 
@@ -187,7 +187,7 @@ class AuthenticationController(
             
             You can complete the login through the endpoint [`POST /api/auth/2fa/login`](https://singularity.stereov.io/docs/api/complete-login).
             
-            **Locale:**
+            ### Locale
             
             A locale can be specified for this request. 
             This will be used for the email 2FA code if this method is enabled for the user.
@@ -196,7 +196,7 @@ class AuthenticationController(
             If no locale is specified, the applications default locale will be used.
             You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
             
-            **Tokens:**
+            ### Tokens
             - If 2FA is disabled and the request is successful, 
               [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) 
               and [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token) 
@@ -298,7 +298,7 @@ class AuthenticationController(
             Invalidates the current session's [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)s 
             and [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)s.
             
-            **Tokens:**
+            ### Tokens
             - To perform the logout, an [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
             - If successful, all cookies related to the user's session will be invalidated.
         """,
@@ -347,7 +347,7 @@ class AuthenticationController(
         description = """
             Request a new [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token).
             
-            **Tokens:**
+            ### Tokens
             - Requires a valid [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token).
             - If successful, [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) and 
               [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token) 
@@ -425,7 +425,7 @@ class AuthenticationController(
             If you request a step-up for a regular [`USER`](https://singularity.stereov.io/docs/guides/auth/roles#users),
             it will result in a `400 - BAD REQUEST`.
             
-            **Locale:**
+            ### Locale
             
             A locale can be specified for this request. 
             This will be used for the email 2FA code if this method is enabled for the user.
@@ -434,7 +434,7 @@ class AuthenticationController(
             If no locale is specified, the applications default locale will be used.
             You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
             
-            **Tokens:**
+            ### Tokens
             - Requires a valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token).
             - If 2FA is disabled and the request is successful, [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
               will automatically be set as HTTP-only cookie.

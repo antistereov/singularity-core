@@ -15,6 +15,11 @@ import io.stereov.singularity.auth.twofactor.controller.EmailAuthenticationContr
 import io.stereov.singularity.auth.twofactor.controller.TotpAuthenticationController
 import io.stereov.singularity.auth.twofactor.controller.TwoFactorAuthenticationController
 import io.stereov.singularity.auth.twofactor.model.token.TwoFactorTokenType
+import io.stereov.singularity.content.article.controller.ArticleController
+import io.stereov.singularity.content.article.controller.ArticleManagementController
+import io.stereov.singularity.content.core.controller.ContentManagementController
+import io.stereov.singularity.content.invitation.controller.InvitationController
+import io.stereov.singularity.content.tag.controller.TagController
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.user.core.controller.UserController
 import io.stereov.singularity.user.settings.controller.UserSettingsController
@@ -101,12 +106,13 @@ import org.springframework.context.annotation.Bean
 
 class OpenApiConfig() {
 
+
     @Bean
     fun customize(): OpenApiCustomizer = OpenApiCustomizer { openApi ->
         trimIndents(openApi)
-        sortEndpoints(openApi)
-        sortTags(openApi)
         sortSecurityRequirements(openApi)
+        sortTags(openApi)
+        sortEndpoints(openApi)
     }
 
     private fun trimIndents(openApi: OpenAPI) {
@@ -134,8 +140,13 @@ class OpenApiConfig() {
             "Sessions",
             "Roles",
             "Groups",
-            "Manging Users",
+            "Managing Users",
             "Profile Management",
+            "Security",
+            "Articles",
+            "Content Management",
+            "Invitations",
+            "Tags",
         )
 
         val sortedTags = mutableListOf<Tag>()
@@ -253,6 +264,47 @@ class OpenApiConfig() {
             UserSettingsController::setAvatarOfAuthorizedUser.name,
             UserSettingsController::deleteAvatarOfAuthorizedUser.name,
             UserSettingsController::deleteAuthorizedUser.name
+        ))
+
+        // Articles
+
+        sortedOperationIds.addAll(listOf(
+            ArticleManagementController::createArticle.name,
+
+            ArticleController::getArticleByKey.name,
+            ArticleController::getArticles.name,
+
+            ArticleManagementController::updateArticle.name,
+            ArticleManagementController::updateArticleState.name,
+            ArticleManagementController::updateArticleImage.name,
+        ))
+
+        // Content Management
+
+        sortedOperationIds.addAll(listOf(
+            ContentManagementController::getContentObjectAccessDetails.name,
+            ContentManagementController::updateContentObjectOwner.name,
+            ContentManagementController::updateContentObjectAccess.name,
+            ContentManagementController::updateContentObjectTrustedState.name,
+            ContentManagementController::deleteContentObjectByKey.name
+        ))
+
+        // Tags
+
+        sortedOperationIds.addAll(listOf(
+            TagController::createTag.name,
+            TagController::getTagByKey.name,
+            TagController::getTags.name,
+            TagController::updateTag.name,
+            TagController::deleteTag.name,
+        ))
+
+        // Invitations
+
+        sortedOperationIds.addAll(listOf(
+            InvitationController::inviteUserToContentObject.name,
+            InvitationController::acceptInvitationToContentObject.name,
+            InvitationController::deleteInvitationToContentObjectById.name
         ))
 
         val allOperations = mutableListOf<Triple<String, PathItem.HttpMethod, Operation>>()

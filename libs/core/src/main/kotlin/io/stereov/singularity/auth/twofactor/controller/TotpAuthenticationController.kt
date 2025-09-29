@@ -64,11 +64,11 @@ class TotpAuthenticationController(
             [`POST /api/auth/2fa/totp/setup`](https://singularity.stereov.io/docs/api/enable-totp-as-two-factor-method)
             using the `token` and a 2FA code from an authenticator app.
             
-            **Requirements:**
+            ### Requirements
             - The user can authenticate using password. 2FA will not work with OAuth2. 
               The OAuth2 provider will validate the second factor if the user enabled it for the provider.
               
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
             - A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
               is required. This token should match user and session contained in the `AccessToken`.
@@ -122,11 +122,11 @@ class TotpAuthenticationController(
             will be sent to the user's email if this setting is enabled and
             email is [enabled and configured correctly](https://singularity.stereov.io/docs/guides/email/configuration).
             
-            **Requirements:**
+            ### Requirements
             - The user can authenticate using password. 2FA will not work with OAuth2. 
               The OAuth2 provider will validate the second factor if the user enabled it for the provider.
               
-            **Locale:**
+            ### Locale
             
             A locale can be specified for this request. 
             The email will be sent in the specified locale.
@@ -135,7 +135,7 @@ class TotpAuthenticationController(
             If no locale is specified, the applications default locale will be used.
             You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
             
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
             - A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
               is required. This token should match user and session contained in the `AccessToken`.
@@ -191,7 +191,7 @@ class TotpAuthenticationController(
             
             You can learn more about this [here](https://singularity.stereov.io/docs/guides/auth/two-factor#setup).
             
-            **Locale:**
+            ### Locale
             
             A locale can be specified for this request. 
             The email will be sent in the specified locale.
@@ -200,7 +200,7 @@ class TotpAuthenticationController(
             If no locale is specified, the applications default locale will be used.
             You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
             
-            **Tokens:**
+            ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
             - A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
               is required. This token should match user and session contained in the `AccessToken`.
@@ -245,7 +245,7 @@ class TotpAuthenticationController(
             
             You can learn more about recovery for TOTP [here](https://singularity.stereov.io/docs/guides/auth/two-factor#recovery).
             
-            **Requirements:**
+            ### Requirements
             - The user can authenticate using password.
             - The user enabled TOTP as 2FA method.
             
@@ -255,7 +255,7 @@ class TotpAuthenticationController(
                 - `browser`: The name of the browser used (e.g., "Chrome", "Firefox").
                 - `os`: The operating system of the device (e.g., "Windows", "macOS", "Android").
             
-            **Tokens:**
+            ### Tokens
             - A valid [`TwoFactorAuthenticationToken`](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token)
               is required. This token will be set automatically as HTTP-only cookie through 
               [`POST /api/auth/login`](https://singularity.stereov.io/docs/api/login) or

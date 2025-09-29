@@ -34,7 +34,7 @@ import org.springframework.boot.runApplication
             This API is a foundation for building robust backend services, microservices, or 
             full-stack applications.
             
-            **Note:** Some endpoints require explicit configuration to be enabled.
+            >**Note:** Some endpoints require explicit configuration to be enabled.
             """,
         version = "1.0.0",
                 contact = Contact(

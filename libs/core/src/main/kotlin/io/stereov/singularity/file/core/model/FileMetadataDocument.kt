@@ -9,7 +9,6 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Transient
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
-import org.springframework.http.MediaType
 import java.time.Instant
 
 @Document(collection = "files")
@@ -19,9 +18,10 @@ data class FileMetadataDocument(
     override val createdAt: Instant = Instant.now(),
     override var updatedAt: Instant = Instant.now(),
     override var access: ContentAccessDetails,
-    private val _contentType: String,
-    val size: Long,
-    override val trusted: Boolean = false,
+    var renditions: Map<String, FileRendition> = emptyMap(),
+    var renditionKeys: Set<String>,
+    var contentTypes: Set<String>,
+    override var trusted: Boolean = false,
     override var tags: MutableSet<String> = mutableSetOf()
 ) : ContentDocument<FileMetadataDocument> {
 
@@ -29,19 +29,14 @@ data class FileMetadataDocument(
     override val id: ObjectId
         get() = _id ?: throw InvalidDocumentException("No ID found")
 
-    @get:Transient
-    val contentType: MediaType
-        get() = MediaType.valueOf(_contentType)
-
     constructor(
         id: ObjectId? = null,
         key: String,
         createdAt: Instant = Instant.now(),
         updatedAt: Instant = Instant.now(),
         ownerId: ObjectId,
-        contentType: MediaType,
-        accessType: AccessType,
-        size: Long,
+        isPublic: Boolean,
+        renditions: Map<String, FileRendition>,
         trusted: Boolean = false,
         tags: MutableSet<String> = mutableSetOf()
     ): this(
@@ -49,10 +44,16 @@ data class FileMetadataDocument(
         key = key,
         createdAt = createdAt,
         updatedAt = updatedAt,
-        access = ContentAccessDetails(ownerId = ownerId, visibility = accessType),
-        _contentType = contentType.toString(),
-        size = size,
+        access = ContentAccessDetails(ownerId = ownerId, visibility = if (isPublic) AccessType.PUBLIC else AccessType.PRIVATE),
+        renditions = renditions,
+        renditionKeys = renditions.values.map { it.key }.toSet(),
+        contentTypes = renditions.values.map { it.contentType }.toSet(),
         trusted = trusted,
         tags = tags
     )
+
+    companion object {
+        const val ORIGINAL_RENDITION = "original"
+        const val CONTENT_TYPE = "files"
+    }
 }

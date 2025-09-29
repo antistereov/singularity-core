@@ -1,0 +1,33 @@
+---
+id: location
+title: "Location"
+description: ""
+sidebar_label: "Location"
+hide_title: true
+hide_table_of_contents: true
+schema: true
+sample: {"accuracy_radius":0,"average_income":0,"latitude":0,"longitude":0,"population_density":0,"time_zone":"string"}
+custom_edit_url: null
+---
+
+import Schema from "@theme/Schema";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Location"}
+>
+</Heading>
+
+
+
+
+
+<Schema
+  schema={{"type":"object","properties":{"accuracy_radius":{"type":"integer","format":"int32"},"average_income":{"type":"integer","format":"int32"},"latitude":{"type":"number","format":"double"},"longitude":{"type":"number","format":"double"},"metro_code":{"type":"integer","format":"int32","deprecated":true},"population_density":{"type":"integer","format":"int32"},"time_zone":{"type":"string"}},"title":"Location"}}
+  schemaType={"response"}
+>
+  
+</Schema>
+            

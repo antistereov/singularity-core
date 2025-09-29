@@ -15,10 +15,10 @@ import java.util.*
 data class Article(
     @Id private val _id: ObjectId? = null,
     @Indexed(unique = true) override var key: String,
-    override val createdAt: Instant = Instant.now(),
+    override var createdAt: Instant = Instant.now(),
     override var updatedAt: Instant = Instant.now(),
     override var access: ContentAccessDetails,
-    val publishedAt: Instant? = null,
+    var publishedAt: Instant? = null,
     var path: String,
     var state: ArticleState = ArticleState.DRAFT,
     var colors: ArticleColors = ArticleColors(),
@@ -26,14 +26,13 @@ data class Article(
     override var trusted: Boolean,
     override var tags: MutableSet<String> = mutableSetOf(),
     override val translations: MutableMap<Locale, ArticleTranslation> = mutableMapOf(),
-    override val primaryLocale: Locale
 ) : ContentDocument<Article>, Translatable<ArticleTranslation> {
 
     override val id: ObjectId
         get() = _id ?: throw InvalidDocumentException("No id found")
 
     companion object {
-        val basePath: String
-            get() = "/articles"
+        const val CONTENT_TYPE = "articles"
     }
+
 }
