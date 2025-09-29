@@ -20,6 +20,8 @@ env:
   GPG_PUBLIC_KEY: ${{ secrets.GPG_PUBLIC_KEY }}
   GITHUB_TOKEN: ${{ secrets.TOKEN }}
   MIRROR_TOKEN: ${{ secrets.MIRROR_TOKEN }}
+  MAXMIND_ACCOUNT_ID: ${{ secrets.MAXMIND_ACCOUNT_ID }}
+  MAXMIND_LICENSE_KEY: ${{ secrets.MAXMIND_LICENSE_KEY }}
 
 jobs:
   release_and_deploy:
