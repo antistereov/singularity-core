@@ -1,3 +1,16 @@
+## [v1.9.0]
+
+## Changelog
+
+## 🛠  Build
+- [8e2cf7e](https://github.com/antistereov/singularity-core/commits/8e2cf7e) bump version to 1.9.0
+- [af4121d](https://github.com/antistereov/singularity-core/commits/af4121d) add maxmind credentials to release and deploy workflow
+
+
+## Contributors
+We'd like to thank the following people for their contributions:
+antistereov
+
 ## [v1.8.0]
 
 ## Changelog
