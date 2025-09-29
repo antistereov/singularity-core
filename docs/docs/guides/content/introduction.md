@@ -16,9 +16,9 @@ If you are new to Spring, we recommend starting with their [official guides](htt
 
 You need to set the URL pattern for content in your frontend.
 
-| Property                        | Type     | Description                                                                                                                                          | Default value                                              |
-|---------------------------------|----------|------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------|
-| singularity.content.content-url | `String` | The URL of content objects in your frontend. Please use the placeholders {contentType} and {contentKey} which will be autofilled by the application. | `http://localhost:4200/content/{contentType}/{contentKey}` |
+| Property                        | Type     | Description                                                                                                                                              | Default value                                              |
+|---------------------------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------|
+| singularity.content.content-url | `String` | The URL of content objects in your frontend. Please use the placeholders `{contentType}` and `{contentKey}` which will be autofilled by the application. | `http://localhost:4200/content/{contentType}/{contentKey}` |
 
 Let's say you set this property to `https://example.com/content/{contentType}/{contentKey}`.
 The `article` with a `key` of `my-cool-article` should be available in your frontend on the url

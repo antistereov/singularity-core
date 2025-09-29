@@ -21,7 +21,7 @@ info:
   license:
     name: GPLv3 License
     url: https://www.gnu.org/licenses/gpl-3.0.en.html
-  version: 1.0.0
+  version: 1.9.0
 servers:
 - url: https://singularity.stereov.io
   description: Demo server

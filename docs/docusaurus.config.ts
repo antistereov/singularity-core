@@ -85,6 +85,11 @@ const config: Config = {
         colorMode: {
             respectPrefersColorScheme: true,
         },
+        algolia: {
+            appId: '22OHLZZ92Z',
+            apiKey: 'b7bafc42b3eccefacc6905c647fce6f6',
+            indexName: 'Singularity Documentation',
+        },
         navbar: {
             title: 'Singularity',
             logo: {
