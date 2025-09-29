@@ -38,13 +38,13 @@ import Heading from "@theme/Heading";
 
 Complete second factor for login.
 
-You can learn more about the login flow [here](../../docs/guides/auth/authentication#login).
+You can learn more about the login flow [here](https://singularity.stereov.io/docs/guides/auth/authentication#login).
 
 ### Requirements
-- User authenticated using their password through [`POST /api/auth/login`](../../docs/api/login).
-- At least one of [email](../../docs/guides/auth/two-factor#email) or [TOTP](../../docs/guides/auth/two-factor#totp) as 2FA methods should be enabled.
+- User authenticated using their password through [`POST /api/auth/login`](https://singularity.stereov.io/docs/api/login).
+- At least one of [email](https://singularity.stereov.io/docs/guides/auth/two-factor#email) or [TOTP](https://singularity.stereov.io/docs/guides/auth/two-factor#totp) as 2FA methods should be enabled.
 - An `email` or `totp` 2FA code is present for an enabled 2FA method.
-  Check out [email](../../docs/guides/auth/two-factor#email) and [TOTP](../../docs/guides/auth/two-factor#totp)
+  Check out [email](https://singularity.stereov.io/docs/guides/auth/two-factor#email) and [TOTP](https://singularity.stereov.io/docs/guides/auth/two-factor#totp)
   to learn how to retrieve a 2FA code.
   
 **Optional session data:**
@@ -56,16 +56,16 @@ You can learn more about the login flow [here](../../docs/guides/auth/authentica
 This information helps users identify and manage authorized sessions, improving overall account security.
 
 ### Tokens
-- A valid [`TwoFactorAuthenticationToken`](../../docs/guides/auth/tokens#two-factor-authentication-token)
-  is required. This token will be set automatically as HTTP-only cookie through [`POST /api/auth/login`](../../docs/api/login)
-  or can be retrieved from the response and set as header manually if [header authentication](../../docs/guides/authentication#header-authentication) 
+- A valid [`TwoFactorAuthenticationToken`](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token)
+  is required. This token will be set automatically as HTTP-only cookie through [`POST /api/auth/login`](https://singularity.stereov.io/docs/api/login)
+  or can be retrieved from the response and set as header manually if [header authentication](https://singularity.stereov.io/docs/guides/authentication#header-authentication) 
   is enabled.
-- If this action is successful, [`AccessToken`](../../docs/guides/auth/tokens#access-token) and 
-  [`RefreshToken`](../../docs/guides/auth/tokens#refresh-token) 
+- If this action is successful, [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) and 
+  [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token) 
   will automatically be set as HTTP-only cookies.
-  If [header authentication](../../docs/guides/auth/authentication#header-authentication) is enabled,
-  [`AccessToken`](../../docs/guides/auth/tokens#access-token) and 
-  [`RefreshToken`](../../docs/guides/auth/tokens#refresh-token)
+  If [header authentication](https://singularity.stereov.io/docs/guides/auth/authentication#header-authentication) is enabled,
+  [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) and 
+  [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)
   will be returned in the response body and can be used as 
   bearer tokens in the authorization header for upcoming requests.
 

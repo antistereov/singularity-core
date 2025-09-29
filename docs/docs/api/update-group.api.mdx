@@ -38,23 +38,23 @@ import Heading from "@theme/Heading";
 
 Update the group with the given `key`.
 
-You can find more information about groups [here](../../docs/guides/auth/groups).
+You can find more information about groups [here](https://singularity.stereov.io/docs/guides/auth/groups).
 
 ### Locale
 
 Group names and descriptions can be specified in multiples languages.
-These can be set when [creating](../../docs/guides/auth/groups#creating-groups)
-groups or through [updates](../../docs/guides/auth/groups#updating-groups).
+These can be set when [creating](https://singularity.stereov.io/docs/guides/auth/groups#creating-groups)
+groups or through [updates](https://singularity.stereov.io/docs/guides/auth/groups#updating-groups).
 
 >**Note:** A translation for the application's default locale must exist.
->You can learn more about configuring the default locale [here](../../docs/guides/configuration).
+>You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
 
 The `locale` in the request body specifies which translation should be created.
 The `locale` query parameter specifies which translation should be returned.
 
 ### Tokens
-- A valid [`AccessToken`](../../docs/guides/auth/tokens#access-token)
-  with [`ADMIN`](../../docs/guides/auth/roles#admins) permissions is required.
+- A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
+  with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
 
 <Heading
   id={"request"}
@@ -80,7 +80,7 @@ The `locale` query parameter specifies which translation should be returned.
 <StatusCodes
   id={undefined}
   label={undefined}
-  responses={{"200":{"description":"Updated group information.","content":{"*/*":{"schema":{"type":"object","properties":{"key":{"type":"string"},"locale":{"type":"string"},"name":{"type":"string"},"description":{"type":"string"}},"required":["description","key","locale","name"],"title":"GroupResponse"}}}},"400":{"description":"Update would cause the translation for default locale to be missing.","content":{"*/*":{"schema":{"type":"object","properties":{"timestamp":{"type":"string","format":"date-time"},"status":{"type":"integer","format":"int32"},"error":{"type":"string"},"message":{"type":"string"},"path":{"type":"string"}},"required":["error","status","timestamp"],"title":"ErrorResponse"}}}},"401":{"description":"Invalid or expired `AccessToken`.","content":{"*/*":{"schema":{"type":"object","properties":{"timestamp":{"type":"string","format":"date-time"},"status":{"type":"integer","format":"int32"},"error":{"type":"string"},"message":{"type":"string"},"path":{"type":"string"}},"required":["error","status","timestamp"],"title":"ErrorResponse"}}}},"403":{"description":"`AccessToken` does permit [`ADMIN`](../../docs/guides/auth/roles) access.","content":{"*/*":{"schema":{"type":"object","properties":{"timestamp":{"type":"string","format":"date-time"},"status":{"type":"integer","format":"int32"},"error":{"type":"string"},"message":{"type":"string"},"path":{"type":"string"}},"required":["error","status","timestamp"],"title":"ErrorResponse"}}}}}}
+  responses={{"200":{"description":"Updated group information.","content":{"*/*":{"schema":{"type":"object","properties":{"key":{"type":"string"},"locale":{"type":"string"},"name":{"type":"string"},"description":{"type":"string"}},"required":["description","key","locale","name"],"title":"GroupResponse"}}}},"400":{"description":"Update would cause the translation for default locale to be missing.","content":{"*/*":{"schema":{"type":"object","properties":{"timestamp":{"type":"string","format":"date-time"},"status":{"type":"integer","format":"int32"},"error":{"type":"string"},"message":{"type":"string"},"path":{"type":"string"}},"required":["error","status","timestamp"],"title":"ErrorResponse"}}}},"401":{"description":"Invalid or expired `AccessToken`.","content":{"*/*":{"schema":{"type":"object","properties":{"timestamp":{"type":"string","format":"date-time"},"status":{"type":"integer","format":"int32"},"error":{"type":"string"},"message":{"type":"string"},"path":{"type":"string"}},"required":["error","status","timestamp"],"title":"ErrorResponse"}}}},"403":{"description":"`AccessToken` does permit [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles) access.","content":{"*/*":{"schema":{"type":"object","properties":{"timestamp":{"type":"string","format":"date-time"},"status":{"type":"integer","format":"int32"},"error":{"type":"string"},"message":{"type":"string"},"path":{"type":"string"}},"required":["error","status","timestamp"],"title":"ErrorResponse"}}}}}}
 >
   
 </StatusCodes>

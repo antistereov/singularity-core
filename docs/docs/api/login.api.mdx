@@ -38,9 +38,9 @@ import Heading from "@theme/Heading";
 
 Authenticates a user with `email` and `password`.
 
-A [login alert](../../docs/guides/auth/security-alerts#core-identity-alerts) 
+A [login alert](https://singularity.stereov.io/docs/guides/auth/security-alerts#core-identity-alerts) 
 will be sent to the user's email if this setting is enabled
-email is [enabled and configured correctly](../../docs/guides/email/configuration).
+email is [enabled and configured correctly](https://singularity.stereov.io/docs/guides/email/configuration).
 
 **Optional session data:**
 - The `session` object can be included in the request body.
@@ -53,11 +53,11 @@ This information helps users identify and manage authorized sessions, improving 
 **2FA:**
 
 If the user enabled 2FA, the user will not be authenticated immediately. 
-Instead, a [`TwoFactorAuthenticationToken`](../../docs/guides/auth/tokens#two-factor-authentication-token) 
+Instead, a [`TwoFactorAuthenticationToken`](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token) 
 is set as HTTP-only cookie and returned in the response body
-if [header authentication](../../docs/guides/auth/authentication#header-authentication) is enabled.
+if [header authentication](https://singularity.stereov.io/docs/guides/auth/authentication#header-authentication) is enabled.
 
-You can complete the login through the endpoint [`POST /api/auth/2fa/login`](../../docs/api/complete-login).
+You can complete the login through the endpoint [`POST /api/auth/2fa/login`](https://singularity.stereov.io/docs/api/complete-login).
 
 ### Locale
 
@@ -66,16 +66,16 @@ This will be used for the email 2FA code if this method is enabled for the user.
 You can learn more about 2FA through email [here](/docs/guides/auth/two-factor#email).
 
 If no locale is specified, the applications default locale will be used.
-You can learn more about configuring the default locale [here](../../docs/guides/configuration).
+You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
 
 ### Tokens
 - If 2FA is disabled and the request is successful, 
-  [`AccessToken`](../../docs/guides/auth/tokens#access-token) 
-  and [`RefreshToken`](../../docs/guides/auth/tokens#refresh-token) 
+  [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) 
+  and [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token) 
   will automatically be set as HTTP-only cookies.
-  If [header authentication](../../docs/guides/auth/authentication#header-authentication) is enabled,
-  [`AccessToken`](../../docs/guides/auth/tokens#access-token) and 
-  [`RefreshToken`](../../docs/guides/auth/tokens#refresh-token) 
+  If [header authentication](https://singularity.stereov.io/docs/guides/auth/authentication#header-authentication) is enabled,
+  [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) and 
+  [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token) 
   will be returned in the response body and can be used as 
   bearer tokens in the authorization header for upcoming requests.
 

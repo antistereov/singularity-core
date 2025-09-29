@@ -39,7 +39,7 @@ import Heading from "@theme/Heading";
 Recover the user if they lost access to their 2FA device using a recovery `code`.
 Each `code` is only valid once.
 
-You can learn more about recovery for TOTP [here](../../docs/guides/auth/two-factor#recovery).
+You can learn more about recovery for TOTP [here](https://singularity.stereov.io/docs/guides/auth/two-factor#recovery).
 
 ### Requirements
 - The user can authenticate using password.
@@ -52,21 +52,21 @@ You can learn more about recovery for TOTP [here](../../docs/guides/auth/two-fac
     - `os`: The operating system of the device (e.g., "Windows", "macOS", "Android").
 
 ### Tokens
-- A valid [`TwoFactorAuthenticationToken`](../../docs/guides/auth/tokens#two-factor-authentication-token)
+- A valid [`TwoFactorAuthenticationToken`](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token)
   is required. This token will be set automatically as HTTP-only cookie through 
-  [`POST /api/auth/login`](../../docs/api/login) or
-  [`POST /api/auth/step-up`](../../docs/api/step-up)
-  or can be retrieved from any of those endpoints' response and set as header manually if [header authentication](../../docs/guides/authentication#header-authentication) 
+  [`POST /api/auth/login`](https://singularity.stereov.io/docs/api/login) or
+  [`POST /api/auth/step-up`](https://singularity.stereov.io/docs/api/step-up)
+  or can be retrieved from any of those endpoints' response and set as header manually if [header authentication](https://singularity.stereov.io/docs/guides/authentication#header-authentication) 
   is enabled.
-- If this action is successful, [`AccessToken`](../../docs/guides/auth/tokens#access-token), 
-  [`RefreshToken`](../../docs/guides/auth/tokens#refresh-token) and
-  [`StepUpToken`](../../docs/guides/auth/tokens#step-up-token)
+- If this action is successful, [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token), 
+  [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token) and
+  [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
   will automatically be set as HTTP-only cookies.
   
-  If [header authentication](../../docs/guides/auth/authentication#header-authentication) is enabled,
-  [`AccessToken`](../../docs/guides/auth/tokens#access-token), 
-  [`RefreshToken`](../../docs/guides/auth/tokens#refresh-token) and
-  [`StepUpToken`](../../docs/guides/auth/tokens#step-up-token)
+  If [header authentication](https://singularity.stereov.io/docs/guides/auth/authentication#header-authentication) is enabled,
+  [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token), 
+  [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token) and
+  [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
   will be returned in the response body and can be used in the authorization header for upcoming requests.
 
 <Heading

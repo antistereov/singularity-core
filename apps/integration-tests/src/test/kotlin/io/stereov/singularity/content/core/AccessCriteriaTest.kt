@@ -229,7 +229,7 @@ class AccessCriteriaTest : BaseArticleTest() {
     fun `getArticles correctly filters tags`() = runTest {
         val user = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
         val article = saveArticle(owner = user)
-        val tag = tagService.create(CreateTagRequest("test", name = "Test", locale = null))
+        val tag = tagService.create(CreateTagRequest("test2", name = "Test", locale = null))
 
         article.tags.add(tag.key)
         articleService.save(article)
@@ -253,8 +253,8 @@ class AccessCriteriaTest : BaseArticleTest() {
     fun `getArticles correctly filters when multiple tags`() = runTest {
         val user = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
         val article = saveArticle(owner = user)
-        val tag = tagService.create(CreateTagRequest("test", name = "Test", locale = null))
-        val anotherTag = tagService.create(CreateTagRequest("test2", name = "Another Test", locale = null))
+        val tag = tagService.create(CreateTagRequest("test2", name = "Test", locale = null))
+        val anotherTag = tagService.create(CreateTagRequest("test3", name = "Another Test", locale = null))
 
         article.tags.add(tag.key)
         articleService.save(article)

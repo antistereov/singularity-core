@@ -508,59 +508,6 @@ const sidebar: SidebarsConfig = {
     },
     {
       type: "category",
-      label: "File Metadata",
-      link: {
-        type: "generated-index",
-        title: "File Metadata",
-        slug: "/category/api/file-metadata",
-      },
-      items: [
-        {
-          type: "doc",
-          id: "api/get-file-metadata-by-key",
-          label: "Get File Metadata By Key",
-          className: "api-method get",
-        },
-        {
-          type: "doc",
-          id: "api/get-file-metadata",
-          label: "Get File Metadata",
-          className: "api-method get",
-        },
-        {
-          type: "doc",
-          id: "api/get-content-object-access-details",
-          label: "Get Access Details of Content Objects",
-          className: "api-method get",
-        },
-        {
-          type: "doc",
-          id: "api/update-content-object-access",
-          label: "Update Access of Content Objects",
-          className: "api-method put",
-        },
-        {
-          type: "doc",
-          id: "api/update-content-object-owner",
-          label: "Update Owner of Content Object ",
-          className: "api-method put",
-        },
-        {
-          type: "doc",
-          id: "api/update-content-object-trusted-state",
-          label: "Update Trusted State of Content Object ",
-          className: "api-method put",
-        },
-        {
-          type: "doc",
-          id: "api/delete-content-object-by-key",
-          label: "Delete Content Object",
-          className: "api-method delete",
-        },
-      ],
-    },
-    {
-      type: "category",
       label: "Content Management",
       link: {
         type: "generated-index",
@@ -766,8 +713,8 @@ const sidebar: SidebarsConfig = {
         },
         {
           type: "doc",
-          id: "api/schemas/updatecontentvisibilityrequest",
-          label: "UpdateContentVisibilityRequest",
+          id: "api/schemas/updatecontentaccessrequest",
+          label: "UpdateContentAccessRequest",
           className: "schema",
         },
         {
@@ -1098,12 +1045,6 @@ const sidebar: SidebarsConfig = {
           type: "doc",
           id: "api/schemas/pagetagresponse",
           label: "PageTagResponse",
-          className: "schema",
-        },
-        {
-          type: "doc",
-          id: "api/schemas/pagefilemetadataresponse",
-          label: "PageFileMetadataResponse",
           className: "schema",
         },
         {

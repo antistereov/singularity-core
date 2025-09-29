@@ -27,10 +27,6 @@ This is the core data model for file metadata.
 It stores a unique ID, a developer-friendly key, a unique ID, a content type, file size, and access details.
 The `FileMetadataDocument` is stored in a MongoDB collection.
 
-:::note File Metadata
-You can learn more on how to access and change file metadata [here](./metadata.md).
-:::
-
 ## Key Operations
 
 #### `upload`

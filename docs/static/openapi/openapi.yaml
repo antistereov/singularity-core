@@ -49,8 +49,6 @@ tags:
   description: Operations related to managing the servers security.
 - name: Articles
   description: Operations related to articles
-- name: File Metadata
-  description: Operations related to metadata of files
 - name: Content Management
   description: Operations related to management of content of all types.
 - name: Invitations
@@ -3315,144 +3313,16 @@ paths:
         - editorScope
       - accessTokenCookie:
         - editorScope
-  /api/content/files/{key}:
-    get:
-      tags:
-      - File Metadata
-      summary: Get File Metadata By Key
-      description: "Get a file by given `key`.\n\nYou can find more information about\
-        \ file management [here](https://singularity.stereov.io/docs/guides/file-storage/metadata).\n\
-        \n>**Note:** It will only return file metadata that is accessible by the requester.\
-        \ \n>You can learn more about access [here](https://singularity.stereov.io/docs/guides/content/introduction#authorization-logic)."
-      externalDocs:
-        url: https://singularity.stereov.io/docs/guides/file-storage/metadata
-      operationId: getFileMetadataByKey
-      parameters:
-      - name: key
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: The metadata of the file with `key`.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/FileMetadataResponse"
-        "404":
-          description: No file with given key exists.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-      security:
-      - {}
-      - {}
-  /api/content/files:
-    get:
-      tags:
-      - File Metadata
-      summary: Get File Metadata
-      description: "Get and filter file metadata.\n\nYou can find more information\
-        \ about file management [here](https://singularity.stereov.io/docs/guides/file-storage/metadata).\n\
-        \n>**Note:** It will only return file metadata that is accessible by the requester.\
-        \ \n>You can learn more about access [here](https://singularity.stereov.io/docs/guides/content/introduction#authorization-logic)."
-      externalDocs:
-        url: https://singularity.stereov.io/docs/guides/file-storage/metadata
-      operationId: getFileMetadata
-      parameters:
-      - name: page
-        in: query
-        required: false
-        schema:
-          type: integer
-          format: int32
-      - name: size
-        in: query
-        required: false
-        schema:
-          type: integer
-          format: int32
-      - name: sort
-        in: query
-        required: false
-        schema:
-          type: array
-          items:
-            type: string
-      - name: tags
-        in: query
-        required: false
-        schema:
-          type: array
-          items:
-            type: string
-      - name: roles
-        in: query
-        required: false
-        schema:
-          type: array
-          items:
-            type: string
-          uniqueItems: true
-      - name: contentType
-        in: query
-        required: false
-        schema:
-          type: string
-      - name: createdAtBefore
-        in: query
-        required: false
-        schema:
-          type: string
-          format: date-time
-      - name: createdAtAfter
-        in: query
-        required: false
-        schema:
-          type: string
-          format: date-time
-      - name: updatedAtBefore
-        in: query
-        required: false
-        schema:
-          type: string
-          format: date-time
-      - name: updatedAtAfter
-        in: query
-        required: false
-        schema:
-          type: string
-          format: date-time
-      responses:
-        "200":
-          description: The metadata of the file with `key`.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/PageFileMetadataResponse"
-        "404":
-          description: No file with given key exists.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-      security:
-      - {}
-      - {}
   /api/content/{contentType}/{key}/access:
     get:
       tags:
       - Content Management
       - Articles
-      - File Metadata
       summary: Get Access Details of Content Objects
       description: "Get detail on who is allowed to access and change a content object.\n\
         \nYou can find more information about content management [here](https://singularity.stereov.io/docs/guides/content/management).\n\
         \n>**Note:** You have to specify the content type.\n>For [articles](https://singularity.stereov.io/docs/guides/content/articles)\
-        \ it is `articles` and for\n>[file metadata](https://singularity.stereov.io/docs/guides/file-storage/metadata)\
-        \ it is `files`.\n\n### Locale\n\nA locale can be specified for this request.\
+        \ it is `articles`.\n\n### Locale\n\nA locale can be specified for this request.\
         \ \nThe email will be sent in the specified locale.\nYou can learn more about\
         \ locale in emails [here](https://singularity.stereov.io/docs/guides/email/templates).\n\
         \nIf no locale is specified, the applications default locale will be used.\n\
@@ -3478,9 +3348,7 @@ paths:
         "200":
           description: "The updated content object. The response depends on the content\
             \ object. For [articles](https://singularity.stereov.io/docs/guides/content/articles)\
-            \ it will return [`FullArticleResponse`](https://singularity.stereov.io/docs/api/schemas/fullarticleresponse)and\
-            \ for [file metadata](https://singularity.stereov.io/docs/guides/file-storage/metadata)\
-            \ it will return [`FileMetadataResponse`](https://singularity.stereov.io/docs/api/schemas/filemetadataresponse)."
+            \ it will return [`FullArticleResponse`](https://singularity.stereov.io/docs/api/schemas/fullarticleresponse)."
           content:
             '*/*':
               schema:
@@ -3498,6 +3366,12 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Content object with `key` not found.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader:
         - maintainerScope
@@ -3507,13 +3381,11 @@ paths:
       tags:
       - Content Management
       - Articles
-      - File Metadata
       summary: Update Access of Content Objects
       description: "Update the access to content object.\n\nYou can find more information\
         \ about content management [here](https://singularity.stereov.io/docs/guides/content/management).\n\
         \n>**Note:** You have to specify the content type.\n>For [articles](https://singularity.stereov.io/docs/guides/content/articles)\
-        \ it is `articles` and for\n>[file metadata](https://singularity.stereov.io/docs/guides/file-storage/metadata)\
-        \ it is `files`.\n\n### Locale\n\nA locale can be specified for this request.\
+        \ it is `articles`.\n\n### Locale\n\nA locale can be specified for this request.\
         \ \nThe email will be sent in the specified locale.\nYou can learn more about\
         \ locale in emails [here](https://singularity.stereov.io/docs/guides/email/templates).\n\
         \nIf no locale is specified, the applications default locale will be used.\n\
@@ -3544,15 +3416,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateContentVisibilityRequest"
+              $ref: "#/components/schemas/UpdateContentAccessRequest"
         required: true
       responses:
         "200":
           description: "The updated content object. The response depends on the content\
             \ object. For [articles](https://singularity.stereov.io/docs/guides/content/articles)\
-            \ it will return [`FullArticleResponse`](https://singularity.stereov.io/docs/api/schemas/fullarticleresponse)and\
-            \ for [file metadata](https://singularity.stereov.io/docs/guides/file-storage/metadata)\
-            \ it will return [`FileMetadataResponse`](https://singularity.stereov.io/docs/api/schemas/filemetadataresponse)."
+            \ it will return [`FullArticleResponse`](https://singularity.stereov.io/docs/api/schemas/fullarticleresponse)."
           content:
             '*/*':
               schema:
@@ -3570,6 +3440,12 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Content object with `key` not found.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader:
         - maintainerScope
@@ -3580,13 +3456,11 @@ paths:
       tags:
       - Content Management
       - Articles
-      - File Metadata
       summary: 'Update Owner of Content Object '
       description: "Update the owner of a content object.\nOnly owners can perform\
         \ this action. \n\n>**Note:** You have to specify the content type.\n>For\
         \ [articles](https://singularity.stereov.io/docs/guides/content/articles)\
-        \ it is `articles` and for\n>[file metadata](https://singularity.stereov.io/docs/guides/file-storage/metadata)\
-        \ it is `files`.\n\nYou can find more information about content management\
+        \ it is `articles`.\n\nYou can find more information about content management\
         \ [here](https://singularity.stereov.io/docs/guides/content/management).\n\
         \n>**Note:** The old owner will automatically be demoted to a [`MAINTAINER`](https://singularity.stereov.io/docs/guides/content/introduction#object-specific-roles-shared-state)\n\
         >role if the action was successful.\n\n### Locale\n\nA locale can be specified\
@@ -3610,23 +3484,22 @@ paths:
         required: true
         schema:
           type: string
-      - name: req
-        in: query
-        required: true
-        schema:
-          $ref: "#/components/schemas/UpdateOwnerRequest"
       - name: locale
         in: query
         required: false
         schema:
           type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateOwnerRequest"
+        required: true
       responses:
         "200":
           description: "The updated content object. The response depends on the content\
             \ object. For [articles](https://singularity.stereov.io/docs/guides/content/articles)\
-            \ it will return [`FullArticleResponse`](https://singularity.stereov.io/docs/api/schemas/fullarticleresponse)and\
-            \ for [file metadata](https://singularity.stereov.io/docs/guides/file-storage/metadata)\
-            \ it will return [`FileMetadataResponse`](https://singularity.stereov.io/docs/api/schemas/filemetadataresponse)."
+            \ it will return [`FullArticleResponse`](https://singularity.stereov.io/docs/api/schemas/fullarticleresponse)."
           content:
             '*/*':
               schema:
@@ -3643,6 +3516,12 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Content object with `key` not found.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader:
         - maintainerScope
@@ -3653,15 +3532,13 @@ paths:
       tags:
       - Content Management
       - Articles
-      - File Metadata
       summary: 'Update Trusted State of Content Object '
       description: "Update the trusted state of a content object.\nThis is critical\
         \ for links and files that may harm the application.\nThe trusted state can\
         \ only be changed by your application-wide [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins)s.\n\
         \nYou can find more information about content management [here](https://singularity.stereov.io/docs/guides/content/management).\n\
         \n>**Note:** You have to specify the content type.\n>For [articles](https://singularity.stereov.io/docs/guides/content/articles)\
-        \ it is `articles` and for\n>[file metadata](https://singularity.stereov.io/docs/guides/file-storage/metadata)\
-        \ it is `files`.\n\n### Locale\n\nA locale can be specified for this request.\
+        \ it is `articles`.\n\n### Locale\n\nA locale can be specified for this request.\
         \ \nThe email will be sent in the specified locale.\nYou can learn more about\
         \ locale in emails [here](https://singularity.stereov.io/docs/guides/email/templates).\n\
         \nIf no locale is specified, the applications default locale will be used.\n\
@@ -3697,9 +3574,7 @@ paths:
         "200":
           description: "The updated content object. The response depends on the content\
             \ object. For [articles](https://singularity.stereov.io/docs/guides/content/articles)\
-            \ it will return [`FullArticleResponse`](https://singularity.stereov.io/docs/api/schemas/fullarticleresponse)and\
-            \ for [file metadata](https://singularity.stereov.io/docs/guides/file-storage/metadata)\
-            \ it will return [`FileMetadataResponse`](https://singularity.stereov.io/docs/api/schemas/filemetadataresponse)."
+            \ it will return [`FullArticleResponse`](https://singularity.stereov.io/docs/api/schemas/fullarticleresponse)."
           content:
             '*/*':
               schema:
@@ -3717,6 +3592,12 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Content object with `key` not found.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader:
         - adminScope
@@ -3727,13 +3608,11 @@ paths:
       tags:
       - Content Management
       - Articles
-      - File Metadata
       summary: Delete Content Object
       description: "Delete a content object.\n\nYou can find more information about\
         \ content management [here](https://singularity.stereov.io/docs/guides/content/management).\n\
         \n>**Note:** You have to specify the content type.\n>For [articles](https://singularity.stereov.io/docs/guides/content/articles)\
-        \ it is `articles` and for\n>[file metadata](https://singularity.stereov.io/docs/guides/file-storage/metadata)\
-        \ it is `files`.\n\n### Locale\n\nA locale can be specified for this request.\
+        \ it is `articles`.\n\n### Locale\n\nA locale can be specified for this request.\
         \ \nThe email will be sent in the specified locale.\nYou can learn more about\
         \ locale in emails [here](https://singularity.stereov.io/docs/guides/email/templates).\n\
         \nIf no locale is specified, the applications default locale will be used.\n\
@@ -3771,6 +3650,12 @@ paths:
         "403":
           description: "AccessToken does permit [`MAINTAINER`](https://singularity.stereov.io/docs/guides/content/introduction#object-specific-roles-shared-state)\
             \ access on this resource."
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Content object with `key` not found.
           content:
             '*/*':
               schema:
@@ -4148,6 +4033,12 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: No content object with `key` found.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader:
         - maintainerScope
@@ -4201,6 +4092,13 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: No content object with `key` or no user with `userId` contained
+            in invitation found
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - {}
       - {}
@@ -4249,7 +4147,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "404":
-          description: No invitation with given `id` found.
+          description: No invitation with given `id` found or no content document
+            with `key` contained in invitation found.
           content:
             '*/*':
               schema:
@@ -4628,13 +4527,13 @@ components:
       type: object
       properties:
         newOwnerId:
-          $ref: "#/components/schemas/ObjectId"
+          type: string
       required:
       - newOwnerId
-    UpdateContentVisibilityRequest:
+    UpdateContentAccessRequest:
       type: object
       properties:
-        visibility:
+        accessType:
           type: string
           enum:
           - PRIVATE
@@ -4657,9 +4556,9 @@ components:
             - EDITOR
             - MAINTAINER
       required:
+      - accessType
       - sharedGroups
       - sharedUsers
-      - visibility
     ChangeArticleStateRequest:
       type: object
       properties:
@@ -5364,18 +5263,19 @@ components:
     UpdateArticleRequest:
       type: object
       properties:
-        tags:
-          type: array
-          items:
-            type: string
         title:
           type: string
-        colors:
-          $ref: "#/components/schemas/ArticleColors"
         summary:
           type: string
         content:
           type: string
+        colors:
+          $ref: "#/components/schemas/ArticleColors"
+        tags:
+          type: array
+          items:
+            type: string
+          uniqueItems: true
         locale:
           type: string
       required:
@@ -5391,6 +5291,13 @@ components:
           format: int32
         pageable:
           $ref: "#/components/schemas/PageableObject"
+        numberOfElements:
+          type: integer
+          format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
         size:
           type: integer
           format: int32
@@ -5403,18 +5310,13 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
-        numberOfElements:
-          type: integer
-          format: int32
-        first:
-          type: boolean
-        last:
-          type: boolean
         empty:
           type: boolean
     PageableObject:
       type: object
       properties:
+        unpaged:
+          type: boolean
         paged:
           type: boolean
         pageNumber:
@@ -5423,8 +5325,6 @@ components:
         pageSize:
           type: integer
           format: int32
-        unpaged:
-          type: boolean
         offset:
           type: integer
           format: int64
@@ -5433,9 +5333,9 @@ components:
     SortObject:
       type: object
       properties:
-        sorted:
-          type: boolean
         unsorted:
+          type: boolean
+        sorted:
           type: boolean
         empty:
           type: boolean
@@ -5460,6 +5360,13 @@ components:
           format: int32
         pageable:
           $ref: "#/components/schemas/PageableObject"
+        numberOfElements:
+          type: integer
+          format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
         size:
           type: integer
           format: int32
@@ -5472,13 +5379,6 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
-        numberOfElements:
-          type: integer
-          format: int32
-        first:
-          type: boolean
-        last:
-          type: boolean
         empty:
           type: boolean
     PageTagResponse:
@@ -5492,6 +5392,13 @@ components:
           format: int32
         pageable:
           $ref: "#/components/schemas/PageableObject"
+        numberOfElements:
+          type: integer
+          format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
         size:
           type: integer
           format: int32
@@ -5504,45 +5411,6 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
-        numberOfElements:
-          type: integer
-          format: int32
-        first:
-          type: boolean
-        last:
-          type: boolean
-        empty:
-          type: boolean
-    PageFileMetadataResponse:
-      type: object
-      properties:
-        totalElements:
-          type: integer
-          format: int64
-        totalPages:
-          type: integer
-          format: int32
-        pageable:
-          $ref: "#/components/schemas/PageableObject"
-        size:
-          type: integer
-          format: int32
-        content:
-          type: array
-          items:
-            $ref: "#/components/schemas/FileMetadataResponse"
-        number:
-          type: integer
-          format: int32
-        sort:
-          $ref: "#/components/schemas/SortObject"
-        numberOfElements:
-          type: integer
-          format: int32
-        first:
-          type: boolean
-        last:
-          type: boolean
         empty:
           type: boolean
     ArticleOverviewResponse:
@@ -5609,6 +5477,13 @@ components:
           format: int32
         pageable:
           $ref: "#/components/schemas/PageableObject"
+        numberOfElements:
+          type: integer
+          format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
         size:
           type: integer
           format: int32
@@ -5621,13 +5496,6 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
-        numberOfElements:
-          type: integer
-          format: int32
-        first:
-          type: boolean
-        last:
-          type: boolean
         empty:
           type: boolean
     AuthenticationStatusResponse:

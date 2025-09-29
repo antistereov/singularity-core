@@ -23,7 +23,6 @@ import java.util.*
 @RestController
 @RequestMapping("/api/content")
 @Tag(name = "Content Management", description = "Operations related to management of content of all types.")
-@Tag(name = "File Metadata")
 @Tag(name = "Articles")
 class ContentManagementController(
     private val context: ApplicationContext
@@ -38,8 +37,7 @@ class ContentManagementController(
             You can find more information about content management [here](https://singularity.stereov.io/docs/guides/content/management).
             
             >**Note:** You have to specify the content type.
-            >For [articles](https://singularity.stereov.io/docs/guides/content/articles) it is `articles` and for
-            >[file metadata](https://singularity.stereov.io/docs/guides/file-storage/metadata) it is `files`.
+            >For [articles](https://singularity.stereov.io/docs/guides/content/articles) it is `articles`.
             
             ### Locale
             
@@ -64,9 +62,7 @@ class ContentManagementController(
                 responseCode = "200",
                 description = "The updated content object. The response depends on the content object. " +
                         "For [articles](https://singularity.stereov.io/docs/guides/content/articles) " +
-                        "it will return [`FullArticleResponse`](https://singularity.stereov.io/docs/api/schemas/fullarticleresponse)" +
-                        "and for [file metadata](https://singularity.stereov.io/docs/guides/file-storage/metadata) it will return " +
-                        "[`FileMetadataResponse`](https://singularity.stereov.io/docs/api/schemas/filemetadataresponse).",
+                        "it will return [`FullArticleResponse`](https://singularity.stereov.io/docs/api/schemas/fullarticleresponse).",
             ),
             ApiResponse(
                 responseCode = "401",
@@ -105,8 +101,7 @@ class ContentManagementController(
             You can find more information about content management [here](https://singularity.stereov.io/docs/guides/content/management).
             
             >**Note:** You have to specify the content type.
-            >For [articles](https://singularity.stereov.io/docs/guides/content/articles) it is `articles` and for
-            >[file metadata](https://singularity.stereov.io/docs/guides/file-storage/metadata) it is `files`.
+            >For [articles](https://singularity.stereov.io/docs/guides/content/articles) it is `articles`.
             
             ### Locale
             
@@ -131,9 +126,7 @@ class ContentManagementController(
                 responseCode = "200",
                 description = "The updated content object. The response depends on the content object. " +
                         "For [articles](https://singularity.stereov.io/docs/guides/content/articles) " +
-                        "it will return [`FullArticleResponse`](https://singularity.stereov.io/docs/api/schemas/fullarticleresponse)" +
-                        "and for [file metadata](https://singularity.stereov.io/docs/guides/file-storage/metadata) it will return " +
-                        "[`FileMetadataResponse`](https://singularity.stereov.io/docs/api/schemas/filemetadataresponse).",
+                        "it will return [`FullArticleResponse`](https://singularity.stereov.io/docs/api/schemas/fullarticleresponse).",
             ),
             ApiResponse(
                 responseCode = "401",
@@ -170,8 +163,7 @@ class ContentManagementController(
             You can find more information about content management [here](https://singularity.stereov.io/docs/guides/content/management).
             
             >**Note:** You have to specify the content type.
-            >For [articles](https://singularity.stereov.io/docs/guides/content/articles) it is `articles` and for
-            >[file metadata](https://singularity.stereov.io/docs/guides/file-storage/metadata) it is `files`.
+            >For [articles](https://singularity.stereov.io/docs/guides/content/articles) it is `articles`.
             
             ### Locale
             
@@ -233,8 +225,7 @@ class ContentManagementController(
             You can find more information about content management [here](https://singularity.stereov.io/docs/guides/content/management).
             
             >**Note:** You have to specify the content type.
-            >For [articles](https://singularity.stereov.io/docs/guides/content/articles) it is `articles` and for
-            >[file metadata](https://singularity.stereov.io/docs/guides/file-storage/metadata) it is `files`.
+            >For [articles](https://singularity.stereov.io/docs/guides/content/articles) it is `articles`.
             
             ### Locale
             
@@ -259,9 +250,7 @@ class ContentManagementController(
                 responseCode = "200",
                 description = "The updated content object. The response depends on the content object. " +
                         "For [articles](https://singularity.stereov.io/docs/guides/content/articles) " +
-                        "it will return [`FullArticleResponse`](https://singularity.stereov.io/docs/api/schemas/fullarticleresponse)" +
-                        "and for [file metadata](https://singularity.stereov.io/docs/guides/file-storage/metadata) it will return " +
-                        "[`FileMetadataResponse`](https://singularity.stereov.io/docs/api/schemas/filemetadataresponse).",
+                        "it will return [`FullArticleResponse`](https://singularity.stereov.io/docs/api/schemas/fullarticleresponse).",
             ),
             ApiResponse(
                 responseCode = "401",
@@ -298,8 +287,7 @@ class ContentManagementController(
             Only owners can perform this action. 
             
             >**Note:** You have to specify the content type.
-            >For [articles](https://singularity.stereov.io/docs/guides/content/articles) it is `articles` and for
-            >[file metadata](https://singularity.stereov.io/docs/guides/file-storage/metadata) it is `files`.
+            >For [articles](https://singularity.stereov.io/docs/guides/content/articles) it is `articles`.
             
             You can find more information about content management [here](https://singularity.stereov.io/docs/guides/content/management).
             
@@ -329,9 +317,7 @@ class ContentManagementController(
                 responseCode = "200",
                 description = "The updated content object. The response depends on the content object. " +
                         "For [articles](https://singularity.stereov.io/docs/guides/content/articles) " +
-                        "it will return [`FullArticleResponse`](https://singularity.stereov.io/docs/api/schemas/fullarticleresponse)" +
-                        "and for [file metadata](https://singularity.stereov.io/docs/guides/file-storage/metadata) it will return " +
-                        "[`FileMetadataResponse`](https://singularity.stereov.io/docs/api/schemas/filemetadataresponse).",
+                        "it will return [`FullArticleResponse`](https://singularity.stereov.io/docs/api/schemas/fullarticleresponse).",
             ),
             ApiResponse(
                 responseCode = "401",

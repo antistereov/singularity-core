@@ -1,7 +1,7 @@
 ---
 id: step-up
 title: "Step-Up"
-description: "Requests [step-up authentification](../../docs/guides/auth/authentication#step-up)."
+description: "Requests [step-up authentification](https://singularity.stereov.io/docs/guides/auth/authentication#step-up)."
 sidebar_label: "Step-Up"
 hide_title: true
 hide_table_of_contents: true
@@ -36,25 +36,25 @@ import Heading from "@theme/Heading";
 
 
 
-Requests [step-up authentification](../../docs/guides/auth/authentication#step-up). 
+Requests [step-up authentification](https://singularity.stereov.io/docs/guides/auth/authentication#step-up). 
 This re-authentication is required by critical endpoints.
 
 **2FA:**
 
 If the user enabled 2FA, the step-up will not be granted immediately. 
-Instead, a [`TwoFactorAuthenticationToken`](../../docs/guides/auth/tokens#two-factor-authentication-token) 
+Instead, a [`TwoFactorAuthenticationToken`](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token) 
 is set as HTTP-only cookie and returned in the response body
-if [header authentication](../../docs/guides/auth/authentication#header-authentication) is enabled.
+if [header authentication](https://singularity.stereov.io/docs/guides/auth/authentication#header-authentication) is enabled.
 
-You can complete the step-up through the endpoint [`POST /api/auth/2fa/step-up`](../../docs/api/complete-step-up).
+You can complete the step-up through the endpoint [`POST /api/auth/2fa/step-up`](https://singularity.stereov.io/docs/api/complete-step-up).
 
 **Request Body:**
 
-When requesting a step-up for a [`GUEST`](../../docs/guides/auth/roles#guests)
+When requesting a step-up for a [`GUEST`](https://singularity.stereov.io/docs/guides/auth/roles#guests)
 there is no way to authenticate the user.
 Therefore, no request body is required in this case.
 
-If you request a step-up for a regular [`USER`](../../docs/guides/auth/roles#users),
+If you request a step-up for a regular [`USER`](https://singularity.stereov.io/docs/guides/auth/roles#users),
 it will result in a `400 - BAD REQUEST`.
 
 ### Locale
@@ -64,14 +64,14 @@ This will be used for the email 2FA code if this method is enabled for the user.
 You can learn more about 2FA through email [here](/docs/guides/auth/two-factor#email).
 
 If no locale is specified, the applications default locale will be used.
-You can learn more about configuring the default locale [here](../../docs/guides/configuration).
+You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
 
 ### Tokens
-- Requires a valid [`AccessToken`](../../docs/guides/auth/tokens#access-token).
-- If 2FA is disabled and the request is successful, [`StepUpToken`](../../docs/guides/auth/tokens#step-up-token)
+- Requires a valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token).
+- If 2FA is disabled and the request is successful, [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
   will automatically be set as HTTP-only cookie.
-  If [header authentication](../../docs/guides/auth/authentication#header-authentication) is enabled,
-  the [`StepUpToken`](../../docs/guides/auth/tokens#step-up-token)
+  If [header authentication](https://singularity.stereov.io/docs/guides/auth/authentication#header-authentication) is enabled,
+  the [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
   will be returned in the response body and can be used to authorized critical requests.
 
 <Heading

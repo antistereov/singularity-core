@@ -152,14 +152,14 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
         if (content.access.ownerId != currentUser.id) {
             throw NotAuthorizedException("Changing owner failed: only the owner can update the owner of this resource")
         }
+        val newOwnerId = ObjectId(req.newOwnerId)
 
-        if (!userService.existsById(req.newOwnerId)) {
+        if (!userService.existsById(newOwnerId)) {
             throw DocumentNotFoundException("No user with ID ${req.newOwnerId} found")
         }
 
         content.access.share(ContentAccessSubject.USER, content.access.ownerId.toString(), ContentAccessRole.MAINTAINER)
-
-        content.access.ownerId = req.newOwnerId
+        content.access.ownerId = newOwnerId
 
         return contentService.save(content)
     }
@@ -175,7 +175,7 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
     suspend fun extendedContentAccessDetails(key: String): ExtendedContentAccessDetailsResponse {
         logger.debug { "Fetching extended content access details for article with key \"$key\"" }
 
-        val content = contentService.findByKey(key)
+        val content = contentService.findAuthorizedByKey(key, ContentAccessRole.MAINTAINER)
 
         return extendedContentAccessDetails(content)
     }

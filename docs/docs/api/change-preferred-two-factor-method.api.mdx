@@ -38,16 +38,16 @@ import Heading from "@theme/Heading";
 
 Change the preferred 2FA method.
 
-You can learn more about 2FA methods [here](../../docs/guides/auth/two-factor).
+You can learn more about 2FA methods [here](https://singularity.stereov.io/docs/guides/auth/two-factor).
 
 ### Requirements
 - The user can authenticate using password. 2FA will not work with OAuth2. 
   The OAuth2 provider will validate the second factor if the user enabled it for the provider.
-- At least one of [email](../../docs/guides/auth/two-factor#email) or [TOTP](../../docs/guides/auth/two-factor#totp) as 2FA methods should be enabled.
+- At least one of [email](https://singularity.stereov.io/docs/guides/auth/two-factor#email) or [TOTP](https://singularity.stereov.io/docs/guides/auth/two-factor#totp) as 2FA methods should be enabled.
 
 ### Tokens
-- A valid [`AccessToken`](../../docs/guides/auth/tokens#access-token) is required.
-- A valid [`StepUpToken`](../../docs/guides/auth/tokens#step-up-token)
+- A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
+- A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
   is required. This token should match user and session contained in the `AccessToken`.
 
 <Heading

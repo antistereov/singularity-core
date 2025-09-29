@@ -6,6 +6,8 @@ import io.stereov.singularity.content.article.dto.response.FullArticleResponse
 import io.stereov.singularity.content.article.model.ArticleState
 import io.stereov.singularity.content.article.model.ArticleTranslation
 import io.stereov.singularity.content.core.AccessCriteriaTest
+import io.stereov.singularity.content.tag.model.TagDocument
+import io.stereov.singularity.content.tag.model.TagTranslation
 import io.stereov.singularity.test.BaseArticleTest
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.runBlocking
@@ -254,6 +256,7 @@ class ArticleService : BaseArticleTest() {
     @Test fun `find works with tags`() = runTest {
         val owner = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
         val article = saveArticle(owner = owner)
+        tagService.save(TagDocument(key = "tag", translations = mutableMapOf(Locale.ENGLISH to TagTranslation("Tag"))))
         article.tags.add("tag")
         articleService.save(article)
         saveArticle(owner = owner)

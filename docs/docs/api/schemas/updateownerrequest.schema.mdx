@@ -6,7 +6,7 @@ sidebar_label: "UpdateOwnerRequest"
 hide_title: true
 hide_table_of_contents: true
 schema: true
-sample: {"newOwnerId":{"timestamp":0,"date":"2024-07-29T15:51:28.071Z"}}
+sample: {"newOwnerId":"string"}
 custom_edit_url: null
 ---
 
@@ -25,7 +25,7 @@ import Heading from "@theme/Heading";
 
 
 <Schema
-  schema={{"type":"object","properties":{"newOwnerId":{"type":"object","properties":{"timestamp":{"type":"integer","format":"int32"},"date":{"type":"string","format":"date-time"}},"title":"ObjectId"}},"required":["newOwnerId"],"title":"UpdateOwnerRequest"}}
+  schema={{"type":"object","properties":{"newOwnerId":{"type":"string"}},"required":["newOwnerId"],"title":"UpdateOwnerRequest"}}
   schemaType={"response"}
 >
   

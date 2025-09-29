@@ -39,9 +39,6 @@ import io.stereov.singularity.content.invitation.service.InvitationTokenService
 import io.stereov.singularity.content.tag.service.TagService
 import io.stereov.singularity.database.encryption.service.EncryptionSecretService
 import io.stereov.singularity.database.hash.service.HashService
-import io.stereov.singularity.file.core.mapper.FileMetadataMapper
-import io.stereov.singularity.file.core.service.FileMetadataManagementService
-import io.stereov.singularity.file.core.service.FileMetadataService
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.global.properties.UiProperties
@@ -82,20 +79,12 @@ class BaseSpringBootTest() {
     @Autowired
     lateinit var appProperties: AppProperties
 
-    @Autowired
-    lateinit var fileMetadataManagementService: FileMetadataManagementService
 
     @Autowired
     lateinit var invitationTokenService: InvitationTokenService
 
     @Autowired
     lateinit var invitationService: InvitationService
-
-    @Autowired
-    lateinit var fileMetadataMapper: FileMetadataMapper
-
-    @Autowired
-    lateinit var fileMetadataService: FileMetadataService
 
     @Autowired
     lateinit var tagService: TagService

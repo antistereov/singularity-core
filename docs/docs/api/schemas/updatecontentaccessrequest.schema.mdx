@@ -1,0 +1,33 @@
+---
+id: updatecontentaccessrequest
+title: "UpdateContentAccessRequest"
+description: ""
+sidebar_label: "UpdateContentAccessRequest"
+hide_title: true
+hide_table_of_contents: true
+schema: true
+sample: {"accessType":"PRIVATE","sharedUsers":{},"sharedGroups":{}}
+custom_edit_url: null
+---
+
+import Schema from "@theme/Schema";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"UpdateContentAccessRequest"}
+>
+</Heading>
+
+
+
+
+
+<Schema
+  schema={{"type":"object","properties":{"accessType":{"type":"string","enum":["PRIVATE","PUBLIC","SHARED"]},"sharedUsers":{"type":"object","additionalProperties":{"type":"string","enum":["VIEWER","EDITOR","MAINTAINER"]}},"sharedGroups":{"type":"object","additionalProperties":{"type":"string","enum":["VIEWER","EDITOR","MAINTAINER"]}}},"required":["accessType","sharedGroups","sharedUsers"],"title":"UpdateContentAccessRequest"}}
+  schemaType={"response"}
+>
+  
+</Schema>
+            

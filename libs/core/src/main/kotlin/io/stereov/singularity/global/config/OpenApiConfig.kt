@@ -20,7 +20,6 @@ import io.stereov.singularity.content.article.controller.ArticleManagementContro
 import io.stereov.singularity.content.core.controller.ContentManagementController
 import io.stereov.singularity.content.invitation.controller.InvitationController
 import io.stereov.singularity.content.tag.controller.TagController
-import io.stereov.singularity.file.core.controller.FileMetadataController
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.user.core.controller.UserController
 import io.stereov.singularity.user.settings.controller.UserSettingsController
@@ -145,7 +144,6 @@ class OpenApiConfig() {
             "Profile Management",
             "Security",
             "Articles",
-            "File Metadata",
             "Content Management",
             "Invitations",
             "Tags",
@@ -279,13 +277,6 @@ class OpenApiConfig() {
             ArticleManagementController::updateArticle.name,
             ArticleManagementController::updateArticleState.name,
             ArticleManagementController::updateArticleImage.name,
-        ))
-
-        // File Metadata
-
-        sortedOperationIds.addAll(listOf(
-            FileMetadataController::getFileMetadataByKey.name,
-            FileMetadataController::getFileMetadata.name,
         ))
 
         // Content Management

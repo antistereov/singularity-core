@@ -41,13 +41,13 @@ Delete an identity provider from the connected identity providers of the current
 ### Requirements
 - You are not allowed to delete the password identity or the only existing identity.
 
-A [security alert](../../docs/guides/auth/security-alerts#oauth2-specific-alerts)
+A [security alert](https://singularity.stereov.io/docs/guides/auth/security-alerts#oauth2-specific-alerts)
 will be sent to the user's email if this setting is enabled and
-email is [enabled and configured correctly](../../docs/guides/email/configuration).
+email is [enabled and configured correctly](https://singularity.stereov.io/docs/guides/email/configuration).
 
 ### Tokens
-- A valid [`AccessToken`](../../docs/guides/auth/tokens#access-token) is required.
-- A valid [`StepUpToken`](../../docs/guides/auth/tokens#step-up-token)
+- A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
+- A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
   is required. This token should match user and session contained in the `AccessToken`.
 
 <Heading

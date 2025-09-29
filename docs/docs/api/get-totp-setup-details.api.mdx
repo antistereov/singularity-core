@@ -38,7 +38,7 @@ import Heading from "@theme/Heading";
 
 Get a TOTP secret, recovery codes and a TOTP URL.
 This is the first step to enabling TOTP as 2FA method.
-You can learn more about this [here](../../docs/guides/auth/two-factor#setup).
+You can learn more about this [here](https://singularity.stereov.io/docs/guides/auth/two-factor#setup).
 
 The user needs to save the recovery codes and use the URL or the secret to set up 2FA in their 2FA app.
 
@@ -49,7 +49,7 @@ Therefore, the token is the single point of truth for validation.
 Every request will generate a new TOTP secret, new recovery codes and a new TOTP URL.
 
 The setup can be completed through the endpoint 
-[`POST /api/auth/2fa/totp/setup`](../../docs/api/enable-totp-as-two-factor-method)
+[`POST /api/auth/2fa/totp/setup`](https://singularity.stereov.io/docs/api/enable-totp-as-two-factor-method)
 using the `token` and a 2FA code from an authenticator app.
 
 ### Requirements
@@ -57,8 +57,8 @@ using the `token` and a 2FA code from an authenticator app.
   The OAuth2 provider will validate the second factor if the user enabled it for the provider.
   
 ### Tokens
-- A valid [`AccessToken`](../../docs/guides/auth/tokens#access-token) is required.
-- A valid [`StepUpToken`](../../docs/guides/auth/tokens#step-up-token)
+- A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
+- A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
   is required. This token should match user and session contained in the `AccessToken`.
 
 <ParamsDetails

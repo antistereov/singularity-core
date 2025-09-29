@@ -13,6 +13,7 @@ import io.stereov.singularity.content.article.model.ArticleColors
 import io.stereov.singularity.content.article.model.ArticleState
 import io.stereov.singularity.content.core.dto.request.UpdateContentAccessRequest
 import io.stereov.singularity.content.core.dto.request.UpdateOwnerRequest
+import io.stereov.singularity.content.core.dto.response.ExtendedContentAccessDetailsResponse
 import io.stereov.singularity.content.core.model.ContentAccessRole
 import io.stereov.singularity.file.core.model.FileMetadataDocument
 import io.stereov.singularity.file.image.properties.ImageProperties
@@ -1260,7 +1261,124 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertNothingChanged(article)
     }
 
-    // Get accessible
+    @Test fun `get access details works`() = runTest {
+        val owner = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
+        val article = saveArticle(owner = owner)
+        val maintainer = registerUser()
+        val editor = registerUser()
+        val viewer = registerUser()
+        val maintainerGroup = groupService.save(GroupDocument(
+            key = "maintainer",
+            translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Maintainer"))
+        ))
+        val editorGroup = groupService.save(GroupDocument(
+            key = "editor",
+            translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Editor"))
+        ))
+        val viewerGroup = groupService.save(GroupDocument(
+            key = "viewer",
+            translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Viewer"))
+        ))
+        val req = UpdateContentAccessRequest(
+            accessType = AccessType.PUBLIC,
+            sharedUsers = mapOf(
+                maintainer.info.id to ContentAccessRole.MAINTAINER,
+                editor.info.id to ContentAccessRole.EDITOR,
+                viewer.info.id to ContentAccessRole.VIEWER
+            ),
+            sharedGroups = mapOf(
+                maintainerGroup.key to ContentAccessRole.MAINTAINER,
+                editorGroup.key to ContentAccessRole.EDITOR,
+                viewerGroup.key to ContentAccessRole.VIEWER
+            )
+        )
+
+        webTestClient.put()
+            .uri("/api/content/articles/${article.key}/access")
+            .bodyValue(req)
+            .accessTokenCookie(owner.accessToken)
+            .exchange()
+            .returnResult<FullArticleResponse>()
+            .responseBody
+            .awaitFirst()
+
+        val res1 = webTestClient.get()
+            .uri("/api/content/articles/${article.key}/access")
+            .accessTokenCookie(owner.accessToken)
+            .exchange()
+            .returnResult<ExtendedContentAccessDetailsResponse>()
+            .responseBody
+            .awaitFirst()
+
+        assertEquals(owner.info.id, res1.ownerId)
+        assertEquals(req.accessType, res1.visibility)
+        assertEquals(3, res1.users.size)
+        assertEquals(3, res1.groups.size)
+        assertTrue(res1.users.any { it.user.id == maintainer.info.id && it.role == ContentAccessRole.MAINTAINER })
+        assertTrue(res1.users.any { it.user.id == editor.info.id && it.role == ContentAccessRole.EDITOR })
+        assertTrue(res1.users.any { it.user.id == viewer.info.id && it.role == ContentAccessRole.VIEWER })
+        assertTrue(res1.groups[maintainerGroup.key] == ContentAccessRole.MAINTAINER)
+        assertTrue(res1.groups[editorGroup.key] == ContentAccessRole.EDITOR)
+        assertTrue(res1.groups[viewerGroup.key] == ContentAccessRole.VIEWER)
+
+        val req2 = UpdateContentAccessRequest(
+            accessType = AccessType.PUBLIC
+        )
+
+        webTestClient.put()
+            .uri("/api/content/articles/${article.key}/access")
+            .bodyValue(req2)
+            .accessTokenCookie(owner.accessToken)
+            .exchange()
+            .returnResult<FullArticleResponse>()
+            .responseBody
+            .awaitFirst()
+
+        val res2 = webTestClient.get()
+            .uri("/api/content/articles/${article.key}/access")
+            .accessTokenCookie(owner.accessToken)
+            .exchange()
+            .returnResult<ExtendedContentAccessDetailsResponse>()
+            .responseBody
+            .awaitFirst()
+
+        assertEquals(owner.info.id, res2.ownerId)
+        assertEquals(req.accessType, res2.visibility)
+        assertEquals(0, res2.users.size)
+        assertEquals(0, res2.groups.size)
+    }
+    @Test fun `get access details requires maintainer`() = runTest {
+        val owner = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
+        val article = saveArticle(owner = owner)
+        val anotherUser = registerUser()
+        article.access.users.editor.add(anotherUser.info.id.toString())
+        articleService.save(article)
+
+        webTestClient.get()
+            .uri("/api/content/articles/${article.key}/access")
+            .accessTokenCookie(anotherUser.accessToken)
+            .exchange()
+            .expectStatus().isForbidden
+    }
+    @Test fun `get access details requires authentication`() = runTest {
+        val owner = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
+        val article = saveArticle(owner = owner)
+
+        webTestClient.get()
+            .uri("/api/content/articles/${article.key}/access")
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+    @Test fun `get access details requires article`() = runTest {
+        val owner = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
+        saveArticle(owner = owner)
+
+        webTestClient.get()
+            .uri("/api/content/articles/oops/access")
+            .accessTokenCookie(owner.accessToken)
+            .exchange()
+            .expectStatus().isNotFound
+    }
 
     @Test fun `update access works`() = runTest {
         val owner = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
@@ -1992,13 +2110,13 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         val article = saveArticle(owner = owner)
         val newOwner = registerUser()
 
-        val req = UpdateOwnerRequest(newOwner.info.id)
+        val req = UpdateOwnerRequest(newOwner.info.id.toString())
         assertTrue(userService.existsById(newOwner.info.id))
 
         val res = webTestClient.put()
             .uri("/api/content/articles/${article.key}/owner")
-            .bodyValue(req)
             .accessTokenCookie(owner.accessToken)
+            .bodyValue(req)
             .exchange()
             .returnResult<FullArticleResponse>()
             .responseBody
@@ -2009,7 +2127,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertEquals(article.createdAt.truncatedTo(ChronoUnit.MILLIS), res.createdAt)
         assertEquals(article.publishedAt?.truncatedTo(ChronoUnit.MILLIS), res.publishedAt)
         assertTrue(article.updatedAt.isBefore(res.updatedAt))
-        assertEquals(req.newOwnerId, res.owner.id)
+        assertEquals(req.newOwnerId, res.owner.id.toString())
         assertEquals(contentProperties.contentUrl.substringAfter(uiProperties.baseUrl)
             .replace("{contentType}", Article.CONTENT_TYPE)
             .replace("{contentKey}", key),
@@ -2031,8 +2149,8 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertEquals(article.createdAt.truncatedTo(ChronoUnit.MILLIS), updatedArticle.createdAt)
         assertEquals(article.publishedAt?.truncatedTo(ChronoUnit.MILLIS), updatedArticle.publishedAt)
         assertTrue(article.updatedAt.isBefore(updatedArticle.updatedAt))
-        assertEquals(req.newOwnerId, updatedArticle.access.ownerId)
-        assertTrue(article.access.users.maintainer.contains(owner.info.id.toString()))
+        assertEquals(req.newOwnerId, updatedArticle.access.ownerId.toString())
+        assertTrue(updatedArticle.access.users.maintainer.contains(owner.info.id.toString()))
         assertEquals(contentProperties.contentUrl.substringAfter(uiProperties.baseUrl)
             .replace("{contentType}", Article.CONTENT_TYPE)
             .replace("{contentKey}", key),
@@ -2057,7 +2175,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         articleService.save(article)
         val newOwner = registerUser()
 
-        val req = UpdateOwnerRequest(newOwner.info.id)
+        val req = UpdateOwnerRequest(newOwner.info.id.toString())
 
         webTestClient.put()
             .uri("/api/content/articles/${article.key}/owner")
@@ -2073,7 +2191,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         val article = saveArticle(owner = owner)
         val newOwner = registerUser()
 
-        val req = UpdateOwnerRequest(newOwner.info.id)
+        val req = UpdateOwnerRequest(newOwner.info.id.toString())
 
         webTestClient.put()
             .uri("/api/content/articles/${article.key}/owner")
@@ -2088,7 +2206,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         val article = saveArticle(owner = owner)
         val newOwner = registerUser()
 
-        val req = UpdateOwnerRequest(newOwner.info.id)
+        val req = UpdateOwnerRequest(newOwner.info.id.toString())
 
         webTestClient.put()
             .uri("/api/content/articles/not-there/owner")
@@ -2105,7 +2223,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         val newOwner = registerUser()
         userService.deleteById(newOwner.info.id)
 
-        val req = UpdateOwnerRequest(newOwner.info.id)
+        val req = UpdateOwnerRequest(newOwner.info.id.toString())
 
         webTestClient.put()
             .uri("/api/content/articles/${article.key}/owner")
