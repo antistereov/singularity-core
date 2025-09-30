@@ -109,12 +109,6 @@ jobs:
             exit 1
           fi
 
-      - name: Commit and Push Version update
-        uses: stefanzweifel/git-auto-commit-action@v6
-        with:
-          commit_message: "ci: bump version to ${{ env.release_version }}"
-          tagging_message: "v${{ env.release_version }}"
-
       #############################################################
       # Publishing
       #############################################################
