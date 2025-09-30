@@ -5,14 +5,10 @@ description: Learn more about invitations.
 
 # Invitations
 
-:::note
-This guide demonstrates how to create a new content type, `CoolStuff`, by integrating it into the abstract `ContentDocument` and leveraging the core services for access management and authorization.
-:::
-
 It is possible to **invite** users to view, edit or maintain a content object.
 
 :::warning Email
-For application to work, email needs to be [enabled](../email/configuration.md) in your application.
+For invitations to work, email needs to be [enabled](../email/configuration.md) in your application.
 :::
 
 ## Configuration
