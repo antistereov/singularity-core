@@ -2,14 +2,296 @@
 
 ## Changelog
 
+## 🚀 Features
+- [a3d9be4](https://github.com/antistereov/singularity-core/commits/a3d9be4) remove unnecessary file metadata implementation of content service
+- [77eebe0](https://github.com/antistereov/singularity-core/commits/77eebe0) test article management
+- [5899010](https://github.com/antistereov/singularity-core/commits/5899010) implement deletion of avatars and article images when deleting and fixing bugs in content management
+- [b0d4813](https://github.com/antistereov/singularity-core/commits/b0d4813) **content**: update tags and invitations, fix some logic errors, update docs and test
+- [1fae890](https://github.com/antistereov/singularity-core/commits/1fae890) **content**: rename ADMIN role to MAINTAINER to make the difference between server admin and content maintainer clear
+- [e0136c4](https://github.com/antistereov/singularity-core/commits/e0136c4) **files**: improve new file handling and update tests
+- [1676ba2](https://github.com/antistereov/singularity-core/commits/1676ba2) **files**: implement upload of images and automated conversion of images to multiple sizes
+- [5364ad5](https://github.com/antistereov/singularity-core/commits/5364ad5) **content**: remove unused fields, improve tag controller and add openapi documentation
+- [3282530](https://github.com/antistereov/singularity-core/commits/3282530) **content**: improve content model, create content controller that collects methods and improve creation of queries
+- [75898d5](https://github.com/antistereov/singularity-core/commits/75898d5) **auth**: groups keys are fixed now and cannot be updated to maintain consistency and reduce complexity
+- [9ebcc58](https://github.com/antistereov/singularity-core/commits/9ebcc58) **security**: implement security alerts for login and profile changes
+- [320f320](https://github.com/antistereov/singularity-core/commits/320f320) **users**: improve code, add documentation and test
+- [80ff7d2](https://github.com/antistereov/singularity-core/commits/80ff7d2) **users**: improve code, add documentation and test
+- [6daf356](https://github.com/antistereov/singularity-core/commits/6daf356) **database**: improve design and add documentation
+- [d0d8866](https://github.com/antistereov/singularity-core/commits/d0d8866) **oauth2**: implement custom failure handler and create base test
+- [e5d7cd7](https://github.com/antistereov/singularity-core/commits/e5d7cd7) **oauth2**: implement state token
+- [f76dd21](https://github.com/antistereov/singularity-core/commits/f76dd21) **auth**: improve oauth2 code, update openapi and add tests
+- [834b12e](https://github.com/antistereov/singularity-core/commits/834b12e) **auth**: improve 2fa, add docs and test
+- [df57de8](https://github.com/antistereov/singularity-core/commits/df57de8) **auth**: improve 2fa handling and add documentation and tests
+- [6f587b5](https://github.com/antistereov/singularity-core/commits/6f587b5) **auth**: improve 2fa handling and add documentation
+- [214bb90](https://github.com/antistereov/singularity-core/commits/214bb90) **auth**: minor fixes for groups and add tests
+- [35a8fe8](https://github.com/antistereov/singularity-core/commits/35a8fe8) **auth**: implement, test and document endpoints for roles GUEST and ADMIN
+- [359241c](https://github.com/antistereov/singularity-core/commits/359241c) **translate**: improve retrieving of resource keys
+- [1e08399](https://github.com/antistereov/singularity-core/commits/1e08399) **auth**: improve handling of 2FA already enabled
+- [bc8ebe0](https://github.com/antistereov/singularity-core/commits/bc8ebe0) **user**: rename mail property in user security detail to email
+- [2567c29](https://github.com/antistereov/singularity-core/commits/2567c29) **content**: update AccessCriteria to use access token and does not request database
+- [6adf86c](https://github.com/antistereov/singularity-core/commits/6adf86c) **auth**: create new geolocation response to transfer less data
+- [a17f412](https://github.com/antistereov/singularity-core/commits/a17f412) **auth**: minor fixes in AuthenticationController and update openapi docs
+- [69ed45a](https://github.com/antistereov/singularity-core/commits/69ed45a) **auth**: minor fixes in AuthenticationController and update openapi docs
+- [5f03f27](https://github.com/antistereov/singularity-core/commits/5f03f27) **auth**: password reset requires an email instead of access tokens now and update openapi docs
+- [0054dc4](https://github.com/antistereov/singularity-core/commits/0054dc4) **auth**: remove caching the user document in the AuthorizationService since the service is not bound to a session
+- [b8f452c](https://github.com/antistereov/singularity-core/commits/b8f452c) **groups**: adding or removing users from groups invalidates the users' access and refresh tokens
+- [acce620](https://github.com/antistereov/singularity-core/commits/acce620) **user**: rename mail property in user security detail to email
+- [15446fc](https://github.com/antistereov/singularity-core/commits/15446fc) **openapi**: trim indents for info, summaries and descriptions to make it valid
+- [c327c6d](https://github.com/antistereov/singularity-core/commits/c327c6d) **cache**: improve CacheService and make AccessTokenCache use CacheService
+- [42c8926](https://github.com/antistereov/singularity-core/commits/42c8926) **translation**: create tag request needs locale instead of language tag
+- [92b6deb](https://github.com/antistereov/singularity-core/commits/92b6deb) **translation**: user locale instead of custom language class and implement default locale
+- [49a6bd8](https://github.com/antistereov/singularity-core/commits/49a6bd8) **demo**: add OpenAPI description
+- [9e5f409](https://github.com/antistereov/singularity-core/commits/9e5f409) **openapi**: add admin scope
+- [3898e57](https://github.com/antistereov/singularity-core/commits/3898e57) **openapi**: add customizer to fix security requirement specification with header and cookie and sort tags alphabetically
+- [50cfb11](https://github.com/antistereov/singularity-core/commits/50cfb11) **auth**: move password reset and email verification properties to their own property classes
+- [0b50cb1](https://github.com/antistereov/singularity-core/commits/0b50cb1) **2fa**: update configuration to make it more readable and add OpenAPI documentation
+- [537fa2e](https://github.com/antistereov/singularity-core/commits/537fa2e) **2fa**: implement methods to enable and disable mail as 2fa method and to set preferred 2fa method
+- [8a449a9](https://github.com/antistereov/singularity-core/commits/8a449a9) **auth**: refresh tokens will now be accepted in the authorization header
+- [7080a2b](https://github.com/antistereov/singularity-core/commits/7080a2b) **cache**: make CacheService take value of any Type instead of just String
+- [20786fc](https://github.com/antistereov/singularity-core/commits/20786fc) **auth**: invalidate all AccessTokens related to one session if session is invalidated
+- [6c1daa4](https://github.com/antistereov/singularity-core/commits/6c1daa4) **auth**: make AccessToken stateless and remove necessity to use session token
+- [e55837c](https://github.com/antistereov/singularity-core/commits/e55837c) **auth**: remove necessity to generate a sessionId on the client and move logic to server fully
+- [5e2831b](https://github.com/antistereov/singularity-core/commits/5e2831b) **oauth2**: improve error handling and readability
+- [184ea0b](https://github.com/antistereov/singularity-core/commits/184ea0b) **auth**: trust email verification of oauth2 provider when creating
+- [5a432b4](https://github.com/antistereov/singularity-core/commits/5a432b4) **auth**: implement reauthentication with same account
+- [bdb307e](https://github.com/antistereov/singularity-core/commits/bdb307e) **auth**: implement error handling for oauth2 authentication errors
+- [673d045](https://github.com/antistereov/singularity-core/commits/673d045) **auth**: remove unnecessary usages of SessionInfoRequest since it is already saved in the access token
+- [dfb5a05](https://github.com/antistereov/singularity-core/commits/dfb5a05) **oauth2**: make oauth2 authentication configurable
+- [4ddf06b](https://github.com/antistereov/singularity-core/commits/4ddf06b) **auth**: implement connection and handling of identity providers
+- [499cbff](https://github.com/antistereov/singularity-core/commits/499cbff) **oauth2**: set custom state parameter
+- [c5fe36a](https://github.com/antistereov/singularity-core/commits/c5fe36a) **oauth2**: implement oauth2
+- [4411122](https://github.com/antistereov/singularity-core/commits/4411122) **2fa**: improve status request
+- [45a18b2](https://github.com/antistereov/singularity-core/commits/45a18b2) **auth**: increase size of login code in email template
+- [b88e7b2](https://github.com/antistereov/singularity-core/commits/b88e7b2) **auth**: update step up flow
+- [9d58094](https://github.com/antistereov/singularity-core/commits/9d58094) improve naming and update references in docs
+- [0d1a6ff](https://github.com/antistereov/singularity-core/commits/0d1a6ff) update endpoints to match REST standards and update structure
+- [dfe5a82](https://github.com/antistereov/singularity-core/commits/dfe5a82) **auth**: failing mmdb download now shows a warning instead of throwing an error
+- [ee96bfe](https://github.com/antistereov/singularity-core/commits/ee96bfe) unify token declaration and add new interface SecurityToken
+- [a97369c](https://github.com/antistereov/singularity-core/commits/a97369c) **auth**: update token definitions and openapi documentation for security
+- [6519997](https://github.com/antistereov/singularity-core/commits/6519997) **two-factor**: move properties from security to two-factor
+- [4449be3](https://github.com/antistereov/singularity-core/commits/4449be3) **auth**: improve handling of tokens
+- [cd5084b](https://github.com/antistereov/singularity-core/commits/cd5084b) **auth**: implement expiration for refresh token and add tests
+- [7cae32c](https://github.com/antistereov/singularity-core/commits/7cae32c) **groups**: add group member controller and update package structure
+- [68b7288](https://github.com/antistereov/singularity-core/commits/68b7288) **security**: add security package and create properties to specify allowed origins
+- [f930798](https://github.com/antistereov/singularity-core/commits/f930798) **app**: update application properties
+- [7756bc6](https://github.com/antistereov/singularity-core/commits/7756bc6) **geolocation**: update name
+- [3137c43](https://github.com/antistereov/singularity-core/commits/3137c43) **geolocation**: update name
+- [aea7d64](https://github.com/antistereov/singularity-core/commits/aea7d64) **geolocation**: rename property for real ip header
+- [3426277](https://github.com/antistereov/singularity-core/commits/3426277) **geolocation**: refine usage of geolocation
+- [fc3c9e6](https://github.com/antistereov/singularity-core/commits/fc3c9e6) **geolocation**: fix download of database and setting of information
+- [b234c17](https://github.com/antistereov/singularity-core/commits/b234c17) **core**: update client ip fetching
+- [9c984f3](https://github.com/antistereov/singularity-core/commits/9c984f3) **global**: update configuration for webclient
+- [8fec9e0](https://github.com/antistereov/singularity-core/commits/8fec9e0) **geolocation**: configure usage of geolocation in demo and stereov-io
+- [062e82b](https://github.com/antistereov/singularity-core/commits/062e82b) **geolocation**: implement automated download and update of database
+- [d493358](https://github.com/antistereov/singularity-core/commits/d493358) **geolocation**: use maxmind geolite2-city database for location information
+- [f7ff473](https://github.com/antistereov/singularity-core/commits/f7ff473) **auth**: enable header authorization by default
+- [f6212b6](https://github.com/antistereov/singularity-core/commits/f6212b6) **demo**: add custom configuration options using env variables
+- [af0d463](https://github.com/antistereov/singularity-core/commits/af0d463) **demo**: use redoc instead of swagger
+- [14c32b9](https://github.com/antistereov/singularity-core/commits/14c32b9) **demo**: use openapi docs from endpoint of demo application instead of fixed one to save unnecessary build steps
+- [2ab24a4](https://github.com/antistereov/singularity-core/commits/2ab24a4) **user**: email will not be marked as verified when mail is deactivated
+- [c94aff2](https://github.com/antistereov/singularity-core/commits/c94aff2) **core**: allow header authentication
+- [9c0c049](https://github.com/antistereov/singularity-core/commits/9c0c049) **core**: remove openapi configuration
+- [d413dcb](https://github.com/antistereov/singularity-core/commits/d413dcb) **auth**: implement optional bearer authentication
+- [42ec943](https://github.com/antistereov/singularity-core/commits/42ec943) **file**: improve naming of keys
+- [550e85d](https://github.com/antistereov/singularity-core/commits/550e85d) **file**: urls will now be generated when a response is requested which leads to a better and more consistent implementation with S3
+- [b1ac0fa](https://github.com/antistereov/singularity-core/commits/b1ac0fa) **secret-store**: add default value for not when creating a secret
+
+## 🐛 Fixes
+- [207738c](https://github.com/antistereov/singularity-core/commits/207738c) **files, content**: fix minor bugs in file storage, image storage and tag management
+- [86172ac](https://github.com/antistereov/singularity-core/commits/86172ac) **files**: fix issues with content length header and multi file parts
+- [ba0db09](https://github.com/antistereov/singularity-core/commits/ba0db09) fix function call
+- [fed6ee1](https://github.com/antistereov/singularity-core/commits/fed6ee1) **geolocation**: fix geolocation exception handling if no authorization is specified
+- [a6d20ae](https://github.com/antistereov/singularity-core/commits/a6d20ae) **oauth2**: fix bugs in conversion of guests to users and step up flow, test, and update documentation
+- [cccd8c6](https://github.com/antistereov/singularity-core/commits/cccd8c6) **oauth2**: fix bugs in connection flow and update documentation
+- [b3240be](https://github.com/antistereov/singularity-core/commits/b3240be) **oauth2**: fix bugs in register und login flow and update documentation
+- [6abacd0](https://github.com/antistereov/singularity-core/commits/6abacd0) update tests after changes in authentication
+- [74a64cb](https://github.com/antistereov/singularity-core/commits/74a64cb) **auth**: AccessToken is invalid if NO session exists
+- [cfcae30](https://github.com/antistereov/singularity-core/commits/cfcae30) **auth**: browser and os claim in SessionToken will only be set if not null
+- [bf0f7ed](https://github.com/antistereov/singularity-core/commits/bf0f7ed) **auth**: fix authorization header bugs
+- [18cb455](https://github.com/antistereov/singularity-core/commits/18cb455) **auth**: fix cookies and token initialization and setup
+- [642a487](https://github.com/antistereov/singularity-core/commits/642a487) **two-factor**: fix setting of cookie
+- [b60348d](https://github.com/antistereov/singularity-core/commits/b60348d) **invitation-service**: fix scheduled cleanup
+- [334f5a5](https://github.com/antistereov/singularity-core/commits/334f5a5) **invitation**: add Id annotation
+- [f6f298e](https://github.com/antistereov/singularity-core/commits/f6f298e) **article**: make image nullable when no metadata found
+- [28e1fec](https://github.com/antistereov/singularity-core/commits/28e1fec) **local-file-storage**: add controller bean
+- [2f54a03](https://github.com/antistereov/singularity-core/commits/2f54a03) **article**: fix creation of article dtos after change in file handling
+- [fcad08f](https://github.com/antistereov/singularity-core/commits/fcad08f) **s3-file-storage**: fix generation of presigned urls
+- [68f5dba](https://github.com/antistereov/singularity-core/commits/68f5dba) **local-file-storage**: fix implementation of doGetUrl
+- [10929e0](https://github.com/antistereov/singularity-core/commits/10929e0) **secret-store**: add conditional on property annotation for classes of local secret store so only one bean of type secret store will be created on startup
+- [96fae04](https://github.com/antistereov/singularity-core/commits/96fae04) **vault-secret-store**: add scheme configuration for vault
+- [d8b35c8](https://github.com/antistereov/singularity-core/commits/d8b35c8) **vault-secret-store**: fix various bugs in implementation of vault
+
+## 🔄️ Changes
+- [f5c987c](https://github.com/antistereov/singularity-core/commits/f5c987c) **auth**: move geolocation package to auth
+- [1d89dd8](https://github.com/antistereov/singularity-core/commits/1d89dd8) **core**: reorganize structure
+- [3e52553](https://github.com/antistereov/singularity-core/commits/3e52553) **user**: reorganize user structure
+- [eb2e196](https://github.com/antistereov/singularity-core/commits/eb2e196) **core**: reorganize packages
+- [dd1c0f4](https://github.com/antistereov/singularity-core/commits/dd1c0f4) **local-file-storage**: add logging in controller
+
+## 🧪 Tests
+- [d6fa714](https://github.com/antistereov/singularity-core/commits/d6fa714) **content**: fix article tests after changing the API
+- [aa863e1](https://github.com/antistereov/singularity-core/commits/aa863e1) update errors in 2fa email test because of login alert email
+- [abf291f](https://github.com/antistereov/singularity-core/commits/abf291f) fix oauth2 test
+- [876e74f](https://github.com/antistereov/singularity-core/commits/876e74f) **user-settings**: fix user-settings test and add new tests
+- [a6e001a](https://github.com/antistereov/singularity-core/commits/a6e001a) **oauth2**: start implementing test for oauth2 flow
+- [e29f9f0](https://github.com/antistereov/singularity-core/commits/e29f9f0) **groups**: add tests for group member controller
+- [26a509f](https://github.com/antistereov/singularity-core/commits/26a509f) fix override variable
+- [71184ee](https://github.com/antistereov/singularity-core/commits/71184ee) fix tests after updating API
+- [3e780f5](https://github.com/antistereov/singularity-core/commits/3e780f5) update tests after api change
+- [2c4d000](https://github.com/antistereov/singularity-core/commits/2c4d000) update tests after updating session model
+- [7cfb7ca](https://github.com/antistereov/singularity-core/commits/7cfb7ca) fix cookie value that lead to timeouts
+- [f31a3c3](https://github.com/antistereov/singularity-core/commits/f31a3c3) fix naming of EmailVerificationControllerTest
+- [88caa47](https://github.com/antistereov/singularity-core/commits/88caa47) change port of test server to 8001
+- [f92a7d1](https://github.com/antistereov/singularity-core/commits/f92a7d1) refactor tests to match project structure
+- [8e2ffe4](https://github.com/antistereov/singularity-core/commits/8e2ffe4) **auth**: add tests for token refresh with header
+- [86b4fff](https://github.com/antistereov/singularity-core/commits/86b4fff) **geolocation**: add tests for download and update
+- [3846f78](https://github.com/antistereov/singularity-core/commits/3846f78) **geolocation**: create test
+- [8cd995b](https://github.com/antistereov/singularity-core/commits/8cd995b) **user**: update test after swapping UserResponse to RegisterResponse in /response
+- [b94226e](https://github.com/antistereov/singularity-core/commits/b94226e) **local-file-storage**: add test for saving file in sub dir
+- [47146c1](https://github.com/antistereov/singularity-core/commits/47146c1) **local-file-storage**: add test for saving file in sub dir
+- [ca8162e](https://github.com/antistereov/singularity-core/commits/ca8162e) **secret-store**: fix little bug where Instant will not be rounded to millis as in db
+- [5d51ed0](https://github.com/antistereov/singularity-core/commits/5d51ed0) **secret-store**: fix little bug where Instant will not be rounded to millis as in db
+- [1b19b82](https://github.com/antistereov/singularity-core/commits/1b19b82) **local-file-storage**: test initialization
+- [e943ae9](https://github.com/antistereov/singularity-core/commits/e943ae9) **local-file-storage**: move util package to top level
+- [18ea89b](https://github.com/antistereov/singularity-core/commits/18ea89b) **local-file-storage**: test if correct url is generated
+- [999eef1](https://github.com/antistereov/singularity-core/commits/999eef1) **secret-store**: fix little bug where Instant will not be rounded to millis as in db
+- [aed2baa](https://github.com/antistereov/singularity-core/commits/aed2baa) **local-secret-store**: add integration tests for LocalSecretStore
+- [19e670c](https://github.com/antistereov/singularity-core/commits/19e670c) **vault-secret-store**: add integration tests for VaultSecretStore
+- [694c3cc](https://github.com/antistereov/singularity-core/commits/694c3cc) make applicationContext public in BaseSpringBootTest
+
+## 🧰 Tasks
+- [810d2fa](https://github.com/antistereov/singularity-core/commits/810d2fa) **file-storage**: improve naming of methods to clarify difference between rendition and file metadata
+- [dde2799](https://github.com/antistereov/singularity-core/commits/dde2799) fix code warning
+- [71313c0](https://github.com/antistereov/singularity-core/commits/71313c0) **files**: fix code warnings
+- [1d82282](https://github.com/antistereov/singularity-core/commits/1d82282) fix code warnings
+- [ab42781](https://github.com/antistereov/singularity-core/commits/ab42781) code cleanup
+- [069b81e](https://github.com/antistereov/singularity-core/commits/069b81e) fix code errors
+- [3da14cf](https://github.com/antistereov/singularity-core/commits/3da14cf) fix code warnings
+- [b67696f](https://github.com/antistereov/singularity-core/commits/b67696f) remove unused import
+- [82e062f](https://github.com/antistereov/singularity-core/commits/82e062f) remove unused variable
+- [150eac8](https://github.com/antistereov/singularity-core/commits/150eac8) **auth**: fix grammar in error message
+- [888c3cf](https://github.com/antistereov/singularity-core/commits/888c3cf) fix code warnings
+- [e9d1af0](https://github.com/antistereov/singularity-core/commits/e9d1af0) fix code warnings
+- [e9ac9a6](https://github.com/antistereov/singularity-core/commits/e9ac9a6) code cleanup
+- [6c27eec](https://github.com/antistereov/singularity-core/commits/6c27eec) remove unused imports
+- [eb1b52e](https://github.com/antistereov/singularity-core/commits/eb1b52e) remove unused variables
+- [bd02d87](https://github.com/antistereov/singularity-core/commits/bd02d87) code cleanup
+- [b5be3c2](https://github.com/antistereov/singularity-core/commits/b5be3c2) code cleanup
+- [a09319f](https://github.com/antistereov/singularity-core/commits/a09319f) code cleanup
+- [465411d](https://github.com/antistereov/singularity-core/commits/465411d) code cleanup
+- [9158cc8](https://github.com/antistereov/singularity-core/commits/9158cc8) fix code warnings
+- [4509576](https://github.com/antistereov/singularity-core/commits/4509576) fix code warnings
+- [5f09a95](https://github.com/antistereov/singularity-core/commits/5f09a95) fix code warnings
+- [f537fcf](https://github.com/antistereov/singularity-core/commits/f537fcf) **demo**: update database name
+- [a4ce692](https://github.com/antistereov/singularity-core/commits/a4ce692) fix test class name
+- [6e909a7](https://github.com/antistereov/singularity-core/commits/6e909a7) **auth**: code cleanup
+- [dfe5175](https://github.com/antistereov/singularity-core/commits/dfe5175) **gitignore**: add .run configuration to .gitignore
+- [a17f803](https://github.com/antistereov/singularity-core/commits/a17f803) code cleanup
+- [3246cc1](https://github.com/antistereov/singularity-core/commits/3246cc1) **gitignore**: add run configuraton to gitignore
+- [60e5f66](https://github.com/antistereov/singularity-core/commits/60e5f66) **stereov-io**: add geolocation config to .env.sample
+- [04b3f22](https://github.com/antistereov/singularity-core/commits/04b3f22) **geolocation**: remove todo because it is done
+- [a32d1b2](https://github.com/antistereov/singularity-core/commits/a32d1b2) **core**: remove unused methods and classes
+- [7826184](https://github.com/antistereov/singularity-core/commits/7826184) **core**: remove unused variables and imports
+- [6700e94](https://github.com/antistereov/singularity-core/commits/6700e94) **auth**: remove unused variables
+
 ## 🛠  Build
 - [8e2cf7e](https://github.com/antistereov/singularity-core/commits/8e2cf7e) bump version to 1.9.0
 - [af4121d](https://github.com/antistereov/singularity-core/commits/af4121d) add maxmind credentials to release and deploy workflow
+- [e6e96db](https://github.com/antistereov/singularity-core/commits/e6e96db) update Spring version
+- [548bcba](https://github.com/antistereov/singularity-core/commits/548bcba) **demo**: persist maxmind database file
+- [0e4445a](https://github.com/antistereov/singularity-core/commits/0e4445a) **build-and-test**: fix env names
+- [1cfec90](https://github.com/antistereov/singularity-core/commits/1cfec90) **deploy-docs**: run workflow when apps/demo/** changes
+- [cd1dc6d](https://github.com/antistereov/singularity-core/commits/cd1dc6d) **deploy-docs**: fix command for redis
+- [2f715bb](https://github.com/antistereov/singularity-core/commits/2f715bb) **deploy-docs**: fix container name of singularity-demo
+- [61b6b39](https://github.com/antistereov/singularity-core/commits/61b6b39) **deploy-docs**: use docker compose again instead of swarm
+- [c6aefac](https://github.com/antistereov/singularity-core/commits/c6aefac) **deploy-docs**: make use of swarm again
+- [abe2641](https://github.com/antistereov/singularity-core/commits/abe2641) **deploy-docs**: stop making use of docker swarm
+- [97b0e62](https://github.com/antistereov/singularity-core/commits/97b0e62) **deploy-docs**: update image tags
+- [78d52b6](https://github.com/antistereov/singularity-core/commits/78d52b6) **deploy-docs**: fix build of demo
+- [100f7ee](https://github.com/antistereov/singularity-core/commits/100f7ee) **deploy-docs**: build container before swarm is started
+- [5ec12e8](https://github.com/antistereov/singularity-core/commits/5ec12e8) **deploy-docs**: use docker swarms for zero downtime
+- [33b3da1](https://github.com/antistereov/singularity-core/commits/33b3da1) **deploy-docs**: use .env file for storing secrets of demo project
+- [5c64491](https://github.com/antistereov/singularity-core/commits/5c64491) **deploy-docs**: fix path to docker-compose.yaml
+- [57c1741](https://github.com/antistereov/singularity-core/commits/57c1741) **build-and-test**: specify paths to trigger this workflow
+- [2283e22](https://github.com/antistereov/singularity-core/commits/2283e22) **deploy-docs**: fix setting of envs
+- [4d4602d](https://github.com/antistereov/singularity-core/commits/4d4602d) **deploy-docs**: update setting of maxmind credentials
+- [26c3ebd](https://github.com/antistereov/singularity-core/commits/26c3ebd) **build-and-test**: ignore changes to all README.md files inside the repo
+- [766d321](https://github.com/antistereov/singularity-core/commits/766d321) **build-and-test**: skip build of stereov-io
+- [b15293a](https://github.com/antistereov/singularity-core/commits/b15293a) **deploy-docs**: fix git pull
+- [60ef5dd](https://github.com/antistereov/singularity-core/commits/60ef5dd) **deploy-docs**: update name
+- [d3b4db3](https://github.com/antistereov/singularity-core/commits/d3b4db3) **deploy-docs**: make mongodb and redis host configurable
+- [f9c276e](https://github.com/antistereov/singularity-core/commits/f9c276e) **build-and-test**: stop running pipeline for changes in readme
+- [fa3aedd](https://github.com/antistereov/singularity-core/commits/fa3aedd) **deploy-docs**: fix working directory
+- [541a95e](https://github.com/antistereov/singularity-core/commits/541a95e) **build-and-test**: add more ignored paths
+- [e20078d](https://github.com/antistereov/singularity-core/commits/e20078d) **build-and-test**: stop running workflow when docs are changed
+- [a652931](https://github.com/antistereov/singularity-core/commits/a652931) **deploy docs**: create demo application and automate deployment of demo application
+- [ccafa43](https://github.com/antistereov/singularity-core/commits/ccafa43) **deploy-docs**: use node v22
+- [fe464ed](https://github.com/antistereov/singularity-core/commits/fe464ed) **deploy-docs**: remove broken npm step
+- [ccb148d](https://github.com/antistereov/singularity-core/commits/ccb148d) **deploy-docs**: use yarn in build pipeline
+- [2a4bb96](https://github.com/antistereov/singularity-core/commits/2a4bb96) **deploy-docs**: update dependency install with legacy peer deps
+- [5fa0c38](https://github.com/antistereov/singularity-core/commits/5fa0c38) **docs**: add cname to deploy action
+- [8492d01](https://github.com/antistereov/singularity-core/commits/8492d01) fix docker build
+- [c17e18c](https://github.com/antistereov/singularity-core/commits/c17e18c) improve docker builds
+- [1556e56](https://github.com/antistereov/singularity-core/commits/1556e56) bump version to 1.8.0-SNAPSHOT for next development cycle
+- [bfc9534](https://github.com/antistereov/singularity-core/commits/bfc9534) bump version to 1.8.0
+- [5146f79](https://github.com/antistereov/singularity-core/commits/5146f79) bump version to 1.8.0
+- [1122c27](https://github.com/antistereov/singularity-core/commits/1122c27) fix release and deploy script
+
+## 📝 Documentation
+- [b6cbe52](https://github.com/antistereov/singularity-core/commits/b6cbe52) add algolia search
+- [df00f60](https://github.com/antistereov/singularity-core/commits/df00f60) **content**: update content documentation
+- [2659ab5](https://github.com/antistereov/singularity-core/commits/2659ab5) **files**: update file storage documentation
+- [19c2fff](https://github.com/antistereov/singularity-core/commits/19c2fff) **content**: prepare documents in guides
+- [1380791](https://github.com/antistereov/singularity-core/commits/1380791) **auth**: update openapi
+- [3c880bc](https://github.com/antistereov/singularity-core/commits/3c880bc) **auth**: update documentation
+- [ecfba79](https://github.com/antistereov/singularity-core/commits/ecfba79) **groups**: update docs for groups
+- [dc83386](https://github.com/antistereov/singularity-core/commits/dc83386) **groups**: update group documentation
+- [b834142](https://github.com/antistereov/singularity-core/commits/b834142) update documetation
+- [39e9692](https://github.com/antistereov/singularity-core/commits/39e9692) update information to demo applications's OpenAPI documentation
+- [1f91ad1](https://github.com/antistereov/singularity-core/commits/1f91ad1) add documentation for cache
+- [8927f16](https://github.com/antistereov/singularity-core/commits/8927f16) fix broken links
+- [0bb3037](https://github.com/antistereov/singularity-core/commits/0bb3037) change order of endpoints in openapi.yaml
+- [9837fb2](https://github.com/antistereov/singularity-core/commits/9837fb2) update docs after api change
+- [d60bcfd](https://github.com/antistereov/singularity-core/commits/d60bcfd) drastically improve api documentation by using the docusaurus-openapi-plugin
+- [12c8dbe](https://github.com/antistereov/singularity-core/commits/12c8dbe) update gitignore
+- [1d02b49](https://github.com/antistereov/singularity-core/commits/1d02b49) update gitignore
+- [afbafa9](https://github.com/antistereov/singularity-core/commits/afbafa9) add docusaurus-openapi plugin and remove swagger
+- [7fc1c25](https://github.com/antistereov/singularity-core/commits/7fc1c25) **auth**: add documentation for 2FA
+- [e249baf](https://github.com/antistereov/singularity-core/commits/e249baf) **auth**: update documentation
+- [d3f2aba](https://github.com/antistereov/singularity-core/commits/d3f2aba) **auth**: update documentation for auth
+- [e8a8115](https://github.com/antistereov/singularity-core/commits/e8a8115) **auth**: add openapi documentation for email verification and password reset
+- [dc469a8](https://github.com/antistereov/singularity-core/commits/dc469a8) update documentation
+- [b201dec](https://github.com/antistereov/singularity-core/commits/b201dec) **oauth2**: update documentation for oauth2
+- [5c00a9f](https://github.com/antistereov/singularity-core/commits/5c00a9f) update authorization guide
+- [f350137](https://github.com/antistereov/singularity-core/commits/f350137) **demo**: add openapi docs for security
+- [302e90d](https://github.com/antistereov/singularity-core/commits/302e90d) add more docs for authentication
+- [633b4b2](https://github.com/antistereov/singularity-core/commits/633b4b2) update gradle dependency guide for Kotlin DSL
+- [2a647d1](https://github.com/antistereov/singularity-core/commits/2a647d1) update social card
+- [0cea0e9](https://github.com/antistereov/singularity-core/commits/0cea0e9) add disclaimer on every page
+- [85d40aa](https://github.com/antistereov/singularity-core/commits/85d40aa) update docs
+- [db6e033](https://github.com/antistereov/singularity-core/commits/db6e033) **geolocation**: add geolocation docs
+- [6451859](https://github.com/antistereov/singularity-core/commits/6451859) **geolocation**: fix type in description
+- [452e7a7](https://github.com/antistereov/singularity-core/commits/452e7a7) **docker**: update configuration with maxmind account id and license key
+- [5c38313](https://github.com/antistereov/singularity-core/commits/5c38313) **core**: reorganize docs
+- [660e2c6](https://github.com/antistereov/singularity-core/commits/660e2c6) **core**: add spring boot reference in intro
+- [89b0de9](https://github.com/antistereov/singularity-core/commits/89b0de9) **core**: update spacing in README.md
+- [1042ee0](https://github.com/antistereov/singularity-core/commits/1042ee0) **core**: update description in README and docs
+- [f06667e](https://github.com/antistereov/singularity-core/commits/f06667e) **core**: add maven central version batch
+- [51a1fc2](https://github.com/antistereov/singularity-core/commits/51a1fc2) **core**: remove unused imports and files
+- [6928154](https://github.com/antistereov/singularity-core/commits/6928154) **core**: add intro, quickstart and authentication basics
+- [2234e69](https://github.com/antistereov/singularity-core/commits/2234e69) **readme**: update README.md
+- [951552b](https://github.com/antistereov/singularity-core/commits/951552b) **auth**: add docs for configuration of authentication
+- [3e49651](https://github.com/antistereov/singularity-core/commits/3e49651) **swagger**: update path because /api is reserved for backend
+- [5375681](https://github.com/antistereov/singularity-core/commits/5375681) **openapi**: update openapi docs
+- [5ea0a01](https://github.com/antistereov/singularity-core/commits/5ea0a01) **openapi**: update openapi docs
+- [5f0b6e8](https://github.com/antistereov/singularity-core/commits/5f0b6e8) **openapi**: update openapi
+- [dda4d28](https://github.com/antistereov/singularity-core/commits/dda4d28) **openapi**: update controllers and initialize openapi documentation and swagger
+- [934e65a](https://github.com/antistereov/singularity-core/commits/934e65a) **init**: initialize docs with custom colors and layout
 
 
 ## Contributors
 We'd like to thank the following people for their contributions:
-antistereov
+André Antimonov, GitHub, antistereov
 
 ## [v1.8.0]
 
