@@ -34,13 +34,13 @@ class SecretRotationController(
         description = """
             Triggers an immediate secret key rotation. This is an asynchronous operation.
             
-            You can learn more about key rotation [here](https://singularity.stereov.io/docs/guides/secret-store/basics#secret-rotation).
+            You can learn more about key rotation [here](https://singularity.stereov.io/docs/guides/secret-store/basics#secret-key-rotation).
             
             ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
               with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
         """,
-        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/secret-store/basics#secret-rotation"),
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/secret-store/basics#secret-key-rotation"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER, scopes = [OpenApiConstants.ADMIN_SCOPE]),
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE, scopes = [OpenApiConstants.ADMIN_SCOPE]),
@@ -75,7 +75,7 @@ class SecretRotationController(
         description = """
             Returns the status of the current or most recent secret rotation process.
             
-            You can learn more about key rotation [here](https://singularity.stereov.io/docs/guides/secret-store/basics#secret-rotation).
+            You can learn more about key rotation [here](https://singularity.stereov.io/docs/guides/secret-store/basics#secret-key-rotation).
             
             ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
@@ -85,7 +85,7 @@ class SecretRotationController(
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER, scopes = [OpenApiConstants.ADMIN_SCOPE]),
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE, scopes = [OpenApiConstants.ADMIN_SCOPE]),
         ],
-        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/secret-store/basics#secret-rotation"),
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/secret-store/basics#secret-key-rotation"),
         responses = [
             ApiResponse(
                 responseCode = "200",

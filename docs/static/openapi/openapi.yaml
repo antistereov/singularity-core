@@ -721,7 +721,7 @@ paths:
         \  is required. This token will be set automatically as HTTP-only cookie through\
         \ [`POST /api/auth/login`](https://singularity.stereov.io/docs/api/login)\n\
         \  or can be retrieved from the response and set as header manually if [header\
-        \ authentication](https://singularity.stereov.io/docs/guides/authentication#header-authentication)\
+        \ authentication](https://singularity.stereov.io/docs/guides/auth/authentication#header-authentication)\
         \ \n  is enabled.\n- If this action is successful, [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
         \ and \n  [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)\
         \ \n  will automatically be set as HTTP-only cookies.\n  If [header authentication](https://singularity.stereov.io/docs/guides/auth/authentication#header-authentication)\
@@ -1072,7 +1072,7 @@ paths:
         \ \n  [`POST /api/auth/login`](https://singularity.stereov.io/docs/api/login)\
         \ or\n  [`POST /api/auth/step-up`](https://singularity.stereov.io/docs/api/step-up)\n\
         \  or can be retrieved from any of those endpoints' response and set as header\
-        \ manually if [header authentication](https://singularity.stereov.io/docs/guides/authentication#header-authentication)\
+        \ manually if [header authentication](https://singularity.stereov.io/docs/guides/auth/authentication#header-authentication)\
         \ \n  is enabled.\n- If this action is successful, [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token),\
         \ \n  [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)\
         \ and\n  [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)\n\
@@ -1680,7 +1680,7 @@ paths:
       - Roles
       summary: Create Guest Account
       description: "Create a new [`GUEST`](https://singularity.stereov.io/docs/guides/auth/roles#guests)\
-        \ account.\n\nYou can learn more about `GUEST` accounts [here](https://singularity.stereov.io/docs/guides/roles#guests).\n\
+        \ account.\n\nYou can learn more about `GUEST` accounts [here](https://singularity.stereov.io/docs/guides/auth/roles#guests).\n\
         \n**Optional session data:**\n- The `session` object can be included in the\
         \ request body.\n- Inside the `session` object, you can provide the following\
         \ optional fields:\n    - `browser`: The name of the browser used (e.g., \"\
@@ -1726,9 +1726,9 @@ paths:
       tags:
       - Roles
       summary: Convert Guest To User
-      description: "Converts a [`GUEST`](https://singularity.stereov.io/docs/guides/roles#guests)\
-        \ \naccount to a regular [`USER`](https://singularity.stereov.io/docs/guides/roles#users)\
-        \ account.\n\nYou can learn more about `GUEST` accounts [here](https://singularity.stereov.io/docs/guides/roles#guests).\n\
+      description: "Converts a [`GUEST`](https://singularity.stereov.io/docs/guides/auth/roles#guests)\
+        \ \naccount to a regular [`USER`](https://singularity.stereov.io/docs/guides/auth/roles#users)\
+        \ account.\n\nYou can learn more about `GUEST` accounts [here](https://singularity.stereov.io/docs/guides/auth/roles#guests).\n\
         \n### Requirements\n- The `email` should be a valid email address (e.g., \"\
         test@example.com\")\n  that is not associated to an existing account.\n- The\
         \ `password` must be at least 8 characters long and include at least one uppercase\
@@ -1777,7 +1777,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ConvertToUserResponse"
         "304":
-          description: "Account is already regular [`USER`](https://singularity.stereov.io/docs/guides/roles#users).\
+          description: "Account is already regular [`USER`](https://singularity.stereov.io/docs/guides/auth/roles#users).\
             \ Authenticated session state has not changed since last request."
           content:
             '*/*':
@@ -3320,7 +3320,7 @@ paths:
       - Articles
       summary: Get Access Details of Content Objects
       description: "Get detail on who is allowed to access and change a content object.\n\
-        \nYou can find more information about content management [here](https://singularity.stereov.io/docs/guides/content/management).\n\
+        \nYou can find more information about content management [here](https://singularity.stereov.io/docs/guides/content/introduction).\n\
         \n>**Note:** You have to specify the content type.\n>For [articles](https://singularity.stereov.io/docs/guides/content/articles)\
         \ it is `articles`.\n\n### Locale\n\nA locale can be specified for this request.\
         \ \nThe email will be sent in the specified locale.\nYou can learn more about\
@@ -3331,7 +3331,7 @@ paths:
         \  with [`MAINTAINER`](https://singularity.stereov.io/docs/guides/content/introduction#object-specific-roles-shared-state)\
         \ access on this content object is required."
       externalDocs:
-        url: https://singularity.stereov.io/docs/guides/content/management
+        url: https://singularity.stereov.io/docs/guides/content/introduction
       operationId: getContentObjectAccessDetails
       parameters:
       - name: contentType
@@ -3383,7 +3383,7 @@ paths:
       - Articles
       summary: Update Access of Content Objects
       description: "Update the access to content object.\n\nYou can find more information\
-        \ about content management [here](https://singularity.stereov.io/docs/guides/content/management).\n\
+        \ about content management [here](https://singularity.stereov.io/docs/guides/content/introduction).\n\
         \n>**Note:** You have to specify the content type.\n>For [articles](https://singularity.stereov.io/docs/guides/content/articles)\
         \ it is `articles`.\n\n### Locale\n\nA locale can be specified for this request.\
         \ \nThe email will be sent in the specified locale.\nYou can learn more about\
@@ -3394,7 +3394,7 @@ paths:
         \  with [`MAINTAINER`](https://singularity.stereov.io/docs/guides/content/introduction#object-specific-roles-shared-state)\
         \ access on this content object is required."
       externalDocs:
-        url: https://singularity.stereov.io/docs/guides/content/management
+        url: https://singularity.stereov.io/docs/guides/content/introduction
       operationId: updateContentObjectAccess
       parameters:
       - name: key
@@ -3461,7 +3461,7 @@ paths:
         \ this action. \n\n>**Note:** You have to specify the content type.\n>For\
         \ [articles](https://singularity.stereov.io/docs/guides/content/articles)\
         \ it is `articles`.\n\nYou can find more information about content management\
-        \ [here](https://singularity.stereov.io/docs/guides/content/management).\n\
+        \ [here](https://singularity.stereov.io/docs/guides/content/introduction).\n\
         \n>**Note:** The old owner will automatically be demoted to a [`MAINTAINER`](https://singularity.stereov.io/docs/guides/content/introduction#object-specific-roles-shared-state)\n\
         >role if the action was successful.\n\n### Locale\n\nA locale can be specified\
         \ for this request. \nThe email will be sent in the specified locale.\nYou\
@@ -3471,7 +3471,7 @@ paths:
         \n### Tokens\n- A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\n\
         \  of the owner of this content object is required."
       externalDocs:
-        url: https://singularity.stereov.io/docs/guides/content/management
+        url: https://singularity.stereov.io/docs/guides/content/introduction
       operationId: updateContentObjectOwner
       parameters:
       - name: contentType
@@ -3536,7 +3536,7 @@ paths:
       description: "Update the trusted state of a content object.\nThis is critical\
         \ for links and files that may harm the application.\nThe trusted state can\
         \ only be changed by your application-wide [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins)s.\n\
-        \nYou can find more information about content management [here](https://singularity.stereov.io/docs/guides/content/management).\n\
+        \nYou can find more information about content management [here](https://singularity.stereov.io/docs/guides/content/introduction).\n\
         \n>**Note:** You have to specify the content type.\n>For [articles](https://singularity.stereov.io/docs/guides/content/articles)\
         \ it is `articles`.\n\n### Locale\n\nA locale can be specified for this request.\
         \ \nThe email will be sent in the specified locale.\nYou can learn more about\
@@ -3547,7 +3547,7 @@ paths:
         \  with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins)\
         \ permissions on the server."
       externalDocs:
-        url: https://singularity.stereov.io/docs/guides/content/management
+        url: https://singularity.stereov.io/docs/guides/content/introduction
       operationId: updateContentObjectTrustedState
       parameters:
       - name: contentType
@@ -3610,7 +3610,7 @@ paths:
       - Articles
       summary: Delete Content Object
       description: "Delete a content object.\n\nYou can find more information about\
-        \ content management [here](https://singularity.stereov.io/docs/guides/content/management).\n\
+        \ content management [here](https://singularity.stereov.io/docs/guides/content/introduction).\n\
         \n>**Note:** You have to specify the content type.\n>For [articles](https://singularity.stereov.io/docs/guides/content/articles)\
         \ it is `articles`.\n\n### Locale\n\nA locale can be specified for this request.\
         \ \nThe email will be sent in the specified locale.\nYou can learn more about\
@@ -3621,7 +3621,7 @@ paths:
         \  with [`MAINTAINER`](https://singularity.stereov.io/docs/guides/content/introduction#object-specific-roles-shared-state)\
         \ access on this content object is required."
       externalDocs:
-        url: https://singularity.stereov.io/docs/guides/content/management
+        url: https://singularity.stereov.io/docs/guides/content/introduction
       operationId: deleteContentObjectByKey
       parameters:
       - name: contentType
@@ -4166,13 +4166,13 @@ paths:
       description: |-
         Triggers an immediate secret key rotation. This is an asynchronous operation.
 
-        You can learn more about key rotation [here](https://singularity.stereov.io/docs/guides/secret-store/basics#secret-rotation).
+        You can learn more about key rotation [here](https://singularity.stereov.io/docs/guides/secret-store/basics#secret-key-rotation).
 
         ### Tokens
         - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
           with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
       externalDocs:
-        url: https://singularity.stereov.io/docs/guides/secret-store/basics#secret-rotation
+        url: https://singularity.stereov.io/docs/guides/secret-store/basics#secret-key-rotation
       operationId: rotateSecretKeys
       responses:
         "200":
@@ -4207,13 +4207,13 @@ paths:
       description: |-
         Returns the status of the current or most recent secret rotation process.
 
-        You can learn more about key rotation [here](https://singularity.stereov.io/docs/guides/secret-store/basics#secret-rotation).
+        You can learn more about key rotation [here](https://singularity.stereov.io/docs/guides/secret-store/basics#secret-key-rotation).
 
         ### Tokens
         - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
           with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
       externalDocs:
-        url: https://singularity.stereov.io/docs/guides/secret-store/basics#secret-rotation
+        url: https://singularity.stereov.io/docs/guides/secret-store/basics#secret-key-rotation
       operationId: getSecretKeyRotationStatus
       responses:
         "200":
