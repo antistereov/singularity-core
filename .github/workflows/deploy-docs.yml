@@ -11,6 +11,25 @@ on:
       - main
 
 jobs:
+  test:
+    name: Test Build of Docusaurus
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Cache node modules
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'yarn'
+      - name: Install yarn
+        run: |
+          npm i -g yarn
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+        working-directory: docs
+      - name: Create production build
+        run: yarn build
+        working-directory: docs
   deploy:
     name: Build Docusaurus
     runs-on: ubuntu-latest
