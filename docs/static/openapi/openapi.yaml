@@ -21,7 +21,7 @@ info:
   license:
     name: GPLv3 License
     url: https://www.gnu.org/licenses/gpl-3.0.en.html
-  version: 1.9.0
+  version: 1.0.0
 servers:
 - url: https://singularity.stereov.io
   description: Demo server
@@ -5291,13 +5291,6 @@ components:
           format: int32
         pageable:
           $ref: "#/components/schemas/PageableObject"
-        numberOfElements:
-          type: integer
-          format: int32
-        first:
-          type: boolean
-        last:
-          type: boolean
         size:
           type: integer
           format: int32
@@ -5310,13 +5303,18 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
         empty:
           type: boolean
     PageableObject:
       type: object
       properties:
-        unpaged:
-          type: boolean
         paged:
           type: boolean
         pageNumber:
@@ -5325,6 +5323,8 @@ components:
         pageSize:
           type: integer
           format: int32
+        unpaged:
+          type: boolean
         offset:
           type: integer
           format: int64
@@ -5333,9 +5333,9 @@ components:
     SortObject:
       type: object
       properties:
-        unsorted:
-          type: boolean
         sorted:
+          type: boolean
+        unsorted:
           type: boolean
         empty:
           type: boolean
@@ -5360,13 +5360,6 @@ components:
           format: int32
         pageable:
           $ref: "#/components/schemas/PageableObject"
-        numberOfElements:
-          type: integer
-          format: int32
-        first:
-          type: boolean
-        last:
-          type: boolean
         size:
           type: integer
           format: int32
@@ -5379,6 +5372,13 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
         empty:
           type: boolean
     PageTagResponse:
@@ -5392,13 +5392,6 @@ components:
           format: int32
         pageable:
           $ref: "#/components/schemas/PageableObject"
-        numberOfElements:
-          type: integer
-          format: int32
-        first:
-          type: boolean
-        last:
-          type: boolean
         size:
           type: integer
           format: int32
@@ -5411,6 +5404,13 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
         empty:
           type: boolean
     ArticleOverviewResponse:
@@ -5477,13 +5477,6 @@ components:
           format: int32
         pageable:
           $ref: "#/components/schemas/PageableObject"
-        numberOfElements:
-          type: integer
-          format: int32
-        first:
-          type: boolean
-        last:
-          type: boolean
         size:
           type: integer
           format: int32
@@ -5496,6 +5489,13 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
         empty:
           type: boolean
     AuthenticationStatusResponse:
