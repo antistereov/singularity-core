@@ -48,7 +48,7 @@ class GuestController(
         description = """
             Create a new [`GUEST`](https://singularity.stereov.io/docs/guides/auth/roles#guests) account.
             
-            You can learn more about `GUEST` accounts [here](https://singularity.stereov.io/docs/guides/roles#guests).
+            You can learn more about `GUEST` accounts [here](https://singularity.stereov.io/docs/guides/auth/roles#guests).
         
             **Optional session data:**
             - The `session` object can be included in the request body.
@@ -113,10 +113,10 @@ class GuestController(
     @Operation(
         summary = "Convert Guest To User",
         description = """
-            Converts a [`GUEST`](https://singularity.stereov.io/docs/guides/roles#guests) 
-            account to a regular [`USER`](https://singularity.stereov.io/docs/guides/roles#users) account.
+            Converts a [`GUEST`](https://singularity.stereov.io/docs/guides/auth/roles#guests) 
+            account to a regular [`USER`](https://singularity.stereov.io/docs/guides/auth/roles#users) account.
             
-            You can learn more about `GUEST` accounts [here](https://singularity.stereov.io/docs/guides/roles#guests).
+            You can learn more about `GUEST` accounts [here](https://singularity.stereov.io/docs/guides/auth/roles#guests).
             
             ### Requirements
             - The `email` should be a valid email address (e.g., "test@example.com")
@@ -166,7 +166,7 @@ class GuestController(
             ),
             ApiResponse(
                 responseCode = "304",
-                description = "Account is already regular [`USER`](https://singularity.stereov.io/docs/guides/roles#users). Authenticated session state has not changed since last request.",
+                description = "Account is already regular [`USER`](https://singularity.stereov.io/docs/guides/auth/roles#users). Authenticated session state has not changed since last request.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
             ApiResponse(

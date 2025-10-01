@@ -34,7 +34,7 @@ class ContentManagementController(
         description = """
             Update the access to content object.
             
-            You can find more information about content management [here](https://singularity.stereov.io/docs/guides/content/management).
+            You can find more information about content management [here](https://singularity.stereov.io/docs/guides/content/introduction).
             
             >**Note:** You have to specify the content type.
             >For [articles](https://singularity.stereov.io/docs/guides/content/articles) it is `articles`.
@@ -52,7 +52,7 @@ class ContentManagementController(
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
               with [`MAINTAINER`](https://singularity.stereov.io/docs/guides/content/introduction#object-specific-roles-shared-state) access on this content object is required.
         """,
-        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/content/management"),
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/content/introduction"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER, scopes = [OpenApiConstants.MAINTAINER_SCOPE]),
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE, scopes = [OpenApiConstants.MAINTAINER_SCOPE]),
@@ -98,7 +98,7 @@ class ContentManagementController(
         description = """
             Get detail on who is allowed to access and change a content object.
             
-            You can find more information about content management [here](https://singularity.stereov.io/docs/guides/content/management).
+            You can find more information about content management [here](https://singularity.stereov.io/docs/guides/content/introduction).
             
             >**Note:** You have to specify the content type.
             >For [articles](https://singularity.stereov.io/docs/guides/content/articles) it is `articles`.
@@ -116,7 +116,7 @@ class ContentManagementController(
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
               with [`MAINTAINER`](https://singularity.stereov.io/docs/guides/content/introduction#object-specific-roles-shared-state) access on this content object is required.
         """,
-        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/content/management"),
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/content/introduction"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER, scopes = [OpenApiConstants.MAINTAINER_SCOPE]),
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE, scopes = [OpenApiConstants.MAINTAINER_SCOPE]),
@@ -160,7 +160,7 @@ class ContentManagementController(
         description = """
             Delete a content object.
             
-            You can find more information about content management [here](https://singularity.stereov.io/docs/guides/content/management).
+            You can find more information about content management [here](https://singularity.stereov.io/docs/guides/content/introduction).
             
             >**Note:** You have to specify the content type.
             >For [articles](https://singularity.stereov.io/docs/guides/content/articles) it is `articles`.
@@ -178,7 +178,7 @@ class ContentManagementController(
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
               with [`MAINTAINER`](https://singularity.stereov.io/docs/guides/content/introduction#object-specific-roles-shared-state) access on this content object is required.
         """,
-        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/content/management"),
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/content/introduction"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER, scopes = [OpenApiConstants.MAINTAINER_SCOPE]),
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE, scopes = [OpenApiConstants.MAINTAINER_SCOPE]),
@@ -222,7 +222,7 @@ class ContentManagementController(
             This is critical for links and files that may harm the application.
             The trusted state can only be changed by your application-wide [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins)s.
             
-            You can find more information about content management [here](https://singularity.stereov.io/docs/guides/content/management).
+            You can find more information about content management [here](https://singularity.stereov.io/docs/guides/content/introduction).
             
             >**Note:** You have to specify the content type.
             >For [articles](https://singularity.stereov.io/docs/guides/content/articles) it is `articles`.
@@ -240,7 +240,7 @@ class ContentManagementController(
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
               with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions on the server.
         """,
-        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/content/management"),
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/content/introduction"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER, scopes = [OpenApiConstants.ADMIN_SCOPE]),
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE, scopes = [OpenApiConstants.ADMIN_SCOPE]),
@@ -289,7 +289,7 @@ class ContentManagementController(
             >**Note:** You have to specify the content type.
             >For [articles](https://singularity.stereov.io/docs/guides/content/articles) it is `articles`.
             
-            You can find more information about content management [here](https://singularity.stereov.io/docs/guides/content/management).
+            You can find more information about content management [here](https://singularity.stereov.io/docs/guides/content/introduction).
             
             >**Note:** The old owner will automatically be demoted to a [`MAINTAINER`](https://singularity.stereov.io/docs/guides/content/introduction#object-specific-roles-shared-state)
             >role if the action was successful.
@@ -307,7 +307,7 @@ class ContentManagementController(
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
               of the owner of this content object is required.
         """,
-        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/content/management"),
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/content/introduction"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER, scopes = [OpenApiConstants.MAINTAINER_SCOPE]),
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE, scopes = [OpenApiConstants.MAINTAINER_SCOPE]),

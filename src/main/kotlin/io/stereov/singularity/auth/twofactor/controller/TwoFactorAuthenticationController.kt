@@ -79,7 +79,7 @@ class TwoFactorAuthenticationController(
             ### Tokens
             - A valid [`TwoFactorAuthenticationToken`](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token)
               is required. This token will be set automatically as HTTP-only cookie through [`POST /api/auth/login`](https://singularity.stereov.io/docs/api/login)
-              or can be retrieved from the response and set as header manually if [header authentication](https://singularity.stereov.io/docs/guides/authentication#header-authentication) 
+              or can be retrieved from the response and set as header manually if [header authentication](https://singularity.stereov.io/docs/guides/auth/authentication#header-authentication) 
               is enabled.
             - If this action is successful, [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) and 
               [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token) 
