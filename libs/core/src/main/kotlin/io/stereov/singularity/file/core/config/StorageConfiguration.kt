@@ -39,7 +39,11 @@ class StorageConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun fileMetadataMapper() = FileMetadataMapper()
+    fun fileMetadataMapper(
+        authorizationService: AuthorizationService
+    ) = FileMetadataMapper(
+        authorizationService
+    )
 
     // Service
 

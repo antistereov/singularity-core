@@ -1,5 +1,7 @@
 package io.stereov.singularity.file.core.mapper
 
+import io.stereov.singularity.auth.core.service.AuthorizationService
+import io.stereov.singularity.content.core.dto.response.ContentAccessDetailsResponse
 import io.stereov.singularity.file.core.dto.FileMetadataResponse
 import io.stereov.singularity.file.core.dto.FileRenditionResponse
 import io.stereov.singularity.file.core.model.FileMetadataDocument
@@ -8,7 +10,9 @@ import io.stereov.singularity.file.core.model.FileUploadResponse
 import org.springframework.stereotype.Component
 
 @Component
-class FileMetadataMapper {
+class FileMetadataMapper(
+    private val authorizationService: AuthorizationService
+) {
 
     fun toRenditionResponse(rendition: FileRendition, url: String) = FileRenditionResponse(
         size = rendition.size,
@@ -27,40 +31,16 @@ class FileMetadataMapper {
         height = upload.height,
     )
 
-    fun toMetadataResponse(doc: FileMetadataDocument, renditions: Map<String, FileRenditionResponse>): FileMetadataResponse {
+    suspend fun toMetadataResponse(doc: FileMetadataDocument, renditions: Map<String, FileRenditionResponse>): FileMetadataResponse {
+        val currentAuthentication = authorizationService.getAuthenticationOrNull()
 
         return FileMetadataResponse(
             id = doc.id,
             key = doc.key,
             createdAt = doc.createdAt,
             updatedAt = doc.updatedAt,
-            access = doc.access,
+            access = ContentAccessDetailsResponse.create(doc.access, currentAuthentication),
             renditions = renditions,
-            trusted = doc.trusted,
-            tags = doc.tags
-        )
-    }
-
-    fun toDocument(res: FileMetadataResponse): FileMetadataDocument {
-        return FileMetadataDocument(
-            _id = res.id,
-            key = res.key,
-            createdAt = res.createdAt,
-            updatedAt = res.updatedAt,
-            access = res.access,
-            renditions = res.renditions.map { (key, value) ->
-                key to FileRendition(
-                    value.key,
-                    value.size,
-                    value.contentType,
-                    value.height,
-                    value.width
-                )
-            }.toMap(),
-            renditionKeys = res.renditions.keys,
-            contentTypes = res.renditions.values.map { it.contentType }.toSet(),
-            trusted = res.trusted,
-            tags = res.tags
         )
     }
 }

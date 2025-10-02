@@ -4266,7 +4266,7 @@ components:
       properties:
         name:
           type: string
-    ContentAccessDetails:
+    ContentAccessDetailsResponse:
       type: object
       properties:
         ownerId:
@@ -4277,46 +4277,15 @@ components:
           - PRIVATE
           - PUBLIC
           - SHARED
-        users:
-          $ref: "#/components/schemas/ContentAccessPermissions"
-        groups:
-          $ref: "#/components/schemas/ContentAccessPermissions"
-        invitations:
-          type: array
-          items:
-            $ref: "#/components/schemas/ObjectId"
-          uniqueItems: true
-      required:
-      - groups
-      - invitations
-      - ownerId
-      - users
-      - visibility
-    ContentAccessPermissions:
-      type: object
-      properties:
-        maintainer:
-          type: array
-          items:
-            type: string
-          uniqueItems: true
-        editor:
-          type: array
-          items:
-            type: string
-          uniqueItems: true
-        viewer:
-          type: array
-          items:
-            type: string
-          uniqueItems: true
-        isEmpty:
+        canEdit:
+          type: boolean
+        canDelete:
           type: boolean
       required:
-      - editor
-      - isEmpty
-      - maintainer
-      - viewer
+      - canDelete
+      - canEdit
+      - ownerId
+      - visibility
     FileMetadataResponse:
       type: object
       properties:
@@ -4331,26 +4300,17 @@ components:
           type: string
           format: date-time
         access:
-          $ref: "#/components/schemas/ContentAccessDetails"
+          $ref: "#/components/schemas/ContentAccessDetailsResponse"
         renditions:
           type: object
           additionalProperties:
             $ref: "#/components/schemas/FileRenditionResponse"
-        trusted:
-          type: boolean
-        tags:
-          type: array
-          items:
-            type: string
-          uniqueItems: true
       required:
       - access
       - createdAt
       - id
       - key
       - renditions
-      - tags
-      - trusted
       - updatedAt
     FileRenditionResponse:
       type: object
@@ -4426,7 +4386,7 @@ components:
             - mail
         avatar:
           $ref: "#/components/schemas/FileMetadataResponse"
-        created:
+        createdAt:
           type: string
         groups:
           type: array
@@ -4434,7 +4394,7 @@ components:
             type: string
           uniqueItems: true
       required:
-      - created
+      - createdAt
       - emailVerified
       - groups
       - id
@@ -4577,26 +4537,6 @@ components:
           type: string
         background:
           type: string
-    ContentAccessDetailsResponse:
-      type: object
-      properties:
-        ownerId:
-          $ref: "#/components/schemas/ObjectId"
-        visibility:
-          type: string
-          enum:
-          - PRIVATE
-          - PUBLIC
-          - SHARED
-        canEdit:
-          type: boolean
-        canDelete:
-          type: boolean
-      required:
-      - canDelete
-      - canEdit
-      - ownerId
-      - visibility
     FullArticleResponse:
       type: object
       properties:

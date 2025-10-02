@@ -635,14 +635,8 @@ const sidebar: SidebarsConfig = {
         },
         {
           type: "doc",
-          id: "api/schemas/contentaccessdetails",
-          label: "ContentAccessDetails",
-          className: "schema",
-        },
-        {
-          type: "doc",
-          id: "api/schemas/contentaccesspermissions",
-          label: "ContentAccessPermissions",
+          id: "api/schemas/contentaccessdetailsresponse",
+          label: "ContentAccessDetailsResponse",
           className: "schema",
         },
         {
@@ -727,12 +721,6 @@ const sidebar: SidebarsConfig = {
           type: "doc",
           id: "api/schemas/articlecolors",
           label: "ArticleColors",
-          className: "schema",
-        },
-        {
-          type: "doc",
-          id: "api/schemas/contentaccessdetailsresponse",
-          label: "ContentAccessDetailsResponse",
           className: "schema",
         },
         {

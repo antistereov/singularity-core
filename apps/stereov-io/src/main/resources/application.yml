@@ -42,7 +42,6 @@ singularity:
     create-root-user: ${CREATE_ROOT_USER}
     root-email: ${ROOT_EMAIL}
     root-password: ${ROOT_PASSWORD}
-    enable-mail: true
   auth:
     geolocation:
       enabled: true
@@ -50,10 +49,13 @@ singularity:
       account-id: ${MAXMIND_ACCOUNT_ID}
       license-key: ${MAXMIND_LICENSE_KEY}
     allow-header-authentication: false
-    allow-oauth2-providers: true
+    oauth2:
+      enable: true
     two-factor:
-      recovery-code-length: 10
-      recovery-code-count: 6
+      totp:
+        recovery-code:
+          length: 10
+          count: 6
   file:
     storage:
       type: ${STORAGE_TYPE}
@@ -78,6 +80,7 @@ singularity:
       token: ${VAULT_TOKEN}
       scheme: ${VAULT_SCHEME}
   email:
+    enable: true
     host: ${MAIL_HOST}
     port: ${MAIL_PORT}
     email: ${MAIL_EMAIL}
@@ -87,9 +90,7 @@ singularity:
     smtp-auth: ${MAIL_SMTP_AUTH:true}
     smtp-starttls: ${MAIL_SMTP_STARTTLS:true}
     debug: ${MAIL_DEBUG:false}
-    verification-expiration: ${MAIL_VERIFICATION_EXPIRATION:900}
     send-cooldown: ${MAIL_VERIFICATION_SEND_COOLDOWN:60}
-    password-reset-expiration: 900
   security:
     jwt:
       expires-in: 900
@@ -108,8 +109,6 @@ singularity:
     contact-path: ${CONTACT_PATH:/contact}
     legal-notice-path: ${LEGAL_NOTICE_PATH:/legal-notice}
     privacy-policy-path: ${PRIVACY_POLICY_PATH:/privacy-policy}
-    email-verification-path: ${EMAIL_VERIFICATION_PATH:/auth/verify-email}
-    password-reset-path: ${PASSWORD_RESET_PATH:/auth/reset-password}
   content:
     tags:
       - key: music
