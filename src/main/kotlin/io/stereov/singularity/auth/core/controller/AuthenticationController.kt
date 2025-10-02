@@ -253,7 +253,7 @@ class AuthenticationController(
                     LoginResponse(
                         user = userMapper.toResponse(user),
                         twoFactorRequired = true,
-                        allowedTwoFactorMethods = user.twoFactorMethods,
+                        twoFactorMethods = user.twoFactorMethods,
                         twoFactorAuthenticationToken = if (authProperties.allowHeaderAuthentication) twoFactorAuthenticationToken.value else null,
                         preferredTwoFactorMethod = user.preferredTwoFactorMethod,
                         accessToken = null,
@@ -272,7 +272,7 @@ class AuthenticationController(
             accessToken = if (authProperties.allowHeaderAuthentication) accessToken.value else null,
             refreshToken = if (authProperties.allowHeaderAuthentication) refreshToken.value else null,
             twoFactorRequired = false,
-            allowedTwoFactorMethods = null,
+            twoFactorMethods = null,
             twoFactorAuthenticationToken = null,
             preferredTwoFactorMethod = null,
             location = geoLocationService.getLocationOrNull(exchange.request)
