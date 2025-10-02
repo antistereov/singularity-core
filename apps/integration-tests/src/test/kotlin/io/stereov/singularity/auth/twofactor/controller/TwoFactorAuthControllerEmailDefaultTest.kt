@@ -38,7 +38,7 @@ class TwoFactorAuthControllerEmailDefaultTest : BaseMailIntegrationTest() {
         val body = requireNotNull(res.responseBody)
 
         Assertions.assertTrue(body.twoFactorRequired)
-        Assertions.assertEquals(listOf(TwoFactorMethod.EMAIL), body.allowedTwoFactorMethods)
+        Assertions.assertEquals(listOf(TwoFactorMethod.EMAIL), body.twoFactorMethods)
         Assertions.assertEquals(TwoFactorMethod.EMAIL, body.preferredTwoFactorMethod)
 
         assertThrows<TokenException> { res.extractAccessToken() }

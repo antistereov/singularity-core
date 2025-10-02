@@ -138,7 +138,7 @@ class TwoFactorAuthenticationController(
             user = userMapper.toResponse(user),
             accessToken = if (authProperties.allowHeaderAuthentication) accessToken.value else null,
             refreshToken = if (authProperties.allowHeaderAuthentication) refreshToken.value else null,
-            allowedTwoFactorMethods = null,
+            twoFactorMethods = null,
             twoFactorAuthenticationToken = null,
             preferredTwoFactorMethod = null,
             location = geolocationService.getLocationOrNull(exchange.request)

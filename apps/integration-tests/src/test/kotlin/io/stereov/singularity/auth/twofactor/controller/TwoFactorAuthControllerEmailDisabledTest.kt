@@ -35,7 +35,7 @@ class TwoFactorAuthControllerEmailDisabledTest : BaseIntegrationTest() {
         val body = requireNotNull(res.responseBody)
 
         Assertions.assertFalse(body.twoFactorRequired)
-        Assertions.assertNull(body.allowedTwoFactorMethods)
+        Assertions.assertNull(body.twoFactorMethods)
         Assertions.assertNull(body.preferredTwoFactorMethod)
 
         val accessToken = res.extractAccessToken()
