@@ -1,3 +1,15 @@
+## [v1.9.1]
+
+## Changelog
+
+## 🚀 Features
+- [e677c3e](https://github.com/antistereov/singularity-core/commits/e677c3e) **auth**: unify naming of property for enabled 2fa methods in responses
+
+
+## Contributors
+We'd like to thank the following people for their contributions:
+antistereov
+
 ## [v1.9.0]
 
 ## Changelog
