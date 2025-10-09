@@ -482,7 +482,7 @@ class AuthenticationController(
                 .body(
                     StepUpResponse(
                         twoFactorRequired = true,
-                        allowedTwoFactorMethods = user.twoFactorMethods,
+                        twoFactorMethods = user.twoFactorMethods,
                         twoFactorAuthenticationToken = if (authProperties.allowHeaderAuthentication) twoFactorToken.value else null,
                         stepUpToken = null,
                         preferredTwoFactorMethod = user.preferredTwoFactorMethod
@@ -495,7 +495,7 @@ class AuthenticationController(
 
         val res = StepUpResponse(
             twoFactorRequired = false,
-            allowedTwoFactorMethods = null,
+            twoFactorMethods = null,
             twoFactorAuthenticationToken = null,
             stepUpToken = if (authProperties.allowHeaderAuthentication) stepUpToken.value else null,
             preferredTwoFactorMethod = null,
