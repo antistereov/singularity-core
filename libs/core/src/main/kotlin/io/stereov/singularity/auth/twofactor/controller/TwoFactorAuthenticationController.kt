@@ -2,6 +2,7 @@ package io.stereov.singularity.auth.twofactor.controller
 
 import io.stereov.singularity.auth.core.component.CookieCreator
 import io.stereov.singularity.auth.core.dto.response.LoginResponse
+import io.stereov.singularity.auth.core.dto.response.StepUpResponse
 import io.stereov.singularity.auth.core.exception.model.UserAlreadyAuthenticatedException
 import io.stereov.singularity.auth.core.properties.AuthProperties
 import io.stereov.singularity.auth.core.service.AuthorizationService
@@ -13,7 +14,6 @@ import io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException
 import io.stereov.singularity.auth.twofactor.dto.request.ChangePreferredTwoFactorMethodRequest
 import io.stereov.singularity.auth.twofactor.dto.request.CompleteLoginRequest
 import io.stereov.singularity.auth.twofactor.dto.request.CompleteStepUpRequest
-import io.stereov.singularity.auth.twofactor.dto.response.StepUpResponse
 import io.stereov.singularity.auth.twofactor.model.token.TwoFactorTokenType
 import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthenticationService
 import io.stereov.singularity.global.model.ErrorResponse
@@ -99,7 +99,6 @@ class TwoFactorAuthenticationController(
             ApiResponse(
                 responseCode = "200",
                 description = "Information about the user and the tokens if header authentication is enabled.",
-                content = [Content(schema = Schema(implementation = LoginResponse::class))]
             ),
             ApiResponse(
                 responseCode = "304",
@@ -189,7 +188,6 @@ class TwoFactorAuthenticationController(
             ApiResponse(
                 responseCode = "200",
                 description = "The token if header authentication is enabled.",
-                content = [Content(schema = Schema(implementation = StepUpResponse::class))]
             ),
             ApiResponse(
                 responseCode = "400",
@@ -214,10 +212,17 @@ class TwoFactorAuthenticationController(
             throw InvalidTokenException("TwoFactorAuthenticationToken does not match AccessToken")
 
         val stepUpToken = stepUpTokenService.create(user.id, sessionId)
+        val res = StepUpResponse(
+            stepUpToken = if (authProperties.allowHeaderAuthentication) stepUpToken.value else null,
+            twoFactorRequired = false,
+            allowedTwoFactorMethods = null,
+            preferredTwoFactorMethod = null,
+            twoFactorAuthenticationToken = null
+        )
 
         return ResponseEntity.ok()
             .header("Set-Cookie", cookieCreator.createCookie(stepUpToken).toString())
-            .body(StepUpResponse(if (authProperties.allowHeaderAuthentication) stepUpToken.value else null))
+            .body(res)
     }
 
     @PostMapping("/preferred-method")
@@ -249,7 +254,6 @@ class TwoFactorAuthenticationController(
             ApiResponse(
                 responseCode = "200",
                 description = "Updated user information.",
-                content = [Content(schema = Schema(implementation = UserResponse::class))]
             ),
             ApiResponse(
                 responseCode = "400",

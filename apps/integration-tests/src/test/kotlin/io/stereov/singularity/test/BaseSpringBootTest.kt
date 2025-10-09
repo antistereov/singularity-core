@@ -7,6 +7,7 @@ import io.stereov.singularity.WebSpringBootStarterApplication
 import io.stereov.singularity.auth.core.component.CookieCreator
 import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.auth.core.dto.request.RegisterUserRequest
+import io.stereov.singularity.auth.core.dto.response.StepUpResponse
 import io.stereov.singularity.auth.core.model.SessionInfo
 import io.stereov.singularity.auth.core.model.token.*
 import io.stereov.singularity.auth.core.service.token.*
@@ -24,7 +25,6 @@ import io.stereov.singularity.auth.oauth2.service.token.OAuth2ProviderConnection
 import io.stereov.singularity.auth.twofactor.dto.request.CompleteStepUpRequest
 import io.stereov.singularity.auth.twofactor.dto.request.EnableEmailTwoFactorMethodRequest
 import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorVerifySetupRequest
-import io.stereov.singularity.auth.twofactor.dto.response.StepUpResponse
 import io.stereov.singularity.auth.twofactor.dto.response.TwoFactorSetupResponse
 import io.stereov.singularity.auth.twofactor.model.token.TwoFactorAuthenticationToken
 import io.stereov.singularity.auth.twofactor.model.token.TwoFactorTokenType

@@ -6,5 +6,6 @@ data class StepUpResponse(
     val stepUpToken: String?,
     val twoFactorRequired: Boolean,
     val allowedTwoFactorMethods: List<TwoFactorMethod>?,
+    val preferredTwoFactorMethod: TwoFactorMethod?,
     val twoFactorAuthenticationToken: String?,
 )

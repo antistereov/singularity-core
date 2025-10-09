@@ -450,7 +450,7 @@ class AuthenticationController(
         responses = [
             ApiResponse(
                 responseCode = "200",
-                description = "Logout successful.",
+                description = "Authentication successful.",
             ),
             ApiResponse(
                 responseCode = "400",
@@ -485,6 +485,7 @@ class AuthenticationController(
                         allowedTwoFactorMethods = user.twoFactorMethods,
                         twoFactorAuthenticationToken = if (authProperties.allowHeaderAuthentication) twoFactorToken.value else null,
                         stepUpToken = null,
+                        preferredTwoFactorMethod = user.preferredTwoFactorMethod
                     )
                 )
         }
@@ -496,7 +497,8 @@ class AuthenticationController(
             twoFactorRequired = false,
             allowedTwoFactorMethods = null,
             twoFactorAuthenticationToken = null,
-            stepUpToken = if (authProperties.allowHeaderAuthentication) stepUpToken.value else null
+            stepUpToken = if (authProperties.allowHeaderAuthentication) stepUpToken.value else null,
+            preferredTwoFactorMethod = null,
         )
 
         return ResponseEntity.ok()
