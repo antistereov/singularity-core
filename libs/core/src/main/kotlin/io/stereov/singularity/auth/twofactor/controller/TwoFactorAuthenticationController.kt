@@ -215,7 +215,7 @@ class TwoFactorAuthenticationController(
         val res = StepUpResponse(
             stepUpToken = if (authProperties.allowHeaderAuthentication) stepUpToken.value else null,
             twoFactorRequired = false,
-            allowedTwoFactorMethods = null,
+            twoFactorMethods = null,
             preferredTwoFactorMethod = null,
             twoFactorAuthenticationToken = null
         )
