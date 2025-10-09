@@ -4955,7 +4955,7 @@ components:
           type: string
         twoFactorRequired:
           type: boolean
-        allowedTwoFactorMethods:
+        twoFactorMethods:
           type: array
           items:
             type: string
@@ -5479,6 +5479,9 @@ components:
             enum:
             - totp
             - mail
+        sessionId:
+          type: string
+          format: uuid
       required:
       - authenticated
       - stepUp
