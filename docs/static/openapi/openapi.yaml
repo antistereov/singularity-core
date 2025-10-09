@@ -322,7 +322,7 @@ paths:
               $ref: "#/components/schemas/StepUpRequest"
       responses:
         "200":
-          description: Logout successful.
+          description: Authentication successful.
           content:
             '*/*':
               schema:
@@ -4951,8 +4951,26 @@ components:
     StepUpResponse:
       type: object
       properties:
-        token:
+        stepUpToken:
           type: string
+        twoFactorRequired:
+          type: boolean
+        allowedTwoFactorMethods:
+          type: array
+          items:
+            type: string
+            enum:
+            - totp
+            - mail
+        preferredTwoFactorMethod:
+          type: string
+          enum:
+          - totp
+          - mail
+        twoFactorAuthenticationToken:
+          type: string
+      required:
+      - twoFactorRequired
     GenerateSessionTokenResponse:
       type: object
       properties:
@@ -5229,6 +5247,13 @@ components:
         totalPages:
           type: integer
           format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
         pageable:
           $ref: "#/components/schemas/PageableObject"
         size:
@@ -5243,13 +5268,6 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
-        first:
-          type: boolean
-        last:
-          type: boolean
-        numberOfElements:
-          type: integer
-          format: int32
         empty:
           type: boolean
     PageableObject:
@@ -5298,6 +5316,13 @@ components:
         totalPages:
           type: integer
           format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
         pageable:
           $ref: "#/components/schemas/PageableObject"
         size:
@@ -5312,13 +5337,6 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
-        first:
-          type: boolean
-        last:
-          type: boolean
-        numberOfElements:
-          type: integer
-          format: int32
         empty:
           type: boolean
     PageTagResponse:
@@ -5328,6 +5346,13 @@ components:
           type: integer
           format: int64
         totalPages:
+          type: integer
+          format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
+        numberOfElements:
           type: integer
           format: int32
         pageable:
@@ -5344,13 +5369,6 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
-        first:
-          type: boolean
-        last:
-          type: boolean
-        numberOfElements:
-          type: integer
-          format: int32
         empty:
           type: boolean
     ArticleOverviewResponse:
@@ -5415,6 +5433,13 @@ components:
         totalPages:
           type: integer
           format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
         pageable:
           $ref: "#/components/schemas/PageableObject"
         size:
@@ -5429,13 +5454,6 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
-        first:
-          type: boolean
-        last:
-          type: boolean
-        numberOfElements:
-          type: integer
-          format: int32
         empty:
           type: boolean
     AuthenticationStatusResponse:

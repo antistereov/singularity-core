@@ -6,7 +6,7 @@ sidebar_label: "PageGroupResponse"
 hide_title: true
 hide_table_of_contents: true
 schema: true
-sample: {"totalElements":0,"totalPages":0,"pageable":{"paged":true,"pageNumber":0,"pageSize":0,"unpaged":true,"offset":0,"sort":{"sorted":true,"unsorted":true,"empty":true}},"size":0,"content":[{"key":"string","locale":"string","name":"string","description":"string"}],"number":0,"sort":{"sorted":true,"unsorted":true,"empty":true},"first":true,"last":true,"numberOfElements":0,"empty":true}
+sample: {"totalElements":0,"totalPages":0,"first":true,"last":true,"numberOfElements":0,"pageable":{"paged":true,"pageNumber":0,"pageSize":0,"unpaged":true,"offset":0,"sort":{"sorted":true,"unsorted":true,"empty":true}},"size":0,"content":[{"key":"string","locale":"string","name":"string","description":"string"}],"number":0,"sort":{"sorted":true,"unsorted":true,"empty":true},"empty":true}
 custom_edit_url: null
 ---
 
@@ -25,7 +25,7 @@ import Heading from "@theme/Heading";
 
 
 <Schema
-  schema={{"type":"object","properties":{"totalElements":{"type":"integer","format":"int64"},"totalPages":{"type":"integer","format":"int32"},"pageable":{"type":"object","properties":{"paged":{"type":"boolean"},"pageNumber":{"type":"integer","format":"int32"},"pageSize":{"type":"integer","format":"int32"},"unpaged":{"type":"boolean"},"offset":{"type":"integer","format":"int64"},"sort":{"type":"object","properties":{"sorted":{"type":"boolean"},"unsorted":{"type":"boolean"},"empty":{"type":"boolean"}},"title":"SortObject"}},"title":"PageableObject"},"size":{"type":"integer","format":"int32"},"content":{"type":"array","items":{"type":"object","properties":{"key":{"type":"string"},"locale":{"type":"string"},"name":{"type":"string"},"description":{"type":"string"}},"required":["description","key","locale","name"],"title":"GroupResponse"}},"number":{"type":"integer","format":"int32"},"sort":{"type":"object","properties":{"sorted":{"type":"boolean"},"unsorted":{"type":"boolean"},"empty":{"type":"boolean"}},"title":"SortObject"},"first":{"type":"boolean"},"last":{"type":"boolean"},"numberOfElements":{"type":"integer","format":"int32"},"empty":{"type":"boolean"}},"title":"PageGroupResponse"}}
+  schema={{"type":"object","properties":{"totalElements":{"type":"integer","format":"int64"},"totalPages":{"type":"integer","format":"int32"},"first":{"type":"boolean"},"last":{"type":"boolean"},"numberOfElements":{"type":"integer","format":"int32"},"pageable":{"type":"object","properties":{"paged":{"type":"boolean"},"pageNumber":{"type":"integer","format":"int32"},"pageSize":{"type":"integer","format":"int32"},"unpaged":{"type":"boolean"},"offset":{"type":"integer","format":"int64"},"sort":{"type":"object","properties":{"sorted":{"type":"boolean"},"unsorted":{"type":"boolean"},"empty":{"type":"boolean"}},"title":"SortObject"}},"title":"PageableObject"},"size":{"type":"integer","format":"int32"},"content":{"type":"array","items":{"type":"object","properties":{"key":{"type":"string"},"locale":{"type":"string"},"name":{"type":"string"},"description":{"type":"string"}},"required":["description","key","locale","name"],"title":"GroupResponse"}},"number":{"type":"integer","format":"int32"},"sort":{"type":"object","properties":{"sorted":{"type":"boolean"},"unsorted":{"type":"boolean"},"empty":{"type":"boolean"}},"title":"SortObject"},"empty":{"type":"boolean"}},"title":"PageGroupResponse"}}
   schemaType={"response"}
 >
   
