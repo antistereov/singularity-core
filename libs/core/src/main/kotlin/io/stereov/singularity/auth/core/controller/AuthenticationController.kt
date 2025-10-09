@@ -569,7 +569,8 @@ class AuthenticationController(
                 emailVerified = emailVerified,
                 twoFactorRequired = twoFactorRequired,
                 preferredTwoFactorMethod = preferredTwoFactorMethod,
-                twoFactorMethods = twoFactorMethods
+                twoFactorMethods = twoFactorMethods,
+                sessionId = currentSessionId
             )
         )
     }
