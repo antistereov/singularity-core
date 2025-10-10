@@ -37,10 +37,10 @@ class EmailConfiguration {
         mailSender.password = emailProperties.password
 
         val props = mailSender.javaMailProperties
-        props["email.transport.protocol"] = emailProperties.transportProtocol
-        props["email.smtp.auth"] = emailProperties.smtpAuth
-        props["email.smtp.starttls.enable"] = emailProperties.smtpStarttls
-        props["email.debug"] = emailProperties.debug
+        props["mail.transport.protocol"] = emailProperties.transportProtocol
+        props["mail.smtp.auth"] = emailProperties.smtpAuth
+        props["mail.smtp.starttls.enable"] = emailProperties.smtpStarttls
+        props["mail.debug"] = emailProperties.debug
         return mailSender
     }
 
