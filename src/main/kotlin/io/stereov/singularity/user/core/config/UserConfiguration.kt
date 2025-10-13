@@ -7,7 +7,6 @@ import io.stereov.singularity.database.encryption.service.EncryptionService
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.email.core.config.EmailConfiguration
 import io.stereov.singularity.file.core.service.FileStorage
-import io.stereov.singularity.file.local.service.LocalFileStorage
 import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.user.core.controller.UserController
 import io.stereov.singularity.user.core.exception.handler.UserExceptionHandler
@@ -40,7 +39,7 @@ class UserConfiguration {
         userService: UserService,
         authorizationService: AuthorizationService,
         userMapper: UserMapper,
-        fileStorage: LocalFileStorage,
+        fileStorage: FileStorage,
     ) = UserController(
         userService,
         authorizationService,
