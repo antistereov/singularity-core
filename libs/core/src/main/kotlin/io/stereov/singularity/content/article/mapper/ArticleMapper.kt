@@ -55,6 +55,7 @@ class ArticleMapper(
         val actualLocale = locale ?: appProperties.locale
 
         val translations = mutableMapOf(actualLocale to ArticleTranslation(dto.title, dto.summary, dto.content))
+        requireNotNull(dto.owner) { "Owner of article ${dto.key} does not exist" }
 
         return Article(
             _id = dto.id,
@@ -75,7 +76,7 @@ class ArticleMapper(
     suspend fun createFullResponse(article: Article, locale: Locale?, owner: UserDocument? = null): FullArticleResponse {
         val currentUser = authorizationService.getAuthenticationOrNull()
 
-        val actualOwner = owner ?: userService.findById(article.access.ownerId)
+        val actualOwner = owner ?: userService.findByIdOrNull(article.access.ownerId)
         val access = ContentAccessDetailsResponse.create(article.access, currentUser)
         val (articleLang, translation) = translateService.translate(article, locale)
 
@@ -89,7 +90,7 @@ class ArticleMapper(
             createdAt = article.createdAt,
             publishedAt = article.publishedAt,
             updatedAt = article.updatedAt,
-            owner = userMapper.toOverview(actualOwner),
+            owner = actualOwner?.let { userMapper.toOverview(it) },
             path = article.path,
             state = article.state,
             colors = article.colors,

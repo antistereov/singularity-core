@@ -14,6 +14,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.time.delay
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.springframework.test.web.reactive.server.returnResult
 import java.time.Instant
@@ -114,6 +115,23 @@ class ArticleService : BaseArticleTest() {
             .uri("/api/content/articles/oops")
             .exchange()
             .expectStatus().isNotFound
+    }
+    @Test fun `findByKey does not need existing owner`() = runTest {
+        val owner = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
+        val article = saveArticle(owner = owner)
+
+        userService.deleteById(owner.info.id)
+
+        val res = webTestClient.get()
+            .uri("/api/content/articles/${article.key}")
+            .accessTokenCookie(owner.accessToken)
+            .exchange()
+            .expectStatus().isOk
+            .returnResult<FullArticleResponse>()
+            .responseBody
+            .awaitFirst()
+
+        assertNull(res.owner)
     }
 
     @Test fun `find works`() = runTest {
@@ -409,5 +427,25 @@ class ArticleService : BaseArticleTest() {
         assertEquals(1, res.content.size)
         assertEquals(1, res.totalElements)
         assertEquals(article.key, res.content[0].key)
+    }
+    @Test fun `find does not need owner`() = runTest {
+        val owner = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
+        val article = saveArticle(owner = owner)
+
+        userService.deleteById(owner.info.id)
+
+        val res = webTestClient.get()
+            .uri("/api/content/articles")
+            .accessTokenCookie(owner.accessToken)
+            .exchange()
+            .expectStatus().isOk
+            .returnResult<AccessCriteriaTest.ArticleOverviewPage>()
+            .responseBody
+            .awaitFirst()
+
+        assertEquals(1, res.content.size)
+        assertEquals(1, res.totalElements)
+        assertEquals(article.key, res.content[0].key)
+        assertEquals(owner.info.id, article.access.ownerId)
     }
 }
