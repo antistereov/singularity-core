@@ -1,3 +1,15 @@
+## [v1.9.2]
+
+## Changelog
+
+## 📝 Documentation
+- [4949d4b](https://github.com/antistereov/singularity-core/commits/4949d4b) **openapi**: update api docs after changes in two factor method serialization
+
+
+## Contributors
+We'd like to thank the following people for their contributions:
+antistereov
+
 ## [v1.9.1]
 
 ## Changelog
