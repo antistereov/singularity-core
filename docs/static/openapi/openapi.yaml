@@ -4376,14 +4376,14 @@ components:
           type: string
           enum:
           - totp
-          - mail
+          - email
         twoFactorMethods:
           type: array
           items:
             type: string
             enum:
             - totp
-            - mail
+            - email
         avatar:
           $ref: "#/components/schemas/FileMetadataResponse"
         createdAt:
@@ -4591,7 +4591,6 @@ components:
       - id
       - key
       - locale
-      - owner
       - path
       - state
       - summary
@@ -4961,12 +4960,12 @@ components:
             type: string
             enum:
             - totp
-            - mail
+            - email
         preferredTwoFactorMethod:
           type: string
           enum:
           - totp
-          - mail
+          - email
         twoFactorAuthenticationToken:
           type: string
       required:
@@ -5108,12 +5107,12 @@ components:
             type: string
             enum:
             - totp
-            - mail
+            - email
         preferredTwoFactorMethod:
           type: string
           enum:
           - totp
-          - mail
+          - email
         twoFactorAuthenticationToken:
           type: string
         location:
@@ -5189,7 +5188,7 @@ components:
           type: string
           enum:
           - totp
-          - mail
+          - email
       required:
       - method
     CompleteLoginRequest:
@@ -5247,13 +5246,6 @@ components:
         totalPages:
           type: integer
           format: int32
-        first:
-          type: boolean
-        last:
-          type: boolean
-        numberOfElements:
-          type: integer
-          format: int32
         pageable:
           $ref: "#/components/schemas/PageableObject"
         size:
@@ -5268,6 +5260,13 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
         empty:
           type: boolean
     PageableObject:
@@ -5316,13 +5315,6 @@ components:
         totalPages:
           type: integer
           format: int32
-        first:
-          type: boolean
-        last:
-          type: boolean
-        numberOfElements:
-          type: integer
-          format: int32
         pageable:
           $ref: "#/components/schemas/PageableObject"
         size:
@@ -5337,6 +5329,13 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
         empty:
           type: boolean
     PageTagResponse:
@@ -5346,13 +5345,6 @@ components:
           type: integer
           format: int64
         totalPages:
-          type: integer
-          format: int32
-        first:
-          type: boolean
-        last:
-          type: boolean
-        numberOfElements:
           type: integer
           format: int32
         pageable:
@@ -5369,6 +5361,13 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
         empty:
           type: boolean
     ArticleOverviewResponse:
@@ -5433,13 +5432,6 @@ components:
         totalPages:
           type: integer
           format: int32
-        first:
-          type: boolean
-        last:
-          type: boolean
-        numberOfElements:
-          type: integer
-          format: int32
         pageable:
           $ref: "#/components/schemas/PageableObject"
         size:
@@ -5454,6 +5446,13 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
         empty:
           type: boolean
     AuthenticationStatusResponse:
@@ -5471,14 +5470,14 @@ components:
           type: string
           enum:
           - totp
-          - mail
+          - email
         twoFactorMethods:
           type: array
           items:
             type: string
             enum:
             - totp
-            - mail
+            - email
         sessionId:
           type: string
           format: uuid

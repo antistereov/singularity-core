@@ -25,7 +25,7 @@ import Heading from "@theme/Heading";
 
 
 <Schema
-  schema={{"type":"object","properties":{"authenticated":{"type":"boolean"},"stepUp":{"type":"boolean"},"emailVerified":{"type":"boolean"},"twoFactorRequired":{"type":"boolean"},"preferredTwoFactorMethod":{"type":"string","enum":["totp","mail"]},"twoFactorMethods":{"type":"array","items":{"type":"string","enum":["totp","mail"]}},"sessionId":{"type":"string","format":"uuid"}},"required":["authenticated","stepUp","twoFactorRequired"],"title":"AuthenticationStatusResponse"}}
+  schema={{"type":"object","properties":{"authenticated":{"type":"boolean"},"stepUp":{"type":"boolean"},"emailVerified":{"type":"boolean"},"twoFactorRequired":{"type":"boolean"},"preferredTwoFactorMethod":{"type":"string","enum":["totp","email"]},"twoFactorMethods":{"type":"array","items":{"type":"string","enum":["totp","email"]}},"sessionId":{"type":"string","format":"uuid"}},"required":["authenticated","stepUp","twoFactorRequired"],"title":"AuthenticationStatusResponse"}}
   schemaType={"response"}
 >
   
