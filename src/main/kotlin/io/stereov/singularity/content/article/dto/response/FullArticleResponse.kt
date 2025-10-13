@@ -18,7 +18,7 @@ data class FullArticleResponse(
     val createdAt: Instant,
     val publishedAt: Instant?,
     val updatedAt: Instant,
-    val owner: UserOverviewResponse,
+    val owner: UserOverviewResponse?,
     val path: String,
     var state: ArticleState = ArticleState.DRAFT,
     val colors: ArticleColors,
