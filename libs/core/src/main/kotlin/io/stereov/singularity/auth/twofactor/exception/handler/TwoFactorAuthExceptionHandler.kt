@@ -15,6 +15,7 @@ class TwoFactorAuthExceptionHandler : BaseExceptionHandler<TwoFactorAuthExceptio
         is CannotDisableOnly2FAMethodException -> HttpStatus.BAD_REQUEST
         is EmailTwoFactorEnabledAndUserAuthenticatedException -> HttpStatus.BAD_REQUEST
         is InvalidTwoFactorCodeException -> HttpStatus.UNAUTHORIZED
+        is InvalidTwoFactorMethodException -> HttpStatus.BAD_REQUEST
         is InvalidTwoFactorRequestException -> HttpStatus.BAD_REQUEST
         is MissingPasswordIdentityException -> HttpStatus.BAD_REQUEST
         is TwoFactorMethodAlreadyEnabledException -> HttpStatus.NOT_MODIFIED
