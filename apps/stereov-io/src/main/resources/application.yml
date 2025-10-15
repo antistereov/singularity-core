@@ -136,3 +136,4 @@ singularity:
             name: Coding
           DE:
             name: Programmieren
+    content-url: http://localhost:4200/{contentType}/{contentKey}
