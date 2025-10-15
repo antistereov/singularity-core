@@ -24,6 +24,7 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest
 import java.net.URLDecoder
 import java.time.Duration
+import java.util.concurrent.atomic.AtomicLong
 
 @Service
 @ConditionalOnProperty(prefix = "singularity.file.storage", value = ["type"], havingValue = "s3", matchIfMissing = false)
@@ -49,12 +50,13 @@ class S3FileStorage(
     }
 
     private suspend fun doUploadFilePart(req: FileUploadRequest.FilePartUpload): FileUploadResponse {
-        val publisher = dataBufferPublisher.toFlux(req.data.content())
+        val contentLength = AtomicLong()
+        val publisher = dataBufferPublisher.toFlux(req.data.content(), contentLength)
 
         val putRequest = PutObjectRequest.builder()
             .bucket(s3Properties.bucket)
             .key(req.key.key)
-            .contentLength(req.contentLength)
+            .contentLength(contentLength.get())
             .contentType(req.contentType)
             .acl(ObjectCannedACL.PRIVATE)
             .build()
@@ -66,7 +68,7 @@ class S3FileStorage(
         return FileUploadResponse(
             key = req.key.key,
             contentType = req.contentType,
-            size = req.contentLength,
+            size = contentLength.get(),
             width = req.width,
             height = req.height
         )

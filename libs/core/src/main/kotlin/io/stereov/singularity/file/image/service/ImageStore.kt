@@ -51,8 +51,6 @@ class ImageStore(
         key: String,
         isPublic: Boolean,
     ): FileMetadataResponse {
-        storageProperties.validateContentLength(file.headers().contentLength)
-
         val imageBytes = dataBufferPublisher.toSingleByteArray(file.content())
         val originalExtension = file.filename().substringAfterLast(".", "")
 
@@ -71,7 +69,6 @@ class ImageStore(
             data = resizedBytes,
             width = resized.width,
             height = resized.height,
-            contentLength = resizedBytes.size.toLong()
         )
     }
 
@@ -160,7 +157,6 @@ class ImageStore(
                 data = imageBytes,
                 width = originalImage.width,
                 height = originalImage.height,
-                contentLength = imageBytes.size.toLong()
             )
         }
 
