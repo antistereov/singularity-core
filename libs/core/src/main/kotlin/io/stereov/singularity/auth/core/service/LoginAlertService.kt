@@ -40,7 +40,7 @@ class LoginAlertService(
         val templatePath = "${EmailConstants.TEMPLATE_DIR}/$slug.html"
 
         val unknownMessage = translateService.translateResourceKey(
-            TranslateKey("$slug.unknown"),
+            TranslateKey("$slug.details.unknown"),
             EmailConstants.RESOURCE_BUNDLE,
             actualLocale
         )
