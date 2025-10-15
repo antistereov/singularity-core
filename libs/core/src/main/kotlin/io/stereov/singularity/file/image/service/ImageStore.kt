@@ -8,6 +8,7 @@ import io.stereov.singularity.file.core.component.DataBufferPublisher
 import io.stereov.singularity.file.core.dto.FileMetadataResponse
 import io.stereov.singularity.file.core.exception.model.FileTooLargeException
 import io.stereov.singularity.file.core.exception.model.UnsupportedMediaTypeException
+import io.stereov.singularity.file.core.model.DownloadedFile
 import io.stereov.singularity.file.core.model.FileKey
 import io.stereov.singularity.file.core.model.FileMetadataDocument
 import io.stereov.singularity.file.core.model.FileUploadRequest
@@ -34,74 +35,28 @@ class ImageStore(
 
     suspend fun upload(
         ownerId: ObjectId,
+        downloadedFile: DownloadedFile,
+        key: String,
+        isPublic: Boolean
+    ): FileMetadataResponse {
+        logger.debug { "Uploading image with key $key" }
+        val originalExtension = downloadedFile.url.substringAfterLast(".", "")
+
+        return upload(ownerId, downloadedFile.bytes, downloadedFile.contentType, key, isPublic, originalExtension)
+    }
+
+    suspend fun upload(
+        ownerId: ObjectId,
         file: FilePart,
         key: String,
         isPublic: Boolean,
     ): FileMetadataResponse {
-        logger.debug { "Uploading image with key $key" }
-
         storageProperties.validateContentLength(file.headers().contentLength)
 
-        val allowedMediaTypes = listOf(MediaType.IMAGE_JPEG, MediaType.IMAGE_GIF, MediaType.IMAGE_PNG)
-        val webpMediaType = MediaType.parseMediaType("image/webp")
-
-        val contentType = file.headers().contentType
-            ?: throw UnsupportedMediaTypeException("Media type is not set")
-
-        if (contentType !in allowedMediaTypes) {
-            throw UnsupportedMediaTypeException("Unsupported file type: $contentType")
-        }
-
         val imageBytes = dataBufferPublisher.toSingleByteArray(file.content())
-        if (imageBytes.size > storageProperties.maxFileSize) {
-            throw FileTooLargeException("")
-        }
-        val originalImage = withContext(Dispatchers.Default) {
-            ImmutableImage.loader().fromBytes(imageBytes)
-        }
         val originalExtension = file.filename().substringAfterLast(".", "")
 
-        val filesToUpload = mutableMapOf<String, FileUploadRequest>()
-
-        filesToUpload[ImageProperties::small.name] = createUploadRequest(
-            originalImage,
-            imageProperties.small,
-            key,
-            ImageProperties::small.name,
-            webpMediaType.toString()
-        )
-        filesToUpload[ImageProperties::medium.name] = createUploadRequest(
-            originalImage,
-            imageProperties.medium,
-            key,
-            ImageProperties::medium.name,
-            webpMediaType.toString()
-        )
-        filesToUpload[ImageProperties::large.name] = createUploadRequest(
-            originalImage,
-            imageProperties.large,
-            key,
-            ImageProperties::large.name,
-            webpMediaType.toString()
-        )
-
-        if (imageProperties.storeOriginal) {
-            filesToUpload[FileMetadataDocument.ORIGINAL_RENDITION] = FileUploadRequest.ByteArrayUpload(
-                key = FileKey(filename = key, extension = originalExtension),
-                contentType = contentType.toString(),
-                data = imageBytes,
-                width = originalImage.width,
-                height = originalImage.height,
-                contentLength = imageBytes.size.toLong()
-            )
-        }
-
-        return fileStorage.uploadMultipleRenditions(
-            FileKey(filename = key).key,
-            files = filesToUpload,
-            ownerId,
-            isPublic,
-        )
+        return upload(ownerId, imageBytes, file.headers().contentType, key, isPublic, originalExtension)
     }
 
     private suspend fun createUploadRequest(originalImage: ImmutableImage, size: Int, key: String, suffix: String?, mediaType: String): FileUploadRequest {
@@ -151,7 +106,74 @@ class ImageStore(
         return@withContext finalImage
     }
 
+    suspend fun upload(
+        ownerId: ObjectId,
+        imageBytes: ByteArray,
+        contentType: MediaType?,
+        key: String,
+        isPublic: Boolean,
+        fileExtension: String?
+    ): FileMetadataResponse {
+        val webpMediaType = MediaType.parseMediaType("image/webp")
+
+        if (contentType == null) throw UnsupportedMediaTypeException("Media type is not set")
+
+        if (contentType !in ALLOWED_MEDIA_TYPES) {
+            throw UnsupportedMediaTypeException("Unsupported file type: $contentType")
+        }
+
+        if (imageBytes.size > storageProperties.maxFileSize) {
+            throw FileTooLargeException("File exceeds maximum file size of ${storageProperties.maxFileSize}")
+        }
+        val originalImage = withContext(Dispatchers.Default) {
+            ImmutableImage.loader().fromBytes(imageBytes)
+        }
+
+        val filesToUpload = mutableMapOf<String, FileUploadRequest>()
+
+        filesToUpload[ImageProperties::small.name] = createUploadRequest(
+            originalImage,
+            imageProperties.small,
+            key,
+            ImageProperties::small.name,
+            webpMediaType.toString()
+        )
+        filesToUpload[ImageProperties::medium.name] = createUploadRequest(
+            originalImage,
+            imageProperties.medium,
+            key,
+            ImageProperties::medium.name,
+            webpMediaType.toString()
+        )
+        filesToUpload[ImageProperties::large.name] = createUploadRequest(
+            originalImage,
+            imageProperties.large,
+            key,
+            ImageProperties::large.name,
+            webpMediaType.toString()
+        )
+
+        if (imageProperties.storeOriginal) {
+            filesToUpload[FileMetadataDocument.ORIGINAL_RENDITION] = FileUploadRequest.ByteArrayUpload(
+                key = FileKey(filename = key, extension = fileExtension),
+                contentType = contentType.toString(),
+                data = imageBytes,
+                width = originalImage.width,
+                height = originalImage.height,
+                contentLength = imageBytes.size.toLong()
+            )
+        }
+
+        return fileStorage.uploadMultipleRenditions(
+            FileKey(filename = key).key,
+            files = filesToUpload,
+            ownerId,
+            isPublic,
+        )
+    }
+
     companion object {
         const val MAX_ASPECT_RATIO = 16.0 / 9.0
+        val ALLOWED_MEDIA_TYPES = listOf(MediaType.IMAGE_JPEG, MediaType.IMAGE_GIF, MediaType.IMAGE_PNG)
     }
 }
