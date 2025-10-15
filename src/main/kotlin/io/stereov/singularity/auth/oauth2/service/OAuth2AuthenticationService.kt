@@ -5,10 +5,13 @@ import io.stereov.singularity.auth.core.service.token.AccessTokenService
 import io.stereov.singularity.auth.oauth2.exception.model.OAuth2FlowException
 import io.stereov.singularity.auth.oauth2.model.OAuth2ErrorCode
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties
+import io.stereov.singularity.file.core.service.DownloadService
 import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.service.UserService
+import io.stereov.singularity.user.settings.service.UserSettingsService
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
+import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ServerWebExchange
 import java.util.*
@@ -20,6 +23,8 @@ class OAuth2AuthenticationService(
     private val twoFactorEmailCodeProperties: TwoFactorEmailCodeProperties,
     private val identityProviderService: IdentityProviderService,
     private val accessTokenService: AccessTokenService,
+    private val userSettingsService: UserSettingsService,
+    private val downloadService: DownloadService,
 ) {
 
     enum class OAuth2Action {
@@ -60,7 +65,7 @@ class OAuth2AuthenticationService(
 
          return when (oauth2ProviderConnectionTokenValue != null) {
              true -> handleConnection(email, provider, principalId, oauth2ProviderConnectionTokenValue, stepUpTokenValue, exchange, locale)
-             false -> handleRegistration(name, email, provider, principalId, authenticated) to OAuth2Action.REGISTRATION
+             false -> handleRegistration(name, email, provider, principalId, authenticated, oauth2User) to OAuth2Action.REGISTRATION
          }
     }
 
@@ -78,7 +83,8 @@ class OAuth2AuthenticationService(
         email: String,
         provider: String,
         principalId: String,
-        authenticated: Boolean
+        authenticated: Boolean,
+        oauth2User: OAuth2User
     ): UserDocument {
         logger.debug { "Handling registration after OAuth2 registration" }
 
@@ -97,7 +103,19 @@ class OAuth2AuthenticationService(
             mailTwoFactorCodeExpiresIn = twoFactorEmailCodeProperties.expiresIn
         )
 
-        return userService.save(user)
+        val savedUser = userService.save(user)
+        val avatarUrl = (oauth2User.attributes["picture"] as? String)
+        return if (avatarUrl == null) {
+            logger.debug { "No avatar set in social login" }
+            savedUser
+        } else {
+            val avatar = runCatching { downloadService.download(avatarUrl) }
+                .getOrElse { ex ->
+                    logger.debug(ex) { "Failed to download avatar" }
+                    return savedUser
+                }
+            userSettingsService.setAvatar(savedUser, avatar)
+        }
     }
 
     private suspend fun handleConnection(
