@@ -23,7 +23,13 @@ spring:
             scope:
               - user:email
               - read:user
-
+          google:
+            client-id: ${GOOGLE_OAUTH2_CLIENT_ID}
+            client-secret: ${GOOGLE_OAUTH2_CLIENT_SECRET}
+            scope:
+              - openid
+              - email
+              - profile
   devtools:
     restart:
       enabled: ${DEV_MODE:false}
@@ -51,6 +57,7 @@ singularity:
     allow-header-authentication: false
     oauth2:
       enable: true
+      error-redirect-uri: ${OAUTH2_ERROR_REDIRECT_URI}
     two-factor:
       totp:
         recovery-code:
