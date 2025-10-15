@@ -8,6 +8,7 @@ import io.stereov.singularity.email.core.service.EnabledEmailService
 import io.stereov.singularity.email.core.service.FailingEmailService
 import io.stereov.singularity.email.template.service.TemplateService
 import io.stereov.singularity.global.config.ApplicationConfiguration
+import io.stereov.singularity.global.properties.AppProperties
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -51,10 +52,11 @@ class EmailConfiguration {
     fun mailService(
         mailSender: JavaMailSender,
         emailProperties: EmailProperties,
-        emailTemplateService: EmailTemplateService
+        emailTemplateService: EmailTemplateService,
+        appProperties: AppProperties
     ): EmailService {
         return if (emailProperties.enable) {
-            EnabledEmailService(mailSender, emailProperties, emailTemplateService)
+            EnabledEmailService(mailSender, emailProperties, emailTemplateService, appProperties)
         } else {
             FailingEmailService()
         }
