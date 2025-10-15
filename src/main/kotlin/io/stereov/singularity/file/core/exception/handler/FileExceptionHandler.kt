@@ -13,6 +13,7 @@ class FileExceptionHandler : BaseExceptionHandler<FileException> {
 
     override fun getHttpStatus(ex: FileException) = when (ex) {
         is DeletingMetadataIsForbiddenException -> HttpStatus.BAD_REQUEST
+        is DownloadException -> HttpStatus.BAD_REQUEST
         is FileKeyAlreadyTakenException -> HttpStatus.CONFLICT
         is FileNotFoundException -> HttpStatus.NOT_FOUND
         is FileSecurityException -> HttpStatus.FORBIDDEN

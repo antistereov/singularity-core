@@ -8,6 +8,7 @@ import io.stereov.singularity.file.core.exception.handler.FileExceptionHandler
 import io.stereov.singularity.file.core.mapper.FileMetadataMapper
 import io.stereov.singularity.file.core.properties.StorageProperties
 import io.stereov.singularity.file.core.repository.FileMetadataRepository
+import io.stereov.singularity.file.core.service.DownloadService
 import io.stereov.singularity.file.core.service.FileMetadataService
 import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.translate.service.TranslateService
@@ -18,6 +19,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRepositories
+import org.springframework.web.reactive.function.client.WebClient
 
 @Configuration
 @AutoConfiguration(
@@ -46,6 +48,10 @@ class StorageConfiguration {
     )
 
     // Service
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun downloadService(webClient: WebClient) = DownloadService(webClient)
 
     @Bean
     @ConditionalOnMissingBean
