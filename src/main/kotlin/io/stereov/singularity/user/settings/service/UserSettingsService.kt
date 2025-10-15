@@ -12,6 +12,7 @@ import io.stereov.singularity.auth.core.service.SecurityAlertService
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.file.core.exception.model.UnsupportedMediaTypeException
+import io.stereov.singularity.file.core.model.DownloadedFile
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.file.image.service.ImageStore
 import io.stereov.singularity.user.core.dto.response.UserResponse
@@ -117,6 +118,21 @@ class UserSettingsService(
 
         val savedUser = userService.save(user)
         return userMapper.toResponse(savedUser)
+    }
+
+    suspend fun setAvatar(user: UserDocument, file: DownloadedFile): UserDocument {
+        logger.debug { "Setting avatar for user ${user.id} from URL ${file.url}" }
+        val currentAvatar = user.sensitive.avatarFileKey
+
+        if (currentAvatar != null) {
+            fileStorage.remove(currentAvatar)
+        }
+
+        user.sensitive.avatarFileKey = imageStore
+            .upload(user.id, file, "${user.fileStoragePath}/avatar", true)
+            .key
+
+        return userService.save(user)
     }
 
     suspend fun deleteAvatar(): UserResponse {
