@@ -164,7 +164,8 @@ class ArticleManagementService(
         val currentImage = article.imageKey
 
         if (currentImage != null) {
-            fileStorage.remove(currentImage)
+            runCatching { fileStorage.remove(currentImage) }
+                .getOrElse { ex -> logger.debug(ex) { "Failed to remove old image" } }
         }
         val imageKey = contentService.getUri(key).path.removePrefix("/") + "/" + article.key
 
