@@ -21,9 +21,11 @@ import io.stereov.singularity.auth.oauth2.service.token.OAuth2StateTokenService
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.email.core.properties.EmailProperties
+import io.stereov.singularity.file.core.service.DownloadService
 import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.user.core.mapper.UserMapper
 import io.stereov.singularity.user.core.service.UserService
+import io.stereov.singularity.user.settings.service.UserSettingsService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -124,10 +126,14 @@ class OAuth2Configuration {
         twoFactorEmailCodeProperties: TwoFactorEmailCodeProperties,
         identityProviderService: IdentityProviderService,
         accessTokenService: AccessTokenService,
+        userSettingsService: UserSettingsService,
+        downloadService: DownloadService,
     ) = OAuth2AuthenticationService(
         userService,
         twoFactorEmailCodeProperties,
         identityProviderService,
         accessTokenService,
+        userSettingsService,
+        downloadService,
     )
 }
