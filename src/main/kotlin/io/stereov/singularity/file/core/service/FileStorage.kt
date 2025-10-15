@@ -32,13 +32,11 @@ abstract class FileStorage {
         ownerId: ObjectId,
         isPublic: Boolean,
     ): FileMetadataResponse {
-        storageProperties.validateContentLength(file.headers().contentLength)
         val contentType = file.headers().contentType?.toString()
             ?: throw UnsupportedMediaTypeException("Upload failed: no content type is specified")
         val req = FileUploadRequest.FilePartUpload(
             key = key,
             contentType = contentType,
-            contentLength = file.headers().contentLength,
             data = file,
         )
         if (metadataService.existsRenditionByKey(req.key.key))
@@ -62,7 +60,6 @@ abstract class FileStorage {
         isPublic: Boolean,
     ): FileMetadataResponse {
         files.values.forEach {
-            storageProperties.validateContentLength(it.contentLength)
             if (metadataService.existsRenditionByKey(it.key.key))
                 throw FileKeyAlreadyTakenException("File with key ${it.key} already exists")
         }
