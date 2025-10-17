@@ -4,6 +4,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "singularity.file.storage")
 data class StorageProperties(
-    val type: StorageType = StorageType.LOCAL,
-    val maxFileSize: Long = 5 * 1024 * 1024L
+    val type: StorageType = StorageType.LOCAL
 )
