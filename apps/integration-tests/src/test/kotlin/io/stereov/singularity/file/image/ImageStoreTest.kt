@@ -81,7 +81,7 @@ class ImageStoreTest : BaseIntegrationTest() {
     @Test fun `save image throws when wrong content type with downloaded file`() = runTest {
         val user = registerUser()
         val file = ClassPathResource("files/test-image.jpg").file
-        val downloadedFile = DownloadedFile(bytes = file.readBytes(), contentType = MediaType.IMAGE_JPEG, url = "")
+        val downloadedFile = DownloadedFile(bytes = file.readBytes(), contentType = MediaType.APPLICATION_OCTET_STREAM, url = "")
         val key = FileKey("key")
 
         imageStore.upload(user.info.id, downloadedFile, key.key, true)
