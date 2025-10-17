@@ -4,17 +4,9 @@ import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
-import java.nio.ByteBuffer
 
 @Component
 class DataBufferPublisher() {
-
-    fun toFlux(flux: Flux<DataBuffer>): Flux<ByteBuffer> {
-        return flux
-            .flatMapIterable { buffer ->
-                buffer.readableByteBuffers().asSequence().toList()
-            }
-    }
 
     suspend fun toSingleByteArray(flux: Flux<DataBuffer>): ByteArray {
 

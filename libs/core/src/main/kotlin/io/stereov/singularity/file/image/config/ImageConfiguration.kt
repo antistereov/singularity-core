@@ -2,7 +2,6 @@ package io.stereov.singularity.file.image.config
 
 import com.sksamuel.scrimage.webp.WebpWriter
 import io.stereov.singularity.file.core.component.DataBufferPublisher
-import io.stereov.singularity.file.core.properties.StorageProperties
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.file.image.properties.ImageProperties
 import io.stereov.singularity.file.image.service.ImageStore
@@ -36,13 +35,11 @@ class ImageConfiguration {
         imageProperties: ImageProperties,
         webpWriter: WebpWriter,
         fileStorage: FileStorage,
-        storageProperties: StorageProperties,
         dataBufferPublisher: DataBufferPublisher
     ) = ImageStore(
         imageProperties,
         webpWriter,
         fileStorage,
-        storageProperties,
         dataBufferPublisher
     )
 }

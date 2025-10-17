@@ -12,6 +12,28 @@ If you are new to Spring, we recommend starting with their [official guides](htt
 *Singularity* provides a robust and pluggable file storage system for managing file uploads and their metadata. 
 It's designed to handle different storage backends and ensure data consistency between the database and the actual stored files.
 
+:::warning Limiting File Size
+There is no direct, efficient way to limit file size for uploads
+within the application's reactive stream processing. 
+Due to the purely reactive nature of *Singularity*, 
+the real size of a file can only be determined after loading 
+the entire content into memory completely. 
+Attempting to check the size mid-stream requires buffering, 
+which negates the non-blocking benefit.
+
+Therefore, it is highly recommended to set a file size 
+limit in your front-facing server configuration 
+(e.g., Nginx, Traefik, or Cloud Load Balancer).
+
+For example, in Nginx, you would use:
+```nginx
+client_max_body_size 10M;
+```
+
+This prevents large requests from ever reaching the reactive application, 
+preserving backend performance.
+:::
+
 ## Core Concepts
 
 #### `FileStorage`
@@ -97,4 +119,3 @@ You can only access the renditions through the file metadata.
 | Property                               | Type            | Description                                                                                                                                                                     | Default value |
 |----------------------------------------|-----------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
 | singularity.file.storage.type          | `LOCAL` or `S3` | The implementation of the file storage. The available options are [`S3`](s3.md) and [`LOCAL`](local.md). Check out the respective documentation for more configuration options. | `true`        |
-| singularity.file.storage.max-file-size | `Long`          | The maximum file size. Default is 5MB.                                                                                                                                          | `5242880`     |

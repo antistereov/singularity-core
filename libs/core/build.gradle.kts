@@ -190,7 +190,7 @@ jreleaser {
     release {
         github {
             repoOwner.set("antistereov")
-            name.set("singularity-core")
+            name.set("singularity")
             overwrite.set(true)
             skipTag.set(false)
             sign.set(true)

@@ -5,7 +5,6 @@ import org.springframework.http.codec.multipart.FilePart
 sealed interface FileUploadRequest {
     val key: FileKey
     val contentType: String
-    val contentLength: Long
     val data: Any
     val width: Int?
     val height: Int?
@@ -13,7 +12,6 @@ sealed interface FileUploadRequest {
     data class FilePartUpload(
         override val key: FileKey,
         override val contentType: String,
-        override val contentLength: Long,
         override val data: FilePart,
         override val width: Int? = null,
         override val height: Int? = null
@@ -22,7 +20,6 @@ sealed interface FileUploadRequest {
     data class ByteArrayUpload(
         override val key: FileKey,
         override val contentType: String,
-        override val contentLength: Long,
         override val data: ByteArray,
         override val width: Int? = null,
         override val height: Int? = null

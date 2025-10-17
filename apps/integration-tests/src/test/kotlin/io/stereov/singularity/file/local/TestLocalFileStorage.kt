@@ -1,9 +1,6 @@
 package io.stereov.singularity.file.local
 
-import io.stereov.singularity.auth.geolocation.GeoIpDatabaseServiceTest.Companion.file
 import io.stereov.singularity.file.core.dto.FileMetadataResponse
-import io.stereov.singularity.file.core.exception.model.FileTooLargeException
-import io.stereov.singularity.file.core.exception.model.FileUploadException
 import io.stereov.singularity.file.core.model.FileKey
 import io.stereov.singularity.file.core.model.FileUploadRequest
 import io.stereov.singularity.file.core.service.FileMetadataService
@@ -27,9 +24,7 @@ import org.springframework.core.io.ClassPathResource
 import org.springframework.http.MediaType
 import java.io.File
 import java.net.URI
-import java.nio.file.Files
 import java.time.temporal.ChronoUnit
-import kotlin.math.pow
 
 class TestLocalFileStorage : BaseIntegrationTest() {
 
@@ -82,19 +77,6 @@ class TestLocalFileStorage : BaseIntegrationTest() {
             )
             assertEquals(metadataWithMillis, savedMetadata)
         }
-    }
-    @Test fun `should upload throw error when file too large`() = runTest {
-        val user = registerUser()
-        val filePart = MockFilePart(file, 10.0.pow(1000).toLong())
-        val key = FileKey("key")
-        assertThrows<FileTooLargeException> { storage.upload(ownerId = user.info.id, key = key, isPublic = true, file = filePart) }
-
-    }
-    @Test fun `should upload throw error when content length not set`() = runTest {
-        val user = registerUser()
-        val filePart = MockFilePart(file, setLength = false)
-        val key = FileKey("key")
-        assertThrows<FileUploadException> { storage.upload(ownerId = user.info.id, key = key, isPublic = true, file = filePart) }
     }
     @Test fun `should serve public file`() = runTest {
         runFileTest { file, metadata, _ ->
@@ -159,13 +141,11 @@ class TestLocalFileStorage : BaseIntegrationTest() {
         val req1 = FileUploadRequest.FilePartUpload(
             key = FileKey("file1_small", extension = "jpg"),
             contentType = MediaType.IMAGE_JPEG.toString(),
-            contentLength = Files.size(file.toPath()),
             data = filePart,
         )
         val req2 = FileUploadRequest.FilePartUpload(
             key = FileKey("file2_small", extension = "jpg"),
             contentType = MediaType.IMAGE_JPEG.toString(),
-            contentLength = Files.size(file.toPath()),
             data = filePart,
         )
 
@@ -293,13 +273,11 @@ class TestLocalFileStorage : BaseIntegrationTest() {
         val req1 = FileUploadRequest.FilePartUpload(
             key = FileKey("file1_small", extension = "jpg"),
             contentType = MediaType.IMAGE_JPEG.toString(),
-            contentLength = Files.size(file.toPath()),
             data = filePart,
         )
         val req2 = FileUploadRequest.FilePartUpload(
             key = FileKey("file2_small", extension = "jpg"),
             contentType = MediaType.IMAGE_JPEG.toString(),
-            contentLength = Files.size(file.toPath()),
             data = filePart,
         )
 
@@ -347,13 +325,11 @@ class TestLocalFileStorage : BaseIntegrationTest() {
         val req1 = FileUploadRequest.FilePartUpload(
             key = FileKey("file1_small", extension = "jpg"),
             contentType = MediaType.IMAGE_JPEG.toString(),
-            contentLength = Files.size(file.toPath()),
             data = filePart,
         )
         val req2 = FileUploadRequest.FilePartUpload(
             key = FileKey("file2_small", extension = "jpg"),
             contentType = MediaType.IMAGE_JPEG.toString(),
-            contentLength = Files.size(file.toPath()),
             data = filePart,
         )
 

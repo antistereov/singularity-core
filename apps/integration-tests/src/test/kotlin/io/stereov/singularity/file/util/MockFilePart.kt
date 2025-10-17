@@ -30,8 +30,8 @@ class MockFilePart(
         }
     }
 
-    override fun content(): Flux<DataBuffer?> = DataBufferUtils.read(resource.toPath(), DefaultDataBufferFactory(), 4096)
-    override fun transferTo(dest: Path): Mono<Void?> = Mono.fromCallable {
+    override fun content(): Flux<DataBuffer> = DataBufferUtils.read(resource.toPath(), DefaultDataBufferFactory(), 4096)
+    override fun transferTo(dest: Path): Mono<Void> = Mono.fromCallable {
         resource.copyTo(dest.toFile(), overwrite = true)
         null
     }

@@ -6,13 +6,11 @@ import com.sksamuel.scrimage.webp.WebpWriter
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.file.core.component.DataBufferPublisher
 import io.stereov.singularity.file.core.dto.FileMetadataResponse
-import io.stereov.singularity.file.core.exception.model.FileTooLargeException
 import io.stereov.singularity.file.core.exception.model.UnsupportedMediaTypeException
 import io.stereov.singularity.file.core.model.DownloadedFile
 import io.stereov.singularity.file.core.model.FileKey
 import io.stereov.singularity.file.core.model.FileMetadataDocument
 import io.stereov.singularity.file.core.model.FileUploadRequest
-import io.stereov.singularity.file.core.properties.StorageProperties
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.file.image.properties.ImageProperties
 import kotlinx.coroutines.Dispatchers
@@ -27,7 +25,6 @@ class ImageStore(
     private val imageProperties: ImageProperties,
     private val webpWriter: WebpWriter,
     private val fileStorage: FileStorage,
-    private val storageProperties: StorageProperties,
     private val dataBufferPublisher: DataBufferPublisher
 ) {
 
@@ -49,10 +46,8 @@ class ImageStore(
         ownerId: ObjectId,
         file: FilePart,
         key: String,
-        isPublic: Boolean,
+        isPublic: Boolean
     ): FileMetadataResponse {
-        storageProperties.validateContentLength(file.headers().contentLength)
-
         val imageBytes = dataBufferPublisher.toSingleByteArray(file.content())
         val originalExtension = file.filename().substringAfterLast(".", "")
 
@@ -71,7 +66,6 @@ class ImageStore(
             data = resizedBytes,
             width = resized.width,
             height = resized.height,
-            contentLength = resizedBytes.size.toLong()
         )
     }
 
@@ -122,9 +116,6 @@ class ImageStore(
             throw UnsupportedMediaTypeException("Unsupported file type: $contentType")
         }
 
-        if (imageBytes.size > storageProperties.maxFileSize) {
-            throw FileTooLargeException("File exceeds maximum file size of ${storageProperties.maxFileSize}")
-        }
         val originalImage = withContext(Dispatchers.Default) {
             ImmutableImage.loader().fromBytes(imageBytes)
         }
@@ -160,7 +151,6 @@ class ImageStore(
                 data = imageBytes,
                 width = originalImage.width,
                 height = originalImage.height,
-                contentLength = imageBytes.size.toLong()
             )
         }
 

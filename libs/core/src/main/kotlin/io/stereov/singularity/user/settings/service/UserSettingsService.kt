@@ -100,7 +100,8 @@ class UserSettingsService(
         val currentAvatar = user.sensitive.avatarFileKey
 
         if (currentAvatar != null) {
-            fileStorage.remove(currentAvatar)
+            runCatching { fileStorage.remove(currentAvatar) }
+                .getOrElse { ex -> logger.debug(ex) { "Failed to remove old image" } }
         }
 
         val allowedMediaTypes = listOf(MediaType.IMAGE_JPEG, MediaType.IMAGE_GIF, MediaType.IMAGE_PNG)
@@ -125,7 +126,8 @@ class UserSettingsService(
         val currentAvatar = user.sensitive.avatarFileKey
 
         if (currentAvatar != null) {
-            fileStorage.remove(currentAvatar)
+            runCatching { fileStorage.remove(currentAvatar) }
+                .getOrElse { ex -> logger.debug(ex) { "Failed to remove old image" } }
         }
 
         user.sensitive.avatarFileKey = imageStore

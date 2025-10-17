@@ -174,7 +174,7 @@ class WebSecurityConfiguration {
         allowedOrigins.add(uiProperties.baseUrl)
 
         configuration.allowedOrigins = allowedOrigins
-        configuration.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
+        configuration.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
         configuration.allowedHeaders = listOf("Authorization", "Content-Type")
         configuration.allowCredentials = true
 
