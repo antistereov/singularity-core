@@ -46,7 +46,7 @@ class ImageStore(
         ownerId: ObjectId,
         file: FilePart,
         key: String,
-        isPublic: Boolean,
+        isPublic: Boolean
     ): FileMetadataResponse {
         val imageBytes = dataBufferPublisher.toSingleByteArray(file.content())
         val originalExtension = file.filename().substringAfterLast(".", "")
