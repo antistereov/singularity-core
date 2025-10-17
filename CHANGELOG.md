@@ -1,3 +1,12 @@
+## [v1.9.3]
+
+## Changelog
+
+
+## Contributors
+We'd like to thank the following people for their contributions:
+André Antimonov, GitHub
+
 ## [v1.9.2]
 
 ## Changelog
