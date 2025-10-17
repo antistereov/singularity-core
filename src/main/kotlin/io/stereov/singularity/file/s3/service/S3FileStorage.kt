@@ -12,14 +12,14 @@ import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.file.s3.properties.S3Properties
 import io.stereov.singularity.global.properties.AppProperties
 import kotlinx.coroutines.future.await
+import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+import org.springframework.core.io.buffer.DataBufferUtils
 import org.springframework.stereotype.Service
+import reactor.core.publisher.Mono
 import software.amazon.awssdk.core.async.AsyncRequestBody
 import software.amazon.awssdk.services.s3.S3AsyncClient
-import software.amazon.awssdk.services.s3.model.GetObjectRequest
-import software.amazon.awssdk.services.s3.model.NoSuchKeyException
-import software.amazon.awssdk.services.s3.model.ObjectCannedACL
-import software.amazon.awssdk.services.s3.model.PutObjectRequest
+import software.amazon.awssdk.services.s3.model.*
 import software.amazon.awssdk.services.s3.presigner.S3Presigner
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest
 import java.net.URLDecoder
@@ -51,19 +51,31 @@ class S3FileStorage(
 
     private suspend fun doUploadFilePart(req: FileUploadRequest.FilePartUpload): FileUploadResponse {
         val contentLength = AtomicLong()
-        val publisher = dataBufferPublisher.toFlux(req.data.content(), contentLength)
 
-        val putRequest = PutObjectRequest.builder()
-            .bucket(s3Properties.bucket)
-            .key(req.key.key)
-            .contentLength(contentLength.get())
-            .contentType(req.contentType)
-            .acl(ObjectCannedACL.PRIVATE)
-            .build()
+        val uploadMono: Mono<PutObjectResponse> = DataBufferUtils.join(req.data.content())
+            .flatMap { mergedBuffer ->
 
-        val requestBody = AsyncRequestBody.fromPublisher(publisher)
+                val finalLength = mergedBuffer.readableByteCount().toLong()
 
-        s3Client.putObject(putRequest, requestBody).await()
+                val contentFlux = mergedBuffer.readableByteBuffers().asSequence().toList().toTypedArray()
+                val requestBody = AsyncRequestBody.fromByteBuffers(*contentFlux)
+
+                val putRequest = PutObjectRequest.builder()
+                    .bucket(s3Properties.bucket)
+                    .key(req.key.key)
+                    .contentLength(finalLength)
+                    .contentType(req.contentType)
+                    .acl(ObjectCannedACL.PRIVATE)
+                    .build()
+
+                Mono.using(
+                    { mergedBuffer },
+                    { _ -> Mono.fromFuture(s3Client.putObject(putRequest, requestBody)) },
+                    { buffer -> DataBufferUtils.release(buffer) }
+                )
+            }
+
+        uploadMono.awaitSingle()
 
         return FileUploadResponse(
             key = req.key.key,
