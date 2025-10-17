@@ -84,8 +84,6 @@ class ImageStoreTest : BaseIntegrationTest() {
         val downloadedFile = DownloadedFile(bytes = file.readBytes(), contentType = MediaType.APPLICATION_OCTET_STREAM, url = "")
         val key = FileKey("key")
 
-        imageStore.upload(user.info.id, downloadedFile, key.key, true)
-
         assertThrows<UnsupportedMediaTypeException> { imageStore.upload(user.info.id, downloadedFile, key.key, true) }
     }
 }
