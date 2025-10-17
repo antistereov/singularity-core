@@ -37,7 +37,6 @@ import org.testcontainers.containers.MongoDBContainer
 import org.testcontainers.utility.DockerImageName
 import java.io.File
 import java.net.URI
-import java.nio.file.Files
 import java.time.temporal.ChronoUnit
 import kotlin.math.pow
 
@@ -136,13 +135,11 @@ class TestS3FileStorage : BaseSpringBootTest() {
         val req1 = FileUploadRequest.FilePartUpload(
             key = FileKey("file1_small", extension = "jpg"),
             contentType = MediaType.IMAGE_JPEG.toString(),
-            contentLength = Files.size(file.toPath()),
             data = filePart,
         )
         val req2 = FileUploadRequest.FilePartUpload(
             key = FileKey("file2_small", extension = "jpg"),
             contentType = MediaType.IMAGE_JPEG.toString(),
-            contentLength = Files.size(file.toPath()),
             data = filePart,
         )
 
@@ -200,13 +197,11 @@ class TestS3FileStorage : BaseSpringBootTest() {
         val req1 = FileUploadRequest.FilePartUpload(
             key = FileKey("file1_small", extension = "jpg"),
             contentType = MediaType.IMAGE_JPEG.toString(),
-            contentLength = Files.size(file.toPath()),
             data = filePart,
         )
         val req2 = FileUploadRequest.FilePartUpload(
             key = FileKey("file2_small", extension = "jpg"),
             contentType = MediaType.IMAGE_JPEG.toString(),
-            contentLength = Files.size(file.toPath()),
             data = filePart,
         )
 

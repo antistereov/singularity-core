@@ -27,7 +27,6 @@ import org.springframework.core.io.ClassPathResource
 import org.springframework.http.MediaType
 import java.io.File
 import java.net.URI
-import java.nio.file.Files
 import java.time.temporal.ChronoUnit
 import kotlin.math.pow
 
@@ -159,13 +158,11 @@ class TestLocalFileStorage : BaseIntegrationTest() {
         val req1 = FileUploadRequest.FilePartUpload(
             key = FileKey("file1_small", extension = "jpg"),
             contentType = MediaType.IMAGE_JPEG.toString(),
-            contentLength = Files.size(file.toPath()),
             data = filePart,
         )
         val req2 = FileUploadRequest.FilePartUpload(
             key = FileKey("file2_small", extension = "jpg"),
             contentType = MediaType.IMAGE_JPEG.toString(),
-            contentLength = Files.size(file.toPath()),
             data = filePart,
         )
 
@@ -293,13 +290,11 @@ class TestLocalFileStorage : BaseIntegrationTest() {
         val req1 = FileUploadRequest.FilePartUpload(
             key = FileKey("file1_small", extension = "jpg"),
             contentType = MediaType.IMAGE_JPEG.toString(),
-            contentLength = Files.size(file.toPath()),
             data = filePart,
         )
         val req2 = FileUploadRequest.FilePartUpload(
             key = FileKey("file2_small", extension = "jpg"),
             contentType = MediaType.IMAGE_JPEG.toString(),
-            contentLength = Files.size(file.toPath()),
             data = filePart,
         )
 
@@ -347,13 +342,11 @@ class TestLocalFileStorage : BaseIntegrationTest() {
         val req1 = FileUploadRequest.FilePartUpload(
             key = FileKey("file1_small", extension = "jpg"),
             contentType = MediaType.IMAGE_JPEG.toString(),
-            contentLength = Files.size(file.toPath()),
             data = filePart,
         )
         val req2 = FileUploadRequest.FilePartUpload(
             key = FileKey("file2_small", extension = "jpg"),
             contentType = MediaType.IMAGE_JPEG.toString(),
-            contentLength = Files.size(file.toPath()),
             data = filePart,
         )
 
