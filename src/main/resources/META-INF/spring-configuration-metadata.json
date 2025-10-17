@@ -474,13 +474,6 @@
       "defaultValue": "local"
     },
     {
-      "name": "singularity.file.storage.max-file-size",
-      "type": "java.lang.Long",
-      "sourceType": "io.stereov.singularity.file.core.properties.StorageProperties",
-      "description": "The maximum file size.",
-      "defaultValue": "local"
-    },
-    {
       "name": "singularity.file.storage.image.small",
       "type": "java.lang.Int",
       "sourceType": "io.stereov.singularity.file.image.properties.ImageProperties",
