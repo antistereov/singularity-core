@@ -3,6 +3,11 @@ package io.stereov.singularity.auth.oauth2
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
 import io.stereov.singularity.auth.jwt.exception.TokenException
 import io.stereov.singularity.auth.oauth2.model.OAuth2ErrorCode
+import io.stereov.singularity.file.core.model.FileKey
+import io.stereov.singularity.file.core.model.FileMetadataDocument
+import io.stereov.singularity.file.image.properties.ImageProperties
+import io.stereov.singularity.file.local.properties.LocalFileStorageProperties
+import io.stereov.singularity.file.util.MockFilePart
 import io.stereov.singularity.test.BaseOAuth2FlowTest
 import io.stereov.singularity.user.core.exception.model.UserDoesNotExistException
 import io.stereov.singularity.user.core.model.Role
@@ -10,13 +15,22 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.time.delay
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.core.io.ClassPathResource
+import org.springframework.http.MediaType
+import java.io.File
+import java.net.URI
 import java.time.Duration
 import java.time.Instant
 
 class OAuth2FlowTest() : BaseOAuth2FlowTest() {
+
+    @Autowired
+    private lateinit var localFileStorageProperties: LocalFileStorageProperties
 
     // REGISTER
 
@@ -516,6 +530,232 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         mockOAuth2Server.verifyRequests()
 
         assertThrows<UserDoesNotExistException> { userService.findByEmail(info.email!!) }
+    }
+    @Test fun `register flow sets avatar when existing`() = runTest {
+        val successRedirectUri = "http://localhost:8000/dashboard"
+
+        val (state, sessionCookie) = webTestClient.get()
+            .uri("$authorizationPath?redirect_uri=$successRedirectUri")
+            .exchange()
+            .expectStatus().isFound
+            .expectBody()
+            .returnResult()
+            .extractStateAndSession()
+
+        val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os"))
+
+        val randomUser = registerUser()
+        val file = ClassPathResource("files/test-image.jpg").file
+        val filePart = MockFilePart(file)
+        val key = FileKey("picture", extension = "jpg")
+        val metadata = fileStorage.upload(ownerId = randomUser.info.id, key = key, isPublic = true, file = filePart)
+        val originalUrl = requireNotNull(fileStorage.metadataResponseByKey(metadata.key).originalUrl)
+            .replace("8000", port)
+
+        val info = mockOAuth2Server.enqueueResponses(picture = originalUrl)
+
+        val redirectUri = "$loginPath?code=dummy-code&state=$state"
+        val res = webTestClient.get().uri(redirectUri)
+            .cookie("SESSION", sessionCookie)
+            .sessionTokenCookie(sessionToken)
+            .exchange()
+            .expectStatus().isFound
+            .expectBody()
+            .returnResult()
+
+        mockOAuth2Server.verifyRequests()
+
+        assertEquals(successRedirectUri, res.responseHeaders.location?.toString())
+
+        val user = userService.findByEmail(info.email!!)
+        assertEquals(info.email, user.sensitive.email)
+        assertEquals(mutableSetOf(Role.USER), user.roles)
+
+        val identities = user.sensitive.identities
+        assertEquals(1, identities.size)
+
+        val githubIdentity = requireNotNull(identities["github"])
+        assertEquals(info.sub, githubIdentity.principalId)
+
+        val session = user.sensitive.sessions.values.first()
+        assertEquals(sessionToken.browser, session.browser)
+        assertEquals(sessionToken.os, session.os)
+
+        requireNotNull(res)
+        val accessToken = res.extractAccessToken()
+        val refreshToken = res.extractRefreshToken()
+
+        assertEquals(user.id, accessToken.userId)
+        assertEquals(user.id, refreshToken.userId)
+        assertEquals(refreshToken.sessionId, accessToken.sessionId)
+        assertEquals(setOf(refreshToken.sessionId), user.sensitive.sessions.keys)
+
+        val imageRenditions = fileStorage.metadataResponseByKey(user.sensitive.avatarFileKey!!).renditions
+
+        // Small
+        val small = requireNotNull(imageRenditions[ImageProperties::small.name])
+        val smallFile = File(localFileStorageProperties.fileDirectory, small.key)
+        assertTrue(smallFile.exists())
+        webTestClient.get()
+            .uri(URI.create(small.url).path)
+            .exchange()
+            .expectStatus().isOk
+            .expectHeader().contentType(MediaType.parseMediaType("image/webp"))
+            .expectHeader().contentLength(smallFile.length())
+            .expectBody()
+            .consumeWith {
+                assertThat(it.responseBody).isEqualTo(smallFile.readBytes())
+            }
+        // Medium
+        val medium = requireNotNull(imageRenditions[ImageProperties::medium.name])
+        val mediumFile = File(localFileStorageProperties.fileDirectory, medium.key)
+        assertTrue(mediumFile.exists())
+        webTestClient.get()
+            .uri(URI.create(medium.url).path)
+            .exchange()
+            .expectStatus().isOk
+            .expectHeader().contentType(MediaType.parseMediaType("image/webp"))
+            .expectHeader().contentLength(mediumFile.length())
+            .expectBody()
+            .consumeWith {
+                assertThat(it.responseBody).isEqualTo(mediumFile.readBytes())
+            }
+
+        // Large
+        val large = requireNotNull(imageRenditions[ImageProperties::large.name])
+        val largeFile = File(localFileStorageProperties.fileDirectory, large.key)
+        assertTrue(largeFile.exists())
+        webTestClient.get()
+            .uri(URI.create(large.url).path)
+            .exchange()
+            .expectStatus().isOk
+            .expectHeader().contentType(MediaType.parseMediaType("image/webp"))
+            .expectHeader().contentLength(largeFile.length())
+            .expectBody()
+            .consumeWith {
+                assertThat(it.responseBody).isEqualTo(largeFile.readBytes())
+            }
+
+        // Original
+        val original = requireNotNull(imageRenditions[FileMetadataDocument.ORIGINAL_RENDITION])
+        val originalFile = File(localFileStorageProperties.fileDirectory, original.key)
+        assertTrue(largeFile.exists())
+        webTestClient.get()
+            .uri(URI.create(original.url).path)
+            .exchange()
+            .expectStatus().isOk
+            .expectHeader().contentType(MediaType.IMAGE_JPEG)
+            .expectHeader().contentLength(originalFile.length())
+            .expectBody()
+            .consumeWith {
+                assertThat(it.responseBody).isEqualTo(file.readBytes())
+            }
+    }
+    @Test fun `register flow does not throw when url wrong`() = runTest {
+        val successRedirectUri = "http://localhost:8000/dashboard"
+
+        val (state, sessionCookie) = webTestClient.get()
+            .uri("$authorizationPath?redirect_uri=$successRedirectUri")
+            .exchange()
+            .expectStatus().isFound
+            .expectBody()
+            .returnResult()
+            .extractStateAndSession()
+
+        val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os"))
+
+        val originalUrl = "http://localhost:8000/api/assets/non-existing.jpg"
+
+        val info = mockOAuth2Server.enqueueResponses(picture = originalUrl)
+
+        val redirectUri = "$loginPath?code=dummy-code&state=$state"
+        val res = webTestClient.get().uri(redirectUri)
+            .cookie("SESSION", sessionCookie)
+            .sessionTokenCookie(sessionToken)
+            .exchange()
+            .expectStatus().isFound
+            .expectBody()
+            .returnResult()
+
+        mockOAuth2Server.verifyRequests()
+
+        assertEquals(successRedirectUri, res.responseHeaders.location?.toString())
+
+        val user = userService.findByEmail(info.email!!)
+        assertEquals(info.email, user.sensitive.email)
+        assertEquals(mutableSetOf(Role.USER), user.roles)
+
+        val identities = user.sensitive.identities
+        assertEquals(1, identities.size)
+
+        val githubIdentity = requireNotNull(identities["github"])
+        assertEquals(info.sub, githubIdentity.principalId)
+
+        val session = user.sensitive.sessions.values.first()
+        assertEquals(sessionToken.browser, session.browser)
+        assertEquals(sessionToken.os, session.os)
+
+        requireNotNull(res)
+        val accessToken = res.extractAccessToken()
+        val refreshToken = res.extractRefreshToken()
+
+        assertEquals(user.id, accessToken.userId)
+        assertEquals(user.id, refreshToken.userId)
+        assertEquals(refreshToken.sessionId, accessToken.sessionId)
+        assertEquals(setOf(refreshToken.sessionId), user.sensitive.sessions.keys)
+        assertNull(user.sensitive.avatarFileKey)
+    }
+    @Test fun `register flow does not set avatar when picture not provided`() = runTest {
+        val successRedirectUri = "http://localhost:8000/dashboard"
+
+        val (state, sessionCookie) = webTestClient.get()
+            .uri("$authorizationPath?redirect_uri=$successRedirectUri")
+            .exchange()
+            .expectStatus().isFound
+            .expectBody()
+            .returnResult()
+            .extractStateAndSession()
+
+        val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os"))
+
+        val info = mockOAuth2Server.enqueueResponses(picture = null)
+
+        val redirectUri = "$loginPath?code=dummy-code&state=$state"
+        val res = webTestClient.get().uri(redirectUri)
+            .cookie("SESSION", sessionCookie)
+            .sessionTokenCookie(sessionToken)
+            .exchange()
+            .expectStatus().isFound
+            .expectBody()
+            .returnResult()
+
+        mockOAuth2Server.verifyRequests()
+
+        assertEquals(successRedirectUri, res.responseHeaders.location?.toString())
+
+        val user = userService.findByEmail(info.email!!)
+        assertEquals(info.email, user.sensitive.email)
+        assertEquals(mutableSetOf(Role.USER), user.roles)
+
+        val identities = user.sensitive.identities
+        assertEquals(1, identities.size)
+
+        val githubIdentity = requireNotNull(identities["github"])
+        assertEquals(info.sub, githubIdentity.principalId)
+
+        val session = user.sensitive.sessions.values.first()
+        assertEquals(sessionToken.browser, session.browser)
+        assertEquals(sessionToken.os, session.os)
+
+        requireNotNull(res)
+        val accessToken = res.extractAccessToken()
+        val refreshToken = res.extractRefreshToken()
+
+        assertEquals(user.id, accessToken.userId)
+        assertEquals(user.id, refreshToken.userId)
+        assertEquals(refreshToken.sessionId, accessToken.sessionId)
+        assertEquals(setOf(refreshToken.sessionId), user.sensitive.sessions.keys)
+        assertNull(user.sensitive.avatarFileKey)
     }
 
     // LOGIN

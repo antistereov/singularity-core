@@ -40,15 +40,17 @@ class BaseOAuth2FlowTest : BaseIntegrationTest() {
     data class OAuth2User(
         val sub: String? = "123",
         val login: String? = "testuser",
-        val email: String? = "test@example.com"
+        val email: String? = "test@example.com",
+        val picture: String? = null
     )
 
     fun MockWebServer.enqueueResponses(
         sub: String? = "123",
         login: String? = "testuser",
-        email: String? = "test@example.com"
+        email: String? = "test@example.com",
+        picture: String? = null,
     ) : OAuth2User {
-        val info = OAuth2User(sub, login, email)
+        val info = OAuth2User(sub, login, email, picture)
 
         enqueue(
             MockResponse()
