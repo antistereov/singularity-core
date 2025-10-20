@@ -148,8 +148,13 @@ You can learn more about step-up authentication [here](./authentication#step-up)
 ### Getting Connected Providers
 
 You can request a list of connected providers using 
-[`GET /api/auth/providers`](../../api/get-identity-providers.api.mdx)
+[`GET /api/users/me/providers`](../../api/get-identity-providers.api.mdx)
 with a valid [`AccessToken`](./tokens#access-token).
+
+### Getting Password Status
+
+You can check if a given user set up authentication using email and password through [`GET /api/users/me/providers/password-status`](../../api/get-password-status-by-id.api.mdx).
+This can be useful in the login flow.
 
 ### Connecting an OAuth2 Provider to an Existing Account
 
@@ -170,7 +175,7 @@ Placing them in the header will not lead to a successful connection since they w
 
 #### 2. Create an OAuth2 Provider Connection Token
 
-Call [`POST /api/auth/providers/oauth2/token`](../../api/generate-o-auth-2-provider-connection-token.api.mdx) authenticated as the user to create an [`OAuth2ProviderConnectionToken`](./tokens#oauth2-provider-connection-token).
+Call [`POST /api/users/me/providers/oauth2/token`](../../api/generate-o-auth-2-provider-connection-token.api.mdx) authenticated as the user to create an [`OAuth2ProviderConnectionToken`](./tokens#oauth2-provider-connection-token).
 This token will be set as an HTTP-only cookie and returned in the response if [header-authentication](./authentication#header-authentication) is enabled.
 
 #### 3. Follow the Steps For Registration
@@ -193,7 +198,7 @@ email is [enabled and configured correctly](../email/configuration.md).
 If a user registered using an OAuth2 provider,
 it is possible to add the option to authenticate using a password.
 
-Call [`POST /api/auth/providers/password`](../../api/add-password-authentication.api.mdx)
+Call [`POST /api/users/me/providers/password`](../../api/add-password-authentication.api.mdx)
 with a valid [`AccessToken`](./tokens#access-token) and [`StepUpToken`](./tokens#step-up-token).
 
 If successful, the user can now log in using his new password.
@@ -202,7 +207,7 @@ If successful, the user can now log in using his new password.
 
 If a user connected multiple provider,
 it is possible to disconnect providers through the endpoint
-[`DELETE /api/auth/providers/<provider-name>`](../../api/delete-identity-provider.api.mdx).
+[`DELETE /api/users/me/providers/<provider-name>`](../../api/delete-identity-provider.api.mdx).
 
 :::info
 A [security alert](./security-alerts.md#oauth2-specific-alerts)

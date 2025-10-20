@@ -199,7 +199,7 @@ You can learn more about connecting OAuth2 providers to an existing account [her
 
 This token is issued after a user successfully requests a token through the dedicated endpoint:
 
-* [`POST /api/auth/providers/oauth2/token`](../../api/generate-o-auth-2-provider-connection-token.api.mdx)
+* [`POST /api/users/me/providers/oauth2/token`](../../api/generate-o-auth-2-provider-connection-token.api.mdx)
 
 ### Usage
 

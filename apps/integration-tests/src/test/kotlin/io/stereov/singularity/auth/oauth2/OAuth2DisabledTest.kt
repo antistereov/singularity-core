@@ -1,8 +1,8 @@
 package io.stereov.singularity.auth.oauth2
 
-import io.stereov.singularity.auth.oauth2.controller.IdentityProviderController
 import io.stereov.singularity.auth.oauth2.controller.OAuth2ProviderController
 import io.stereov.singularity.test.BaseIntegrationTest
+import io.stereov.singularity.auth.oauth2.controller.IdentityProviderController
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test

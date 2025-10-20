@@ -387,7 +387,7 @@ class OAuth2AlertUnitTest : BaseOAuth2FlowTest() {
         ) }
 
         webTestClient.delete()
-            .uri("/api/auth/providers/github")
+            .uri("/api/users/me/providers/github")
             .accessTokenCookie(user.accessToken)
             .stepUpTokenCookie(user.stepUpToken)
             .exchange()
@@ -420,7 +420,7 @@ class OAuth2AlertUnitTest : BaseOAuth2FlowTest() {
         ) }
 
         webTestClient.delete()
-            .uri("/api/auth/providers/github?locale=en")
+            .uri("/api/users/me/providers/github?locale=en")
             .accessTokenCookie(user.accessToken)
             .stepUpTokenCookie(user.stepUpToken)
             .exchange()

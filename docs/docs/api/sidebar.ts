@@ -199,6 +199,12 @@ const sidebar: SidebarsConfig = {
           label: "Generate OAuth2ProviderConnectionToken",
           className: "api-method post",
         },
+        {
+          type: "doc",
+          id: "api/get-password-status-by-id",
+          label: "Get Password Status by ID",
+          className: "api-method get",
+        },
       ],
     },
     {
@@ -743,6 +749,24 @@ const sidebar: SidebarsConfig = {
         },
         {
           type: "doc",
+          id: "api/schemas/addpasswordauthenticationrequest",
+          label: "AddPasswordAuthenticationRequest",
+          className: "schema",
+        },
+        {
+          type: "doc",
+          id: "api/schemas/oauth-2-providerconnectiontokenresponse",
+          label: "OAuth2ProviderConnectionTokenResponse",
+          className: "schema",
+        },
+        {
+          type: "doc",
+          id: "api/schemas/oauth-2-providerconnectionrequest",
+          label: "OAuth2ProviderConnectionRequest",
+          className: "schema",
+        },
+        {
+          type: "doc",
           id: "api/schemas/successresponse",
           label: "SuccessResponse",
           className: "schema",
@@ -893,24 +917,6 @@ const sidebar: SidebarsConfig = {
         },
         {
           type: "doc",
-          id: "api/schemas/addpasswordauthenticationrequest",
-          label: "AddPasswordAuthenticationRequest",
-          className: "schema",
-        },
-        {
-          type: "doc",
-          id: "api/schemas/oauth-2-providerconnectiontokenresponse",
-          label: "OAuth2ProviderConnectionTokenResponse",
-          className: "schema",
-        },
-        {
-          type: "doc",
-          id: "api/schemas/oauth-2-providerconnectionrequest",
-          label: "OAuth2ProviderConnectionRequest",
-          className: "schema",
-        },
-        {
-          type: "doc",
           id: "api/schemas/resetpasswordrequest",
           label: "ResetPasswordRequest",
           className: "schema",
@@ -1019,6 +1025,18 @@ const sidebar: SidebarsConfig = {
         },
         {
           type: "doc",
+          id: "api/schemas/passwordstatusresponse",
+          label: "PasswordStatusResponse",
+          className: "schema",
+        },
+        {
+          type: "doc",
+          id: "api/schemas/identityproviderresponse",
+          label: "IdentityProviderResponse",
+          className: "schema",
+        },
+        {
+          type: "doc",
           id: "api/schemas/rotationstatusresponse",
           label: "RotationStatusResponse",
           className: "schema",
@@ -1063,12 +1081,6 @@ const sidebar: SidebarsConfig = {
           type: "doc",
           id: "api/schemas/sessioninforesponse",
           label: "SessionInfoResponse",
-          className: "schema",
-        },
-        {
-          type: "doc",
-          id: "api/schemas/identityproviderresponse",
-          label: "IdentityProviderResponse",
           className: "schema",
         },
         {

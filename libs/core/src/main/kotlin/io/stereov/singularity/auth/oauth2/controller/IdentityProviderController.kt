@@ -6,8 +6,10 @@ import io.stereov.singularity.auth.oauth2.dto.request.AddPasswordAuthenticationR
 import io.stereov.singularity.auth.oauth2.service.IdentityProviderService
 import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.model.OpenApiConstants
+import io.stereov.singularity.user.core.dto.response.PasswordStatusResponse
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.core.mapper.UserMapper
+import io.stereov.singularity.user.core.service.UserService
 import io.swagger.v3.oas.annotations.ExternalDocumentation
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -16,22 +18,24 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
+import org.bson.types.ObjectId
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
 @RestController
-@RequestMapping("/api/auth/providers")
+@RequestMapping("/api/users")
 @ConditionalOnProperty("singularity.auth.oauth2.enable", matchIfMissing = false)
 @Tag(name = "OAuth2", description = "Operations related to connecting and disconnecting identity providers to existing accounts.")
 class IdentityProviderController(
     private val identityProviderService: IdentityProviderService,
     private val authorizationService: AuthorizationService,
     private val userMapper: UserMapper,
+    private val userService: UserService,
 ) {
 
-    @GetMapping
+    @GetMapping("me/providers")
     @Operation(
         summary = "Get Identity Providers",
         description = """
@@ -67,7 +71,39 @@ class IdentityProviderController(
         return ResponseEntity.ok(identityProviders)
     }
 
-    @PostMapping("password")
+    @GetMapping("{id}/providers/password-status")
+    @Operation(
+        summary = "Get Password Status by ID",
+        description = """
+            Check if the user with given ID set up authentication using email and password.
+            
+            Users can authenticate using OAuth2 providers. In this case, password authentication is not enabled.
+            You can learn more about this [here](https://singularity.stereov.io/docs/guides/auth/oauth2).
+        """,
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/oauth2#getting-connected-providers"),
+        security = [
+            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER),
+            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE)
+        ],
+        responses = [
+            ApiResponse(
+                responseCode = "200",
+                description = "The list of identity providers.",
+            ),
+            ApiResponse(
+                responseCode = "404",
+                description = "Invalid `AccessToken`.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            )
+        ]
+    )
+    suspend fun getPasswordStatusById(@PathVariable id: ObjectId): ResponseEntity<PasswordStatusResponse> {
+        val res = PasswordStatusResponse(userService.findById(id).password != null)
+
+        return ResponseEntity.ok(res)
+    }
+
+    @PostMapping("me/providers/password")
     @Operation(
         summary = "Add Password Authentication",
         description = """
@@ -119,7 +155,7 @@ class IdentityProviderController(
         return ResponseEntity.ok(userMapper.toResponse(user))
     }
 
-    @DeleteMapping("{provider}")
+    @DeleteMapping("me/providers/{provider}")
     @Operation(
         summary = "Delete Identity Provider",
         description = """

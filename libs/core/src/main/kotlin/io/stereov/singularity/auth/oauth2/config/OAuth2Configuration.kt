@@ -41,7 +41,7 @@ import org.springframework.context.annotation.Bean
 class OAuth2Configuration {
     
     // Controller
-    
+
     @Bean
     @ConditionalOnProperty("singularity.auth.oauth2.enable", matchIfMissing = false)
     @ConditionalOnMissingBean
@@ -49,10 +49,12 @@ class OAuth2Configuration {
         identityProviderService: IdentityProviderService,
         authorizationService: AuthorizationService,
         userMapper: UserMapper,
+        userService: UserService
     ) = IdentityProviderController(
         identityProviderService,
         authorizationService,
-        userMapper
+        userMapper,
+        userService
     )
 
     @Bean
@@ -87,8 +89,10 @@ class OAuth2Configuration {
         hashService: HashService,
         accessTokenCache: AccessTokenCache,
         accessTokenService: AccessTokenService,
-        stepUpTokenService: StepUpTokenService, emailProperties: EmailProperties,
-        securityAlertService: SecurityAlertService, securityAlertProperties: SecurityAlertProperties
+        stepUpTokenService: StepUpTokenService,
+        emailProperties: EmailProperties,
+        securityAlertService: SecurityAlertService,
+        securityAlertProperties: SecurityAlertProperties
     ) = IdentityProviderService(
         userService,
         oAuth2ProviderConnectionTokenService,
