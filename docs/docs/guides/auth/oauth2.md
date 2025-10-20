@@ -153,7 +153,7 @@ with a valid [`AccessToken`](./tokens#access-token).
 
 ### Getting Password Status
 
-You can check if a given user set up authentication using email and password through [`GET /api/users/me/providers/password-status`](../../api/get-password-status-by-id.api.mdx).
+You can check if a user with a given email is set up authentication using email and password through [`GET /api/users/me/providers/password-status`](../../api/get-password-status-by-id.api.mdx).
 This can be useful in the login flow.
 
 ### Connecting an OAuth2 Provider to an Existing Account

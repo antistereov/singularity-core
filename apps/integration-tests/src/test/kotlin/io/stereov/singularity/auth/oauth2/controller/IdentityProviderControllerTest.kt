@@ -56,7 +56,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
         val user = registerUser()
 
         val res = webTestClient.get()
-            .uri("/api/users/${user.info.id}/providers/password-status")
+            .uri("/api/users/${user.info.sensitive.email}/providers/password-status")
             .exchange().expectStatus().isOk
             .expectBody(PasswordStatusResponse::class.java)
             .returnResult()
@@ -71,7 +71,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
         userService.save(user.info)
 
         val res = webTestClient.get()
-            .uri("/api/users/${user.info.id}/providers/password-status")
+            .uri("/api/users/${user.info.sensitive.email}/providers/password-status")
             .exchange().expectStatus().isOk
             .expectBody(PasswordStatusResponse::class.java)
             .returnResult()
@@ -84,7 +84,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
         val user = registerOAuth2()
 
         val res = webTestClient.get()
-            .uri("/api/users/${user.info.id}/providers/password-status")
+            .uri("/api/users/${user.info.sensitive.email}/providers/password-status")
             .exchange().expectStatus().isOk
             .expectBody(PasswordStatusResponse::class.java)
             .returnResult()
@@ -98,7 +98,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
         userService.deleteById(user.info.id)
 
         webTestClient.get()
-            .uri("/api/users/${user.info.id}/providers/password-status")
+            .uri("/api/users/${user.info.sensitive.email}/providers/password-status")
             .exchange().expectStatus().isNotFound
     }
 
