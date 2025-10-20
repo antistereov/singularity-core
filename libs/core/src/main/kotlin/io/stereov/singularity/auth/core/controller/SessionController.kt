@@ -97,7 +97,7 @@ class SessionController(
         val token = sessionTokenService.create(sessionInfo, locale = locale)
 
         return ResponseEntity.ok()
-            .header("Set-Cookie", cookieCreator.createCookie(token).toString())
+            .header("Set-Cookie", cookieCreator.createCookie(token, sameSite = "Lax").toString())
             .body(GenerateSessionTokenResponse(token.value))
     }
 

@@ -16,12 +16,12 @@ class CookieCreator(
 
     private val logger = KotlinLogging.logger {}
 
-    fun createCookie(token: SecurityToken<*>, path: String = "/"): ResponseCookie {
+    fun createCookie(token: SecurityToken<*>, path: String = "/", sameSite: String = "Strict"): ResponseCookie {
         logger.debug { "Creating cookie from token of type ${token.type.cookieName}" }
 
         val cookie = ResponseCookie.from(token.type.cookieName, token.jwt.tokenValue)
             .httpOnly(true)
-            .sameSite("Strict")
+            .sameSite(sameSite)
             .path(path)
 
         token.expiresAt
