@@ -47,6 +47,7 @@ class OAuth2AuthenticationService(
          val oauth2User = oauth2Authentication.principal
 
          val principalId = oauth2User.attributes["sub"]?.toString()
+             ?: oauth2User.attributes["id"]?.toString()
              ?: throw OAuth2FlowException(OAuth2ErrorCode.SUB_CLAIM_MISSING,
                  "No sub claim provided by OAuth2 provider.")
 
@@ -105,6 +106,7 @@ class OAuth2AuthenticationService(
 
         val savedUser = userService.save(user)
         val avatarUrl = (oauth2User.attributes["picture"] as? String)
+            ?: (oauth2User.attributes["avatar_url"] as? String)
         return if (avatarUrl == null) {
             logger.debug { "No avatar set in social login" }
             savedUser
