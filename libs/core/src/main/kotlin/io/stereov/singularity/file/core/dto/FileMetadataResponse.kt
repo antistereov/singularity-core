@@ -13,4 +13,8 @@ data class FileMetadataResponse(
     var updatedAt: Instant = Instant.now(),
     var access: ContentAccessDetailsResponse,
     val renditions: Map<String, FileRenditionResponse>,
-) : ContentResponse<FileMetadataDocument>
+) : ContentResponse<FileMetadataDocument> {
+
+    val originalUrl: String?
+        get() = renditions[FileMetadataDocument.ORIGINAL_RENDITION]?.url
+}
