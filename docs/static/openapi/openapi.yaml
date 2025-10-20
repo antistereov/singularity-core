@@ -1345,7 +1345,7 @@ paths:
       - accessTokenCookie: []
       - twoFactorAuthenticationTokenHeader: []
       - twoFactorAuthenticationTokenCookie: []
-  /api/auth/providers:
+  /api/users/me/providers:
     get:
       tags:
       - OAuth2
@@ -1379,7 +1379,7 @@ paths:
       security:
       - accessTokenHeader: []
       - accessTokenCookie: []
-  /api/auth/providers/{provider}:
+  /api/users/me/providers/{provider}:
     delete:
       tags:
       - OAuth2
@@ -1443,7 +1443,7 @@ paths:
         stepUpTokenHeader: []
       - accessTokenCookie: []
         stepUpTokenCookie: []
-  /api/auth/providers/password:
+  /api/users/me/providers/password:
     post:
       tags:
       - OAuth2
@@ -1500,7 +1500,7 @@ paths:
         stepUpTokenHeader: []
       - accessTokenCookie: []
         stepUpTokenCookie: []
-  /api/auth/providers/oauth2/token:
+  /api/users/me/providers/oauth2/token:
     post:
       tags:
       - OAuth2
@@ -4199,6 +4199,41 @@ paths:
         - adminScope
       - accessTokenCookie:
         - adminScope
+  /api/users/{id}/providers/password-status:
+    get:
+      tags:
+      - OAuth2
+      summary: Get Password Status by ID
+      description: |-
+        Check if the user with given ID set up authentication using email and password.
+
+        Users can authenticate using OAuth2 providers. In this case, password authentication is not enabled.
+        You can learn more about this [here](https://singularity.stereov.io/docs/guides/auth/oauth2).
+      externalDocs:
+        url: https://singularity.stereov.io/docs/guides/auth/oauth2#getting-connected-providers
+      operationId: getPasswordStatusById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/ObjectId"
+      responses:
+        "200":
+          description: The list of identity providers.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PasswordStatusResponse"
+        "404":
+          description: Invalid `AccessToken`.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - accessTokenHeader: []
+      - accessTokenCookie: []
   /api/security/secrets/rotate-keys/status:
     get:
       tags:
@@ -4305,6 +4340,8 @@ components:
           type: object
           additionalProperties:
             $ref: "#/components/schemas/FileRenditionResponse"
+        originalUrl:
+          type: string
       required:
       - access
       - createdAt
@@ -4638,6 +4675,31 @@ components:
       - id
       - name
       - roles
+    AddPasswordAuthenticationRequest:
+      type: object
+      properties:
+        password:
+          type: string
+          description: "The user's chosen password. It must be at least 8 characters\
+            \ long and include at least one uppercase letter, one lowercase letter,\
+            \ one number, and one special character (!@#$%^&*()_+={}[]|\\:;'\"<>,.?/)."
+          example: S3cur3P@ssw0rd!
+          pattern: "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+\\-={}\\[\\\
+            ]|\\\\:;'\"<,>.?/]).{8,}"
+      required:
+      - password
+    OAuth2ProviderConnectionTokenResponse:
+      type: object
+      properties:
+        token:
+          type: string
+    OAuth2ProviderConnectionRequest:
+      type: object
+      properties:
+        provider:
+          type: string
+      required:
+      - provider
     SuccessResponse:
       type: object
       properties:
@@ -5029,31 +5091,6 @@ components:
           type: string
       required:
       - user
-    AddPasswordAuthenticationRequest:
-      type: object
-      properties:
-        password:
-          type: string
-          description: "The user's chosen password. It must be at least 8 characters\
-            \ long and include at least one uppercase letter, one lowercase letter,\
-            \ one number, and one special character (!@#$%^&*()_+={}[]|\\:;'\"<>,.?/)."
-          example: S3cur3P@ssw0rd!
-          pattern: "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+\\-={}\\[\\\
-            ]|\\\\:;'\"<,>.?/]).{8,}"
-      required:
-      - password
-    OAuth2ProviderConnectionTokenResponse:
-      type: object
-      properties:
-        token:
-          type: string
-    OAuth2ProviderConnectionRequest:
-      type: object
-      properties:
-        provider:
-          type: string
-      required:
-      - provider
     ResetPasswordRequest:
       type: object
       properties:
@@ -5296,6 +5333,20 @@ components:
           type: boolean
         empty:
           type: boolean
+    PasswordStatusResponse:
+      type: object
+      properties:
+        set:
+          type: boolean
+      required:
+      - set
+    IdentityProviderResponse:
+      type: object
+      properties:
+        provider:
+          type: string
+      required:
+      - provider
     RotationStatusResponse:
       type: object
       properties:
@@ -5522,13 +5573,6 @@ components:
       required:
       - id
       - lastActive
-    IdentityProviderResponse:
-      type: object
-      properties:
-        provider:
-          type: string
-      required:
-      - provider
     MailCooldownResponse:
       type: object
       properties:

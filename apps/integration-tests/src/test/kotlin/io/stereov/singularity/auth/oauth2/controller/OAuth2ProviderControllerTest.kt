@@ -14,7 +14,7 @@ class OAuth2ProviderControllerTest : BaseIntegrationTest() {
         val req = OAuth2ProviderConnectionRequest("github")
 
         val res = webTestClient.post()
-            .uri("/api/auth/providers/oauth2/token")
+            .uri("/api/users/me/providers/oauth2/token")
             .accessTokenCookie(user.accessToken)
             .stepUpTokenCookie(user.stepUpToken)
             .bodyValue(req)
@@ -34,7 +34,7 @@ class OAuth2ProviderControllerTest : BaseIntegrationTest() {
         val req = OAuth2ProviderConnectionRequest("github")
 
         val res = webTestClient.post()
-            .uri("/api/auth/providers/oauth2/token")
+            .uri("/api/users/me/providers/oauth2/token")
             .accessTokenCookie(user.accessToken)
             .stepUpTokenCookie(user.stepUpToken)
             .bodyValue(req)
@@ -54,7 +54,7 @@ class OAuth2ProviderControllerTest : BaseIntegrationTest() {
         val req = OAuth2ProviderConnectionRequest("github")
 
         val res = webTestClient.post()
-            .uri("/api/auth/providers/oauth2/token")
+            .uri("/api/users/me/providers/oauth2/token")
             .accessTokenCookie(user.accessToken)
             .stepUpTokenCookie(user.stepUpToken)
             .bodyValue(req)
@@ -74,7 +74,7 @@ class OAuth2ProviderControllerTest : BaseIntegrationTest() {
         val req = OAuth2ProviderConnectionRequest("github")
 
         webTestClient.post()
-            .uri("/api/auth/providers/oauth2/token")
+            .uri("/api/users/me/providers/oauth2/token")
             .stepUpTokenCookie(user.stepUpToken)
             .bodyValue(req)
             .exchange()
@@ -85,7 +85,7 @@ class OAuth2ProviderControllerTest : BaseIntegrationTest() {
         val req = OAuth2ProviderConnectionRequest("github")
 
         webTestClient.post()
-            .uri("/api/auth/providers/oauth2/token")
+            .uri("/api/users/me/providers/oauth2/token")
             .accessTokenCookie(user.accessToken)
             .bodyValue(req)
             .exchange()
@@ -98,7 +98,7 @@ class OAuth2ProviderControllerTest : BaseIntegrationTest() {
         userService.save(user.info.clearSessions())
 
         webTestClient.post()
-            .uri("/api/auth/providers/oauth2/token")
+            .uri("/api/users/me/providers/oauth2/token")
             .accessTokenCookie(user.accessToken)
             .bodyValue(req)
             .exchange()

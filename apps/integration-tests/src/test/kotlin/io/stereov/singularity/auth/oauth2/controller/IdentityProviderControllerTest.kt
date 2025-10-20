@@ -5,6 +5,7 @@ import io.stereov.singularity.auth.core.dto.response.IdentityProviderResponse
 import io.stereov.singularity.auth.core.model.IdentityProvider
 import io.stereov.singularity.auth.oauth2.dto.request.AddPasswordAuthenticationRequest
 import io.stereov.singularity.test.BaseIntegrationTest
+import io.stereov.singularity.user.core.dto.response.PasswordStatusResponse
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.core.model.identity.UserIdentity
 import kotlinx.coroutines.test.runTest
@@ -19,7 +20,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
         userService.save(user.info)
 
         val res = webTestClient.get()
-            .uri("/api/auth/providers")
+            .uri("/api/users/me/providers")
             .accessTokenCookie(user.accessToken)
             .exchange().expectStatus().isOk
             .expectBody(List::class.java)
@@ -35,7 +36,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
         val user = createGuest()
 
         val res = webTestClient.get()
-            .uri("/api/auth/providers")
+            .uri("/api/users/me/providers")
             .accessTokenCookie(user.accessToken)
             .exchange().expectStatus().isOk
             .expectBody(List::class.java)
@@ -47,8 +48,58 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
     }
     @Test fun `get requires access token`() = runTest {
         webTestClient.get()
-            .uri("/api/auth/providers")
+            .uri("/api/users/me/providers")
             .exchange().expectStatus().isUnauthorized
+    }
+
+    @Test fun `getPasswordStatus works`() = runTest {
+        val user = registerUser()
+
+        val res = webTestClient.get()
+            .uri("/api/users/${user.info.sensitive.email}/providers/password-status")
+            .exchange().expectStatus().isOk
+            .expectBody(PasswordStatusResponse::class.java)
+            .returnResult()
+
+        val body = requireNotNull(res.responseBody)
+
+        Assertions.assertTrue(body.set)
+    }
+    @Test fun `getPasswordStatus works also when oauth2 is added`() = runTest {
+        val user = registerUser()
+        user.info.sensitive.identities["github"] = UserIdentity(null, "id")
+        userService.save(user.info)
+
+        val res = webTestClient.get()
+            .uri("/api/users/${user.info.sensitive.email}/providers/password-status")
+            .exchange().expectStatus().isOk
+            .expectBody(PasswordStatusResponse::class.java)
+            .returnResult()
+
+        val body = requireNotNull(res.responseBody)
+
+        Assertions.assertTrue(body.set)
+    }
+    @Test fun `getPasswordStatus works when only oauth2`() = runTest {
+        val user = registerOAuth2()
+
+        val res = webTestClient.get()
+            .uri("/api/users/${user.info.sensitive.email}/providers/password-status")
+            .exchange().expectStatus().isOk
+            .expectBody(PasswordStatusResponse::class.java)
+            .returnResult()
+
+        val body = requireNotNull(res.responseBody)
+
+        Assertions.assertFalse(body.set)
+    }
+    @Test fun `getPasswordStatus returns 404 when user not found`() = runTest {
+        val user = registerOAuth2()
+        userService.deleteById(user.info.id)
+
+        webTestClient.get()
+            .uri("/api/users/${user.info.sensitive.email}/providers/password-status")
+            .exchange().expectStatus().isNotFound
     }
 
     @Test fun `addPassword works`() = runTest {
@@ -56,7 +107,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
         val req = AddPasswordAuthenticationRequest("Password$2")
 
         val res = webTestClient.post()
-            .uri("/api/auth/providers/password")
+            .uri("/api/users/me/providers/password")
             .accessTokenCookie(user.accessToken)
             .stepUpTokenCookie(user.stepUpToken)
             .bodyValue(req)
@@ -85,7 +136,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
         val req = AddPasswordAuthenticationRequest("Pas$2")
 
          webTestClient.post()
-            .uri("/api/auth/providers/password")
+            .uri("/api/users/me/providers/password")
             .accessTokenCookie(user.accessToken)
             .stepUpTokenCookie(user.stepUpToken)
              .bodyValue(req)
@@ -101,7 +152,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
         val req = AddPasswordAuthenticationRequest("PASSWORD$2")
 
         webTestClient.post()
-            .uri("/api/auth/providers/password")
+            .uri("/api/users/me/providers/password")
             .accessTokenCookie(user.accessToken)
             .stepUpTokenCookie(user.stepUpToken)
             .bodyValue(req)
@@ -118,7 +169,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
         val req = AddPasswordAuthenticationRequest("password$2")
 
         webTestClient.post()
-            .uri("/api/auth/providers/password")
+            .uri("/api/users/me/providers/password")
             .accessTokenCookie(user.accessToken)
             .stepUpTokenCookie(user.stepUpToken)
             .bodyValue(req)
@@ -134,7 +185,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
         val req = AddPasswordAuthenticationRequest("Password$")
 
         webTestClient.post()
-            .uri("/api/auth/providers/password")
+            .uri("/api/users/me/providers/password")
             .accessTokenCookie(user.accessToken)
             .stepUpTokenCookie(user.stepUpToken)
             .bodyValue(req)
@@ -150,7 +201,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
         val req = AddPasswordAuthenticationRequest("Password2")
 
         webTestClient.post()
-            .uri("/api/auth/providers/password")
+            .uri("/api/users/me/providers/password")
             .accessTokenCookie(user.accessToken)
             .stepUpTokenCookie(user.stepUpToken)
             .bodyValue(req)
@@ -165,7 +216,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
         val user = registerOAuth2()
 
         webTestClient.post()
-            .uri("/api/auth/providers/password")
+            .uri("/api/users/me/providers/password")
             .accessTokenCookie(user.accessToken)
             .stepUpTokenCookie(user.stepUpToken)
             .exchange()
@@ -180,21 +231,21 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
         val req = AddPasswordAuthenticationRequest("Password$2")
 
         webTestClient.post()
-            .uri("/api/auth/providers/password")
+            .uri("/api/users/me/providers/password")
             .stepUpTokenCookie(user.stepUpToken)
             .bodyValue(req)
             .exchange()
             .expectStatus().isUnauthorized
 
         webTestClient.post()
-            .uri("/api/auth/providers/password")
+            .uri("/api/users/me/providers/password")
             .accessTokenCookie(user.accessToken)
             .bodyValue(req)
             .exchange()
             .expectStatus().isUnauthorized
 
         webTestClient.post()
-            .uri("/api/auth/providers/password")
+            .uri("/api/users/me/providers/password")
             .bodyValue(req)
             .exchange()
             .expectStatus().isUnauthorized
@@ -209,7 +260,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
         val req = AddPasswordAuthenticationRequest("Password$2")
 
         webTestClient.post()
-            .uri("/api/auth/providers/password")
+            .uri("/api/users/me/providers/password")
             .accessTokenCookie(user.accessToken)
             .stepUpTokenCookie(user.stepUpToken)
             .bodyValue(req)
@@ -221,14 +272,14 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
         val req = AddPasswordAuthenticationRequest("Password$2")
 
         webTestClient.post()
-            .uri("/api/auth/providers/password")
+            .uri("/api/users/me/providers/password")
             .accessTokenCookie(oauth2User.accessToken)
             .stepUpTokenCookie(oauth2User.stepUpToken)
             .bodyValue(req)
             .exchange()
             .expectStatus().isOk
         webTestClient.post()
-            .uri("/api/auth/providers/password")
+            .uri("/api/users/me/providers/password")
             .accessTokenCookie(oauth2User.accessToken)
             .stepUpTokenCookie(oauth2User.stepUpToken)
             .bodyValue(req)
@@ -237,7 +288,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
 
         val user = registerUser()
         webTestClient.post()
-            .uri("/api/auth/providers/password")
+            .uri("/api/users/me/providers/password")
             .accessTokenCookie(user.accessToken)
             .stepUpTokenCookie(user.stepUpToken)
             .bodyValue(req)
@@ -251,7 +302,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
         userService.save(user.info)
 
         val res = webTestClient.delete()
-            .uri("/api/auth/providers/github")
+            .uri("/api/users/me/providers/github")
             .accessTokenCookie(user.accessToken)
             .stepUpTokenCookie(user.stepUpToken)
             .exchange()
@@ -273,7 +324,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
         userService.save(user.info)
 
         webTestClient.delete()
-            .uri("/api/auth/providers/git")
+            .uri("/api/users/me/providers/git")
             .accessTokenCookie(user.accessToken)
             .stepUpTokenCookie(user.stepUpToken)
             .exchange()
@@ -291,19 +342,19 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
         userService.save(user.info)
 
         webTestClient.delete()
-            .uri("/api/auth/providers/github")
+            .uri("/api/users/me/providers/github")
             .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isUnauthorized
 
         webTestClient.delete()
-            .uri("/api/auth/providers/github")
+            .uri("/api/users/me/providers/github")
             .stepUpTokenCookie(user.stepUpToken)
             .exchange()
             .expectStatus().isUnauthorized
 
         webTestClient.delete()
-            .uri("/api/auth/providers/github")
+            .uri("/api/users/me/providers/github")
             .exchange()
             .expectStatus().isUnauthorized
 
@@ -319,7 +370,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
         userService.save(user.info)
 
         webTestClient.delete()
-            .uri("/api/auth/providers/${IdentityProvider.PASSWORD}")
+            .uri("/api/users/me/providers/${IdentityProvider.PASSWORD}")
             .accessTokenCookie(user.accessToken)
             .stepUpTokenCookie(user.stepUpToken)
             .exchange()
@@ -335,7 +386,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
         val user = registerOAuth2()
 
         webTestClient.delete()
-            .uri("/api/auth/providers/github")
+            .uri("/api/users/me/providers/github")
             .accessTokenCookie(user.accessToken)
             .stepUpTokenCookie(user.stepUpToken)
             .exchange()

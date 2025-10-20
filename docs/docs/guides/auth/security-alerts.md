@@ -47,7 +47,7 @@ You can learn more about OAUth2 [here](./oauth2.md).
 The alerts for connecting and disconnecting OAuth2 providers relate directly to the user's ability to log in using external services.
 
 * **Provider Connection (`oauth2-provider-connected`)**: Sent when a user successfully links a new external provider (like GitHub or Google) to their account, which happens during registration or when managing providers.
-* **Provider Disconnection (`oauth2-provider-disconnected`)**: Sent when a user removes a linked external provider using the [`DELETE /api/auth/providers/<provider-name>`](../../api/delete-identity-provider.api.mdx) endpoint.
+* **Provider Disconnection (`oauth2-provider-disconnected`)**: Sent when a user removes a linked external provider using the [`DELETE /api/users/me/providers/<provider-name>`](../../api/delete-identity-provider.api.mdx) endpoint.
   
 :::warning
 A user is generally not allowed to disconnect an OAuth2 identity if it is their only means of authentication.
