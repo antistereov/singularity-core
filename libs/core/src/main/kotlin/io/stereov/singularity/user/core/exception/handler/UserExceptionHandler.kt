@@ -35,7 +35,7 @@ class UserExceptionHandler {
         logger.warn { "${ex.javaClass.simpleName} - ${ex.message}" }
 
         val status = when (ex) {
-            is UserDoesNotExistException -> HttpStatus.UNAUTHORIZED
+            is UserDoesNotExistException -> HttpStatus.NOT_FOUND
             is EmailAlreadyTakenException -> HttpStatus.CONFLICT
             is InvalidRoleException -> HttpStatus.BAD_REQUEST
             is NoAppInfoFoundException -> HttpStatus.NOT_FOUND
