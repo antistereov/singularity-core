@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/auth/providers/oauth2")
+@RequestMapping("/api/users/me/providers/oauth2")
 @Tag(name = "OAuth2")
 @ConditionalOnProperty("singularity.auth.oauth2.enable", matchIfMissing = false)
 class OAuth2ProviderController(

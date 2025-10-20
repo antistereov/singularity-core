@@ -1,11 +1,19 @@
 package io.stereov.singularity.user.core.config
 
+import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.config.AuthenticationConfiguration
+import io.stereov.singularity.auth.core.properties.SecurityAlertProperties
 import io.stereov.singularity.auth.core.service.AuthorizationService
+import io.stereov.singularity.auth.core.service.SecurityAlertService
+import io.stereov.singularity.auth.core.service.token.AccessTokenService
+import io.stereov.singularity.auth.core.service.token.StepUpTokenService
+import io.stereov.singularity.auth.oauth2.service.IdentityProviderService
+import io.stereov.singularity.auth.oauth2.service.token.OAuth2ProviderConnectionTokenService
 import io.stereov.singularity.database.encryption.service.EncryptionSecretService
 import io.stereov.singularity.database.encryption.service.EncryptionService
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.email.core.config.EmailConfiguration
+import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.user.core.controller.UserController
