@@ -18,7 +18,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
-import org.bson.types.ObjectId
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -71,9 +70,9 @@ class IdentityProviderController(
         return ResponseEntity.ok(identityProviders)
     }
 
-    @GetMapping("{id}/providers/password-status")
+    @GetMapping("{email}/providers/password-status")
     @Operation(
-        summary = "Get Password Status by ID",
+        summary = "Get Password Status by Email",
         description = """
             Check if the user with given ID set up authentication using email and password.
             
@@ -97,8 +96,8 @@ class IdentityProviderController(
             )
         ]
     )
-    suspend fun getPasswordStatusById(@PathVariable id: ObjectId): ResponseEntity<PasswordStatusResponse> {
-        val res = PasswordStatusResponse(userService.findById(id).password != null)
+    suspend fun getPasswordStatusByEmail(@PathVariable email: String): ResponseEntity<PasswordStatusResponse> {
+        val res = PasswordStatusResponse(userService.findByEmail(email).password != null)
 
         return ResponseEntity.ok(res)
     }
