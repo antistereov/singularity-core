@@ -8,7 +8,6 @@ import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.core.mapper.UserMapper
-import io.stereov.singularity.user.core.service.UserService
 import io.swagger.v3.oas.annotations.ExternalDocumentation
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -30,7 +29,6 @@ class IdentityProviderController(
     private val identityProviderService: IdentityProviderService,
     private val authorizationService: AuthorizationService,
     private val userMapper: UserMapper,
-    private val userService: UserService,
 ) {
 
     @GetMapping("me/providers")
