@@ -4199,41 +4199,6 @@ paths:
         - adminScope
       - accessTokenCookie:
         - adminScope
-  /api/users/{id}/providers/password-status:
-    get:
-      tags:
-      - OAuth2
-      summary: Get Password Status by ID
-      description: |-
-        Check if the user with given ID set up authentication using email and password.
-
-        Users can authenticate using OAuth2 providers. In this case, password authentication is not enabled.
-        You can learn more about this [here](https://singularity.stereov.io/docs/guides/auth/oauth2).
-      externalDocs:
-        url: https://singularity.stereov.io/docs/guides/auth/oauth2#getting-connected-providers
-      operationId: getPasswordStatusById
-      parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          $ref: "#/components/schemas/ObjectId"
-      responses:
-        "200":
-          description: The list of identity providers.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/PasswordStatusResponse"
-        "404":
-          description: Invalid `AccessToken`.
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-      security:
-      - accessTokenHeader: []
-      - accessTokenCookie: []
   /api/security/secrets/rotate-keys/status:
     get:
       tags:
@@ -5285,6 +5250,10 @@ components:
           format: int32
         pageable:
           $ref: "#/components/schemas/PageableObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
         size:
           type: integer
           format: int32
@@ -5297,10 +5266,6 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
-        first:
-          type: boolean
-        last:
-          type: boolean
         numberOfElements:
           type: integer
           format: int32
@@ -5309,6 +5274,8 @@ components:
     PageableObject:
       type: object
       properties:
+        unpaged:
+          type: boolean
         paged:
           type: boolean
         pageNumber:
@@ -5317,8 +5284,6 @@ components:
         pageSize:
           type: integer
           format: int32
-        unpaged:
-          type: boolean
         offset:
           type: integer
           format: int64
@@ -5327,19 +5292,12 @@ components:
     SortObject:
       type: object
       properties:
-        sorted:
-          type: boolean
         unsorted:
+          type: boolean
+        sorted:
           type: boolean
         empty:
           type: boolean
-    PasswordStatusResponse:
-      type: object
-      properties:
-        set:
-          type: boolean
-      required:
-      - set
     IdentityProviderResponse:
       type: object
       properties:
@@ -5368,6 +5326,10 @@ components:
           format: int32
         pageable:
           $ref: "#/components/schemas/PageableObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
         size:
           type: integer
           format: int32
@@ -5380,10 +5342,6 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
-        first:
-          type: boolean
-        last:
-          type: boolean
         numberOfElements:
           type: integer
           format: int32
@@ -5400,6 +5358,10 @@ components:
           format: int32
         pageable:
           $ref: "#/components/schemas/PageableObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
         size:
           type: integer
           format: int32
@@ -5412,10 +5374,6 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
-        first:
-          type: boolean
-        last:
-          type: boolean
         numberOfElements:
           type: integer
           format: int32
@@ -5485,6 +5443,10 @@ components:
           format: int32
         pageable:
           $ref: "#/components/schemas/PageableObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
         size:
           type: integer
           format: int32
@@ -5497,10 +5459,6 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
-        first:
-          type: boolean
-        last:
-          type: boolean
         numberOfElements:
           type: integer
           format: int32

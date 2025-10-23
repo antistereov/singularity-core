@@ -199,12 +199,6 @@ const sidebar: SidebarsConfig = {
           label: "Generate OAuth2ProviderConnectionToken",
           className: "api-method post",
         },
-        {
-          type: "doc",
-          id: "api/get-password-status-by-id",
-          label: "Get Password Status by ID",
-          className: "api-method get",
-        },
       ],
     },
     {
@@ -1021,12 +1015,6 @@ const sidebar: SidebarsConfig = {
           type: "doc",
           id: "api/schemas/sortobject",
           label: "SortObject",
-          className: "schema",
-        },
-        {
-          type: "doc",
-          id: "api/schemas/passwordstatusresponse",
-          label: "PasswordStatusResponse",
           className: "schema",
         },
         {
