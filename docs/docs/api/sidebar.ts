@@ -899,12 +899,6 @@ const sidebar: SidebarsConfig = {
         },
         {
           type: "doc",
-          id: "api/schemas/registerresponse",
-          label: "RegisterResponse",
-          className: "schema",
-        },
-        {
-          type: "doc",
           id: "api/schemas/refreshtokenresponse",
           label: "RefreshTokenResponse",
           className: "schema",

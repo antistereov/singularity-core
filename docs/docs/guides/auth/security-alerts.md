@@ -19,6 +19,9 @@ These alerts cover fundamental changes to the user's primary login credentials a
 
 * **New Login (`login`)**: Sent when a successful login occurs from a previously unrecognized device or location.
   This alert will be sent after successfully requesting the endpoint [`POST /api/auth/login`](../../api/login.api.mdx).
+* **Registration with existing email (`registration-with-existing-email`):** Sent when trying to register
+  a new account using an email address that is already associated with an existing account through the endpoint
+  [`POST /api/auth/register`](../../api/register.api.mdx).
 * **Password Change (`password-changed`)**: Sent when the user successfully changes their password.
   This alert will be sent after successfully requesting the endpoint [`POST /api/users/me/password`](../../api/change-password-of-authorized-user.api.mdx).
 * **Email Change (`email-changed`)**: Sent when the user successfully changes their email address.
@@ -57,13 +60,13 @@ A user is generally not allowed to disconnect an OAuth2 identity if it is their 
 
 You can enable or disable automated email alerts for various security-critical events using the following properties:
 
-| Property                                                     | Type      | Description                                                                                                                                               | Default value |
-|--------------------------------------------------------------|-----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
-| singularity.auth.security-alert.login                        | `Boolean` | Enable automated email alerts for new logins. Alerts are typically sent when a successful login occurs from a previously unrecognized device or location. | `true`        |
-| singularity.auth.security-alert.email-changed                | `Boolean` | Enable automated email alerts for an email change.                                                                                                        | `true`        |
-| singularity.auth.security-alert.password-changed             | `Boolean` | Enable automated email alerts for a password change.                                                                                                      | `true`        |
-| singularity.auth.security-alert.two-factor-added             | `Boolean` | Enable automated email alerts for the addition of a new 2FA method.                                                                                       | `true`        |
-| singularity.auth.security-alert.two-factor-removed           | `Boolean` | Enable automated email alerts for the removal of an existing 2FA method.                                                                                  | `true`        |
-| singularity.auth.security-alert.oauth2-provider-connected    | `Boolean` | Enable automated email alerts for the connection of a new OAuth2 provider.                                                                                | `true`        |
-| singularity.auth.security-alert.oauth2-provider-disconnected | `Boolean` | Enable automated email alerts for the disconnection of an existing OAuth2 provider.                                                                       | `true`        |
-
+| Property                                                         | Type      | Description                                                                                                                                               | Default value |
+|------------------------------------------------------------------|-----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
+| singularity.auth.security-alert.login                            | `Boolean` | Enable automated email alerts for new logins. Alerts are typically sent when a successful login occurs from a previously unrecognized device or location. | `true`        |
+| singularity.auth.security-alert.registration-with-existing-email | `Boolean` | Enable automated email alerts for tries to register a new account with an email address that is already linked to an existing account.                    | `true`        |
+| singularity.auth.security-alert.email-changed                    | `Boolean` | Enable automated email alerts for an email change.                                                                                                        | `true`        |
+| singularity.auth.security-alert.password-changed                 | `Boolean` | Enable automated email alerts for a password change.                                                                                                      | `true`        |
+| singularity.auth.security-alert.two-factor-added                 | `Boolean` | Enable automated email alerts for the addition of a new 2FA method.                                                                                       | `true`        |
+| singularity.auth.security-alert.two-factor-removed               | `Boolean` | Enable automated email alerts for the removal of an existing 2FA method.                                                                                  | `true`        |
+| singularity.auth.security-alert.oauth2-provider-connected        | `Boolean` | Enable automated email alerts for the connection of a new OAuth2 provider.                                                                                | `true`        |
+| singularity.auth.security-alert.oauth2-provider-disconnected     | `Boolean` | Enable automated email alerts for the disconnection of an existing OAuth2 provider.                                                                       | `true`        |

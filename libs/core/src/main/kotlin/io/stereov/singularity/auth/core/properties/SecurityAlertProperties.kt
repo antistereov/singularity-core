@@ -11,4 +11,5 @@ data class SecurityAlertProperties(
     val twoFactorRemoved: Boolean = true,
     val oauth2ProviderConnected: Boolean = true,
     val oauth2ProviderDisconnected: Boolean = true,
+    val registrationWithExistingEmail: Boolean = true,
 )

@@ -236,9 +236,15 @@ class BaseSpringBootTest() {
     ): TestRegisterResponse {
         val actualEmail = "${counter.getAndIncrement()}$emailSuffix"
 
-        var responseCookies = webTestClient.post()
+        webTestClient.post()
             .uri("/api/auth/register?send-email=false")
-            .bodyValue(RegisterUserRequest(email = actualEmail, password = password, name = name, session = null))
+            .bodyValue(RegisterUserRequest(email = actualEmail, password = password, name = name))
+            .exchange()
+            .expectStatus().isOk
+
+        var responseCookies = webTestClient.post()
+            .uri("/api/auth/login")
+            .bodyValue(LoginRequest(actualEmail, password))
             .exchange()
             .expectStatus().isOk
             .returnResult<Void>()

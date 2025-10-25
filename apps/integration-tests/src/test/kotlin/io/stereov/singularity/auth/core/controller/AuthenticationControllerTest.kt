@@ -4,7 +4,10 @@ import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.auth.core.dto.request.RegisterUserRequest
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
 import io.stereov.singularity.auth.core.dto.request.StepUpRequest
-import io.stereov.singularity.auth.core.dto.response.*
+import io.stereov.singularity.auth.core.dto.response.AuthenticationStatusResponse
+import io.stereov.singularity.auth.core.dto.response.LoginResponse
+import io.stereov.singularity.auth.core.dto.response.RefreshTokenResponse
+import io.stereov.singularity.auth.core.dto.response.StepUpResponse
 import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.auth.oauth2.model.token.OAuth2TokenType
 import io.stereov.singularity.auth.twofactor.model.token.TwoFactorTokenType
@@ -22,70 +25,19 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
     @Test fun `register registers new user`() = runTest {
         val email = "test@email.com"
         val password = "Password\"3"
+        val req = RegisterUserRequest(email = email, password = password, name = "Name")
 
-        val response = webTestClient.post()
-            .uri("/api/auth/register")
-            .bodyValue(RegisterUserRequest(email = email, password = password, name = "Name"))
-            .exchange()
-            .expectStatus().isOk
-            .expectBody(RegisterResponse::class.java)
-            .returnResult()
-
-        val accessToken = response.responseCookies[SessionTokenType.Access.cookieName]
-            ?.firstOrNull()?.value
-        val refreshToken = response.responseCookies[SessionTokenType.Refresh.cookieName]
-            ?.firstOrNull()?.value
-        val userDto = response.responseBody!!.user
-
-        requireNotNull(accessToken) { "No access token provided in response" }
-        requireNotNull(refreshToken) { "No refresh token provided in response" }
-
-        Assertions.assertTrue(accessToken.isNotBlank())
-        Assertions.assertTrue(refreshToken.isNotBlank())
-
-        val userDetails = webTestClient.get()
-            .uri("/api/users/me")
-            .accessTokenCookie(accessToken)
-            .exchange()
-            .expectStatus().isOk
-            .expectBody(UserResponse::class.java)
-            .returnResult()
-            .responseBody
-
-        requireNotNull(userDetails) { "No UserDetails provided in response" }
-
-        val sessions = userService.findById(userDto.id).sensitive.sessions
-
-        Assertions.assertEquals(userDto.id, userDetails.id)
-        Assertions.assertEquals(1, sessions.size)
-
-        Assertions.assertEquals(1, userService.findAll().count())
-    }
-    @Test fun `register should save session correctly`() = runTest {
-        val req = RegisterUserRequest(
-            email = "email@example.com",
-            password = "Password$2",
-            name = "Name",
-            session = SessionInfoRequest("browser", "os")
-        )
-
-        val result = webTestClient.post()
+        webTestClient.post()
             .uri("/api/auth/register")
             .bodyValue(req)
             .exchange()
             .expectStatus().isOk
-            .expectBody(RegisterResponse::class.java)
-            .returnResult()
 
-        val accessToken = result.extractAccessToken()
-
-        val user = userService.findByEmail(req.email)
-
-        Assertions.assertEquals(1, user.sensitive.sessions.size)
-        val session = user.sensitive.sessions[accessToken.sessionId]!!
-
-        Assertions.assertEquals(req.session!!.browser, session.browser)
-        Assertions.assertEquals(req.session!!.os, session.os)
+        val userDetails = userService.findByEmail(email)
+        Assertions.assertEquals(userDetails.sensitive.name, req.name)
+        Assertions.assertTrue(hashService.checkBcrypt(password, userDetails.password!!))
+        Assertions.assertFalse(userDetails.sensitive.security.email.verified)
+        Assertions.assertEquals(1, userService.findAll().count())
     }
     @Test fun `register requires valid email`() = runTest {
         webTestClient.post()
@@ -102,17 +54,20 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
     }
     @Test fun `register requires non-taken email address`() = runTest {
         val user = registerUser()
+        val req = RegisterUserRequest(
+            email = user.email!!,
+            password = "Password$2",
+            name = "New Name"
+        )
         webTestClient.post()
             .uri("/api/auth/register")
-            .bodyValue(
-                RegisterUserRequest(
-                    email = user.email!!,
-                    password = "Password$2",
-                    name = "Name"
-                )
-            )
+            .bodyValue(req)
             .exchange()
-            .expectStatus().isEqualTo(HttpStatus.CONFLICT)
+            .expectStatus().isOk()
+
+        val userAfterReq = userService.findById(user.info.id)
+        Assertions.assertFalse(hashService.checkBcrypt( req.password, userAfterReq.password!!))
+        Assertions.assertNotEquals(userAfterReq.sensitive.name, req.name)
     }
     @Test fun `register requires password of min 8 characters`() = runTest {
         webTestClient.post()

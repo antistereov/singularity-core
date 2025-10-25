@@ -2,6 +2,7 @@ package io.stereov.singularity.test
 
 import io.mockk.clearMocks
 import io.stereov.singularity.auth.core.service.LoginAlertService
+import io.stereov.singularity.auth.core.service.RegistrationAlertService
 import io.stereov.singularity.auth.core.service.SecurityAlertService
 import io.stereov.singularity.test.config.MockSecurityAlertConfig
 import org.junit.jupiter.api.BeforeEach
@@ -15,10 +16,13 @@ class BaseSecurityAlertTest : BaseMailIntegrationTest() {
     lateinit var loginAlertService: LoginAlertService
     @Autowired
     lateinit var securityAlertService: SecurityAlertService
+    @Autowired
+    lateinit var registrationAlertService: RegistrationAlertService
 
     @BeforeEach
     fun setupAlertMocks() {
         clearMocks(loginAlertService)
         clearMocks(securityAlertService)
+        clearMocks(registrationAlertService)
     }
 }

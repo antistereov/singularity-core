@@ -235,6 +235,13 @@
       "description": "Enable automated email alerts for new logins. Email needs to be enabled and configured in the application."
     },
     {
+      "name": "singularity.auth.security-alert.registration-with-existing-email",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.stereov.singularity.auth.core.properties.SecurityAlertProperties",
+      "defaultValue": true,
+      "description": "Enable automated email alerts for tries to register a new account with an email address that is already linked to an existing account. "
+    },
+    {
       "name": "singularity.auth.security-alert.email-changed",
       "type": "java.lang.Boolean",
       "sourceType": "io.stereov.singularity.auth.core.properties.SecurityAlertProperties",

@@ -255,6 +255,7 @@ class AuthenticationConfiguration {
         twoFactorEmailCodeProperties: TwoFactorEmailCodeProperties,
         emailProperties: EmailProperties,
         twoFactorEmailProperties: TwoFactorEmailProperties,
+        registrationAlertService: RegistrationAlertService
     ): AuthenticationService {
         return AuthenticationService(
             userService,
@@ -266,6 +267,7 @@ class AuthenticationConfiguration {
             twoFactorEmailCodeProperties,
             emailProperties,
             twoFactorEmailProperties,
+            registrationAlertService,
         )
     }
 
@@ -354,6 +356,20 @@ class AuthenticationConfiguration {
         appProperties,
         securityAlertService,
         securityAlertProperties
+    )
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun registrationAlertService(
+        translateService: TranslateService,
+        templateService: TemplateService,
+        appProperties: AppProperties,
+        emailService: EmailService
+    ) = RegistrationAlertService(
+        translateService,
+        templateService,
+        appProperties,
+        emailService
     )
 
     @Bean

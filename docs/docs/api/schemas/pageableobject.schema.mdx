@@ -6,7 +6,7 @@ sidebar_label: "PageableObject"
 hide_title: true
 hide_table_of_contents: true
 schema: true
-sample: {"unpaged":true,"paged":true,"pageNumber":0,"pageSize":0,"offset":0,"sort":{"unsorted":true,"sorted":true,"empty":true}}
+sample: {"offset":0,"sort":{"empty":true,"sorted":true,"unsorted":true},"paged":true,"pageNumber":0,"pageSize":0,"unpaged":true}
 custom_edit_url: null
 ---
 
@@ -25,7 +25,7 @@ import Heading from "@theme/Heading";
 
 
 <Schema
-  schema={{"type":"object","properties":{"unpaged":{"type":"boolean"},"paged":{"type":"boolean"},"pageNumber":{"type":"integer","format":"int32"},"pageSize":{"type":"integer","format":"int32"},"offset":{"type":"integer","format":"int64"},"sort":{"type":"object","properties":{"unsorted":{"type":"boolean"},"sorted":{"type":"boolean"},"empty":{"type":"boolean"}},"title":"SortObject"}},"title":"PageableObject"}}
+  schema={{"type":"object","properties":{"offset":{"type":"integer","format":"int64"},"sort":{"type":"object","properties":{"empty":{"type":"boolean"},"sorted":{"type":"boolean"},"unsorted":{"type":"boolean"}},"title":"SortObject"},"paged":{"type":"boolean"},"pageNumber":{"type":"integer","format":"int32"},"pageSize":{"type":"integer","format":"int32"},"unpaged":{"type":"boolean"}},"title":"PageableObject"}}
   schemaType={"response"}
 >
   

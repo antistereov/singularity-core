@@ -2,6 +2,7 @@ package io.stereov.singularity.test.config
 
 import io.mockk.mockk
 import io.stereov.singularity.auth.core.service.LoginAlertService
+import io.stereov.singularity.auth.core.service.RegistrationAlertService
 import io.stereov.singularity.auth.core.service.SecurityAlertService
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
@@ -14,4 +15,7 @@ class MockSecurityAlertConfig {
 
     @Bean
     fun securityAlertService(): SecurityAlertService = mockk(relaxed = true)
+
+    @Bean
+    fun registrationAlertService(): RegistrationAlertService = mockk(relaxed = true)
 }

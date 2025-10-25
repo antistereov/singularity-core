@@ -7,7 +7,10 @@ import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.auth.core.dto.request.RegisterUserRequest
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
 import io.stereov.singularity.auth.core.dto.request.StepUpRequest
-import io.stereov.singularity.auth.core.dto.response.*
+import io.stereov.singularity.auth.core.dto.response.AuthenticationStatusResponse
+import io.stereov.singularity.auth.core.dto.response.LoginResponse
+import io.stereov.singularity.auth.core.dto.response.RefreshTokenResponse
+import io.stereov.singularity.auth.core.dto.response.StepUpResponse
 import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.auth.core.properties.AuthProperties
 import io.stereov.singularity.auth.core.properties.SecurityAlertProperties
@@ -75,20 +78,20 @@ class AuthenticationController(
         summary = "Register",
         description = """
             Registers a new user account with `email`, `password`, and `name`.
-        
+            If successful, the user will receive an email with a link to verify the email address
+            if email is [enabled and configured correctly](https://singularity.stereov.io/docs/guides/email/configuration).
+            
             ### Requirements
             - The `email` should be a valid email address (e.g., "test@example.com")
               that is not associated to an existing account.
             - The `password` must be at least 8 characters long and include at least one uppercase letter, 
               one lowercase letter, one number, and one special character (!@#$%^&*()_+={}[]|\:;'"<>,.?/).
 
-            **Optional session data:**
-            - The `session` object can be included in the request body.
-            - Inside the `session` object, you can provide the following optional fields:
-                - `browser`: The name of the browser used (e.g., "Chrome", "Firefox").
-                - `os`: The operating system of the device (e.g., "Windows", "macOS", "Android").
-        
-            This information helps users identify and manage authorized sessions, improving overall account security.
+            ### Behavior for Registering Account with Existing Email
+            
+            If the email is already connected to an existing account, a warning will be sent to the
+            corresponding email address informing the user
+            if email is [enabled and configured correctly](https://singularity.stereov.io/docs/guides/email/configuration).
             
             ### Locale
             
@@ -98,23 +101,12 @@ class AuthenticationController(
             
             If no locale is specified, the applications default locale will be used.
             You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
-            
-            ### Tokens
-            
-            If successful, [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) and 
-            [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token) 
-            will automatically be set as HTTP-only cookies.
-            If [header authentication](https://singularity.stereov.io/docs/guides/auth/authentication#header-authentication) is enabled,
-            [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) and 
-            [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)
-            will be returned in the response body and can be used as 
-            bearer tokens in the authorization header for upcoming requests.
         """,
         externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/authentication#registering-users"),
         responses = [
             ApiResponse(
                 responseCode = "200",
-                description = "Registration successful. Returns user details and tokens if header authentication is enabled.",
+                description = "Request was successful. An email was sent to the given email address. If this email exists, a notification will be send. If the email doesn't exist, an account will be created.",
             ),
             ApiResponse(
                 responseCode = "304",
@@ -125,39 +117,19 @@ class AuthenticationController(
                 responseCode = "400",
                 description = "`email` or `password` are invalid.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "409",
-                description = "The email is already in use.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
     )
     suspend fun register(
-        exchange: ServerWebExchange,
         @RequestBody @Valid payload: RegisterUserRequest,
         @RequestParam("send-email") sendEmail: Boolean = true,
         @RequestParam locale: Locale?
-    ): ResponseEntity<RegisterResponse> {
+    ): ResponseEntity<SuccessResponse> {
         logger.info { "Executing register" }
 
-        val user = authenticationService.register(payload, sendEmail, locale)
-        val sessionId = UUID.randomUUID()
+        authenticationService.register(payload, sendEmail, locale)
 
-        val accessToken = accessTokenService.create(user, sessionId)
-        val refreshToken = refreshTokenService.create(user, sessionId, payload.session, exchange)
-
-        val res = RegisterResponse(
-            userMapper.toResponse(user),
-            if (authProperties.allowHeaderAuthentication) accessToken.value else null,
-            if (authProperties.allowHeaderAuthentication) refreshToken.value else null,
-            geoLocationService.getLocationOrNull(exchange.request)
-        )
-
-        return ResponseEntity.ok()
-            .header("Set-Cookie", cookieCreator.createCookie(accessToken).toString())
-            .header("Set-Cookie", cookieCreator.createCookie(refreshToken).toString())
-            .body(res)
+        return ResponseEntity.ok(SuccessResponse())
     }
 
     @PostMapping("/login")
@@ -191,7 +163,7 @@ class AuthenticationController(
             
             A locale can be specified for this request. 
             This will be used for the email 2FA code if this method is enabled for the user.
-            You can learn more about 2FA through email [here](/docs/guides/auth/two-factor#email).
+            You can learn more about 2FA through email [here](https://singularity.stereov.io/docs/guides/auth/two-factor#email).
             
             If no locale is specified, the applications default locale will be used.
             You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).

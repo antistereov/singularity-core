@@ -62,28 +62,21 @@ paths:
       - Authentication
       summary: Register
       description: "Registers a new user account with `email`, `password`, and `name`.\n\
+        If successful, the user will receive an email with a link to verify the email\
+        \ address\nif email is [enabled and configured correctly](https://singularity.stereov.io/docs/guides/email/configuration).\n\
         \n### Requirements\n- The `email` should be a valid email address (e.g., \"\
         test@example.com\")\n  that is not associated to an existing account.\n- The\
         \ `password` must be at least 8 characters long and include at least one uppercase\
         \ letter, \n  one lowercase letter, one number, and one special character\
-        \ (!@#$%^&*()_+={}[]|\\:;'\"<>,.?/).\n\n**Optional session data:**\n- The\
-        \ `session` object can be included in the request body.\n- Inside the `session`\
-        \ object, you can provide the following optional fields:\n    - `browser`:\
-        \ The name of the browser used (e.g., \"Chrome\", \"Firefox\").\n    - `os`:\
-        \ The operating system of the device (e.g., \"Windows\", \"macOS\", \"Android\"\
-        ).\n\nThis information helps users identify and manage authorized sessions,\
-        \ improving overall account security.\n\n### Locale\n\nA locale can be specified\
-        \ for this request. \nThis will be used for the email verification email.\n\
-        You can learn more about email verification [here](https://singularity.stereov.io/docs/guides/auth/authentication#email-verification).\n\
+        \ (!@#$%^&*()_+={}[]|\\:;'\"<>,.?/).\n\n### Behavior for Registering Account\
+        \ with Existing Email\n\nIf the email is already connected to an existing\
+        \ account, a warning will be sent to the\ncorresponding email address informing\
+        \ the user\nif email is [enabled and configured correctly](https://singularity.stereov.io/docs/guides/email/configuration).\n\
+        \n### Locale\n\nA locale can be specified for this request. \nThis will be\
+        \ used for the email verification email.\nYou can learn more about email verification\
+        \ [here](https://singularity.stereov.io/docs/guides/auth/authentication#email-verification).\n\
         \nIf no locale is specified, the applications default locale will be used.\n\
-        You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).\n\
-        \n### Tokens\n\nIf successful, [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
-        \ and \n[`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)\
-        \ \nwill automatically be set as HTTP-only cookies.\nIf [header authentication](https://singularity.stereov.io/docs/guides/auth/authentication#header-authentication)\
-        \ is enabled,\n[`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
-        \ and \n[`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token)\n\
-        will be returned in the response body and can be used as \nbearer tokens in\
-        \ the authorization header for upcoming requests."
+        You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration)."
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/auth/authentication#registering-users
       operationId: register
@@ -106,12 +99,13 @@ paths:
         required: true
       responses:
         "200":
-          description: Registration successful. Returns user details and tokens if
-            header authentication is enabled.
+          description: "Request was successful. An email was sent to the given email\
+            \ address. If this email exists, a notification will be send. If the email\
+            \ doesn't exist, an account will be created."
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/RegisterResponse"
+                $ref: "#/components/schemas/SuccessResponse"
         "304":
           description: User is already authenticated. Authenticated session state
             has not changed since last request.
@@ -121,12 +115,6 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
         "400":
           description: '`email` or `password` are invalid.'
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "409":
-          description: The email is already in use.
           content:
             '*/*':
               schema:
@@ -156,7 +144,7 @@ paths:
         \ is enabled.\n\nYou can complete the login through the endpoint [`POST /api/auth/2fa/login`](https://singularity.stereov.io/docs/api/complete-login).\n\
         \n### Locale\n\nA locale can be specified for this request. \nThis will be\
         \ used for the email 2FA code if this method is enabled for the user.\nYou\
-        \ can learn more about 2FA through email [here](/docs/guides/auth/two-factor#email).\n\
+        \ can learn more about 2FA through email [here](https://singularity.stereov.io/docs/guides/auth/two-factor#email).\n\
         \nIf no locale is specified, the applications default locale will be used.\n\
         You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).\n\
         \n### Tokens\n- If 2FA is disabled and the request is successful, \n  [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
@@ -5025,26 +5013,10 @@ components:
           type: string
           description: The user's name. Makes the user experience more personalized
           minLength: 1
-        session:
-          $ref: "#/components/schemas/SessionInfoRequest"
-          description: "Information about the user's session, for security purposes."
       required:
       - email
       - name
       - password
-    RegisterResponse:
-      type: object
-      properties:
-        user:
-          $ref: "#/components/schemas/UserResponse"
-        accessToken:
-          type: string
-        refreshToken:
-          type: string
-        location:
-          $ref: "#/components/schemas/GeolocationResponse"
-      required:
-      - user
     RefreshTokenResponse:
       type: object
       properties:
@@ -5248,12 +5220,6 @@ components:
         totalPages:
           type: integer
           format: int32
-        pageable:
-          $ref: "#/components/schemas/PageableObject"
-        first:
-          type: boolean
-        last:
-          type: boolean
         size:
           type: integer
           format: int32
@@ -5269,13 +5235,22 @@ components:
         numberOfElements:
           type: integer
           format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
         empty:
           type: boolean
     PageableObject:
       type: object
       properties:
-        unpaged:
-          type: boolean
+        offset:
+          type: integer
+          format: int64
+        sort:
+          $ref: "#/components/schemas/SortObject"
         paged:
           type: boolean
         pageNumber:
@@ -5284,19 +5259,16 @@ components:
         pageSize:
           type: integer
           format: int32
-        offset:
-          type: integer
-          format: int64
-        sort:
-          $ref: "#/components/schemas/SortObject"
+        unpaged:
+          type: boolean
     SortObject:
       type: object
       properties:
-        unsorted:
+        empty:
           type: boolean
         sorted:
           type: boolean
-        empty:
+        unsorted:
           type: boolean
     IdentityProviderResponse:
       type: object
@@ -5324,12 +5296,6 @@ components:
         totalPages:
           type: integer
           format: int32
-        pageable:
-          $ref: "#/components/schemas/PageableObject"
-        first:
-          type: boolean
-        last:
-          type: boolean
         size:
           type: integer
           format: int32
@@ -5345,6 +5311,12 @@ components:
         numberOfElements:
           type: integer
           format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
         empty:
           type: boolean
     PageTagResponse:
@@ -5356,12 +5328,6 @@ components:
         totalPages:
           type: integer
           format: int32
-        pageable:
-          $ref: "#/components/schemas/PageableObject"
-        first:
-          type: boolean
-        last:
-          type: boolean
         size:
           type: integer
           format: int32
@@ -5377,6 +5343,12 @@ components:
         numberOfElements:
           type: integer
           format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
         empty:
           type: boolean
     ArticleOverviewResponse:
@@ -5441,12 +5413,6 @@ components:
         totalPages:
           type: integer
           format: int32
-        pageable:
-          $ref: "#/components/schemas/PageableObject"
-        first:
-          type: boolean
-        last:
-          type: boolean
         size:
           type: integer
           format: int32
@@ -5462,6 +5428,12 @@ components:
         numberOfElements:
           type: integer
           format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
         empty:
           type: boolean
     AuthenticationStatusResponse:
