@@ -6,10 +6,8 @@ import io.stereov.singularity.auth.oauth2.dto.request.AddPasswordAuthenticationR
 import io.stereov.singularity.auth.oauth2.service.IdentityProviderService
 import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.model.OpenApiConstants
-import io.stereov.singularity.user.core.dto.response.PasswordStatusResponse
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.core.mapper.UserMapper
-import io.stereov.singularity.user.core.service.UserService
 import io.swagger.v3.oas.annotations.ExternalDocumentation
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -31,7 +29,6 @@ class IdentityProviderController(
     private val identityProviderService: IdentityProviderService,
     private val authorizationService: AuthorizationService,
     private val userMapper: UserMapper,
-    private val userService: UserService,
 ) {
 
     @GetMapping("me/providers")
@@ -68,38 +65,6 @@ class IdentityProviderController(
             .map { IdentityProviderResponse(it.key) }
 
         return ResponseEntity.ok(identityProviders)
-    }
-
-    @GetMapping("{email}/providers/password-status")
-    @Operation(
-        summary = "Get Password Status by Email",
-        description = """
-            Check if the user with given ID set up authentication using email and password.
-            
-            Users can authenticate using OAuth2 providers. In this case, password authentication is not enabled.
-            You can learn more about this [here](https://singularity.stereov.io/docs/guides/auth/oauth2).
-        """,
-        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/auth/oauth2#getting-connected-providers"),
-        security = [
-            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER),
-            SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE)
-        ],
-        responses = [
-            ApiResponse(
-                responseCode = "200",
-                description = "The list of identity providers.",
-            ),
-            ApiResponse(
-                responseCode = "404",
-                description = "Invalid `AccessToken`.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            )
-        ]
-    )
-    suspend fun getPasswordStatusByEmail(@PathVariable email: String): ResponseEntity<PasswordStatusResponse> {
-        val res = PasswordStatusResponse(userService.findByEmail(email).password != null)
-
-        return ResponseEntity.ok(res)
     }
 
     @PostMapping("me/providers/password")

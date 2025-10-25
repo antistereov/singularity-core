@@ -9,12 +9,12 @@ import io.stereov.singularity.auth.core.dto.request.StepUpRequest
 import io.stereov.singularity.auth.core.exception.AuthException
 import io.stereov.singularity.auth.core.exception.model.InvalidCredentialsException
 import io.stereov.singularity.auth.core.exception.model.UserAlreadyAuthenticatedException
+import io.stereov.singularity.auth.core.properties.SecurityAlertProperties
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailProperties
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.global.exception.model.MissingRequestParameterException
-import io.stereov.singularity.user.core.exception.model.EmailAlreadyTakenException
 import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.service.UserService
 import org.springframework.stereotype.Service
@@ -30,7 +30,9 @@ class AuthenticationService(
     private val emailVerificationService: EmailVerificationService,
     private val factorMailCodeProperties: TwoFactorEmailCodeProperties,
     private val emailProperties: EmailProperties,
-    private val twoFactorEmailProperties: TwoFactorEmailProperties
+    private val twoFactorEmailProperties: TwoFactorEmailProperties,
+    private val registrationAlertService: RegistrationAlertService,
+    private val securityAlertProperties: SecurityAlertProperties
 ) {
 
     private val logger: KLogger
@@ -70,18 +72,19 @@ class AuthenticationService(
      * @param payload The registration request containing the user's email, password, and name.
      *
      * @return The [UserDocument] of the registered user.
-     *
-     * @throws EmailAlreadyTakenException If the email already exists in the system.
-     * @throws io.stereov.singularity.auth.core.exception.AuthException If the user document does not contain an ID.
      */
-    suspend fun register(payload: RegisterUserRequest, sendEmail: Boolean, locale: Locale?): UserDocument {
+    suspend fun register(payload: RegisterUserRequest, sendEmail: Boolean, locale: Locale?) {
         logger.debug { "Registering user ${payload.email}" }
 
         if (authorizationService.isAuthenticated())
             throw UserAlreadyAuthenticatedException("Register failed: user is already authenticated")
 
-        if (userService.existsByEmail(payload.email)) {
-            throw EmailAlreadyTakenException("Failed to register user ${payload.email}")
+        val user = userService.findByEmailOrNull(payload.email)
+        if (user != null) {
+            if (securityAlertProperties.registrationWithExistingEmail && emailProperties.enable ) {
+                registrationAlertService.send(user, locale)
+            }
+            return
         }
 
         val userDocument = UserDocument.ofPassword(
@@ -96,7 +99,7 @@ class AuthenticationService(
 
         if (sendEmail && emailProperties.enable) emailVerificationService.sendVerificationEmail(savedUserDocument, locale)
 
-        return savedUserDocument
+        return
     }
 
     suspend fun logout(): UserDocument {

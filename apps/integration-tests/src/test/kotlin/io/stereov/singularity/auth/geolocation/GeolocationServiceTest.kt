@@ -1,6 +1,6 @@
 package io.stereov.singularity.auth.geolocation
 
-import io.stereov.singularity.auth.core.dto.request.RegisterUserRequest
+import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
 import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.test.runTest
@@ -43,19 +43,22 @@ class GeolocationServiceTest : BaseIntegrationTest() {
     }
 
     @Test fun `it should resolve geolocation in session`() = runTest {
-        val email = "test@example.com"
-        val body = RegisterUserRequest(email = email, password = "Password$2", "Name")
+        val user = registerUser()
+        user.info.clearSessions()
+        userService.save(user.info)
+
+        val body = LoginRequest(email = user.email!!, password = user.password!!)
 
         webTestClient.post()
-            .uri("/api/auth/register")
+            .uri("/api/auth/login")
             .header("X-Real-IP", "93.128.176.188")
             .bodyValue(body)
             .exchange()
             .expectStatus()
             .isOk
 
-        val user = userService.findByEmail(email)
-        val location = user.sensitive.sessions.values.first().location
+        val updatedUser = userService.findById(user.info.id)
+        val location = updatedUser.sensitive.sessions.values.first().location
 
         println(location)
 

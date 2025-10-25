@@ -49,12 +49,10 @@ class OAuth2Configuration {
         identityProviderService: IdentityProviderService,
         authorizationService: AuthorizationService,
         userMapper: UserMapper,
-        userService: UserService
     ) = IdentityProviderController(
         identityProviderService,
         authorizationService,
         userMapper,
-        userService
     )
 
     @Bean

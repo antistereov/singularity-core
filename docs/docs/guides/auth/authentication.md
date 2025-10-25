@@ -61,12 +61,17 @@ curl -X GET 'https://example.com/api/users/me' \
 
 A new user can be registered by calling the endpoint [`POST /api/auth/register`](../../api/register.api.mdx).
 Users are uniquely identified by email address. 
-An error response will be returned if a register request is send with an email that is already used.
 
-After the registration succeeded,
-an HTTP-only cookie with [`AccessToken`](./tokens#access-token) and [`RefreshToken`](./tokens#refresh-token) will be set automatically.
-If [header authentication](./authentication#header-authentication) is enabled,
-access token and refresh token will be returned in the response body.
+If successful and if the email is not linked to any existing account, 
+the user will receive an email with a link to verify the email address.
+
+In case that email is already connected to an existing account, a warning will be sent to the
+corresponding email address informing the user.
+
+:::info Security
+To prevent account enumeration attacks, this endpoint will return response code `201`
+no matter if a new account is created or not.
+:::
 
 ### Email Verification
 

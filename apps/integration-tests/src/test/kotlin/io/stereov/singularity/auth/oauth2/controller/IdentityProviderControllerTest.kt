@@ -5,7 +5,6 @@ import io.stereov.singularity.auth.core.dto.response.IdentityProviderResponse
 import io.stereov.singularity.auth.core.model.IdentityProvider
 import io.stereov.singularity.auth.oauth2.dto.request.AddPasswordAuthenticationRequest
 import io.stereov.singularity.test.BaseIntegrationTest
-import io.stereov.singularity.user.core.dto.response.PasswordStatusResponse
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.core.model.identity.UserIdentity
 import kotlinx.coroutines.test.runTest
@@ -50,56 +49,6 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
         webTestClient.get()
             .uri("/api/users/me/providers")
             .exchange().expectStatus().isUnauthorized
-    }
-
-    @Test fun `getPasswordStatus works`() = runTest {
-        val user = registerUser()
-
-        val res = webTestClient.get()
-            .uri("/api/users/${user.info.sensitive.email}/providers/password-status")
-            .exchange().expectStatus().isOk
-            .expectBody(PasswordStatusResponse::class.java)
-            .returnResult()
-
-        val body = requireNotNull(res.responseBody)
-
-        Assertions.assertTrue(body.set)
-    }
-    @Test fun `getPasswordStatus works also when oauth2 is added`() = runTest {
-        val user = registerUser()
-        user.info.sensitive.identities["github"] = UserIdentity(null, "id")
-        userService.save(user.info)
-
-        val res = webTestClient.get()
-            .uri("/api/users/${user.info.sensitive.email}/providers/password-status")
-            .exchange().expectStatus().isOk
-            .expectBody(PasswordStatusResponse::class.java)
-            .returnResult()
-
-        val body = requireNotNull(res.responseBody)
-
-        Assertions.assertTrue(body.set)
-    }
-    @Test fun `getPasswordStatus works when only oauth2`() = runTest {
-        val user = registerOAuth2()
-
-        val res = webTestClient.get()
-            .uri("/api/users/${user.info.sensitive.email}/providers/password-status")
-            .exchange().expectStatus().isOk
-            .expectBody(PasswordStatusResponse::class.java)
-            .returnResult()
-
-        val body = requireNotNull(res.responseBody)
-
-        Assertions.assertFalse(body.set)
-    }
-    @Test fun `getPasswordStatus returns 404 when user not found`() = runTest {
-        val user = registerOAuth2()
-        userService.deleteById(user.info.id)
-
-        webTestClient.get()
-            .uri("/api/users/${user.info.sensitive.email}/providers/password-status")
-            .exchange().expectStatus().isNotFound
     }
 
     @Test fun `addPassword works`() = runTest {

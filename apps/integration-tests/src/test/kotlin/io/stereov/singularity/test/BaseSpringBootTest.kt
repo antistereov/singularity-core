@@ -43,6 +43,7 @@ import io.stereov.singularity.file.core.service.DownloadService
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.global.properties.UiProperties
+import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.test.config.MockConfig
 import io.stereov.singularity.user.core.model.Role
 import io.stereov.singularity.user.core.model.UserDocument
@@ -236,32 +237,34 @@ class BaseSpringBootTest() {
     ): TestRegisterResponse {
         val actualEmail = "${counter.getAndIncrement()}$emailSuffix"
 
-        var responseCookies = webTestClient.post()
+        webTestClient.post()
             .uri("/api/auth/register?send-email=false")
-            .bodyValue(RegisterUserRequest(email = actualEmail, password = password, name = name, session = null))
+            .bodyValue(RegisterUserRequest(email = actualEmail, password = password, name = name))
             .exchange()
             .expectStatus().isOk
-            .returnResult<Void>()
-            .responseCookies
-
-        var accessToken = responseCookies[SessionTokenType.Access.cookieName]?.firstOrNull()?.value
-        var refreshToken = responseCookies[SessionTokenType.Refresh.cookieName]?.firstOrNull()?.value
-
-        requireNotNull(accessToken) { "No access token contained in response" }
-        requireNotNull(refreshToken) { "No refresh token contained in response" }
 
         var twoFactorToken: String? = null
         var twoFactorRecovery: String? = null
         var twoFactorSecret: String? = null
 
         var user = userService.findByEmail(actualEmail)
-        var stepUpToken = stepUpTokenService.create(user.id, user.sensitive.sessions.keys.first())
+
+        var sessionId = UUID.randomUUID()
+        var accessToken: String? = accessTokenService.create(user, sessionId).value
+        val refreshTokenId = Random.generateString(20)
+        var refreshToken: String? = refreshTokenService.create(user.id, sessionId, refreshTokenId).value
+        var stepUpToken = stepUpTokenService.create(user.id, sessionId)
+
+        user.updateLastActive()
+        user.addOrUpdatesession(sessionId, SessionInfo(refreshTokenId = refreshTokenId))
+
+        userService.save(user)
 
         if (totpEnabled) {
 
             val twoFactorRes = webTestClient.get()
                 .uri("/api/auth/2fa/totp/setup")
-                .accessTokenCookie(accessToken)
+                .accessTokenCookie(accessToken!!)
                 .stepUpTokenCookie(stepUpToken.value)
                 .exchange()
                 .expectStatus().isOk
@@ -298,7 +301,7 @@ class BaseSpringBootTest() {
                 ?.firstOrNull()
                 ?.value
 
-            responseCookies = webTestClient.post()
+            val responseCookies = webTestClient.post()
                 .uri("/api/auth/2fa/login")
                 .bodyValue(CompleteStepUpRequest(totp = gAuth.getTotpPassword(twoFactorSecret)))
                 .twoFactorAuthenticationTokenCookie(twoFactorToken!!)
@@ -313,7 +316,8 @@ class BaseSpringBootTest() {
             requireNotNull(accessToken) { "No access token contained in response" }
             requireNotNull(refreshToken) { "No refresh token contained in response" }
 
-            stepUpToken = stepUpTokenService.create(user.id, accessTokenService.extract(accessToken).sessionId)
+            sessionId =  accessTokenService.extract(accessToken).sessionId
+            stepUpToken = stepUpTokenService.create(user.id, sessionId)
         }
 
         if (email2faEnabled) {
@@ -326,13 +330,19 @@ class BaseSpringBootTest() {
 
                 webTestClient.post()
                     .uri("/api/auth/2fa/email/enable")
-                    .accessTokenCookie(accessToken)
+                    .accessTokenCookie(accessToken!!)
                     .stepUpTokenCookie(stepUpToken.value)
                     .bodyValue(EnableEmailTwoFactorMethodRequest(code))
                     .exchange()
                     .expectStatus().isOk
 
                 user = userService.findById(user.id)
+
+                refreshToken = refreshTokenService.create(user.id, sessionId, refreshTokenId).value
+                stepUpToken = stepUpTokenService.create(user.id, sessionId)
+
+                user.updateLastActive()
+                user.addOrUpdatesession(sessionId, SessionInfo(refreshTokenId = refreshTokenId))
 
                 twoFactorToken = twoFactorAuthenticationTokenService.create(user.id).value
             }
@@ -351,14 +361,12 @@ class BaseSpringBootTest() {
         val mailVerificationToken = user.sensitive.security.email.verificationSecret
         val passwordResetToken = user.sensitive.security.password.resetSecret
 
-        val sessionId = user.sensitive.sessions.keys.first()
-
         return TestRegisterResponse(
             user,
             actualEmail,
             password,
             accessTokenService.create(user, sessionId).value,
-            refreshToken,
+            refreshToken!!,
             twoFactorToken,
             stepUpToken.value,
             twoFactorSecret,
