@@ -9,6 +9,7 @@ import io.stereov.singularity.auth.core.dto.request.StepUpRequest
 import io.stereov.singularity.auth.core.exception.AuthException
 import io.stereov.singularity.auth.core.exception.model.InvalidCredentialsException
 import io.stereov.singularity.auth.core.exception.model.UserAlreadyAuthenticatedException
+import io.stereov.singularity.auth.core.properties.SecurityAlertProperties
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailProperties
 import io.stereov.singularity.database.hash.service.HashService
@@ -30,7 +31,8 @@ class AuthenticationService(
     private val factorMailCodeProperties: TwoFactorEmailCodeProperties,
     private val emailProperties: EmailProperties,
     private val twoFactorEmailProperties: TwoFactorEmailProperties,
-    private val registrationAlertService: RegistrationAlertService
+    private val registrationAlertService: RegistrationAlertService,
+    private val securityAlertProperties: SecurityAlertProperties
 ) {
 
     private val logger: KLogger
@@ -79,10 +81,10 @@ class AuthenticationService(
 
         val user = userService.findByEmailOrNull(payload.email)
         if (user != null) {
-            if (sendEmail && emailProperties.enable) {
+            if (securityAlertProperties.registrationWithExistingEmail && emailProperties.enable ) {
                 registrationAlertService.send(user, locale)
-                return
             }
+            return
         }
 
         val userDocument = UserDocument.ofPassword(
