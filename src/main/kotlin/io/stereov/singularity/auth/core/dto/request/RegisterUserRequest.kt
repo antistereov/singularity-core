@@ -28,7 +28,4 @@ data class RegisterUserRequest(
     @field:NotBlank
     @field:Schema(description = "The user's name. Makes the user experience more personalized")
     val name: String,
-
-    @field:Schema(description = "Information about the user's session, for security purposes.", required = false)
-    val session: SessionInfoRequest? = null,
 )

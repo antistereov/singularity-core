@@ -3,6 +3,7 @@ package io.stereov.singularity.auth.core.service
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.model.SecurityAlertType
 import io.stereov.singularity.auth.guest.exception.model.GuestCannotPerformThisActionException
+import io.stereov.singularity.auth.oauth2.util.getWellKnownProvider
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
 import io.stereov.singularity.email.core.service.EmailService
 import io.stereov.singularity.email.core.util.EmailConstants
@@ -25,6 +26,7 @@ class SecurityAlertService(
 ) {
 
     private val logger = KotlinLogging.logger {  }
+    val slug = "security_alert"
 
     suspend fun send(
         user: UserDocument,
@@ -49,7 +51,6 @@ class SecurityAlertService(
                 ?: throw InvalidDocumentException("No email specified in user document")
         }
 
-        val slug = "security_alert"
         val templatePath = "${EmailConstants.TEMPLATE_DIR}/$slug.html"
         val providerName = providerKey
             ?.let { getWellKnownProvider(it) }
@@ -58,6 +59,7 @@ class SecurityAlertService(
             TwoFactorMethod.TOTP -> "TOTP"
             TwoFactorMethod.EMAIL -> "Email"
         } } ?: "Unknown"
+
 
         val subject = translateService.translateResourceKey(TranslateKey("$slug.subject.${alertType.value}"),
             EmailConstants.RESOURCE_BUNDLE, actualLocale)
@@ -71,35 +73,10 @@ class SecurityAlertService(
                 "provider_name" to providerName,
                 "2fa_method" to twoFactorMethodName,
                 "old_email" to (oldEmail ?: "unknown"),
-                "new_email" to (newEmail ?: "unknown")
+                "new_email" to (newEmail ?: "unknown"),
             )))
             .build()
 
         emailService.sendEmail(email, subject, content, actualLocale)
     }
-
-    fun getWellKnownProvider(providerName: String): String = when(providerName.lowercase()) {
-        "google" -> "Google"
-        "github" -> "GitHub"
-        "gitlab" -> "GitLab"
-        "microsoft" -> "Microsoft"
-        "facebook" -> "Facebook"
-        "apple" -> "Apple"
-        "linkedin" -> "LinkedIn"
-        "slack" -> "Slack"
-        "twitter" -> "Twitter"
-        "amazon" -> "Amazon"
-        "salesforce" -> "Salesforce"
-        "atlassian" -> "Atlassian"
-        "discord" -> "Discord"
-        "zoom" -> "Zoom"
-        "okta" -> "Okta"
-        "azure" -> "Azure"
-        "autodesk" -> "Autodesk"
-        "spotify" -> "Spotify"
-
-        else -> providerName
-    }
-
-
 }
