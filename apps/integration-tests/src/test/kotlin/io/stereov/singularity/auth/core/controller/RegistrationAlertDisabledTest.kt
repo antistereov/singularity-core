@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 
-class RegisrationAlertDisabledTest : BaseMailIntegrationTest() {
+class RegistrationAlertDisabledTest : BaseMailIntegrationTest() {
 
     @Test fun `does not send email`() = runTest {
         val user = registerUser()

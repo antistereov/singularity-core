@@ -255,7 +255,8 @@ class AuthenticationConfiguration {
         twoFactorEmailCodeProperties: TwoFactorEmailCodeProperties,
         emailProperties: EmailProperties,
         twoFactorEmailProperties: TwoFactorEmailProperties,
-        registrationAlertService: RegistrationAlertService
+        registrationAlertService: RegistrationAlertService,
+        securityAlertProperties: SecurityAlertProperties
     ): AuthenticationService {
         return AuthenticationService(
             userService,
@@ -268,6 +269,7 @@ class AuthenticationConfiguration {
             emailProperties,
             twoFactorEmailProperties,
             registrationAlertService,
+            securityAlertProperties,
         )
     }
 
