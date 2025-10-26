@@ -556,6 +556,12 @@ paths:
         required: false
         schema:
           type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendEmailVerificationRequest"
+        required: true
       responses:
         "200":
           description: The number of seconds the user needs to wait before sending
@@ -669,6 +675,12 @@ paths:
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/docs/auth/authentication#email-verification
       operationId: getRemainingEmailVerificationCooldown
+      parameters:
+      - name: email
+        in: query
+        required: true
+        schema:
+          type: string
       responses:
         "200":
           description: The remaining cooldown.
@@ -5094,6 +5106,13 @@ components:
       required:
       - twoFactorRequired
       - user
+    SendEmailVerificationRequest:
+      type: object
+      properties:
+        email:
+          type: string
+      required:
+      - email
     TwoFactorSetupResponse:
       type: object
       properties:
@@ -5220,6 +5239,8 @@ components:
         totalPages:
           type: integer
           format: int32
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
         size:
           type: integer
           format: int32
@@ -5232,25 +5253,18 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
-        numberOfElements:
-          type: integer
-          format: int32
         first:
           type: boolean
         last:
           type: boolean
-        pageable:
-          $ref: "#/components/schemas/PageableObject"
+        numberOfElements:
+          type: integer
+          format: int32
         empty:
           type: boolean
     PageableObject:
       type: object
       properties:
-        offset:
-          type: integer
-          format: int64
-        sort:
-          $ref: "#/components/schemas/SortObject"
         paged:
           type: boolean
         pageNumber:
@@ -5261,14 +5275,19 @@ components:
           format: int32
         unpaged:
           type: boolean
+        offset:
+          type: integer
+          format: int64
+        sort:
+          $ref: "#/components/schemas/SortObject"
     SortObject:
       type: object
       properties:
-        empty:
-          type: boolean
         sorted:
           type: boolean
         unsorted:
+          type: boolean
+        empty:
           type: boolean
     IdentityProviderResponse:
       type: object
@@ -5296,6 +5315,8 @@ components:
         totalPages:
           type: integer
           format: int32
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
         size:
           type: integer
           format: int32
@@ -5308,15 +5329,13 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
-        numberOfElements:
-          type: integer
-          format: int32
         first:
           type: boolean
         last:
           type: boolean
-        pageable:
-          $ref: "#/components/schemas/PageableObject"
+        numberOfElements:
+          type: integer
+          format: int32
         empty:
           type: boolean
     PageTagResponse:
@@ -5328,6 +5347,8 @@ components:
         totalPages:
           type: integer
           format: int32
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
         size:
           type: integer
           format: int32
@@ -5340,15 +5361,13 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
-        numberOfElements:
-          type: integer
-          format: int32
         first:
           type: boolean
         last:
           type: boolean
-        pageable:
-          $ref: "#/components/schemas/PageableObject"
+        numberOfElements:
+          type: integer
+          format: int32
         empty:
           type: boolean
     ArticleOverviewResponse:
@@ -5413,6 +5432,8 @@ components:
         totalPages:
           type: integer
           format: int32
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
         size:
           type: integer
           format: int32
@@ -5425,15 +5446,13 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
-        numberOfElements:
-          type: integer
-          format: int32
         first:
           type: boolean
         last:
           type: boolean
-        pageable:
-          $ref: "#/components/schemas/PageableObject"
+        numberOfElements:
+          type: integer
+          format: int32
         empty:
           type: boolean
     AuthenticationStatusResponse:

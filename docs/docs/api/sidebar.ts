@@ -935,6 +935,12 @@ const sidebar: SidebarsConfig = {
         },
         {
           type: "doc",
+          id: "api/schemas/sendemailverificationrequest",
+          label: "SendEmailVerificationRequest",
+          className: "schema",
+        },
+        {
+          type: "doc",
           id: "api/schemas/twofactorsetupresponse",
           label: "TwoFactorSetupResponse",
           className: "schema",
