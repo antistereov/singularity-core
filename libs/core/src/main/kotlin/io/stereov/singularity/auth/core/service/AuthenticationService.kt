@@ -84,6 +84,9 @@ class AuthenticationService(
             if (securityAlertProperties.registrationWithExistingEmail && emailProperties.enable ) {
                 registrationAlertService.send(user, locale)
             }
+            if (sendEmail && emailProperties.enable) {
+                emailVerificationService.startCooldown(payload.email)
+            }
             return
         }
 
@@ -95,9 +98,11 @@ class AuthenticationService(
             mailTwoFactorCodeExpiresIn = factorMailCodeProperties.expiresIn
         )
 
-        val savedUserDocument = userService.save(userDocument)
+        userService.save(userDocument)
 
-        if (sendEmail && emailProperties.enable) emailVerificationService.sendVerificationEmail(savedUserDocument, locale)
+        if (sendEmail && emailProperties.enable) {
+            emailVerificationService.sendVerificationEmail(payload.email, locale)
+        }
 
         return
     }

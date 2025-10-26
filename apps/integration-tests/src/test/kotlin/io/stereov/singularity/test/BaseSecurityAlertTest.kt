@@ -19,6 +19,7 @@ class BaseSecurityAlertTest : BaseMailIntegrationTest() {
     @Autowired
     lateinit var registrationAlertService: RegistrationAlertService
 
+
     @BeforeEach
     fun setupAlertMocks() {
         clearMocks(loginAlertService)

@@ -57,7 +57,7 @@ class UserSettingsService(
         }
 
         if (emailProperties.enable) {
-            emailVerificationService.sendVerificationEmail(user, locale, payload.newEmail)
+            emailVerificationService.sendVerificationEmail(payload.newEmail, locale)
         } else {
             user.sensitive.email = payload.newEmail
             user.sensitive.security.email.verified = true

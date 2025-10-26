@@ -286,7 +286,6 @@ class AuthenticationConfiguration {
     @ConditionalOnMissingBean
     fun emailVerificationService(
         userService: UserService,
-        authorizationService: AuthorizationService,
         emailVerificationTokenService: EmailVerificationTokenService,
         userMapper: UserMapper,
         redisTemplate: ReactiveRedisTemplate<String, String>,
@@ -300,7 +299,6 @@ class AuthenticationConfiguration {
         securityAlertService: SecurityAlertService
     ) = EmailVerificationService(
         userService,
-        authorizationService,
         emailVerificationTokenService,
         userMapper,
         redisTemplate,

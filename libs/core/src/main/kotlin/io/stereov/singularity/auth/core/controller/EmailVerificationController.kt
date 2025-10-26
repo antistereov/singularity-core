@@ -1,5 +1,6 @@
 package io.stereov.singularity.auth.core.controller
 
+import io.stereov.singularity.auth.core.dto.request.SendEmailVerificationRequest
 import io.stereov.singularity.auth.core.dto.response.MailCooldownResponse
 import io.stereov.singularity.auth.core.service.EmailVerificationService
 import io.stereov.singularity.global.model.ErrorResponse
@@ -109,10 +110,12 @@ class EmailVerificationController(
             ),
         ]
     )
-    suspend fun getRemainingEmailVerificationCooldown(): ResponseEntity<MailCooldownResponse> {
-        val remainingCooldown = emailVerificationService.getRemainingCooldown()
+    suspend fun getRemainingEmailVerificationCooldown(
+        @RequestParam email: String
+    ): ResponseEntity<MailCooldownResponse> {
+        val remainingCooldown = emailVerificationService.getRemainingCooldown(email)
 
-        return ResponseEntity.ok().body(remainingCooldown)
+        return ResponseEntity.ok().body(MailCooldownResponse(remainingCooldown))
     }
 
     @PostMapping("/send")
@@ -188,13 +191,14 @@ class EmailVerificationController(
         ]
     )
     suspend fun sendEmailVerificationEmail(
-        @RequestParam locale: Locale?
+        @RequestParam locale: Locale?,
+        @RequestBody request: SendEmailVerificationRequest,
     ): ResponseEntity<MailSendResponse> {
 
-        emailVerificationService.sendEmailVerificationToken(locale)
+        emailVerificationService.sendVerificationEmail(request.email, locale)
 
         return ResponseEntity.ok().body(
-            MailSendResponse(emailVerificationService.getRemainingCooldown().remaining)
+            MailSendResponse(emailVerificationService.getRemainingCooldown(request.email))
         )
     }
 }

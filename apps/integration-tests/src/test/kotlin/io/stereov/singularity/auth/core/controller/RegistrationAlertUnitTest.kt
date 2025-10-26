@@ -1,28 +1,46 @@
 package io.stereov.singularity.auth.core.controller
 
+import io.mockk.clearMocks
 import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.slot
 import io.stereov.singularity.auth.core.dto.request.RegisterUserRequest
+import io.stereov.singularity.auth.core.service.EmailVerificationService
 import io.stereov.singularity.test.BaseSecurityAlertTest
+import io.stereov.singularity.test.config.MockEmailVerificationService
 import io.stereov.singularity.user.core.model.UserDocument
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Import
 import java.util.*
 
+@Import(MockEmailVerificationService::class)
 class RegistrationAlertUnitTest : BaseSecurityAlertTest() {
+
+    @Autowired
+    lateinit var emailVerificationService: EmailVerificationService
+
+    @BeforeEach
+    fun initialize() {
+        clearMocks(emailVerificationService)
+    }
 
     @Test fun `works without session and locale`() = runTest {
         val user = registerUser()
 
         val userSlot = slot<UserDocument>()
         val localeSlot = slot<Locale?>()
+        val emailSlot = slot<String>()
 
         coJustRun { registrationAlertService.send(
             capture(userSlot),
             captureNullable(localeSlot),
         ) }
+
+        coJustRun { emailVerificationService.startCooldown(capture(emailSlot)) }
 
         webTestClient.post()
             .uri("/api/auth/register")
@@ -32,18 +50,26 @@ class RegistrationAlertUnitTest : BaseSecurityAlertTest() {
             .isOk
 
         coVerify(exactly = 1) { registrationAlertService.send(any(), anyNullable()) }
+        coVerify(exactly = 1) { emailVerificationService.startCooldown(any()) }
         assert(userSlot.isCaptured)
         assertEquals(user.info.id, userSlot.captured.id)
         assert(localeSlot.isNull)
+        assertEquals(user.email, emailSlot.captured)
     }
-    @Test fun `does  not send when user does not exist`() = runTest {
+    @Test fun `does not send when user does not exist`() = runTest {
+        val emailSlot = slot<String>()
         val userSlot = slot<UserDocument>()
-        val localeSlot = slot<Locale?>()
+        val registrationLocaleSlot = slot<Locale?>()
+        val verificationLocaleSlot = slot<Locale?>()
         val req = RegisterUserRequest("examil@example.com", "Password$1", "Name")
 
         coJustRun { registrationAlertService.send(
             capture(userSlot),
-            captureNullable(localeSlot),
+            captureNullable(registrationLocaleSlot),
+        ) }
+        coJustRun { emailVerificationService.sendVerificationEmail(
+            capture(emailSlot),
+            captureNullable(verificationLocaleSlot),
         ) }
 
         webTestClient.post()
@@ -54,6 +80,10 @@ class RegistrationAlertUnitTest : BaseSecurityAlertTest() {
             .isOk
 
         coVerify(exactly = 0) { registrationAlertService.send(any(), anyNullable()) }
+        coVerify(exactly = 1) { emailVerificationService.sendVerificationEmail(any(), anyNullable()) }
+
+        assert(emailSlot.isCaptured)
+        assertEquals(emailSlot.captured, req.email)
     }
     @Test fun `works with locale`() = runTest {
         val user = registerUser()

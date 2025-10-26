@@ -119,7 +119,7 @@ class ChangeAlertUnitTest : BaseSecurityAlertTest() {
             .exchange()
             .expectStatus().isOk
 
-        coVerify(exactly = 1) { securityAlertService.send(any(), anyNullable(), any(), anyNullable(), any(), anyNullable(), anyNullable()) }
+        coVerify(exactly = 1) { securityAlertService.send(any(), anyNullable(), any(), anyNullable(), anyNullable(), anyNullable(), anyNullable()) }
         assert(userSlot.isCaptured)
         assertEquals(user.info.id, userSlot.captured.id)
         assert(localeSlot.isNull)
@@ -159,7 +159,7 @@ class ChangeAlertUnitTest : BaseSecurityAlertTest() {
             .exchange()
             .expectStatus().isOk
 
-        coVerify(exactly = 1) { securityAlertService.send(any(), anyNullable(), any(), anyNullable(), any(), anyNullable(), anyNullable()) }
+        coVerify(exactly = 1) { securityAlertService.send(any(), anyNullable(), any(), anyNullable(), anyNullable(), anyNullable(), anyNullable()) }
         assertEquals(Locale.ENGLISH, localeSlot.captured)
         assert(userSlot.isCaptured)
         assertEquals(user.info.id, userSlot.captured.id)

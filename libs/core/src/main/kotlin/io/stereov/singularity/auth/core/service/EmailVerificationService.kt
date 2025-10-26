@@ -1,7 +1,7 @@
 package io.stereov.singularity.auth.core.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.auth.core.dto.response.MailCooldownResponse
+import io.lettuce.core.KillArgs.Builder.user
 import io.stereov.singularity.auth.core.exception.AuthException
 import io.stereov.singularity.auth.core.exception.model.EmailAlreadyVerifiedException
 import io.stereov.singularity.auth.core.model.SecurityAlertType
@@ -21,10 +21,8 @@ import io.stereov.singularity.translate.model.TranslateKey
 import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.core.mapper.UserMapper
-import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.service.UserService
 import kotlinx.coroutines.reactor.awaitSingleOrNull
-import org.bson.types.ObjectId
 import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.stereotype.Service
 import java.time.Duration
@@ -33,7 +31,6 @@ import java.util.*
 @Service
 class EmailVerificationService(
     private val userService: UserService,
-    private val authorizationService: AuthorizationService,
     private val emailVerificationTokenService: EmailVerificationTokenService,
     private val userMapper: UserMapper,
     private val redisTemplate: ReactiveRedisTemplate<String, String>,
@@ -95,72 +92,19 @@ class EmailVerificationService(
         return userMapper.toResponse(savedUser)
     }
 
-    /**
-     * Gets the remaining cooldown time for email verification.
-     *
-     * This method checks the Redis cache for the remaining time to wait before sending another verification email.
-     *
-     * @return The remaining cooldown time in seconds.
-     */
-    suspend fun getRemainingCooldown(): MailCooldownResponse {
-        logger.debug { "Getting remaining email verification cooldown" }
-
-        val userId = authorizationService.getUserId()
-        val cooldown = getRemainingCooldown(userId)
-
-        return MailCooldownResponse(cooldown)
-    }
-
-    /**
-     * Sends an email verification token to the user.
-     *
-     * This method generates a verification token and sends it to the user's email address.
-     */
-    suspend fun sendEmailVerificationToken(locale: Locale?) {
-        logger.debug { "Sending email verification token" }
-
-        val user = authorizationService.getUser()
-
-        if (user.isGuest)
-            throw GuestCannotPerformThisActionException("Guests cannot verify their email since no email is specified")
-
-        if (user.sensitive.security.email.verified)
-            throw EmailAlreadyVerifiedException("Email is already verified")
-
-        return sendVerificationEmail(user, locale)
-    }
-
-    /**
-     * Gets the remaining cooldown time for email verification.
-     *
-     * This method checks the Redis cache for the remaining time to wait before sending another verification email.
-     *
-     * @param userId The ID of the user to check the cooldown for.
-     *
-     * @return The remaining cooldown time in seconds.
-     */
-    suspend fun getRemainingCooldown(userId: ObjectId): Long {
+suspend fun getRemainingCooldown(email: String): Long {
         logger.debug { "Getting remaining cooldown for email verification" }
 
-        val key = "email-verification-cooldown:$userId"
+        val key = "email-verification-cooldown:$email"
         val remainingTtl = redisTemplate.getExpire(key).awaitSingleOrNull() ?: Duration.ofSeconds(-1)
 
         return if (remainingTtl.seconds > 0) remainingTtl.seconds else 0
     }
 
-    /**
-     * Starts the cooldown period for email verification.
-     *
-     * This method sets a key in Redis to indicate that the cooldown period has started.
-     *
-     * @param userId The ID of the user to start the cooldown for.
-     *
-     * @return True if the cooldown was successfully started, false if it was already in progress.
-     */
-    private suspend fun startCooldown(userId: ObjectId): Boolean {
+    suspend fun startCooldown(email: String): Boolean {
         logger.debug { "Starting cooldown for email verification" }
 
-        val key = "email-verification-cooldown:$userId"
+        val key = "email-verification-cooldown:$email"
         val isNewKey = redisTemplate.opsForValue()
             .setIfAbsent(key, "1", Duration.ofSeconds(emailProperties.sendCooldown))
             .awaitSingleOrNull()
@@ -184,24 +128,33 @@ class EmailVerificationService(
      *
      * @param user The user to send the verification email to.
      */
-    suspend fun sendVerificationEmail(user: UserDocument, locale: Locale?, newEmail: String? = null) {
-        logger.debug { "Sending verification email to ${newEmail ?: user.sensitive.email}" }
+    suspend fun sendVerificationEmail(email: String, locale: Locale?) {
+        logger.debug { "Sending verification email to $email" }
 
-        val userId = user.id
         val actualLocale = locale ?: appProperties.locale
 
-        val remainingCooldown = getRemainingCooldown(userId)
+        val remainingCooldown = getRemainingCooldown(email)
         if (remainingCooldown > 0) {
             throw EmailCooldownException(remainingCooldown)
         }
 
+        startCooldown(email)
+        val user = userService.findByEmailOrNull(email)
+
+        if (user == null) {
+            logger.debug { "User with email $email not found. Skipping verification." }
+            return
+        }
+
         val secret = user.sensitive.security.email.verificationSecret
 
-        if (user.isGuest) throw GuestCannotPerformThisActionException("Failed to send verification email: a guest cannot verify an email address")
+        if (user.isGuest)
+            throw GuestCannotPerformThisActionException("Failed to send verification email: a guest cannot verify an email address")
 
-        val email = newEmail ?: user.sensitive.email
-            ?: throw InvalidDocumentException("No email specified in user document")
-        val token = emailVerificationTokenService.create(userId, email, secret)
+        if (user.sensitive.security.email.verified)
+            throw EmailAlreadyVerifiedException("Email is already verified")
+
+        val token = emailVerificationTokenService.create(user.id, email, secret)
         val verificationUrl = generateVerificationUrl(token)
 
         val slug = "email_verification"
@@ -217,7 +170,6 @@ class EmailVerificationService(
             .build()
 
         emailService.sendEmail(email, subject, content, actualLocale)
-        startCooldown(userId)
     }
 
 }
