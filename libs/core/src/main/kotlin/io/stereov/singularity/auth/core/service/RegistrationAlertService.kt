@@ -72,7 +72,7 @@ class RegistrationAlertService(
         }
 
         val oauth2ProviderString = oauth2ProviderStringWithPlaceholder
-            .replace("{{ providers }}", oauth2Providers)
+            .replace("{{ provider }}", oauth2Providers)
 
         return if (providers.contains(IdentityProvider.PASSWORD)) {
             if (list.isEmpty()) {

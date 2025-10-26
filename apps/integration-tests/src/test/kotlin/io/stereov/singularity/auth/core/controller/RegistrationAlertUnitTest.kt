@@ -36,6 +36,25 @@ class RegistrationAlertUnitTest : BaseSecurityAlertTest() {
         assertEquals(user.info.id, userSlot.captured.id)
         assert(localeSlot.isNull)
     }
+    @Test fun `does  not send when user does not exist`() = runTest {
+        val userSlot = slot<UserDocument>()
+        val localeSlot = slot<Locale?>()
+        val req = RegisterUserRequest("examil@example.com", "Password$1", "Name")
+
+        coJustRun { registrationAlertService.send(
+            capture(userSlot),
+            captureNullable(localeSlot),
+        ) }
+
+        webTestClient.post()
+            .uri("/api/auth/register")
+            .bodyValue(req)
+            .exchange()
+            .expectStatus()
+            .isOk
+
+        coVerify(exactly = 0) { registrationAlertService.send(any(), anyNullable()) }
+    }
     @Test fun `works with locale`() = runTest {
         val user = registerUser()
 
