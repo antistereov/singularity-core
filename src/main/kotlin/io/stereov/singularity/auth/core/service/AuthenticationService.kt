@@ -57,7 +57,8 @@ class AuthenticationService(
         val user = userService.findByEmailOrNull(payload.email)
             ?: throw InvalidCredentialsException()
 
-        val password = user.validateLoginTypeAndGetPassword()
+        val password = runCatching { user.validateLoginTypeAndGetPassword() }
+            .getOrElse { throw InvalidCredentialsException() }
 
         if (!hashService.checkBcrypt(payload.password, password)) {
             throw InvalidCredentialsException()

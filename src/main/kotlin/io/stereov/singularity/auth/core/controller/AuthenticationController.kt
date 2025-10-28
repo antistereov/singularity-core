@@ -195,13 +195,8 @@ class AuthenticationController(
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
             ApiResponse(
-                responseCode = "400",
-                description = "Trying to log in user that did not set up authentication using password.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
                 responseCode = "401",
-                description = "Invalid credentials.",
+                description = "Invalid credentials or trying to log in user that did not set up authentication using password.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
