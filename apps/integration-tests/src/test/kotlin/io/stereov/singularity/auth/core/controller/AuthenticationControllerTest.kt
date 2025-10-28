@@ -76,7 +76,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isBadRequest
     }
-    @Test fun `register requires passwort with lower case letter`() = runTest {
+    @Test fun `register requires password with lower case letter`() = runTest {
         webTestClient.post()
             .uri("/api/auth/register")
             .bodyValue(
@@ -321,7 +321,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
                 "any password"
             ))
             .exchange()
-            .expectStatus().isBadRequest
+            .expectStatus().isUnauthorized
     }
 
     @Test fun `logout deletes all cookies and logs out user`() = runTest {
