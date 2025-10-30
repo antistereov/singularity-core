@@ -83,3 +83,9 @@ singularity:
       ip-time-window: 1
   ui:
     base-url: ${UI_BASE_URL:http://localhost:3000}
+
+sentry:
+  dsn: ${SENTRY_DSN}
+  traces-sample-rate: ${SENTRY_TRACES_SAMPLE_RATE:0.01}
+  environment: ${SENTRY_ENVIRONMENT:production}
+  release: ${SENTRY_RELEASE}

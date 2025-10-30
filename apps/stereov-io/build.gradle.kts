@@ -18,6 +18,7 @@ kotlin {
 
 dependencies {
     api(project(":libs:core"))
+    implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.25.0")
 }
 
 configurations.all {
