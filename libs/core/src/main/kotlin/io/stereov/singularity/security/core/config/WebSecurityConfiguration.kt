@@ -175,7 +175,7 @@ class WebSecurityConfiguration {
 
         configuration.allowedOrigins = allowedOrigins
         configuration.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
-        configuration.allowedHeaders = listOf("Authorization", "Content-Type")
+        configuration.allowedHeaders = listOf("*")
         configuration.allowCredentials = true
 
         val source = UrlBasedCorsConfigurationSource()
