@@ -91,6 +91,10 @@ singularity:
         recovery-code:
           length: 10
           count: 6
+    email-verification:
+      uri: ${EMAIL_VERIFICATION_URI}
+    password-reset:
+      uri: ${PASSWORD_RESET_URI}
   file:
     storage:
       type: ${STORAGE_TYPE}
