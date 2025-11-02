@@ -70,8 +70,8 @@ logging:
 singularity:
   app:
     name: ${APP_NAME}
-    base-url: ${BACKEND_BASE_URL}
-    support-mail: ${SUPPORT_EMAIL}
+    base-uri: ${BACKEND_BASE_URL}
+    support-email: ${SUPPORT_EMAIL}
     secure: ${SECURE:false}
     create-root-user: ${CREATE_ROOT_USER}
     root-email: ${ROOT_EMAIL}
@@ -91,10 +91,6 @@ singularity:
         recovery-code:
           length: 10
           count: 6
-    email-verification:
-      uri: ${EMAIL_VERIFICATION_URI}
-    password-reset:
-      uri: ${PASSWORD_RESET_URI}
   file:
     storage:
       type: ${STORAGE_TYPE}
@@ -143,12 +139,9 @@ singularity:
       ip-limit: 1000
       ip-time-window: 1
   ui:
-    base-url: ${UI_BASE_URL}
-    icon-url: ${ICON_URL}
+    base-uri: ${UI_BASE_URL}
+    icon-uri: ${ICON_URL}
     primary-color: ${UI_PRIMARY_COLOR:#6366f1}
-    contact-path: ${CONTACT_PATH:/contact}
-    legal-notice-path: ${LEGAL_NOTICE_PATH:/legal-notice}
-    privacy-policy-path: ${PRIVACY_POLICY_PATH:/privacy-policy}
   content:
     tags:
       - key: music

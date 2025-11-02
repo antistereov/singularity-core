@@ -50,8 +50,8 @@ singularity:
       enable: true
   app:
     name: TestApplication
-    base-url: ${BACKEND_BASE_URL:http://localhost:8000}
-    support-mail: support@example.com
+    base-uri: ${BACKEND_BASE_URL:http://localhost:8000}
+    support-email: support@example.com
     secure: false
     create-root-user: true
     root-email: root@example.com
@@ -82,7 +82,7 @@ singularity:
       ip-limit: 10000
       ip-time-window: 1
   ui:
-    base-url: ${UI_BASE_URL:http://localhost:3000}
+    base-uri: ${UI_BASE_URL:http://localhost:3000}
 
 sentry:
   dsn: ${SENTRY_DSN}
