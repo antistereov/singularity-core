@@ -1,10 +1,12 @@
 package io.stereov.singularity.auth.oauth2.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.auth.core.service.IdentityProviderInfoService
 import io.stereov.singularity.auth.core.service.token.AccessTokenService
 import io.stereov.singularity.auth.oauth2.exception.model.OAuth2FlowException
 import io.stereov.singularity.auth.oauth2.model.OAuth2ErrorCode
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties
+import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.file.core.service.DownloadService
 import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.service.UserService
@@ -25,6 +27,8 @@ class OAuth2AuthenticationService(
     private val accessTokenService: AccessTokenService,
     private val userSettingsService: UserSettingsService,
     private val downloadService: DownloadService,
+    private val identityProviderInfoService: IdentityProviderInfoService,
+    private val emailProperties: EmailProperties,
 ) {
 
     enum class OAuth2Action {
@@ -66,7 +70,7 @@ class OAuth2AuthenticationService(
 
          return when (oauth2ProviderConnectionTokenValue != null) {
              true -> handleConnection(email, provider, principalId, oauth2ProviderConnectionTokenValue, stepUpTokenValue, exchange, locale)
-             false -> handleRegistration(name, email, provider, principalId, authenticated, oauth2User) to OAuth2Action.REGISTRATION
+             false -> handleRegistration(name, email, provider, principalId, authenticated, oauth2User, locale) to OAuth2Action.REGISTRATION
          }
     }
 
@@ -85,16 +89,24 @@ class OAuth2AuthenticationService(
         provider: String,
         principalId: String,
         authenticated: Boolean,
-        oauth2User: OAuth2User
+        oauth2User: OAuth2User,
+        locale: Locale?
     ): UserDocument {
         logger.debug { "Handling registration after OAuth2 registration" }
 
         if (authenticated)
             throw OAuth2FlowException(OAuth2ErrorCode.USER_ALREADY_AUTHENTICATED, "Registration via OAuth2 provider failed: user is already authenticated")
 
-        if (userService.existsByEmail(email))
+        if (userService.existsByEmail(email)) {
+            if (emailProperties.enable) {
+                val user = userService.findByEmail(email)
+                identityProviderInfoService.send(user, locale)
+            }
+
             throw OAuth2FlowException(OAuth2ErrorCode.EMAIL_ALREADY_REGISTERED,
                 "Failed to convert guest to user via OAuth2 provider: email is already registered")
+
+        }
 
         val user = UserDocument.ofIdentityProvider(
             name = name,

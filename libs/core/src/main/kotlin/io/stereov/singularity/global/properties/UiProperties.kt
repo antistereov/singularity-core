@@ -2,25 +2,24 @@ package io.stereov.singularity.global.properties
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 
-/**
- * # UI properties.
- *
- * This class is responsible for holding the UI properties
- * and is annotated with [ConfigurationProperties]
- * to bind the properties from the application configuration file.
- *
- * It is prefixed with `baseline.ui` in the configuration file.
- *
- * @property baseUrl The base URL of the UI application.
- *
- * @author <a href="https://github.com/antistereov">antistereov</a>
- */
 @ConfigurationProperties(prefix = "singularity.ui")
 data class UiProperties(
-    val baseUrl: String = "http://localhost:4200",
-    val iconUrl: String = "http://localhost:4200/icon.svg",
     val primaryColor: String = "#6366f1",
-    val contactPath: String = "/contact",
-    val legalNoticePath: String = "/legal-notice",
-    val privacyPolicyPath: String = "/privacy-policy",
+    val secondaryBackgroundColor: String = "#E5E5E5",
+    val secondaryTextColor: String = "#404040",
+
+    val baseUri: String = "http://localhost:4200",
+
+    val iconUri: String = "${baseUri}/icon.svg",
+
+    val contactUri: String = "${baseUri}/contact",
+    val legalNoticeUri: String = "${baseUri}/legal-notice",
+    val privacyPolicyUri: String = "${baseUri}/privacy-policy",
+
+    val loginUri: String = "${baseUri}/auth",
+    val registerUri: String = "${baseUri}/auth/register",
+    val emailVerificationUri: String = "${baseUri}/auth/verify-email",
+    val passwordResetUri: String = "${baseUri}/auth/reset-password",
+
+    val securitySettingsUri: String = "${baseUri}/me"
 )

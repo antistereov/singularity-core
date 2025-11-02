@@ -26,7 +26,7 @@ abstract class ContentService<T: ContentDocument<T>> : CrudService<T>  {
     abstract val contentType: String
 
     fun getUri(key: String): URL = URI.create(
-        contentProperties.contentUrl
+        contentProperties.contentUri
             .replace("{contentType}", contentType)
             .replace("{contentKey}", key)
     ).toURL()

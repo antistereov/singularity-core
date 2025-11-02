@@ -3,6 +3,7 @@ package io.stereov.singularity.auth.core.config
 import io.lettuce.core.ExperimentalLettuceCoroutinesApi
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.component.CookieCreator
+import io.stereov.singularity.auth.core.component.ProviderStringCreator
 import io.stereov.singularity.auth.core.component.TokenValueExtractor
 import io.stereov.singularity.auth.core.controller.AuthenticationController
 import io.stereov.singularity.auth.core.controller.EmailVerificationController
@@ -11,8 +12,6 @@ import io.stereov.singularity.auth.core.controller.SessionController
 import io.stereov.singularity.auth.core.exception.handler.AuthExceptionHandler
 import io.stereov.singularity.auth.core.mapper.SessionMapper
 import io.stereov.singularity.auth.core.properties.AuthProperties
-import io.stereov.singularity.auth.core.properties.EmailVerificationProperties
-import io.stereov.singularity.auth.core.properties.PasswordResetProperties
 import io.stereov.singularity.auth.core.properties.SecurityAlertProperties
 import io.stereov.singularity.auth.core.service.*
 import io.stereov.singularity.auth.core.service.token.*
@@ -33,6 +32,7 @@ import io.stereov.singularity.email.template.service.TemplateService
 import io.stereov.singularity.file.s3.config.S3Configuration
 import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.global.properties.AppProperties
+import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.user.core.mapper.UserMapper
 import io.stereov.singularity.user.core.service.UserService
@@ -52,8 +52,6 @@ import org.springframework.data.redis.core.ReactiveRedisTemplate
 )
 @EnableConfigurationProperties(
     AuthProperties::class,
-    EmailVerificationProperties::class,
-    PasswordResetProperties::class,
     SecurityAlertProperties::class
 )
 class AuthenticationConfiguration {
@@ -74,6 +72,10 @@ class AuthenticationConfiguration {
     @Bean
     @ConditionalOnMissingBean
     fun cookieCreator(appProperties: AppProperties) = CookieCreator(appProperties)
+    
+    @Bean
+    @ConditionalOnMissingBean
+    fun providerStringCreator(translateService: TranslateService) = ProviderStringCreator(translateService)
 
 
     @Bean
@@ -256,7 +258,8 @@ class AuthenticationConfiguration {
         emailProperties: EmailProperties,
         twoFactorEmailProperties: TwoFactorEmailProperties,
         registrationAlertService: RegistrationAlertService,
-        securityAlertProperties: SecurityAlertProperties
+        securityAlertProperties: SecurityAlertProperties,
+        identityProviderInfoService: IdentityProviderInfoService
     ): AuthenticationService {
         return AuthenticationService(
             userService,
@@ -270,6 +273,7 @@ class AuthenticationConfiguration {
             twoFactorEmailProperties,
             registrationAlertService,
             securityAlertProperties,
+            identityProviderInfoService,
         )
     }
 
@@ -290,26 +294,48 @@ class AuthenticationConfiguration {
         userMapper: UserMapper,
         redisTemplate: ReactiveRedisTemplate<String, String>,
         emailProperties: EmailProperties,
-        emailVerificationProperties: EmailVerificationProperties,
+        uiProperties: UiProperties,
         translateService: TranslateService,
         emailService: EmailService,
         templateService: TemplateService,
         appProperties: AppProperties,
         securityAlertProperties: SecurityAlertProperties,
-        securityAlertService: SecurityAlertService
+        securityAlertService: SecurityAlertService,
+        noAccountInfoService: NoAccountInfoService
     ) = EmailVerificationService(
         userService,
         emailVerificationTokenService,
         userMapper,
         redisTemplate,
         emailProperties,
-        emailVerificationProperties,
+        uiProperties,
         translateService,
         emailService,
         templateService,
         appProperties,
         securityAlertService,
         securityAlertProperties,
+        noAccountInfoService,
+    )
+    
+    @Bean
+    @ConditionalOnMissingBean
+    fun identityProviderInfoService(
+        appProperties: AppProperties,
+        translateService: TranslateService,
+        emailService: EmailService,
+        templateService: TemplateService,
+        providerStringCreator: ProviderStringCreator,
+        redisTemplate: ReactiveRedisTemplate<String, String>,
+        emailProperties: EmailProperties
+    ) = IdentityProviderInfoService(
+        appProperties,
+        translateService,
+        emailService,
+        templateService,
+        providerStringCreator,
+        redisTemplate,
+        emailProperties
     )
 
     @Bean
@@ -325,6 +351,24 @@ class AuthenticationConfiguration {
         emailService,
         templateService
     )
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun noAccountInfoService(
+        appProperties: AppProperties,
+        translateService: TranslateService,
+        emailService: EmailService,
+        templateService: TemplateService,
+        redisTemplate: ReactiveRedisTemplate<String, String>,
+        emailProperties: EmailProperties
+    ) = NoAccountInfoService(
+        appProperties,
+        translateService,
+        emailService,
+        templateService,
+        redisTemplate,
+        emailProperties
+    )
     
     @Bean
     @ConditionalOnMissingBean
@@ -334,28 +378,30 @@ class AuthenticationConfiguration {
         hashService: HashService,
         redisTemplate: ReactiveRedisTemplate<String, String>,
         emailProperties: EmailProperties,
-        passwordResetProperties: PasswordResetProperties,
+        uiProperties: UiProperties,
         translateService: TranslateService,
         emailService: EmailService,
         templateService: TemplateService,
         accessTokenCache: AccessTokenCache,
         appProperties: AppProperties,
         securityAlertService: SecurityAlertService,
-        securityAlertProperties: SecurityAlertProperties
+        securityAlertProperties: SecurityAlertProperties,
+        noAccountInfoService: NoAccountInfoService
     ) = PasswordResetService(
         userService,
         passwordResetTokenService,
         hashService,
         redisTemplate,
         emailProperties,
-        passwordResetProperties,
+        uiProperties,
         translateService,
         emailService,
         templateService,
         accessTokenCache,
         appProperties,
         securityAlertService,
-        securityAlertProperties
+        securityAlertProperties,
+        noAccountInfoService
     )
 
     @Bean
@@ -364,12 +410,14 @@ class AuthenticationConfiguration {
         translateService: TranslateService,
         templateService: TemplateService,
         appProperties: AppProperties,
-        emailService: EmailService
+        emailService: EmailService,
+        providerStringCreator: ProviderStringCreator
     ) = RegistrationAlertService(
         translateService,
         templateService,
         appProperties,
-        emailService
+        emailService,
+        providerStringCreator
     )
 
     @Bean

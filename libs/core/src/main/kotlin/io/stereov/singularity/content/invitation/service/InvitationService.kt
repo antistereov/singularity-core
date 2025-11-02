@@ -90,7 +90,7 @@ class InvitationService(
     ): InvitationDocument {
         logger.debug { "Inviting \"$email\" with claims: $claims" }
 
-        val acceptUrl = invitationProperties.acceptUrl
+        val acceptUri = invitationProperties.acceptUri
             .replace("{contentType}", contentType)
             .replace("{contentKey}", contentKey)
 
@@ -107,7 +107,7 @@ class InvitationService(
             "inviter_name" to inviterName,
             "invited_to" to invitedTo,
             "expiration_days" to (expiresInSeconds / 60 / 60 / 24).toInt(),
-            "accept_url" to acceptUrl,
+            "accept_uri" to acceptUri,
             "accept_token" to token.value
         )
         val template = TemplateBuilder

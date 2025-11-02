@@ -208,7 +208,7 @@ class AuthenticationController(
     ): ResponseEntity<LoginResponse> {
         logger.info { "Executing login" }
 
-        val user = authenticationService.login(payload)
+        val user = authenticationService.login(payload, locale)
 
         if (user.twoFactorEnabled) {
             twoFactorAuthenticationService.handleTwoFactor(user, locale)

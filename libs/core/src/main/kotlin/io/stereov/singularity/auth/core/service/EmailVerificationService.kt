@@ -4,8 +4,8 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.lettuce.core.KillArgs.Builder.user
 import io.stereov.singularity.auth.core.exception.AuthException
 import io.stereov.singularity.auth.core.exception.model.EmailAlreadyVerifiedException
+import io.stereov.singularity.auth.core.model.NoAccountInfoAction
 import io.stereov.singularity.auth.core.model.SecurityAlertType
-import io.stereov.singularity.auth.core.properties.EmailVerificationProperties
 import io.stereov.singularity.auth.core.properties.SecurityAlertProperties
 import io.stereov.singularity.auth.core.service.token.EmailVerificationTokenService
 import io.stereov.singularity.auth.guest.exception.model.GuestCannotPerformThisActionException
@@ -17,6 +17,7 @@ import io.stereov.singularity.email.template.service.TemplateService
 import io.stereov.singularity.email.template.util.TemplateBuilder
 import io.stereov.singularity.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.global.properties.AppProperties
+import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.translate.model.TranslateKey
 import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.user.core.dto.response.UserResponse
@@ -35,13 +36,14 @@ class EmailVerificationService(
     private val userMapper: UserMapper,
     private val redisTemplate: ReactiveRedisTemplate<String, String>,
     private val emailProperties: EmailProperties,
-    private val emailVerificationProperties: EmailVerificationProperties,
+    private val uiProperties: UiProperties,
     private val translateService: TranslateService,
     private val emailService: EmailService,
     private val templateService: TemplateService,
     private val appProperties: AppProperties,
     private val securityAlertService: SecurityAlertService,
-    private val securityAlertProperties: SecurityAlertProperties
+    private val securityAlertProperties: SecurityAlertProperties,
+    private val noAccountInfoService: NoAccountInfoService
 ) {
 
     private val logger = KotlinLogging.logger {}
@@ -119,8 +121,8 @@ suspend fun getRemainingCooldown(email: String): Long {
      * @param token The token to include in the verification URL.
      * @return The generated verification URL.
      */
-    private fun generateVerificationUrl(token: String): String {
-        return "${emailVerificationProperties.uri}?token=$token"
+    private fun generateVerificationUri(token: String): String {
+        return "${uiProperties.emailVerificationUri}?token=$token"
     }
 
     /**
@@ -142,7 +144,8 @@ suspend fun getRemainingCooldown(email: String): Long {
         val user = userService.findByEmailOrNull(email)
 
         if (user == null) {
-            logger.debug { "User with email $email not found. Skipping verification." }
+            logger.debug { "User with email $email not found. Sending no account info" }
+            noAccountInfoService.send(email, NoAccountInfoAction.EMAIL_VERIFICATION, locale)
             return
         }
 
@@ -155,7 +158,7 @@ suspend fun getRemainingCooldown(email: String): Long {
             throw EmailAlreadyVerifiedException("Email is already verified")
 
         val token = emailVerificationTokenService.create(user.id, email, secret)
-        val verificationUrl = generateVerificationUrl(token)
+        val verificationUrl = generateVerificationUri(token)
 
         val slug = "email_verification"
         val templatePath = "${EmailConstants.TEMPLATE_DIR}/$slug.html"
@@ -165,7 +168,7 @@ suspend fun getRemainingCooldown(email: String): Long {
             .translate(EmailConstants.RESOURCE_BUNDLE, actualLocale)
             .replacePlaceholders(templateService.getPlaceholders(mapOf(
                 "name" to user.sensitive.name,
-                "verification_url" to verificationUrl
+                "verification_uri" to verificationUrl
             )))
             .build()
 

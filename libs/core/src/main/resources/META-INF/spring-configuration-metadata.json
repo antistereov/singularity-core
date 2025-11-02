@@ -11,16 +11,6 @@
       "sourceType": "io.stereov.singularity.auth.core.properties.AuthProperties"
     },
     {
-      "name": "singularity.auth.email-verification",
-      "type": "io.stereov.singularity.auth.core.properties.EmailVerificationProperties",
-      "sourceType": "io.stereov.singularity.auth.core.properties.EmailVerificationProperties"
-    },
-    {
-      "name": "singularity.auth.password-reset",
-      "type": "io.stereov.singularity.auth.core.properties.PasswordResetProperties",
-      "sourceType": "io.stereov.singularity.auth.core.properties.PasswordResetProperties"
-    },
-    {
       "name": "singularity.auth.security-alert",
       "type": "io.stereov.singularity.auth.core.properties.SecurityAlertProperties",
       "sourceType": "io.stereov.singularity.auth.core.properties.SecurityAlertProperties"
@@ -123,14 +113,14 @@
   ],
   "properties": [
     {
-      "name": "singularity.app.base-url",
+      "name": "singularity.app.base-uri",
       "type": "java.lang.String",
       "sourceType": "io.stereov.singularity.global.properties.AppProperties",
       "defaultValue": "http://localhost:8000",
-      "description": "Base URL for the application. This is used to generate links to files, emails and other application resources. Do not use /api, use the base path instead."
+      "description": "Base URI for the application. This is used to generate links to files, emails and other application resources. Do not use /api, use the base path instead."
     },
     {
-      "name": "singularity.app.support-mail",
+      "name": "singularity.app.support-email",
       "type": "java.lang.String",
       "sourceType": "io.stereov.singularity.global.properties.AppProperties",
       "description": "The email address users can contact for questions about your app."
@@ -212,20 +202,6 @@
       "sourceType": "io.stereov.singularity.auth.core.properties.AuthProperties",
       "description": "If header authentication is allowed, this property controls the precedence: if true, the Authorization header is preferred over HTTP-only cookies.",
       "default": true
-    },
-    {
-      "name": "singularity.auth.email-verification.uri",
-      "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.auth.core.properties.EmailVerificationProperties",
-      "defaultValue": "http://localhost:8000/auth/verify-email",
-      "description": "The URI that will included in the verification email that leads to the email verification page in your frontend application."
-    },
-    {
-      "name": "singularity.auth.password-reset.uri",
-      "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.auth.core.properties.PasswordResetProperties",
-      "defaultValue": "http://localhost:8000/auth/reset-password",
-      "description": "The URI that will be included in the password reset email that leads to the password reset page in your frontend application."
     },
     {
       "name": "singularity.auth.security-alert.login",
@@ -373,18 +349,18 @@
       "description": "Enable articles."
     },
     {
-      "name": "singularity.content.contentUrl",
+      "name": "singularity.content.content-uri",
       "type": "java.lang.Boolean",
-      "sourceType": "io.stereov.singularity.content.article.properties.ArticleProperties",
-      "defaultValue": "http://localhost:4200/content/{contentType}/{contentKey}",
-      "description": "The URL of content objects in your frontend. Please use the placeholders {contentType} and {contentKey} which will be autofilled by the application."
+      "sourceType": "io.stereov.singularity.content.core.properties.ContentProperties",
+      "defaultValue": "${singularity.ui.base-uri}/content/{contentType}/{contentKey}",
+      "description": "The URI of content objects in your frontend. Please use the placeholders {contentType} and {contentKey} which will be autofilled by the application."
     },
     {
-      "name": "singularity.content.invitations.accept-url",
+      "name": "singularity.content.invitations.accept-uri",
       "type": "java.lang.String",
       "sourceType": "io.stereov.singularity.content.invitation.properties.InvitationProperties",
-      "defaultValue": "http://localhost:4200/content/{contentType}/{contentKey}/accept-invitation",
-      "description": "The URL for accepting invitations in your frontend. Please use the placeholders {contentType} and {contentKey} which will be autofilled by the application."
+      "defaultValue": "${singularity.ui.base-uri}/content/{contentType}/{contentKey}/accept-invitation",
+      "description": "The URI for accepting invitations in your frontend. Please use the placeholders {contentType} and {contentKey} which will be autofilled by the application."
     },
     {
       "name": "singularity.content.invitations.allow-unregistered-users",
@@ -518,7 +494,7 @@
       "name": "singularity.file.storage.s3.scheme",
       "type": "io.stereov.singularity.global.model.HttpScheme",
       "sourceType": "io.stereov.singularity.global.model.HttpScheme",
-      "description": "The scheme of your S3 URL. Can be http or https.",
+      "description": "The scheme of your S3 URI. Can be http or https.",
       "defaultValue": "https"
     },
     {
@@ -551,7 +527,7 @@
       "name": "singularity.file.storage.s3.signature-duration",
       "type": "java.util.List<java.lang.Long>",
       "sourceType": "io.stereov.singularity.file.s3.properties.S3Properties",
-      "description": "How many minutes should presigned URLs be valid? Default is 5 min.",
+      "description": "How many minutes should presigned URIs be valid? Default is 5 min.",
       "defaultValue": 5
     },
     {
@@ -687,19 +663,6 @@
       "description": "Length of the recovery code that can be used to log in if a user lost access to their second factor. Default is 10 characters."
     },
     {
-      "name": "singularity.ui.base-url",
-      "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.global.properties.UiProperties",
-      "defaultValue": "http://localhost:4200",
-      "description": "Base URL for the user interface of your application. This address will be set as trusted in the CORS configuration. It will also be used in email templates and more places."
-    },
-    {
-      "name": "singularity.ui.icon-url",
-      "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.global.properties.AppProperties",
-      "description": "URL to the application icon. "
-    },
-    {
       "name": "singularity.ui.primary-color",
       "type": "java.lang.String",
       "sourceType": "io.stereov.singularity.global.properties.UiProperties",
@@ -707,25 +670,74 @@
       "description": "Primary color for the UI, used in email templates and other branding elements. "
     },
     {
-      "name": "singularity.ui.contact-path",
+      "name": "singularity.ui.base-uri",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.global.properties.AppProperties",
-      "defaultValue": "/contact",
+      "sourceType": "io.stereov.singularity.global.properties.UiProperties",
+      "defaultValue": "${singularity.ui.base-uri}",
+      "description": "Base URI for the user interface of your application. This address will be set as trusted in the CORS configuration. It will also be used in email templates and more places."
+    },
+    {
+      "name": "singularity.ui.icon-uri",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.global.properties.UiProperties",
+      "defaultValue": "${singularity.ui.base-uri}/icon.svg",
+      "description": "URI to the application icon. "
+    },
+    {
+      "name": "singularity.ui.contact-uri",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.global.properties.UiProperties",
+      "defaultValue": "${singularity.ui.base-uri}/contact",
       "description": "Path to the contact page in your frontend application.  "
     },
     {
-      "name": "singularity.ui.legal-notice-path",
+      "name": "singularity.ui.legal-notice-uri",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.global.properties.AppProperties",
-      "defaultValue": "/legal-notice",
+      "sourceType": "io.stereov.singularity.global.properties.UiProperties",
+      "defaultValue": "${singularity.ui.base-uri}/legal-notice",
       "description": "Path to the legal notice page."
     },
     {
-      "name": "singularity.ui.privacy-policy-path",
+      "name": "singularity.ui.privacy-policy-uri",
       "type": "java.lang.String",
-      "sourceType": "io.stereov.singularity.global.properties.AppProperties",
-      "defaultValue": "/privacy-policy",
+      "sourceType": "io.stereov.singularity.global.properties.UiProperties",
+      "defaultValue": "${singularity.ui.base-uri}/privacy-policy",
       "description": "Path to the privacy policy page."
+    },
+    {
+      "name": "singularity.auth.email-verification-uri",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.global.properties.UiProperties",
+      "defaultValue": "${singularity.ui.base-uri}/auth/verify-email",
+      "description": "The URI that will included in the verification email that leads to the email verification page in your frontend application."
+    },
+    {
+      "name": "singularity.auth.password-reset-uri",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.global.properties.UiProperties",
+      "defaultValue": "${singularity.ui.base-uri}/auth/reset-password",
+      "description": "The URI that will be included in the password reset email that leads to the password reset page in your frontend application."
+    },
+    {
+      "name": "singularity.auth.register-uri",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.global.properties.UiProperties",
+      "defaultValue": "${singularity.ui.base-uri}/auth/register",
+      "description": "The URI that will included in emails informing the user that an action was performed that requires an account."
+    },
+    {
+      "name": "singularity.auth.login-uri",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.global.properties.UiProperties",
+      "defaultValue": "${singularity.ui.base-uri}/auth",
+      "description": "The URI that will be included in emails informing that an account already exists."
+    },
+    {
+      "name": "singularity.auth.security-settings-uri",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.global.properties.UiProperties",
+      "defaultValue": "${singularity.ui.base-uri}/me",
+      "description": "The URI that will be included in security alert emails to redirect the user to their security settings."
     }
   ],
   "hints": []

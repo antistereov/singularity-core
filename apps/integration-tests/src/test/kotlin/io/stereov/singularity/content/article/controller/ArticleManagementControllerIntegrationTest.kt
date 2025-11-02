@@ -265,7 +265,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertEquals(article.publishedAt?.truncatedTo(ChronoUnit.MILLIS), res.publishedAt)
         assertTrue(article.updatedAt.isBefore(res.updatedAt))
         assertEquals(article.access.ownerId, res.owner?.id)
-        assertEquals(contentProperties.contentUrl.substringAfter(uiProperties.baseUrl)
+        assertEquals(contentProperties.contentUri.substringAfter(uiProperties.baseUri)
             .replace("{contentType}", Article.CONTENT_TYPE)
             .replace("{contentKey}", key),
             res.path
@@ -288,7 +288,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertEquals(article.publishedAt?.truncatedTo(ChronoUnit.MILLIS), updatedArticle.publishedAt)
         assertTrue(article.updatedAt.isBefore(updatedArticle.updatedAt))
         assertEquals(article.access, updatedArticle.access)
-        assertEquals(contentProperties.contentUrl.substringAfter(uiProperties.baseUrl)
+        assertEquals(contentProperties.contentUri.substringAfter(uiProperties.baseUri)
             .replace("{contentType}", Article.CONTENT_TYPE)
             .replace("{contentKey}", key),
             updatedArticle.path
@@ -331,7 +331,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertEquals(article.publishedAt?.truncatedTo(ChronoUnit.MILLIS), res.publishedAt)
         assertTrue(article.updatedAt.isBefore(res.updatedAt))
         assertEquals(article.access.ownerId, res.owner?.id)
-        assertEquals(contentProperties.contentUrl.substringAfter(uiProperties.baseUrl)
+        assertEquals(contentProperties.contentUri.substringAfter(uiProperties.baseUri)
             .replace("{contentType}", Article.CONTENT_TYPE)
             .replace("{contentKey}", key),
             res.path
@@ -353,7 +353,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertEquals(article.publishedAt?.truncatedTo(ChronoUnit.MILLIS), updatedArticle.publishedAt)
         assertTrue(article.updatedAt.isBefore(updatedArticle.updatedAt))
         assertEquals(article.access, updatedArticle.access)
-        assertEquals(contentProperties.contentUrl.substringAfter(uiProperties.baseUrl)
+        assertEquals(contentProperties.contentUri.substringAfter(uiProperties.baseUri)
             .replace("{contentType}", Article.CONTENT_TYPE)
             .replace("{contentKey}", key),
             updatedArticle.path
@@ -396,7 +396,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertEquals(article.publishedAt?.truncatedTo(ChronoUnit.MILLIS), res.publishedAt)
         assertTrue(article.updatedAt.isBefore(res.updatedAt))
         assertEquals(article.access.ownerId, res.owner?.id)
-        assertEquals(contentProperties.contentUrl.substringAfter(uiProperties.baseUrl)
+        assertEquals(contentProperties.contentUri.substringAfter(uiProperties.baseUri)
             .replace("{contentType}", Article.CONTENT_TYPE)
             .replace("{contentKey}", key),
             res.path
@@ -418,7 +418,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertEquals(article.publishedAt?.truncatedTo(ChronoUnit.MILLIS), updatedArticle.publishedAt)
         assertTrue(article.updatedAt.isBefore(updatedArticle.updatedAt))
         assertEquals(article.access, updatedArticle.access)
-        assertEquals(contentProperties.contentUrl.substringAfter(uiProperties.baseUrl)
+        assertEquals(contentProperties.contentUri.substringAfter(uiProperties.baseUri)
             .replace("{contentType}", Article.CONTENT_TYPE)
             .replace("{contentKey}", key),
             updatedArticle.path
@@ -461,7 +461,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertEquals(article.publishedAt?.truncatedTo(ChronoUnit.MILLIS), res.publishedAt)
         assertTrue(article.updatedAt.isBefore(res.updatedAt))
         assertEquals(article.access.ownerId, res.owner?.id)
-        assertEquals(contentProperties.contentUrl.substringAfter(uiProperties.baseUrl)
+        assertEquals(contentProperties.contentUri.substringAfter(uiProperties.baseUri)
             .replace("{contentType}", Article.CONTENT_TYPE)
             .replace("{contentKey}", key),
             res.path
@@ -484,7 +484,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertEquals(article.publishedAt?.truncatedTo(ChronoUnit.MILLIS), updatedArticle.publishedAt)
         assertTrue(article.updatedAt.isBefore(updatedArticle.updatedAt))
         assertEquals(article.access, updatedArticle.access)
-        assertEquals(contentProperties.contentUrl.substringAfter(uiProperties.baseUrl)
+        assertEquals(contentProperties.contentUri.substringAfter(uiProperties.baseUri)
             .replace("{contentType}", Article.CONTENT_TYPE)
             .replace("{contentKey}", key),
             updatedArticle.path
@@ -528,7 +528,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertEquals(article.publishedAt?.truncatedTo(ChronoUnit.MILLIS), res.publishedAt)
         assertTrue(article.updatedAt.isBefore(res.updatedAt))
         assertEquals(article.access.ownerId, res.owner?.id)
-        assertEquals(contentProperties.contentUrl.substringAfter(uiProperties.baseUrl)
+        assertEquals(contentProperties.contentUri.substringAfter(uiProperties.baseUri)
             .replace("{contentType}", Article.CONTENT_TYPE)
             .replace("{contentKey}", key),
             res.path
@@ -551,7 +551,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertEquals(article.publishedAt?.truncatedTo(ChronoUnit.MILLIS), updatedArticle.publishedAt)
         assertTrue(article.updatedAt.isBefore(updatedArticle.updatedAt))
         assertEquals(article.access, updatedArticle.access)
-        assertEquals(contentProperties.contentUrl.substringAfter(uiProperties.baseUrl)
+        assertEquals(contentProperties.contentUri.substringAfter(uiProperties.baseUri)
             .replace("{contentType}", Article.CONTENT_TYPE)
             .replace("{contentKey}", key),
             updatedArticle.path
@@ -595,7 +595,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertEquals(article.publishedAt?.truncatedTo(ChronoUnit.MILLIS), res.publishedAt)
         assertTrue(article.updatedAt.isBefore(res.updatedAt))
         assertEquals(article.access.ownerId, res.owner?.id)
-        assertEquals(contentProperties.contentUrl.substringAfter(uiProperties.baseUrl)
+        assertEquals(contentProperties.contentUri.substringAfter(uiProperties.baseUri)
             .replace("{contentType}", Article.CONTENT_TYPE)
             .replace("{contentKey}", key),
             res.path
@@ -623,7 +623,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertEquals(article.publishedAt?.truncatedTo(ChronoUnit.MILLIS), updatedArticle.publishedAt)
         assertTrue(article.updatedAt.isBefore(updatedArticle.updatedAt))
         assertEquals(article.access, updatedArticle.access)
-        assertEquals(contentProperties.contentUrl.substringAfter(uiProperties.baseUrl)
+        assertEquals(contentProperties.contentUri.substringAfter(uiProperties.baseUri)
             .replace("{contentType}", Article.CONTENT_TYPE)
             .replace("{contentKey}", key),
             updatedArticle.path
@@ -666,7 +666,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertEquals(article.publishedAt?.truncatedTo(ChronoUnit.MILLIS), res.publishedAt)
         assertTrue(article.updatedAt.isBefore(res.updatedAt))
         assertEquals(article.access.ownerId, res.owner?.id)
-        assertEquals(contentProperties.contentUrl.substringAfter(uiProperties.baseUrl)
+        assertEquals(contentProperties.contentUri.substringAfter(uiProperties.baseUri)
             .replace("{contentType}", Article.CONTENT_TYPE)
             .replace("{contentKey}", key),
             res.path
@@ -689,7 +689,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertEquals(article.publishedAt?.truncatedTo(ChronoUnit.MILLIS), updatedArticle.publishedAt)
         assertTrue(article.updatedAt.isBefore(updatedArticle.updatedAt))
         assertEquals(article.access, updatedArticle.access)
-        assertEquals(contentProperties.contentUrl.substringAfter(uiProperties.baseUrl)
+        assertEquals(contentProperties.contentUri.substringAfter(uiProperties.baseUri)
             .replace("{contentType}", Article.CONTENT_TYPE)
             .replace("{contentKey}", key),
             updatedArticle.path
@@ -815,7 +815,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertEquals(article.publishedAt?.truncatedTo(ChronoUnit.MILLIS), res.publishedAt)
         assertTrue(article.updatedAt.isBefore(res.updatedAt))
         assertEquals(article.access.ownerId, res.owner?.id)
-        assertEquals(contentProperties.contentUrl.substringAfter(uiProperties.baseUrl)
+        assertEquals(contentProperties.contentUri.substringAfter(uiProperties.baseUri)
             .replace("{contentType}", Article.CONTENT_TYPE)
             .replace("{contentKey}", key),
             res.path
@@ -837,7 +837,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertEquals(article.publishedAt?.truncatedTo(ChronoUnit.MILLIS), updatedArticle.publishedAt)
         assertTrue(article.updatedAt.isBefore(updatedArticle.updatedAt))
         assertEquals(article.access, updatedArticle.access)
-        assertEquals(contentProperties.contentUrl.substringAfter(uiProperties.baseUrl)
+        assertEquals(contentProperties.contentUri.substringAfter(uiProperties.baseUri)
             .replace("{contentType}", Article.CONTENT_TYPE)
             .replace("{contentKey}", key),
             updatedArticle.path
@@ -928,7 +928,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertEquals(article.publishedAt?.truncatedTo(ChronoUnit.MILLIS), res.publishedAt)
         assertTrue(article.updatedAt.isBefore(res.updatedAt))
         assertEquals(article.access.ownerId, res.owner?.id)
-        assertEquals(contentProperties.contentUrl.substringAfter(uiProperties.baseUrl)
+        assertEquals(contentProperties.contentUri.substringAfter(uiProperties.baseUri)
             .replace("{contentType}", Article.CONTENT_TYPE)
             .replace("{contentKey}", key),
             res.path
@@ -950,7 +950,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertEquals(article.publishedAt?.truncatedTo(ChronoUnit.MILLIS), updatedArticle.publishedAt)
         assertTrue(article.updatedAt.isBefore(updatedArticle.updatedAt))
         assertEquals(article.access, updatedArticle.access)
-        assertEquals(contentProperties.contentUrl.substringAfter(uiProperties.baseUrl)
+        assertEquals(contentProperties.contentUri.substringAfter(uiProperties.baseUri)
             .replace("{contentType}", Article.CONTENT_TYPE)
             .replace("{contentKey}", key),
             updatedArticle.path
@@ -1072,7 +1072,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertEquals(article.publishedAt?.truncatedTo(ChronoUnit.MILLIS), res.publishedAt)
         assertTrue(article.updatedAt.isBefore(res.updatedAt))
         assertEquals(article.access.ownerId, res.owner?.id)
-        assertEquals(contentProperties.contentUrl.substringAfter(uiProperties.baseUrl)
+        assertEquals(contentProperties.contentUri.substringAfter(uiProperties.baseUri)
             .replace("{contentType}", Article.CONTENT_TYPE)
             .replace("{contentKey}", key),
             res.path
@@ -1094,7 +1094,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertEquals(article.publishedAt?.truncatedTo(ChronoUnit.MILLIS), updatedArticle.publishedAt)
         assertTrue(article.updatedAt.isBefore(updatedArticle.updatedAt))
         assertEquals(article.access, updatedArticle.access)
-        assertEquals(contentProperties.contentUrl.substringAfter(uiProperties.baseUrl)
+        assertEquals(contentProperties.contentUri.substringAfter(uiProperties.baseUri)
             .replace("{contentType}", Article.CONTENT_TYPE)
             .replace("{contentKey}", key),
             updatedArticle.path
@@ -1428,7 +1428,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertEquals(article.publishedAt?.truncatedTo(ChronoUnit.MILLIS), res.publishedAt)
         assertTrue(article.updatedAt.isBefore(res.updatedAt))
         assertEquals(article.access.ownerId, res.access.ownerId)
-        assertEquals(contentProperties.contentUrl.substringAfter(uiProperties.baseUrl)
+        assertEquals(contentProperties.contentUri.substringAfter(uiProperties.baseUri)
             .replace("{contentType}", Article.CONTENT_TYPE)
             .replace("{contentKey}", key),
             res.path
@@ -1458,7 +1458,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertTrue(updatedArticle.access.groups.maintainer.contains(maintainerGroup.key))
         assertTrue(updatedArticle.access.groups.editor.contains(editorGroup.key))
         assertTrue(updatedArticle.access.groups.viewer.contains(viewerGroup.key))
-        assertEquals(contentProperties.contentUrl.substringAfter(uiProperties.baseUrl)
+        assertEquals(contentProperties.contentUri.substringAfter(uiProperties.baseUri)
             .replace("{contentType}", Article.CONTENT_TYPE)
             .replace("{contentKey}", key),
             updatedArticle.path
@@ -1534,7 +1534,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertEquals(article.publishedAt?.truncatedTo(ChronoUnit.MILLIS), res.publishedAt)
         assertTrue(article.updatedAt.isBefore(res.updatedAt))
         assertEquals(article.access.ownerId, res.access.ownerId)
-        assertEquals(contentProperties.contentUrl.substringAfter(uiProperties.baseUrl)
+        assertEquals(contentProperties.contentUri.substringAfter(uiProperties.baseUri)
             .replace("{contentType}", Article.CONTENT_TYPE)
             .replace("{contentKey}", key),
             res.path
@@ -1563,7 +1563,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertTrue(updatedArticle.access.groups.maintainer.isEmpty())
         assertTrue(updatedArticle.access.groups.editor.isEmpty())
         assertTrue(updatedArticle.access.groups.viewer.isEmpty())
-        assertEquals(contentProperties.contentUrl.substringAfter(uiProperties.baseUrl)
+        assertEquals(contentProperties.contentUri.substringAfter(uiProperties.baseUri)
             .replace("{contentType}", Article.CONTENT_TYPE)
             .replace("{contentKey}", key),
             updatedArticle.path
@@ -1649,7 +1649,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertEquals(article.publishedAt?.truncatedTo(ChronoUnit.MILLIS), res.publishedAt)
         assertTrue(article.updatedAt.isBefore(res.updatedAt))
         assertEquals(article.access.ownerId, res.access.ownerId)
-        assertEquals(contentProperties.contentUrl.substringAfter(uiProperties.baseUrl)
+        assertEquals(contentProperties.contentUri.substringAfter(uiProperties.baseUri)
             .replace("{contentType}", Article.CONTENT_TYPE)
             .replace("{contentKey}", key),
             res.path
@@ -1678,7 +1678,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertTrue(updatedArticle.access.groups.maintainer.isEmpty())
         assertTrue(updatedArticle.access.groups.editor.isEmpty())
         assertTrue(updatedArticle.access.groups.viewer.isEmpty())
-        assertEquals(contentProperties.contentUrl.substringAfter(uiProperties.baseUrl)
+        assertEquals(contentProperties.contentUri.substringAfter(uiProperties.baseUri)
             .replace("{contentType}", Article.CONTENT_TYPE)
             .replace("{contentKey}", key),
             updatedArticle.path
@@ -1742,7 +1742,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertEquals(article.publishedAt?.truncatedTo(ChronoUnit.MILLIS), res.publishedAt)
         assertTrue(article.updatedAt.isBefore(res.updatedAt))
         assertEquals(article.access.ownerId, res.access.ownerId)
-        assertEquals(contentProperties.contentUrl.substringAfter(uiProperties.baseUrl)
+        assertEquals(contentProperties.contentUri.substringAfter(uiProperties.baseUri)
             .replace("{contentType}", Article.CONTENT_TYPE)
             .replace("{contentKey}", key),
             res.path
@@ -1771,7 +1771,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertTrue(updatedArticle.access.groups.maintainer.isEmpty())
         assertTrue(updatedArticle.access.groups.editor.isEmpty())
         assertTrue(updatedArticle.access.groups.viewer.isEmpty())
-        assertEquals(contentProperties.contentUrl.substringAfter(uiProperties.baseUrl)
+        assertEquals(contentProperties.contentUri.substringAfter(uiProperties.baseUri)
             .replace("{contentType}", Article.CONTENT_TYPE)
             .replace("{contentKey}", key),
             updatedArticle.path
@@ -1847,7 +1847,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertEquals(article.publishedAt?.truncatedTo(ChronoUnit.MILLIS), res.publishedAt)
         assertTrue(article.updatedAt.isBefore(res.updatedAt))
         assertEquals(article.access.ownerId, res.access.ownerId)
-        assertEquals(contentProperties.contentUrl.substringAfter(uiProperties.baseUrl)
+        assertEquals(contentProperties.contentUri.substringAfter(uiProperties.baseUri)
             .replace("{contentType}", Article.CONTENT_TYPE)
             .replace("{contentKey}", key),
             res.path
@@ -1876,7 +1876,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertTrue(updatedArticle.access.groups.maintainer.isEmpty())
         assertTrue(updatedArticle.access.groups.editor.isEmpty())
         assertTrue(updatedArticle.access.groups.viewer.isEmpty())
-        assertEquals(contentProperties.contentUrl.substringAfter(uiProperties.baseUrl)
+        assertEquals(contentProperties.contentUri.substringAfter(uiProperties.baseUri)
             .replace("{contentType}", Article.CONTENT_TYPE)
             .replace("{contentKey}", key),
             updatedArticle.path
@@ -2128,7 +2128,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertEquals(article.publishedAt?.truncatedTo(ChronoUnit.MILLIS), res.publishedAt)
         assertTrue(article.updatedAt.isBefore(res.updatedAt))
         assertEquals(req.newOwnerId, res.owner?.id.toString())
-        assertEquals(contentProperties.contentUrl.substringAfter(uiProperties.baseUrl)
+        assertEquals(contentProperties.contentUri.substringAfter(uiProperties.baseUri)
             .replace("{contentType}", Article.CONTENT_TYPE)
             .replace("{contentKey}", key),
             res.path
@@ -2151,7 +2151,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertTrue(article.updatedAt.isBefore(updatedArticle.updatedAt))
         assertEquals(req.newOwnerId, updatedArticle.access.ownerId.toString())
         assertTrue(updatedArticle.access.users.maintainer.contains(owner.info.id.toString()))
-        assertEquals(contentProperties.contentUrl.substringAfter(uiProperties.baseUrl)
+        assertEquals(contentProperties.contentUri.substringAfter(uiProperties.baseUri)
             .replace("{contentType}", Article.CONTENT_TYPE)
             .replace("{contentKey}", key),
             updatedArticle.path
@@ -2259,7 +2259,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertEquals(article.publishedAt?.truncatedTo(ChronoUnit.MILLIS), res.publishedAt)
         assertTrue(article.updatedAt.isBefore(res.updatedAt))
         assertEquals(article.access.ownerId, res.owner?.id)
-        assertEquals(contentProperties.contentUrl.substringAfter(uiProperties.baseUrl)
+        assertEquals(contentProperties.contentUri.substringAfter(uiProperties.baseUri)
             .replace("{contentType}", Article.CONTENT_TYPE)
             .replace("{contentKey}", key),
             res.path
@@ -2281,7 +2281,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertEquals(article.publishedAt?.truncatedTo(ChronoUnit.MILLIS), updatedArticle.publishedAt)
         assertTrue(article.updatedAt.isBefore(updatedArticle.updatedAt))
         assertEquals(article.access, updatedArticle.access)
-        assertEquals(contentProperties.contentUrl.substringAfter(uiProperties.baseUrl)
+        assertEquals(contentProperties.contentUri.substringAfter(uiProperties.baseUri)
             .replace("{contentType}", Article.CONTENT_TYPE)
             .replace("{contentKey}", key),
             updatedArticle.path
@@ -2450,7 +2450,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertEquals(article.publishedAt?.truncatedTo(ChronoUnit.MILLIS), updatedArticle.publishedAt)
         assertEquals(article.updatedAt.truncatedTo(ChronoUnit.MILLIS), updatedArticle.updatedAt)
         assertEquals(article.access, updatedArticle.access)
-        assertEquals(contentProperties.contentUrl.substringAfter(uiProperties.baseUrl)
+        assertEquals(contentProperties.contentUri.substringAfter(uiProperties.baseUri)
             .replace("{contentType}", Article.CONTENT_TYPE)
             .replace("{contentKey}", article.key),
             updatedArticle.path
