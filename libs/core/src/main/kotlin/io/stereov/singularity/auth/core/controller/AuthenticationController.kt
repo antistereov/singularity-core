@@ -89,8 +89,8 @@ class AuthenticationController(
 
             ### Behavior for Registering Account with Existing Email
             
-            If the email is already connected to an existing account, a warning will be sent to the
-            corresponding email address informing the user
+            If the email is already connected to an existing account, a [warning](https://singularity.stereov.io/docs/guides/auth/security-alerts#core-identity-alerts)
+            will be sent to the corresponding email address informing the user
             if email is [enabled and configured correctly](https://singularity.stereov.io/docs/guides/email/configuration).
             
             ### Locale
@@ -141,6 +141,10 @@ class AuthenticationController(
             A [login alert](https://singularity.stereov.io/docs/guides/auth/security-alerts#core-identity-alerts) 
             will be sent to the user's email if this setting is enabled
             email is [enabled and configured correctly](https://singularity.stereov.io/docs/guides/email/configuration).
+            
+            If there is an account associated with the given email address but this account did not set up
+            password authentication, an [Identity Provider Information](https://singularity.stereov.io/docs/guides/auth/security-alerts#no-account-information)
+            email will be sent if email is enabled.
             
             **Optional session data:**
             - The `session` object can be included in the request body.

@@ -147,21 +147,6 @@ class PasswordResetControllerTest : BaseMailIntegrationTest() {
 
         verify(exactly = 1) { mailSender.send(any<MimeMessage>()) }
     }
-    @Test fun `sendPasswordReset cooldown works ok for non-existing email`() = runTest {
-        webTestClient.post()
-            .uri("/api/auth/password/reset-request")
-            .bodyValue(SendPasswordResetRequest("another@email.com"))
-            .exchange()
-            .expectStatus().isOk
-
-        webTestClient.post()
-            .uri("/api/auth/password/reset-request")
-            .bodyValue(SendPasswordResetRequest("another@email.com"))
-            .exchange()
-            .expectStatus().isEqualTo(HttpStatus.TOO_MANY_REQUESTS)
-
-        verify(exactly = 1) { mailSender.send(any<MimeMessage>()) }
-    }
     @Test fun `sendPasswordReset is too many requests when cooldown is active`() = runTest {
         val user = registerUser()
 
@@ -174,6 +159,21 @@ class PasswordResetControllerTest : BaseMailIntegrationTest() {
         webTestClient.post()
             .uri("/api/auth/password/reset-request")
             .bodyValue(SendPasswordResetRequest(user.info.sensitive.email!!))
+            .exchange()
+            .expectStatus().isEqualTo(HttpStatus.TOO_MANY_REQUESTS)
+
+        verify(exactly = 1) { mailSender.send(any<MimeMessage>()) }
+    }
+    @Test fun `sendPasswordReset is too many requests when cooldown is active for non-existing email`() = runTest {
+        webTestClient.post()
+            .uri("/api/auth/password/reset-request")
+            .bodyValue(SendPasswordResetRequest("another@email.com"))
+            .exchange()
+            .expectStatus().isOk
+
+        webTestClient.post()
+            .uri("/api/auth/password/reset-request")
+            .bodyValue(SendPasswordResetRequest("another@email.com"))
             .exchange()
             .expectStatus().isEqualTo(HttpStatus.TOO_MANY_REQUESTS)
 

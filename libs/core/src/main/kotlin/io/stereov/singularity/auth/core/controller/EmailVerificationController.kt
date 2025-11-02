@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.util.*
@@ -136,6 +137,10 @@ class EmailVerificationController(
             
             >**Note:** If email is disabled, there is no way to verify a user's email address.
             
+            If there is no account associated with the given email address, 
+            a [No Account Information](https://singularity.stereov.io/docs/guides/auth/security-alerts#no-account-information)
+            email will be sent to the given email address.
+            
             ### Locale
             
             A locale can be specified for this request. 
@@ -192,10 +197,10 @@ class EmailVerificationController(
     )
     suspend fun sendEmailVerificationEmail(
         @RequestParam locale: Locale?,
-        @RequestBody request: SendEmailVerificationRequest,
+        @RequestBody @Valid request: SendEmailVerificationRequest,
     ): ResponseEntity<MailSendResponse> {
 
-        emailVerificationService.sendVerificationEmail(request.email, locale)
+        emailVerificationService.sendVerificationEmail(request.email, locale, true)
 
         return ResponseEntity.ok().body(
             MailSendResponse(emailVerificationService.getRemainingCooldown(request.email))

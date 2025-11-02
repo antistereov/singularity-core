@@ -174,7 +174,7 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isEqualTo(HttpStatus.TOO_MANY_REQUESTS)
 
-        verify(exactly = 0) { mailSender.send(any<MimeMessage>()) }
+        verify(exactly = 1) { mailSender.send(any<MimeMessage>()) }
     }
 
     @Test fun `verifyCooldown works`() = runTest {

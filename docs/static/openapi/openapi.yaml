@@ -131,14 +131,16 @@ paths:
         \ alert](https://singularity.stereov.io/docs/guides/auth/security-alerts#core-identity-alerts)\
         \ \nwill be sent to the user's email if this setting is enabled\nemail is\
         \ [enabled and configured correctly](https://singularity.stereov.io/docs/guides/email/configuration).\n\
-        \n**Optional session data:**\n- The `session` object can be included in the\
-        \ request body.\n- Inside the `session` object, you can provide the following\
-        \ optional fields:\n    - `browser`: The name of the browser used (e.g., \"\
-        Chrome\", \"Firefox\").\n    - `os`: The operating system of the device (e.g.,\
-        \ \"Windows\", \"macOS\", \"Android\").\n\nThis information helps users identify\
-        \ and manage authorized sessions, improving overall account security.\n\n\
-        **2FA:**\n\nIf the user enabled 2FA, the user will not be authenticated immediately.\
-        \ \nInstead, a [`TwoFactorAuthenticationToken`](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token)\
+        \nIf there is an account associated with the given email address but this\
+        \ account did not set up\npassword authentication, an [Identity Provider Information](https://singularity.stereov.io/docs/guides/auth/security-alerts#no-account-information)\n\
+        email will be sent if email is enabled.\n\n**Optional session data:**\n- The\
+        \ `session` object can be included in the request body.\n- Inside the `session`\
+        \ object, you can provide the following optional fields:\n    - `browser`:\
+        \ The name of the browser used (e.g., \"Chrome\", \"Firefox\").\n    - `os`:\
+        \ The operating system of the device (e.g., \"Windows\", \"macOS\", \"Android\"\
+        ).\n\nThis information helps users identify and manage authorized sessions,\
+        \ improving overall account security.\n\n**2FA:**\n\nIf the user enabled 2FA,\
+        \ the user will not be authenticated immediately. \nInstead, a [`TwoFactorAuthenticationToken`](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token)\
         \ \nis set as HTTP-only cookie and returned in the response body\nif [header\
         \ authentication](https://singularity.stereov.io/docs/guides/auth/authentication#header-authentication)\
         \ is enabled.\n\nYou can complete the login through the endpoint [`POST /api/auth/2fa/login`](https://singularity.stereov.io/docs/api/complete-login).\n\
@@ -375,10 +377,12 @@ paths:
         \ as request parameter.\nYou can find more information about this [here](https://singularity.stereov.io/docs/guides/auth/authentication#password-reset).\n\
         \nYou can perform the reset using the token through the endpoint [`POST /api/auth/password/reset`](https://singularity.stereov.io/docs/api/reset-password).\n\
         \n>**Note:** If email is disabled, there is no way to reset the password.\n\
-        \n### Locale\n\nA locale can be specified for this request. \nThe email will\
-        \ be sent in the specified locale.\nYou can learn more about locale in emails\
-        \ [here](https://singularity.stereov.io/docs/guides/email/templates).\n\n\
-        If no locale is specified, the applications default locale will be used.\n\
+        \nIf there is no account associated with the given email address, \na [No\
+        \ Account Information](https://singularity.stereov.io/docs/guides/auth/security-alerts#no-account-information)\n\
+        email will be sent to the given email address.\n\n### Locale\n\nA locale can\
+        \ be specified for this request. \nThe email will be sent in the specified\
+        \ locale.\nYou can learn more about locale in emails [here](https://singularity.stereov.io/docs/guides/email/templates).\n\
+        \nIf no locale is specified, the applications default locale will be used.\n\
         You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).\n\
         \n>**Note:** After each email, a cooldown will be started.\n>You can check\
         \ the status of the cooldown through the endpoint [`GET /api/auth/password/reset/cooldown`](https://singularity.stereov.io/docs/api/get-remaining-password-reset-cooldown).\n\
@@ -531,9 +535,11 @@ paths:
         \ with the\ntoken as request parameter.\n\nYou can perform the verification\
         \ using the token through the endpoint [`POST /api/auth/email/verification`](https://singularity.stereov.io/docs/api/verify-email).\n\
         \n>**Note:** If email is disabled, there is no way to verify a user's email\
-        \ address.\n\n### Locale\n\nA locale can be specified for this request. \n\
-        The email will be sent in the specified locale.\nYou can learn more about\
-        \ locale in emails [here](https://singularity.stereov.io/docs/guides/email/templates).\n\
+        \ address.\n\nIf there is no account associated with the given email address,\
+        \ \na [No Account Information](https://singularity.stereov.io/docs/guides/auth/security-alerts#no-account-information)\n\
+        email will be sent to the given email address.\n\n### Locale\n\nA locale can\
+        \ be specified for this request. \nThe email will be sent in the specified\
+        \ locale.\nYou can learn more about locale in emails [here](https://singularity.stereov.io/docs/guides/email/templates).\n\
         \nIf no locale is specified, the applications default locale will be used.\n\
         You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).\n\
         \n### Tokens\n- A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
@@ -5105,6 +5111,7 @@ components:
       properties:
         email:
           type: string
+          format: email
       required:
       - email
     TwoFactorSetupResponse:
@@ -5259,8 +5266,6 @@ components:
     PageableObject:
       type: object
       properties:
-        unpaged:
-          type: boolean
         paged:
           type: boolean
         pageNumber:
@@ -5269,6 +5274,8 @@ components:
         pageSize:
           type: integer
           format: int32
+        unpaged:
+          type: boolean
         offset:
           type: integer
           format: int64
@@ -5277,9 +5284,9 @@ components:
     SortObject:
       type: object
       properties:
-        unsorted:
-          type: boolean
         sorted:
+          type: boolean
+        unsorted:
           type: boolean
         empty:
           type: boolean

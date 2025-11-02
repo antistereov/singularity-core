@@ -65,7 +65,7 @@ Users are uniquely identified by email address.
 If successful and if the email is not linked to any existing account, 
 the user will receive an email with a link to verify the email address.
 
-In case that email is already connected to an existing account, a warning will be sent to the
+In case that email is already connected to an existing account, a [warning](./security-alerts.md#core-identity-alerts) will be sent to the
 corresponding email address informing the user.
 
 :::info Security
@@ -80,9 +80,9 @@ an email with a link to verify the email address will be sent to the user automa
 
 The link will be generated based on the URI you configure here:
 
-| Property                                | Type     | Description                                                                                                                  | Default value                             |
-|-----------------------------------------|----------|------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------|
-| singularity.auth.email-verification.uri | `String` | The URI that will included in the verification email that leads to the email verification page in your frontend application. | `http://localhost:8000/auth/verify-email` |
+| Property                              | Type     | Description                                                                                                                  | Default value                             |
+|---------------------------------------|----------|------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------|
+| singularity.ui.email-verification-uri | `String` | The URI that will included in the verification email that leads to the email verification page in your frontend application. | `http://localhost:4200/auth/verify-email` |
 
 This URI should lead to the email verification page of your frontend application.
 
@@ -95,6 +95,12 @@ Your frontend application should then request [`POST /api/auth/email/verificatio
 attaching the token.
 
 If successful, the user's email address is verified.
+
+:::note
+If there is no account associated with the given email address,
+a [No Account Information](./security-alerts#no-account-information)
+email will be sent to the given email address.
+:::
 
 #### Resending the Verification Email
 
@@ -156,9 +162,9 @@ An email with a link to reset the password will be sent to the user.
 
 The link will be generated based on the URI you configure here:
 
-| Property                            | Type     | Description                                                                                                                   | Default value                               |
-|-------------------------------------|----------|-------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------|
-| singularity.auth.password-reset.uri | `String` | The URI that will be included in the password reset email that leads to the password reset page in your frontend application. | `http://localhost:8000/auth/reset-password` |
+| Property                          | Type     | Description                                                                                                                   | Default value                               |
+|-----------------------------------|----------|-------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------|
+| singularity.ui.password-reset-uri | `String` | The URI that will be included in the password reset email that leads to the password reset page in your frontend application. | `http://localhost:4200/auth/reset-password` |
 
 This URI should lead to the password reset page of your frontend application.
 
@@ -174,6 +180,12 @@ If successful, the new password is set and the user can log in again.
 
 :::info
 All active sessions will be deleted after resetting the password.
+:::
+
+:::note
+If there is no account associated with the given email address,
+a [No Account Information](./security-alerts#no-account-information)
+email will be sent to the given email address.
 :::
 
 #### Resending the Reset Password Request

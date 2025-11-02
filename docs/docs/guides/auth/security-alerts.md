@@ -5,13 +5,20 @@ description: Learn how to configure automated security email alerts for user acc
 
 # Security Alerts
 
-:::note
+:::warning
 All security alerts require email to be enabled and configured in your application.
 :::
 
 To keep users informed of critical account activity and help them quickly identify potential compromises, *Singularity* supports automated email security alerts.
 
 These alerts are sent for high-impact events, ensuring users are immediately aware of changes to their authentication methods and access points.
+
+:::info
+These emails include references to pages of the frontend application
+such as a link to the account security settings or the login page.
+
+These paths can be configured [here](../configuration.md#paths).
+:::
 
 ## Core Identity Alerts
 
@@ -27,6 +34,11 @@ These alerts cover fundamental changes to the user's primary login credentials a
 * **Email Change (`email-changed`)**: Sent when the user successfully changes their email address.
   This alert will be sent after successfully requesting the endpoint [`POST /api/auth/email/verification`](../../api/verify-email.api.mdx).
 
+:::note
+These emails include links to the account security settings and login page of the frontend application.
+These links can be configured [here](../configuration.md#paths).
+:::
+
 ## 2FA Specific Alerts
 
 :::note
@@ -34,12 +46,16 @@ You can learn more about 2FA [here](./two-factor.md).
 :::
 
 * **2FA Added (`two-factor-added`)**: Sent upon the successful addition of a new Two-Factor Authentication method (TOTP or Email). 
-  Adding a new 2FA method is a critical setting and all active sessions are terminated upon completion.
+  Adding a new 2FA method is a critical setting, and all active sessions are terminated upon completion.
   This alert will be sent after successfully requesting the endpoint [`POST /api/auth/2fa/totp/setup`](../../api/enable-totp-as-two-factor-method.api.mdx)
   for [TOTP](./two-factor.md#totp) or [`POST /api/auth/2fa/email/enable`](../../api/enable-email-as-two-factor-method.api.mdx) for [email](./two-factor.md#email).
 * **2FA Removed (`two-factor-removed`)**: Sent when an existing 2FA method is removed.
   This alert will be sent after successfully requesting the endpoint [`DELETE /api/auth/2fa/totp`](../../api/disable-totp-as-two-factor-method.api.mdx) or [`DELETE /api/auth/2fa/email`](../../api/disable-email-as-two-factor-method.api.mdx).
 
+:::note
+These emails include a link to the account security settings of the frontend application.
+These links can be configured [here](../configuration.md#paths).
+:::
 
 ## OAuth2 Specific Alerts
 
@@ -54,6 +70,48 @@ The alerts for connecting and disconnecting OAuth2 providers relate directly to 
   
 :::warning
 A user is generally not allowed to disconnect an OAuth2 identity if it is their only means of authentication.
+:::
+
+:::note
+These emails include a link to the account security settings of the frontend application.
+These links can be configured [here](../configuration.md#paths).
+:::
+
+## User Information
+
+To improve the user experience, *Singularity* will send the following emails:
+
+### No Account Information
+
+If a user tries to perform one of the following security actions:
+
+* requesting a password reset [`POST /api/auth/password/reset-request`](../../api/send-password-reset-email.api.mdx) or
+* verifying an email address via [`POST /api/auth/email/verification`](../../api/verify-email.api.mdx)
+
+an email will be sent to the user notifying that there is no account associated with the provided email address.
+
+:::note
+This email includes a link to the registration page of the frontend application.
+These links can be configured [here](../configuration.md#paths).
+:::
+
+### Identity Provider Information
+
+If a user tries to log in through a method the user did not set up, an email will be sent 
+that informs the user which methods are configured.
+
+This will limit confusion if a user thinks they already signed up but doesn't seem to remember the correct password or which provider they connected with.
+
+It will be sent in the following scenarios:
+
+* login with password through [`POST /api/auth/login`](../../api/login.api.mdx) or
+* [registration via an OAuth2 provider](./oauth2.md#registration) and
+  * the provider account is not yet registered in the application
+  * the email address associated with the provider account is already associated with an existing account
+
+:::note
+This email includes a link to the login page of the frontend application.
+These links can be configured [here](../configuration.md#paths).
 :::
 
 ## Configuration

@@ -265,10 +265,10 @@ these codes can occur when trying to connect an OAuth2 provider to an existing a
 Besides the error codes that can occur on all flows,
 these codes can occur when trying to register a user via OAuth2.
 
-| Code                         | Description                                                                                                     |
-|------------------------------|-----------------------------------------------------------------------------------------------------------------|
-| `user_already_authenticated` | Registration failed. The user is already authenticated.                                                         |
-| `email_already_registered`   | Registration failed. The email attribute of the OAuth2 provider matches an email of an already registered user. |
+| Code                         | Description                                                                                                                                                                                                                                                 |
+|------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `user_already_authenticated` | Registration failed. The user is already authenticated.                                                                                                                                                                                                     |
+| `email_already_registered`   | Registration failed. The email attribute of the OAuth2 provider matches an email of an already registered user. In this case an [Identity Provider Information](./security-alerts.md#identity-provider-information) will be sent to the associated account. |
 
 
 ### Login

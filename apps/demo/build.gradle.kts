@@ -3,7 +3,6 @@ plugins {
     kotlin("plugin.spring") version "2.0.21"
     id("org.springframework.boot") version "3.4.1"
     id("io.spring.dependency-management") version "1.1.4"
-
     id("org.springdoc.openapi-gradle-plugin") version "1.9.0"
 }
 
@@ -21,6 +20,11 @@ repositories {
 dependencies {
     api(project(":libs:core"))
     implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.25.0")
+}
+
+configurations.all {
+    exclude(group = "ch.qos.logback", module = "logback-classic")
+    exclude(group = "org.apache.logging.log4j", module = "log4j-to-slf4j")
 }
 
 tasks.test {

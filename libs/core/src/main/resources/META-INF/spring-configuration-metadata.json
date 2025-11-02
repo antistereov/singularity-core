@@ -670,6 +670,20 @@
       "description": "Primary color for the UI, used in email templates and other branding elements. "
     },
     {
+      "name": "singularity.ui.secondary-background-color",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.global.properties.UiProperties",
+      "defaultValue": "#E5E5E5",
+      "description": "Secondary background color for the UI, used in email templates and other branding elements. "
+    },
+    {
+      "name": "singularity.ui.secondary-text-color",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.global.properties.UiProperties",
+      "defaultValue": "#404040",
+      "description": "Secondary text color for the UI, used in email templates and other branding elements. "
+    },
+    {
       "name": "singularity.ui.base-uri",
       "type": "java.lang.String",
       "sourceType": "io.stereov.singularity.global.properties.UiProperties",
@@ -688,21 +702,21 @@
       "type": "java.lang.String",
       "sourceType": "io.stereov.singularity.global.properties.UiProperties",
       "defaultValue": "${singularity.ui.base-uri}/contact",
-      "description": "Path to the contact page in your frontend application.  "
+      "description": "URI for the contact page in your frontend application.  "
     },
     {
       "name": "singularity.ui.legal-notice-uri",
       "type": "java.lang.String",
       "sourceType": "io.stereov.singularity.global.properties.UiProperties",
       "defaultValue": "${singularity.ui.base-uri}/legal-notice",
-      "description": "Path to the legal notice page."
+      "description": "URI for the legal notice page."
     },
     {
       "name": "singularity.ui.privacy-policy-uri",
       "type": "java.lang.String",
       "sourceType": "io.stereov.singularity.global.properties.UiProperties",
       "defaultValue": "${singularity.ui.base-uri}/privacy-policy",
-      "description": "Path to the privacy policy page."
+      "description": "URI for the privacy policy page."
     },
     {
       "name": "singularity.auth.email-verification-uri",
