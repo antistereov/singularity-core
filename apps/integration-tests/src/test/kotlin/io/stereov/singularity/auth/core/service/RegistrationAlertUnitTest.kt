@@ -1,11 +1,10 @@
-package io.stereov.singularity.auth.core.controller
+package io.stereov.singularity.auth.core.service
 
 import io.mockk.clearMocks
 import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.slot
 import io.stereov.singularity.auth.core.dto.request.RegisterUserRequest
-import io.stereov.singularity.auth.core.service.EmailVerificationService
 import io.stereov.singularity.test.BaseSecurityAlertTest
 import io.stereov.singularity.test.config.MockEmailVerificationService
 import io.stereov.singularity.user.core.model.UserDocument

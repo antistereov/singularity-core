@@ -1,4 +1,4 @@
-package io.stereov.singularity.auth.core.controller
+package io.stereov.singularity.auth.core.service
 
 import io.mockk.coJustRun
 import io.mockk.coVerify

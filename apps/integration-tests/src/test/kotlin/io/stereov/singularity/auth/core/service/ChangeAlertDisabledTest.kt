@@ -1,4 +1,4 @@
-package io.stereov.singularity.auth.core.controller
+package io.stereov.singularity.auth.core.service
 
 import io.mockk.verify
 import io.stereov.singularity.auth.core.dto.request.ResetPasswordRequest

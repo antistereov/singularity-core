@@ -1,7 +1,7 @@
-package io.stereov.singularity.auth.core.controller
+package io.stereov.singularity.auth.core.service
 
 import io.mockk.verify
-import io.stereov.singularity.auth.core.dto.request.RegisterUserRequest
+import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.test.BaseMailIntegrationTest
 import jakarta.mail.internet.MimeMessage
 import kotlinx.coroutines.test.runTest
@@ -9,14 +9,14 @@ import org.junit.jupiter.api.Test
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 
-class RegistrationAlertDisabledTest : BaseMailIntegrationTest() {
+class LoginAlertDisabledTest : BaseMailIntegrationTest() {
 
     @Test fun `does not send email`() = runTest {
         val user = registerUser()
 
         webTestClient.post()
-            .uri("/api/auth/register")
-            .bodyValue(RegisterUserRequest(user.email!!, user.password!!, "Name"))
+            .uri("/api/auth/login")
+            .bodyValue(LoginRequest(user.email!!, user.password!!))
             .exchange()
             .expectStatus().isOk
 
@@ -28,7 +28,7 @@ class RegistrationAlertDisabledTest : BaseMailIntegrationTest() {
         @JvmStatic
         @Suppress("UNUSED")
         fun properties(registry: DynamicPropertyRegistry) {
-            registry.add("singularity.auth.security-alert.registration-with-existing-email") { false }
+            registry.add("singularity.auth.security-alert.login") { false }
         }
     }
 }

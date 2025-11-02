@@ -1,9 +1,7 @@
 package io.stereov.singularity.test
 
 import io.mockk.clearMocks
-import io.stereov.singularity.auth.core.service.LoginAlertService
-import io.stereov.singularity.auth.core.service.RegistrationAlertService
-import io.stereov.singularity.auth.core.service.SecurityAlertService
+import io.stereov.singularity.auth.core.service.*
 import io.stereov.singularity.test.config.MockSecurityAlertConfig
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
@@ -18,6 +16,10 @@ class BaseSecurityAlertTest : BaseMailIntegrationTest() {
     lateinit var securityAlertService: SecurityAlertService
     @Autowired
     lateinit var registrationAlertService: RegistrationAlertService
+    @Autowired
+    lateinit var identityProviderInfoService: IdentityProviderInfoService
+    @Autowired
+    lateinit var noAccountInfoService: NoAccountInfoService
 
 
     @BeforeEach
@@ -25,5 +27,7 @@ class BaseSecurityAlertTest : BaseMailIntegrationTest() {
         clearMocks(loginAlertService)
         clearMocks(securityAlertService)
         clearMocks(registrationAlertService)
+        clearMocks(identityProviderInfoService)
+        clearMocks(noAccountInfoService)
     }
 }

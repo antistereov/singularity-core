@@ -8,14 +8,20 @@ import org.springframework.http.HttpStatus
 
 class PasswordResetControllerDisabledTest : BaseIntegrationTest() {
 
-    @Test
-    fun `sendPasswordReset throws disabled exception`() = runTest {
+    @Test fun `sendPasswordReset throws disabled exception`() = runTest {
         val user = registerUser()
 
         webTestClient.post()
             .uri("/api/auth/password/reset-request")
             .bodyValue(SendPasswordResetRequest(user.info.sensitive.email!!))
-            .accessTokenCookie(user.accessToken)
+            .exchange()
+            .expectStatus()
+            .isEqualTo(HttpStatus.SERVICE_UNAVAILABLE)
+    }
+    @Test fun `sendPasswordReset throws disabled exception for non-existing`() = runTest {
+        webTestClient.post()
+            .uri("/api/auth/password/reset-request")
+            .bodyValue(SendPasswordResetRequest("not@email.com"))
             .exchange()
             .expectStatus()
             .isEqualTo(HttpStatus.SERVICE_UNAVAILABLE)

@@ -18,4 +18,13 @@ class EmailVerificationControllerDisabledTest : BaseIntegrationTest() {
             .expectStatus()
             .isEqualTo(HttpStatus.SERVICE_UNAVAILABLE)
     }
+
+    @Test fun `sendVerificationEmail throws disabled exception for not existing`() = runTest {
+        webTestClient.post()
+            .uri("/api/auth/email/verification/send")
+            .bodyValue(SendEmailVerificationRequest("not@email.com"))
+            .exchange()
+            .expectStatus()
+            .isEqualTo(HttpStatus.SERVICE_UNAVAILABLE)
+    }
 }

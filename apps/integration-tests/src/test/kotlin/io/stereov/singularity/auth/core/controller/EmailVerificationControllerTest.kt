@@ -98,6 +98,15 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isBadRequest
     }
+    @Test fun `sendVerificationEmail requires valid email`() = runTest {
+        webTestClient.post()
+            .uri("/api/auth/email/verification/send")
+            .bodyValue(SendEmailVerificationRequest("invalid"))
+            .exchange()
+            .expectStatus().isBadRequest
+
+        verify(exactly = 0) { mailSender.send(any<MimeMessage>()) }
+    }
     @Test fun `sendVerificationEmail returns not modified when already verified`() = runTest {
         val user = registerUser()
         user.info.sensitive.security.email.verified = true
@@ -116,7 +125,22 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isOk
 
-        verify(exactly = 0) { mailSender.send(any<MimeMessage>()) }
+        verify(exactly = 1) { mailSender.send(any<MimeMessage>()) }
+    }
+    @Test fun `sendVerificationEmail cooldown works for non-existing emails`() = runTest {
+        webTestClient.post()
+            .uri("/api/auth/email/verification/send")
+            .bodyValue(SendEmailVerificationRequest("not@email.com"))
+            .exchange()
+            .expectStatus().isOk
+
+        webTestClient.post()
+            .uri("/api/auth/email/verification/send")
+            .bodyValue(SendEmailVerificationRequest("not@email.com"))
+            .exchange()
+            .expectStatus().isEqualTo(HttpStatus.TOO_MANY_REQUESTS)
+
+        verify(exactly = 1) { mailSender.send(any<MimeMessage>()) }
     }
     @Test fun `sendVerificationEmail is too many attempts when cooldown is active`() = runTest {
         val user = registerUser()
