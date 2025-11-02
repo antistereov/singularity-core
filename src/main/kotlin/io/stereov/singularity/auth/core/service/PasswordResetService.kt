@@ -8,8 +8,8 @@ import io.stereov.singularity.auth.core.dto.response.MailCooldownResponse
 import io.stereov.singularity.auth.core.exception.AuthException
 import io.stereov.singularity.auth.core.exception.model.WrongIdentityProviderException
 import io.stereov.singularity.auth.core.model.IdentityProvider
+import io.stereov.singularity.auth.core.model.NoAccountInfoAction
 import io.stereov.singularity.auth.core.model.SecurityAlertType
-import io.stereov.singularity.auth.core.properties.PasswordResetProperties
 import io.stereov.singularity.auth.core.properties.SecurityAlertProperties
 import io.stereov.singularity.auth.core.service.token.PasswordResetTokenService
 import io.stereov.singularity.database.hash.service.HashService
@@ -20,6 +20,7 @@ import io.stereov.singularity.email.core.util.EmailConstants
 import io.stereov.singularity.email.template.service.TemplateService
 import io.stereov.singularity.email.template.util.TemplateBuilder
 import io.stereov.singularity.global.properties.AppProperties
+import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.translate.model.TranslateKey
 import io.stereov.singularity.translate.service.TranslateService
@@ -39,14 +40,15 @@ class PasswordResetService(
     private val hashService: HashService,
     private val redisTemplate: ReactiveRedisTemplate<String, String>,
     private val emailProperties: EmailProperties,
-    private val passwordResetProperties: PasswordResetProperties,
+    private val uiProperties: UiProperties,
     private val translateService: TranslateService,
     private val emailService: EmailService,
     private val templateService: TemplateService,
     private val accessTokenCache: AccessTokenCache,
     private val appProperties: AppProperties,
     private val securityAlertService: SecurityAlertService,
-    private val securityAlertProperties: SecurityAlertProperties
+    private val securityAlertProperties: SecurityAlertProperties,
+    private val noAccountInfoService: NoAccountInfoService
 ) {
 
     private val logger = KotlinLogging.logger {}
@@ -58,6 +60,7 @@ class PasswordResetService(
             val user = userService.findByEmail(req.email)
             return sendPasswordResetEmail(user, locale)
         } catch (_: UserDoesNotExistException) {
+            noAccountInfoService.send(req.email, NoAccountInfoAction.PASSWORD_RESET, locale)
             startCooldown(req.email)
             return
         }
@@ -135,7 +138,7 @@ class PasswordResetService(
         val secret = user.sensitive.security.password.resetSecret
 
         val token = passwordResetTokenService.create(user.id, secret)
-        val passwordResetUrl = generatePasswordResetUrl(token)
+        val passwordResetUri = generatePasswordResetUri(token)
 
         val slug = "password_reset"
         val templatePath = "${EmailConstants.TEMPLATE_DIR}/$slug.html"
@@ -145,7 +148,7 @@ class PasswordResetService(
             .translate(EmailConstants.RESOURCE_BUNDLE, actualLocale)
             .replacePlaceholders(templateService.getPlaceholders(mapOf(
                 "name" to user.sensitive.name,
-                "reset_url" to passwordResetUrl
+                "reset_uri" to passwordResetUri
             )))
             .build()
 
@@ -153,7 +156,7 @@ class PasswordResetService(
         startCooldown(email)
     }
 
-    private fun generatePasswordResetUrl(token: String): String {
-        return "${passwordResetProperties.uri}?token=$token"
+    private fun generatePasswordResetUri(token: String): String {
+        return "${uiProperties.passwordResetUri}?token=$token"
     }
 }

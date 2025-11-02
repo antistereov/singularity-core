@@ -108,6 +108,6 @@ class LocalFileStorage(
     }
 
     override suspend fun getRenditionUrl(key: String): String {
-        return "${appProperties.baseUrl}${apiPath}${key}"
+        return "${appProperties.baseUri}${apiPath}${key}"
     }
 }

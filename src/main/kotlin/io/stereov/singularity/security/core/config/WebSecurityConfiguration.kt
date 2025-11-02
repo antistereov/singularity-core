@@ -171,7 +171,7 @@ class WebSecurityConfiguration {
 
         val allowedOrigins = mutableListOf<String>()
         allowedOrigins.addAll(securityProperties.allowedOrigins)
-        allowedOrigins.add(uiProperties.baseUrl)
+        allowedOrigins.add(uiProperties.baseUri)
 
         configuration.allowedOrigins = allowedOrigins
         configuration.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")

@@ -1,8 +1,9 @@
 <div style="margin-bottom: 1rem;">
-    <p>{{ invitation.description.1 | translate }}</p>
-    <p>{{ invitation.description.2 | translate }}</p>
-    <p>{{ invitation.description.3 | translate }}</p>
+    <p>{{ no_account_info.message.1 | translate }}</p>
+    <p>{{ no_account_info.message.2 | translate }}</p>
+    <p style="margin-top: 1rem">{{ no_account_info.message.3 | translate }}</p>
 </div>
+
 <a style="
     box-sizing: border-box;
     display: inline-block;
@@ -17,10 +18,7 @@
     color: white;
     text-decoration: none;
     text-align: center;"
-    href="{{ accept_uri }}?token={{ accept_token }}"
+   href="{{ register_uri }}"
 >
-    <strong>{{ invitation.accept | translate }}</strong>
+    <strong>{{ no_account_info.register | translate }}</strong>
 </a>
-<div>
-    <p>{{ invitation.description.4 | translate }}</p>
-</div>

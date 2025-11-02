@@ -11,14 +11,21 @@ class TemplateService(
 ) {
 
     private val placeholders = mapOf(
-        "app_url" to uiProperties.baseUrl.trim(),
+        "app_uri" to uiProperties.baseUri.trim(),
         "app_name" to appProperties.name.trim(),
-        "icon_url" to uiProperties.iconUrl.trim(),
-        "contact_url" to uiProperties.baseUrl.removeSuffix("/").trim() + "/" + uiProperties.contactPath.removePrefix("/").trim(),
-        "legal_notice_url" to uiProperties.baseUrl.removeSuffix("/").trim() + "/" + uiProperties.legalNoticePath.removePrefix("/").trim(),
-        "privacy_policy_url" to uiProperties.baseUrl.removeSuffix("/").trim() + "/" + uiProperties.privacyPolicyPath.removePrefix("/").trim(),
-        "support_mail" to appProperties.supportMail.trim(),
+        "icon_uri" to uiProperties.iconUri.trim(),
+        "contact_uri" to uiProperties.contactUri.trim(),
+        "legal_notice_uri" to uiProperties.legalNoticeUri.trim(),
+        "privacy_policy_uri" to uiProperties.privacyPolicyUri.trim(),
+        "login_uri" to uiProperties.loginUri.trim(),
+        "register_uri" to uiProperties.registerUri.trim(),
+        "email_verification_uri" to uiProperties.emailVerificationUri.trim(),
+        "password_reset_uri" to uiProperties.passwordResetUri.trim(),
+        "security_settings_uri" to uiProperties.securitySettingsUri.trim(),
+        "support_email" to appProperties.supportEmail.trim(),
         "primary_color" to uiProperties.primaryColor.trim(),
+        "secondary_background_color" to uiProperties.secondaryBackgroundColor.trim(),
+        "secondary_text_color" to uiProperties.secondaryTextColor.trim(),
     )
 
     fun getPlaceholders(additional: Map<String, Any>): Map<String, Any> {

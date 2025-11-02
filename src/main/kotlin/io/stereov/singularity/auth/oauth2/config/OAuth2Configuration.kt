@@ -5,6 +5,7 @@ import io.stereov.singularity.auth.core.component.CookieCreator
 import io.stereov.singularity.auth.core.properties.AuthProperties
 import io.stereov.singularity.auth.core.properties.SecurityAlertProperties
 import io.stereov.singularity.auth.core.service.AuthorizationService
+import io.stereov.singularity.auth.core.service.IdentityProviderInfoService
 import io.stereov.singularity.auth.core.service.SecurityAlertService
 import io.stereov.singularity.auth.core.service.token.AccessTokenService
 import io.stereov.singularity.auth.core.service.token.StepUpTokenService
@@ -130,6 +131,8 @@ class OAuth2Configuration {
         accessTokenService: AccessTokenService,
         userSettingsService: UserSettingsService,
         downloadService: DownloadService,
+        identityProviderInfoService: IdentityProviderInfoService,
+        emailProperties: EmailProperties
     ) = OAuth2AuthenticationService(
         userService,
         twoFactorEmailCodeProperties,
@@ -137,5 +140,7 @@ class OAuth2Configuration {
         accessTokenService,
         userSettingsService,
         downloadService,
+        identityProviderInfoService,
+        emailProperties,
     )
 }

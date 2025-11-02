@@ -6,5 +6,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 @ConfigurationProperties(prefix = "singularity.content")
 data class ContentProperties(
     val tags: List<CreateTagMultiLangRequest>?,
-    val contentUrl: String = "http://localhost:4200/content/{contentType}/{contentKey}"
+    val contentUri: String = "http://localhost:4200/content/{contentType}/{contentKey}"
 )

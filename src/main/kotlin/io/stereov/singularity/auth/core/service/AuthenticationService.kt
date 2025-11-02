@@ -32,7 +32,8 @@ class AuthenticationService(
     private val emailProperties: EmailProperties,
     private val twoFactorEmailProperties: TwoFactorEmailProperties,
     private val registrationAlertService: RegistrationAlertService,
-    private val securityAlertProperties: SecurityAlertProperties
+    private val securityAlertProperties: SecurityAlertProperties,
+    private val identityProviderInfoService: IdentityProviderInfoService
 ) {
 
     private val logger: KLogger
@@ -48,7 +49,7 @@ class AuthenticationService(
      * @throws InvalidCredentialsException If the email or password is invalid.
      * @throws io.stereov.singularity.auth.core.exception.AuthException If the user document does not contain an ID.
      */
-    suspend fun login(payload: LoginRequest): UserDocument {
+    suspend fun login(payload: LoginRequest, locale: Locale?): UserDocument {
         logger.debug { "Logging in user ${payload.email}" }
 
         if (authorizationService.isAuthenticated())
@@ -58,7 +59,12 @@ class AuthenticationService(
             ?: throw InvalidCredentialsException()
 
         val password = runCatching { user.validateLoginTypeAndGetPassword() }
-            .getOrElse { throw InvalidCredentialsException() }
+            .getOrElse {
+                if (emailProperties.enable) {
+                    identityProviderInfoService.send(user, locale)
+                }
+                throw InvalidCredentialsException()
+            }
 
         if (!hashService.checkBcrypt(payload.password, password)) {
             throw InvalidCredentialsException()

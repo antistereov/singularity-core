@@ -21,8 +21,8 @@
         box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
 
         width: 100%;">
-        <a style="display: flex; gap: 0.5rem; align-items: center; text-decoration: none" href="{{ app_url }}">
-            <img src="{{ icon_url }}" alt="icon" style="height: 2rem; width: 2rem;"/>
+        <a style="display: flex; gap: 0.5rem; align-items: center; text-decoration: none" href="{{ app_uri }}">
+            <img src="{{ icon_uri }}" alt="icon" style="height: 2rem; width: 2rem;"/>
             <span style="font-size: 2.25rem; font-weight: 300; color: black; text-decoration: none">{{ app_name }}</span>
         </a>
     </div>
@@ -69,11 +69,11 @@
         color: #52525b;"
     >
         <div>
-            <a href="{{ contact_url }}" style="color: #52525b;">{{ contact | translate }}</a>
+            <a href="{{ contact_uri }}" style="color: #52525b;">{{ contact | translate }}</a>
             <span> | </span>
-            <a href="{{ legal_notice_url }}" style="color: #52525b;">{{ legal_notice | translate }}</a>
+            <a href="{{ legal_notice_uri }}" style="color: #52525b;">{{ legal_notice | translate }}</a>
             <span> | </span>
-            <a href="{{ privacy_policy_url }}" style="color: #52525b;">{{ privacy_policy | translate }}</a>
+            <a href="{{ privacy_policy_uri }}" style="color: #52525b;">{{ privacy_policy | translate }}</a>
         </div>
 
     </div>

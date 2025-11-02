@@ -9,8 +9,8 @@ import java.util.*
 data class AppProperties(
     // core
     val name: String = "Singularity",
-    val baseUrl: String = "http://localhost:8000",
-    val supportMail: String = "support@example.com",
+    val baseUri: String = "http://localhost:8000",
+    val supportEmail: String = "support@example.com",
     val secure: Boolean = false,
     private val defaultLocale: String = "en",
 

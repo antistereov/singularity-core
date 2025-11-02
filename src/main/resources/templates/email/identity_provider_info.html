@@ -1,7 +1,7 @@
 <div style="margin-bottom: 1rem;">
-    <p>{{ registration_alert.greeting | translate }}</p>
-    <p>{{ registration_alert.message.1 | translate }}</p>
-    <p style="margin-top: 1.5rem;">{{ registration_alert.message.2 | translate }}</p>
+    <p>{{ identity_provider_info.greeting | translate }}</p>
+    <p>{{ identity_provider_info.message.1 | translate }}</p>
+    <p style="margin-top: 1.5rem;">{{ identity_provider_info.message.2 | translate }}</p>
 </div>
 
 <a style="
@@ -20,5 +20,9 @@
     text-align: center;"
    href="{{ login_uri }}"
 >
-    <strong>{{ registration_alert.sign_in | translate }}</strong>
+    <strong>{{ identity_provider_info.sign_in | translate }}</strong>
 </a>
+
+<div style="margin-top: 1.5rem;">
+    <p>{{ identity_provider_info.message.3 | translate }}</p>
+</div>
