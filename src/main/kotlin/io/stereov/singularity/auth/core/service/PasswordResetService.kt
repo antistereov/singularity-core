@@ -6,7 +6,6 @@ import io.stereov.singularity.auth.core.dto.request.ResetPasswordRequest
 import io.stereov.singularity.auth.core.dto.request.SendPasswordResetRequest
 import io.stereov.singularity.auth.core.dto.response.MailCooldownResponse
 import io.stereov.singularity.auth.core.exception.AuthException
-import io.stereov.singularity.auth.core.exception.model.WrongIdentityProviderException
 import io.stereov.singularity.auth.core.model.IdentityProvider
 import io.stereov.singularity.auth.core.model.NoAccountInfoAction
 import io.stereov.singularity.auth.core.model.SecurityAlertType
@@ -26,6 +25,7 @@ import io.stereov.singularity.translate.model.TranslateKey
 import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.user.core.exception.model.UserDoesNotExistException
 import io.stereov.singularity.user.core.model.UserDocument
+import io.stereov.singularity.user.core.model.identity.UserIdentity
 import io.stereov.singularity.user.core.service.UserService
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.data.redis.core.ReactiveRedisTemplate
@@ -87,9 +87,12 @@ class PasswordResetService(
 
         user.sensitive.security.password.resetSecret = Random.generateString(20)
         val passwordIdentity = user.sensitive.identities[IdentityProvider.PASSWORD]
-            ?: throw WrongIdentityProviderException("No password authentication is set for user")
-
-        passwordIdentity.password = hashService.hashBcrypt(req.newPassword)
+        val newPasswordHash = hashService.hashBcrypt(req.newPassword)
+        if (passwordIdentity != null) {
+            passwordIdentity.password = newPasswordHash
+        } else {
+            user.sensitive.identities[IdentityProvider.PASSWORD] = UserIdentity.ofPassword(newPasswordHash)
+        }
         user.clearSessions()
         accessTokenCache.invalidateAllTokens(user.id)
 
