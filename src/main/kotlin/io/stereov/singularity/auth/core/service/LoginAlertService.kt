@@ -58,7 +58,7 @@ class LoginAlertService(
             .replacePlaceholders(templateService.getPlaceholders(mapOf(
                 "name" to user.sensitive.name,
                 "login_location" to loginLocation,
-                "login_device" to device,
+                "login_os" to device,
                 "login_browser" to browser
             )))
             .build()
