@@ -56,6 +56,11 @@ class PasswordResetService(
     suspend fun sendPasswordReset(req: SendPasswordResetRequest, locale: Locale?) {
         logger.debug { "Sending password reset email" }
 
+        val remainingCooldown = getRemainingCooldown(req.email)
+        if (remainingCooldown > 0) {
+            throw EmailCooldownException(remainingCooldown)
+        }
+
         try {
             val user = userService.findByEmail(req.email)
             return sendPasswordResetEmail(user, locale)
@@ -129,11 +134,6 @@ class PasswordResetService(
 
         val email = user.requireNotGuestAndGetEmail()
         val actualLocale = locale ?: appProperties.locale
-
-        val remainingCooldown = getRemainingCooldown(email)
-        if (remainingCooldown > 0) {
-            throw EmailCooldownException(remainingCooldown)
-        }
 
         val secret = user.sensitive.security.password.resetSecret
 

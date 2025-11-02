@@ -130,7 +130,7 @@ suspend fun getRemainingCooldown(email: String): Long {
      *
      * @param user The user to send the verification email to.
      */
-    suspend fun sendVerificationEmail(email: String, locale: Locale?) {
+    suspend fun sendVerificationEmail(email: String, locale: Locale?, sendNoAccountInfo: Boolean = false) {
         logger.debug { "Sending verification email to $email" }
 
         val actualLocale = locale ?: appProperties.locale
@@ -144,8 +144,11 @@ suspend fun getRemainingCooldown(email: String): Long {
         val user = userService.findByEmailOrNull(email)
 
         if (user == null) {
-            logger.debug { "User with email $email not found. Sending no account info" }
-            noAccountInfoService.send(email, NoAccountInfoAction.EMAIL_VERIFICATION, locale)
+            if (sendNoAccountInfo) {
+                logger.debug { "User with email $email not found. Sending no account info" }
+                noAccountInfoService.send(email, NoAccountInfoAction.EMAIL_VERIFICATION, locale)
+            }
+
             return
         }
 
