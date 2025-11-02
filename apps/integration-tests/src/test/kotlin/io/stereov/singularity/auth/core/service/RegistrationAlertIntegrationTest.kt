@@ -17,7 +17,7 @@ import org.springframework.context.annotation.Import
 import java.util.*
 
 @Import(MockEmailVerificationService::class)
-class RegistrationAlertUnitTest : BaseSecurityAlertTest() {
+class RegistrationAlertIntegrationTest : BaseSecurityAlertTest() {
 
     @Autowired
     lateinit var emailVerificationService: EmailVerificationService

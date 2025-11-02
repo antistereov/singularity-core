@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
 import java.util.*
 
-class ChangeAlertUnitTest : BaseSecurityAlertTest() {
+class ChangeAlertIntegrationTest : BaseSecurityAlertTest() {
 
     @Test fun `password reset works without locale`() = runTest {
         val user = registerUser()

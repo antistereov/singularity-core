@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.*
 
-class LoginAlertUnitTest : BaseSecurityAlertTest() {
+class LoginAlertIntegrationTest : BaseSecurityAlertTest() {
 
     @Test fun `works without session and locale`() = runTest {
         val user = registerUser()

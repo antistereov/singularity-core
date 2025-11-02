@@ -1,160 +1,30 @@
 package io.stereov.singularity.auth.core.service
 
-import io.mockk.coJustRun
-import io.mockk.coVerify
-import io.mockk.slot
-import io.stereov.singularity.auth.core.dto.request.SendEmailVerificationRequest
-import io.stereov.singularity.auth.core.dto.request.SendPasswordResetRequest
+import io.mockk.verify
 import io.stereov.singularity.auth.core.model.NoAccountInfoAction
-import io.stereov.singularity.test.BaseSecurityAlertTest
+import io.stereov.singularity.test.BaseMailIntegrationTest
+import jakarta.mail.internet.MimeMessage
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.util.*
+import org.springframework.beans.factory.annotation.Autowired
 
-class NoAccountInfoServiceUnitTest : BaseSecurityAlertTest() {
+class NoAccountInfoServiceUnitTest : BaseMailIntegrationTest() {
 
-    @Test fun `verify email works without locale`() = runTest {
-        val emailSlot = slot<String>()
-        val actionSlot = slot<NoAccountInfoAction>()
-        val localeSlot = slot<Locale?>()
-        val email = "not@existing.com"
+    @Autowired
+    private lateinit var noAccountInfoService: NoAccountInfoService
 
-        coJustRun { noAccountInfoService.send(
-            capture(emailSlot),
-            capture(actionSlot),
-            captureNullable(localeSlot),
-        ) }
+    @Test fun `cooldown works with password reset`() = runTest {
+        noAccountInfoService.send("email@test.com", NoAccountInfoAction.PASSWORD_RESET,null)
+        noAccountInfoService.send("email@test.com", NoAccountInfoAction.PASSWORD_RESET,null)
+        noAccountInfoService.send("email@test.com", NoAccountInfoAction.EMAIL_VERIFICATION,null)
 
-        webTestClient.post()
-            .uri("/api/auth/email/verification/send")
-            .bodyValue(SendEmailVerificationRequest(email))
-            .exchange()
-            .expectStatus().isOk
-
-        coVerify(exactly = 1) { noAccountInfoService.send(any(), any(), anyNullable()) }
-        assert(emailSlot.isCaptured)
-        assertEquals(email, emailSlot.captured)
-        assert(actionSlot.isCaptured)
-        assertEquals(NoAccountInfoAction.EMAIL_VERIFICATION, actionSlot.captured)
-        assert(localeSlot.isNull)
+        verify(exactly = 1) { mailSender.send(any<MimeMessage>()) }
     }
-    @Test fun `verify email works with locale`() = runTest {
-        val emailSlot = slot<String>()
-        val actionSlot = slot<NoAccountInfoAction>()
-        val localeSlot = slot<Locale?>()
-        val email = "not@existing.com"
+    @Test fun `cooldown works with email verification`() = runTest {
+        noAccountInfoService.send("email@test.com", NoAccountInfoAction.EMAIL_VERIFICATION,null)
+        noAccountInfoService.send("email@test.com", NoAccountInfoAction.PASSWORD_RESET,null)
+        noAccountInfoService.send("email@test.com", NoAccountInfoAction.EMAIL_VERIFICATION,null)
 
-        coJustRun { noAccountInfoService.send(
-            capture(emailSlot),
-            capture(actionSlot),
-            captureNullable(localeSlot),
-        ) }
-
-        webTestClient.post()
-            .uri("/api/auth/email/verification/send?locale=en")
-            .bodyValue(SendEmailVerificationRequest(email))
-            .exchange()
-            .expectStatus().isOk
-
-        coVerify(exactly = 1) { noAccountInfoService.send(any(), any(), anyNullable()) }
-        assert(emailSlot.isCaptured)
-        assertEquals(email, emailSlot.captured)
-        assert(actionSlot.isCaptured)
-        assertEquals(NoAccountInfoAction.EMAIL_VERIFICATION, actionSlot.captured)
-        assert(localeSlot.isCaptured)
-        assertEquals(Locale.ENGLISH, localeSlot.captured)
-    }
-    @Test fun `verify email does not send for existing`() = runTest {
-        val emailSlot = slot<String>()
-        val actionSlot = slot<NoAccountInfoAction>()
-        val localeSlot = slot<Locale?>()
-        val email = registerUser().email!!
-
-        coJustRun { noAccountInfoService.send(
-            capture(emailSlot),
-            capture(actionSlot),
-            captureNullable(localeSlot),
-        ) }
-
-        webTestClient.post()
-            .uri("/api/auth/email/verification/send")
-            .bodyValue(SendEmailVerificationRequest(email))
-            .exchange()
-            .expectStatus().isOk
-
-        coVerify(exactly = 0) { noAccountInfoService.send(any(), any(), anyNullable()) }
-    }
-
-    @Test fun `reset password works without locale`() = runTest {
-        val emailSlot = slot<String>()
-        val actionSlot = slot<NoAccountInfoAction>()
-        val localeSlot = slot<Locale?>()
-        val email = "not@existing.com"
-
-        coJustRun { noAccountInfoService.send(
-            capture(emailSlot),
-            capture(actionSlot),
-            captureNullable(localeSlot),
-        ) }
-
-        webTestClient.post()
-            .uri("/api/auth/password/reset-request")
-            .bodyValue(SendPasswordResetRequest(email))
-            .exchange()
-            .expectStatus().isOk
-
-        coVerify(exactly = 1) { noAccountInfoService.send(any(), any(), anyNullable()) }
-        assert(emailSlot.isCaptured)
-        assertEquals(email, emailSlot.captured)
-        assert(actionSlot.isCaptured)
-        assertEquals(NoAccountInfoAction.PASSWORD_RESET, actionSlot.captured)
-        assert(localeSlot.isNull)
-    }
-    @Test fun `reset password works with locale`() = runTest {
-        val emailSlot = slot<String>()
-        val actionSlot = slot<NoAccountInfoAction>()
-        val localeSlot = slot<Locale?>()
-        val email = "not@existing.com"
-
-        coJustRun { noAccountInfoService.send(
-            capture(emailSlot),
-            capture(actionSlot),
-            captureNullable(localeSlot),
-        ) }
-
-        webTestClient.post()
-            .uri("/api/auth/password/reset-request?locale=en")
-            .bodyValue(SendPasswordResetRequest(email))
-            .exchange()
-            .expectStatus().isOk
-
-        coVerify(exactly = 1) { noAccountInfoService.send(any(), any(), anyNullable()) }
-        assert(emailSlot.isCaptured)
-        assertEquals(email, emailSlot.captured)
-        assert(actionSlot.isCaptured)
-        assertEquals(NoAccountInfoAction.PASSWORD_RESET, actionSlot.captured)
-        assert(localeSlot.isCaptured)
-        assertEquals(Locale.ENGLISH, localeSlot.captured)
-    }
-    @Test fun `reset password does not send for existing`() = runTest {
-        val emailSlot = slot<String>()
-        val actionSlot = slot<NoAccountInfoAction>()
-        val localeSlot = slot<Locale?>()
-        val email = registerUser().email!!
-
-        coJustRun { noAccountInfoService.send(
-            capture(emailSlot),
-            capture(actionSlot),
-            captureNullable(localeSlot),
-        ) }
-
-        webTestClient.post()
-            .uri("/api/auth/password/reset-request")
-            .bodyValue(SendPasswordResetRequest(email))
-            .exchange()
-            .expectStatus().isOk
-
-        coVerify(exactly = 0) { noAccountInfoService.send(any(), any(), anyNullable()) }
+        verify(exactly = 1) { mailSender.send(any<MimeMessage>()) }
     }
 }
