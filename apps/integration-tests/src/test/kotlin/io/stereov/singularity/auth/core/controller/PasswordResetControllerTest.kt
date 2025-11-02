@@ -87,7 +87,7 @@ class PasswordResetControllerTest : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isBadRequest
     }
-    @Test fun `resetPassword is bad for only oauth2`() = runTest {
+    @Test fun `resetPassword sets password for oauth2`() = runTest {
         val user = registerOAuth2()
         val token = passwordResetTokenService.create(user.info.id, user.info.sensitive.security.password.resetSecret)
 
@@ -98,7 +98,23 @@ class PasswordResetControllerTest : BaseMailIntegrationTest() {
             .uri("/api/auth/password/reset?token=$token")
             .bodyValue(req)
             .exchange()
-            .expectStatus().isBadRequest
+            .expectStatus().isOk
+
+        val verifiedUser = userService.findById(user.info.id)
+
+        Assertions.assertNotEquals(
+            user.info.sensitive.security.password.resetSecret,
+            verifiedUser.sensitive.security.password.resetSecret
+        )
+        Assertions.assertNotEquals(user.info.password, verifiedUser.password)
+
+        val credentials = LoginRequest(user.info.sensitive.email!!, newPassword, SessionInfoRequest("test"))
+
+        webTestClient.post()
+            .uri("/api/auth/login")
+            .bodyValue(credentials)
+            .exchange()
+            .expectStatus().isOk
     }
     @Test fun `resetPassword is bad for guest`() = runTest {
         val guest = createGuest()

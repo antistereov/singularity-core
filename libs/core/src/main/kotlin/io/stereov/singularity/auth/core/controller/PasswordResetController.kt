@@ -65,11 +65,6 @@ class PasswordResetController(
                 description = "Updated user information.",
             ),
             ApiResponse(
-                responseCode = "400",
-                description = "Trying to request a password reset for a user that only authenticated via OAuth2 providers or a [`GUEST`](https://singularity.stereov.io/docs/guides/auth/roles#guests).",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
                 responseCode = "403",
                 description = "No password identity is set up for the user.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]

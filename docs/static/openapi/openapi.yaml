@@ -70,8 +70,9 @@ paths:
         \ letter, \n  one lowercase letter, one number, and one special character\
         \ (!@#$%^&*()_+={}[]|\\:;'\"<>,.?/).\n\n### Behavior for Registering Account\
         \ with Existing Email\n\nIf the email is already connected to an existing\
-        \ account, a warning will be sent to the\ncorresponding email address informing\
-        \ the user\nif email is [enabled and configured correctly](https://singularity.stereov.io/docs/guides/email/configuration).\n\
+        \ account, a [warning](https://singularity.stereov.io/docs/guides/auth/security-alerts#core-identity-alerts)\n\
+        will be sent to the corresponding email address informing the user\nif email\
+        \ is [enabled and configured correctly](https://singularity.stereov.io/docs/guides/email/configuration).\n\
         \n### Locale\n\nA locale can be specified for this request. \nThis will be\
         \ used for the email verification email.\nYou can learn more about email verification\
         \ [here](https://singularity.stereov.io/docs/guides/auth/authentication#email-verification).\n\
@@ -476,13 +477,6 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/SuccessResponse"
-        "400":
-          description: "Trying to request a password reset for a user that only authenticated\
-            \ via OAuth2 providers or a [`GUEST`](https://singularity.stereov.io/docs/guides/auth/roles#guests)."
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
         "403":
           description: No password identity is set up for the user.
           content:
