@@ -53,7 +53,7 @@ class NoAccountInfoService(
             .replace("{{ action_subject }}", actionSubject)
 
         val action = translateService.translateResourceKey(
-            TranslateKey("$slug.message.${action.value}"),
+            TranslateKey("$slug.action.${action.value}"),
             EmailConstants.RESOURCE_BUNDLE, actualLocale)
 
         val content = TemplateBuilder.fromResource(templatePath)
