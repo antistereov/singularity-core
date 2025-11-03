@@ -18,7 +18,7 @@ class ChangeAlertDisabledTest : BaseMailIntegrationTest() {
         userService.save(user.info)
 
         val token = passwordResetTokenService.create(user.info.id, user.passwordResetSecret!!)
-        val newPassword = "new-password878"
+        val newPassword = "Password$2"
         val req = ResetPasswordRequest(newPassword)
 
         webTestClient.post()
@@ -35,7 +35,7 @@ class ChangeAlertDisabledTest : BaseMailIntegrationTest() {
         userService.save(user.info)
 
         val token = passwordResetTokenService.create(user.info.id, user.passwordResetSecret!!)
-        val newPassword = "new-password878"
+        val newPassword = "Password$2"
         val req = ResetPasswordRequest(newPassword)
 
         webTestClient.post()

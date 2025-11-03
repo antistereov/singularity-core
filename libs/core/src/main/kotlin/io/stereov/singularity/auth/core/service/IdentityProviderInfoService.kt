@@ -26,7 +26,8 @@ class IdentityProviderInfoService(
     private val templateService: TemplateService,
     private val providerStringCreator: ProviderStringCreator,
     private val redisTemplate: ReactiveRedisTemplate<String, String>,
-    private val emailProperties: EmailProperties
+    private val emailProperties: EmailProperties,
+    private val passwortResetService: PasswordResetService
 ) {
 
     private val logger = KotlinLogging.logger {  }
@@ -54,7 +55,8 @@ class IdentityProviderInfoService(
             .translate(EmailConstants.RESOURCE_BUNDLE, actualLocale)
             .replacePlaceholders(templateService.getPlaceholders(mapOf(
                 "name" to user.sensitive.name,
-                "provider_placeholder" to providerStringCreator.getProvidersString(user, actualLocale)
+                "provider_placeholder" to providerStringCreator.getProvidersString(user, actualLocale),
+                "reset_password_uri" to passwortResetService.generatePasswordResetUri(user)
             )))
             .build()
 

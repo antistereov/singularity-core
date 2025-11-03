@@ -36,7 +36,7 @@ class ChangeAlertIntegrationTest : BaseSecurityAlertTest() {
         ) }
 
         val token = passwordResetTokenService.create(user.info.id, user.passwordResetSecret!!)
-        val newPassword = "new-password878"
+        val newPassword = "Password$2"
         val req = ResetPasswordRequest(newPassword)
 
         webTestClient.post()
@@ -71,7 +71,7 @@ class ChangeAlertIntegrationTest : BaseSecurityAlertTest() {
         ) }
 
         val token = passwordResetTokenService.create(user.info.id, user.passwordResetSecret!!)
-        val newPassword = "new-password878"
+        val newPassword = "Password$2"
         val req = ResetPasswordRequest(newPassword)
 
         webTestClient.post()
