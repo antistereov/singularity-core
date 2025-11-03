@@ -138,10 +138,7 @@ class PasswordResetService(
         val email = user.requireNotGuestAndGetEmail()
         val actualLocale = locale ?: appProperties.locale
 
-        val secret = user.sensitive.security.password.resetSecret
-
-        val token = passwordResetTokenService.create(user.id, secret)
-        val passwordResetUri = generatePasswordResetUri(token)
+        val passwordResetUri = generatePasswordResetUri(user)
 
         val slug = "password_reset"
         val templatePath = "${EmailConstants.TEMPLATE_DIR}/$slug.html"
@@ -159,7 +156,9 @@ class PasswordResetService(
         startCooldown(email)
     }
 
-    private fun generatePasswordResetUri(token: String): String {
+    suspend fun generatePasswordResetUri(user: UserDocument): String {
+        val secret = user.sensitive.security.password.resetSecret
+        val token = passwordResetTokenService.create(user.id, secret)
         return "${uiProperties.passwordResetUri}?token=$token"
     }
 }

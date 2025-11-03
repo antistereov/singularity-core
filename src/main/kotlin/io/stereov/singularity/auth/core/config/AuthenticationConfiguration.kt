@@ -327,7 +327,8 @@ class AuthenticationConfiguration {
         templateService: TemplateService,
         providerStringCreator: ProviderStringCreator,
         redisTemplate: ReactiveRedisTemplate<String, String>,
-        emailProperties: EmailProperties
+        emailProperties: EmailProperties,
+        passwordResetService: PasswordResetService
     ) = IdentityProviderInfoService(
         appProperties,
         translateService,
@@ -335,7 +336,8 @@ class AuthenticationConfiguration {
         templateService,
         providerStringCreator,
         redisTemplate,
-        emailProperties
+        emailProperties,
+        passwordResetService
     )
 
     @Bean
