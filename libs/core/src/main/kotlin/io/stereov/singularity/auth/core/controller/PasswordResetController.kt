@@ -47,6 +47,10 @@ class PasswordResetController(
             
             You can resend this email through the endpoint [`POST /api/auth/password/reset-request`](https://singularity.stereov.io/docs/api/send-password-reset-email).
             
+            ### Requirements
+            - The `password` must be at least 8 characters long and include at least one uppercase letter, 
+              one lowercase letter, one number, and one special character (!@#$%^&*()_+={}[]|\:;'"<>,.?/).
+            
             ### Locale
             
             A locale can be specified for this request. 
@@ -62,18 +66,18 @@ class PasswordResetController(
         responses = [
             ApiResponse(
                 responseCode = "200",
-                description = "Updated user information.",
+                description = "Success.",
             ),
             ApiResponse(
-                responseCode = "403",
-                description = "No password identity is set up for the user.",
+                responseCode = "400",
+                description = "`newPassword` is invalid.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
+            )
         ]
     )
     suspend fun resetPassword(
         @RequestParam token: String,
-        @RequestBody req: ResetPasswordRequest,
+        @RequestBody @Valid req: ResetPasswordRequest,
         @RequestParam locale: Locale?
     ): ResponseEntity<SuccessResponse> {
         passwordResetService.resetPassword(token, req, locale)

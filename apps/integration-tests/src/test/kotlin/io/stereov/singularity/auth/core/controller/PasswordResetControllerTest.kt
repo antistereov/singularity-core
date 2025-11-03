@@ -1,5 +1,6 @@
 package io.stereov.singularity.auth.core.controller
 
+import com.mongodb.assertions.Assertions.assertTrue
 import io.mockk.verify
 import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.auth.core.dto.request.ResetPasswordRequest
@@ -22,7 +23,7 @@ class PasswordResetControllerTest : BaseMailIntegrationTest() {
 
         Assertions.assertFalse(user.info.sensitive.security.email.verified)
 
-        val newPassword = "new-password878"
+        val newPassword = "Password$2"
         val req = ResetPasswordRequest(newPassword)
 
         webTestClient.post()
@@ -48,7 +49,7 @@ class PasswordResetControllerTest : BaseMailIntegrationTest() {
             .expectStatus().isOk
     }
     @Test fun `resetPassword requires token`() = runTest {
-        val req = ResetPasswordRequest("test")
+        val req = ResetPasswordRequest("Password$2")
 
         webTestClient.post()
             .uri("/api/auth/password/reset")
@@ -57,7 +58,7 @@ class PasswordResetControllerTest : BaseMailIntegrationTest() {
             .expectStatus().isBadRequest
     }
     @Test fun `resetPassword requires valid token`() = runTest {
-        val req = ResetPasswordRequest("test")
+        val req = ResetPasswordRequest("Password$2")
 
         webTestClient.post()
             .uri("/api/auth/email/verification?token=test")
@@ -69,13 +70,103 @@ class PasswordResetControllerTest : BaseMailIntegrationTest() {
         val user = registerUser()
         val token = passwordResetTokenService.create(user.info.id, user.passwordResetSecret!!, Instant.ofEpochSecond(0))
 
-        val req = ResetPasswordRequest("Test")
+        val req = ResetPasswordRequest("Password$2")
 
         webTestClient.post()
             .uri("/api/auth/email/verification?token=$token")
             .bodyValue(req)
             .exchange()
             .expectStatus().isUnauthorized
+    }
+    @Test fun `resetPassword requires capital letter`() = runTest {
+        val user = registerUser()
+        val token = passwordResetTokenService.create(user.info.id, user.passwordResetSecret!!)
+
+        Assertions.assertFalse(user.info.sensitive.security.email.verified)
+
+        val newPassword = "password$2"
+        val req = ResetPasswordRequest(newPassword)
+
+        webTestClient.post()
+            .uri("/api/auth/password/reset?token=$token")
+            .bodyValue(req)
+            .exchange()
+            .expectStatus().isBadRequest
+
+        val foundUser = userService.findById(user.info.id)
+        assertTrue(hashService.checkBcrypt(user.password!!, foundUser.password!!))
+    }
+    @Test fun `resetPassword requires small letter`() = runTest {
+        val user = registerUser()
+        val token = passwordResetTokenService.create(user.info.id, user.passwordResetSecret!!)
+
+        Assertions.assertFalse(user.info.sensitive.security.email.verified)
+
+        val newPassword = "PASSWORD$2"
+        val req = ResetPasswordRequest(newPassword)
+
+        webTestClient.post()
+            .uri("/api/auth/password/reset?token=$token")
+            .bodyValue(req)
+            .exchange()
+            .expectStatus().isBadRequest
+
+        val foundUser = userService.findById(user.info.id)
+        assertTrue(hashService.checkBcrypt(user.password!!, foundUser.password!!))
+    }
+    @Test fun `resetPassword requires number`() = runTest {
+        val user = registerUser()
+        val token = passwordResetTokenService.create(user.info.id, user.passwordResetSecret!!)
+
+        Assertions.assertFalse(user.info.sensitive.security.email.verified)
+
+        val newPassword = "Password2"
+        val req = ResetPasswordRequest(newPassword)
+
+        webTestClient.post()
+            .uri("/api/auth/password/reset?token=$token")
+            .bodyValue(req)
+            .exchange()
+            .expectStatus().isBadRequest
+
+        val foundUser = userService.findById(user.info.id)
+        assertTrue(hashService.checkBcrypt(user.password!!, foundUser.password!!))
+    }
+    @Test fun `resetPassword requires special character`() = runTest {
+        val user = registerUser()
+        val token = passwordResetTokenService.create(user.info.id, user.passwordResetSecret!!)
+
+        Assertions.assertFalse(user.info.sensitive.security.email.verified)
+
+        val newPassword = "Password2"
+        val req = ResetPasswordRequest(newPassword)
+
+        webTestClient.post()
+            .uri("/api/auth/password/reset?token=$token")
+            .bodyValue(req)
+            .exchange()
+            .expectStatus().isBadRequest
+
+        val foundUser = userService.findById(user.info.id)
+        assertTrue(hashService.checkBcrypt(user.password!!, foundUser.password!!))
+    }
+    @Test fun `resetPassword requires 8 characters`() = runTest {
+        val user = registerUser()
+        val token = passwordResetTokenService.create(user.info.id, user.passwordResetSecret!!)
+
+        Assertions.assertFalse(user.info.sensitive.security.email.verified)
+
+        val newPassword = "Pass$2"
+        val req = ResetPasswordRequest(newPassword)
+
+        webTestClient.post()
+            .uri("/api/auth/password/reset?token=$token")
+            .bodyValue(req)
+            .exchange()
+            .expectStatus().isBadRequest
+
+        val foundUser = userService.findById(user.info.id)
+        assertTrue(hashService.checkBcrypt(user.password!!, foundUser.password!!))
     }
     @Test fun `resetPassword needs body`() = runTest {
         val user = registerUser()
@@ -91,7 +182,7 @@ class PasswordResetControllerTest : BaseMailIntegrationTest() {
         val user = registerOAuth2()
         val token = passwordResetTokenService.create(user.info.id, user.info.sensitive.security.password.resetSecret)
 
-        val newPassword = "new-password878"
+        val newPassword = "NewPassword$2"
         val req = ResetPasswordRequest(newPassword)
 
         webTestClient.post()
@@ -120,7 +211,7 @@ class PasswordResetControllerTest : BaseMailIntegrationTest() {
         val guest = createGuest()
         val token = passwordResetTokenService.create(guest.info.id, guest.info.sensitive.security.password.resetSecret)
 
-        val newPassword = "new-password878"
+        val newPassword = "NewPassword$2"
         val req = ResetPasswordRequest(newPassword)
 
         webTestClient.post()

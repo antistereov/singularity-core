@@ -444,10 +444,12 @@ paths:
         \ as request parameter.\nYou can find more information about this [here](https://singularity.stereov.io/docs/guides/auth/authentication#password-reset).\n\
         \nIf successful, the user can log in using the new password afterwards.\n\n\
         You can resend this email through the endpoint [`POST /api/auth/password/reset-request`](https://singularity.stereov.io/docs/api/send-password-reset-email).\n\
-        \n### Locale\n\nA locale can be specified for this request. \nThe email will\
-        \ be sent in the specified locale.\nYou can learn more about locale in emails\
-        \ [here](https://singularity.stereov.io/docs/guides/email/templates).\n\n\
-        If no locale is specified, the applications default locale will be used.\n\
+        \n### Requirements\n- The `password` must be at least 8 characters long and\
+        \ include at least one uppercase letter, \n  one lowercase letter, one number,\
+        \ and one special character (!@#$%^&*()_+={}[]|\\:;'\"<>,.?/).\n\n### Locale\n\
+        \nA locale can be specified for this request. \nThe email will be sent in\
+        \ the specified locale.\nYou can learn more about locale in emails [here](https://singularity.stereov.io/docs/guides/email/templates).\n\
+        \nIf no locale is specified, the applications default locale will be used.\n\
         You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).\n\
         \n>**Note:** If email is disabled, there is no way to reset the password."
       externalDocs:
@@ -472,13 +474,13 @@ paths:
         required: true
       responses:
         "200":
-          description: Updated user information.
+          description: Success.
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/SuccessResponse"
-        "403":
-          description: No password identity is set up for the user.
+        "400":
+          description: '`newPassword` is invalid.'
           content:
             '*/*':
               schema:
@@ -5039,6 +5041,12 @@ components:
       properties:
         newPassword:
           type: string
+          description: "The user's chosen password. It must be at least 8 characters\
+            \ long and include at least one uppercase letter, one lowercase letter,\
+            \ one number, and one special character (!@#$%^&*()_+={}[]|\\:;'\"<>,.?/)."
+          example: S3cur3P@ssw0rd!
+          pattern: "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+\\-={}\\[\\\
+            ]|\\\\:;'\"<,>.?/]).{8,}"
       required:
       - newPassword
     SendPasswordResetRequest:
