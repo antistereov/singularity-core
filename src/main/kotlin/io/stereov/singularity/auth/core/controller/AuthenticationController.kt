@@ -26,6 +26,7 @@ import io.stereov.singularity.auth.oauth2.model.token.OAuth2TokenType
 import io.stereov.singularity.auth.twofactor.model.token.TwoFactorTokenType
 import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthenticationService
 import io.stereov.singularity.auth.twofactor.service.token.TwoFactorAuthenticationTokenService
+import io.stereov.singularity.email.core.exception.model.EmailCooldownException
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.global.model.ErrorResponse
@@ -215,7 +216,7 @@ class AuthenticationController(
         val user = authenticationService.login(payload, locale)
 
         if (user.twoFactorEnabled) {
-            twoFactorAuthenticationService.handleTwoFactor(user, locale)
+            runCatching { twoFactorAuthenticationService.handleTwoFactor(user, locale) }
             val twoFactorAuthenticationToken = twoFactorAuthenticationTokenService.create(user.id)
 
             return ResponseEntity.ok()
@@ -445,7 +446,8 @@ class AuthenticationController(
         val user = authenticationService.stepUp(req)
 
         if (user.twoFactorEnabled) {
-            twoFactorAuthenticationService.handleTwoFactor(user, locale)
+            runCatching { twoFactorAuthenticationService.handleTwoFactor(user, locale) }
+
             val twoFactorToken = twoFactorAuthenticationTokenService.create(user.id)
 
             return ResponseEntity.ok()
