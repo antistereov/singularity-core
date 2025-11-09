@@ -18,10 +18,13 @@ import org.springframework.core.io.ClassPathResource
 import org.springframework.http.MediaType
 import java.io.File
 
-class ImageStoreTest : BaseIntegrationTest() {
+class ImageStoreTest() : BaseIntegrationTest() {
 
     @Autowired
     private lateinit var properties: LocalFileStorageProperties
+
+    @Autowired
+    private lateinit var imageProperties: ImageProperties
 
 
     @Autowired
@@ -43,6 +46,28 @@ class ImageStoreTest : BaseIntegrationTest() {
         metadata.renditions.values.forEach { rend ->
             assertTrue { File(properties.fileDirectory, rend.key).exists() }
         }
+        assertTrue { metadata.renditions[ImageProperties::small.name]!!.height!! >= imageProperties.small }
+        assertTrue { metadata.renditions[ImageProperties::small.name]!!.width!! >= imageProperties.small }
+    }
+    @Test fun `save image doesn't scale up small images`() = runTest {
+        val user = registerUser()
+        val file = ClassPathResource("files/test-image.jpg").file
+        val filePart = MockFilePart(file)
+        val key = FileKey("key")
+
+        val metadata = imageStore.upload(user.info.id, filePart, key.key, true)
+
+        assertTrue { metadata.renditions.keys.contains(ImageProperties::small.name) }
+        assertTrue { metadata.renditions.keys.contains(ImageProperties::medium.name) }
+        assertTrue { metadata.renditions.keys.contains(ImageProperties::large.name) }
+        assertTrue { metadata.renditions.keys.contains(FileMetadataDocument.ORIGINAL_RENDITION) }
+
+        metadata.renditions.values.forEach { rend ->
+            assertTrue { File(properties.fileDirectory, rend.key).exists() }
+        }
+        assertTrue { imageProperties.large > 640 }
+        assertTrue { metadata.renditions[ImageProperties::large.name]!!.height!! == 424 }
+        assertTrue { metadata.renditions[ImageProperties::large.name]!!.width!! == 640 }
     }
     @Test fun `save image throws when wrong content type`() = runTest {
         val user = registerUser()
