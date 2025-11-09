@@ -42,7 +42,7 @@ class CacheServiceTest : BaseIntegrationTest() {
 
         assertTrue(cacheService.exists("test"))
 
-        runBlocking { delay(Duration.ofSeconds(1)) }
+        runBlocking { delay(Duration.ofMillis(1100)) }
 
         assertFalse(cacheService.exists("test"))
     }
