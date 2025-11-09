@@ -3,6 +3,7 @@ package io.stereov.singularity.auth.core.service.token
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.model.token.EmailVerificationToken
 import io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException
+import io.stereov.singularity.auth.jwt.exception.model.TokenExpiredException
 import io.stereov.singularity.auth.jwt.properties.JwtProperties
 import io.stereov.singularity.auth.jwt.service.JwtService
 import org.bson.types.ObjectId
@@ -54,7 +55,7 @@ class EmailVerificationTokenService(
      * @return An [EmailVerificationToken] object containing the email and secret.
      *
      * @throws InvalidTokenException if the token is invalid or expired.
-     * @throws io.stereov.singularity.auth.jwt.exception.model.TokenExpiredException if the token is expired.
+     * @throws TokenExpiredException if the token is expired.
      */
     suspend fun extract(token: String): EmailVerificationToken {
         logger.debug { "Validating email verification token" }

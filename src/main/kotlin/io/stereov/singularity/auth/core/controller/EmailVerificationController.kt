@@ -70,6 +70,11 @@ class EmailVerificationController(
                 responseCode = "400",
                 description = "Trying to verify an email for [`GUEST`](https://singularity.stereov.io/docs/guides/auth/roles#guests).",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
+            ApiResponse(
+                responseCode = "401",
+                description = "Invalid or expired verification token.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
     )
