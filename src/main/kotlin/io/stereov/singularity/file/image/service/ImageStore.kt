@@ -70,13 +70,18 @@ class ImageStore(
     }
 
     suspend fun ImmutableImage.resize(size: Int): ImmutableImage = withContext(Dispatchers.Default) {
-        val ratio = this@resize.height.toDouble() / this@resize.width.toDouble()
-        val calculatedHeight = (size * ratio).toInt()
+        val w = this@resize.width
+        val h = this@resize.height
+        val shortEdge = minOf(w, h)
 
-        val resizedImage = if (calculatedHeight < size) {
-            this@resize.scaleToHeight(size)
+        val scale = minOf(1.0, size.toDouble() / shortEdge.toDouble())
+        val targetW = maxOf(1, (w * scale).toInt())
+        val targetH = maxOf(1, (h * scale).toInt())
+
+        val resizedImage = if (targetW != w || targetH != h) {
+            this@resize.scaleTo(targetW, targetH)
         } else {
-            this@resize.scaleToWidth(size)
+            this@resize
         }
 
         val targetCropWidth = resizedImage.width
