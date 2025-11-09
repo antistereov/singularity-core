@@ -53,3 +53,8 @@ configurations.all {
 tasks.test {
     useJUnitPlatform()
 }
+
+tasks.withType<Test> {
+    jvmArgs("-XX:+HeapDumpOnOutOfMemoryError", "-XX:HeapDumpPath=build/oom.hprof")
+    maxParallelForks = 1
+}
