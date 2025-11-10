@@ -65,7 +65,7 @@ class IdentityProviderInfoService(
     }
 
     private suspend fun cooldownActive(email: String): Boolean {
-        logger.debug { "Getting remaining cooldown for email verification" }
+        logger.debug { "Getting remaining cooldown for identity provider info" }
 
         val key = "$slug:$email"
         val remainingTtl = redisTemplate.getExpire(key).awaitSingleOrNull() ?: Duration.ofSeconds(-1)
@@ -74,7 +74,7 @@ class IdentityProviderInfoService(
     }
 
     private suspend fun startCooldown(email: String): Boolean {
-        logger.debug { "Starting cooldown for email verification" }
+        logger.debug { "Starting cooldown for identity provider info" }
 
         val key = "$slug:$email"
         val isNewKey = redisTemplate.opsForValue()
