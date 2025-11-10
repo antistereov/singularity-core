@@ -72,6 +72,11 @@ class PasswordResetController(
                 responseCode = "400",
                 description = "`newPassword` is invalid.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+            ),
+            ApiResponse(
+                responseCode = "401",
+                description = "Invalid or expired password reset token.",
+                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
     )
