@@ -5,12 +5,12 @@ import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.model.OpenApiConstants
-import io.stereov.singularity.global.model.SendEmailResponse
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.core.mapper.UserMapper
 import io.stereov.singularity.user.settings.dto.request.ChangeEmailRequest
 import io.stereov.singularity.user.settings.dto.request.ChangePasswordRequest
 import io.stereov.singularity.user.settings.dto.request.ChangeUserRequest
+import io.stereov.singularity.user.settings.dto.response.ChangeEmailResponse
 import io.stereov.singularity.user.settings.service.UserSettingsService
 import io.swagger.v3.oas.annotations.ExternalDocumentation
 import io.swagger.v3.oas.annotations.Operation
@@ -113,7 +113,7 @@ class UserSettingsController(
         responses = [
             ApiResponse(
                 responseCode = "200",
-                description = "The number of seconds the user needs to wait before sending a new request.",
+                description = "If email is enabled, `verificationRequired` will be `true` indicating that this request did not update the user, otherwise `verificationRequired` is `false`. Since this request sends an email, the remaining cooldown in seconds will be returned.",
             ),
             ApiResponse(
                 responseCode = "400",
@@ -130,7 +130,7 @@ class UserSettingsController(
     suspend fun changeEmailOfAuthorizedUser(
         @RequestBody @Valid payload: ChangeEmailRequest,
         @RequestParam locale: Locale?,
-    ): ResponseEntity<SendEmailResponse> {
+    ): ResponseEntity<ChangeEmailResponse> {
         val cooldown = userSettingsService.changeEmail(payload, locale)
         return ResponseEntity.ok().body(cooldown)
     }
