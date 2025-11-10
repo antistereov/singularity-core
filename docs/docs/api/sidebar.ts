@@ -677,6 +677,12 @@ const sidebar: SidebarsConfig = {
         },
         {
           type: "doc",
+          id: "api/schemas/sendemailresponse",
+          label: "SendEmailResponse",
+          className: "schema",
+        },
+        {
+          type: "doc",
           id: "api/schemas/grouptranslation",
           label: "GroupTranslation",
           className: "schema",
@@ -917,12 +923,6 @@ const sidebar: SidebarsConfig = {
         },
         {
           type: "doc",
-          id: "api/schemas/mailsendresponse",
-          label: "MailSendResponse",
-          className: "schema",
-        },
-        {
-          type: "doc",
           id: "api/schemas/loginrequest",
           label: "LoginRequest",
           className: "schema",
@@ -931,12 +931,6 @@ const sidebar: SidebarsConfig = {
           type: "doc",
           id: "api/schemas/loginresponse",
           label: "LoginResponse",
-          className: "schema",
-        },
-        {
-          type: "doc",
-          id: "api/schemas/sendemailverificationrequest",
-          label: "SendEmailVerificationRequest",
           className: "schema",
         },
         {

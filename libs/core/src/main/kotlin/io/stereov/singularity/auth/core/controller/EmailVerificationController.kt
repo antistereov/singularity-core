@@ -1,11 +1,11 @@
 package io.stereov.singularity.auth.core.controller
 
-import io.stereov.singularity.auth.core.dto.request.SendEmailVerificationRequest
 import io.stereov.singularity.auth.core.dto.response.MailCooldownResponse
+import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.core.service.EmailVerificationService
 import io.stereov.singularity.global.model.ErrorResponse
-import io.stereov.singularity.global.model.MailSendResponse
 import io.stereov.singularity.global.model.OpenApiConstants
+import io.stereov.singularity.global.model.SendEmailResponse
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.swagger.v3.oas.annotations.ExternalDocumentation
 import io.swagger.v3.oas.annotations.Operation
@@ -14,7 +14,6 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
-import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.util.*
@@ -26,6 +25,7 @@ import java.util.*
 )
 class EmailVerificationController(
     private val emailVerificationService: EmailVerificationService,
+    private val authorizationService: AuthorizationService,
 ) {
 
     @PostMapping
@@ -116,10 +116,11 @@ class EmailVerificationController(
             ),
         ]
     )
-    suspend fun getRemainingEmailVerificationCooldown(
-        @RequestParam email: String
-    ): ResponseEntity<MailCooldownResponse> {
-        val remainingCooldown = emailVerificationService.getRemainingCooldown(email)
+    suspend fun getRemainingEmailVerificationCooldown(): ResponseEntity<MailCooldownResponse> {
+        val email = authorizationService.getUser().sensitive.email
+        val remainingCooldown = if (email != null) {
+            emailVerificationService.getRemainingCooldown(email)
+        } else 0
 
         return ResponseEntity.ok().body(MailCooldownResponse(remainingCooldown))
     }
@@ -202,13 +203,12 @@ class EmailVerificationController(
     )
     suspend fun sendEmailVerificationEmail(
         @RequestParam locale: Locale?,
-        @RequestBody @Valid request: SendEmailVerificationRequest,
-    ): ResponseEntity<MailSendResponse> {
-
-        emailVerificationService.sendVerificationEmail(request.email, locale, true)
+    ): ResponseEntity<SendEmailResponse> {
+        val user = authorizationService.getUser()
+        val cooldown = emailVerificationService.sendVerificationEmail(user, locale)
 
         return ResponseEntity.ok().body(
-            MailSendResponse(emailVerificationService.getRemainingCooldown(request.email))
+            SendEmailResponse(cooldown)
         )
     }
 }

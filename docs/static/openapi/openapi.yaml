@@ -411,7 +411,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/MailSendResponse"
+                $ref: "#/components/schemas/SendEmailResponse"
         "429":
           description: Cooldown is active. You have to wait until you can send another
             email.
@@ -552,12 +552,6 @@ paths:
         required: false
         schema:
           type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SendEmailVerificationRequest"
-        required: true
       responses:
         "200":
           description: The number of seconds the user needs to wait before sending
@@ -565,7 +559,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/MailSendResponse"
+                $ref: "#/components/schemas/SendEmailResponse"
         "304":
           description: Trying to send a verification email for verified account.
           content:
@@ -649,6 +643,12 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
         "400":
           description: "Trying to verify an email for [`GUEST`](https://singularity.stereov.io/docs/guides/auth/roles#guests)."
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Invalid or expired verification token.
           content:
             '*/*':
               schema:
@@ -2702,11 +2702,12 @@ paths:
         required: true
       responses:
         "200":
-          description: User information.
+          description: The number of seconds the user needs to wait before sending
+            a new request.
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/UserResponse"
+                $ref: "#/components/schemas/SendEmailResponse"
         "400":
           description: Invalid `email` provided
           content:
@@ -4428,6 +4429,14 @@ components:
           minLength: 1
       required:
       - newEmail
+    SendEmailResponse:
+      type: object
+      properties:
+        cooldown:
+          type: integer
+          format: int64
+      required:
+      - cooldown
     GroupTranslation:
       type: object
       properties:
@@ -5058,14 +5067,6 @@ components:
           minLength: 1
       required:
       - email
-    MailSendResponse:
-      type: object
-      properties:
-        cooldown:
-          type: integer
-          format: int64
-      required:
-      - cooldown
     LoginRequest:
       type: object
       properties:
@@ -5108,14 +5109,6 @@ components:
       required:
       - twoFactorRequired
       - user
-    SendEmailVerificationRequest:
-      type: object
-      properties:
-        email:
-          type: string
-          format: email
-      required:
-      - email
     TwoFactorSetupResponse:
       type: object
       properties:

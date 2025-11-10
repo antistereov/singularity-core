@@ -5,7 +5,7 @@ import io.stereov.singularity.auth.core.dto.request.SendPasswordResetRequest
 import io.stereov.singularity.auth.core.dto.response.MailCooldownResponse
 import io.stereov.singularity.auth.core.service.PasswordResetService
 import io.stereov.singularity.global.model.ErrorResponse
-import io.stereov.singularity.global.model.MailSendResponse
+import io.stereov.singularity.global.model.SendEmailResponse
 import io.stereov.singularity.global.model.SuccessResponse
 import io.swagger.v3.oas.annotations.ExternalDocumentation
 import io.swagger.v3.oas.annotations.Operation
@@ -168,11 +168,11 @@ class PasswordResetController(
     suspend fun sendPasswordResetEmail(
         @RequestBody @Valid req: SendPasswordResetRequest,
         @RequestParam locale: Locale?
-    ): ResponseEntity<MailSendResponse> {
+    ): ResponseEntity<SendEmailResponse> {
         passwordResetService.sendPasswordReset(req, locale)
 
         return ResponseEntity.ok().body(
-            MailSendResponse(passwordResetService.getRemainingCooldown(req).remaining)
+            SendEmailResponse(passwordResetService.getRemainingCooldown(req).remaining)
         )
     }
 }

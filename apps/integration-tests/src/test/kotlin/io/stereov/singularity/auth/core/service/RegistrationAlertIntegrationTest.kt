@@ -56,7 +56,7 @@ class RegistrationAlertIntegrationTest : BaseSecurityAlertTest() {
         assertEquals(user.email, emailSlot.captured)
     }
     @Test fun `does not send when user does not exist`() = runTest {
-        val emailSlot = slot<String>()
+        val emailSlot = slot<UserDocument>()
         val userSlot = slot<UserDocument>()
         val registrationLocaleSlot = slot<Locale?>()
         val verificationLocaleSlot = slot<Locale?>()
@@ -82,7 +82,7 @@ class RegistrationAlertIntegrationTest : BaseSecurityAlertTest() {
         coVerify(exactly = 1) { emailVerificationService.sendVerificationEmail(any(), anyNullable()) }
 
         assert(emailSlot.isCaptured)
-        assertEquals(emailSlot.captured, req.email)
+        assertEquals(emailSlot.captured.sensitive.email, req.email)
     }
     @Test fun `works with locale`() = runTest {
         val user = registerUser()

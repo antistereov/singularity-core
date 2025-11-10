@@ -6,6 +6,7 @@ import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.file.core.model.FileMetadataDocument
 import io.stereov.singularity.file.image.properties.ImageProperties
 import io.stereov.singularity.file.local.properties.LocalFileStorageProperties
+import io.stereov.singularity.global.model.SendEmailResponse
 import io.stereov.singularity.test.BaseMailIntegrationTest
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.settings.dto.request.ChangeEmailRequest
@@ -66,7 +67,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .bodyValue(ChangeEmailRequest(newEmail))
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserResponse::class.java)
+            .expectBody(SendEmailResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -93,7 +94,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .bodyValue(ChangeEmailRequest(newEmail))
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserResponse::class.java)
+            .expectBody(SendEmailResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -241,13 +242,12 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .bodyValue(ChangeEmailRequest(newEmail))
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserResponse::class.java)
+            .expectBody(SendEmailResponse::class.java)
             .returnResult()
             .responseBody
 
         requireNotNull(res)
-        assertEquals(user.email!!, res.email)
-        val foundUser = userService.findByEmail(user.email)
+        val foundUser = userService.findByEmail(user.email!!)
         assertEquals(user.info.id, foundUser.id)
     }
     @Test fun `changeEmail requires valid email`() = runTest {
@@ -265,6 +265,26 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
         requireNotNull(res)
         val foundUser = userService.findByEmail(user.email!!)
         assertEquals(user.info.id, foundUser.id)
+    }
+    @Test fun `changeEmail throws cooldown`() = runTest {
+        val newEmail = "new@email.com"
+        val user = registerUser()
+
+        webTestClient.put()
+            .uri("/api/users/me/email")
+            .accessTokenCookie(user.accessToken)
+            .stepUpTokenCookie(user.stepUpToken)
+            .bodyValue(ChangeEmailRequest(newEmail))
+            .exchange()
+            .expectStatus().isOk
+
+        webTestClient.put()
+            .uri("/api/users/me/email")
+            .accessTokenCookie(user.accessToken)
+            .stepUpTokenCookie(user.stepUpToken)
+            .bodyValue(ChangeEmailRequest(newEmail))
+            .exchange()
+            .expectStatus().isEqualTo(HttpStatus.TOO_MANY_REQUESTS)
     }
 
     @Test fun `changePassword works`() = runTest {

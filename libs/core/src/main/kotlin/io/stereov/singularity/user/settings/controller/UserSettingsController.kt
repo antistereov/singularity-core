@@ -5,6 +5,7 @@ import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.model.OpenApiConstants
+import io.stereov.singularity.global.model.SendEmailResponse
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.core.mapper.UserMapper
 import io.stereov.singularity.user.settings.dto.request.ChangeEmailRequest
@@ -112,7 +113,7 @@ class UserSettingsController(
         responses = [
             ApiResponse(
                 responseCode = "200",
-                description = "User information.",
+                description = "The number of seconds the user needs to wait before sending a new request.",
             ),
             ApiResponse(
                 responseCode = "400",
@@ -129,11 +130,9 @@ class UserSettingsController(
     suspend fun changeEmailOfAuthorizedUser(
         @RequestBody @Valid payload: ChangeEmailRequest,
         @RequestParam locale: Locale?,
-    ): ResponseEntity<UserResponse> {
-        val user = userSettingsService.changeEmail(payload, locale)
-        return ResponseEntity.ok().body(
-            userMapper.toResponse(user)
-        )
+    ): ResponseEntity<SendEmailResponse> {
+        val cooldown = userSettingsService.changeEmail(payload, locale)
+        return ResponseEntity.ok().body(cooldown)
     }
 
     @Operation(

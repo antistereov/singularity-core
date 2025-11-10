@@ -76,7 +76,7 @@ class GuestService(
         val savedUserDocument = userService.save(user)
         accessTokenCache.invalidateAllTokens(userId)
 
-        if (emailEnabled) emailVerificationService.sendVerificationEmail(req.email, locale)
+        if (emailEnabled) emailVerificationService.sendVerificationEmail(savedUserDocument, locale)
 
         return savedUserDocument
     }

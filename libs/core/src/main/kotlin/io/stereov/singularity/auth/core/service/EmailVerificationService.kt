@@ -1,10 +1,8 @@
 package io.stereov.singularity.auth.core.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.lettuce.core.KillArgs.Builder.user
 import io.stereov.singularity.auth.core.exception.AuthException
 import io.stereov.singularity.auth.core.exception.model.EmailAlreadyVerifiedException
-import io.stereov.singularity.auth.core.model.NoAccountInfoAction
 import io.stereov.singularity.auth.core.model.SecurityAlertType
 import io.stereov.singularity.auth.core.properties.SecurityAlertProperties
 import io.stereov.singularity.auth.core.service.token.EmailVerificationTokenService
@@ -22,6 +20,7 @@ import io.stereov.singularity.translate.model.TranslateKey
 import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.core.mapper.UserMapper
+import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.service.UserService
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.data.redis.core.ReactiveRedisTemplate
@@ -43,7 +42,6 @@ class EmailVerificationService(
     private val appProperties: AppProperties,
     private val securityAlertService: SecurityAlertService,
     private val securityAlertProperties: SecurityAlertProperties,
-    private val noAccountInfoService: NoAccountInfoService
 ) {
 
     private val logger = KotlinLogging.logger {}
@@ -130,8 +128,16 @@ suspend fun getRemainingCooldown(email: String): Long {
      *
      * @param user The user to send the verification email to.
      */
-    suspend fun sendVerificationEmail(email: String, locale: Locale?, sendNoAccountInfo: Boolean = false) {
-        logger.debug { "Sending verification email to $email" }
+    suspend fun sendVerificationEmail(user: UserDocument, locale: Locale?, newEmail: String? = null): Long {
+        logger.debug { "Sending verification email for user ${user.id}" }
+
+        if (user.isGuest) {
+            throw GuestCannotPerformThisActionException("Failed to send verification email: a guest cannot verify an email address")
+        }
+
+        val email = newEmail
+            ?: user.sensitive.email
+            ?: throw InvalidDocumentException("No email address saved in user document")
 
         val actualLocale = locale ?: appProperties.locale
 
@@ -141,23 +147,10 @@ suspend fun getRemainingCooldown(email: String): Long {
         }
 
         startCooldown(email)
-        val user = userService.findByEmailOrNull(email)
-
-        if (user == null) {
-            if (sendNoAccountInfo) {
-                logger.debug { "User with email $email not found. Sending no account info" }
-                noAccountInfoService.send(email, NoAccountInfoAction.EMAIL_VERIFICATION, locale)
-            }
-
-            return
-        }
 
         val secret = user.sensitive.security.email.verificationSecret
 
-        if (user.isGuest)
-            throw GuestCannotPerformThisActionException("Failed to send verification email: a guest cannot verify an email address")
-
-        if (user.sensitive.security.email.verified)
+        if (newEmail == null && user.sensitive.security.email.verified)
             throw EmailAlreadyVerifiedException("Email is already verified")
 
         val token = emailVerificationTokenService.create(user.id, email, secret)
@@ -176,6 +169,8 @@ suspend fun getRemainingCooldown(email: String): Long {
             .build()
 
         emailService.sendEmail(email, subject, content, actualLocale)
+
+        return remainingCooldown
     }
 
 }

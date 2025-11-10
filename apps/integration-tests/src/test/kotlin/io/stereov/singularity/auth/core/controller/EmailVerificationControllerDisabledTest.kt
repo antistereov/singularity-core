@@ -1,6 +1,5 @@
 package io.stereov.singularity.auth.core.controller
 
-import io.stereov.singularity.auth.core.dto.request.SendEmailVerificationRequest
 import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
@@ -13,16 +12,7 @@ class EmailVerificationControllerDisabledTest : BaseIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/auth/email/verification/send")
-            .bodyValue(SendEmailVerificationRequest(user.email!!))
-            .exchange()
-            .expectStatus()
-            .isEqualTo(HttpStatus.SERVICE_UNAVAILABLE)
-    }
-
-    @Test fun `sendVerificationEmail throws disabled exception for not existing`() = runTest {
-        webTestClient.post()
-            .uri("/api/auth/email/verification/send")
-            .bodyValue(SendEmailVerificationRequest("not@email.com"))
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus()
             .isEqualTo(HttpStatus.SERVICE_UNAVAILABLE)

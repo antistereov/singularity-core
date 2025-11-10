@@ -16,14 +16,6 @@ class NoAccountInfoServiceUnitTest : BaseMailIntegrationTest() {
     @Test fun `cooldown works with password reset`() = runTest {
         noAccountInfoService.send("email@test.com", NoAccountInfoAction.PASSWORD_RESET,null)
         noAccountInfoService.send("email@test.com", NoAccountInfoAction.PASSWORD_RESET,null)
-        noAccountInfoService.send("email@test.com", NoAccountInfoAction.EMAIL_VERIFICATION,null)
-
-        verify(exactly = 1) { mailSender.send(any<MimeMessage>()) }
-    }
-    @Test fun `cooldown works with email verification`() = runTest {
-        noAccountInfoService.send("email@test.com", NoAccountInfoAction.EMAIL_VERIFICATION,null)
-        noAccountInfoService.send("email@test.com", NoAccountInfoAction.PASSWORD_RESET,null)
-        noAccountInfoService.send("email@test.com", NoAccountInfoAction.EMAIL_VERIFICATION,null)
 
         verify(exactly = 1) { mailSender.send(any<MimeMessage>()) }
     }

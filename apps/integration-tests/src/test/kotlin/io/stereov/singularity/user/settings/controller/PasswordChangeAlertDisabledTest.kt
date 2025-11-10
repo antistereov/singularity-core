@@ -36,7 +36,7 @@ class PasswordChangeAlertDisabledTest : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isOk
 
-        verify(exactly = 0) { mailSender.send(any<MimeMessage>()) }
+        verify(exactly = 1) { mailSender.send(any<MimeMessage>()) }
     }
 
     companion object {

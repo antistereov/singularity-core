@@ -1,7 +1,6 @@
 package io.stereov.singularity.auth.core.controller
 
 import io.mockk.verify
-import io.stereov.singularity.auth.core.dto.request.SendEmailVerificationRequest
 import io.stereov.singularity.auth.core.dto.response.MailCooldownResponse
 import io.stereov.singularity.test.BaseMailIntegrationTest
 import jakarta.mail.internet.MimeMessage
@@ -86,26 +85,17 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/auth/email/verification/send")
-            .bodyValue(SendEmailVerificationRequest(user.email!!))
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isOk
 
         verify { mailSender.send(any<MimeMessage>()) }
     }
-    @Test fun `sendVerificationEmail requires body`() = runTest {
+    @Test fun `sendVerificationEmail requires authentication`() = runTest {
         webTestClient.post()
             .uri("/api/auth/email/verification/send")
             .exchange()
-            .expectStatus().isBadRequest
-    }
-    @Test fun `sendVerificationEmail requires valid email`() = runTest {
-        webTestClient.post()
-            .uri("/api/auth/email/verification/send")
-            .bodyValue(SendEmailVerificationRequest("invalid"))
-            .exchange()
-            .expectStatus().isBadRequest
-
-        verify(exactly = 0) { mailSender.send(any<MimeMessage>()) }
+            .expectStatus().isUnauthorized
     }
     @Test fun `sendVerificationEmail returns not modified when already verified`() = runTest {
         val user = registerUser()
@@ -114,63 +104,22 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/auth/email/verification/send")
-            .bodyValue(SendEmailVerificationRequest(user.email!!))
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isNotModified
-    }
-    @Test fun `sendVerificationEmail works for non-existing emails`() = runTest {
-        webTestClient.post()
-            .uri("/api/auth/email/verification/send")
-            .bodyValue(SendEmailVerificationRequest("not@email.com"))
-            .exchange()
-            .expectStatus().isOk
-
-        verify(exactly = 1) { mailSender.send(any<MimeMessage>()) }
-    }
-    @Test fun `sendVerificationEmail cooldown works for non-existing emails`() = runTest {
-        webTestClient.post()
-            .uri("/api/auth/email/verification/send")
-            .bodyValue(SendEmailVerificationRequest("not@email.com"))
-            .exchange()
-            .expectStatus().isOk
-
-        webTestClient.post()
-            .uri("/api/auth/email/verification/send")
-            .bodyValue(SendEmailVerificationRequest("not@email.com"))
-            .exchange()
-            .expectStatus().isEqualTo(HttpStatus.TOO_MANY_REQUESTS)
-
-        verify(exactly = 1) { mailSender.send(any<MimeMessage>()) }
     }
     @Test fun `sendVerificationEmail is too many attempts when cooldown is active`() = runTest {
         val user = registerUser()
 
         webTestClient.post()
             .uri("/api/auth/email/verification/send")
-            .bodyValue(SendEmailVerificationRequest(user.email!!))
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isOk
 
         webTestClient.post()
             .uri("/api/auth/email/verification/send")
-            .bodyValue(SendEmailVerificationRequest(user.email))
-            .exchange()
-            .expectStatus().isEqualTo(HttpStatus.TOO_MANY_REQUESTS)
-
-        verify(exactly = 1) { mailSender.send(any<MimeMessage>()) }
-    }
-    @Test fun `sendVerificationEmail is too many attempts when cooldown is active for non-existing`() = runTest {
-        val email = "test@email.com"
-
-        webTestClient.post()
-            .uri("/api/auth/email/verification/send")
-            .bodyValue(SendEmailVerificationRequest(email))
-            .exchange()
-            .expectStatus().isOk
-
-        webTestClient.post()
-            .uri("/api/auth/email/verification/send")
-            .bodyValue(SendEmailVerificationRequest(email))
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isEqualTo(HttpStatus.TOO_MANY_REQUESTS)
 
@@ -182,33 +131,13 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/auth/email/verification/send")
-            .bodyValue(SendEmailVerificationRequest(user.email!!))
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isOk
 
         val res = webTestClient.get()
             .uri("/api/auth/email/verification/cooldown?email=${user.email}")
-            .exchange()
-            .expectStatus().isOk
-            .expectBody(MailCooldownResponse::class.java)
-            .returnResult()
-            .responseBody
-
-        requireNotNull(res)
-
-        assertTrue(res.remaining > 0)
-    }
-    @Test fun `verifyCooldown works with non-existing email`() = runTest {
-        val email = "test@email.com"
-
-        webTestClient.post()
-            .uri("/api/auth/email/verification/send")
-            .bodyValue(SendEmailVerificationRequest(email))
-            .exchange()
-            .expectStatus().isOk
-
-        val res = webTestClient.get()
-            .uri("/api/auth/email/verification/cooldown?email=$email")
+            .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isOk
             .expectBody(MailCooldownResponse::class.java)
@@ -234,11 +163,5 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
         requireNotNull(res)
 
         assertEquals(0, res.remaining)
-    }
-    @Test fun `verifyCooldown requires email`() = runTest {
-        webTestClient.get()
-            .uri("/api/auth/email/verification/cooldown")
-            .exchange()
-            .expectStatus().isBadRequest
     }
 }
