@@ -677,8 +677,8 @@ const sidebar: SidebarsConfig = {
         },
         {
           type: "doc",
-          id: "api/schemas/sendemailresponse",
-          label: "SendEmailResponse",
+          id: "api/schemas/changeemailresponse",
+          label: "ChangeEmailResponse",
           className: "schema",
         },
         {
@@ -919,6 +919,12 @@ const sidebar: SidebarsConfig = {
           type: "doc",
           id: "api/schemas/sendpasswordresetrequest",
           label: "SendPasswordResetRequest",
+          className: "schema",
+        },
+        {
+          type: "doc",
+          id: "api/schemas/sendemailresponse",
+          label: "SendEmailResponse",
           className: "schema",
         },
         {

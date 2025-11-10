@@ -671,12 +671,6 @@ paths:
       externalDocs:
         url: https://singularity.stereov.io/docs/guides/docs/auth/authentication#email-verification
       operationId: getRemainingEmailVerificationCooldown
-      parameters:
-      - name: email
-        in: query
-        required: true
-        schema:
-          type: string
       responses:
         "200":
           description: The remaining cooldown.
@@ -2702,12 +2696,14 @@ paths:
         required: true
       responses:
         "200":
-          description: The number of seconds the user needs to wait before sending
-            a new request.
+          description: "If email is enabled, `verificationRequired` will be `true`\
+            \ indicating that this request did not update the user, otherwise `verificationRequired`\
+            \ is `false`. Since this request sends an email, the remaining cooldown\
+            \ in seconds will be returned."
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/SendEmailResponse"
+                $ref: "#/components/schemas/ChangeEmailResponse"
         "400":
           description: Invalid `email` provided
           content:
@@ -4429,14 +4425,17 @@ components:
           minLength: 1
       required:
       - newEmail
-    SendEmailResponse:
+    ChangeEmailResponse:
       type: object
       properties:
+        verificationRequired:
+          type: boolean
         cooldown:
           type: integer
           format: int64
       required:
       - cooldown
+      - verificationRequired
     GroupTranslation:
       type: object
       properties:
@@ -5067,6 +5066,14 @@ components:
           minLength: 1
       required:
       - email
+    SendEmailResponse:
+      type: object
+      properties:
+        cooldown:
+          type: integer
+          format: int64
+      required:
+      - cooldown
     LoginRequest:
       type: object
       properties:

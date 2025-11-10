@@ -15,7 +15,6 @@ import io.stereov.singularity.file.core.exception.model.UnsupportedMediaTypeExce
 import io.stereov.singularity.file.core.model.DownloadedFile
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.file.image.service.ImageStore
-import io.stereov.singularity.global.model.SendEmailResponse
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.core.exception.model.EmailAlreadyTakenException
 import io.stereov.singularity.user.core.mapper.UserMapper
@@ -24,6 +23,7 @@ import io.stereov.singularity.user.core.service.UserService
 import io.stereov.singularity.user.settings.dto.request.ChangeEmailRequest
 import io.stereov.singularity.user.settings.dto.request.ChangePasswordRequest
 import io.stereov.singularity.user.settings.dto.request.ChangeUserRequest
+import io.stereov.singularity.user.settings.dto.response.ChangeEmailResponse
 import org.springframework.http.MediaType
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
@@ -46,7 +46,7 @@ class UserSettingsService(
 
     private val logger = KotlinLogging.logger {}
 
-    suspend fun changeEmail(payload: ChangeEmailRequest, locale: Locale?): SendEmailResponse {
+    suspend fun changeEmail(payload: ChangeEmailRequest, locale: Locale?): ChangeEmailResponse {
         logger.debug { "Changing email" }
 
         val user = authorizationService.getUser()
@@ -59,12 +59,12 @@ class UserSettingsService(
 
         return if (emailProperties.enable) {
             val cooldown = emailVerificationService.sendVerificationEmail(user, locale, payload.newEmail)
-            SendEmailResponse(cooldown)
+            ChangeEmailResponse(true, cooldown)
         } else {
             user.sensitive.email = payload.newEmail
             user.sensitive.security.email.verified = true
             userService.save(user)
-            SendEmailResponse(0)
+            ChangeEmailResponse(false, 0)
         }
     }
 

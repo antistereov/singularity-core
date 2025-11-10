@@ -6,12 +6,12 @@ import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.file.core.model.FileMetadataDocument
 import io.stereov.singularity.file.image.properties.ImageProperties
 import io.stereov.singularity.file.local.properties.LocalFileStorageProperties
-import io.stereov.singularity.global.model.SendEmailResponse
 import io.stereov.singularity.test.BaseMailIntegrationTest
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.settings.dto.request.ChangeEmailRequest
 import io.stereov.singularity.user.settings.dto.request.ChangePasswordRequest
 import io.stereov.singularity.user.settings.dto.request.ChangeUserRequest
+import io.stereov.singularity.user.settings.dto.response.ChangeEmailResponse
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
@@ -67,7 +67,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .bodyValue(ChangeEmailRequest(newEmail))
             .exchange()
             .expectStatus().isOk
-            .expectBody(SendEmailResponse::class.java)
+            .expectBody(ChangeEmailResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -94,7 +94,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .bodyValue(ChangeEmailRequest(newEmail))
             .exchange()
             .expectStatus().isOk
-            .expectBody(SendEmailResponse::class.java)
+            .expectBody(ChangeEmailResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -242,11 +242,12 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .bodyValue(ChangeEmailRequest(newEmail))
             .exchange()
             .expectStatus().isOk
-            .expectBody(SendEmailResponse::class.java)
+            .expectBody(ChangeEmailResponse::class.java)
             .returnResult()
             .responseBody
 
         requireNotNull(res)
+        assertTrue(res.verificationRequired)
         val foundUser = userService.findByEmail(user.email!!)
         assertEquals(user.info.id, foundUser.id)
     }
