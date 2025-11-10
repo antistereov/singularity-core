@@ -105,10 +105,10 @@ class AuthenticationService(
             mailTwoFactorCodeExpiresIn = factorMailCodeProperties.expiresIn
         )
 
-        userService.save(userDocument)
+        val registeredUser = userService.save(userDocument)
 
         if (sendEmail && emailProperties.enable) {
-            emailVerificationService.sendVerificationEmail(payload.email, locale)
+            emailVerificationService.sendVerificationEmail(registeredUser, locale)
         }
 
         return

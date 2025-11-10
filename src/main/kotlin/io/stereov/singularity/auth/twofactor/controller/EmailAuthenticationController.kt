@@ -6,7 +6,7 @@ import io.stereov.singularity.auth.twofactor.dto.request.EnableEmailTwoFactorMet
 import io.stereov.singularity.auth.twofactor.service.EmailAuthenticationService
 import io.stereov.singularity.auth.twofactor.service.token.TwoFactorAuthenticationTokenService
 import io.stereov.singularity.global.model.ErrorResponse
-import io.stereov.singularity.global.model.MailSendResponse
+import io.stereov.singularity.global.model.SendEmailResponse
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.global.model.SuccessResponse
 import io.stereov.singularity.user.core.dto.response.UserResponse
@@ -120,7 +120,7 @@ class EmailAuthenticationController(
     suspend fun sendEmailTwoFactorCode(
         @RequestParam locale: Locale?,
         exchange: ServerWebExchange,
-    ): ResponseEntity<MailSendResponse> {
+    ): ResponseEntity<SendEmailResponse> {
         val userId = authorizationService.getUserIdOrNull()
             ?: twoFactorAuthenticationTokenService.extract(exchange).userId
 
@@ -129,7 +129,7 @@ class EmailAuthenticationController(
             locale
         )
 
-        return ResponseEntity.ok(MailSendResponse(emailAuthenticationService.getRemainingCooldown(userId)))
+        return ResponseEntity.ok(SendEmailResponse(emailAuthenticationService.getRemainingCooldown(userId)))
     }
 
     @PostMapping("/enable")

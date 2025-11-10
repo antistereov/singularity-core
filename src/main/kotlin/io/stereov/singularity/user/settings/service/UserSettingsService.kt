@@ -15,6 +15,7 @@ import io.stereov.singularity.file.core.exception.model.UnsupportedMediaTypeExce
 import io.stereov.singularity.file.core.model.DownloadedFile
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.file.image.service.ImageStore
+import io.stereov.singularity.global.model.SendEmailResponse
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.core.exception.model.EmailAlreadyTakenException
 import io.stereov.singularity.user.core.mapper.UserMapper
@@ -45,7 +46,7 @@ class UserSettingsService(
 
     private val logger = KotlinLogging.logger {}
 
-    suspend fun changeEmail(payload: ChangeEmailRequest, locale: Locale?): UserDocument {
+    suspend fun changeEmail(payload: ChangeEmailRequest, locale: Locale?): SendEmailResponse {
         logger.debug { "Changing email" }
 
         val user = authorizationService.getUser()
@@ -56,14 +57,15 @@ class UserSettingsService(
             throw EmailAlreadyTakenException("Failed to register user ${payload.newEmail}")
         }
 
-        if (emailProperties.enable) {
-            emailVerificationService.sendVerificationEmail(payload.newEmail, locale)
+        return if (emailProperties.enable) {
+            val cooldown = emailVerificationService.sendVerificationEmail(user, locale, payload.newEmail)
+            SendEmailResponse(cooldown)
         } else {
             user.sensitive.email = payload.newEmail
             user.sensitive.security.email.verified = true
+            userService.save(user)
+            SendEmailResponse(0)
         }
-
-        return userService.save(user)
     }
 
     suspend fun changePassword(payload: ChangePasswordRequest, locale: Locale?): UserDocument {

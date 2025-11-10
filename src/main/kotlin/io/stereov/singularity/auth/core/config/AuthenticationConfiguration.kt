@@ -126,8 +126,9 @@ class AuthenticationConfiguration {
     @Bean
     @ConditionalOnMissingBean
     fun emailVerificationController(
-        emailVerificationService: EmailVerificationService
-    ) = EmailVerificationController(emailVerificationService)
+        emailVerificationService: EmailVerificationService,
+        authorizationService: AuthorizationService
+    ) = EmailVerificationController(emailVerificationService, authorizationService)
     
     @Bean
     @ConditionalOnMissingBean
@@ -301,7 +302,6 @@ class AuthenticationConfiguration {
         appProperties: AppProperties,
         securityAlertProperties: SecurityAlertProperties,
         securityAlertService: SecurityAlertService,
-        noAccountInfoService: NoAccountInfoService
     ) = EmailVerificationService(
         userService,
         emailVerificationTokenService,
@@ -315,7 +315,6 @@ class AuthenticationConfiguration {
         appProperties,
         securityAlertService,
         securityAlertProperties,
-        noAccountInfoService,
     )
     
     @Bean
