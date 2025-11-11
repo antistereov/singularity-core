@@ -1,3 +1,15 @@
+## [v1.9.6]
+
+## Changelog
+
+## 🛠  Build
+- [dde8ffa](https://github.com/antistereov/singularity/commits/dde8ffa) bump version to 1.9.5-SNAPSHOT
+
+
+## Contributors
+We'd like to thank the following people for their contributions:
+André Antimonov, GitHub
+
 ## [v1.9.4]
 
 ## Changelog
