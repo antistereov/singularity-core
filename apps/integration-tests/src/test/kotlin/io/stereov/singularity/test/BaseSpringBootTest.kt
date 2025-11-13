@@ -16,7 +16,7 @@ import io.stereov.singularity.auth.group.repository.GroupRepository
 import io.stereov.singularity.auth.group.service.GroupService
 import io.stereov.singularity.auth.guest.dto.request.CreateGuestRequest
 import io.stereov.singularity.auth.guest.dto.response.CreateGuestResponse
-import io.stereov.singularity.auth.jwt.exception.model.TokenException
+import io.stereov.singularity.auth.jwt.exception.TokenExtractionException
 import io.stereov.singularity.auth.oauth2.model.token.OAuth2ProviderConnectionToken
 import io.stereov.singularity.auth.oauth2.model.token.OAuth2TokenType
 import io.stereov.singularity.auth.oauth2.properties.OAuth2Properties
@@ -474,34 +474,34 @@ class BaseSpringBootTest() {
     suspend fun EntityExchangeResult<*>.extractAccessToken(): AccessToken {
         return this.responseCookies[SessionTokenType.Access.cookieName]?.firstOrNull()?.value
             ?.let { accessTokenService.extract(it) }
-            ?: throw TokenException("No AccessToken found in response")
+            ?: throw TokenExtractionException("No AccessToken found in response")
     }
 
     suspend fun EntityExchangeResult<*>.extractRefreshToken(): RefreshToken {
         return this.responseCookies[SessionTokenType.Refresh.cookieName]?.firstOrNull()?.value
             ?.let { refreshTokenService.extract(it) }
-            ?: throw TokenException("No RefreshToken found in response")
+            ?: throw TokenExtractionException("No RefreshToken found in response")
     }
 
     suspend fun EntityExchangeResult<*>.extractTwoFactorAuthenticationToken(): TwoFactorAuthenticationToken {
         return this.responseCookies[TwoFactorTokenType.Authentication.cookieName]
             ?.firstOrNull()?.value
             ?.let { twoFactorAuthenticationTokenService.extract(it) }
-            ?: throw TokenException("No TwoFactorAuthenticationToken found in response")
+            ?: throw TokenExtractionException("No TwoFactorAuthenticationToken found in response")
     }
 
     suspend fun EntityExchangeResult<*>.extractStepUpToken(userId: ObjectId, sessionId: UUID): StepUpToken {
         return this.responseCookies[SessionTokenType.StepUp.cookieName]
             ?.firstOrNull()?.value
             ?.let { stepUpTokenService.extract(it, userId, sessionId) }
-            ?: throw TokenException("No StepUpToken found in response")
+            ?: throw TokenExtractionException("No StepUpToken found in response")
     }
 
     suspend fun EntityExchangeResult<*>.extractOAuth2ProviderConnectionToken(user: UserDocument): OAuth2ProviderConnectionToken {
         return this.responseCookies[OAuth2TokenType.ProviderConnection.cookieName]
             ?.firstOrNull()?.value
             ?.let { oAuth2ProviderConnectionTokenService.extract(it, user) }
-            ?: throw TokenException("No OAuth2ProviderConnectionToken found in response")
+            ?: throw TokenExtractionException("No OAuth2ProviderConnectionToken found in response")
     }
 
     fun <S: WebTestClient.RequestHeadersSpec<S>> WebTestClient.RequestHeadersSpec<S>.accessTokenCookie(tokenValue: String): WebTestClient.RequestBodySpec {

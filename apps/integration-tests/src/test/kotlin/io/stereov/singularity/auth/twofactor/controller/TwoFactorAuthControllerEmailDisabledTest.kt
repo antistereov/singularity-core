@@ -2,7 +2,7 @@ package io.stereov.singularity.auth.twofactor.controller
 
 import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.auth.core.dto.response.LoginResponse
-import io.stereov.singularity.auth.jwt.exception.model.TokenException
+import io.stereov.singularity.auth.jwt.exception.TokenExtractionException
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
 import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.test.runTest
@@ -41,7 +41,7 @@ class TwoFactorAuthControllerEmailDisabledTest : BaseIntegrationTest() {
         val accessToken = res.extractAccessToken()
         val refreshToken = res.extractRefreshToken()
 
-        assertThrows<TokenException> { res.extractTwoFactorAuthenticationToken() }
+        assertThrows<TokenExtractionException> { res.extractTwoFactorAuthenticationToken() }
 
         Assertions.assertEquals(user.info.id, accessToken.userId)
         Assertions.assertEquals(user.info.id, refreshToken.userId)

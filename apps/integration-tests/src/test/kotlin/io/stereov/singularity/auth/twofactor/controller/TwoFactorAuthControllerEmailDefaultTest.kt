@@ -4,7 +4,7 @@ import io.mockk.verify
 import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.auth.core.dto.request.StepUpRequest
 import io.stereov.singularity.auth.core.dto.response.LoginResponse
-import io.stereov.singularity.auth.jwt.exception.model.TokenException
+import io.stereov.singularity.auth.jwt.exception.TokenExtractionException
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
 import io.stereov.singularity.test.BaseMailIntegrationTest
 import jakarta.mail.internet.MimeMessage
@@ -41,8 +41,8 @@ class TwoFactorAuthControllerEmailDefaultTest : BaseMailIntegrationTest() {
         Assertions.assertEquals(listOf(TwoFactorMethod.EMAIL), body.allowedTwoFactorMethods)
         Assertions.assertEquals(TwoFactorMethod.EMAIL, body.preferredTwoFactorMethod)
 
-        assertThrows<TokenException> { res.extractAccessToken() }
-        assertThrows<TokenException> { res.extractRefreshToken() }
+        assertThrows<TokenExtractionException> { res.extractAccessToken() }
+        assertThrows<TokenExtractionException> { res.extractRefreshToken() }
 
         val twoFactorAuthToken = res.extractTwoFactorAuthenticationToken()
 

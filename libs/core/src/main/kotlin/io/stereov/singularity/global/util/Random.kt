@@ -1,5 +1,8 @@
 package io.stereov.singularity.global.util
 
+import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.mapError
+import com.github.michaelbull.result.runCatching
 import java.security.SecureRandom
 import kotlin.math.pow
 import kotlin.random.Random
@@ -15,11 +18,14 @@ class Random {
          *
          * @return A string representing the generated recovery code.
          */
-        fun generateString(length: Int = 10): String {
+        fun generateString(length: Int = 10): Result<String, IllegalArgumentException> {
             val chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-            return (1..length)
-                .map { chars[random.nextInt(chars.length)] }
-                .joinToString("")
+
+            return runCatching {
+                (1..length)
+                    .map { chars[random.nextInt(chars.length)] }
+                    .joinToString("")
+            }.mapError { ex -> IllegalArgumentException("Bound must be positive", ex) }
         }
 
         fun generateInt(length: Int = 6): String {

@@ -1,8 +1,11 @@
 package io.stereov.singularity.database.encryption.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.github.michaelbull.result.*
+import com.github.michaelbull.result.coroutines.coroutineBinding
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.database.encryption.exception.EncryptionException
 import io.stereov.singularity.database.encryption.model.Encrypted
 import io.stereov.singularity.secrets.core.component.SecretStore
 import kotlinx.coroutines.Dispatchers
@@ -22,45 +25,98 @@ class EncryptionService(
     private val logger: KLogger
         get() = KotlinLogging.logger {}
 
-    suspend fun <T> wrap(value: T): Encrypted<T> = withContext(Dispatchers.IO) {
-        val jsonStr = objectMapper.writeValueAsString(value)
-        encrypt(jsonStr)
+    suspend fun <T> wrap(value: T): Result<Encrypted<T>, EncryptionException> = withContext(Dispatchers.IO) {
+        return@withContext runCatching {
+            objectMapper.writeValueAsString(value)
+        }
+            .mapError { ex -> EncryptionException.ObjectMapping("Failed to write object as string: ${ex.message}", ex) }
+            .andThen { jsonStr -> encrypt(jsonStr) }
     }
 
-    suspend fun <T> unwrap(encrypted: Encrypted<T>, clazz: Class<T>): T = withContext(Dispatchers.IO) {
-        val decryptedJson = decrypt(encrypted)
-        objectMapper.readValue(decryptedJson, clazz)
+    suspend fun <T> unwrap(encrypted: Encrypted<T>, clazz: Class<T>): Result<T, EncryptionException> = withContext(Dispatchers.IO) {
+        return@withContext decrypt(encrypted).flatMap { decryptedJson ->
+            runCatching { objectMapper.readValue(decryptedJson, clazz) }
+                .mapError { ex -> EncryptionException.ObjectMapping("Failed to create object of string $decryptedJson: ${ex.message}", ex) }
+        }
     }
 
-    suspend fun <T> encrypt(strToEncrypt: String): Encrypted<T> {
-        this.logger.debug { "Encrypting..." }
+    suspend fun <T> encrypt(strToEncrypt: String): Result<Encrypted<T>, EncryptionException> = coroutineBinding {
+        logger.debug { "Encrypting..." }
 
-        val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
         val secret = encryptionSecretService.getCurrentSecret()
+            .mapError { ex -> EncryptionException.Secret("Failed to retrieve encryption secret", ex) }
+            .bind()
 
-        cipher.init(Cipher.ENCRYPT_MODE, getKeyFromBase64(secret.value))
-        val encrypted = cipher.doFinal(strToEncrypt.toByteArray())
+        val secretEncryptionKey = getKeyFromBase64(secret.value)
+            .bind()
 
-        val encryptedString = Base64.getUrlEncoder().encodeToString(encrypted)
-
-        return Encrypted(secret.key, encryptedString)
+        runCatching { Cipher.getInstance("AES/ECB/PKCS5Padding") }
+            .mapError { ex -> EncryptionException.Cipher("Failed to get cipher instance: ${ex.message}", ex) }
+            .flatMap { cipher ->
+                runCatching { cipher.init(Cipher.ENCRYPT_MODE, secretEncryptionKey) }
+                    .mapError { ex -> EncryptionException.Cipher("Failed to initialize cipher instance: ${ex.message}", ex) }
+                    .map { cipher }
+            }
+            .flatMap { cipher ->
+                runCatching { cipher.doFinal(strToEncrypt.toByteArray()) }
+                    .mapError { ex -> EncryptionException.Cipher("Failed to encrypt string $strToEncrypt: ${ex.message}", ex) }
+            }
+            .flatMap { encrypted ->
+                runCatching { Base64.getUrlEncoder().encodeToString(encrypted) }
+                    .mapError { ex -> EncryptionException.Encoding("Failed to encode encrypted string as Base64: ${ex.message}", ex) }
+            }
+            .map { encryptedString -> Encrypted<T>(secret.key, encryptedString) }
+            .bind()
     }
 
-    suspend fun <T> decrypt(encrypted: Encrypted<T>): String {
-       this. logger.debug { "Decrypting..." }
+    suspend fun <T> decrypt(encrypted: Encrypted<T>): Result<String, EncryptionException> = coroutineBinding {
+        logger.debug { "Decrypting..." }
 
-        val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
-        val secret = this.secretStore.get(encrypted.secretKey)
+        val secret = secretStore.get(encrypted.secretKey)
+            .mapError { ex ->
+                EncryptionException.Secret(
+                    "Failed to retrieve encryption key ${encrypted.secretKey}: ${ex.message}",
+                    ex
+                )
+            }
+            .bind()
 
-        cipher.init(Cipher.DECRYPT_MODE, getKeyFromBase64(secret.value))
+        val decodedStr = runCatching { Base64.getUrlDecoder().decode(encrypted.ciphertext) }
+            .mapError { ex ->
+                EncryptionException.Encoding(
+                    "Failed to decode encrypted string as Base64: ${ex.message}",
+                    ex
+                )
+            }
+            .bind()
 
-        val decrypted = cipher.doFinal(Base64.getUrlDecoder().decode(encrypted.ciphertext))
+        val secretEncryptionKey = getKeyFromBase64(secret.value)
+            .bind()
 
-        return String(decrypted)
+        runCatching { Cipher.getInstance("AES/ECB/PKCS5Padding") }
+            .mapError { ex -> EncryptionException.Cipher("Failed to get cipher instance: ${ex.message}", ex) }
+            .flatMap { cipher ->
+                runCatching { cipher.init(Cipher.DECRYPT_MODE, secretEncryptionKey) }
+                    .mapError { ex ->
+                        EncryptionException.Cipher(
+                            "Failed to initialize cipher instance: ${ex.message}",
+                            ex
+                        )
+                    }
+                    .map { cipher }
+            }
+            .flatMap { cipher ->
+                runCatching { cipher.doFinal(decodedStr) }
+                    .mapError { ex -> EncryptionException.Cipher("Failed to decrypt string: ${ex.message}", ex) }
+                    .map { bytes -> String(bytes) }
+            }
+            .bind()
     }
 
-    private fun getKeyFromBase64(base64Key: String, algorithm: String = "AES"): SecretKeySpec {
-        val decodedKey = Base64.getDecoder().decode(base64Key)
-        return SecretKeySpec(decodedKey, algorithm)
+    private fun getKeyFromBase64(base64Key: String, algorithm: String = "AES"): Result<SecretKeySpec, EncryptionException> {
+        return runCatching {
+            val decodedKey = Base64.getDecoder().decode(base64Key)
+            SecretKeySpec(decodedKey, algorithm)
+        }.mapError { ex -> EncryptionException.Cipher("Failed to decode cipher key: ${ex.message}", ex) }
     }
 }

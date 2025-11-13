@@ -2,7 +2,6 @@ package io.stereov.singularity.secrets.vault
 
 import com.mongodb.assertions.Assertions.assertNull
 import io.stereov.singularity.secrets.core.component.SecretStore
-import io.stereov.singularity.secrets.core.exception.model.SecretKeyNotFoundException
 import io.stereov.singularity.secrets.core.properties.SecretStoreImplementation
 import io.stereov.singularity.secrets.vault.component.VaultSecretStore
 import io.stereov.singularity.secrets.vault.properties.VaultSecretStoreProperties
@@ -50,7 +49,7 @@ class TestVaultSecretStore : BaseSpringBootTest() {
         assertThrows<SecretKeyNotFoundException> { secretStore.get("random-key") }
     }
     @Test fun `getOrNull return null when no secret exists`() = runTest {
-        assertNull(secretStore.getOrNull("random-key"))
+        assertNull(secretStore.get("random-key"))
     }
 
     companion object {
