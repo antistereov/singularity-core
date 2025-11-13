@@ -8,7 +8,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.web.server.ServerWebExchange
 import java.util.*
 
-class CustomAuthenticationToken(
+class AuthenticationToken(
     val userId: ObjectId,
     val roles: Set<Role>,
     val groups: Set<String>,

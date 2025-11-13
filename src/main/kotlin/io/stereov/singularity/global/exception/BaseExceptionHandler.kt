@@ -14,11 +14,11 @@ import org.springframework.web.server.ServerWebExchange
  *
  * Implementations of this interface should provide the logic for handling exceptions.
  *
- * @see [BaseWebException]
+ * @see [SingularityException]
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
-interface BaseExceptionHandler<T : BaseWebException> {
+interface BaseExceptionHandler<T : SingularityException> {
 
     private val logger: KLogger
         get() = KotlinLogging.logger {}
@@ -42,7 +42,8 @@ interface BaseExceptionHandler<T : BaseWebException> {
             status = status.value(),
             error = ex.javaClass.simpleName,
             message = ex.message,
-            path = exchange.request.uri.path
+            path = exchange.request.uri.path,
+            code = ex.code
         )
 
         return ResponseEntity(errorResponse, status)

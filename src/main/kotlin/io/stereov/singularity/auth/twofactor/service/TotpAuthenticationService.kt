@@ -2,7 +2,7 @@ package io.stereov.singularity.auth.twofactor.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
-import io.stereov.singularity.auth.core.exception.AuthException
+import io.stereov.singularity.auth.core.exception.AuthenticationException
 import io.stereov.singularity.auth.core.exception.model.TwoFactorMethodDisabledException
 import io.stereov.singularity.auth.core.model.IdentityProvider
 import io.stereov.singularity.auth.core.model.SecurityAlertType
@@ -86,7 +86,7 @@ class TotpAuthenticationService(
      * @param code The two-factor authentication code to validate.
      *
      * @throws io.stereov.singularity.global.exception.model.InvalidDocumentException If the user document does not contain a two-factor authentication secret.
-     * @throws io.stereov.singularity.auth.core.exception.AuthException If the setup token is invalid.
+     * @throws io.stereov.singularity.auth.core.exception.AuthenticationException If the setup token is invalid.
      *
      * @return The updated user document.
      */
@@ -104,7 +104,7 @@ class TotpAuthenticationService(
         authorizationService.requireStepUp()
 
         if (!totpService.codeIsValid(setupToken.secret, code)) {
-            throw AuthException("Invalid two-factor authentication code")
+            throw AuthenticationException("Invalid two-factor authentication code")
         }
 
         val encryptedSecret = setupToken.secret
@@ -167,7 +167,7 @@ class TotpAuthenticationService(
         }
 
         if (!match) {
-            throw AuthException("Invalid recovery code")
+            throw AuthenticationException("Invalid recovery code")
         }
 
         return userService.save(user)

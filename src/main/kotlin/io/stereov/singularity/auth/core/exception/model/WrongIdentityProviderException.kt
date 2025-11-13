@@ -1,6 +1,6 @@
 package io.stereov.singularity.auth.core.exception.model
 
-import io.stereov.singularity.auth.core.exception.AuthException
+import io.stereov.singularity.auth.core.exception.AuthenticationException
 
-class WrongIdentityProviderException(msg: String, cause: Throwable? = null) : AuthException(msg, cause) {
+class WrongIdentityProviderException(msg: String, cause: Throwable? = null) : AuthenticationException(msg, cause) {
 }

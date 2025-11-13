@@ -1,6 +1,6 @@
 package io.stereov.singularity.auth.core.exception.handler
 
-import io.stereov.singularity.auth.core.exception.AuthException
+import io.stereov.singularity.auth.core.exception.AuthenticationException
 import io.stereov.singularity.auth.core.exception.model.*
 import io.stereov.singularity.global.exception.BaseExceptionHandler
 import org.springframework.http.HttpStatus
@@ -14,14 +14,14 @@ import org.springframework.web.server.ServerWebExchange
  * This class handles exceptions related to authentication operations.
  *
  * It extends the [BaseExceptionHandler] interface
- * and provides a method to handle [AuthException] and its subclasses.
+ * and provides a method to handle [AuthenticationException] and its subclasses.
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
 @ControllerAdvice
-class AuthExceptionHandler : BaseExceptionHandler<AuthException> {
+class AuthExceptionHandler : BaseExceptionHandler<AuthenticationException> {
 
-    override fun getHttpStatus(ex: AuthException) = when (ex) {
+    override fun getHttpStatus(ex: AuthenticationException) = when (ex) {
         is EmailAlreadyVerifiedException -> HttpStatus.NOT_MODIFIED
         is InvalidCredentialsException -> HttpStatus.UNAUTHORIZED
         is InvalidPrincipalException -> HttpStatus.UNAUTHORIZED
@@ -34,9 +34,9 @@ class AuthExceptionHandler : BaseExceptionHandler<AuthException> {
         else -> HttpStatus.UNAUTHORIZED
     }
 
-    @ExceptionHandler(AuthException::class)
+    @ExceptionHandler(AuthenticationException::class)
     override fun handleException(
-        ex: AuthException,
+        ex: AuthenticationException,
         exchange: ServerWebExchange
     ) = handleExceptionInternal(ex, exchange)
 }
