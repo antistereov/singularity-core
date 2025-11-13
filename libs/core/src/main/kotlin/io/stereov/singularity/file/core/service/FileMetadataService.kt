@@ -12,14 +12,11 @@ import io.stereov.singularity.global.util.CriteriaBuilder
 import io.stereov.singularity.translate.service.TranslateService
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.exists
 import org.springframework.data.mongodb.core.find
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Service
-import java.time.Instant
 
 @Service
 class FileMetadataService(
@@ -78,26 +75,5 @@ class FileMetadataService(
         doc.contentTypes = doc.renditions.values.map { it.contentType }.toSet()
 
         return super.save(doc)
-    }
-
-    suspend fun getFiles(
-        pageable: Pageable,
-        tags: List<String>,
-        roles: Set<String>,
-        contentType: String?,
-        createdAtBefore: Instant?,
-        createdAtAfter: Instant?,
-        updatedAtBefore: Instant?,
-        updatedAtAfter: Instant?,
-    ): Page<FileMetadataDocument> {
-
-        val criteria = CriteriaBuilder(accessCriteria.getAccessCriteria(roles))
-            .compare(FileMetadataDocument::createdAt, createdAtBefore, createdAtAfter)
-            .compare(FileMetadataDocument::updatedAt, updatedAtBefore, updatedAtAfter)
-            .hasElement(FileMetadataDocument::contentTypes, contentType)
-            .isIn(FileMetadataDocument::tags, tags)
-            .build()
-
-        return findAllPaginated(pageable, criteria)
     }
 }

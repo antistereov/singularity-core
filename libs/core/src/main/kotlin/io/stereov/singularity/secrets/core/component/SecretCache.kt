@@ -1,6 +1,8 @@
 package io.stereov.singularity.secrets.core.component
 
+import com.github.michaelbull.result.Result
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.cache.exception.CacheException
 import io.stereov.singularity.cache.service.CacheService
 import io.stereov.singularity.secrets.core.model.Secret
 import io.stereov.singularity.secrets.core.properties.SecretStoreProperties
@@ -25,13 +27,13 @@ class SecretCache(
 
     private val expirationDurationSeconds = secretStoreProperties.cacheExpiration
 
-    suspend fun put(secret: Secret) {
+    suspend fun put(secret: Secret): Result<Secret, CacheException> {
         logger.trace { "Caching secret ${secret.key}" }
-        cacheService.put(getCacheKey(secret.key), secret, expirationDurationSeconds)
+        return cacheService.put(getCacheKey(secret.key), secret, expirationDurationSeconds)
     }
 
-    suspend fun getOrNull(key: String): Secret? {
+    suspend fun get(key: String): Result<Secret, CacheException> {
         logger.trace { "Retrieving secret $key from cache" }
-        return cacheService.getOrNull<Secret>(getCacheKey(key))
+        return cacheService.get<Secret>(getCacheKey(key))
     }
 }

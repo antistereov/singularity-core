@@ -1,10 +1,10 @@
 package io.stereov.singularity.auth.core.model.token
 
-import io.stereov.singularity.auth.core.exception.AccessTokenException
+import io.stereov.singularity.auth.jwt.exception.TokenExtractionException
 import org.springframework.security.authentication.AbstractAuthenticationToken
 
-data class AccessTokenExceptionToken(
-    val error: AccessTokenException
+data class AuthenticationFilterExcpeptionToken(
+    val error: TokenExtractionException
 ) : AbstractAuthenticationToken(null) {
 
     override fun getCredentials(): Any? {
