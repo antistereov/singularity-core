@@ -1,7 +1,7 @@
 package io.stereov.singularity.auth.oauth2
 
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
-import io.stereov.singularity.auth.jwt.exception.TokenException
+import io.stereov.singularity.auth.jwt.exception.model.TokenException
 import io.stereov.singularity.auth.oauth2.model.OAuth2ErrorCode
 import io.stereov.singularity.file.core.model.FileKey
 import io.stereov.singularity.file.core.model.FileMetadataDocument

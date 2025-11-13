@@ -1,6 +1,6 @@
 package io.stereov.singularity.content.core.model
 
-import io.stereov.singularity.auth.core.model.token.CustomAuthenticationToken
+import io.stereov.singularity.auth.core.model.token.AuthenticationToken
 import io.stereov.singularity.content.invitation.model.InvitationDocument
 import org.bson.types.ObjectId
 import java.time.Instant
@@ -34,7 +34,7 @@ interface ContentDocument<T: ContentDocument<T>> {
         return this as T
     }
 
-    fun hasAccess(authentication: CustomAuthenticationToken, role: ContentAccessRole): Boolean {
+    fun hasAccess(authentication: AuthenticationToken, role: ContentAccessRole): Boolean {
         return access.hasAccess(authentication, role)
     }
 }

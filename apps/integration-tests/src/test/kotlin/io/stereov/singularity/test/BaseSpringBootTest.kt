@@ -17,7 +17,7 @@ import io.stereov.singularity.auth.group.repository.GroupRepository
 import io.stereov.singularity.auth.group.service.GroupService
 import io.stereov.singularity.auth.guest.dto.request.CreateGuestRequest
 import io.stereov.singularity.auth.guest.dto.response.CreateGuestResponse
-import io.stereov.singularity.auth.jwt.exception.TokenException
+import io.stereov.singularity.auth.jwt.exception.model.TokenException
 import io.stereov.singularity.auth.oauth2.model.token.OAuth2ProviderConnectionToken
 import io.stereov.singularity.auth.oauth2.model.token.OAuth2TokenType
 import io.stereov.singularity.auth.oauth2.properties.OAuth2Properties

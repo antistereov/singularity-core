@@ -2,7 +2,6 @@ package io.stereov.singularity.user.core.model
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.user.core.exception.model.InvalidRoleException
 import io.stereov.singularity.user.core.model.Role.*
 
 /**
@@ -56,11 +55,9 @@ enum class Role(private val value: String) {
          *
          * @param role The string representation of the role.
          *
-         * @return The corresponding [Role] enum value.
-         *
-         * @throws InvalidRoleException If the string does not match any role.
+         * @return The corresponding [Role] enum value or null if not existing.
          */
-        fun fromString(role: String): Role {
+        fun fromString(role: String): Role? {
             logger.debug { "Creating role from string: $role" }
 
             val roleLowerCase = role.lowercase()
@@ -69,7 +66,7 @@ enum class Role(private val value: String) {
                 "user" -> USER
                 "admin" -> ADMIN
                 "guest" -> GUEST
-                else -> throw InvalidRoleException(role)
+                else -> null
             }
         }
     }

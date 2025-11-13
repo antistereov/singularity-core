@@ -56,7 +56,7 @@ class ArticleManagementService(
     suspend fun create(req: CreateArticleRequest, locale: Locale?): FullArticleResponse {
         logger.debug { "Creating article with title ${req.title}" }
 
-        contentService.requireContributerGroupMembership()
+        contentService.requireContributorGroupMembership()
         val user = authorizationService.getUser()
 
         if (req.title.isBlank())

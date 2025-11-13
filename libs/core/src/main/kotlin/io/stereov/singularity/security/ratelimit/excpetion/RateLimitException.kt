@@ -1,11 +1,11 @@
 package io.stereov.singularity.ratelimit.excpetion
 
-import io.stereov.singularity.global.exception.BaseWebException
+import io.stereov.singularity.global.exception.SingularityException
 
 /**
  * Exception thrown when a rate limit has been exceeded.
  *
- * Extends the [BaseWebException] to provide additional context for rate-limiting errors.
+ * Extends the [SingularityException] to provide additional context for rate-limiting errors.
  * Designed to be used in scenarios where requests surpass the allowed limit.
  *
  * @param message The error message providing details about the rate limit breach.
@@ -13,4 +13,4 @@ import io.stereov.singularity.global.exception.BaseWebException
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */
-open class RateLimitException(message: String, cause: Throwable? = null) : BaseWebException(message, cause)
+open class RateLimitException(message: String, cause: Throwable? = null) : SingularityException(message, cause)

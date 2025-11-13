@@ -2,12 +2,12 @@ package io.stereov.singularity.auth.core.exception.model
 
 import io.stereov.singularity.auth.core.exception.AuthenticationException
 
-class NoTokenProvidedException(
-    message: String,
+class GroupMembershipRequiredException(
+    msg: String,
     cause: Throwable? = null
-) : AuthenticationException(message, CODE, cause) {
+) : AuthenticationException(msg, CODE, cause) {
 
     companion object {
-        const val CODE = "NO_TOKEN_PROVIDED"
+        const val CODE = "GROUP_MEMBERSHIP_REQUIRED"
     }
 }

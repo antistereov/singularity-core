@@ -1,5 +1,6 @@
 package io.stereov.singularity.content.core.service
 
+import io.stereov.singularity.auth.core.exception.model.GroupMembershipRequiredException
 import io.stereov.singularity.auth.core.exception.model.NotAuthorizedException
 import io.stereov.singularity.auth.core.model.token.AccessType
 import io.stereov.singularity.auth.core.service.AuthorizationService
@@ -56,9 +57,9 @@ abstract class ContentService<T: ContentDocument<T>> : CrudService<T>  {
     /**
      * Validate that the current user belongs to the Editor group.
      *
-     * @throws NotAuthorizedException if the user does not have sufficient permissions.
+     * @throws GroupMembershipRequiredException if the user does not have sufficient permissions.
      */
-    suspend fun requireContributerGroupMembership() {
+    suspend fun requireContributorGroupMembership() {
         logger.debug { "Validate that user belongs to Editor group" }
 
         authorizationService.requireGroupMembership(KnownGroups.CONTRIBUTOR)

@@ -1,16 +1,19 @@
 package io.stereov.singularity.auth.jwt.service
 
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException
-import io.stereov.singularity.auth.jwt.exception.model.TokenExpiredException
+import io.stereov.singularity.auth.jwt.exception.model.TokenCreationException
+import io.stereov.singularity.auth.jwt.exception.model.TokenException
 import kotlinx.coroutines.reactive.awaitFirst
 import org.springframework.security.oauth2.jwt.*
 import org.springframework.stereotype.Service
 import java.time.Instant
 
 /**
- * # JWT Service
+ * JWT Service
  *
  * This service is responsible for encoding and decoding JWT tokens.
  * It uses the `ReactiveJwtDecoder` and `JwtEncoder` to handle JWT operations.
@@ -27,7 +30,7 @@ class JwtService(
     private val logger: KLogger
         get() = KotlinLogging.logger {}
 
-    val tokenTypeClaim = "token_type"
+    private val tokenTypeClaim = "token_type"
 
     /**
      * Decodes a JWT token.
@@ -36,32 +39,30 @@ class JwtService(
      *
      * @param token The JWT token to decode.
      * @param tokenType The type of token.
-     *
-     * @return The decoded JWT.
      */
-    suspend fun decodeJwt(token: String, tokenType: String): Jwt {
+    suspend fun decodeJwt(token: String, tokenType: String): Result<Jwt, TokenException> {
         logger.debug { "Decoding jwt" }
 
         val jwt = try {
             jwtDecoder.decode(token).awaitFirst()
         } catch(e: Exception) {
             logger.error(e) {}
-            throw InvalidTokenException("Cannot decode token", e)
+            return  Err(TokenException.Invalid("Cannot decode token", e))
         }
 
         if (jwt.claims[tokenTypeClaim] != tokenType)
-            throw InvalidTokenException("Token is not of type $tokenType")
+            return Err(TokenException.Invalid("Token is not of type $tokenType"))
 
         if (jwt.notBefore != null && jwt.notBefore > Instant.now()) {
-            throw InvalidTokenException("Token not valid before ${jwt.notBefore}")
+            return Err(TokenException.Invalid("Token not valid before ${jwt.notBefore}"))
         }
 
         val expiresAt = jwt.expiresAt
-            ?: throw InvalidTokenException("JWT does not contain expiration information")
+            ?: return Err(TokenException.Invalid("JWT does not contain expiration information"))
 
-        if (expiresAt <= Instant.now()) throw TokenExpiredException("Token is expired")
+        if (expiresAt <= Instant.now()) return Err(TokenException.Expired("Token is expired"))
 
-        return jwt
+        return Ok(jwt)
     }
 
     /**
@@ -74,7 +75,7 @@ class JwtService(
      *
      * @return The encoded JWT token as a string.
      */
-    suspend fun encodeJwt(claims: JwtClaimsSet, tokenType: String): Jwt {
+    suspend fun encodeJwt(claims: JwtClaimsSet, tokenType: String): Result<Jwt, TokenCreationException.Encoding> {
         val currentJwt = jwtSecretService.getCurrentSecret()
 
         val actualClaims = JwtClaimsSet.from(claims)
@@ -89,7 +90,16 @@ class JwtService(
         return this.encodeJwt(JwtEncoderParameters.from(jwsHeader, actualClaims))
     }
 
-    private fun encodeJwt(parameters: JwtEncoderParameters): Jwt {
-        return jwtEncoder.encode(parameters)
+    /**
+     * Encode JWT based on encoder parameters.
+     *
+     * @param parameters Encoder parameters.
+     */
+    private fun encodeJwt(parameters: JwtEncoderParameters): Result<Jwt, TokenCreationException.Encoding> {
+        return try {
+            Ok(jwtEncoder.encode(parameters))
+        } catch(e: JwtEncodingException) {
+            Err(TokenCreationException.Encoding("Failed to encode jwt: ${e.message}", e))
+        }
     }
 }
