@@ -1,16 +1,12 @@
 package io.stereov.singularity.auth.core.exception.model
 
-import io.stereov.singularity.auth.core.exception.AuthException
+import io.stereov.singularity.auth.core.exception.AuthenticationException
 
-/**
- * # Exception thrown when the principal is invalid.
- *
- * This exception is used to indicate that the provided principal is not valid or does not exist.
- * It extends the [AuthException] class.
- *
- * @property message The error message to be displayed.
- * @property cause The underlying cause of the exception, if any.
- *
- * @author <a href="https://github.com/antistereov">antistereov</a>
- */
-class InvalidPrincipalException(message: String, cause: Throwable? = null) : AuthException(message, cause)
+class InvalidPrincipalException(
+    message: String, cause: Throwable? = null
+) : AuthenticationException(message, CODE, cause) {
+
+    companion object {
+        const val CODE = "INVALID_PRINCIPAL"
+    }
+}

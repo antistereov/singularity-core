@@ -1,9 +1,10 @@
 package io.stereov.singularity.auth.core.filter
 
-import io.stereov.singularity.auth.core.model.token.CustomAuthenticationToken
-import io.stereov.singularity.auth.core.model.token.ErrorAuthenticationToken
+import com.github.michaelbull.result.getOrElse
+import io.stereov.singularity.auth.core.exception.AccessTokenException
+import io.stereov.singularity.auth.core.model.token.AccessTokenExceptionToken
+import io.stereov.singularity.auth.core.model.token.AuthenticationToken
 import io.stereov.singularity.auth.core.service.token.AccessTokenService
-import io.stereov.singularity.auth.jwt.exception.TokenException
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.mono
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
@@ -18,13 +19,11 @@ class AuthenticationFilter(
 ) : WebFilter {
 
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain) = mono {
-        val accessToken = try {
-            accessTokenService.extract(exchange)
-        } catch(e: TokenException) {
-            return@mono setSecurityContext(chain, exchange, e)
+        val accessToken = accessTokenService.extract(exchange).getOrElse { e ->
+            return@mono handleAccessTokenException(chain, exchange, e)
         }
 
-        val authentication = CustomAuthenticationToken(
+        val authentication = AuthenticationToken(
             accessToken.userId,
             accessToken.roles,
             accessToken.groups,
@@ -39,8 +38,12 @@ class AuthenticationFilter(
             .awaitFirstOrNull()
     }
 
-    private suspend fun setSecurityContext(chain: WebFilterChain, exchange: ServerWebExchange, exception: Exception): Void? {
-        val auth = ErrorAuthenticationToken(exception)
+    private suspend fun handleAccessTokenException(
+        chain: WebFilterChain,
+        exchange: ServerWebExchange,
+        exception: AccessTokenException
+    ): Void? {
+        val auth = AccessTokenExceptionToken(exception)
         val securityContext = SecurityContextImpl(auth)
 
         return chain

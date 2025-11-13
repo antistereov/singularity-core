@@ -1,5 +1,8 @@
 package io.stereov.singularity.global.util
 
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
 import com.github.slugify.Slugify
 import io.stereov.singularity.translate.model.Translatable
 import org.springframework.data.domain.*
@@ -50,3 +53,7 @@ suspend fun <S, T> Page<T>.mapContent(map: suspend (content: T) -> S): Page<S> {
     val mappedContent = this.content.map { map(it) }
     return PageImpl(mappedContent, this.pageable, this.totalElements)
 }
+
+inline fun <E, T> catchAs(block: () -> T, onError: (Throwable) -> E): Result<T, E> =
+    try { Ok(block()) } catch (t: Throwable) { Err(onError(t)) }
+

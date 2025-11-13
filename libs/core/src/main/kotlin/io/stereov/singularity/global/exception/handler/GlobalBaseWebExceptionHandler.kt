@@ -1,6 +1,6 @@
 package io.stereov.singularity.global.exception.handler
 
-import io.stereov.singularity.auth.core.exception.AuthException
+import io.stereov.singularity.auth.core.exception.AuthenticationException
 import io.stereov.singularity.global.exception.BaseExceptionHandler
 import io.stereov.singularity.global.exception.GlobalBaseWebException
 import io.stereov.singularity.global.exception.model.DocumentNotFoundException
@@ -18,7 +18,7 @@ import org.springframework.web.server.ServerWebExchange
  * This class handles exceptions related to authentication operations.
  *
  * It extends the [BaseExceptionHandler] interface
- * and provides a method to handle [AuthException] and its subclasses.
+ * and provides a method to handle [AuthenticationException] and its subclasses.
  *
  * @author <a href="https://github.com/antistereov">antistereov</a>
  */

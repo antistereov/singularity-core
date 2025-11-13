@@ -1,5 +1,9 @@
 package io.stereov.singularity.admin.core.exception
 
-import io.stereov.singularity.global.exception.BaseWebException
+import io.stereov.singularity.global.exception.SingularityException
 
-open class AdminException(msg: String, cause: Throwable? = null) : BaseWebException(msg, cause)
+open class AdminException(
+    msg: String,
+    code: Strng,
+    cause: Throwable? = null
+) : SingularityException(msg, code, cause)

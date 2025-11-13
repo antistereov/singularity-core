@@ -118,6 +118,10 @@ dependencies {
 
     // Documentation
     api("org.springdoc:springdoc-openapi-starter-webflux-api:2.8.13")
+
+    // Result
+    api("com.michael-bull.kotlin-result:kotlin-result:2.1.0")
+    api("com.michael-bull.kotlin-result:kotlin-result-coroutines:2.1.0")
 }
 
 configurations.all {
