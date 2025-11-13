@@ -4,7 +4,6 @@ import io.stereov.singularity.cache.service.CacheService
 import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.secrets.core.component.SecretCache
 import io.stereov.singularity.secrets.core.controller.SecretRotationController
-import io.stereov.singularity.secrets.core.exception.handler.SecretsExceptionHandler
 import io.stereov.singularity.secrets.core.properties.SecretStoreProperties
 import io.stereov.singularity.secrets.core.service.SecretRotationService
 import org.springframework.boot.autoconfigure.AutoConfiguration
@@ -43,12 +42,6 @@ class SecretsConfiguration {
     ) = SecretRotationController(
         secretRotationService
     )
-
-    // Exception Handler
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun secretsExceptionHandler() = SecretsExceptionHandler()
 
     // Service
 

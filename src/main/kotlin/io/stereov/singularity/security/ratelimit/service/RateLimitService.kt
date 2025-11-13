@@ -1,4 +1,4 @@
-package io.stereov.singularity.ratelimit.service
+package io.stereov.singularity.security.ratelimit.service
 
 import io.github.bucket4j.Bucket
 import io.github.bucket4j.BucketConfiguration
@@ -55,7 +55,7 @@ class RateLimitService(
      *
      * @return a Mono<Void> that completes if the user is within the rate limit or emits an error if the limit is exceeded
      */
-    fun checkUserRateLimit() = mono { authorizationService.getUserId() }
+    fun checkUserRateLimit(): Mono<Void?> = mono { authorizationService.getUserId() }
         .onErrorResume { Mono.empty() }
         .flatMap { userId ->
             val userBucket = resolveBucket(

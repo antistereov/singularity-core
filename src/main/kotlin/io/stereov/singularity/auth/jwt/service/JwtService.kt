@@ -5,8 +5,8 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.auth.jwt.exception.model.TokenCreationException
-import io.stereov.singularity.auth.jwt.exception.model.TokenException
+import io.stereov.singularity.auth.jwt.exception.TokenCreationException
+import io.stereov.singularity.auth.jwt.exception.TokenExtractionException
 import kotlinx.coroutines.reactive.awaitFirst
 import org.springframework.security.oauth2.jwt.*
 import org.springframework.stereotype.Service
@@ -40,27 +40,27 @@ class JwtService(
      * @param token The JWT token to decode.
      * @param tokenType The type of token.
      */
-    suspend fun decodeJwt(token: String, tokenType: String): Result<Jwt, TokenException> {
+    suspend fun decodeJwt(token: String, tokenType: String): Result<Jwt, TokenExtractionException> {
         logger.debug { "Decoding jwt" }
 
         val jwt = try {
             jwtDecoder.decode(token).awaitFirst()
         } catch(e: Exception) {
             logger.error(e) {}
-            return  Err(TokenException.Invalid("Cannot decode token", e))
+            return  Err(TokenExtractionException.Invalid("Cannot decode token", e))
         }
 
         if (jwt.claims[tokenTypeClaim] != tokenType)
-            return Err(TokenException.Invalid("Token is not of type $tokenType"))
+            return Err(TokenExtractionException.Invalid("Token is not of type $tokenType"))
 
         if (jwt.notBefore != null && jwt.notBefore > Instant.now()) {
-            return Err(TokenException.Invalid("Token not valid before ${jwt.notBefore}"))
+            return Err(TokenExtractionException.Invalid("Token not valid before ${jwt.notBefore}"))
         }
 
         val expiresAt = jwt.expiresAt
-            ?: return Err(TokenException.Invalid("JWT does not contain expiration information"))
+            ?: return Err(TokenExtractionException.Invalid("JWT does not contain expiration information"))
 
-        if (expiresAt <= Instant.now()) return Err(TokenException.Expired("Token is expired"))
+        if (expiresAt <= Instant.now()) return Err(TokenExtractionException.Expired("Token is expired"))
 
         return Ok(jwt)
     }

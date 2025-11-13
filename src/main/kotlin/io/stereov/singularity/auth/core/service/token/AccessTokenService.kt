@@ -4,20 +4,22 @@ import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
+import com.github.michaelbull.result.coroutines.coroutineBinding
 import com.github.michaelbull.result.map
 import com.github.michaelbull.result.mapBoth
 import com.github.michaelbull.result.mapError
+import com.github.michaelbull.result.runCatching
 import com.github.michaelbull.result.toResultOr
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.component.TokenValueExtractor
-import io.stereov.singularity.auth.core.exception.AccessTokenException
+import io.stereov.singularity.auth.core.exception.AccessTokenCreationException
+import io.stereov.singularity.auth.core.exception.AccessTokenExtractionException
 import io.stereov.singularity.auth.core.exception.model.TokenMissingException
 import io.stereov.singularity.auth.core.model.token.AccessToken
 import io.stereov.singularity.auth.core.model.token.SessionTokenType
-import io.stereov.singularity.auth.jwt.exception.model.TokenCreationException
-import io.stereov.singularity.auth.jwt.exception.model.TokenException
-import io.stereov.singularity.auth.jwt.exception.model.TokenExpiredException
+import io.stereov.singularity.auth.jwt.exception.TokenCreationException
+import io.stereov.singularity.auth.jwt.exception.TokenExtractionException
 import io.stereov.singularity.auth.jwt.properties.JwtProperties
 import io.stereov.singularity.auth.jwt.service.JwtService
 import io.stereov.singularity.auth.oauth2.exception.model.OAuth2FlowException
@@ -34,13 +36,11 @@ import org.springframework.web.server.ServerWebExchange
 import java.time.Instant
 import java.util.*
 import kotlin.String
-import kotlin.getOrElse
-import kotlin.runCatching
 
 /**
  * Service for creating and extracting [AccessToken]s.
  *
- * @author antistereov
+ * @author <a href="https://github.com/antistereov">antistereov</a>
  */
 @Service
 class AccessTokenService(
@@ -64,26 +64,39 @@ class AccessTokenService(
         user: UserDocument,
         sessionId: UUID,
         issuedAt: Instant = Instant.now()
-    ): Result<AccessToken, TokenCreationException.Encoding> {
+    ): Result<AccessToken, AccessTokenCreationException> = coroutineBinding {
         logger.debug { "Creating access token for user ${user.id} and session $sessionId" }
 
         val tokenId = Random.generateString(20)
+            .mapError { ex -> AccessTokenCreationException.Failed("Failed to generate token id: ${ex.message}", ex) }
+            .bind()
 
-        accessTokenCache.addTokenId(user.id, sessionId, tokenId)
+        runCatching { accessTokenCache.allowTokenId(user.id, sessionId, tokenId) }
+            .mapError { ex -> AccessTokenCreationException.Cache("Failed to cache access token: ${ex.message}", ex) }
+            .bind()
 
-        val claims = JwtClaimsSet.builder()
-            .issuedAt(issuedAt)
-            .expiresAt(issuedAt.plusSeconds(jwtProperties.expiresIn))
-            .subject(user.id.toHexString())
-            .claim(Constants.JWT_ROLES_CLAIM, user.roles)
-            .claim(Constants.JWT_SESSION_CLAIM, sessionId)
-            .claim(Constants.JWT_GROUPS_CLAIM, user.groups)
-            .id(tokenId)
-            .build()
-
-        return jwtService.encodeJwt(claims, tokenType.cookieName).map { jwt ->
-            AccessToken(user.id, sessionId, tokenId, user.roles, user.groups, jwt)
+        val claims = runCatching {
+            JwtClaimsSet.builder()
+                .issuedAt(issuedAt)
+                .expiresAt(issuedAt.plusSeconds(jwtProperties.expiresIn))
+                .subject(user.id.toHexString())
+                .claim(Constants.JWT_ROLES_CLAIM, user.roles)
+                .claim(Constants.JWT_SESSION_CLAIM, sessionId)
+                .claim(Constants.JWT_GROUPS_CLAIM, user.groups)
+                .id(tokenId)
+                .build()
         }
+            .mapError { ex -> AccessTokenCreationException.Encoding("Failed to build claim set: ${ex.message}", ex) }
+            .bind()
+
+        jwtService.encodeJwt(claims, tokenType.cookieName)
+            .mapError { ex -> when(ex) {
+                is TokenCreationException.Encoding -> AccessTokenCreationException.Encoding("Failed to encode access token: ${ex.message}", ex)
+            } }
+            .map { jwt ->
+                AccessToken(user.id, sessionId, tokenId, user.roles, user.groups, jwt)
+            }
+            .bind()
     }
 
     /**
@@ -92,14 +105,14 @@ class AccessTokenService(
      * @param exchange The [ServerWebExchange] that should contain an [AccessToken].
      * @throws [TokenMissingException] If no access token was found in the [ServerWebExchange].
      */
-    suspend fun extract(exchange: ServerWebExchange): Result<AccessToken, AccessTokenException> {
+    suspend fun extract(exchange: ServerWebExchange): Result<AccessToken, AccessTokenExtractionException> {
 
         return tokenValueExtractor.extractValue(exchange, tokenType, true)
             .mapBoth(
                 success = { tokenValue -> extract(tokenValue) },
                 failure = { ex ->
                     when (ex) {
-                        is TokenException.Missing -> Err(AccessTokenException.Missing(ex))
+                        is TokenExtractionException.Missing -> Err(AccessTokenExtractionException.Missing("No access token was found in exchange: ${ex.message}", ex))
                     }
                 }
             )
@@ -128,83 +141,76 @@ class AccessTokenService(
         )
     }
 
-    suspend fun extract(tokenValue: String): Result<AccessToken, AccessTokenException> {
+    suspend fun extract(tokenValue: String): Result<AccessToken, AccessTokenExtractionException> {
         logger.debug { "Extracting and validating access token" }
 
         return jwtService.decodeJwt(tokenValue, tokenType.cookieName)
-            .mapError { exception ->
-                when (exception) {
-                    is TokenException.Expired -> AccessTokenException.Expired(exception)
-                    is TokenException.Invalid -> AccessTokenException.Invalid(
-                        exception.message ?: "Failed to decode access token", exception
-                    )
-
-                    is TokenException.Missing -> AccessTokenException.Missing(exception)
-                }
-            }
+            .mapError { ex -> when(ex) {
+                is TokenExtractionException.Missing -> AccessTokenExtractionException.Missing("Access token missing: ${ex.message}", ex)
+                is TokenExtractionException.Invalid -> AccessTokenExtractionException.Invalid("Access token invalid: ${ex.message}", ex)
+                is TokenExtractionException.Expired -> AccessTokenExtractionException.Expired("Access token expired: ${ex.message}", ex)
+            } }
             .andThen { jwt ->
-                val userId = jwt.subject.toResultOr { AccessTokenException.Invalid("AccessToken does not contain sub") }
-                    .andThen { sub ->
-                        catchAs({ ObjectId(sub) }) { ex ->
-                            AccessTokenException.Invalid("Invalid ObjectId in sub: $sub", ex)
-                        }
-                    }
+                coroutineBinding {
+                    val userId = jwt.subject
+                        .toResultOr { AccessTokenExtractionException.Invalid("Access token does not contain sub") }
+                        .andThen { sub ->
+                            runCatching { ObjectId(sub) }
+                                .mapError { ex -> AccessTokenExtractionException.Invalid("Invalid ObjectId in sub: $sub", ex) }
+                        }.bind()
 
-                val sessionId = (jwt.claims[Constants.JWT_SESSION_CLAIM] as? String)
-                    .toResultOr { AccessTokenException.Invalid("AccessToken does not contain session id") }
-                    .andThen { s ->
-                        catchAs({ UUID.fromString(s) }) { ex ->
-                            AccessTokenException.Invalid(
-                                "Invalid session id: $s",
-                                ex
-                            )
-                        }
-                    }
-
-                val tokenId = jwt.id
-                    .toResultOr { AccessTokenException.Invalid("AccessToken does not contain token id") }
-
-                val roles = (jwt.claims[Constants.JWT_ROLES_CLAIM] as? List<*>)
-                    .toResultOr { AccessTokenException.Invalid("AccessToken does not contain roles") }
-                    .andThen { list ->
-                        val parsed = mutableSetOf<Role>()
-                        for (raw in list) {
-                            val s = raw as? String
-                                ?: return@andThen Err(AccessTokenException.Invalid("Cannot decode role $raw"))
-                            val r = Role.fromString(s)
-                                ?: return@andThen Err(AccessTokenException.Invalid("Unknown role $s"))
-                            parsed += r
-                        }
-                        Ok(parsed.toSet())
-                    }
-
-                val groups = (jwt.claims[Constants.JWT_GROUPS_CLAIM] as? List<*>)
-                    .toResultOr { AccessTokenException.Invalid("AccessToken does not contain groups") }
-                    .andThen { list ->
-                        val parsed = mutableSetOf<String>()
-                        for (raw in list) {
-                            val g = raw as? String
-                                ?: return@andThen Err(AccessTokenException.Invalid("Cannot decode group $raw"))
-                            parsed += g
-                        }
-                        Ok(parsed.toSet())
-                    }
-
-                userId.andThen { uid ->
-                    sessionId.andThen { sid ->
-                        tokenId.andThen { tid ->
-                            roles.andThen { rs ->
-                                groups.andThen { gs ->
-                                    if (!accessTokenCache.isTokenIdValid(uid, sid, tid)) {
-                                        Err(AccessTokenException.Invalid("AccessToken is not valid"))
-                                    } else {
-                                        Ok(AccessToken(uid, sid, tid, rs, gs, jwt))
-                                    }
-                                }
+                    val sessionId = (jwt.claims[Constants.JWT_SESSION_CLAIM] as? String)
+                        .toResultOr { AccessTokenExtractionException.Invalid("Access token does not contain session id") }
+                        .andThen { s ->
+                            catchAs({ UUID.fromString(s) }) { ex ->
+                                AccessTokenExtractionException.Invalid("Invalid session id: $s", ex)
                             }
+                        }.bind()
+
+                    val tokenId = jwt.id
+                        .toResultOr { AccessTokenExtractionException.Invalid("Access token does not contain token id") }
+                        .bind()
+
+                    val roles = (jwt.claims[Constants.JWT_ROLES_CLAIM] as? List<*>)
+                        .toResultOr { AccessTokenExtractionException.Invalid("Access token does not contain roles") }
+                        .andThen { list ->
+                            val parsed = mutableSetOf<Role>()
+                            for (raw in list) {
+                                val s = (raw as? String)
+                                    .toResultOr { AccessTokenExtractionException.Invalid("Cannot decode role $raw") }
+                                    .bind()
+                                val r = Role.fromString(s)
+                                    .toResultOr { AccessTokenExtractionException.Invalid("Unknown role $s") }
+                                    .bind()
+                                parsed += r
+                            }
+                            Ok(parsed.toSet())
+                        }.bind()
+
+                    val groups = (jwt.claims[Constants.JWT_GROUPS_CLAIM] as? List<*>)
+                        .toResultOr { AccessTokenExtractionException.Invalid("Access token does not contain groups") }
+                        .andThen { list ->
+                            val parsed = mutableSetOf<String>()
+                            for (raw in list) {
+                                val g = (raw as? String)
+                                    .toResultOr { AccessTokenExtractionException.Invalid("Cannot decode group $raw") }
+                                    .bind()
+                                parsed += g
+                            }
+                            Ok(parsed.toSet())
+                        }.bind()
+
+                accessTokenCache.isTokenIdValid(userId, sessionId, tokenId)
+                    .mapError { ex -> AccessTokenExtractionException.Cache("Failed to access access token allowlist: ${ex.message}", ex) }
+                    .andThen { valid ->
+                        if (valid) {
+                            Ok(AccessToken(userId, sessionId, tokenId, roles, groups, jwt))
+                        } else {
+                            Err(AccessTokenExtractionException.Invalid("Access token is not valid"))
                         }
                     }
-                }
+                    .bind()
             }
+        }
     }
 }

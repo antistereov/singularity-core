@@ -58,7 +58,7 @@ import org.springframework.data.redis.core.ReactiveRedisTemplate
 )
 class AuthenticationConfiguration {
 
-    // Cache
+    // WriteAllowlist
 
     @OptIn(ExperimentalLettuceCoroutinesApi::class)
     @Bean

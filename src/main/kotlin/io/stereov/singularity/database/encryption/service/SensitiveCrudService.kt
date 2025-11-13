@@ -1,6 +1,10 @@
 package io.stereov.singularity.database.encryption.service
 
+import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.flatMap
+import com.github.michaelbull.result.map
 import io.github.oshai.kotlinlogging.KLogger
+import io.stereov.singularity.database.encryption.exception.EncryptionException
 import io.stereov.singularity.database.encryption.model.Encrypted
 import io.stereov.singularity.database.encryption.model.EncryptedSensitiveDocument
 import io.stereov.singularity.database.encryption.model.SensitiveDocument
@@ -18,6 +22,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.validation.Validator.document
 
 /**
  * This service provides CRUD operations with encryption.
@@ -35,20 +40,22 @@ abstract class SensitiveCrudService<SensitiveData, DecryptedDocument: SensitiveD
     abstract val logger: KLogger
     abstract val reactiveMongoTemplate: ReactiveMongoTemplate
 
-    protected abstract suspend fun doEncrypt(document: DecryptedDocument, encryptedSensitive: Encrypted<SensitiveData>): EncryptedDocument
+    protected abstract suspend fun doEncrypt(document: DecryptedDocument, encryptedSensitive: Encrypted<SensitiveData>): Result<EncryptedDocument, EncryptionException>
 
-    protected abstract suspend fun doDecrypt(encrypted: EncryptedDocument, decryptedSensitive: SensitiveData): DecryptedDocument
+    protected abstract suspend fun doDecrypt(encrypted: EncryptedDocument, decryptedSensitive: SensitiveData): Result<DecryptedDocument, EncryptionException>
 
     @Suppress("UNCHECKED_CAST")
-    suspend fun encrypt(document: DecryptedDocument): EncryptedDocument {
-        val wrapped = this.encryptionService.wrap(document.sensitive)
-        return doEncrypt(document, wrapped)
+    suspend fun encrypt(document: DecryptedDocument): Result<EncryptedDocument, EncryptionException> {
+        return encryptionService.wrap(document.sensitive).flatMap { wrapped ->
+            doEncrypt(document, wrapped)
+        }
     }
 
     @Suppress("UNCHECKED_CAST")
-    suspend fun decrypt(encrypted: EncryptedDocument): DecryptedDocument {
-        val unwrapped = encryptionService.unwrap(encrypted.sensitive, sensitiveClazz)
-        return doDecrypt(encrypted, unwrapped)
+    suspend fun decrypt(encrypted: EncryptedDocument): Result<DecryptedDocument, EncryptionException> {
+        return encryptionService.unwrap(encrypted.sensitive, sensitiveClazz).flatMap { unwrapped ->
+            doDecrypt(encrypted, unwrapped)
+        }
     }
 
     @Suppress("UNUSED")
