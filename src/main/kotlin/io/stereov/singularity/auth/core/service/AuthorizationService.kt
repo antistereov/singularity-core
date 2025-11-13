@@ -1,17 +1,13 @@
 package io.stereov.singularity.auth.core.service
 
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
-import com.github.michaelbull.result.map
+import com.github.michaelbull.result.*
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.auth.core.exception.AccessTokenException
 import io.stereov.singularity.auth.core.exception.AuthenticationException
-import io.stereov.singularity.auth.core.exception.StepUpTokenException
-import io.stereov.singularity.auth.core.model.token.AccessTokenExceptionToken
+import io.stereov.singularity.auth.core.model.token.AuthenticationFilterExcpeptionToken
 import io.stereov.singularity.auth.core.model.token.AuthenticationToken
 import io.stereov.singularity.auth.core.model.token.StepUpToken
 import io.stereov.singularity.auth.core.service.token.StepUpTokenService
+import io.stereov.singularity.auth.jwt.exception.TokenExtractionException
 import io.stereov.singularity.user.core.model.Role
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.bson.types.ObjectId
@@ -39,7 +35,7 @@ class AuthorizationService(
     /**
      * Get the ID of the currently authenticated user.
      */
-    suspend fun getUserId(): Result<ObjectId, AccessTokenException> {
+    suspend fun getUserId(): Result<ObjectId, TokenExtractionException> {
         logger.debug { "Extracting user ID." }
 
         return getAuthentication().map { it.userId }
@@ -48,7 +44,7 @@ class AuthorizationService(
     /**
      * Get the ID of the currently authenticated session.
      */
-    suspend fun getSessionId(): Result<UUID, AccessTokenException> {
+    suspend fun getSessionId(): Result<UUID, TokenExtractionException> {
         logger.debug { "Extracting session ID" }
 
         return getAuthentication().map { it.sessionId }
@@ -57,7 +53,7 @@ class AuthorizationService(
     /**
      * Get the ID of the currently authenticated token.
      */
-    suspend fun getTokenId(): Result<String, AccessTokenException> {
+    suspend fun getTokenId(): Result<String, TokenExtractionException> {
         logger.debug { "Extracting token ID" }
 
         return getAuthentication().map { it.tokenId }
@@ -75,7 +71,10 @@ class AuthorizationService(
      * @param authentication The [AuthenticationToken] of the current request.
      * @param role The required role.
      */
-    fun requireRole(authentication: AuthenticationToken, role: Role): Result<AuthenticationToken, AuthenticationException.RoleRequired> {
+    fun requireRole(
+        authentication: AuthenticationToken,
+        role: Role
+    ): Result<AuthenticationToken, AuthenticationException.RoleRequired> {
         logger.debug { "Validating authorization: role $role" }
 
         return when (authentication.roles.contains(role)) {
@@ -90,7 +89,10 @@ class AuthorizationService(
      * @param authentication The [AuthenticationToken] of the current request.
      * @param groupKey The key of the required group.
      */
-    fun requireGroupMembership(authentication: AuthenticationToken, groupKey: String): Result<AuthenticationToken, AuthenticationException.GroupMembershipRequired> {
+    fun requireGroupMembership(
+        authentication: AuthenticationToken,
+        groupKey: String
+    ): Result<AuthenticationToken, AuthenticationException.GroupMembershipRequired> {
         logger.debug { "Checking if the current user is part of the group \"$groupKey\"" }
 
         return when (authentication.groups.contains(groupKey) || authentication.roles.contains(Role.ADMIN)) {
@@ -99,18 +101,29 @@ class AuthorizationService(
         }
     }
 
-    suspend fun getRoles(): Result<Set<Role>, AccessTokenException> {
+    /**
+     * Get all the [Role]s the current user contains.
+     *
+     * @return A [Set] of [Role]s.
+     */
+    @Suppress("UNUSED")
+    suspend fun getRoles(): Result<Set<Role>, TokenExtractionException> {
         return getAuthentication().map { it.roles }
     }
 
-    suspend fun getGroups(): Result<Set<String>, AccessTokenException> {
+    /**
+     * Get keys of all groups the current user is a member of.
+     *
+     * @return A [Set] of group keys.
+     */
+    suspend fun getGroups(): Result<Set<String>, TokenExtractionException> {
         return getAuthentication().map { it.groups }
     }
 
     /**
      * Validate that the current user performed a step-up.
      */
-    suspend fun requireStepUp(authentication: AuthenticationToken): Result<StepUpToken, StepUpTokenException> {
+    suspend fun requireStepUp(authentication: AuthenticationToken): Result<StepUpToken, TokenExtractionException> {
         logger.debug { "Validating step up" }
 
         return stepUpTokenService.extract(
@@ -125,15 +138,18 @@ class AuthorizationService(
      *
      * This method retrieves the current authentication token from the security context.
      */
-    suspend fun getAuthentication(): Result<AuthenticationToken, AccessTokenException> {
-        val authentication = ReactiveSecurityContextHolder.getContext()
-            .awaitFirstOrNull()?.authentication
-            ?: return Err(AccessTokenException.Missing())
+    suspend fun getAuthentication(): Result<AuthenticationToken, TokenExtractionException> {
 
-        return when (authentication) {
-            is AuthenticationToken -> Ok(authentication)
-            is AccessTokenExceptionToken -> Err(authentication.error)
-            else -> Err(AccessTokenException.Invalid(IllegalArgumentException("Unknown authentication type: ${authentication::class.simpleName}")))
-        }
+        return ReactiveSecurityContextHolder.getContext()
+            .awaitFirstOrNull()?.authentication
+            .toResultOr { TokenExtractionException.Missing("No access token found in exchange") }
+            .andThen { authentication ->
+                when (authentication) {
+                    is AuthenticationToken -> Ok(authentication)
+                    is AuthenticationFilterExcpeptionToken -> Err(authentication.error)
+                    else -> Err(TokenExtractionException.Invalid("Unexpected wrong SecurityContext: contains authentication type ${authentication::class.simpleName}"))
+                }
+            }
     }
 }
+

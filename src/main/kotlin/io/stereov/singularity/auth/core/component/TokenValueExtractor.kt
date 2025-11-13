@@ -6,7 +6,7 @@ import com.github.michaelbull.result.Result
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.model.token.SecurityTokenType
 import io.stereov.singularity.auth.core.properties.AuthProperties
-import io.stereov.singularity.auth.jwt.exception.model.TokenException
+import io.stereov.singularity.auth.jwt.exception.TokenExtractionException
 import org.springframework.stereotype.Component
 import org.springframework.web.server.ServerWebExchange
 
@@ -31,7 +31,7 @@ class TokenValueExtractor(
         exchange: ServerWebExchange,
         securityTokenType: SecurityTokenType,
         useBearerPrefix: Boolean = false
-    ): Result<String, TokenException.Missing> {
+    ): Result<String, TokenExtractionException.Missing> {
         logger.debug { "Extracting ${securityTokenType.cookieName} from request" }
 
         val cookieToken = exchange.request.cookies[securityTokenType.cookieName]?.firstOrNull()?.value
@@ -39,7 +39,7 @@ class TokenValueExtractor(
         if (!authProperties.allowHeaderAuthentication) {
             return cookieToken
                 ?.let { Ok(it) }
-                ?: Err(TokenException.Missing("No token of type ${securityTokenType.header} found in exchange cookies and header authentication is forbidden"))
+                ?: Err(TokenExtractionException.Missing("No token of type ${securityTokenType.header} found in exchange cookies and header authentication is forbidden"))
         }
 
         val headerToken = if (useBearerPrefix) {
@@ -58,6 +58,6 @@ class TokenValueExtractor(
 
         return token
             ?.let { Ok(it) }
-            ?: Err(TokenException.Missing("No token of type ${securityTokenType.header} found in exchange"))
+            ?: Err(TokenExtractionException.Missing("No token of type ${securityTokenType.header} found in exchange"))
     }
 }

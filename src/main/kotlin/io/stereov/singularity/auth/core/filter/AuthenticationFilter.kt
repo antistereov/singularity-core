@@ -1,10 +1,10 @@
 package io.stereov.singularity.auth.core.filter
 
 import com.github.michaelbull.result.getOrElse
-import io.stereov.singularity.auth.core.exception.AccessTokenException
-import io.stereov.singularity.auth.core.model.token.AccessTokenExceptionToken
+import io.stereov.singularity.auth.core.model.token.AuthenticationFilterExcpeptionToken
 import io.stereov.singularity.auth.core.model.token.AuthenticationToken
 import io.stereov.singularity.auth.core.service.token.AccessTokenService
+import io.stereov.singularity.auth.jwt.exception.TokenExtractionException
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.mono
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
@@ -41,9 +41,9 @@ class AuthenticationFilter(
     private suspend fun handleAccessTokenException(
         chain: WebFilterChain,
         exchange: ServerWebExchange,
-        exception: AccessTokenException
+        exception: TokenExtractionException
     ): Void? {
-        val auth = AccessTokenExceptionToken(exception)
+        val auth = AuthenticationFilterExcpeptionToken(exception)
         val securityContext = SecurityContextImpl(auth)
 
         return chain

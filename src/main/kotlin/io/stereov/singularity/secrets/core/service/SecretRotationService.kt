@@ -20,9 +20,7 @@ class SecretRotationService(
 ) {
 
     private val logger = KotlinLogging.logger {}
-
     private val rotationOngoing = AtomicBoolean(false)
-
     private val keyRotationScope = CoroutineScope(Dispatchers.Default)
 
     @PostConstruct

@@ -21,7 +21,7 @@ import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.global.filter.LoggingFilter
 import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.ratelimit.filter.RateLimitFilter
-import io.stereov.singularity.ratelimit.service.RateLimitService
+import io.stereov.singularity.security.ratelimit.service.RateLimitService
 import io.stereov.singularity.security.core.properties.SecurityProperties
 import io.stereov.singularity.user.core.model.Role
 import org.springframework.boot.autoconfigure.AutoConfiguration

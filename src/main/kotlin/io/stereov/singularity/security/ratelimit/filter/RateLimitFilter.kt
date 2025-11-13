@@ -3,7 +3,7 @@ package io.stereov.singularity.ratelimit.filter
 import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
 import io.stereov.singularity.global.util.getClientIp
 import io.stereov.singularity.ratelimit.excpetion.model.TooManyRequestsException
-import io.stereov.singularity.ratelimit.service.RateLimitService
+import io.stereov.singularity.security.ratelimit.service.RateLimitService
 import org.springframework.http.HttpStatus
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilter

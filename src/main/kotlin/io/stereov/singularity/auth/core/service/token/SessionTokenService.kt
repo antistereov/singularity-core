@@ -1,10 +1,12 @@
 package io.stereov.singularity.auth.core.service.token
 
+import com.github.michaelbull.result.Result
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.component.TokenValueExtractor
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
 import io.stereov.singularity.auth.core.model.token.SessionToken
 import io.stereov.singularity.auth.core.model.token.SessionTokenType
+import io.stereov.singularity.auth.jwt.exception.TokenCreationException
 import io.stereov.singularity.auth.jwt.properties.JwtProperties
 import io.stereov.singularity.auth.jwt.service.JwtService
 import io.stereov.singularity.global.util.Constants
@@ -24,7 +26,7 @@ class SessionTokenService(
     private val logger = KotlinLogging.logger {}
     val tokenType = "session"
 
-    suspend fun create(sessionInfo: SessionInfoRequest? = null, issuedAt: Instant = Instant.now(), locale: Locale? = null): SessionToken {
+    suspend fun create(sessionInfo: SessionInfoRequest? = null, issuedAt: Instant = Instant.now(), locale: Locale? = null): Result<SessionToken, TokenCreationException.Encoding> {
         logger.debug { "Creating session token" }
 
         val claims = JwtClaimsSet.builder()
@@ -41,7 +43,7 @@ class SessionTokenService(
             claims.claim(Constants.JWT_LOCALE_CLAIM, locale.toLanguageTag())
         }
 
-        val jwt = jwtService.encodeJwt(claims.build(), tokenType)
+        return jwtService.encodeJwt(claims.build(), tokenType)
 
         return SessionToken(sessionInfo?.browser, sessionInfo?.os, locale, jwt)
     }
