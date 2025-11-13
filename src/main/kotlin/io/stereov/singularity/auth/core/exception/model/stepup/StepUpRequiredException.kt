@@ -1,13 +1,13 @@
-package io.stereov.singularity.auth.core.exception.model
+package io.stereov.singularity.auth.core.exception.model.stepup
 
 import io.stereov.singularity.auth.core.exception.AuthenticationException
 
-class EmailAlreadyVerifiedException(
+class StepUpRequiredException(
     msg: String,
     cause: Throwable? = null
 ) : AuthenticationException(msg, CODE, cause) {
 
     companion object {
-        const val CODE = "EMAIL_ALREADY_VERIFIED"
+        const val CODE = "STEP_UP_REQUIRED"
     }
 }

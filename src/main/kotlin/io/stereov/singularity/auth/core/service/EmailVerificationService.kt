@@ -2,7 +2,7 @@ package io.stereov.singularity.auth.core.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.dto.response.MailCooldownResponse
-import io.stereov.singularity.auth.core.exception.AuthException
+import io.stereov.singularity.auth.core.exception.AuthenticationException
 import io.stereov.singularity.auth.core.exception.model.EmailAlreadyVerifiedException
 import io.stereov.singularity.auth.core.model.SecurityAlertType
 import io.stereov.singularity.auth.core.properties.EmailVerificationProperties
@@ -63,7 +63,7 @@ class EmailVerificationService(
 
         val verificationToken = emailVerificationTokenService.extract(token)
         val user = userService.findByIdOrNull(verificationToken.userId)
-            ?: throw AuthException("User does not exist")
+            ?: throw AuthenticationException("User does not exist")
 
         if (user.isGuest)
             throw GuestCannotPerformThisActionException("Guests cannot verify their email since no email is specified")
@@ -73,7 +73,7 @@ class EmailVerificationService(
 
         val savedSecret = user.sensitive.security.email.verificationSecret
 
-        if (verificationToken.secret != savedSecret) throw AuthException("Authentication token does not match")
+        if (verificationToken.secret != savedSecret) throw AuthenticationException("Authentication token does not match")
 
         val oldEmail = user.sensitive.email
         val newEmail = verificationToken.email

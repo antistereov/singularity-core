@@ -5,7 +5,7 @@ import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.dto.request.ResetPasswordRequest
 import io.stereov.singularity.auth.core.dto.request.SendPasswordResetRequest
 import io.stereov.singularity.auth.core.dto.response.MailCooldownResponse
-import io.stereov.singularity.auth.core.exception.AuthException
+import io.stereov.singularity.auth.core.exception.AuthenticationException
 import io.stereov.singularity.auth.core.exception.model.WrongIdentityProviderException
 import io.stereov.singularity.auth.core.model.IdentityProvider
 import io.stereov.singularity.auth.core.model.SecurityAlertType
@@ -74,7 +74,7 @@ class PasswordResetService(
         val tokenIsValid = resetToken.secret == savedSecret
 
         if (!tokenIsValid) {
-            throw AuthException("Password request secret does not match")
+            throw AuthenticationException("Password request secret does not match")
         }
 
         user.sensitive.security.password.resetSecret = Random.generateString(20)

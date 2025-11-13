@@ -1,7 +1,7 @@
 package io.stereov.singularity.content.core.model
 
 import io.stereov.singularity.auth.core.model.token.AccessType
-import io.stereov.singularity.auth.core.model.token.CustomAuthenticationToken
+import io.stereov.singularity.auth.core.model.token.AuthenticationToken
 import io.stereov.singularity.content.core.dto.request.UpdateContentAccessRequest
 import io.stereov.singularity.content.core.dto.response.ContentAccessDetailsResponse
 import io.stereov.singularity.user.core.model.Role
@@ -47,7 +47,7 @@ data class ContentAccessDetails(
         }
     }
 
-    fun hasAccess(authentication: CustomAuthenticationToken, role: ContentAccessRole): Boolean {
+    fun hasAccess(authentication: AuthenticationToken, role: ContentAccessRole): Boolean {
         val isAdmin = authentication.roles.contains(Role.ADMIN)
         val isOwner = authentication.userId == ownerId
 

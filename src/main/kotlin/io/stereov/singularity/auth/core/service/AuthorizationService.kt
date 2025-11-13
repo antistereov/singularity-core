@@ -1,32 +1,30 @@
 package io.stereov.singularity.auth.core.service
 
-import io.github.oshai.kotlinlogging.KLogger
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.map
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.auth.core.exception.model.InvalidPrincipalException
-import io.stereov.singularity.auth.core.exception.model.NotAuthorizedException
-import io.stereov.singularity.auth.core.model.token.CustomAuthenticationToken
-import io.stereov.singularity.auth.core.model.token.ErrorAuthenticationToken
+import io.stereov.singularity.auth.core.exception.AccessTokenException
+import io.stereov.singularity.auth.core.exception.AuthenticationException
+import io.stereov.singularity.auth.core.exception.StepUpTokenException
+import io.stereov.singularity.auth.core.model.token.AccessTokenExceptionToken
+import io.stereov.singularity.auth.core.model.token.AuthenticationToken
 import io.stereov.singularity.auth.core.model.token.StepUpToken
 import io.stereov.singularity.auth.core.service.token.StepUpTokenService
-import io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException
 import io.stereov.singularity.user.core.model.Role
-import io.stereov.singularity.user.core.model.UserDocument
-import io.stereov.singularity.user.core.service.UserService
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.bson.types.ObjectId
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
-import org.springframework.security.core.context.SecurityContext
 import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
 class AuthorizationService(
     private val stepUpTokenService: StepUpTokenService,
-    private val userService: UserService
 ) {
 
-    private val logger: KLogger
-        get() = KotlinLogging.logger {}
+    private val logger = KotlinLogging.logger {}
 
     /**
      * Check if the current user is authenticated.
@@ -35,172 +33,107 @@ class AuthorizationService(
     suspend fun isAuthenticated(): Boolean {
         logger.debug { "Checking if user is authenticated" }
 
-        return getUserIdOrNull() != null
+        return getAuthentication().isOk
     }
 
     /**
      * Get the ID of the currently authenticated user.
-     *
-     * @throws InvalidPrincipalException If the security context or authentication is missing.
-     * @throws InvalidTokenException If the authentication does not contain the necessary properties.
      */
-    suspend fun getUserId(): ObjectId {
-        logger.debug {"Extracting user ID." }
+    suspend fun getUserId(): Result<ObjectId, AccessTokenException> {
+        logger.debug { "Extracting user ID." }
 
-        val auth = getAuthentication()
-        return auth.userId
-    }
-
-    /**
-     * Get the ID of the currently authenticated user or null if not authenticated.
-     *
-     * @throws InvalidPrincipalException If the security context or authentication is missing.
-     * @throws InvalidTokenException If the authentication does not contain the necessary properties.
-     */
-    suspend fun getUserIdOrNull(): ObjectId? {
-        return runCatching { getUserId() }
-            .getOrNull()
-    }
-
-    /**
-     * Get the ID of the currently authenticated user.
-     *
-     * @throws InvalidPrincipalException If the security context or authentication is missing.
-     * @throws InvalidTokenException If the authentication does not contain the necessary properties.
-     */
-    suspend fun getUserOrNull(): UserDocument? {
-        logger.debug { "Extracting current user" }
-
-        return getUserIdOrNull()?.let { userService.findById(it) }
-    }
-
-    /**
-     * Get the currently authenticated user document.
-     *
-     * @throws InvalidPrincipalException If the security context or authentication is missing.
-     * @throws InvalidTokenException If the authentication does not contain the necessary properties.
-     */
-    suspend fun getUser(): UserDocument {
-        logger.debug { "Extracting current user" }
-
-        return userService.findById(getUserId())
+        return getAuthentication().map { it.userId }
     }
 
     /**
      * Get the ID of the currently authenticated session.
-     *
-     * @throws InvalidPrincipalException If the security context or authentication is missing.
-     * @throws InvalidTokenException If the authentication does not contain the necessary properties.
      */
-    suspend fun getSessionId(): UUID {
+    suspend fun getSessionId(): Result<UUID, AccessTokenException> {
         logger.debug { "Extracting session ID" }
 
-        val auth = getAuthentication()
-        return auth.sessionId
-    }
-
-    /**
-     * Get the ID of the currently authenticated session or null if not authenticated.
-     *
-     * @throws InvalidPrincipalException If the security context or authentication is missing.
-     * @throws InvalidTokenException If the authentication does not contain the necessary properties.
-     */
-    suspend fun getSessionIdOrNull(): UUID? {
-        return try {
-            getSessionId()
-        } catch(_: Exception) {
-            null
-        }
+        return getAuthentication().map { it.sessionId }
     }
 
     /**
      * Get the ID of the currently authenticated token.
-     *
-     * @throws InvalidPrincipalException If the security context or authentication is missing.
-     * @throws InvalidTokenException If the authentication does not contain the necessary properties.
      */
-    suspend fun getTokenId(): String {
+    suspend fun getTokenId(): Result<String, AccessTokenException> {
         logger.debug { "Extracting token ID" }
 
-        val auth = getAuthentication()
-        return auth.tokenId
+        return getAuthentication().map { it.tokenId }
     }
 
     /**
-     * Require authentication.
-     *
-     * @throws InvalidPrincipalException If the security context or authentication is missing.
-     * @throws InvalidTokenException If the authentication does not contain the necessary properties.
+     * Require authentication and return the current user's ID.
      */
     @Suppress("UNUSED")
-    suspend fun requireAuthentication() {
-        getAuthentication()
-    }
+    suspend fun requireAuthentication() = getUserId()
 
     /**
-     * Validate the authority of the current user.
-     * It throws a [NotAuthorizedException] if the user does not have the required role.
+     * Validating that the current user has the required role.
      *
+     * @param authentication The [AuthenticationToken] of the current request.
      * @param role The required role.
-     *
-     * @throws NotAuthorizedException If the user does not have the required role.
      */
-    suspend fun requireRole(role: Role) {
+    fun requireRole(authentication: AuthenticationToken, role: Role): Result<AuthenticationToken, AuthenticationException.RoleRequired> {
         logger.debug { "Validating authorization: role $role" }
 
-        val valid = getAuthentication().roles.contains(role)
-
-        if (!valid) throw NotAuthorizedException("User does not have sufficient permission: User does not have role $role")
-    }
-
-    suspend fun requireGroupMembership(groupKey: String) {
-        logger.debug { "Validating that the current user is part of the group \"$groupKey\"" }
-
-        val auth = getAuthentication()
-
-        if (!auth.groups.contains(groupKey) && !auth.roles.contains(Role.ADMIN)) {
-            throw NotAuthorizedException("User does not have sufficient permission: User does not belong to group \"$groupKey\"")
+        return when (authentication.roles.contains(role)) {
+            true -> Ok(authentication)
+            false -> Err(AuthenticationException.RoleRequired("Failed to perform this action: role ${role.name} is required"))
         }
     }
 
-    suspend fun getRoles(): Set<Role> {
-        return getAuthentication().roles
+    /**
+     * Validate the group membership of the current user.
+     *
+     * @param authentication The [AuthenticationToken] of the current request.
+     * @param groupKey The key of the required group.
+     */
+    fun requireGroupMembership(authentication: AuthenticationToken, groupKey: String): Result<AuthenticationToken, AuthenticationException.GroupMembershipRequired> {
+        logger.debug { "Checking if the current user is part of the group \"$groupKey\"" }
+
+        return when (authentication.groups.contains(groupKey) || authentication.roles.contains(Role.ADMIN)) {
+            true -> Ok(authentication)
+            false -> Err(AuthenticationException.GroupMembershipRequired("Failed to perform this action: user must be a member of group $groupKey"))
+        }
     }
 
-    suspend fun getGroups(): Set<String> {
-        return getAuthentication().groups
+    suspend fun getRoles(): Result<Set<Role>, AccessTokenException> {
+        return getAuthentication().map { it.roles }
     }
 
-    suspend fun requireStepUp(): StepUpToken {
+    suspend fun getGroups(): Result<Set<String>, AccessTokenException> {
+        return getAuthentication().map { it.groups }
+    }
+
+    /**
+     * Validate that the current user performed a step-up.
+     */
+    suspend fun requireStepUp(authentication: AuthenticationToken): Result<StepUpToken, StepUpTokenException> {
         logger.debug { "Validating step up" }
 
-        val authentication = getAuthentication()
-        return stepUpTokenService.extract(authentication.exchange, authentication.userId, authentication.sessionId)
-    }
-
-    suspend fun getAuthenticationOrNull(): CustomAuthenticationToken? {
-        return runCatching { getAuthentication() }.getOrNull()
+        return stepUpTokenService.extract(
+            authentication.exchange,
+            authentication.userId,
+            authentication.sessionId
+        )
     }
 
     /**
      * Get the current authentication token.
      *
      * This method retrieves the current authentication token from the security context.
-     *
-     * @throws InvalidPrincipalException If the security context or authentication is missing.
-     * @throws InvalidTokenException If the authentication does not contain the necessary properties.
      */
-    suspend fun getAuthentication(): CustomAuthenticationToken {
-        val securityContext: SecurityContext = ReactiveSecurityContextHolder.getContext().awaitFirstOrNull()
-            ?: throw InvalidPrincipalException("No security context found.")
+    suspend fun getAuthentication(): Result<AuthenticationToken, AccessTokenException> {
+        val authentication = ReactiveSecurityContextHolder.getContext()
+            .awaitFirstOrNull()?.authentication
+            ?: return Err(AccessTokenException.Missing())
 
-        val authentication = securityContext.authentication
-            ?: throw InvalidTokenException("Authentication is missing.")
-
-        return when ( authentication) {
-            is CustomAuthenticationToken -> authentication
-            is ErrorAuthenticationToken -> throw authentication.error
-            else -> throw InvalidTokenException("Unknown authentication type: ${authentication::class.simpleName}")
+        return when (authentication) {
+            is AuthenticationToken -> Ok(authentication)
+            is AccessTokenExceptionToken -> Err(authentication.error)
+            else -> Err(AccessTokenException.Invalid(IllegalArgumentException("Unknown authentication type: ${authentication::class.simpleName}")))
         }
     }
 }

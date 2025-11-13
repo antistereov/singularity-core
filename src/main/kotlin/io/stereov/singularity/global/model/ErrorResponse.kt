@@ -9,6 +9,7 @@ import java.time.LocalDateTime
  *
  * @property timestamp The timestamp when the error occurred.
  * @property status The HTTP status code of the error.
+ * @property code The error code for the specific error.
  * @property error A brief description of the error.
  * @property message A detailed error message, if available.
  * @property path The path of the request that caused the error.
@@ -18,6 +19,7 @@ import java.time.LocalDateTime
 data class ErrorResponse(
     val timestamp: LocalDateTime = LocalDateTime.now(),
     val status: Int,
+    val code: String,
     val error: String,
     val message: String?,
     val path: String?,

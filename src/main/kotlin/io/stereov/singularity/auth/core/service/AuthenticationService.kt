@@ -6,7 +6,7 @@ import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.auth.core.dto.request.RegisterUserRequest
 import io.stereov.singularity.auth.core.dto.request.StepUpRequest
-import io.stereov.singularity.auth.core.exception.AuthException
+import io.stereov.singularity.auth.core.exception.AuthenticationException
 import io.stereov.singularity.auth.core.exception.model.InvalidCredentialsException
 import io.stereov.singularity.auth.core.exception.model.UserAlreadyAuthenticatedException
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties
@@ -44,7 +44,7 @@ class AuthenticationService(
      * @return The [UserDocument] of the logged-in user.
      *
      * @throws InvalidCredentialsException If the email or password is invalid.
-     * @throws io.stereov.singularity.auth.core.exception.AuthException If the user document does not contain an ID.
+     * @throws io.stereov.singularity.auth.core.exception.AuthenticationException If the user document does not contain an ID.
      */
     suspend fun login(payload: LoginRequest): UserDocument {
         logger.debug { "Logging in user ${payload.email}" }
@@ -72,7 +72,7 @@ class AuthenticationService(
      * @return The [UserDocument] of the registered user.
      *
      * @throws EmailAlreadyTakenException If the email already exists in the system.
-     * @throws io.stereov.singularity.auth.core.exception.AuthException If the user document does not contain an ID.
+     * @throws io.stereov.singularity.auth.core.exception.AuthenticationException If the user document does not contain an ID.
      */
     suspend fun register(payload: RegisterUserRequest, sendEmail: Boolean, locale: Locale?): UserDocument {
         logger.debug { "Registering user ${payload.email}" }
@@ -118,7 +118,7 @@ class AuthenticationService(
         val sessionId = authorizationService.getSessionId()
 
         if (!user.sensitive.sessions.containsKey(sessionId)) {
-            throw AuthException("Step up failed: trying to execute for step up for invalid session, user logged out or revoked session")
+            throw AuthenticationException("Step up failed: trying to execute for step up for invalid session, user logged out or revoked session")
         }
 
         if (user.isGuest) return user

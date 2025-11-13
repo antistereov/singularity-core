@@ -1,5 +1,5 @@
 package io.stereov.singularity.translate.exception
 
-import io.stereov.singularity.global.exception.BaseWebException
+import io.stereov.singularity.global.exception.SingularityException
 
-open class TranslationException(msg: String, cause: Throwable? = null) : BaseWebException(msg, cause)
+open class TranslationException(msg: String, cause: Throwable? = null) : SingularityException(msg, cause)
