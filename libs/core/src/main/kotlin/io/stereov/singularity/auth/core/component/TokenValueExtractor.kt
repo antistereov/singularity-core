@@ -23,9 +23,17 @@ class TokenValueExtractor(
     private val logger = KotlinLogging.logger {}
 
     /**
-     * Extracts the value of a token from the [ServerWebExchange] either from a cookie or a header.
+     * Extracts the value of a security token from the request, based on cookies and headers.
      *
-     * Based on [AuthProperties] it can allow header values and prefer header values to cookie values.
+     * The token can be retrieved from a cookie or a header, depending on the configuration provided
+     * in the [AuthProperties]. If header authentication is disallowed, only the cookie is checked.
+     * If "Bearer" prefix is expected, it is removed from the header token before returning.
+     *
+     * @param exchange the server web exchange that contains the request to extract the token from.
+     * @param securityTokenType defines the type of security token, including associated cookie name and header name.
+     * @param useBearerPrefix a flag indicating whether to look for and remove the "Bearer" prefix in the header token.
+     * @return a [Result] containing the extracted token value as [String] if present, or [TokenExtractionException.Missing]
+     *         if no valid token could be found.
      */
     fun extractValue(
         exchange: ServerWebExchange,

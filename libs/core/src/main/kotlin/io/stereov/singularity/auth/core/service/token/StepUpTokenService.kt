@@ -40,7 +40,7 @@ class StepUpTokenService(
 
         return jwtService.encodeJwt(claims, tokenType.cookieName)
             .mapError { ex -> when (ex) {
-                is TokenCreationException.Encoding -> StepUpTokenCreationException.Encoding("Failed to encode step-up token: ${ex.msg}", ex)
+                is TokenCreationException.Encoding -> StepUpTokenCreationException.Encoding("Failed to encode step-up token: ${ex.message}", ex)
             } }
             .map { jwt ->
                 StepUpToken(userId, sessionId, jwt)

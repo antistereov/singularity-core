@@ -38,9 +38,13 @@ import java.util.*
 import kotlin.String
 
 /**
- * Service for creating and extracting [AccessToken]s.
+ * Service class responsible for handling the creation, extraction, and validation
+ * of access tokens used for user authentication and session management.
  *
- * @author <a href="https://github.com/antistereov">antistereov</a>
+ * @property jwtService Service for encoding and decoding JWT tokens.
+ * @property accessTokenCache Cache to manage access token-related data.
+ * @property jwtProperties Configuration properties for JWT tokens, including expiration time.
+ * @property tokenValueExtractor Utility to extract token values from web exchanges.
  */
 @Service
 class AccessTokenService(
@@ -54,11 +58,12 @@ class AccessTokenService(
     private val tokenType = SessionTokenType.Access
 
     /**
-     * Creates an [AccessToken] for a given [UserDocument] and session.
+     * Creates an access token for a specified user and session.
      *
-     * @param user The [UserDocument] the [AccessToken] should be created for.
-     * @param sessionId The [UUID] of the session this [AccessToken] should be linked to.
-     * @param issuedAt Optional issue time. Defaults to the current time.
+     * @param user The user document containing the user's information, including ID, roles, and groups.
+     * @param sessionId The identifier of the session for which the token is being created.
+     * @param issuedAt The timestamp representing when the token is issued. Defaults to the current time.
+     * @return A [Result] containing either the created [AccessToken] or an [AccessTokenCreationException] in case of a failure.
      */
     suspend fun create(
         user: UserDocument,
@@ -100,10 +105,11 @@ class AccessTokenService(
     }
 
     /**
-     * Extract an [AccessToken] from a [ServerWebExchange].
+     * Extracts an access token from the given server web exchange.
      *
-     * @param exchange The [ServerWebExchange] that should contain an [AccessToken].
-     * @throws [TokenMissingException] If no access token was found in the [ServerWebExchange].
+     * @param exchange the server web exchange from which to extract the access token
+     * @return a [Result] containing the extracted [AccessToken] on success,
+     *   or an [AccessTokenExtractionException] on failure
      */
     suspend fun extract(exchange: ServerWebExchange): Result<AccessToken, AccessTokenExtractionException> {
 
@@ -141,6 +147,13 @@ class AccessTokenService(
         )
     }
 
+    /**
+     * Extracts and validates an access token from the provided token value.
+     *
+     * @param tokenValue The raw access token string to be decoded and validated.
+     * @return A [Result] containing the decoded [AccessToken] if successful, or an [AccessTokenExtractionException]
+     *         if the extraction or validation process fails.
+     */
     suspend fun extract(tokenValue: String): Result<AccessToken, AccessTokenExtractionException> {
         logger.debug { "Extracting and validating access token" }
 

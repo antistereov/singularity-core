@@ -5,7 +5,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.user.core.model.Role.*
 
 /**
- * # Enum class representing the roles of a user in the system.
+ * Enum class representing the roles of a user in the system.
  *
  * This class is used to define the different roles that a user can have in the system.
  *

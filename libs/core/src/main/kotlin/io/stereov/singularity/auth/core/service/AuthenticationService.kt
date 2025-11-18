@@ -118,7 +118,7 @@ class AuthenticationService(
         logger.debug { "Logging out user" }
 
         val userId = authorizationService.getUserId()
-        val tokenId = authorizationService.getTokenId()
+        val tokenId = authorizationService.getAccessTokenId()
         val sessionId = authorizationService.getSessionId()
 
         accessTokenCache.invalidateToken(userId, sessionId, tokenId)
