@@ -13,10 +13,12 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 /**
- * This class is responsible for managing access tokens in Redis.
- * It provides methods to add, check, remove, and invalidate access tokens.
+ * Service for managing access tokens in a cache. This includes operations such as
+ * storing, validating, and invalidating tokens associated with specific users
+ * and sessions.
  *
- * @author <a href="https://github.com/antistereov">antistereov</a>
+ * This service relies on an underlying [CacheService] to perform cache operations
+ * and uses configurations from [JwtProperties] for token expiration settings.
  */
 @Service
 @OptIn(ExperimentalLettuceCoroutinesApi::class)
@@ -32,10 +34,14 @@ class AccessTokenCache(
     private val expiresIn = jwtProperties.expiresIn
 
     /**
-     * Adds a token ID to the cache for a specific user to the allowlist.
+     * Associates a specific token ID with a user and session in the cache, allowing it to be treated as valid
+     * for subsequent operations.
      *
-     * @param userId The ID of the user.
-     * @param tokenId The token ID to be added.
+     * @param userId The unique identifier of the user.
+     * @param sessionId The unique identifier of the session the token is associated with.
+     * @param tokenId The token ID to be stored and allowed for the user and session.
+     * @return A [Result] which, if successful, contains the stored token ID as a string.
+     *   If the operation fails, a [CacheException] is returned.
      */
     suspend fun allowTokenId(userId: ObjectId, sessionId: UUID, tokenId: String): Result<String, CacheException> {
         logger.trace { "Adding token ID for user $userId" }
@@ -45,11 +51,13 @@ class AccessTokenCache(
     }
 
     /**
-     * Checks if a token ID is valid for a specific user.
+     * Verifies if a specific token ID is valid for a given user and session.
      *
-     * @param userId The ID of the user.
-     * @param tokenId The token ID to be checked.
-     * @return True if the token ID is valid, false otherwise.
+     * @param userId The unique identifier of the user.
+     * @param sessionId The unique identifier of the session the token is associated with.
+     * @param tokenId The token ID to be validated.
+     * @return A [Result] containing a Boolean that indicates whether the token ID is valid.
+     *   If the operation fails, a [CacheException] is returned.
      */
     suspend fun isTokenIdValid(userId: ObjectId, sessionId: UUID, tokenId: String): Result<Boolean, CacheException> {
         logger.trace { "Checking validity of token for user $userId" }
@@ -59,11 +67,13 @@ class AccessTokenCache(
     }
 
     /**
-     * Checks if a token ID is valid for a specific user.
+     * Invalidates a specific token for the given user and session by removing it from the cache.
      *
-     * @param userId The ID of the user.
-     * @param tokenId The token ID to be checked.
-     * @return True if the token ID is valid, false otherwise.
+     * @param userId The unique identifier of the user.
+     * @param sessionId The unique identifier of the session associated with the token.
+     * @param tokenId The unique identifier of the token to be invalidated.
+     * @return A [Result] containing a Boolean that indicates whether the token was successfully invalidated
+     * (`true` if the token was removed, `false` if it did not exist). If the operation fails, a [CacheException] is returned.
      */
     suspend fun invalidateToken(userId: ObjectId, sessionId: UUID, tokenId: String): Result<Boolean, CacheException> {
         logger.trace { "Removing token for user $userId" }
@@ -72,6 +82,13 @@ class AccessTokenCache(
         return cacheService.delete(key).map { it == 1L }
     }
 
+    /**
+     * Invalidates all session tokens associated with a specific user and session.
+     *
+     * @param userId The unique identifier of the user.
+     * @param sessionId The unique identifier of the session for which tokens need to be invalidated.
+     * @return A [Result] that, if successful, indicates that all tokens were invalidated. If the operation fails, a [CacheException] is returned.
+     */
     suspend fun invalidateSessionTokens(userId: ObjectId, sessionId: UUID): Result<Unit, CacheException> {
         logger.debug { "Invalidating all tokens for user $userId and session $sessionId" }
 
@@ -79,9 +96,11 @@ class AccessTokenCache(
     }
 
     /**
-     * Invalidates all tokens for a specific user.
+     * Invalidates all active tokens associated with a specific user by removing them from the cache.
      *
-     * @param userId The ID of the user.
+     * @param userId The unique identifier of the user whose tokens need to be invalidated.
+     * @return A [Result] that, if successful, indicates that all tokens were invalidated.
+     * If the operation fails, a [CacheException] is returned.
      */
     suspend fun invalidateAllTokens(userId: ObjectId): Result<Unit, CacheException> {
         logger.trace { "Invalidating all tokens for user $userId" }

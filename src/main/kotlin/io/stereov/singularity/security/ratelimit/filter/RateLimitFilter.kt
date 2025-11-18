@@ -11,7 +11,7 @@ import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Mono
 
 /**
- * # Filter for rate limiting incoming requests.
+ * Filter for rate limiting incoming requests.
  *
  * This ratelimit limits the number of requests from a single IP address and user account
  * within a specified time period.

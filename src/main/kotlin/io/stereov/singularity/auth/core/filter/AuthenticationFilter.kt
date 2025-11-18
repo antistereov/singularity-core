@@ -1,19 +1,41 @@
 package io.stereov.singularity.auth.core.filter
 
 import com.github.michaelbull.result.getOrElse
-import io.stereov.singularity.auth.core.model.token.AuthenticationFilterExcpeptionToken
+import io.stereov.singularity.auth.core.exception.AccessTokenExtractionException
+import io.stereov.singularity.auth.core.model.token.AuthenticationFilterExceptionToken
 import io.stereov.singularity.auth.core.model.token.AuthenticationToken
 import io.stereov.singularity.auth.core.service.token.AccessTokenService
-import io.stereov.singularity.auth.jwt.exception.TokenExtractionException
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.mono
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
+import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextImpl
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Mono
 
+/**
+ * A web filter responsible for handling authentication in a reactive environment.
+ * This filter extracts an access token from the incoming request, validates it,
+ * and sets up a security context containing the authenticated user's details.
+ * It delegates further request processing to the next filter in the chain.
+ *
+ * The filter interacts with the following components:
+ * - An [AccessTokenService] to handle extraction and validation of access tokens.
+ * - The [ReactiveSecurityContextHolder] to store the security context in the reactive context.
+ *
+ * If an access token cannot be extracted or is invalid, an exception token is created
+ * and added to the security context, allowing downstream components to handle the error condition.
+ *
+ * Primary Responsibilities:
+ * - Extract and validate the access token using the [AccessTokenService].
+ * - Construct an [AuthenticationToken] upon successful access token validation.
+ * - Create and propagate a [SecurityContext] containing authentication details.
+ * - Handle token extraction failures by adding an exception token to the security context.
+ *
+ * This class implements the [WebFilter] interface used in reactive web applications.
+ */
 class AuthenticationFilter(
     private val accessTokenService: AccessTokenService,
 ) : WebFilter {
@@ -41,9 +63,9 @@ class AuthenticationFilter(
     private suspend fun handleAccessTokenException(
         chain: WebFilterChain,
         exchange: ServerWebExchange,
-        exception: TokenExtractionException
+        exception: AccessTokenExtractionException
     ): Void? {
-        val auth = AuthenticationFilterExcpeptionToken(exception)
+        val auth = AuthenticationFilterExceptionToken(exception)
         val securityContext = SecurityContextImpl(auth)
 
         return chain

@@ -31,15 +31,15 @@ class PasswordResetTokenService(
     private val tokenType = "password_reset"
 
     /**
-     * Creates a password reset token.
+     * Creates a password reset token for a given user with an associated secret and issued timestamp.
      *
-     * This method generates a JWT token with the user ID and secret as claims.
-     * The token is valid for the duration specified in the email properties.
+     * This method encrypts the provided secret and generates a JWT token containing relevant claims.
      *
-     * @param userId The ID of the user requesting the password reset.
-     * @param secret The secret associated with the user.
+     * @param userId The unique identifier of the user for whom the token is being created.
+     * @param secret The secret that will be included in the token, encrypted before use.
+     * @param issuedAt The timestamp indicating the issuance time of the token. Defaults to the current time if not provided.
      *
-     * @return The generated JWT token.
+     * @return A [Result] wrapping the generated token as a [String] on success or a [TokenCreationException.Encoding] on failure.
      */
     suspend fun create(
         userId: ObjectId,
@@ -68,13 +68,15 @@ class PasswordResetTokenService(
     }
 
     /**
-     * Validates and extracts the password reset token.
+     * Extracts and validates a password reset token from the provided JWT token string.
      *
-     * This method decodes the JWT token and extracts the user ID and secret claims.
+     * This method decodes the JWT token, validates its claims, decrypts the secret
+     * contained within the token, and constructs a [PasswordResetToken] containing
+     * the extracted information.
      *
-     * @param token The JWT token to be validated.
-     *
-     * @return A [PasswordResetToken] object containing the user ID and secret.
+     * @param token The JWT token string to extract and validate.
+     * @return A [Result] containing the extracted [PasswordResetToken] on success
+     * or a [TokenExtractionException] on failure.
      */
     suspend fun extract(token: String): Result<PasswordResetToken, TokenExtractionException> {
         logger.debug { "Validating and extracting password reset token" }

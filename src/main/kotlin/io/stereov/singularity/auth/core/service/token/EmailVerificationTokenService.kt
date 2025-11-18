@@ -15,9 +15,14 @@ import org.springframework.stereotype.Service
 import java.time.Instant
 
 /**
- * Create an extract [EmailVerificationToken]s.
+ * A service responsible for creating and extracting email verification tokens.
  *
- * @author <a href="https://github.com/antistereov">antistereov</a>
+ * This service provides functionality for generating JWT tokens that verify user emails
+ * and extracting specific email verification details from the token.
+ *
+ * @constructor Initializes the service with the provided JWT properties and service dependencies.
+ * @param jwtProperties Configuration properties for token expiration and other JWT settings.
+ * @param jwtService Service for encoding and decoding JWT tokens.
  */
 @Service
 class EmailVerificationTokenService(
@@ -31,14 +36,15 @@ class EmailVerificationTokenService(
     /**
      * Creates an email verification token.
      *
-     * This method generates a JWT token with the email and secret as claims.
-     * The token is valid for the duration specified in the email properties.
+     * This method generates a JWT token containing the user's email and a secret, with an issued and expiration date.
      *
-     * @param userId The ID of the user to create the token for.
-     * @param email The email address to be verified.
-     * @param secret The secret associated with the email.
+     * @param userId The unique identifier of the user for whom the token is being created.
+     * @param email The email address associated with the token.
+     * @param secret A unique identifier or secret to include in the token.
+     * @param issuedAt The timestamp when the token is issued. Defaults to the current time.
      *
-     * @return The generated JWT token.
+     * @return A [Result] containing the encoded JWT token as a string if successful,
+     * or a [TokenCreationException.Encoding] if an error occurs during token creation.
      */
     suspend fun create(
         userId: ObjectId,
@@ -67,13 +73,14 @@ class EmailVerificationTokenService(
     }
 
     /**
-     * Validates and extracts the email verification token.
+     * Extracts an [EmailVerificationToken] from the provided JWT token string.
      *
-     * This method decodes the JWT token and extracts the email and secret claims.
+     * This method decodes and validates the token, extracting the user ID, email, and secret
+     * to construct an [EmailVerificationToken].
      *
-     * @param token The JWT token to be validated.
-     *
-     * @return An [EmailVerificationToken] object containing the email and secret.
+     * @param token The JWT token string to be decoded and validated.
+     * @return A [Result] containing the extracted [EmailVerificationToken] if successful,
+     * or a [TokenExtractionException] if an error occurs during extraction.
      */
     suspend fun extract(token: String): Result<EmailVerificationToken, TokenExtractionException> {
         logger.debug { "Validating email verification token" }

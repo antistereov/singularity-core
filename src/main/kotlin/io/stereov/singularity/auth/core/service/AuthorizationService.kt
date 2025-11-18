@@ -2,8 +2,9 @@ package io.stereov.singularity.auth.core.service
 
 import com.github.michaelbull.result.*
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.auth.core.exception.AccessTokenExtractionException
 import io.stereov.singularity.auth.core.exception.AuthenticationException
-import io.stereov.singularity.auth.core.model.token.AuthenticationFilterExcpeptionToken
+import io.stereov.singularity.auth.core.model.token.AuthenticationFilterExceptionToken
 import io.stereov.singularity.auth.core.model.token.AuthenticationToken
 import io.stereov.singularity.auth.core.model.token.StepUpToken
 import io.stereov.singularity.auth.core.service.token.StepUpTokenService
@@ -15,6 +16,17 @@ import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.stereotype.Service
 import java.util.*
 
+/**
+ * A service responsible for managing and validating user authentication and authorization.
+ *
+ * This service provides methods for validating user authentication, retrieving user details
+ * such as user ID, session ID, access token ID, roles, and groups. It also includes utilities
+ * for enforcing access control checks such as role requirements, group membership, and step-up
+ * authentication validation.
+ *
+ * @constructor Initializes the service with the required dependencies.
+ * @param stepUpTokenService A service for managing step-up authentication tokens.
+ */
 @Service
 class AuthorizationService(
     private val stepUpTokenService: StepUpTokenService,
@@ -23,7 +35,9 @@ class AuthorizationService(
     private val logger = KotlinLogging.logger {}
 
     /**
-     * Check if the current user is authenticated.
+     * Checks whether the current user is authenticated.
+     *
+     * @return A boolean indicating whether the user is authenticated.
      */
     @Suppress("UNUSED")
     suspend fun isAuthenticated(): Boolean {
@@ -33,43 +47,60 @@ class AuthorizationService(
     }
 
     /**
-     * Get the ID of the currently authenticated user.
+     * Retrieves the user ID of the currently authenticated user.
+     *
+     * @return A [Result] containing the [ObjectId] of the user if authentication is successful,
+     *   or an [AccessTokenExtractionException] if an error occurs during authentication.
      */
-    suspend fun getUserId(): Result<ObjectId, TokenExtractionException> {
+    suspend fun getUserId(): Result<ObjectId, AccessTokenExtractionException> {
         logger.debug { "Extracting user ID." }
 
         return getAuthentication().map { it.userId }
     }
 
     /**
-     * Get the ID of the currently authenticated session.
+     * Extracts the session ID of the currently authenticated user.
+     *
+     * @return A [Result] containing the [UUID] of the session if the user is authenticated,
+     *   or an [AccessTokenExtractionException] if an error occurs during authentication or token extraction.
      */
-    suspend fun getSessionId(): Result<UUID, TokenExtractionException> {
+    suspend fun getSessionId(): Result<UUID, AccessTokenExtractionException> {
         logger.debug { "Extracting session ID" }
 
         return getAuthentication().map { it.sessionId }
     }
 
     /**
-     * Get the ID of the currently authenticated token.
+     * Extracts the access token ID of the currently authenticated user.
+     *
+     * @return A [Result] containing the token ID as a [String] if the authentication is successful,
+     *   or an [AccessTokenExtractionException] if an error occurs during authentication or token extraction.
      */
-    suspend fun getTokenId(): Result<String, TokenExtractionException> {
+    suspend fun getAccessTokenId(): Result<String, AccessTokenExtractionException> {
         logger.debug { "Extracting token ID" }
 
         return getAuthentication().map { it.tokenId }
     }
 
     /**
-     * Require authentication and return the current user's ID.
+     * Ensures that the currently authenticated user is valid and retrieves the associated user ID.
+     *
+     * This method invokes `getUserId()` to verify the authentication status of the user.
+     * If the authentication is successful, the user's ID is returned.
+     *
+     * @return A [Result] containing the [ObjectId] of the authenticated user if the authentication is valid,
+     * or an [AccessTokenExtractionException] if an error occurs during authentication.
      */
     @Suppress("UNUSED")
     suspend fun requireAuthentication() = getUserId()
 
     /**
-     * Validating that the current user has the required role.
+     * Verifies that the provided authentication token includes the specified role.
      *
-     * @param authentication The [AuthenticationToken] of the current request.
-     * @param role The required role.
+     * @param authentication The [AuthenticationToken] containing the user's roles.
+     * @param role The [Role] required for the action.
+     * @return A [Result] containing the [AuthenticationToken] if the required role is present,
+     * or an [AuthenticationException.RoleRequired] if the required role is missing.
      */
     fun requireRole(
         authentication: AuthenticationToken,
@@ -84,10 +115,13 @@ class AuthorizationService(
     }
 
     /**
-     * Validate the group membership of the current user.
+     * Ensures that the user associated with the given authentication token is a member of the specified group,
+     * or holds the [Role.ADMIN] role.
      *
-     * @param authentication The [AuthenticationToken] of the current request.
-     * @param groupKey The key of the required group.
+     * @param authentication The [AuthenticationToken] representing the authenticated user's session and associated roles/groups.
+     * @param groupKey The key identifying the required group the user must belong to.
+     * @return A [Result] containing the [AuthenticationToken] if the user is a member of the group or holds the ADMIN role,
+     * or an [AuthenticationException.GroupMembershipRequired] if the user does not meet the group membership requirement.
      */
     fun requireGroupMembership(
         authentication: AuthenticationToken,
@@ -102,26 +136,31 @@ class AuthorizationService(
     }
 
     /**
-     * Get all the [Role]s the current user contains.
+     * Retrieves the roles associated with the currently authenticated user.
      *
-     * @return A [Set] of [Role]s.
+     * @return A [Result] containing a [Set] of [Role] objects if authentication is successful,
+     * or an [AccessTokenExtractionException] if an error occurs during authentication or role retrieval.
      */
     @Suppress("UNUSED")
-    suspend fun getRoles(): Result<Set<Role>, TokenExtractionException> {
+    suspend fun getRoles(): Result<Set<Role>, AccessTokenExtractionException> {
         return getAuthentication().map { it.roles }
     }
 
     /**
-     * Get keys of all groups the current user is a member of.
+     * Retrieves the groups associated with the currently authenticated user.
      *
-     * @return A [Set] of group keys.
+     * @return A [Result] containing a [Set] of group keys as [String] if authentication is successful,
+     * or an [AccessTokenExtractionException] if an error occurs during authentication or group retrieval.
      */
-    suspend fun getGroups(): Result<Set<String>, TokenExtractionException> {
+    suspend fun getGroups(): Result<Set<String>, AccessTokenExtractionException> {
         return getAuthentication().map { it.groups }
     }
 
     /**
-     * Validate that the current user performed a step-up.
+     * Validates the requirement for step-up authentication and extracts a step-up token if applicable.
+     *
+     * @param authentication The authentication token containing information about the current session, user, and exchange.
+     * @return A [Result] containing a valid [StepUpToken] if the extraction is successful, or a [TokenExtractionException] in case of failure.
      */
     suspend fun requireStepUp(authentication: AuthenticationToken): Result<StepUpToken, TokenExtractionException> {
         logger.debug { "Validating step up" }
@@ -134,20 +173,23 @@ class AuthorizationService(
     }
 
     /**
-     * Get the current authentication token.
+     * Retrieves the current authentication from the security context and processes it to extract an
+     * [AuthenticationToken]. If the authentication cannot be extracted or is of an unexpected type,
+     * an appropriate error will be returned.
      *
-     * This method retrieves the current authentication token from the security context.
+     * @return A [Result] containing an [AuthenticationToken] if successful, or an error of type
+     * [AccessTokenExtractionException] if the authentication extraction or type validation fails.
      */
-    suspend fun getAuthentication(): Result<AuthenticationToken, TokenExtractionException> {
+    suspend fun getAuthentication(): Result<AuthenticationToken, AccessTokenExtractionException> {
 
         return ReactiveSecurityContextHolder.getContext()
             .awaitFirstOrNull()?.authentication
-            .toResultOr { TokenExtractionException.Missing("No access token found in exchange") }
+            .toResultOr { AccessTokenExtractionException.Missing("No access token found in exchange") }
             .andThen { authentication ->
                 when (authentication) {
                     is AuthenticationToken -> Ok(authentication)
-                    is AuthenticationFilterExcpeptionToken -> Err(authentication.error)
-                    else -> Err(TokenExtractionException.Invalid("Unexpected wrong SecurityContext: contains authentication type ${authentication::class.simpleName}"))
+                    is AuthenticationFilterExceptionToken -> Err(authentication.error)
+                    else -> Err(AccessTokenExtractionException.Invalid("Unexpected wrong SecurityContext: contains authentication type ${authentication::class.simpleName}"))
                 }
             }
     }

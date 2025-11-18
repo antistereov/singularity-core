@@ -1,6 +1,8 @@
 package io.stereov.singularity.user.core.service
 
+import com.github.michaelbull.result.Result
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.database.encryption.exception.EncryptedDatabaseException
 import io.stereov.singularity.database.encryption.model.Encrypted
 import io.stereov.singularity.database.encryption.service.EncryptionSecretService
 import io.stereov.singularity.database.encryption.service.EncryptionService
@@ -108,7 +110,7 @@ class UserService(
 
         val hashedEmail = hashService.hashSearchableHmacSha256(email)
         return this.repository.findByEmail(hashedEmail)
-            ?.let { this. decrypt(it) }
+            ?.let { this.decrypt(it) }
     }
 
     /**
@@ -156,7 +158,7 @@ class UserService(
         lastActiveBefore: Instant?,
         lastActiveAfter: Instant?,
         identityKeys: Set<String>?
-    ): Page<UserDocument> {
+    ): Result<Page<UserDocument>, EncryptedDatabaseException> {
         logger.debug { "Finding ${encryptedDocumentClazz.simpleName}: page ${pageable.pageNumber}, size: ${pageable.pageSize}, sort: ${pageable.sort}" }
 
         val criteria = CriteriaBuilder()

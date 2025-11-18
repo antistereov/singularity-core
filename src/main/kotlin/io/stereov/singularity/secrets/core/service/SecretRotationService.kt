@@ -23,6 +23,8 @@ class SecretRotationService(
     private val rotationOngoing = AtomicBoolean(false)
     private val keyRotationScope = CoroutineScope(Dispatchers.Default)
 
+    // TODO: Make this use results and maybe server-side events?
+
     @PostConstruct
     fun init() {
         this.getSecretServices().forEach { runBlocking { it.getCurrentSecret() } }

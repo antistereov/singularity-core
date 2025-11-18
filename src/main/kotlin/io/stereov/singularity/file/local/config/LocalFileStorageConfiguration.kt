@@ -23,7 +23,7 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 @ConditionalOnProperty(prefix = "singularity.file.storage", value = ["type"], havingValue = "local", matchIfMissing = true)
 @EnableConfigurationProperties(LocalFileStorageProperties::class)
-class LocalFileStorageConfiguration {
+internal class LocalFileStorageConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
