@@ -8,7 +8,6 @@ import io.stereov.singularity.auth.jwt.exception.TokenCreationException
 import io.stereov.singularity.auth.jwt.exception.TokenExtractionException
 import io.stereov.singularity.auth.jwt.properties.JwtProperties
 import io.stereov.singularity.auth.jwt.service.JwtService
-import io.stereov.singularity.global.util.catchAs
 import org.bson.types.ObjectId
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
 import org.springframework.stereotype.Service
@@ -51,7 +50,7 @@ class EmailVerificationTokenService(
         email: String,
         secret: String,
         issuedAt: Instant = Instant.now()
-    ): Result<String, TokenCreationException.Encoding> = coroutineBinding {
+    ): Result<String, TokenCreationException> = coroutineBinding {
         logger.debug { "Creating email verification token" }
 
         val claims = runCatching {
@@ -89,7 +88,7 @@ class EmailVerificationTokenService(
             val userId = jwt.subject
                 .toResultOr { TokenExtractionException.Invalid("Email verification token does not contain sub claim") }
                 .andThen { sub ->
-                    catchAs({ ObjectId(sub) }) { ex ->
+                    runCatching { ObjectId(sub) }.mapError { ex ->
                         TokenExtractionException.Invalid("Invalid ObjectId in sub: $sub", ex)
                     }
                 }.bind()
