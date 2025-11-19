@@ -1,6 +1,6 @@
 package io.stereov.singularity.file.core.mapper
 
-import io.stereov.singularity.auth.core.service.AuthorizationService
+import io.stereov.singularity.auth.core.model.token.AuthenticationToken
 import io.stereov.singularity.content.core.dto.response.ContentAccessDetailsResponse
 import io.stereov.singularity.file.core.dto.FileMetadataResponse
 import io.stereov.singularity.file.core.dto.FileRenditionResponse
@@ -10,9 +10,7 @@ import io.stereov.singularity.file.core.model.FileUploadResponse
 import org.springframework.stereotype.Component
 
 @Component
-class FileMetadataMapper(
-    private val authorizationService: AuthorizationService
-) {
+class FileMetadataMapper {
 
     fun toRenditionResponse(rendition: FileRendition, url: String) = FileRenditionResponse(
         size = rendition.size,
@@ -31,16 +29,17 @@ class FileMetadataMapper(
         height = upload.height,
     )
 
-    suspend fun toMetadataResponse(doc: FileMetadataDocument, renditions: Map<String, FileRenditionResponse>): FileMetadataResponse {
-        val currentAuthentication = authorizationService.getAuthenticationOrNull()
+    suspend fun toMetadataResponse(
+        doc: FileMetadataDocument,
+        authentication: AuthenticationToken,
+        renditions: Map<String, FileRenditionResponse>
+    ) = FileMetadataResponse(
+        id = doc.id,
+        key = doc.key,
+        createdAt = doc.createdAt,
+        updatedAt = doc.updatedAt,
+        access = ContentAccessDetailsResponse.create(doc.access, authentication),
+        renditions = renditions,
+    )
 
-        return FileMetadataResponse(
-            id = doc.id,
-            key = doc.key,
-            createdAt = doc.createdAt,
-            updatedAt = doc.updatedAt,
-            access = ContentAccessDetailsResponse.create(doc.access, currentAuthentication),
-            renditions = renditions,
-        )
-    }
 }
