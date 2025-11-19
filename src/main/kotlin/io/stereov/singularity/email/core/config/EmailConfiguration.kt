@@ -1,6 +1,5 @@
 package io.stereov.singularity.email.core.config
 
-import io.stereov.singularity.email.core.exception.handler.EmailExceptionHandler
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.email.core.service.EmailService
 import io.stereov.singularity.email.core.service.EmailTemplateService
@@ -65,12 +64,4 @@ class EmailConfiguration {
     @Bean
     @ConditionalOnMissingBean
     fun mailTemplateService(templateService: TemplateService) = EmailTemplateService(templateService)
-
-    // ExceptionHandler
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun mailExceptionHandler(): EmailExceptionHandler {
-        return EmailExceptionHandler()
-    }
 }
