@@ -15,7 +15,6 @@ import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.component.TokenValueExtractor
 import io.stereov.singularity.auth.core.exception.AccessTokenCreationException
 import io.stereov.singularity.auth.core.exception.AccessTokenExtractionException
-import io.stereov.singularity.auth.core.exception.model.TokenMissingException
 import io.stereov.singularity.auth.core.model.token.AccessToken
 import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.auth.jwt.exception.TokenCreationException
@@ -34,7 +33,6 @@ import org.springframework.stereotype.Service
 import org.springframework.web.server.ServerWebExchange
 import java.time.Instant
 import java.util.*
-import kotlin.String
 
 /**
  * Service class responsible for handling the creation, extraction, and validation
@@ -96,6 +94,7 @@ class AccessTokenService(
         jwtService.encodeJwt(claims, tokenType.cookieName)
             .mapError { ex -> when(ex) {
                 is TokenCreationException.Encoding -> AccessTokenCreationException.Encoding("Failed to encode access token: ${ex.message}", ex)
+                is TokenCreationException.Secret -> AccessTokenCreationException.Secret("Failed to fetch current JWT secret: ${ex.message}", ex)
             } }
             .map { jwt ->
                 AccessToken(user.id, sessionId, tokenId, user.roles, user.groups, jwt)
