@@ -1,5 +1,6 @@
 package io.stereov.singularity.security.ratelimit.service
 
+import com.github.michaelbull.result.getOrThrow
 import io.github.bucket4j.Bucket
 import io.github.bucket4j.BucketConfiguration
 import io.github.bucket4j.redis.lettuce.cas.LettuceBasedProxyManager
@@ -55,7 +56,7 @@ class RateLimitService(
      *
      * @return a Mono<Void> that completes if the user is within the rate limit or emits an error if the limit is exceeded
      */
-    fun checkUserRateLimit(): Mono<Void?> = mono { authorizationService.getUserId() }
+    fun checkUserRateLimit(): Mono<Void?> = mono { authorizationService.getUserId().getOrThrow() }
         .onErrorResume { Mono.empty() }
         .flatMap { userId ->
             val userBucket = resolveBucket(
@@ -86,7 +87,7 @@ class RateLimitService(
     }
 
     /**
-     * Resolves a bucket that applies rate limiting rules based on the given key, capacity, and time window.
+     * Resolves a bucket that applies rate-limiting rules based on the given key, capacity, and time window.
      *
      * @param key The unique identifier for the rate limit bucket.
      * @param capacity The maximum number of tokens allowed in the bucket.
