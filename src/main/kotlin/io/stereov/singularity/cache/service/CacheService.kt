@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.*
 import com.github.michaelbull.result.coroutines.coroutineBinding
+import com.github.michaelbull.result.coroutines.runSuspendCatching
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.lettuce.core.ExperimentalLettuceCoroutinesApi
 import io.lettuce.core.api.coroutines.RedisCoroutinesCommands
@@ -50,14 +51,14 @@ class CacheService(
                 .bind()
 
             if (expiresIn != null) {
-                runCatching {
+                runSuspendCatching {
                     redisCommands.setex(key, expiresIn, string.toByteArray())
                     value
                 }
                     .mapError { ex -> CacheException.Operation("Failed to set key $key with expiration: ${ex.message}", ex) }
                     .bind()
             } else {
-                runCatching {
+                runSuspendCatching {
                     redisCommands.set(key, string.toByteArray())
                     value
                 }
@@ -76,7 +77,7 @@ class CacheService(
     suspend fun exists(key: String): Result<Boolean, CacheException.Operation> {
         logger.debug { "Checking if value for key $key exists" }
 
-        return runCatching {  redisCommands.exists(key)?.let { it > 0 } ?: false }
+        return runSuspendCatching {  redisCommands.exists(key)?.let { it > 0 } ?: false }
             .mapError { ex -> CacheException.Operation("Failed to check existence of key $key: ${ex.message}", ex) }
     }
 
@@ -96,7 +97,7 @@ class CacheService(
     final suspend inline fun <reified T: Any> get(key: String): Result<T, CacheException> {
         logger.debug { "Getting value for key: $key" }
 
-        return runCatching { redisCommands.get(key) }
+        return runSuspendCatching { redisCommands.get(key) }
             .mapError { ex -> CacheException.Operation("Failed to get value for key $key: ${ex.message}", ex) }
             .andThen { value ->
                 if (value != null) {
@@ -121,7 +122,7 @@ class CacheService(
     suspend fun delete(vararg keys: String): Result<Long, CacheException.Operation> {
         logger.debug { "Deleting data for keys: $keys" }
 
-        return runCatching { redisCommands.unlink(*keys) }
+        return runSuspendCatching { redisCommands.unlink(*keys) }
             .mapError { ex -> CacheException.Operation("Failed to delete keys ${keys}: ${ex.message}", ex) }
             .map { it ?: 0 }
     }
@@ -138,10 +139,10 @@ class CacheService(
      */
     suspend fun deleteAll(pattern: String? = null): Result<Unit, CacheException.Operation> {
         return if (pattern == null) {
-            runCatching { redisCommands.flushall() }
+            runSuspendCatching { redisCommands.flushall() }
                 .mapError { ex -> CacheException.Operation("Failed to flush cache: ${ex.message}", ex) }
         } else {
-            runCatching {
+            runSuspendCatching {
                 redisCommands.keys(pattern).asFlux()
                 .buffer(1000)
                 .collect { keys ->

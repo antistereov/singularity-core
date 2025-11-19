@@ -2,6 +2,7 @@ package io.stereov.singularity.database.encryption.service
 
 import com.github.michaelbull.result.*
 import com.github.michaelbull.result.coroutines.coroutineBinding
+import com.github.michaelbull.result.coroutines.runSuspendCatching
 import io.github.oshai.kotlinlogging.KLogger
 import io.stereov.singularity.database.encryption.exception.EncryptedDatabaseException
 import io.stereov.singularity.database.encryption.exception.EncryptionException
@@ -100,7 +101,7 @@ abstract class SensitiveCrudService<SensitiveData, DecryptedDocument: SensitiveD
     suspend fun existsById(id: ObjectId): Result<Boolean, EncryptedDatabaseException.Database> {
         logger.debug { "Checking if document with ID $id exists" }
 
-        return runCatching { repository.existsById(id) }
+        return runSuspendCatching { repository.existsById(id) }
             .mapError { ex -> EncryptedDatabaseException.Database("Failed to check existence of ${sensitiveClazz.simpleName} with ID $id: ${ex.message}", ex) }
     }
 
@@ -139,7 +140,7 @@ abstract class SensitiveCrudService<SensitiveData, DecryptedDocument: SensitiveD
     suspend fun findEncryptedById(id: ObjectId): Result<EncryptedDocument, EncryptedDatabaseException> {
         logger.debug { "Getting encrypted document with ID: $id" }
 
-        return runCatching { repository.findById(id) }
+        return runSuspendCatching { repository.findById(id) }
             .mapError { ex -> EncryptedDatabaseException.Database("Failed to fetch ${sensitiveClazz.simpleName} by ID $id: ${ex.message}", ex) }
             .andThen { encrypted ->
                 encrypted
@@ -166,7 +167,7 @@ abstract class SensitiveCrudService<SensitiveData, DecryptedDocument: SensitiveD
         val encryptedDoc = encrypt(document)
             .mapError { ex -> EncryptedDatabaseException.Encryption("Failed to encrypt ${sensitiveClazz.simpleName}: ${ex.message}", ex) }
             .bind()
-        val savedDoc = runCatching { repository.save(encryptedDoc) }
+        val savedDoc = runSuspendCatching { repository.save(encryptedDoc) }
             .mapError { ex -> EncryptedDatabaseException.Database("Failed to save ${sensitiveClazz.simpleName}: ${ex.message}", ex) }
             .bind()
 
@@ -199,7 +200,7 @@ abstract class SensitiveCrudService<SensitiveData, DecryptedDocument: SensitiveD
                 .mapError { ex -> EncryptedDatabaseException.Encryption("Failed to encrypt ${sensitiveClazz.simpleName}: ${ex.message}", ex) }
                 .bind()
         }
-        runCatching { repository.saveAll(encryptedDocs) }
+        runSuspendCatching { repository.saveAll(encryptedDocs) }
             .mapError { ex -> EncryptedDatabaseException.Database("Failed to save ${sensitiveClazz.simpleName}s: ${ex.message}", ex) }
             .map { encrypted ->
                 encrypted.map {
@@ -225,7 +226,7 @@ abstract class SensitiveCrudService<SensitiveData, DecryptedDocument: SensitiveD
     open suspend fun deleteById(id: ObjectId): Result<Unit, EncryptedDatabaseException.Database> {
         logger.debug { "Deleting document by ID $id" }
 
-        return runCatching { repository.deleteById(id) }
+        return runSuspendCatching { repository.deleteById(id) }
             .mapError { ex -> EncryptedDatabaseException.Database("Failed to delete ${sensitiveClazz.simpleName} by ID: ${ex.message}", ex) }
     }
 
@@ -241,7 +242,7 @@ abstract class SensitiveCrudService<SensitiveData, DecryptedDocument: SensitiveD
     suspend fun deleteAll(): Result<Unit, EncryptedDatabaseException.Database> {
         logger.debug { "Deleting all documents" }
 
-        return runCatching { repository.deleteAll() }
+        return runSuspendCatching { repository.deleteAll() }
             .mapError { ex -> EncryptedDatabaseException.Database("Failed to delete all ${sensitiveClazz.simpleName}s: ${ex.message}", ex) }
     }
 
@@ -318,7 +319,7 @@ abstract class SensitiveCrudService<SensitiveData, DecryptedDocument: SensitiveD
 
         logger.debug { "Executing count with query: $query" }
 
-        val count = runCatching { reactiveMongoTemplate.count(query, encryptedDocumentClazz).awaitFirstOrElse { 0 } }
+        val count = runSuspendCatching { reactiveMongoTemplate.count(query, encryptedDocumentClazz).awaitFirstOrElse { 0 } }
             .mapError { ex ->
                 EncryptedDatabaseException.Database(
                     "Failed to count ${sensitiveClazz.simpleName} with given criteria: ${ex.message}",
@@ -336,7 +337,7 @@ abstract class SensitiveCrudService<SensitiveData, DecryptedDocument: SensitiveD
             }
             .bind()
 
-        val encrypted = runCatching {
+        val encrypted = runSuspendCatching {
             reactiveMongoTemplate
                 .find(paginatedQuery, encryptedDocumentClazz)
                 .collectList()
