@@ -1,6 +1,7 @@
 package io.stereov.singularity.secrets.local.repository
 
 import com.github.michaelbull.result.*
+import com.github.michaelbull.result.coroutines.runSuspendCatching
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.secrets.core.exception.SecretStoreException
 import io.stereov.singularity.secrets.local.data.LocalSecretEntity
@@ -26,7 +27,7 @@ class LocalSecretRepository(
     fun init() {
         logger.info { "Initializing local secret repository" }
 
-        runCatching {
+        runSuspendCatching {
             secretsTemplate.databaseClient.sql(
                 """
                 CREATE TABLE IF NOT EXISTS secrets (
@@ -41,7 +42,7 @@ class LocalSecretRepository(
     }
 
     suspend fun findByKey(key: String): Result<LocalSecretEntity, SecretStoreException> {
-        return runCatching {
+        return runSuspendCatching {
             secretsTemplate
                 .select<LocalSecretEntity>()
                 .matching(Query.query(Criteria.where("key").`is`(key)))
@@ -59,7 +60,7 @@ class LocalSecretRepository(
     }
 
     suspend fun put(secret: LocalSecretEntity): Result<LocalSecretEntity, SecretStoreException> {
-        return runCatching {
+        return runSuspendCatching {
             secretsTemplate.databaseClient.sql(
                 """
                 MERGE INTO secrets (secret_key, secret_value, secret_id, secret_created_at)

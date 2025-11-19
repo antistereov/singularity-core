@@ -2,6 +2,7 @@ package io.stereov.singularity.database.core.service
 
 import com.github.michaelbull.result.*
 import com.github.michaelbull.result.coroutines.coroutineBinding
+import com.github.michaelbull.result.coroutines.runSuspendCatching
 import io.github.oshai.kotlinlogging.KLogger
 import io.stereov.singularity.database.core.exception.DatabaseException
 import kotlinx.coroutines.flow.Flow
@@ -54,7 +55,7 @@ interface CrudService<T: Any> {
     suspend fun findById(id: ObjectId): Result<T, DatabaseException> {
         logger.debug { "Finding ${collectionClazz.name} by ID $id" }
 
-        return runCatching { repository.findById(id) }
+        return runSuspendCatching { repository.findById(id) }
             .mapError { ex -> DatabaseException.Database("Failed to fetch ${collectionClazz.simpleName} with ID $id: ${ex.message}", ex) }
             .andThen { entity -> entity.toResultOr { DatabaseException.NotFound("No ${collectionClazz.simpleName} with ID $id found") } }
     }
@@ -69,7 +70,7 @@ interface CrudService<T: Any> {
     suspend fun existsById(id: ObjectId): Result<Boolean, DatabaseException.Database> {
         logger.debug { "Checking if ${collectionClazz.name} exists by ID $id" }
 
-        return runCatching { repository.existsById(id) }
+        return runSuspendCatching { repository.existsById(id) }
             .mapError { ex -> DatabaseException.Database("Failed to check existence of ${collectionClazz.simpleName} with ID $id: ${ex.message}", ex) }
     }
 
@@ -83,7 +84,7 @@ interface CrudService<T: Any> {
     suspend fun deleteById(id: ObjectId): Result<Unit, DatabaseException.Database> {
         logger.debug { "Deleting ${collectionClazz.name} by ID $id" }
 
-        return runCatching { repository.deleteById(id) }
+        return runSuspendCatching { repository.deleteById(id) }
             .mapError { ex -> DatabaseException.Database("Failed to delete ${collectionClazz.simpleName} with ID $id: ${ex.message}", ex) }
     }
 
@@ -96,7 +97,7 @@ interface CrudService<T: Any> {
     suspend fun deleteAll(): Result<Unit, DatabaseException.Database> {
         logger.debug { "Deleting all ${collectionClazz.name}" }
 
-        return runCatching { repository.deleteAll() }
+        return runSuspendCatching { repository.deleteAll() }
             .mapError { ex -> DatabaseException.Database("Failed to delete all ${collectionClazz.simpleName}s: ${ex.message}", ex) }
     }
 
@@ -109,7 +110,7 @@ interface CrudService<T: Any> {
     suspend fun save(doc: T): Result<T, DatabaseException.Database> {
         logger.debug { "Saving ${collectionClazz.name}" }
 
-        return runCatching { repository.save(doc) }
+        return runSuspendCatching { repository.save(doc) }
             .mapError { ex -> DatabaseException.Database("Failed to save ${collectionClazz.name}: ${ex.message}", ex) }
     }
 
@@ -123,7 +124,7 @@ interface CrudService<T: Any> {
     suspend fun saveAll(docs: Collection<T>): Result<List<T>, DatabaseException.Database> {
         logger.debug { "Saving multiple ${collectionClazz.name}s" }
 
-        return runCatching { repository.saveAll(docs).toList() }
+        return runSuspendCatching { repository.saveAll(docs).toList() }
             .mapError { ex -> DatabaseException.Database("Failed to save multiple ${collectionClazz.simpleName}s: ${ex.message}", ex) }
     }
 
@@ -180,13 +181,13 @@ interface CrudService<T: Any> {
         val query = runCatching { criteria?.let { Query(it) } ?: Query() }
             .mapError { ex -> DatabaseException.Database("Failed to create query: ${ex.message}", ex) }
             .bind()
-        val count = runCatching { reactiveMongoTemplate.count(query, collectionClazz).awaitFirstOrElse { 0 } }
+        val count = runSuspendCatching { reactiveMongoTemplate.count(query, collectionClazz).awaitFirstOrElse { 0 } }
             .mapError { ex -> DatabaseException.Database("Failed to count ${collectionClazz.simpleName}s: ${ex.message}", ex) }
             .bind()
         val paginatedQuery = runCatching { query.with(pageable) }
             .mapError { ex -> DatabaseException.Database("Failed to create pageable query: ${ex.message}", ex) }
             .bind()
-        val groups = runCatching {
+        val groups = runSuspendCatching {
             reactiveMongoTemplate
                 .find(paginatedQuery, collectionClazz)
                 .collectList()
