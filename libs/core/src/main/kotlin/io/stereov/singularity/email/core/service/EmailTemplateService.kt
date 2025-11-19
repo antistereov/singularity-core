@@ -1,6 +1,10 @@
 package io.stereov.singularity.email.core.service
 
+import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.andThen
+import com.github.michaelbull.result.map
 import io.stereov.singularity.email.core.util.EmailConstants
+import io.stereov.singularity.email.template.exception.TemplateException
 import io.stereov.singularity.email.template.service.TemplateService
 import io.stereov.singularity.email.template.util.TemplateBuilder
 import org.springframework.stereotype.Service
@@ -11,16 +15,16 @@ class EmailTemplateService(
     private val templateService: TemplateService
 ) {
 
-    suspend fun createTemplate(subject: String, content: String, locale: Locale): String {
+    suspend fun createTemplate(subject: String, content: String, locale: Locale): Result<String, TemplateException> {
         val placeholders = templateService.getPlaceholders(mapOf(
             "subject" to subject,
             "content" to content
         ))
 
         return TemplateBuilder.fromResource(EmailConstants.BASE_TEMPLATE_PATH)
-            .translate(EmailConstants.RESOURCE_BUNDLE, locale)
-            .replacePlaceholders(placeholders)
-            .build()
+            .andThen { it.translate(EmailConstants.RESOURCE_BUNDLE, locale) }
+            .map { it.replacePlaceholders(placeholders) }
+            .map { it.build() }
     }
 
 }
