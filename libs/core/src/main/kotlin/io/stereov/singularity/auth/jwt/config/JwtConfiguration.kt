@@ -1,17 +1,17 @@
 package io.stereov.singularity.auth.jwt.config
 
+import com.github.michaelbull.result.getOrThrow
 import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.jwk.OctetSequenceKey
 import com.nimbusds.jose.jwk.source.JWKSource
 import com.nimbusds.jose.proc.SecurityContext
 import com.nimbusds.jwt.SignedJWT
-import io.stereov.singularity.global.config.ApplicationConfiguration
-import io.stereov.singularity.global.properties.AppProperties
-import io.stereov.singularity.auth.jwt.exception.handler.TokenExceptionHandler
-import io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException
+import io.stereov.singularity.auth.jwt.exception.TokenExtractionException
 import io.stereov.singularity.auth.jwt.properties.JwtProperties
 import io.stereov.singularity.auth.jwt.service.JwtSecretService
 import io.stereov.singularity.auth.jwt.service.JwtService
+import io.stereov.singularity.global.config.ApplicationConfiguration
+import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.secrets.core.component.SecretStore
 import io.stereov.singularity.secrets.core.config.SecretsConfiguration
 import kotlinx.coroutines.reactor.mono
@@ -54,14 +54,14 @@ class JwtConfiguration {
                 val jwt = try {
                     SignedJWT.parse(token)
                 } catch (e: Exception) {
-                    throw InvalidTokenException("Cannot parse token: $e", e)
+                    throw TokenExtractionException.Invalid("Cannot parse token: $e", e)
                 }
                 val keyId = jwt.header.keyID
 
-                if (keyId.isNullOrEmpty()) throw InvalidTokenException("No key for JWT secret found in header")
-                val secret = secretStore.get(keyId)
+                if (keyId.isNullOrEmpty()) throw TokenExtractionException.Invalid("No key for JWT secret found in header")
+                val secret = secretStore.get(keyId).getOrThrow()
 
-                if (!verifyJwtSignature(jwt, secret.value)) throw InvalidTokenException("Signature is invalid.")
+                if (!verifyJwtSignature(jwt, secret.value)) throw TokenExtractionException.Invalid("Signature is invalid.")
 
                 val claims = jwt.jwtClaimsSet.claims.mapValues { (key, value) ->
                     when (key) {
@@ -70,7 +70,7 @@ class JwtConfiguration {
                             is Instant -> value
                             is String -> Instant.parse(value)
                             is Date -> value.toInstant()
-                            else -> throw InvalidTokenException("Date claims require Instant values: ${value.javaClass.name}")
+                            else -> throw TokenExtractionException.Invalid("Date claims require Instant values: ${value.javaClass.name}")
                         }
                         else -> value
                     }
@@ -100,7 +100,7 @@ class JwtConfiguration {
     @ConditionalOnMissingBean
     fun jwtEncoder(jwtSecretService: JwtSecretService): JwtEncoder {
         val jwkSource = JWKSource<SecurityContext> { _, _ ->
-            val secret = runBlocking { jwtSecretService.getCurrentSecret().value.toByteArray() }
+            val secret = runBlocking { jwtSecretService.getCurrentSecret().getOrThrow().value.toByteArray() }
             val secretKey = SecretKeySpec(secret, "HmacSHA256")
             val jwk = OctetSequenceKey.Builder(secretKey)
                 .algorithm(JWSAlgorithm.HS256)
@@ -118,13 +118,5 @@ class JwtConfiguration {
         jwtSecretService: JwtSecretService
     ): JwtService {
         return JwtService(jwtDecoder, jwtEncoder, jwtSecretService)
-    }
-
-    // Exception Handler
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun tokenExceptionHandler(): TokenExceptionHandler {
-        return TokenExceptionHandler()
     }
 }

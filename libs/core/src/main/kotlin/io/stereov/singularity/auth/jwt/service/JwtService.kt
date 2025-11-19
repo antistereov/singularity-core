@@ -1,9 +1,7 @@
 package io.stereov.singularity.auth.jwt.service
 
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
-import io.github.oshai.kotlinlogging.KLogger
+import com.github.michaelbull.result.*
+import com.github.michaelbull.result.coroutines.coroutineBinding
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.jwt.exception.TokenCreationException
 import io.stereov.singularity.auth.jwt.exception.TokenExtractionException
@@ -13,12 +11,9 @@ import org.springframework.stereotype.Service
 import java.time.Instant
 
 /**
- * JWT Service
- *
- * This service is responsible for encoding and decoding JWT tokens.
- * It uses the `ReactiveJwtDecoder` and `JwtEncoder` to handle JWT operations.
- *
- * @author <a href="https://github.com/antistereov">antistereov</a>
+ * Service responsible for handling encoding and decoding of JSON Web Tokens (JWT).
+ * It uses the provided [ReactiveJwtDecoder] for decoding tokens, [JwtEncoder] for encoding tokens,
+ * and [JwtSecretService] for fetching secure secrets necessary for signing and verifying JWTs.
  */
 @Service
 class JwtService(
@@ -27,18 +22,16 @@ class JwtService(
     private val jwtSecretService: JwtSecretService
 ) {
 
-    private val logger: KLogger
-        get() = KotlinLogging.logger {}
-
+    private val logger = KotlinLogging.logger {}
     private val tokenTypeClaim = "token_type"
 
     /**
-     * Decodes a JWT token.
+     * Decodes a JSON Web Token (JWT) and validates its type and expiration details.
      *
-     * This method decodes the JWT token and checks for expiration if specified.
+     * @param token The JWT to decode.
+     * @param tokenType The expected token type to validate against.
      *
-     * @param token The JWT token to decode.
-     * @param tokenType The type of token.
+     * @return A [Result] containing the decoded [Jwt] on success, or a [TokenExtractionException] on failure.
      */
     suspend fun decodeJwt(token: String, tokenType: String): Result<Jwt, TokenExtractionException> {
         logger.debug { "Decoding jwt" }
@@ -47,7 +40,7 @@ class JwtService(
             jwtDecoder.decode(token).awaitFirst()
         } catch(e: Exception) {
             logger.error(e) {}
-            return  Err(TokenExtractionException.Invalid("Cannot decode token", e))
+            return Err(TokenExtractionException.Invalid("Cannot decode token", e))
         }
 
         if (jwt.claims[tokenTypeClaim] != tokenType)
@@ -66,17 +59,19 @@ class JwtService(
     }
 
     /**
-     * Encodes a JWT token.
+     * Encodes a JSON Web Token (JWT) using specified claims and token type.
      *
-     * This method encodes the JWT token using the provided claims.
-     *
-     * @param claims The claims to include in the JWT.
-     * @param tokenType The type of token.
-     *
-     * @return The encoded JWT token as a string.
+     * @param claims The set of claims to include in the JWT.
+     * @param tokenType The type of token to associate with the JWT.
+     * @return A [Result] containing the encoded [Jwt] on success, or a [TokenCreationException] on failure.
      */
-    suspend fun encodeJwt(claims: JwtClaimsSet, tokenType: String): Result<Jwt, TokenCreationException.Encoding> {
+    suspend fun encodeJwt(
+        claims: JwtClaimsSet,
+        tokenType: String
+    ): Result<Jwt, TokenCreationException> = coroutineBinding {
         val currentJwt = jwtSecretService.getCurrentSecret()
+            .mapError { ex -> TokenCreationException.Secret("Failed to fetch current JWT secret: ${ex.message}", ex) }
+            .bind()
 
         val actualClaims = JwtClaimsSet.from(claims)
             .claim(tokenTypeClaim, tokenType)
@@ -87,19 +82,12 @@ class JwtService(
             .keyId(currentJwt.key)
             .build()
 
-        return this.encodeJwt(JwtEncoderParameters.from(jwsHeader, actualClaims))
+        encodeJwt(JwtEncoderParameters.from(jwsHeader, actualClaims)).bind()
     }
 
-    /**
-     * Encode JWT based on encoder parameters.
-     *
-     * @param parameters Encoder parameters.
-     */
     private fun encodeJwt(parameters: JwtEncoderParameters): Result<Jwt, TokenCreationException.Encoding> {
-        return try {
-            Ok(jwtEncoder.encode(parameters))
-        } catch(e: JwtEncodingException) {
-            Err(TokenCreationException.Encoding("Failed to encode jwt: ${e.message}", e))
-        }
+        return runCatching { jwtEncoder.encode(parameters) }
+            .mapError { ex -> TokenCreationException.Encoding("Failed to encode jwt: ${ex.message}", ex) }
     }
+
 }
