@@ -14,12 +14,23 @@ import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Mono
 
 /**
- * # Filter for logging incoming requests and outgoing responses.
+ * LoggingFilter is an implementation of [WebFilter] responsible for logging incoming HTTP requests
+ * and outgoing HTTP responses within a reactive application. It provides detailed information
+ * about the request/response process, including the HTTP method, URI, client IP address, and
+ * geolocation details if available.
  *
- * This ratelimit logs the details of incoming requests and outgoing responses,
- * including the HTTP method, path, and status code.
+ * The filter uses the `geolocationProperties` and `geoLocationService` to optionally retrieve
+ * geolocation data associated with the client IP address. This data can help provide more
+ * contextual logging based on the location of the request origin.
  *
- * @author <a href="https://github.com/antistereov">antistereov</a>
+ * Error handling is integrated to log exceptions or failed responses appropriately, aiding in
+ * debugging and tracing issues in the request-response lifecycle.
+ *
+ * @constructor
+ * Initializes the LoggingFilter with required dependencies for geolocation and logging.
+ *
+ * @param geolocationProperties The configuration properties for geolocation functionality.
+ * @param geoLocationService The service used to retrieve geolocation data.
  */
 class LoggingFilter(
     private val geolocationProperties: GeolocationProperties,
