@@ -24,4 +24,9 @@ sealed class AccessTokenCreationException(
             const val CODE = TokenCreationException.Encoding.CODE
         }
     }
+    class Secret(msg: String, cause: Throwable? = null) : AccessTokenCreationException(msg, CODE, cause) {
+        companion object {
+            const val CODE = TokenCreationException.Secret.CODE
+        }
+    }
 }

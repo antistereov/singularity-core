@@ -26,7 +26,6 @@ import io.stereov.singularity.auth.oauth2.exception.model.OAuth2FlowException
 import io.stereov.singularity.auth.oauth2.model.OAuth2ErrorCode
 import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.global.util.Random
-import io.stereov.singularity.global.util.catchAs
 import io.stereov.singularity.user.core.model.Role
 import io.stereov.singularity.user.core.model.UserDocument
 import org.bson.types.ObjectId
@@ -175,7 +174,7 @@ class AccessTokenService(
                     val sessionId = (jwt.claims[Constants.JWT_SESSION_CLAIM] as? String)
                         .toResultOr { AccessTokenExtractionException.Invalid("Access token does not contain session id") }
                         .andThen { s ->
-                            catchAs({ UUID.fromString(s) }) { ex ->
+                            runCatching { UUID.fromString(s) }.mapError { ex ->
                                 AccessTokenExtractionException.Invalid("Invalid session id: $s", ex)
                             }
                         }.bind()

@@ -17,7 +17,6 @@ import io.stereov.singularity.auth.jwt.properties.JwtProperties
 import io.stereov.singularity.auth.jwt.service.JwtService
 import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.global.util.Random
-import io.stereov.singularity.global.util.catchAs
 import io.stereov.singularity.global.util.getClientIp
 import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.service.UserService
@@ -130,7 +129,7 @@ class RefreshTokenService(
         user.updateLastActive()
         user.addOrUpdatesession(sessionId, sessionInfo)
 
-        runCatching { userService.save(user) }.bind()
+        userService.save(user)
     }
 
     /**
@@ -164,7 +163,7 @@ class RefreshTokenService(
                 val sessionId = (jwt.claims[Constants.JWT_SESSION_CLAIM] as? String)
                     .toResultOr { TokenExtractionException.Invalid("AccessToken does not contain session id") }
                     .andThen { s ->
-                        catchAs({ UUID.fromString(s) }) { ex ->
+                        runCatching { UUID.fromString(s) }.mapError { ex ->
                             TokenExtractionException.Invalid("Invalid session id: $s", ex)
                         }
                     }.bind()
