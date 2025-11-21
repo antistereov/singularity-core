@@ -1,5 +1,6 @@
 package io.stereov.singularity.content.core.component
 
+import com.github.michaelbull.result.getOrElse
 import io.stereov.singularity.auth.core.model.token.AccessType
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.content.core.model.ContentAccessDetails
@@ -44,14 +45,14 @@ class AccessCriteria(
     private fun isMaintainerGroup(groups: Set<String>) = Criteria.where(isMaintainerGroupsField).`in`(groups)
 
     suspend fun getAccessCriteria(roles: Set<String> = emptySet()): Criteria {
-        val userId = authorizationService.getUserIdOrNull()
+        val userId = authorizationService.getUserId().getOrElse { null }
             ?: return if (roles.isEmpty() || roles.any { runCatching { ContentAccessRole.fromString(it) }.getOrNull() == ContentAccessRole.VIEWER }) {
                 isPublic
             } else {
                 Criteria.where("_id").`is`("")
             }
 
-        val groups = authorizationService.getGroups()
+        val groups = authorizationService.getGroups().getOrElse { emptySet() }
 
         val allAccessCriteria = Criteria().orOperator(
             isOwner(userId),

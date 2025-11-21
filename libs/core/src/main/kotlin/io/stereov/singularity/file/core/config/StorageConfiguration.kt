@@ -4,12 +4,11 @@ import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.content.core.component.AccessCriteria
 import io.stereov.singularity.content.core.properties.ContentProperties
 import io.stereov.singularity.file.core.component.DataBufferPublisher
-import io.stereov.singularity.file.core.exception.handler.FileExceptionHandler
 import io.stereov.singularity.file.core.mapper.FileMetadataMapper
 import io.stereov.singularity.file.core.properties.StorageProperties
 import io.stereov.singularity.file.core.repository.FileMetadataRepository
-import io.stereov.singularity.file.core.service.DownloadService
 import io.stereov.singularity.file.core.service.FileMetadataService
+import io.stereov.singularity.file.download.service.DownloadService
 import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.translate.service.TranslateService
 import org.springframework.boot.autoconfigure.AutoConfiguration
@@ -41,11 +40,7 @@ class StorageConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun fileMetadataMapper(
-        authorizationService: AuthorizationService
-    ) = FileMetadataMapper(
-        authorizationService
-    )
+    fun fileMetadataMapper() = FileMetadataMapper()
 
     // Service
 
@@ -72,9 +67,4 @@ class StorageConfiguration {
             contentProperties
         )
     }
-
-    // Exception Handler
-
-    @Bean
-    fun fileExceptionHandler() = FileExceptionHandler()
 }

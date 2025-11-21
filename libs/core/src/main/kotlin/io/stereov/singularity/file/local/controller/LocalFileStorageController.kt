@@ -3,7 +3,6 @@ package io.stereov.singularity.file.local.controller
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.model.token.AccessType
 import io.stereov.singularity.content.core.model.ContentAccessRole
-import io.stereov.singularity.file.core.exception.model.FileNotFoundException
 import io.stereov.singularity.file.core.service.FileMetadataService
 import io.stereov.singularity.file.local.properties.LocalFileStorageProperties
 import io.stereov.singularity.global.exception.model.InvalidDocumentException

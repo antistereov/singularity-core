@@ -1,7 +1,5 @@
 package io.stereov.singularity.file.image
 
-import io.stereov.singularity.file.core.exception.model.UnsupportedMediaTypeException
-import io.stereov.singularity.file.core.model.DownloadedFile
 import io.stereov.singularity.file.core.model.FileKey
 import io.stereov.singularity.file.core.model.FileMetadataDocument
 import io.stereov.singularity.file.image.properties.ImageProperties

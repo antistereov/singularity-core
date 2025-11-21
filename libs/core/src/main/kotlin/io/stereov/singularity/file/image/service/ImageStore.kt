@@ -1,13 +1,14 @@
 package io.stereov.singularity.file.image.service
 
+import com.github.michaelbull.result.Result
 import com.sksamuel.scrimage.ImmutableImage
 import com.sksamuel.scrimage.Position
 import com.sksamuel.scrimage.webp.WebpWriter
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.auth.core.model.token.AuthenticationToken
 import io.stereov.singularity.file.core.component.DataBufferPublisher
 import io.stereov.singularity.file.core.dto.FileMetadataResponse
-import io.stereov.singularity.file.core.exception.model.UnsupportedMediaTypeException
-import io.stereov.singularity.file.core.model.DownloadedFile
+import io.stereov.singularity.file.core.exception.FileException
 import io.stereov.singularity.file.core.model.FileKey
 import io.stereov.singularity.file.core.model.FileMetadataDocument
 import io.stereov.singularity.file.core.model.FileUploadRequest
@@ -15,7 +16,6 @@ import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.file.image.properties.ImageProperties
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.bson.types.ObjectId
 import org.springframework.http.MediaType
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
@@ -31,27 +31,27 @@ class ImageStore(
     private val logger = KotlinLogging.logger {}
 
     suspend fun upload(
-        ownerId: ObjectId,
+        authentication: AuthenticationToken,
         downloadedFile: DownloadedFile,
         key: String,
         isPublic: Boolean
-    ): FileMetadataResponse {
+    ): Result<FileMetadataResponse, FileException> {
         logger.debug { "Uploading image with key $key" }
         val originalExtension = downloadedFile.url.substringAfterLast(".", "")
 
-        return upload(ownerId, downloadedFile.bytes, downloadedFile.contentType, key, isPublic, originalExtension)
+        return upload(authentication, downloadedFile.bytes, downloadedFile.contentType, key, isPublic, originalExtension)
     }
 
     suspend fun upload(
-        ownerId: ObjectId,
+        authentication: AuthenticationToken,
         file: FilePart,
         key: String,
         isPublic: Boolean
-    ): FileMetadataResponse {
+    ): Result<FileMetadataResponse, FileException> {
         val imageBytes = dataBufferPublisher.toSingleByteArray(file.content())
         val originalExtension = file.filename().substringAfterLast(".", "")
 
-        return upload(ownerId, imageBytes, file.headers().contentType, key, isPublic, originalExtension)
+        return upload(authentication, imageBytes, file.headers().contentType, key, isPublic, originalExtension)
     }
 
     private suspend fun createUploadRequest(originalImage: ImmutableImage, size: Int, key: String, suffix: String?, mediaType: String): FileUploadRequest {
@@ -106,13 +106,13 @@ class ImageStore(
     }
 
     suspend fun upload(
-        ownerId: ObjectId,
+        authentication: AuthenticationToken,
         imageBytes: ByteArray,
         contentType: MediaType?,
         key: String,
         isPublic: Boolean,
         fileExtension: String?
-    ): FileMetadataResponse {
+    ): Result<FileMetadataResponse, FileException> {
         val webpMediaType = MediaType.parseMediaType("image/webp")
 
         if (contentType == null) throw UnsupportedMediaTypeException("Media type is not set")
@@ -160,9 +160,9 @@ class ImageStore(
         }
 
         return fileStorage.uploadMultipleRenditions(
+            authentication,
             FileKey(filename = key).key,
             files = filesToUpload,
-            ownerId,
             isPublic,
         )
     }

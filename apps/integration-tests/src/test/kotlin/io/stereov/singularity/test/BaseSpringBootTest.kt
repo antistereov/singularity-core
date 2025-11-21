@@ -39,7 +39,7 @@ import io.stereov.singularity.content.invitation.service.InvitationTokenService
 import io.stereov.singularity.content.tag.service.TagService
 import io.stereov.singularity.database.encryption.service.EncryptionSecretService
 import io.stereov.singularity.database.hash.service.HashService
-import io.stereov.singularity.file.core.service.DownloadService
+import io.stereov.singularity.file.download.service.DownloadService
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.global.properties.UiProperties

@@ -7,7 +7,7 @@ import io.stereov.singularity.auth.oauth2.exception.model.OAuth2FlowException
 import io.stereov.singularity.auth.oauth2.model.OAuth2ErrorCode
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties
 import io.stereov.singularity.email.core.properties.EmailProperties
-import io.stereov.singularity.file.core.service.DownloadService
+import io.stereov.singularity.file.download.service.DownloadService
 import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.service.UserService
 import io.stereov.singularity.user.settings.service.UserSettingsService
