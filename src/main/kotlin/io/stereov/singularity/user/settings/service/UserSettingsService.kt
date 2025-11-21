@@ -11,8 +11,6 @@ import io.stereov.singularity.auth.core.service.EmailVerificationService
 import io.stereov.singularity.auth.core.service.SecurityAlertService
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.email.core.properties.EmailProperties
-import io.stereov.singularity.file.core.exception.model.UnsupportedMediaTypeException
-import io.stereov.singularity.file.core.model.DownloadedFile
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.file.image.service.ImageStore
 import io.stereov.singularity.user.core.dto.response.UserResponse

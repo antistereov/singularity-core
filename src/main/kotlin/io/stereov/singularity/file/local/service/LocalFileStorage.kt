@@ -1,6 +1,13 @@
 package io.stereov.singularity.file.local.service
 
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.coroutines.coroutineBinding
+import com.github.michaelbull.result.coroutines.runSuspendCatching
+import com.github.michaelbull.result.mapError
+import com.github.michaelbull.result.runCatching
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.file.core.exception.FileException
 import io.stereov.singularity.file.core.mapper.FileMetadataMapper
 import io.stereov.singularity.file.core.model.FileUploadRequest
 import io.stereov.singularity.file.core.model.FileUploadResponse
@@ -43,7 +50,7 @@ class LocalFileStorage(
 
     override suspend fun uploadRendition(
         req: FileUploadRequest
-    ): FileUploadResponse {
+    ): Result<FileUploadResponse, FileException.Operation> {
         logger.debug { "Uploading file of content type ${req.contentType} to path \"${req.key}\"" }
 
         return when (req) {
@@ -52,13 +59,22 @@ class LocalFileStorage(
         }
     }
 
-    private suspend fun doUploadFilePart(req: FileUploadRequest.FilePartUpload): FileUploadResponse {
+    private suspend fun doUploadFilePart(
+        req: FileUploadRequest.FilePartUpload
+    ): Result<FileUploadResponse, FileException.Operation> = coroutineBinding {
         val filePath = baseDir.resolve(req.key.key)
 
-        return withContext(Dispatchers.IO) {
-            Files.createDirectories(filePath.parent)
-            req.data.transferTo(filePath).awaitSingleOrNull()
-            val size = Files.size(filePath)
+        withContext(Dispatchers.IO) {
+            runCatching { Files.createDirectories(filePath.parent) }
+                .mapError { ex -> FileException.Operation("Failed to create directory to safe file in ${filePath.parent}: ${ex.message}", ex) }
+                .bind()
+            runSuspendCatching { req.data.transferTo(filePath).awaitSingleOrNull() }
+                .mapError { ex -> FileException.Operation("Failed to save file $filePath: ${ex.message}", ex) }
+                .bind()
+
+            val size = runCatching { Files.size(filePath) }
+                .mapError { ex -> FileException.Operation("Failed to read size of saved file $filePath: ${ex.message}") }
+                .bind()
 
             FileUploadResponse(
                 contentType = req.contentType,
@@ -69,13 +85,22 @@ class LocalFileStorage(
             )
         }
     }
-    private suspend fun doUploadByteArray(req: FileUploadRequest.ByteArrayUpload): FileUploadResponse {
+    private suspend fun doUploadByteArray(
+        req: FileUploadRequest.ByteArrayUpload
+    ): Result<FileUploadResponse, FileException.Operation> = coroutineBinding {
         val filePath = baseDir.resolve(req.key.key)
 
-        return withContext(Dispatchers.IO) {
-            Files.createDirectories(filePath.parent)
-            Files.write(filePath, req.data)
-            val size = Files.size(filePath)
+        withContext(Dispatchers.IO) {
+            runCatching { Files.createDirectories(filePath.parent) }
+                .mapError { ex -> FileException.Operation("Failed to create directory to safe file in ${filePath.parent}: ${ex.message}", ex) }
+                .bind()
+            runSuspendCatching { Files.write(filePath, req.data) }
+                .mapError { ex -> FileException.Operation("Failed to save file $filePath: ${ex.message}", ex) }
+                .bind()
+
+            val size = runCatching { Files.size(filePath) }
+                .mapError { ex -> FileException.Operation("Failed to read size of saved file $filePath: ${ex.message}") }
+                .bind()
 
             FileUploadResponse(
                 contentType = req.contentType,
@@ -87,27 +112,35 @@ class LocalFileStorage(
         }
     }
 
-    override suspend fun renditionExists(key: String): Boolean {
+    override suspend fun renditionExists(key: String): Result<Boolean, FileException.Operation> {
         logger.debug { "Checking if file with path \"$key\" exists" }
 
         val filePath = getFilePath(key)
 
-        return Files.exists(filePath)
+        return runSuspendCatching {
+            withContext(Dispatchers.IO) {
+                return@withContext Files.exists(filePath)
+            }
+        }
+            .mapError { ex -> FileException.Operation("Failed to check existence of local file with path $filePath: ${ex.message}", ex) }
     }
 
-    override suspend fun removeRendition(key: String) {
+    override suspend fun removeRendition(key: String): Result<Unit, FileException.Operation> {
         logger.debug { "Removing local file in path \"$key\"" }
 
         val filePath = getFilePath(key)
 
-        try {
-            Files.deleteIfExists(filePath)
-        } catch (e: Exception) {
-            logger.error(e) { "Failed to delete local file with path \"$filePath\"" }
+        return runSuspendCatching {
+            withContext(Dispatchers.IO) {
+                Files.deleteIfExists(filePath)
+            }
+            Unit
+        }.mapError { ex ->
+            FileException.Operation("Failed to delete local file with path \"$filePath\"", ex)
         }
     }
 
-    override suspend fun getRenditionUrl(key: String): String {
-        return "${appProperties.baseUri}${apiPath}${key}"
+    override suspend fun getRenditionUrl(key: String): Result<String, FileException.Operation> {
+        return Ok("${appProperties.baseUri}${apiPath}${key}")
     }
 }
