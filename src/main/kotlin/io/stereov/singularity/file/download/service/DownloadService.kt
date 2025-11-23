@@ -4,15 +4,18 @@ import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.coroutines.runSuspendCatching
 import com.github.michaelbull.result.mapError
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.netty.handler.timeout.TimeoutException
+import io.netty.util.IllegalReferenceCountException
 import io.stereov.singularity.file.download.exception.DownloadException
 import io.stereov.singularity.file.download.model.StreamedFile
-import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.core.io.buffer.DataBuffer
-import org.springframework.core.io.buffer.DataBufferUtils
+import org.springframework.core.io.buffer.DataBufferLimitException
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.WebClientRequestException
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToFlux
 import reactor.core.publisher.Mono
 
@@ -52,22 +55,27 @@ class DownloadService(
                     val headers = clientResponse.headers().asHttpHeaders()
                     val contentType = headers.contentType ?: MediaType.APPLICATION_OCTET_STREAM
 
-                    val bodyFlux = clientResponse.bodyToFlux<DataBuffer>()
-                    val contentFlow = bodyFlux
-                        .map { DataBufferUtils.retain(it) }
-                        .asFlow()
-
                     Mono.just(
                         StreamedFile(
                             url = url,
                             contentType = contentType,
-                            content = contentFlow
+                            content = clientResponse.bodyToFlux<DataBuffer>()
                         )
                     )
                 }
                 .awaitSingle()
         }.mapError { ex ->
-            DownloadException("Failed to stream file form URL $url: ${ex.message}", ex)
+            when (ex) {
+                is WebClientResponseException.NotFound -> DownloadException.FileNotFound(url, ex)
+                is WebClientResponseException.BadRequest -> DownloadException.BadRequest(url, ex)
+                is WebClientResponseException.Unauthorized -> DownloadException.Unauthorized(url, ex)
+                is WebClientResponseException.Forbidden -> DownloadException.Forbidden(url, ex)
+                is WebClientRequestException -> DownloadException.NetworkError(url, ex)
+                is DataBufferLimitException -> DownloadException.FileTooLarge(url, ex)
+                is TimeoutException -> DownloadException.Timeout(url, ex)
+                is IllegalReferenceCountException -> DownloadException.InternalError("Buffer misuse", ex)
+                else -> DownloadException.Unknown("Unknown error for $url", ex)
+            }
         }
     }
 }

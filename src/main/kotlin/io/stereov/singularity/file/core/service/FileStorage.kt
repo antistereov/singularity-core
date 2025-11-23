@@ -3,7 +3,6 @@ package io.stereov.singularity.file.core.service
 import com.github.michaelbull.result.*
 import com.github.michaelbull.result.coroutines.coroutineBinding
 import io.github.oshai.kotlinlogging.KLogger
-import io.stereov.singularity.auth.core.model.token.AuthenticationToken
 import io.stereov.singularity.database.core.exception.DatabaseException
 import io.stereov.singularity.file.core.dto.FileMetadataResponse
 import io.stereov.singularity.file.core.exception.FileException

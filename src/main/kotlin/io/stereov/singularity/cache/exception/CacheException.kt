@@ -1,6 +1,7 @@
 package io.stereov.singularity.cache.exception
 
 import io.stereov.singularity.global.exception.SingularityException
+import org.springframework.http.HttpStatus
 
 /**
  * Represents a base class for various cache-related exceptions.
@@ -20,8 +21,9 @@ import io.stereov.singularity.global.exception.SingularityException
 sealed class CacheException(
     msg: String,
     code: String,
+    status: HttpStatus,
     cause: Throwable?
-) : SingularityException(msg, code, cause) {
+) : SingularityException(msg, code, status, cause) {
 
     /**
      * Represents an exception that occurs during object mapping operations within a cache.
@@ -32,8 +34,11 @@ sealed class CacheException(
      * @param msg The error message describing the failure.
      * @param cause An optional [Throwable] that represents the underlying reason for the exception.
      */
-    class ObjectMapper(msg: String, cause: Throwable? = null) : CacheException(msg, CODE, cause) {
-        companion object { const val CODE = "CACHE_OBJECT_MAPPING_FAILURE" }
+    class ObjectMapper(msg: String, cause: Throwable? = null) : CacheException(msg, CODE, STATUS, cause) {
+        companion object {
+            const val CODE = "CACHE_OBJECT_MAPPING_FAILURE"
+            val STATUS = HttpStatus.INTERNAL_SERVER_ERROR
+        }
     }
 
     /**
@@ -45,8 +50,11 @@ sealed class CacheException(
      * @param msg The error message describing the failure.
      * @param cause An optional [Throwable] representing the underlying reason for the exception.
      */
-    class Operation(msg: String, cause: Throwable? = null) : CacheException(msg, CODE, cause) {
-        companion object { const val CODE = "CACHE_OPERATION_FAILURE" }
+    class Operation(msg: String, cause: Throwable? = null) : CacheException(msg, CODE, STATUS, cause) {
+        companion object {
+            const val CODE = "CACHE_OPERATION_FAILURE"
+            val STATUS = HttpStatus.INTERNAL_SERVER_ERROR
+        }
     }
 
     /**
@@ -58,7 +66,10 @@ sealed class CacheException(
      * @param msg The error message describing the missing key.
      * @param cause An optional [Throwable] that represents the underlying reason for the exception.
      */
-    class KeyNotFound(msg: String, cause: Throwable? = null) : CacheException(msg, CODE, cause) {
-        companion object { const val CODE = "CACHE_KEY_NOT_FOUND" }
+    class KeyNotFound(msg: String, cause: Throwable? = null) : CacheException(msg, CODE, STATUS, cause) {
+        companion object {
+            const val CODE = "CACHE_KEY_NOT_FOUND"
+            val STATUS = HttpStatus.INTERNAL_SERVER_ERROR
+        }
     }
 }

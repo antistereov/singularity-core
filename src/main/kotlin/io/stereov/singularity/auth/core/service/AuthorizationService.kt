@@ -3,18 +3,15 @@ package io.stereov.singularity.auth.core.service
 import com.github.michaelbull.result.*
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.exception.AccessTokenExtractionException
-import io.stereov.singularity.auth.core.exception.AuthenticationException
+import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.auth.core.model.token.AuthenticationFilterExceptionToken
-import io.stereov.singularity.auth.core.model.token.AuthenticationToken
 import io.stereov.singularity.auth.core.model.token.StepUpToken
 import io.stereov.singularity.auth.core.service.token.StepUpTokenService
 import io.stereov.singularity.auth.jwt.exception.TokenExtractionException
-import io.stereov.singularity.user.core.model.Role
 import kotlinx.coroutines.reactive.awaitFirstOrNull
-import org.bson.types.ObjectId
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.stereotype.Service
-import java.util.*
+import org.springframework.web.server.ServerWebExchange
 
 /**
  * A service responsible for managing and validating user authentication and authorization.
@@ -39,159 +36,59 @@ class AuthorizationService(
      *
      * @return A boolean indicating whether the user is authenticated.
      */
-    @Suppress("UNUSED")
     suspend fun isAuthenticated(): Boolean {
         logger.debug { "Checking if user is authenticated" }
 
-        return getAuthentication().isOk
+        return getAuthenticationOutcome()
+            .map { outcome -> outcome.isAuthenticated }
+            .getOrElse { false }
     }
 
-    /**
-     * Retrieves the user ID of the currently authenticated user.
-     *
-     * @return A [Result] containing the [ObjectId] of the user if authentication is successful,
-     *   or an [AccessTokenExtractionException] if an error occurs during authentication.
-     */
-    suspend fun getUserId(): Result<ObjectId, AccessTokenExtractionException> {
-        logger.debug { "Extracting user ID." }
-
-        return getAuthentication().map { it.userId }
-    }
 
     /**
-     * Extracts the session ID of the currently authenticated user.
+     * Validates the step-up authentication process for the provided authenticated user.
      *
-     * @return A [Result] containing the [UUID] of the session if the user is authenticated,
-     *   or an [AccessTokenExtractionException] if an error occurs during authentication or token extraction.
+     * The method extracts a step-up authentication token based on the user's authentication
+     * information and the current server web exchange.
+     *
+     * @param authentication The authenticated user's authentication details, including user ID and session ID.
+     * @param exchange The server web exchange that contains the current HTTP request and response.
+     * @return A [Result] containing the extracted [StepUpToken] if the extraction is successful,
+     *   or a [TokenExtractionException] if an error occurs during token extraction.
      */
-    suspend fun getSessionId(): Result<UUID, AccessTokenExtractionException> {
-        logger.debug { "Extracting session ID" }
-
-        return getAuthentication().map { it.sessionId }
-    }
-
-    /**
-     * Extracts the access token ID of the currently authenticated user.
-     *
-     * @return A [Result] containing the token ID as a [String] if the authentication is successful,
-     *   or an [AccessTokenExtractionException] if an error occurs during authentication or token extraction.
-     */
-    suspend fun getAccessTokenId(): Result<String, AccessTokenExtractionException> {
-        logger.debug { "Extracting token ID" }
-
-        return getAuthentication().map { it.tokenId }
-    }
-
-    /**
-     * Ensures that the currently authenticated user is valid and retrieves the associated user ID.
-     *
-     * This method invokes `getUserId()` to verify the authentication status of the user.
-     * If the authentication is successful, the user's ID is returned.
-     *
-     * @return A [Result] containing the [ObjectId] of the authenticated user if the authentication is valid,
-     * or an [AccessTokenExtractionException] if an error occurs during authentication.
-     */
-    @Suppress("UNUSED")
-    suspend fun requireAuthentication() = getUserId()
-
-    /**
-     * Verifies that the provided authentication token includes the specified role.
-     *
-     * @param authentication The [AuthenticationToken] containing the user's roles.
-     * @param role The [Role] required for the action.
-     * @return A [Result] containing the [AuthenticationToken] if the required role is present,
-     * or an [AuthenticationException.RoleRequired] if the required role is missing.
-     */
-    fun requireRole(
-        authentication: AuthenticationToken,
-        role: Role
-    ): Result<AuthenticationToken, AuthenticationException.RoleRequired> {
-        logger.debug { "Validating authorization: role $role" }
-
-        return when (authentication.roles.contains(role)) {
-            true -> Ok(authentication)
-            false -> Err(AuthenticationException.RoleRequired("Failed to perform this action: role ${role.name} is required"))
-        }
-    }
-
-    /**
-     * Ensures that the user associated with the given authentication token is a member of the specified group,
-     * or holds the [Role.ADMIN] role.
-     *
-     * @param authentication The [AuthenticationToken] representing the authenticated user's session and associated roles/groups.
-     * @param groupKey The key identifying the required group the user must belong to.
-     * @return A [Result] containing the [AuthenticationToken] if the user is a member of the group or holds the ADMIN role,
-     * or an [AuthenticationException.GroupMembershipRequired] if the user does not meet the group membership requirement.
-     */
-    fun requireGroupMembership(
-        authentication: AuthenticationToken,
-        groupKey: String
-    ): Result<AuthenticationToken, AuthenticationException.GroupMembershipRequired> {
-        logger.debug { "Checking if the current user is part of the group \"$groupKey\"" }
-
-        return when (authentication.groups.contains(groupKey) || authentication.roles.contains(Role.ADMIN)) {
-            true -> Ok(authentication)
-            false -> Err(AuthenticationException.GroupMembershipRequired("Failed to perform this action: user must be a member of group $groupKey"))
-        }
-    }
-
-    /**
-     * Retrieves the roles associated with the currently authenticated user.
-     *
-     * @return A [Result] containing a [Set] of [Role] objects if authentication is successful,
-     * or an [AccessTokenExtractionException] if an error occurs during authentication or role retrieval.
-     */
-    @Suppress("UNUSED")
-    suspend fun getRoles(): Result<Set<Role>, AccessTokenExtractionException> {
-        return getAuthentication().map { it.roles }
-    }
-
-    /**
-     * Retrieves the groups associated with the currently authenticated user.
-     *
-     * @return A [Result] containing a [Set] of group keys as [String] if authentication is successful,
-     * or an [AccessTokenExtractionException] if an error occurs during authentication or group retrieval.
-     */
-    suspend fun getGroups(): Result<Set<String>, AccessTokenExtractionException> {
-        return getAuthentication().map { it.groups }
-    }
-
-    /**
-     * Validates the requirement for step-up authentication and extracts a step-up token if applicable.
-     *
-     * @param authentication The authentication token containing information about the current session, user, and exchange.
-     * @return A [Result] containing a valid [StepUpToken] if the extraction is successful, or a [TokenExtractionException] in case of failure.
-     */
-    suspend fun requireStepUp(authentication: AuthenticationToken): Result<StepUpToken, TokenExtractionException> {
+    suspend fun requireStepUp(
+        authentication: AuthenticationOutcome.Authenticated,
+        exchange: ServerWebExchange
+    ): Result<StepUpToken, TokenExtractionException> {
         logger.debug { "Validating step up" }
 
         return stepUpTokenService.extract(
-            authentication.exchange,
+            exchange,
             authentication.userId,
             authentication.sessionId
         )
     }
 
     /**
-     * Retrieves the current authentication from the security context and processes it to extract an
-     * [AuthenticationToken]. If the authentication cannot be extracted or is of an unexpected type,
-     * an appropriate error will be returned.
+     * Retrieves the outcome of the current authentication process.
      *
-     * @return A [Result] containing an [AuthenticationToken] if successful, or an error of type
-     * [AccessTokenExtractionException] if the authentication extraction or type validation fails.
+     * This method evaluates the authentication state stored in the reactive security context
+     * and identifies whether the user is authenticated, unauthenticated, or if there was an
+     * error during the authentication process.
+     *
+     * @return A [Result] containing:
+     * - [AuthenticationOutcome] if the authentication process completed successfully.
+     * - [AccessTokenExtractionException] if an error occurred during the extraction of the authentication token.
      */
-    suspend fun getAuthentication(): Result<AuthenticationToken, AccessTokenExtractionException> {
+    suspend fun getAuthenticationOutcome(): Result<AuthenticationOutcome, AccessTokenExtractionException> {
 
-        return ReactiveSecurityContextHolder.getContext()
+        val token = ReactiveSecurityContextHolder.getContext()
             .awaitFirstOrNull()?.authentication
-            .toResultOr { AccessTokenExtractionException.Missing("No access token found in exchange") }
-            .andThen { authentication ->
-                when (authentication) {
-                    is AuthenticationToken -> Ok(authentication)
-                    is AuthenticationFilterExceptionToken -> Err(authentication.error)
-                    else -> Err(AccessTokenExtractionException.Invalid("Unexpected wrong SecurityContext: contains authentication type ${authentication::class.simpleName}"))
-                }
-            }
+        return when (token) {
+            null -> Ok(AuthenticationOutcome.None())
+            is AuthenticationOutcome -> Ok(token)
+            is AuthenticationFilterExceptionToken -> Err(token.error)
+            else -> Err(AccessTokenExtractionException.Invalid("Unexpected wrong SecurityContext: contains authentication type ${token::class.simpleName}"))
+        }
     }
 }
-

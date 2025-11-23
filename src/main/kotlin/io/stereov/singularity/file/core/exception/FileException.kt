@@ -2,6 +2,7 @@ package io.stereov.singularity.file.core.exception
 
 import io.stereov.singularity.file.core.exception.FileException.Operation.Companion.CODE
 import io.stereov.singularity.global.exception.SingularityException
+import org.springframework.http.HttpStatus
 
 /**
  * Represents the base exception class for all file-related errors.
@@ -15,7 +16,7 @@ import io.stereov.singularity.global.exception.SingularityException
  * @param code The predefined error code associated with the specific exception type.
  * @param cause The root cause of the exception, if applicable.
  */
-sealed class FileException(msg: String, code: String, cause: Throwable? = null) : SingularityException(msg, code, cause) {
+sealed class FileException(msg: String, code: String, status: HttpStatus, cause: Throwable? = null) : SingularityException(msg, code, status, cause) {
 
     /**
      * Thrown to indicate that an operation failed due to an unsupported media type.
@@ -28,8 +29,11 @@ sealed class FileException(msg: String, code: String, cause: Throwable? = null) 
      * @param msg A descriptive message providing details about the exception.
      * @param cause The underlying cause of the exception, if available.
      */
-    class UnsupportedMediaType(msg: String, cause: Throwable? = null) : FileException(msg, CODE, cause) {
-        companion object { const val CODE = "UNSUPPORTED_MEDIA_TYPE" }
+    class UnsupportedMediaType(msg: String, cause: Throwable? = null) : FileException(msg, CODE, STATUS, cause) {
+        companion object {
+            const val CODE = "UNSUPPORTED_MEDIA_TYPE"
+            val STATUS = HttpStatus.UNSUPPORTED_MEDIA_TYPE
+        }
     }
 
     /**
@@ -44,8 +48,11 @@ sealed class FileException(msg: String, code: String, cause: Throwable? = null) 
      * @param msg A message describing the exception.
      * @param cause The underlying cause of the exception, if available.
      */
-    class Metadata(msg: String, cause: Throwable? = null) : FileException(msg, CODE, cause) {
-        companion object { const val CODE = "FILE_METADATA_FAILURE" }
+    class Metadata(msg: String, cause: Throwable? = null) : FileException(msg, CODE, STATUS, cause) {
+        companion object {
+            const val CODE = "FILE_METADATA_FAILURE"
+            val STATUS = HttpStatus.INTERNAL_SERVER_ERROR
+        }
     }
 
     /**
@@ -58,8 +65,11 @@ sealed class FileException(msg: String, code: String, cause: Throwable? = null) 
      * @param msg The detail message regarding the exception.
      * @param cause The cause of this exception, or `null` if no cause is specified.
      */
-    class FileKeyTaken(msg: String, cause: Throwable? = null) : FileException(msg, CODE, cause) {
-        companion object { const val CODE = "FILE_KEY_TAKEN" }
+    class FileKeyTaken(msg: String, cause: Throwable? = null) : FileException(msg, CODE, STATUS, cause) {
+        companion object {
+            const val CODE = "FILE_KEY_TAKEN"
+            val STATUS = HttpStatus.CONFLICT
+        }
     }
 
     /**
@@ -75,8 +85,11 @@ sealed class FileException(msg: String, code: String, cause: Throwable? = null) 
      * @param msg The detail message explaining the exception.
      * @param cause The underlying cause of the exception, if any.
      */
-    class MetadataOutOfSync(msg: String, cause: Throwable? = null) : FileException(msg, CODE, cause) {
-        companion object { const val CODE = "FILE_METADATA_OUT_OF_SYNC" }
+    class MetadataOutOfSync(msg: String, cause: Throwable? = null) : FileException(msg, CODE, STATUS, cause) {
+        companion object {
+            const val CODE = "FILE_METADATA_OUT_OF_SYNC"
+            val STATUS = HttpStatus.INTERNAL_SERVER_ERROR
+        }
     }
 
     /**
@@ -90,7 +103,31 @@ sealed class FileException(msg: String, code: String, cause: Throwable? = null) 
      * @param msg The error message describing the file operation failure.
      * @param cause The throwable that caused this exception, if any.
      */
-    class Operation(msg: String, cause: Throwable? = null) : FileException(msg, CODE, cause) {
-        companion object { const val CODE = "FILE_OPERATION_FAILURE" }
+    class Operation(msg: String, cause: Throwable? = null) : FileException(msg, CODE, STATUS, cause) {
+        companion object {
+            const val CODE = "FILE_OPERATION_FAILURE"
+            val STATUS = HttpStatus.INTERNAL_SERVER_ERROR
+        }
+    }
+
+    class Stream(msg: String, cause: Throwable? = null) : FileException(msg, CODE, STATUS, cause) {
+        companion object {
+            const val CODE = "FILE_STREAM_FAILURE"
+            val STATUS = HttpStatus.INTERNAL_SERVER_ERROR
+        }
+    }
+
+    class NotFound(msg: String, cause: Throwable? = null) : FileException(msg, CODE, STATUS, cause) {
+        companion object {
+            const val CODE = "FILE_NOT_FOUND"
+            val STATUS = HttpStatus.NOT_FOUND
+        }
+    }
+
+    class BadRequest(msg: String, cause: Throwable? = null) : FileException(msg, CODE, STATUS, cause) {
+        companion object {
+            const val CODE = "BAD_FILE_REQUEST"
+            val STATUS = HttpStatus.BAD_REQUEST
+        }
     }
 }

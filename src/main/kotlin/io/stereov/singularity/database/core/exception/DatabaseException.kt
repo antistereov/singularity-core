@@ -1,6 +1,13 @@
 package io.stereov.singularity.database.core.exception
 
+import io.stereov.singularity.database.core.exception.DatabaseException.Database.Companion.CODE
+import io.stereov.singularity.database.core.exception.DatabaseException.Database.Companion.STATUS
+import io.stereov.singularity.database.core.exception.DatabaseException.NotFound.Companion.CODE
+import io.stereov.singularity.database.core.exception.DatabaseException.NotFound.Companion.STATUS
+import io.stereov.singularity.database.core.exception.DatabaseException.PostCommitSideEffect.Companion.CODE
+import io.stereov.singularity.database.core.exception.DatabaseException.PostCommitSideEffect.Companion.STATUS
 import io.stereov.singularity.global.exception.SingularityException
+import org.springframework.http.HttpStatus
 
 /**
  * Represents exceptions related to database operations.
@@ -16,8 +23,9 @@ import io.stereov.singularity.global.exception.SingularityException
 sealed class DatabaseException(
     msg: String,
     code: String,
+    status: HttpStatus,
     cause: Throwable?
-) : SingularityException(msg, code, cause) {
+) : SingularityException(msg, code, status, cause) {
 
     /**
      * Exception thrown when a database entity is not found.
@@ -27,9 +35,15 @@ sealed class DatabaseException(
      *
      * @param msg The error message providing details about the missing entity.
      * @param cause The root cause of this exception, if any.
+     *
+     * @property CODE The error code `DATABASE_ENTITY_NOT_FOUND`
+     * @property STATUS The status [HttpStatus.NOT_FOUND]
      */
-    class NotFound(msg: String, cause: Throwable? = null): DatabaseException(msg, CODE, cause) {
-        companion object { const val CODE = "DATABASE_ENTITY_NOT_FOUND" }
+    class NotFound(msg: String, cause: Throwable? = null): DatabaseException(msg, CODE, STATUS, cause) {
+        companion object {
+            const val CODE = "DATABASE_ENTITY_NOT_FOUND"
+            val STATUS = HttpStatus.NOT_FOUND
+        }
     }
 
     /**
@@ -41,9 +55,15 @@ sealed class DatabaseException(
      *
      * @param msg The error message providing details about the failure.
      * @param cause The root cause of this exception, if any.
+     *
+     * @property CODE The code `DATABASE_FAILURE`
+     * @property STATUS The status [HttpStatus.INTERNAL_SERVER_ERROR]
      */
-    class Database(msg: String, cause: Throwable? = null) : DatabaseException(msg, CODE, cause) {
-        companion object { const val CODE = "DATABASE_FAILURE" }
+    class Database(msg: String, cause: Throwable? = null) : DatabaseException(msg, CODE, STATUS, cause) {
+        companion object {
+            const val CODE = "DATABASE_FAILURE"
+            val STATUS = HttpStatus.INTERNAL_SERVER_ERROR
+        }
     }
 
     /**
@@ -54,10 +74,18 @@ sealed class DatabaseException(
      * applied to the database. It helps identify problems that relate to post-commit
      * operations, differentiating them from other database-related issues.
      *
+     * Extends [DatabaseException].
+     *
      * @param msg The error message providing details about the specific failure.
      * @param cause The underlying cause of the exception, if any.
+     *
+     * @property CODE The code `POST_DATABASE_COMMIT_SIDE_EFFECT_FAILURE`
+     * @property STATUS The status [HttpStatus.OK]
      */
-    class PostCommitSideEffect(msg: String, cause: Throwable? = null) : DatabaseException(msg, CODE, cause) {
-        companion object { const val CODE = "POST_DATABASE_COMMIT_SIDE_EFFECT_FAILURE" }
+    class PostCommitSideEffect(msg: String, cause: Throwable? = null) : DatabaseException(msg, CODE, STATUS, cause) {
+        companion object {
+            const val CODE = "POST_DATABASE_COMMIT_SIDE_EFFECT_FAILURE"
+            val STATUS = HttpStatus.OK
+        }
     }
 }

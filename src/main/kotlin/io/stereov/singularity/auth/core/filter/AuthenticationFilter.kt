@@ -3,7 +3,6 @@ package io.stereov.singularity.auth.core.filter
 import com.github.michaelbull.result.getOrElse
 import io.stereov.singularity.auth.core.exception.AccessTokenExtractionException
 import io.stereov.singularity.auth.core.model.token.AuthenticationFilterExceptionToken
-import io.stereov.singularity.auth.core.model.token.AuthenticationToken
 import io.stereov.singularity.auth.core.service.token.AccessTokenService
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.mono
@@ -41,18 +40,9 @@ class AuthenticationFilter(
 ) : WebFilter {
 
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain) = mono {
-        val accessToken = accessTokenService.extract(exchange).getOrElse { e ->
+        val authentication = accessTokenService.extract(exchange).getOrElse { e ->
             return@mono handleAccessTokenException(chain, exchange, e)
         }
-
-        val authentication = AuthenticationToken(
-            accessToken.userId,
-            accessToken.roles,
-            accessToken.groups,
-            accessToken.sessionId,
-            accessToken.tokenId,
-            exchange
-        )
 
         val securityContext = SecurityContextImpl(authentication)
         return@mono chain.filter(exchange)

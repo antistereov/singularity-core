@@ -1,6 +1,5 @@
 package io.stereov.singularity.file.core.mapper
 
-import io.stereov.singularity.auth.core.model.token.AuthenticationToken
 import io.stereov.singularity.content.core.dto.response.ContentAccessDetailsResponse
 import io.stereov.singularity.file.core.dto.FileMetadataResponse
 import io.stereov.singularity.file.core.dto.FileRenditionResponse

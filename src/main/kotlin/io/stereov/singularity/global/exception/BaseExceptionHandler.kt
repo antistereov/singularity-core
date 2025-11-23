@@ -33,19 +33,5 @@ interface BaseExceptionHandler<T : SingularityException> {
      * @param exchange The [ServerWebExchange] for the current request.
      * @return A [ResponseEntity] containing the error response.
      */
-     fun handleExceptionInternal(ex: T, exchange: ServerWebExchange): ResponseEntity<ErrorResponse> {
-        logger.warn { "${ex.javaClass.simpleName} - ${ex.message}" }
 
-        val status = getHttpStatus(ex)
-
-        val errorResponse = ErrorResponse(
-            status = status.value(),
-            error = ex.javaClass.simpleName,
-            message = ex.message,
-            path = exchange.request.uri.path,
-            code = ex.code
-        )
-
-        return ResponseEntity(errorResponse, status)
-    }
 }

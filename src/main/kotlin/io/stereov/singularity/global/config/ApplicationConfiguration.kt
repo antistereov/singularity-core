@@ -1,6 +1,6 @@
 package io.stereov.singularity.global.config
 
-import io.stereov.singularity.global.exception.handler.GlobalBaseWebExceptionHandler
+import io.stereov.singularity.global.exception.handler.GlobalExceptionHandler
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.global.properties.UiProperties
 import org.springframework.boot.autoconfigure.AutoConfiguration
@@ -32,6 +32,6 @@ class ApplicationConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun globalExceptionHandler() = GlobalBaseWebExceptionHandler()
+    fun globalExceptionHandler() = GlobalExceptionHandler()
 
 }
