@@ -1,20 +1,13 @@
 package io.stereov.singularity.auth.core.service.token
 
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
-import com.github.michaelbull.result.andThen
+import com.github.michaelbull.result.*
 import com.github.michaelbull.result.coroutines.coroutineBinding
-import com.github.michaelbull.result.map
-import com.github.michaelbull.result.mapBoth
-import com.github.michaelbull.result.mapError
-import com.github.michaelbull.result.runCatching
-import com.github.michaelbull.result.toResultOr
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.component.TokenValueExtractor
 import io.stereov.singularity.auth.core.exception.AccessTokenCreationException
 import io.stereov.singularity.auth.core.exception.AccessTokenExtractionException
+import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.auth.core.model.token.AccessToken
 import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.auth.jwt.exception.TokenCreationException
@@ -109,16 +102,14 @@ class AccessTokenService(
      * @return a [Result] containing the extracted [AccessToken] on success,
      *   or an [AccessTokenExtractionException] on failure
      */
-    suspend fun extract(exchange: ServerWebExchange): Result<AccessToken, AccessTokenExtractionException> {
+    suspend fun extract(exchange: ServerWebExchange): Result<AuthenticationOutcome, AccessTokenExtractionException> {
 
         return tokenValueExtractor.extractValue(exchange, tokenType, true)
-            .mapBoth(
+            .flatMapEither(
                 success = { tokenValue -> extract(tokenValue) },
-                failure = { ex ->
-                    when (ex) {
-                        is TokenExtractionException.Missing -> Err(AccessTokenExtractionException.Missing("No access token was found in exchange: ${ex.message}", ex))
-                    }
-                }
+                failure = { ex -> when (ex) {
+                    is TokenExtractionException.Missing -> Ok(AuthenticationOutcome.None())
+                } }
             )
     }
 
@@ -152,22 +143,22 @@ class AccessTokenService(
      * @return A [Result] containing the decoded [AccessToken] if successful, or an [AccessTokenExtractionException]
      *         if the extraction or validation process fails.
      */
-    suspend fun extract(tokenValue: String): Result<AccessToken, AccessTokenExtractionException> {
+    suspend fun extract(tokenValue: String): Result<AuthenticationOutcome, AccessTokenExtractionException> {
         logger.debug { "Extracting and validating access token" }
 
         return jwtService.decodeJwt(tokenValue, tokenType.cookieName)
-            .mapError { ex -> when(ex) {
-                is TokenExtractionException.Missing -> AccessTokenExtractionException.Missing("Access token missing: ${ex.message}", ex)
-                is TokenExtractionException.Invalid -> AccessTokenExtractionException.Invalid("Access token invalid: ${ex.message}", ex)
-                is TokenExtractionException.Expired -> AccessTokenExtractionException.Expired("Access token expired: ${ex.message}", ex)
-            } }
-            .andThen { jwt ->
-                coroutineBinding {
+            .flatMapEither(
+                success = { jwt -> coroutineBinding {
                     val userId = jwt.subject
                         .toResultOr { AccessTokenExtractionException.Invalid("Access token does not contain sub") }
                         .andThen { sub ->
                             runCatching { ObjectId(sub) }
-                                .mapError { ex -> AccessTokenExtractionException.Invalid("Invalid ObjectId in sub: $sub", ex) }
+                                .mapError { ex ->
+                                    AccessTokenExtractionException.Invalid(
+                                        "Invalid ObjectId in sub: $sub",
+                                        ex
+                                    )
+                                }
                         }.bind()
 
                     val sessionId = (jwt.claims[Constants.JWT_SESSION_CLAIM] as? String)
@@ -211,17 +202,27 @@ class AccessTokenService(
                             Ok(parsed.toSet())
                         }.bind()
 
-                accessTokenCache.isTokenIdValid(userId, sessionId, tokenId)
-                    .mapError { ex -> AccessTokenExtractionException.Cache("Failed to access access token allowlist: ${ex.message}", ex) }
-                    .andThen { valid ->
-                        if (valid) {
-                            Ok(AccessToken(userId, sessionId, tokenId, roles, groups, jwt))
-                        } else {
-                            Err(AccessTokenExtractionException.Invalid("Access token is not valid"))
+                    accessTokenCache.isTokenIdValid(userId, sessionId, tokenId)
+                        .mapError { ex ->
+                            AccessTokenExtractionException.Cache(
+                                "Failed to access access token allowlist: ${ex.message}",
+                                ex
+                            )
                         }
-                    }
-                    .bind()
-            }
-        }
+                        .andThen { onAllowlist ->
+                            if (onAllowlist) {
+                                Ok(AuthenticationOutcome.Authenticated(userId, roles, groups, sessionId, tokenId, ))
+                            } else {
+                                Err(AccessTokenExtractionException.Expired("Access token is expired"))
+                            }
+                        }
+                        .bind()
+                } },
+                failure = {ex -> when (ex) {
+                    is TokenExtractionException.Invalid -> Err(AccessTokenExtractionException.Invalid("Access token invalid: ${ex.message}", ex))
+                    is TokenExtractionException.Expired -> Err(AccessTokenExtractionException.Expired("Access token expired: ${ex.message}", ex))
+                    is TokenExtractionException.Missing -> Ok(AuthenticationOutcome.None())
+                } }
+            )
     }
 }

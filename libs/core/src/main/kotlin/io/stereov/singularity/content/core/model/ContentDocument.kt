@@ -1,8 +1,10 @@
 package io.stereov.singularity.content.core.model
 
-import io.stereov.singularity.auth.core.model.token.AuthenticationToken
+import io.stereov.singularity.auth.core.model.AuthenticationOutcome
+import io.stereov.singularity.auth.core.model.token.AccessType
 import io.stereov.singularity.content.invitation.model.InvitationDocument
 import org.bson.types.ObjectId
+import org.springframework.data.annotation.Transient
 import java.time.Instant
 
 interface ContentDocument<T: ContentDocument<T>> {
@@ -13,6 +15,11 @@ interface ContentDocument<T: ContentDocument<T>> {
     var access: ContentAccessDetails
     var trusted: Boolean
     var tags: MutableSet<String>
+
+    @get:Transient
+    val isPublic: Boolean
+        get() = access.visibility == AccessType.PUBLIC
+
 
     @Suppress("UNCHECKED_CAST")
     fun share(type: ContentAccessSubject, subjectId: String, role: ContentAccessRole): T {
@@ -34,7 +41,7 @@ interface ContentDocument<T: ContentDocument<T>> {
         return this as T
     }
 
-    fun hasAccess(authentication: AuthenticationToken, role: ContentAccessRole): Boolean {
+    fun hasAccess(authentication: AuthenticationOutcome, role: ContentAccessRole): Boolean {
         return access.hasAccess(authentication, role)
     }
 }

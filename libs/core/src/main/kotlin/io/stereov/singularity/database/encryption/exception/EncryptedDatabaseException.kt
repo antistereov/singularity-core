@@ -2,6 +2,7 @@ package io.stereov.singularity.database.encryption.exception
 
 import io.stereov.singularity.database.core.exception.DatabaseException
 import io.stereov.singularity.global.exception.SingularityException
+import org.springframework.http.HttpStatus
 
 /**
  * Represents exceptions specific to encrypted database operations.
@@ -18,8 +19,9 @@ import io.stereov.singularity.global.exception.SingularityException
 sealed class EncryptedDatabaseException(
     msg: String,
     code: String,
+    status: HttpStatus,
     cause: Throwable?
-) : SingularityException(msg, code, cause) {
+) : SingularityException(msg, code, status, cause) {
 
     /**
      * Exception thrown when an entity is not found in the encrypted database.
@@ -30,8 +32,11 @@ sealed class EncryptedDatabaseException(
      * @param msg A detailed message describing the missing entity and its context.
      * @param cause The underlying exception, if available, that caused this error.
      */
-    class NotFound(msg: String, cause: Throwable? = null): EncryptedDatabaseException(msg, CODE, cause) {
-        companion object { const val CODE = DatabaseException.NotFound.CODE }
+    class NotFound(msg: String, cause: Throwable? = null): EncryptedDatabaseException(msg, CODE, STATUS, cause) {
+        companion object {
+            const val CODE = DatabaseException.NotFound.CODE
+            val STATUS = DatabaseException.NotFound.STATUS
+        }
     }
 
     /**
@@ -46,8 +51,11 @@ sealed class EncryptedDatabaseException(
      * @param msg The error message providing details about the failure.
      * @param cause The underlying cause of this exception, if any.
      */
-    class Database(msg: String, cause: Throwable? = null) : EncryptedDatabaseException(msg, CODE, cause) {
-        companion object { const val CODE = DatabaseException.Database.CODE }
+    class Database(msg: String, cause: Throwable? = null) : EncryptedDatabaseException(msg, CODE, STATUS, cause) {
+        companion object {
+            const val CODE = DatabaseException.Database.CODE
+            val STATUS = DatabaseException.Database.STATUS
+        }
     }
 
     /**
@@ -61,8 +69,11 @@ sealed class EncryptedDatabaseException(
      * @param msg The error message describing the encryption failure.
      * @param cause The underlying cause of the exception, if available.
      */
-    class Encryption(msg: String, cause: Throwable? = null) : EncryptedDatabaseException(msg, CODE, cause) {
-        companion object { const val CODE = "DATABASE_ENCRYPTION_FAILURE" }
+    class Encryption(msg: String, cause: Throwable? = null) : EncryptedDatabaseException(msg, CODE, STATUS, cause) {
+        companion object {
+            const val CODE = "DATABASE_ENCRYPTION_FAILURE"
+            val STATUS = HttpStatus.INTERNAL_SERVER_ERROR
+        }
     }
 
     /**
@@ -76,7 +87,10 @@ sealed class EncryptedDatabaseException(
      * @param msg The error message describing the specific side effect failure.
      * @param cause The underlying cause of this exception, if available.
      */
-    class PostCommitSideEffect(msg: String, cause: Throwable? = null) : EncryptedDatabaseException(msg, CODE, cause) {
-        companion object { const val CODE = DatabaseException.PostCommitSideEffect.CODE }
+    class PostCommitSideEffect(msg: String, cause: Throwable? = null) : EncryptedDatabaseException(msg, CODE, STATUS, cause) {
+        companion object {
+            const val CODE = DatabaseException.PostCommitSideEffect.CODE
+            val STATUS = DatabaseException.PostCommitSideEffect.STATUS
+        }
     }
 }

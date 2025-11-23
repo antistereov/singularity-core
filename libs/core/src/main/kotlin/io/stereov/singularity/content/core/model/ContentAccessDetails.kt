@@ -1,7 +1,7 @@
 package io.stereov.singularity.content.core.model
 
+import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.auth.core.model.token.AccessType
-import io.stereov.singularity.auth.core.model.token.AuthenticationToken
 import io.stereov.singularity.content.core.dto.request.UpdateContentAccessRequest
 import io.stereov.singularity.content.core.dto.response.ContentAccessDetailsResponse
 import io.stereov.singularity.user.core.model.Role
@@ -47,26 +47,32 @@ data class ContentAccessDetails(
         }
     }
 
-    fun hasAccess(authentication: AuthenticationToken, role: ContentAccessRole): Boolean {
-        val isAdmin = authentication.roles.contains(Role.ADMIN)
-        val isOwner = authentication.userId == ownerId
-
-        val userIsMaintainer = hasAccess(ContentAccessSubject.USER, authentication.userId.toString(), ContentAccessRole.MAINTAINER)
-        val groupIsMaintainer = authentication.groups.any { groupId -> hasAccess(ContentAccessSubject.GROUP, groupId, ContentAccessRole.MAINTAINER) }
-
-        val userIsEditor = hasAccess(ContentAccessSubject.USER, authentication.userId.toString(), ContentAccessRole.EDITOR)
-        val groupIsEditor = authentication.groups.any { groupId -> hasAccess(ContentAccessSubject.GROUP, groupId, ContentAccessRole.EDITOR) }
-
-        val userIsViewer = hasAccess(ContentAccessSubject.USER, authentication.userId.toString(), ContentAccessRole.VIEWER)
-        val groupIsViewer = authentication.groups.any { groupId -> hasAccess(ContentAccessSubject.GROUP, groupId, ContentAccessRole.VIEWER) }
-
+    fun hasAccess(authentication: AuthenticationOutcome, role: ContentAccessRole): Boolean {
         val isPublic = visibility == AccessType.PUBLIC
 
-        return when (role) {
-            ContentAccessRole.VIEWER -> isAdmin || isOwner || userIsMaintainer || groupIsMaintainer || userIsEditor || groupIsEditor || userIsViewer || groupIsViewer || isPublic
-            ContentAccessRole.EDITOR ->  isAdmin || isOwner || userIsMaintainer || groupIsMaintainer || userIsEditor || groupIsEditor
-            ContentAccessRole.MAINTAINER -> isAdmin || isOwner || userIsMaintainer || groupIsMaintainer
+        return when (authentication) {
+            is AuthenticationOutcome.None -> role == ContentAccessRole.VIEWER && isPublic
+            is AuthenticationOutcome.Authenticated -> {
+                val isAdmin = authentication.roles.contains(Role.ADMIN)
+                val isOwner = authentication.userId == ownerId
+
+                val userIsMaintainer = hasAccess(ContentAccessSubject.USER, authentication.userId.toString(), ContentAccessRole.MAINTAINER)
+                val groupIsMaintainer = authentication.groups.any { groupId -> hasAccess(ContentAccessSubject.GROUP, groupId, ContentAccessRole.MAINTAINER) }
+
+                val userIsEditor = hasAccess(ContentAccessSubject.USER, authentication.userId.toString(), ContentAccessRole.EDITOR)
+                val groupIsEditor = authentication.groups.any { groupId -> hasAccess(ContentAccessSubject.GROUP, groupId, ContentAccessRole.EDITOR) }
+
+                val userIsViewer = hasAccess(ContentAccessSubject.USER, authentication.userId.toString(), ContentAccessRole.VIEWER)
+                val groupIsViewer = authentication.groups.any { groupId -> hasAccess(ContentAccessSubject.GROUP, groupId, ContentAccessRole.VIEWER) }
+
+                when (role) {
+                    ContentAccessRole.VIEWER -> isAdmin || isOwner || userIsMaintainer || groupIsMaintainer || userIsEditor || groupIsEditor || userIsViewer || groupIsViewer || isPublic
+                    ContentAccessRole.EDITOR ->  isAdmin || isOwner || userIsMaintainer || groupIsMaintainer || userIsEditor || groupIsEditor
+                    ContentAccessRole.MAINTAINER -> isAdmin || isOwner || userIsMaintainer || groupIsMaintainer
+                }
+            }
         }
+
     }
 
     private fun updateShared(

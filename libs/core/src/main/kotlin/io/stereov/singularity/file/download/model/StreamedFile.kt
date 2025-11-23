@@ -1,8 +1,8 @@
 package io.stereov.singularity.file.download.model
 
-import kotlinx.coroutines.flow.Flow
 import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.http.MediaType
+import reactor.core.publisher.Flux
 
 /**
  * Represents a file streamed as a flow of data buffers.
@@ -17,7 +17,7 @@ import org.springframework.http.MediaType
  * @property url The source URL where the file is being streamed from.
  */
 data class StreamedFile(
-    val content: Flow<DataBuffer>,
+    val content: Flux<DataBuffer>,
     val contentType: MediaType,
     val url: String
 )

@@ -1,5 +1,7 @@
 package io.stereov.singularity.global.exception
 
+import org.springframework.http.HttpStatus
+
 /**
  * Base class for all web-related exceptions.
  *
@@ -14,5 +16,6 @@ package io.stereov.singularity.global.exception
 open class SingularityException(
     msg: String,
     val code: String,
+    val status: HttpStatus,
     cause: Throwable? = null,
 ) : RuntimeException(msg, cause)

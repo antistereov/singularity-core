@@ -1,6 +1,8 @@
 package io.stereov.singularity.file.core.model
 
+import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.http.codec.multipart.FilePart
+import reactor.core.publisher.Flux
 
 /**
  * Represents a request for uploading a file.
@@ -86,4 +88,12 @@ sealed interface FileUploadRequest {
             return result
         }
     }
+
+    data class DataBufferUpload(
+        override val key: FileKey,
+        override val contentType: String,
+        override val data: Flux<DataBuffer>,
+        override val width: Int? = null,
+        override val height: Int? = null
+    ) : FileUploadRequest
 }

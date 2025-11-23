@@ -47,5 +47,5 @@ internal class LocalFileStorageConfiguration {
     fun localFileStorageController(
         metadataService: FileMetadataService,
         properties: LocalFileStorageProperties
-    ) = LocalFileStorageController(metadataService, properties)
+    ) = LocalFileStorageController(metadataService, properties, fileStorage, authorizationService)
 }
