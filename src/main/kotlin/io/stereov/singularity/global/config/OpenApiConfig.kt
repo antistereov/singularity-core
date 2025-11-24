@@ -20,6 +20,8 @@ import io.stereov.singularity.content.article.controller.ArticleManagementContro
 import io.stereov.singularity.content.core.controller.ContentManagementController
 import io.stereov.singularity.content.invitation.controller.InvitationController
 import io.stereov.singularity.content.tag.controller.TagController
+import io.stereov.singularity.global.annotation.ThrowsDomainError
+import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.user.core.controller.UserController
 import io.stereov.singularity.user.settings.controller.UserSettingsController
@@ -29,11 +31,18 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme
 import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.Operation
 import io.swagger.v3.oas.models.PathItem
+import io.swagger.v3.oas.models.media.Content
+import io.swagger.v3.oas.models.media.Schema
+import io.swagger.v3.oas.models.responses.ApiResponse
 import io.swagger.v3.oas.models.security.SecurityRequirement
 import io.swagger.v3.oas.models.tags.Tag
 import org.springdoc.core.customizers.OpenApiCustomizer
+import org.springdoc.core.customizers.OperationCustomizer
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.context.annotation.Bean
+import org.springframework.stereotype.Component
+import org.springframework.web.method.HandlerMethod
+import kotlin.reflect.full.primaryConstructor
 
 @AutoConfiguration
 @SecurityScheme(
@@ -105,6 +114,56 @@ import org.springframework.context.annotation.Bean
 )
 
 class OpenApiConfig() {
+
+    @Bean
+    fun domainErrorOperationCustomizer(): OperationCustomizer = DomainErrorOperationCustomizer()
+
+    @Component
+    class DomainErrorOperationCustomizer : OperationCustomizer {
+
+        override fun customize(operation: Operation, handlerMethod: HandlerMethod): Operation {
+            val domainErrorAnnotation = handlerMethod.getMethodAnnotation(ThrowsDomainError::class.java)
+                ?: return operation
+
+            domainErrorAnnotation.errorClasses.forEach { errorKClass ->
+
+                errorKClass.sealedSubclasses.forEach { concreteErrorClass ->
+
+                    val apiError = concreteErrorClass.objectInstance
+                        ?: concreteErrorClass.primaryConstructor?.call()
+                        ?: return@forEach
+
+                    val responseCode = apiError.status.value().toString()
+                    val descriptionEntry = "\n* [`${apiError.code}`](https://singularity.stereov.io/docs/guides/errors#${apiError.code})"
+
+                    val existingResponse = operation.responses[responseCode]
+                    if (existingResponse == null) {
+                        val initialDescription = "A specific domain error occurred (see list below):$descriptionEntry"
+
+                        operation.responses.addApiResponse(
+                            responseCode,
+                            ApiResponse()
+                                .description(initialDescription)
+                                .content(createErrorContent())
+                        )
+                    } else {
+                        val currentDescription = existingResponse.description ?: "A specific domain error occurred (see list below):"
+                        existingResponse.description = currentDescription + descriptionEntry
+                    }
+                }
+            }
+
+            return operation
+        }
+
+        private fun createErrorContent(): Content {
+            return Content().addMediaType(
+                org.springframework.http.MediaType.APPLICATION_JSON_VALUE,
+                io.swagger.v3.oas.models.media.MediaType()
+                    .schema(Schema<ErrorResponse>())
+            )
+        }
+    }
 
 
     @Bean
