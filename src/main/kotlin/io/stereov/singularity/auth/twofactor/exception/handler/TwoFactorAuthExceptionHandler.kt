@@ -2,7 +2,6 @@ package io.stereov.singularity.auth.twofactor.exception.handler
 
 import io.stereov.singularity.auth.twofactor.exception.TwoFactorAuthException
 import io.stereov.singularity.auth.twofactor.exception.model.*
-import io.stereov.singularity.global.exception.BaseExceptionHandler
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler

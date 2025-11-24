@@ -1,63 +1,83 @@
 package io.stereov.singularity.secrets.core.exception
 
 import io.stereov.singularity.global.exception.SingularityException
-import io.stereov.singularity.secrets.core.exception.SecretStoreException.KeyGenerator.Companion.CODE
+import org.springframework.http.HttpStatus
 
 /**
- * Represents exceptions related to operations in the secret store.
- * This is a sealed class extending [SingularityException], allowing for specific types of
- * exceptions related to secret store failures to be represented and handled distinctly.
+ * Represents a base exception for errors occurring within the secret store.
  *
- * @constructor Creates a [SecretStoreException] with the given message, code, and cause.
+ * This sealed class serves as a foundation for specific secret store exceptions, providing
+ * additional context with error codes, HTTP status, and detailed descriptions. It extends
+ * the [SingularityException] class to integrate with the application's error-handling framework.
  *
- * @param msg The error message describing the issue.
- * @param code The error code associated with this exception.
- * @param cause The cause of the exception, if any.
+ * @param msg The error message describing the exception.
+ * @param code A unique code representing the type of error.
+ * @param status The associated HTTP status for the exception.
+ * @param description A detailed description providing more context about the error.
+ * @param cause The underlying cause of the exception, if available.
  */
 sealed class SecretStoreException(
     msg: String,
     code: String,
+    status: HttpStatus,
+    description: String,
     cause: Throwable?
-) : SingularityException(msg, code, cause) {
+) : SingularityException(msg, code, status, description, cause) {
 
     /**
-     * Represents an exception that is thrown when a requested secret cannot be found in the secret store.
+     * Represents an exception thrown when a requested secret cannot be found in the secret store.
      *
-     * @constructor Creates a [NotFound] exception with the specified message and optional cause.
+     * Extends [SecretStoreException]
+     *
      * @param msg The error message describing the missing secret.
      * @param cause The cause of the exception, if any.
+     *
+     * @property code `SECRET_NOT_FOUND`
+     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
      */
-    class NotFound(msg: String, cause: Throwable? = null) : SecretStoreException(msg, CODE, cause) {
-        companion object { const val CODE = "SECRET_NOT_FOUND" }
-    }
+    class NotFound(msg: String, cause: Throwable? = null) : SecretStoreException(
+        msg,
+        "SECRET_NOT_FOUND",
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        "Represents an exception thrown when a requested secret cannot be found in the secret store.",
+        cause
+    )
 
     /**
      * Exception representing the failure of cryptographic key generation within the secret store operations.
      *
-     * This exception is thrown when an error occurs while generating a cryptographic key
-     * required for secret management. The associated [CODE] provides a specific error identifier
-     * for such failures.
-     *
-     * @constructor Creates a [KeyGenerator] exception with the specified message and optional cause.
+     * Extends [SecretStoreException].
      *
      * @param msg The error message describing the key generation failure.
      * @param cause The cause of the exception, if any.
+     *
+     * @property code `SECRET_KEY_GENERATION_FAILURE`
+     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
      */
-    class KeyGenerator(msg: String, cause: Throwable? = null) : SecretStoreException(msg, CODE, cause) {
-        companion object { const val CODE = "SECRET_KEY_GENERATION_FAILURE"}
-    }
+    class KeyGenerator(msg: String, cause: Throwable? = null) : SecretStoreException(
+        msg,
+        "SECRET_KEY_GENERATION_FAILURE",
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        "Exception representing the failure of cryptographic key generation within the secret store operations.",
+        cause
+    )
 
     /**
      * Represents an exception that occurs during a secret store operation.
      *
-     * This exception is specifically used to indicate failures in performing
-     * operations related to secrets, such as fetching or storing secrets in a
-     * secret store or vault.
+     * Extends [SecretStoreException].
      *
      * @param msg The detail message for the exception.
      * @param cause The cause of the exception, which can be null.
+     *
+     * @property code `SECRET_OPERATION_FAILURE`
+     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
      */
-    class Operation(msg: String, cause: Throwable? = null) : SecretStoreException(msg, CODE, cause) {
-        companion object { const val CODE = "SECRET_OPERATION_FAILURE"}
-    }
+    class Operation(msg: String, cause: Throwable? = null) : SecretStoreException(
+        msg,
+        "SECRET_OPERATION_FAILURE",
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        "Represents an exception that occurs during a secret store operation.",
+        cause
+    )
 }

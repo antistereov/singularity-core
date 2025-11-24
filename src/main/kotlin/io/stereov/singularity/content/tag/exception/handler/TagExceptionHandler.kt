@@ -3,7 +3,6 @@ package io.stereov.singularity.content.tag.exception.handler
 import io.stereov.singularity.content.tag.exception.TagException
 import io.stereov.singularity.content.tag.exception.model.InvalidUpdateTagRequest
 import io.stereov.singularity.content.tag.exception.model.TagKeyExistsException
-import io.stereov.singularity.global.exception.BaseExceptionHandler
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler

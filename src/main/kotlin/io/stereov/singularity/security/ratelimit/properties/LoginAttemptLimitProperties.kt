@@ -1,19 +1,7 @@
-package io.stereov.singularity.ratelimit.properties
+package io.stereov.singularity.security.ratelimit.properties
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 
-/**
- * # Authentication Attempt Limit properties.
- *
- * This class is responsible for holding the login attempt limit properties
- * and is annotated with [ConfigurationProperties]
- * to bind the properties from the application configuration file.
- *
- * It is prefixed with `baseline.security.login-attempt-limit` in the configuration file.
- *
- * @property ipLimit The maximum number of login attempts allowed from a single IP address.
- * @property ipTimeWindow The time window in minutes for the IP address limit.
- */
 @ConfigurationProperties(prefix = "singularity.security.login-attempt-limit")
 data class LoginAttemptLimitProperties(
     val ipLimit: Long = 10,

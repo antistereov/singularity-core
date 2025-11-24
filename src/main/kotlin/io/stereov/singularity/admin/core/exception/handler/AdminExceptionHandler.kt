@@ -3,7 +3,6 @@ package io.stereov.singularity.admin.core.exception.handler
 import io.stereov.singularity.admin.core.exception.AdminException
 import io.stereov.singularity.admin.core.exception.model.GuestCannotBeAdminException
 import io.stereov.singularity.admin.core.exception.model.AtLeastOneAdminRequiredException
-import io.stereov.singularity.global.exception.BaseExceptionHandler
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler

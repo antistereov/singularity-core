@@ -1,82 +1,101 @@
 package io.stereov.singularity.database.encryption.exception
 
-import io.stereov.singularity.database.encryption.exception.EncryptionException.Cipher.Companion.CODE
 import io.stereov.singularity.global.exception.SingularityException
+import org.springframework.http.HttpStatus
 
 /**
- * Represents exceptions related to encryption operations.
+ * Represents exceptions specifically related to encryption operations.
  *
- * This sealed class extends [SingularityException] and defines specific types of encryption-related
- * exceptions that can occur during various encryption and decryption processes. Each specialized
- * exception includes an associated error code and an optional cause to provide more context for the failure.
+ * This is a sealed class extending [SingularityException] and serves as the base class for all exceptions
+ * related to encryption processes within the application.
  *
- * @param msg A detailed message describing the encryption-related error.
- * @param code The associated error code representing the type of failure.
- * @param cause The underlying cause of this exception, if available.
+ * @param msg The error message describing the nature of the exception.
+ * @param code The unique error code associated with this exception.
+ * @param status The HTTP status corresponding to the exception.
+ * @param description A detailed description providing additional context about the exception.
+ * @param cause The underlying cause of the exception, if available.
  */
 sealed class EncryptionException(
     msg: String,
     code: String,
+    status: HttpStatus,
+    description: String,
     cause: Throwable?
-) : SingularityException(msg, code, cause) {
+) : SingularityException(msg, code, status, description, cause) {
 
     /**
      * Exception representing a failure related to object mapping during encryption operations.
      *
-     * This exception is a specific type of [EncryptionException] used to indicate an error that
-     * occurs when mapping objects as part of encryption or decryption processes fails.
-     * It provides additional context regarding the mapping failure, making it easier to identify
-     * and address the root cause of the problem.
+     * This exception is a specific type of [EncryptionException].
      *
      * @param msg The error message describing the object mapping failure.
      * @param cause The underlying cause of this exception, if available.
+     *
+     * @property code `ENCRYPTION_OBJECT_MAPPING_FAILURE`
+     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
      */
-    class ObjectMapping(msg: String, cause: Throwable? = null) : EncryptionException(msg, CODE, cause) {
-        companion object { const val CODE = "ENCRYPTION_OBJECT_MAPPING_FAILURE" }
-    }
+    class ObjectMapping(msg: String, cause: Throwable? = null) : EncryptionException(
+        msg,
+        "ENCRYPTION_OBJECT_MAPPING_FAILURE",
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        "Exception representing a failure related to object mapping during encryption operations.",
+        cause
+    )
 
     /**
      * Exception representing a failure related to encryption or decryption operations.
      *
-     * This class extends [EncryptionException] and is used to indicate errors
-     * that occur during encryption processes, such as issues with cipher initialization,
-     * encryption, or decryption failures. It provides a specific error code
-     * ([CODE]) to identify encryption-related failures distinctly.
+     * This class extends [EncryptionException].
      *
      * @param msg The error message providing details about the failure.
      * @param cause The underlying cause of the exception, if available.
+     *
+     * @property code `ENCRYPTION_CIPHER_FAILURE`
+     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
      */
-    class Cipher(msg: String, cause: Throwable? = null) : EncryptionException(msg, CODE, cause) {
-        companion object { const val CODE = "ENCRYPTION_CIPHER_FAILURE" }
-    }
+    class Cipher(msg: String, cause: Throwable? = null) : EncryptionException(
+        msg,
+        "ENCRYPTION_CIPHER_FAILURE",
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        "Exception representing a failure related to encryption or decryption operations.",
+        cause
+    )
 
     /**
      * Represents an exception indicating a failure related to encryption secrets.
      *
-     * This exception is a specific type of [EncryptionException] used to signal errors
-     * occurring during the processing of secrets, such as invalid
-     * secret operations. It extends the encryption exception hierarchy by providing an
-     * identifiable error code to classify these operations.
+     * This exception is a specific type of [EncryptionException].
      *
      * @param msg The error message describing the failure.
      * @param cause The underlying cause of the exception, if available.
+     *
+     * @property code `ENCRYPTION_SECRET_FAILURE`
+     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
      */
-    class Secret(msg: String, cause: Throwable? = null) : EncryptionException(msg, CODE, cause) {
-        companion object { const val CODE = "ENCRYPTION_SECRET_FAILURE" }
-    }
+    class Secret(msg: String, cause: Throwable? = null) : EncryptionException(
+        msg,
+        "ENCRYPTION_SECRET_FAILURE",
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        "Represents an exception indicating a failure related to encryption secrets.",
+        cause
+    )
 
     /**
      * Exception representing an encoding failure during encryption operations.
      *
-     * This exception is a specific type of [EncryptionException] that indicates an error
-     * occurring during the encoding process within encryption or decryption workflows.
-     * It signifies that an encoding-related failure has prevented successful encryption
-     * or decryption of data.
+     * This exception is a specific type of [EncryptionException].
      *
      * @param msg The error message describing the encoding failure.
      * @param cause The underlying cause of the exception, if available.
+     *
+     * @property code `ENCRYPTION_ENCODING_FAILURE`
+     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
      */
-    class Encoding(msg: String, cause: Throwable? = null) : EncryptionException(msg, CODE, cause) {
-        companion object { const val CODE = "ENCRYPTION_ENCODING_FAILURE" }
-    }
+    class Encoding(msg: String, cause: Throwable? = null) : EncryptionException(
+        msg,
+        "ENCRYPTION_ENCODING_FAILURE",
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        "Exception representing an encoding failure during encryption operations.",
+        cause
+    )
 }

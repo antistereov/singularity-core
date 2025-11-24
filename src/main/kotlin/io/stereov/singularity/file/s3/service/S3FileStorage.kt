@@ -51,15 +51,16 @@ class S3FileStorage(
         return when (req) {
             is FileUploadRequest.FilePartUpload -> doUploadFilePart(req)
             is FileUploadRequest.ByteArrayUpload -> doUploadByteArray(req)
+            is FileUploadRequest.DataBufferUpload -> doUploadDataBuffer(req)
         }
     }
 
-    private suspend fun doUploadFilePart(
-        req: FileUploadRequest.FilePartUpload
+    private suspend fun doUploadDataBuffer(
+        req: FileUploadRequest.DataBufferUpload
     ): Result<FileUploadResponse, FileException.Operation> = coroutineBinding {
         val contentLength = AtomicLong()
 
-        val uploadMono: Mono<PutObjectResponse> = DataBufferUtils.join(req.data.content())
+        val uploadMono: Mono<PutObjectResponse> = DataBufferUtils.join(req.data)
             .flatMap { mergedBuffer ->
 
                 val finalLength = mergedBuffer.readableByteCount().toLong()
@@ -93,6 +94,20 @@ class S3FileStorage(
             width = req.width,
             height = req.height
         )
+    }
+
+
+    private suspend fun doUploadFilePart(
+        req: FileUploadRequest.FilePartUpload
+    ): Result<FileUploadResponse, FileException.Operation> {
+        val dataBufferRequest = FileUploadRequest.DataBufferUpload(
+            key = req.key,
+            contentType = req.contentType,
+            data = req.data.content(),
+            width = req.width,
+            height = req.height
+        )
+        return doUploadDataBuffer(dataBufferRequest)
     }
 
     private suspend fun doUploadByteArray(
@@ -154,8 +169,12 @@ class S3FileStorage(
         }.mapError { ex -> FileException.Operation("Failed to remove rendition with key $key: ${ex.message}", ex) }
     }
 
-    override suspend fun getRenditionUrl(key: String): Result<String, FileException.Operation> {
-        return runSuspendCatching {
+    override suspend fun getRenditionUrl(key: String): Result<String, FileException> = coroutineBinding {
+
+        val fileExists = exists(key).bind()
+        resolveMetadataSyncConflicts(fileExists, key).bind()
+
+        runSuspendCatching {
             val getObjectRequest = GetObjectRequest.builder()
                 .bucket(s3Properties.bucket)
                 .key(key)
@@ -168,7 +187,13 @@ class S3FileStorage(
 
             val presigned = s3Presigner.presignGetObject(presignRequest)
             URLDecoder.decode(presigned.url().toString(), StandardCharset.UTF_8)
-        }.mapError { ex -> FileException.Operation("Failed to get url for rendition with key $key: ${ex.message}", ex) }
-
         }
+            .mapError { ex ->
+                FileException.Operation(
+                    "Failed to get url for rendition with key $key: ${ex.message}",
+                    ex
+                )
+            }
+            .bind()
+    }
 }

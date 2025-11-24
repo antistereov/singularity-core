@@ -3,10 +3,8 @@ package io.stereov.singularity.file.core.model
 import io.stereov.singularity.auth.core.model.token.AccessType
 import io.stereov.singularity.content.core.model.ContentAccessDetails
 import io.stereov.singularity.content.core.model.ContentDocument
-import io.stereov.singularity.global.exception.model.InvalidDocumentException
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
-import org.springframework.data.annotation.Transient
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
@@ -33,7 +31,7 @@ import java.time.Instant
  */
 @Document(collection = "files")
 data class FileMetadataDocument(
-    @Id private val _id: ObjectId? = null,
+    @Id override val _id: ObjectId? = null,
     @Indexed(unique = true) override val key: String,
     override val createdAt: Instant = Instant.now(),
     override var updatedAt: Instant = Instant.now(),
@@ -45,9 +43,7 @@ data class FileMetadataDocument(
     override var tags: MutableSet<String> = mutableSetOf()
 ) : ContentDocument<FileMetadataDocument> {
 
-    @get:Transient
-    override val id: ObjectId
-        get() = _id ?: throw InvalidDocumentException("No ID found")
+
 
     constructor(
         id: ObjectId? = null,

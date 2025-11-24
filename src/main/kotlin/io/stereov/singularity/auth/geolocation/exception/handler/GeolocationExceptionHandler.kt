@@ -1,7 +1,6 @@
 package io.stereov.singularity.auth.geolocation.exception.handler
 
 import io.stereov.singularity.auth.geolocation.exception.GeolocationException
-import io.stereov.singularity.global.exception.BaseExceptionHandler
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler

@@ -2,7 +2,6 @@ package io.stereov.singularity.content.invitation.exception.handler
 
 import io.stereov.singularity.content.invitation.exception.InvitationException
 import io.stereov.singularity.content.invitation.exception.model.InvalidInvitationException
-import io.stereov.singularity.global.exception.BaseExceptionHandler
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler

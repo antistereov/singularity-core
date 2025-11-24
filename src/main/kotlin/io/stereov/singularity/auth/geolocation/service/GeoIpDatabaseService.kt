@@ -6,7 +6,6 @@ import com.maxmind.geoip2.model.CityResponse
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.geolocation.exception.GeolocationException
 import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
-import io.stereov.singularity.ratelimit.excpetion.model.TooManyRequestsException
 import jakarta.annotation.PostConstruct
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.reactor.awaitSingle

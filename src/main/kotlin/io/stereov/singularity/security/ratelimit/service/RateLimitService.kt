@@ -5,9 +5,9 @@ import io.github.bucket4j.Bucket
 import io.github.bucket4j.BucketConfiguration
 import io.github.bucket4j.redis.lettuce.cas.LettuceBasedProxyManager
 import io.stereov.singularity.auth.core.service.AuthorizationService
-import io.stereov.singularity.ratelimit.excpetion.model.TooManyRequestsException
-import io.stereov.singularity.ratelimit.properties.LoginAttemptLimitProperties
-import io.stereov.singularity.ratelimit.properties.RateLimitProperties
+import io.stereov.singularity.ratelimit.excpetion.RateLimitException
+import io.stereov.singularity.security.ratelimit.properties.LoginAttemptLimitProperties
+import io.stereov.singularity.security.ratelimit.properties.RateLimitProperties
 import kotlinx.coroutines.reactor.mono
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
@@ -44,7 +44,7 @@ class RateLimitService(
      */
     fun checkIpRateLimit(clientIp: String): Mono<Void> {
         return resolveBucket("rate_limit_ip:$clientIp", rateLimitProperties.ipLimit, 1)
-            .flatMap { checkBucket(it, "Too many login attempts for current IP") }
+            .flatMap { checkBucket(it) { RateLimitException.Ip("Too many login attempts for current IP") } }
     }
 
     /**
@@ -56,7 +56,13 @@ class RateLimitService(
      *
      * @return a Mono<Void> that completes if the user is within the rate limit or emits an error if the limit is exceeded
      */
-    fun checkUserRateLimit(): Mono<Void?> = mono { authorizationService.getUserId().getOrThrow() }
+    fun checkUserRateLimit(): Mono<Void?> = mono {
+        authorizationService.getAuthenticationOutcome()
+            .getOrThrow()
+            .requireAuthentication()
+            .getOrThrow()
+            .userId
+    }
         .onErrorResume { Mono.empty() }
         .flatMap { userId ->
             val userBucket = resolveBucket(
@@ -64,7 +70,7 @@ class RateLimitService(
                 rateLimitProperties.userLimit,
                 rateLimitProperties.userTimeWindow
             )
-            userBucket.flatMap { checkBucket(it, "Too many requests for current user") }
+            userBucket.flatMap { checkBucket(it) { RateLimitException.User("Too many requests for current user") } }
         }
 
     /**
@@ -83,7 +89,7 @@ class RateLimitService(
             loginAttemptLimitProperties.ipLimit,
             loginAttemptLimitProperties.ipTimeWindow
         )
-            .flatMap { checkBucket(it, "Too many requests from current IP address") }
+            .flatMap { checkBucket(it) { RateLimitException.Login("Too many requests from current IP address") } }
     }
 
     /**
@@ -116,12 +122,12 @@ class RateLimitService(
      * @return A `Mono<Void>` that completes if the token was consumed successfully,
      *         or emits an error of type `TooManyRequestsException` if the rate limit is exceeded.
      */
-    fun checkBucket(bucket: Bucket, errorMessage: String): Mono<Void> {
+    fun checkBucket(bucket: Bucket, exception: () -> RateLimitException): Mono<Void> {
         return Mono.defer {
             if (bucket.tryConsume(1)) {
                 Mono.empty()
             } else {
-                Mono.error(TooManyRequestsException(errorMessage))
+                Mono.error(exception())
             }
         }
     }

@@ -40,7 +40,8 @@ class SecretsConfiguration {
     fun secretRotationController(
         secretRotationService: SecretRotationService
     ) = SecretRotationController(
-        secretRotationService
+        secretRotationService,
+        authorizationService
     )
 
     // Service

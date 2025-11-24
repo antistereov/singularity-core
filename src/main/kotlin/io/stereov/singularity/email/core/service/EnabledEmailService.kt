@@ -19,6 +19,24 @@ import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.stereotype.Service
 import java.util.*
 
+/**
+ * Service implementation of [EmailService] responsible for sending emails when email functionality
+ * is enabled in the application configuration.
+ *
+ * This service provides an email-sending mechanism using the [JavaMailSender] for constructing
+ * and delivering emails. It integrates with other services like [EmailTemplateService], to generate
+ * localized email templates, and uses properties defined in [EmailProperties] and [AppProperties]
+ * to configure email settings and application metadata.
+ *
+ * The service is conditionally loaded based on the `singularity.email.enable` property in the
+ * application configuration. When this property is set to `true`, the service is activated and ready
+ * to handle email operations. If set to `false`, the service is not loaded, [FailingEmailService] will be used.
+ *
+ * Key responsibilities of this service include:
+ * - Constructing and preparing the email content and metadata.
+ * - Generating localized email templates through the [EmailTemplateService].
+ * - Handling exceptions related to email sending, such as authentication failures or sending errors.
+ */
 @Service
 @ConditionalOnProperty(prefix = "singularity.email", value = ["enable"], havingValue = "true", matchIfMissing = false)
 class EnabledEmailService(
