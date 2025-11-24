@@ -3,7 +3,6 @@ package io.stereov.singularity.content.core.exception.handler
 import io.stereov.singularity.content.core.exception.ContentException
 import io.stereov.singularity.content.core.exception.model.ContentKeyExistsException
 import io.stereov.singularity.content.core.exception.model.ContentTypeNotFoundException
-import io.stereov.singularity.global.exception.BaseExceptionHandler
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler

@@ -1,10 +1,16 @@
 package io.stereov.singularity.secrets.core.controller
 
-import io.stereov.singularity.admin.core.dto.RotationStatusResponse
-import io.stereov.singularity.global.model.ErrorResponse
+import com.github.michaelbull.result.getOrThrow
+import io.stereov.singularity.auth.core.exception.AccessTokenExtractionException
+import io.stereov.singularity.auth.core.exception.AuthenticationException
+import io.stereov.singularity.auth.core.service.AuthorizationService
+import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.global.model.SuccessResponse
+import io.stereov.singularity.secrets.core.dto.RotationStatusResponse
+import io.stereov.singularity.secrets.core.exception.SecretRotationException
 import io.stereov.singularity.secrets.core.service.SecretRotationService
+import io.stereov.singularity.user.core.model.Role
 import io.swagger.v3.oas.annotations.ExternalDocumentation
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -25,7 +31,8 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/security/secrets")
 @Tag(name = "Security", description = "Operations related to managing the servers security.")
 class SecretRotationController(
-    private val secretRotationService: SecretRotationService
+    private val secretRotationService: SecretRotationService,
+    private val authorizationService: AuthorizationService
 ) {
 
     @PostMapping("/rotate-keys")
@@ -50,20 +57,27 @@ class SecretRotationController(
                 responseCode = "200",
                 description = "Rotation process successfully triggered.",
                 content = [Content(schema = Schema(implementation = SuccessResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "Invalid or expired AccessToken.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "403",
-                description = "AccessToken does not grant [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) access.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
     )
+    @ThrowsDomainError([
+        AccessTokenExtractionException::class,
+        AuthenticationException.AuthenticationRequired::class,
+        AuthenticationException.RoleRequired::class,
+        SecretRotationException.Ongoing::class
+    ])
     suspend fun rotateSecretKeys(): ResponseEntity<SuccessResponse> = coroutineScope {
+        authorizationService.getAuthenticationOutcome()
+            .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
+            .requireAuthentication()
+            .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it } }
+            .requireRole(Role.ADMIN)
+            .getOrThrow { when (it) { is AuthenticationException.RoleRequired -> it } }
+
+        if (secretRotationService.rotationOngoing()) {
+            throw SecretRotationException.Ongoing("Rotation is already ongoing")
+        }
+
         async { secretRotationService.rotateKeys() }.start()
 
         return@coroutineScope ResponseEntity.ok(SuccessResponse(true))
@@ -90,23 +104,24 @@ class SecretRotationController(
             ApiResponse(
                 responseCode = "200",
                 description = "The rotation status.",
-                content = [Content(schema = Schema(implementation = RotationStatusResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "Invalid or expired AccessToken.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "403",
-                description = "AccessToken does not grant [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) access.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
     )
+    @ThrowsDomainError([
+        AccessTokenExtractionException::class,
+        AuthenticationException.AuthenticationRequired::class,
+        AuthenticationException.RoleRequired::class,
+    ])
     suspend fun getSecretKeyRotationStatus(): ResponseEntity<RotationStatusResponse> {
+        authorizationService.getAuthenticationOutcome()
+            .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
+            .requireAuthentication()
+            .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it } }
+            .requireRole(Role.ADMIN)
+            .getOrThrow { when (it) { is AuthenticationException.RoleRequired -> it } }
+
         return ResponseEntity.ok(
-            this.secretRotationService.getRotationStatus()
+            secretRotationService.getRotationStatus()
         )
     }
 }

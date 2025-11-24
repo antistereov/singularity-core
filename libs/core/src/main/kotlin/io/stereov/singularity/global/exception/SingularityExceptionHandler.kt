@@ -1,7 +1,6 @@
-package io.stereov.singularity.global.exception.handler
+package io.stereov.singularity.global.exception
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.global.exception.SingularityException
 import io.stereov.singularity.global.model.ErrorResponse
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
@@ -9,13 +8,13 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.server.ServerWebExchange
 
 @ControllerAdvice
-class GlobalExceptionHandler {
+class SingularityExceptionHandler {
 
 
     private val logger = KotlinLogging.logger {}
 
     @ExceptionHandler(SingularityException::class)
-    fun handleExceptionInternal(ex: SingularityException, exchange: ServerWebExchange): ResponseEntity<ErrorResponse> {
+    fun handleException(ex: SingularityException, exchange: ServerWebExchange): ResponseEntity<ErrorResponse> {
         logger.warn { "${ex.javaClass.simpleName} - ${ex.message}" }
 
         val status = ex.status

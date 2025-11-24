@@ -22,6 +22,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
+import java.time.Instant
 
 /**
  * Abstract service for handling CRUD operations on sensitive documents with encryption and decryption mechanisms.
@@ -48,8 +49,10 @@ abstract class SensitiveCrudService<SensitiveData, DecryptedDocument: SensitiveD
     abstract val reactiveMongoTemplate: ReactiveMongoTemplate
 
     protected abstract suspend fun doEncrypt(document: DecryptedDocument, encryptedSensitive: Encrypted<SensitiveData>): Result<EncryptedDocument, EncryptionException>
-
     protected abstract suspend fun doDecrypt(encrypted: EncryptedDocument, decryptedSensitive: SensitiveData): Result<DecryptedDocument, EncryptionException>
+
+    private var lastSuccessfulKeyRotation: Instant? = null
+    fun getLastSuccessfulKeyRotation(): Instant? = lastSuccessfulKeyRotation
 
     /**
      * Encrypts a given decrypted document and returns the encrypted result.
@@ -295,7 +298,10 @@ abstract class SensitiveCrudService<SensitiveData, DecryptedDocument: SensitiveD
                     .bind()
                 repository.save(newlyEncrypted)
             }
-            .onCompletion { logger.debug { "Key successfully rotated" } }
+            .onCompletion {
+                logger.debug { "Key successfully rotated" }
+                lastSuccessfulKeyRotation = Instant.now()
+            }
             .collect {}
     }
 

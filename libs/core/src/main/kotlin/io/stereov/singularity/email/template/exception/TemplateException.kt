@@ -1,49 +1,65 @@
 package io.stereov.singularity.email.template.exception
 
 import io.stereov.singularity.global.exception.SingularityException
+import org.springframework.http.HttpStatus
 
 /**
- * Represents a base class for template-related exceptions.
+ * Represents a base exception class for template-related errors in the application.
  *
- * This sealed class extends [SingularityException] and serves as the base for all exceptions related to
- * template processing or resource handling. It provides a unified way to handle various types
- * of errors that can occur during template management, such as missing resources or translation bundles.
+ * This sealed class extends [SingularityException], providing a foundational structure
+ * for more specific exceptions that occur when working with email templates. It includes
+ * additional context like an error code, HTTP status, and a detailed description, enabling
+ * systematic handling of template errors.
  *
- * @param msg A message describing the details of the error.
- * @param code A code representing the specific type of the exception.
- * @param cause The underlying cause of the exception, if any.
+ * @param msg The error message describing the exception.
+ * @param code A unique code identifying the type of template error.
+ * @param status The HTTP status associated with the error.
+ * @param description A detailed description of the error.
+ * @param cause The underlying cause of the exception, if available.
  */
 sealed class TemplateException(
     msg: String,
     code: String,
+    status: HttpStatus,
+    description: String,
     cause: Throwable?
-) : SingularityException(msg, code, cause) {
+) : SingularityException(msg, code, status, description, cause) {
 
     /**
      * Exception indicating that a required template resource could not be found.
      *
-     * This exception is typically used when a template resource specified for loading or processing
-     * is not available or cannot be accessed. It extends the [TemplateException] class, providing
-     * additional context specific to resource-related errors.
+     * This exception extends [TemplateException].
      *
      * @param msg A message describing the details of the missing resource.
      * @param cause The underlying cause of the exception, if any.
+     *
+     * @property code `TEMPLATE_RESOURCE_NOT_FOUND`
+     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
      */
-    class ResourceNotFound(msg: String, cause: Throwable? = null) : TemplateException(msg, CODE, cause) {
-        companion object { const val CODE = "TEMPLATE_RESOURCE_NOT_FOUND" }
-    }
+    class ResourceNotFound(msg: String, cause: Throwable? = null) : TemplateException(
+        msg,
+        "TEMPLATE_RESOURCE_NOT_FOUND",
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        "Exception indicating that a required template resource could not be found.",
+        cause
+    )
 
     /**
      * Exception indicating that a translation bundle could not be found.
      *
-     * This exception is typically thrown when an attempt is made to load a translation resource bundle,
-     * but the resource cannot be located. It extends the [TemplateException] class,
-     * providing additional context specific to translation-related errors.
+     * This exception extends [TemplateException].
      *
      * @param msg A message describing the details of the missing translation bundle.
      * @param cause The underlying cause of the exception, if any.
+     *
+     * @property code `TRANSLATION_BUNDLE_NOT_FOUND`
+     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
      */
-    class TranslationBundleNotFound(msg: String, cause: Throwable? = null) : TemplateException(msg, CODE, cause) {
-        companion object { const val CODE = "TRANSLATION_BUNDLE_NOT_FOUND" }
-    }
+    class TranslationBundleNotFound(msg: String, cause: Throwable? = null) : TemplateException(
+        msg,
+        "TRANSLATION_BUNDLE_NOT_FOUND",
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        "Exception indicating that a translation bundle could not be found.",
+        cause
+    )
 }

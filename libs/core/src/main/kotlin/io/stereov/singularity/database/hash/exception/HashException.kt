@@ -1,58 +1,85 @@
 package io.stereov.singularity.database.hash.exception
 
 import io.stereov.singularity.global.exception.SingularityException
+import org.springframework.http.HttpStatus
 
 /**
- * Represents exceptions related to hashing operations.
+ * Represents a family of exceptions related to hashing operations.
  *
- * This sealed class serves as a base for specific hashing-related exception types.
+ * This sealed class serves as a base for more specific exceptions that may occur
+ * during hashing operations within the application, such as secret handling,
+ * encoding, or hashing failures. Each subclass provides a unique context and
+ * specific details about the error encountered.
+ *
+ * Extends [SingularityException].
  *
  * @param msg The error message describing the exception.
- * @param code The error code associated with the exception.
- * @param cause The underlying cause of the exception, if any.
+ * @param code A unique code representing the specific type of hashing error.
+ * @param status The associated HTTP status for the exception.
+ * @param description A detailed description providing more context about the error.
+ * @param cause The underlying cause of the exception, if available.
  */
 sealed class HashException(
     msg: String,
     code: String,
+    status: HttpStatus,
+    description: String,
     cause: Throwable?
-) : SingularityException(msg, code, cause) {
+) : SingularityException(msg, code, status, description, cause) {
 
     /**
      * Represents an exception that occurs when there is a failure related to hash secrets.
      *
-     * This exception is used to indicate issues that arise during operations involving
-     * hash secrets, such as retrieving the current hash secret or decoding it.
+     * Extends [HashException].
      *
      * @param msg The error message describing the exception.
      * @param cause The underlying cause of the exception, if any.
+     *
+     * @property code `HASH_SECRET_FAILURE`
+     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
      */
-    class Secret(msg: String, cause: Throwable? = null): HashException(msg, CODE, cause) {
-        companion object { const val CODE = "HASH_SECRET_FAILURE" }
-    }
-
+    class Secret(msg: String, cause: Throwable? = null): HashException(
+        msg,
+        "HASH_SECRET_FAILURE", 
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        "Represents an exception that occurs when there is a failure related to hash secrets.",
+        cause
+    )
     /**
      * Represents an exception that occurs during encoding operations in the hashing process.
      *
-     * This exception is typically used to indicate issues related to encoding, such as
-     * errors decoding hash secrets or encoding generated hash values.
+     * Extends [HashException].
      *
      * @param msg The error message describing the exception.
      * @param cause The underlying cause of the exception, if any.
+     *
+     * @property code `HASH_ENCODING_FAILURE`
+     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
      */
-    class Encoding(msg: String, cause: Throwable? = null): HashException(msg, CODE, cause) {
-        companion object { const val CODE = "HASH_ENCODING_FAILURE" }
-    }
+    class Encoding(msg: String, cause: Throwable? = null): HashException(
+        msg,
+        "HASH_ENCODING_FAILURE",
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        "Represents an exception that occurs during encoding operations in the hashing process.",
+        cause
+    )
 
     /**
      * Represents an exception that occurs during the hashing process.
      *
-     * This exception is used to signify failures related to hashing operations, for example,
-     * when initializing a hashing algorithm, validating hashes, or performing other hashing-related tasks.
+     * Extends [HashException].
      *
      * @param msg The error message describing the exception.
      * @param cause The underlying cause of the exception, if any.
+     *
+     * @property code `HASHING_FAILURE`
+     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
      */
-    class Hashing(msg: String, cause: Throwable? = null): HashException(msg, CODE, cause) {
-        companion object { const val CODE = "HASHING_FAILURE" }
-    }
+    class Hashing(msg: String, cause: Throwable? = null): HashException(
+        msg,
+        "HASHING_FAILURE",
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        "Represents an exception that occurs during the hashing process.",
+        cause
+    )
 }

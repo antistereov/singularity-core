@@ -8,9 +8,7 @@ import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.content.core.exception.ContentException
 import io.stereov.singularity.content.core.model.ContentAccessRole
 import io.stereov.singularity.file.core.exception.FileException
-import io.stereov.singularity.file.core.exception.FileMetadataException
 import io.stereov.singularity.file.core.mapper.FileMetadataMapper
-import io.stereov.singularity.file.core.model.FileMetadataDocument
 import io.stereov.singularity.file.core.model.FileUploadRequest
 import io.stereov.singularity.file.core.model.FileUploadResponse
 import io.stereov.singularity.file.core.properties.StorageProperties
@@ -56,6 +54,14 @@ class LocalFileStorage(
         return baseDir.resolve(key)
     }
 
+    /**
+     * Serves a file based on the provided key and authentication outcome.
+     *
+     * @param authenticationOutcome The result of the authentication process, used to validate user permissions.
+     * @param key The file key to locate and serve the file.
+     * @return A [Result] containing the served file data encapsulated in [ServedFile] if successful,
+     * or a [FileException] if an error occurs, such as file access issues, invalid requests, or authorization failures.
+     */
     suspend fun serveFile(
         authenticationOutcome: AuthenticationOutcome,
         key: String,
@@ -80,7 +86,16 @@ class LocalFileStorage(
             .mapError { ex -> FileException.Operation("Failed to resolve file path: ${ex.message}") }
             .bind()
 
-        val metadata = resolveMetadataSyncConflicts(filePath, key).bind()
+        val fileExists = runCatching { filePath.exists() }
+            .mapError { ex ->
+                FileException.Operation(
+                    "Failed to check existence of file with path $filePath: ${ex.message}",
+                    ex
+                )
+            }
+            .bind()
+
+        val metadata = resolveMetadataSyncConflicts(fileExists, key).bind()
 
         metadataService.requireAuthorization(authenticationOutcome, metadata, ContentAccessRole.VIEWER)
             .mapError { ex ->
@@ -125,64 +140,6 @@ class LocalFileStorage(
             size = size,
             content = DataBufferUtils.read(filePath, DefaultDataBufferFactory(), 4092),
         )
-    }
-
-    private suspend fun resolveMetadataSyncConflicts(
-        filePath: Path,
-        key: String
-    ): Result<FileMetadataDocument, FileException> = coroutineBinding {
-        val fileExists = runCatching { filePath.exists() }
-            .mapError { ex ->
-                FileException.Operation(
-                    "Failed to check existence of file with path $filePath: ${ex.message}",
-                    ex
-                )
-            }
-            .bind()
-
-        metadataService.findRenditionByKey(key)
-            .flatMapEither(
-                success = { metadata -> Ok(metadata) },
-                failure = { ex ->
-                    when (ex) {
-                        is FileMetadataException.NotFound -> {
-                            if (fileExists) {
-                                logger.warn { "No metadata found for rendition with key $key but file exists, removing file..." }
-                                remove(key)
-                                    .mapError { ex ->
-                                        FileException.MetadataOutOfSync(
-                                            "File with key $key found but no metadata was found; attempt to resolve conflict failed: ${ex.message}",
-                                            ex
-                                        )
-                                    }
-                                    .andThen {
-                                        Err(
-                                            FileException.Metadata(
-                                                "Failed to fetch metadata for file with key $key: ${ex.message}",
-                                                ex
-                                            )
-                                        )
-                                    }
-                            } else {
-                                Err(FileException.NotFound("File with key $key not found: ${ex.message}", ex))
-                            }
-                        }
-
-                        is FileMetadataException.Database -> {
-                            if (fileExists) {
-                                Err(
-                                    FileException.Metadata(
-                                        "Failed to fetch metadata for file with key $key: ${ex.message}",
-                                        ex
-                                    )
-                                )
-                            } else {
-                                Err(FileException.NotFound("File with key $key not found"))
-                            }
-                        }
-                    }
-                }
-            ).bind()
     }
 
     override suspend fun uploadRendition(

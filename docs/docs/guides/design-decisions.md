@@ -1,10 +1,10 @@
 ---
-sidebar_position: 13
+sidebar_position: 3
 ---
 
-# Errors
+# Design Decision
 
-## Design Decision
+## Error Handling
 
 This paragraph outlines the rationale behind our chosen error-handling strategy, 
 which prioritizes **explicitness** and **type safety** across our Spring WebFlux application by leveraging a 
@@ -70,37 +70,3 @@ referencing the relevant Domain Error sealed classes (e.g., `@ThrowsDomainError(
 
 This keeps our documentation in **perfect sync** with the actual application code, eliminating manual `@ApiResponse` boilerplate.
 :::
-
-## Reference
-
-### File
-
-#### UNSUPPORTED_MEDIA_TYPE
-
-* **Status:** `415 Unsupported Media Type`
-* **Description:**
-  Thrown to indicate that an operation failed due to an unsupported media type.
-  This exception is specifically used to represent scenarios where a provided
-  media type is not compatible or allowed in the current context of file operations.
-
-#### FILE_METADATA_FAILURE
-
-* **Status:** `500 Internal Server Error`
-* **Description:** 
-  Thrown to indicate that a failure occurred during the handling of file metadata.
-  This exception is specifically used to represent scenarios where an operation
-  involving file metadata cannot be completed successfully due to an error.
-
-#### FILE_KEY_TAKEN
-
-* **Status:** `409 Conflict`
-* **Description:**
-  This exception is thrown when attempting to use a file key that is already taken or in use.
-
-
-#### FILE_METADATA_OUT_OF_SYNC
-
-* **Status:** `500 Internal Server Error`
-* **Description:**
-  Represents an exception thrown when file metadata saved in the database is out of sync 
-  with the expected state of the actual file.

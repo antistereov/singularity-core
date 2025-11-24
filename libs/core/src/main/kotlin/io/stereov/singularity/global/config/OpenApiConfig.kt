@@ -134,7 +134,7 @@ class OpenApiConfig() {
                         ?: return@forEach
 
                     val responseCode = apiError.status.value().toString()
-                    val descriptionEntry = "\n* [`${apiError.code}`](https://singularity.stereov.io/docs/guides/errors#${apiError.code})"
+                    val descriptionEntry = "\n* **`${apiError.code}`:** ${apiError.description}"
 
                     val existingResponse = operation.responses[responseCode]
                     if (existingResponse == null) {

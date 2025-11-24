@@ -29,6 +29,13 @@ import java.io.PipedInputStream
 import java.io.PipedOutputStream
 import javax.imageio.ImageIO
 
+/**
+ * Service for handling image uploads and processing, including resizing, format conversion, and storage in a file system.
+ *
+ * @property imageProperties Configuration properties for image processing, such as dimensions for various renditions.
+ * @property fileStorage File storage service for handling file operations like uploads.
+ * @property dataBufferPublisher Utility for converting reactive data streams to byte arrays.
+ */
 @Service
 class ImageStore(
     private val imageProperties: ImageProperties,
@@ -38,6 +45,15 @@ class ImageStore(
 
     private val logger = KotlinLogging.logger {}
 
+    /**
+     * Uploads an image file to the file storage while handling authentication, metadata, and visibility.
+     *
+     * @param authentication The authentication outcome representing the authenticated user.
+     * @param file The streamed file to be uploaded.
+     * @param key The unique key used to identify the uploaded file.
+     * @param isPublic Whether the uploaded file should be publicly accessible.
+     * @return A [Result] containing the [FileMetadataResponse] if the upload is successful, or a [FileException] if an error occurs.
+     */
     suspend fun upload(
         authentication: AuthenticationOutcome.Authenticated,
         file: StreamedFile,
@@ -52,6 +68,15 @@ class ImageStore(
         return upload(authentication, imageBytes, file.contentType, key, isPublic, originalExtension)
     }
 
+    /**
+     * Uploads a file to the storage system, handling metadata, authentication, and visibility options.
+     *
+     * @param authentication The authentication outcome representing the authenticated user.
+     * @param file The file to be uploaded, provided as a [FilePart].
+     * @param key The unique key or identifier for the uploaded file.
+     * @param isPublic A boolean indicating whether the file should be publicly accessible.
+     * @return A [Result] encapsulating the [FileMetadataResponse] upon successful upload, or a [FileException] in case of failure.
+     */
     suspend fun upload(
         authentication: AuthenticationOutcome.Authenticated,
         file: FilePart,
@@ -140,6 +165,17 @@ class ImageStore(
         return@withContext finalImage
     }
 
+    /**
+     * Uploads an image along with its renditions to a file storage system.
+     *
+     * @param authentication The authentication object containing user credentials and permissions.
+     * @param imageBytes The raw byte array of the image to be uploaded.
+     * @param contentType The media type of the image (e.g., "image/jpeg", "image/png"). Null if unspecified.
+     * @param key The unique identifier for the file in the storage.
+     * @param isPublic Boolean flag indicating whether the file should be publicly accessible.
+     * @param fileExtension The file extension of the uploaded image (e.g., "jpg", "png"). Null if unspecified.
+     * @return A [Result] containing the [FileMetadataResponse] of the uploaded file on success, or a [FileException] on failure.
+     */
     suspend fun upload(
         authentication: AuthenticationOutcome.Authenticated,
         imageBytes: ByteArray,

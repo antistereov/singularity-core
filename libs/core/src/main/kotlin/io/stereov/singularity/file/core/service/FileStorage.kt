@@ -3,6 +3,7 @@ package io.stereov.singularity.file.core.service
 import com.github.michaelbull.result.*
 import com.github.michaelbull.result.coroutines.coroutineBinding
 import io.github.oshai.kotlinlogging.KLogger
+import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.database.core.exception.DatabaseException
 import io.stereov.singularity.file.core.dto.FileMetadataResponse
 import io.stereov.singularity.file.core.exception.FileException
@@ -48,7 +49,7 @@ abstract class FileStorage {
      * or an appropriate [FileException] on failure.
      */
     suspend fun upload(
-        authentication: AuthenticationToken,
+        authentication: AuthenticationOutcome.Authenticated,
         key: FileKey,
         file: FilePart,
         isPublic: Boolean,
@@ -92,19 +93,20 @@ abstract class FileStorage {
     }
 
     /**
-     * Uploads multiple file renditions and associates them with a common key and metadata.
+     * Uploads multiple renditions of a file and associates them with the specified key and metadata.
      *
-     * This method performs validation to ensure that no rendition with the same keys already exists,
-     * uploads the provided file renditions, and saves metadata for the uploaded renditions.
+     * This method performs several operations, including checking the existence of each rendition,
+     * uploading the renditions, saving metadata, and handling out-of-sync metadata situations.
      *
      * @param authentication The authentication token of the user performing the upload.
-     * @param key A unique key that groups the file renditions together.
-     * @param files A map of file identifiers to their corresponding upload requests, where the key is a string identifier, and the value is a [FileUploadRequest] object.
-     * @param isPublic Indicates whether the uploaded renditions should be publicly accessible.
-     * @return A [Result] containing the file metadata response on successful upload, or an appropriate [FileException] on failure.
+     * @param key A unique key identifying the file for which renditions are being uploaded.
+     * @param files A map of rendition identifiers to their respective file upload requests.
+     * @param isPublic Indicates whether the uploaded file renditions should be publicly accessible.
+     * @return A [Result] containing the metadata response for the uploaded file and renditions on success,
+     * or an appropriate [FileException] on failure.
      */
     suspend fun uploadMultipleRenditions(
-        authentication: AuthenticationToken,
+        authentication: AuthenticationOutcome.Authenticated,
         key: String,
         files: Map<String, FileUploadRequest>,
         isPublic: Boolean,
@@ -267,6 +269,9 @@ abstract class FileStorage {
 
         metadata.renditions.values.forEach { rendition ->
             removeRendition(rendition.key).bind()
+            metadataService.deleteRenditionByKey(rendition.key)
+                .mapError { ex -> FileException.MetadataOutOfSync("Failed to delete metadata for rendition with key $key: ${ex.message}", ex) }
+                .bind()
         }
         metadataService.deleteByKey(key)
             .mapError { ex ->
@@ -286,7 +291,7 @@ abstract class FileStorage {
      * @param key The unique key identifying the file whose metadata is to be retrieved.
      * @return A [Result] containing the [FileMetadataResponse] on success, or a [FileException] if an error occurs.
      */
-    suspend fun metadataResponseByKey(authentication: AuthenticationToken, key: String): Result<FileMetadataResponse, FileException> {
+    suspend fun metadataResponseByKey(authentication: AuthenticationOutcome.Authenticated, key: String): Result<FileMetadataResponse, FileException> {
         logger.debug { "Creating metadata response for file with key \"$key\"" }
 
         return metadataService.findByKey(key)
@@ -309,7 +314,7 @@ abstract class FileStorage {
      * or a [FileException] if an error occurs during the response creation process.
      */
     suspend fun createResponse(
-        authentication: AuthenticationToken,
+        authentication: AuthenticationOutcome.Authenticated,
         doc: FileMetadataDocument
     ): Result<FileMetadataResponse, FileException> = coroutineBinding {
         val renditions = doc.renditions.map { (id, rend) ->
@@ -323,8 +328,58 @@ abstract class FileStorage {
         )
     }
 
+    protected suspend fun resolveMetadataSyncConflicts(
+        fileExists: Boolean,
+        key: String
+    ): Result<FileMetadataDocument, FileException> = coroutineBinding {
+
+        metadataService.findRenditionByKey(key)
+            .flatMapEither(
+                success = { metadata -> Ok(metadata) },
+                failure = { ex ->
+                    when (ex) {
+                        is FileMetadataException.NotFound -> {
+                            if (fileExists) {
+                                logger.warn { "No metadata found for rendition with key $key but file exists, removing file..." }
+                                remove(key)
+                                    .mapError { ex ->
+                                        FileException.MetadataOutOfSync(
+                                            "File with key $key found but no metadata was found; attempt to resolve conflict failed: ${ex.message}",
+                                            ex
+                                        )
+                                    }
+                                    .andThen {
+                                        Err(
+                                            FileException.Metadata(
+                                                "Failed to fetch metadata for file with key $key: ${ex.message}",
+                                                ex
+                                            )
+                                        )
+                                    }
+                            } else {
+                                Err(FileException.NotFound("File with key $key not found: ${ex.message}", ex))
+                            }
+                        }
+
+                        is FileMetadataException.Database -> {
+                            if (fileExists) {
+                                Err(
+                                    FileException.Metadata(
+                                        "Failed to fetch metadata for file with key $key: ${ex.message}",
+                                        ex
+                                    )
+                                )
+                            } else {
+                                Err(FileException.NotFound("File with key $key not found"))
+                            }
+                        }
+                    }
+                }
+            ).bind()
+    }
+
     protected abstract suspend fun uploadRendition(req: FileUploadRequest): Result<FileUploadResponse, FileException.Operation>
     protected abstract suspend fun renditionExists(key: String): Result<Boolean, FileException.Operation>
     protected abstract suspend fun removeRendition(key: String): Result<Unit, FileException.Operation>
-    protected abstract suspend fun getRenditionUrl(key: String): Result<String, FileException.Operation>
+    protected abstract suspend fun getRenditionUrl(key: String): Result<String, FileException>
 }

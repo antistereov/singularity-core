@@ -5,7 +5,6 @@ import io.stereov.singularity.auth.oauth2.exception.model.CannotDisconnectIdenti
 import io.stereov.singularity.auth.oauth2.exception.model.OAuth2FlowException
 import io.stereov.singularity.auth.oauth2.exception.model.OAuth2ProviderConnectedException
 import io.stereov.singularity.auth.oauth2.exception.model.PasswordIdentityAlreadyAddedException
-import io.stereov.singularity.global.exception.BaseExceptionHandler
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler

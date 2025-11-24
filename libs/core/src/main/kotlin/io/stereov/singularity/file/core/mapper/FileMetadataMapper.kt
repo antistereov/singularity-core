@@ -1,5 +1,6 @@
 package io.stereov.singularity.file.core.mapper
 
+import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.content.core.dto.response.ContentAccessDetailsResponse
 import io.stereov.singularity.file.core.dto.FileMetadataResponse
 import io.stereov.singularity.file.core.dto.FileRenditionResponse
@@ -54,19 +55,20 @@ class FileMetadataMapper {
     )
 
     /**
-     * Converts a [FileMetadataDocument] and associated data into a [FileMetadataResponse].
+     * Converts a [FileMetadataDocument], an authenticated user, and renditions map into a
+     * [FileMetadataResponse] object.
      *
-     * @param doc The [FileMetadataDocument] containing metadata information such as ID, key,
-     * creation and update timestamps, access details, and renditions.
-     * @param authentication The [AuthenticationToken] used to determine the access details and permissions.
-     * @param renditions A map of rendition keys to [FileRenditionResponse] objects,
-     * providing the renditions available for the file.
-     * @return A [FileMetadataResponse] object containing the aggregated metadata, access details,
-     * and renditions for the file.
+     * @param doc The file metadata document containing metadata details, such as access permissions,
+     *            creation and update timestamps, and renditions.
+     * @param authentication The authenticated user information, used to evaluate access permissions.
+     * @param renditions A map of renditions where each key corresponds to a rendition identifier,
+     *   and value is the associated [FileRenditionResponse].
+     * @return A [FileMetadataResponse] object constructed from the provided metadata document,
+     *   authentication context, and rendition map.
      */
     fun toMetadataResponse(
         doc: FileMetadataDocument,
-        authentication: AuthenticationToken,
+        authentication: AuthenticationOutcome.Authenticated,
         renditions: Map<String, FileRenditionResponse>
     ) = FileMetadataResponse(
         id = doc.id,
@@ -76,6 +78,4 @@ class FileMetadataMapper {
         access = ContentAccessDetailsResponse.create(doc.access, authentication),
         renditions = renditions,
     )
-
-
 }
