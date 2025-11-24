@@ -1,5 +1,7 @@
 package io.stereov.singularity.file.core.exception
 
+import io.stereov.singularity.file.core.exception.FileException.MetadataOutOfSync.Companion.CODE
+import io.stereov.singularity.file.core.exception.FileException.MetadataOutOfSync.Companion.STATUS
 import io.stereov.singularity.file.core.exception.FileException.Operation.Companion.CODE
 import io.stereov.singularity.global.exception.SingularityException
 import org.springframework.http.HttpStatus
@@ -73,17 +75,14 @@ sealed class FileException(msg: String, code: String, status: HttpStatus, cause:
     }
 
     /**
-     * Represents an exception that is thrown when file metadata is out of sync with
-     * the expected state, indicating a discrepancy between the current metadata
-     * and the desired or actual state.
+     * Represents an exception thrown when file metadata saved in the database is out of sync
+     * with the expected state of the actual file.
      *
-     * This exception is a specialization of the [FileException] class and includes
-     * a specific error code, represented by the `CODE` property.
-     *
-     * @constructor Creates a new instance of the MetadataOutOfSync exception with
-     * a specified error message and an optional cause.
      * @param msg The detail message explaining the exception.
      * @param cause The underlying cause of the exception, if any.
+     *
+     * @property CODE The error code `FILE_METADATA_OUT_OF_SYNC`
+     * @property STATUS The status [HttpStatus.INTERNAL_SERVER_ERROR]
      */
     class MetadataOutOfSync(msg: String, cause: Throwable? = null) : FileException(msg, CODE, STATUS, cause) {
         companion object {
@@ -128,6 +127,13 @@ sealed class FileException(msg: String, code: String, status: HttpStatus, cause:
         companion object {
             const val CODE = "BAD_FILE_REQUEST"
             val STATUS = HttpStatus.BAD_REQUEST
+        }
+    }
+
+    class NotAuthorized(msg: String, cause: Throwable? = null) : FileException(msg, CODE, STATUS, cause) {
+        companion object {
+            const val CODE = "FILE_ACCESS_NOT_AUTHORIZED"
+            val STATUS = HttpStatus.FORBIDDEN
         }
     }
 }

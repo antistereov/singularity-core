@@ -6,6 +6,7 @@ import com.github.michaelbull.result.coroutines.runSuspendCatching
 import com.sksamuel.scrimage.ImmutableImage
 import com.sksamuel.scrimage.Position
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.file.core.component.DataBufferPublisher
 import io.stereov.singularity.file.core.dto.FileMetadataResponse
 import io.stereov.singularity.file.core.exception.FileException
@@ -38,7 +39,7 @@ class ImageStore(
     private val logger = KotlinLogging.logger {}
 
     suspend fun upload(
-        authentication: AuthenticationToken,
+        authentication: AuthenticationOutcome.Authenticated,
         file: StreamedFile,
         key: String,
         isPublic: Boolean
@@ -52,7 +53,7 @@ class ImageStore(
     }
 
     suspend fun upload(
-        authentication: AuthenticationToken,
+        authentication: AuthenticationOutcome.Authenticated,
         file: FilePart,
         key: String,
         isPublic: Boolean
@@ -74,7 +75,7 @@ class ImageStore(
         return runSuspendCatching {
             val fileKey = FileKey(filename = key, suffix = suffix, extension = "webp")
             logger.debug { "Creating upload request for $fileKey" }
-            val resized = originalImage.resize(size.toDouble())
+            val resized = originalImage.resize(size)
 
             val pipedInput = PipedInputStream()
             val pipedOutput = PipedOutputStream(pipedInput)
@@ -140,7 +141,7 @@ class ImageStore(
     }
 
     suspend fun upload(
-        authentication: AuthenticationToken,
+        authentication: AuthenticationOutcome.Authenticated,
         imageBytes: ByteArray,
         contentType: MediaType?,
         key: String,
