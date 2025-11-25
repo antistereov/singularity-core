@@ -17,7 +17,7 @@ import io.stereov.singularity.auth.token.model.SessionTokenType
 import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.global.util.getClientIp
-import io.stereov.singularity.user.core.model.AccountDocument
+import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.service.UserService
 import org.bson.types.ObjectId
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
@@ -58,7 +58,7 @@ class RefreshTokenService(
      * @return A [Result] containing the created [RefreshToken] on success or a [RefreshTokenCreationException] on failure.
      */
     suspend fun create(
-        user: AccountDocument,
+        user: UserDocument,
         sessionId: UUID,
         sessionInfo: SessionInfoRequest?,
         exchange: ServerWebExchange
@@ -107,11 +107,11 @@ class RefreshTokenService(
 
     private suspend fun updateSessions(
         exchange: ServerWebExchange,
-        user: AccountDocument,
+        user: UserDocument,
         sessionId: UUID,
         sessionInfo: SessionInfoRequest?,
         tokenId: String
-    ): Result<AccountDocument, RefreshTokenCreationException.SessionUpdate> = coroutineBinding {
+    ): Result<UserDocument, RefreshTokenCreationException.SessionUpdate> = coroutineBinding {
         val ipAddress = exchange.request.getClientIp(geolocationProperties.realIpHeader)
             ?.let { ip -> 
                 runCatching { InetAddress.getByName(ip) }
