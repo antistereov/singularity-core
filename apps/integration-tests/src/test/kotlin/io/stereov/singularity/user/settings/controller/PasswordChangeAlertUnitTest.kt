@@ -6,7 +6,7 @@ import io.mockk.slot
 import io.stereov.singularity.auth.core.model.SecurityAlertType
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
 import io.stereov.singularity.test.BaseSecurityAlertTest
-import io.stereov.singularity.user.core.model.UserDocument
+import io.stereov.singularity.user.core.model.AccountDocument
 import io.stereov.singularity.user.settings.dto.request.ChangePasswordRequest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -20,7 +20,7 @@ class PasswordChangeAlertUnitTest : BaseSecurityAlertTest() {
         user.info.clearSessions()
         userService.save(user.info)
 
-        val userSlot = slot<UserDocument>()
+        val userSlot = slot<AccountDocument>()
         val localeSlot = slot<Locale?>()
         val alertTypeSlot = slot<SecurityAlertType>()
         val providerKeySlot = slot<String?>()
@@ -54,7 +54,7 @@ class PasswordChangeAlertUnitTest : BaseSecurityAlertTest() {
         user.info.clearSessions()
         userService.save(user.info)
 
-        val userSlot = slot<UserDocument>()
+        val userSlot = slot<AccountDocument>()
         val localeSlot = slot<Locale?>()
         val alertTypeSlot = slot<SecurityAlertType>()
         val providerKeySlot = slot<String?>()

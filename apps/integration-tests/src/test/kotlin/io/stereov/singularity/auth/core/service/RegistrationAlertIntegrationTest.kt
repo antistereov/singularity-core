@@ -7,7 +7,7 @@ import io.mockk.slot
 import io.stereov.singularity.auth.core.dto.request.RegisterUserRequest
 import io.stereov.singularity.test.BaseSecurityAlertTest
 import io.stereov.singularity.test.config.MockEmailVerificationService
-import io.stereov.singularity.user.core.model.UserDocument
+import io.stereov.singularity.user.core.model.AccountDocument
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -30,7 +30,7 @@ class RegistrationAlertIntegrationTest : BaseSecurityAlertTest() {
     @Test fun `works without session and locale`() = runTest {
         val user = registerUser()
 
-        val userSlot = slot<UserDocument>()
+        val userSlot = slot<AccountDocument>()
         val localeSlot = slot<Locale?>()
         val emailSlot = slot<String>()
 
@@ -56,8 +56,8 @@ class RegistrationAlertIntegrationTest : BaseSecurityAlertTest() {
         assertEquals(user.email, emailSlot.captured)
     }
     @Test fun `does not send when user does not exist`() = runTest {
-        val emailSlot = slot<UserDocument>()
-        val userSlot = slot<UserDocument>()
+        val emailSlot = slot<AccountDocument>()
+        val userSlot = slot<AccountDocument>()
         val registrationLocaleSlot = slot<Locale?>()
         val verificationLocaleSlot = slot<Locale?>()
         val req = RegisterUserRequest("examil@example.com", "Password$1", "Name")
@@ -87,7 +87,7 @@ class RegistrationAlertIntegrationTest : BaseSecurityAlertTest() {
     @Test fun `works with locale`() = runTest {
         val user = registerUser()
 
-        val userSlot = slot<UserDocument>()
+        val userSlot = slot<AccountDocument>()
         val localeSlot = slot<Locale?>()
 
         coJustRun { registrationAlertService.send(

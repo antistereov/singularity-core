@@ -5,11 +5,11 @@ import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.slot
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
-import io.stereov.singularity.auth.core.service.IdentityProviderInfoService
+import io.stereov.singularity.auth.alert.service.IdentityProviderInfoService
 import io.stereov.singularity.auth.oauth2.model.OAuth2ErrorCode
 import io.stereov.singularity.test.BaseOAuth2FlowTest
 import io.stereov.singularity.test.config.MockSecurityAlertConfig
-import io.stereov.singularity.user.core.model.UserDocument
+import io.stereov.singularity.user.core.model.AccountDocument
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -24,7 +24,7 @@ import java.util.*
 class OAuth2IdentityProviderInfoUnitTest : BaseOAuth2FlowTest() {
 
     @Test fun `register works without locale`() = runTest {
-        val userSlot = slot<UserDocument>()
+        val userSlot = slot<AccountDocument>()
         val localeSlot = slot<Locale?>()
 
         coJustRun { identityProviderInfoService.send(
@@ -66,7 +66,7 @@ class OAuth2IdentityProviderInfoUnitTest : BaseOAuth2FlowTest() {
         assert(localeSlot.isNull)
     }
     @Test fun `register works with locale`() = runTest {
-        val userSlot = slot<UserDocument>()
+        val userSlot = slot<AccountDocument>()
         val localeSlot = slot<Locale?>()
 
         coJustRun { identityProviderInfoService.send(
@@ -108,7 +108,7 @@ class OAuth2IdentityProviderInfoUnitTest : BaseOAuth2FlowTest() {
         assertEquals(Locale.ENGLISH, localeSlot.captured)
     }
     @Test fun `register works with another oauth2`() = runTest {
-        val userSlot = slot<UserDocument>()
+        val userSlot = slot<AccountDocument>()
         val localeSlot = slot<Locale?>()
 
         coJustRun { identityProviderInfoService.send(
@@ -150,7 +150,7 @@ class OAuth2IdentityProviderInfoUnitTest : BaseOAuth2FlowTest() {
         assert(localeSlot.isNull)
     }
     @Test fun `register does not send when not registered`() = runTest {
-        val userSlot = slot<UserDocument>()
+        val userSlot = slot<AccountDocument>()
         val localeSlot = slot<Locale?>()
 
         coJustRun { identityProviderInfoService.send(

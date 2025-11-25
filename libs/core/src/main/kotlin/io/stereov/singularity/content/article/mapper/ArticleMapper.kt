@@ -13,7 +13,7 @@ import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.user.core.mapper.UserMapper
-import io.stereov.singularity.user.core.model.UserDocument
+import io.stereov.singularity.user.core.model.AccountDocument
 import io.stereov.singularity.user.core.service.UserService
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
@@ -73,7 +73,7 @@ class ArticleMapper(
         )
     }
 
-    suspend fun createFullResponse(article: Article, locale: Locale?, owner: UserDocument? = null): FullArticleResponse {
+    suspend fun createFullResponse(article: Article, locale: Locale?, owner: AccountDocument? = null): FullArticleResponse {
         val currentUser = authorizationService.getAuthenticationOrNull()
 
         val actualOwner = owner ?: userService.findByIdOrNull(article.access.ownerId)

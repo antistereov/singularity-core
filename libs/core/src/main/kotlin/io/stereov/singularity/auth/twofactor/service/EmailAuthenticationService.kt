@@ -6,9 +6,9 @@ import io.stereov.singularity.auth.core.exception.model.TwoFactorMethodDisabledE
 import io.stereov.singularity.auth.core.exception.model.WrongIdentityProviderException
 import io.stereov.singularity.auth.core.model.IdentityProvider
 import io.stereov.singularity.auth.core.model.SecurityAlertType
-import io.stereov.singularity.auth.core.properties.SecurityAlertProperties
+import io.stereov.singularity.auth.alert.properties.SecurityAlertProperties
 import io.stereov.singularity.auth.core.service.AuthorizationService
-import io.stereov.singularity.auth.core.service.SecurityAlertService
+import io.stereov.singularity.auth.alert.service.SecurityAlertService
 import io.stereov.singularity.auth.twofactor.dto.request.EnableEmailTwoFactorMethodRequest
 import io.stereov.singularity.auth.twofactor.exception.model.CannotDisableOnly2FAMethodException
 import io.stereov.singularity.auth.twofactor.exception.model.InvalidTwoFactorCodeException
@@ -26,7 +26,7 @@ import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.translate.model.TranslateKey
 import io.stereov.singularity.translate.service.TranslateService
-import io.stereov.singularity.user.core.model.UserDocument
+import io.stereov.singularity.user.core.model.AccountDocument
 import io.stereov.singularity.user.core.service.UserService
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.bson.types.ObjectId
@@ -54,7 +54,7 @@ class EmailAuthenticationService(
 
     private val logger = KotlinLogging.logger {}
 
-    suspend fun sendMail(user: UserDocument, locale: Locale?) {
+    suspend fun sendMail(user: AccountDocument, locale: Locale?) {
         logger.debug { "Generating new code and sending email" }
 
         val code = Random.generateInt()
@@ -66,7 +66,7 @@ class EmailAuthenticationService(
         sendAuthenticationEmail(user, code, locale)
     }
 
-    suspend fun validateCode(user: UserDocument, code: String): UserDocument {
+    suspend fun validateCode(user: AccountDocument, code: String): AccountDocument {
         logger.debug { "Validating 2FA code" }
 
         if (!user.sensitive.security.twoFactor.email.enabled)
@@ -77,7 +77,7 @@ class EmailAuthenticationService(
         return userService.save(user)
     }
 
-    suspend fun sendAuthenticationEmail(user: UserDocument, code: String, locale: Locale?) {
+    suspend fun sendAuthenticationEmail(user: AccountDocument, code: String, locale: Locale?) {
         logger.debug { "Sending verification email to ${user.sensitive.email}" }
 
         val userId = user.id
@@ -118,7 +118,7 @@ class EmailAuthenticationService(
         return if (remainingTtl.seconds > 0) remainingTtl.seconds else 0
     }
 
-    private suspend fun doValidateCode(user: UserDocument, code: String) {
+    private suspend fun doValidateCode(user: AccountDocument, code: String) {
         val details = user.sensitive.security.twoFactor.email
 
         if (details.expiresAt.isBefore(Instant.now()))
@@ -142,7 +142,7 @@ class EmailAuthenticationService(
         return isNewKey
     }
 
-    suspend fun enable(req: EnableEmailTwoFactorMethodRequest, locale: Locale?): UserDocument {
+    suspend fun enable(req: EnableEmailTwoFactorMethodRequest, locale: Locale?): AccountDocument {
         logger.debug { "Enabling email as 2FA method" }
 
         val user = authorizationService.getUser()
@@ -176,7 +176,7 @@ class EmailAuthenticationService(
         return savedUser
     }
 
-    suspend fun disable(locale: Locale?): UserDocument {
+    suspend fun disable(locale: Locale?): AccountDocument {
         logger.debug { "Disabling email as 2FA method" }
 
         val user = authorizationService.getUser()

@@ -2,6 +2,7 @@ package io.stereov.singularity.auth.core.service
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.auth.alert.service.RegistrationAlertService
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.auth.core.dto.request.RegisterUserRequest
@@ -9,13 +10,14 @@ import io.stereov.singularity.auth.core.dto.request.StepUpRequest
 import io.stereov.singularity.auth.core.exception.AuthException
 import io.stereov.singularity.auth.core.exception.model.InvalidCredentialsException
 import io.stereov.singularity.auth.core.exception.model.UserAlreadyAuthenticatedException
-import io.stereov.singularity.auth.core.properties.SecurityAlertProperties
+import io.stereov.singularity.auth.alert.properties.SecurityAlertProperties
+import io.stereov.singularity.auth.alert.service.IdentityProviderInfoService
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailProperties
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.global.exception.model.MissingRequestParameterException
-import io.stereov.singularity.user.core.model.UserDocument
+import io.stereov.singularity.user.core.model.AccountDocument
 import io.stereov.singularity.user.core.service.UserService
 import org.springframework.stereotype.Service
 import java.util.*
@@ -44,12 +46,12 @@ class AuthenticationService(
      *
      * @param payload The login request containing the user's email and password.
      *
-     * @return The [UserDocument] of the logged-in user.
+     * @return The [AccountDocument] of the logged-in user.
      *
      * @throws InvalidCredentialsException If the email or password is invalid.
      * @throws io.stereov.singularity.auth.core.exception.AuthException If the user document does not contain an ID.
      */
-    suspend fun login(payload: LoginRequest, locale: Locale?): UserDocument {
+    suspend fun login(payload: LoginRequest, locale: Locale?): AccountDocument {
         logger.debug { "Logging in user ${payload.email}" }
 
         if (authorizationService.isAuthenticated())
@@ -78,7 +80,7 @@ class AuthenticationService(
      *
      * @param payload The registration request containing the user's email, password, and name.
      *
-     * @return The [UserDocument] of the registered user.
+     * @return The [AccountDocument] of the registered user.
      */
     suspend fun register(payload: RegisterUserRequest, sendEmail: Boolean, locale: Locale?) {
         logger.debug { "Registering user ${payload.email}" }
@@ -97,7 +99,7 @@ class AuthenticationService(
             return
         }
 
-        val userDocument = UserDocument.ofPassword(
+        val userDocument = AccountDocument.ofPassword(
             email = payload.email,
             password = hashService.hashBcrypt(payload.password),
             name = payload.name,
@@ -114,7 +116,7 @@ class AuthenticationService(
         return
     }
 
-    suspend fun logout(): UserDocument {
+    suspend fun logout(): AccountDocument {
         logger.debug { "Logging out user" }
 
         val userId = authorizationService.getUserId()
@@ -126,7 +128,7 @@ class AuthenticationService(
         return sessionService.deleteSession(sessionId)
     }
 
-    suspend fun stepUp(req: StepUpRequest?): UserDocument {
+    suspend fun stepUp(req: StepUpRequest?): AccountDocument {
         logger.debug { "Executing step up" }
 
         val user = authorizationService.getUser()

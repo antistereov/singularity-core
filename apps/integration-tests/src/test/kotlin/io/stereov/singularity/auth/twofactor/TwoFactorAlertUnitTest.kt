@@ -9,7 +9,7 @@ import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorVerifySetupReq
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
 import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.test.BaseSecurityAlertTest
-import io.stereov.singularity.user.core.model.UserDocument
+import io.stereov.singularity.user.core.model.AccountDocument
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -22,7 +22,7 @@ class TwoFactorAlertUnitTest : BaseSecurityAlertTest() {
         user.info.sensitive.security.twoFactor.email.enabled = false
         userService.save(user.info)
 
-        val userSlot = slot<UserDocument>()
+        val userSlot = slot<AccountDocument>()
         val localeSlot = slot<Locale?>()
         val alertTypeSlot = slot<SecurityAlertType>()
         val providerKeySlot = slot<String?>()
@@ -56,7 +56,7 @@ class TwoFactorAlertUnitTest : BaseSecurityAlertTest() {
         user.info.sensitive.security.twoFactor.email.enabled = false
         userService.save(user.info)
 
-        val userSlot = slot<UserDocument>()
+        val userSlot = slot<AccountDocument>()
         val localeSlot = slot<Locale?>()
         val alertTypeSlot = slot<SecurityAlertType>()
         val providerKeySlot = slot<String?>()
@@ -92,7 +92,7 @@ class TwoFactorAlertUnitTest : BaseSecurityAlertTest() {
         user.info.sensitive.security.twoFactor.totp.enabled = true
         userService.save(user.info)
 
-        val userSlot = slot<UserDocument>()
+        val userSlot = slot<AccountDocument>()
         val localeSlot = slot<Locale?>()
         val alertTypeSlot = slot<SecurityAlertType>()
         val providerKeySlot = slot<String?>()
@@ -126,7 +126,7 @@ class TwoFactorAlertUnitTest : BaseSecurityAlertTest() {
         user.info.sensitive.security.twoFactor.totp.enabled = true
         userService.save(user.info)
 
-        val userSlot = slot<UserDocument>()
+        val userSlot = slot<AccountDocument>()
         val localeSlot = slot<Locale?>()
         val alertTypeSlot = slot<SecurityAlertType>()
         val providerKeySlot = slot<String?>()
@@ -160,7 +160,7 @@ class TwoFactorAlertUnitTest : BaseSecurityAlertTest() {
         user.info.sensitive.security.twoFactor.email.enabled = false
         userService.save(user.info)
 
-        val userSlot = slot<UserDocument>()
+        val userSlot = slot<AccountDocument>()
         val localeSlot = slot<Locale?>()
         val alertTypeSlot = slot<SecurityAlertType>()
         val providerKeySlot = slot<String?>()
@@ -199,7 +199,7 @@ class TwoFactorAlertUnitTest : BaseSecurityAlertTest() {
         user.info.sensitive.security.twoFactor.email.enabled = false
         userService.save(user.info)
 
-        val userSlot = slot<UserDocument>()
+        val userSlot = slot<AccountDocument>()
         val localeSlot = slot<Locale?>()
         val alertTypeSlot = slot<SecurityAlertType>()
         val providerKeySlot = slot<String?>()
@@ -240,7 +240,7 @@ class TwoFactorAlertUnitTest : BaseSecurityAlertTest() {
         user.info.sensitive.security.twoFactor.totp.enabled = true
         userService.save(user.info)
 
-        val userSlot = slot<UserDocument>()
+        val userSlot = slot<AccountDocument>()
         val localeSlot = slot<Locale?>()
         val alertTypeSlot = slot<SecurityAlertType>()
         val providerKeySlot = slot<String?>()
@@ -274,7 +274,7 @@ class TwoFactorAlertUnitTest : BaseSecurityAlertTest() {
         user.info.sensitive.security.twoFactor.totp.enabled = true
         userService.save(user.info)
 
-        val userSlot = slot<UserDocument>()
+        val userSlot = slot<AccountDocument>()
         val localeSlot = slot<Locale?>()
         val alertTypeSlot = slot<SecurityAlertType>()
         val providerKeySlot = slot<String?>()

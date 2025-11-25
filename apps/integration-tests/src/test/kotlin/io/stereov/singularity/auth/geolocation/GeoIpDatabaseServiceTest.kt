@@ -1,6 +1,6 @@
 package io.stereov.singularity.auth.geolocation
 
-import io.stereov.singularity.auth.geolocation.service.GeoIpDatabaseService
+import io.stereov.singularity.auth.geolocation.service.GeolocationDatabaseService
 import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
@@ -15,7 +15,7 @@ import kotlin.io.path.Path
 class GeoIpDatabaseServiceTest : BaseIntegrationTest() {
 
     @Autowired
-    private lateinit var geoIpDatabaseService: GeoIpDatabaseService
+    private lateinit var geolocationDatabaseService: GeolocationDatabaseService
 
     companion object {
         val location = Path("./.data/test/files/geolocation")
@@ -38,7 +38,7 @@ class GeoIpDatabaseServiceTest : BaseIntegrationTest() {
     @Test fun `should download database on initialize`() = runTest {
         assertThat(file.exists())
 
-        val location = geoIpDatabaseService.getCity(InetAddress.getByName("93.128.176.188"))
+        val location = geolocationDatabaseService.getCity(InetAddress.getByName("93.128.176.188"))
 
         println(location)
 
@@ -49,9 +49,9 @@ class GeoIpDatabaseServiceTest : BaseIntegrationTest() {
     @Test @DirtiesContext fun `should download database`() = runTest {
         file.delete()
 
-        geoIpDatabaseService.initialize()
+        geolocationDatabaseService.initialize()
 
-        val location = geoIpDatabaseService.getCity(InetAddress.getByName("93.128.176.188"))
+        val location = geolocationDatabaseService.getCity(InetAddress.getByName("93.128.176.188"))
 
         println(location)
 
@@ -67,9 +67,9 @@ class GeoIpDatabaseServiceTest : BaseIntegrationTest() {
         file.createNewFile()
         file.setLastModified(0)
 
-        geoIpDatabaseService.initialize()
+        geolocationDatabaseService.initialize()
 
-        val location = geoIpDatabaseService.getCity(InetAddress.getByName("93.128.176.188"))
+        val location = geolocationDatabaseService.getCity(InetAddress.getByName("93.128.176.188"))
 
         println(location)
 

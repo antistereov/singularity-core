@@ -15,7 +15,7 @@ import io.stereov.singularity.content.tag.repository.TagRepository
 import io.stereov.singularity.database.core.service.CrudService
 import io.stereov.singularity.global.exception.model.DocumentNotFoundException
 import io.stereov.singularity.global.properties.AppProperties
-import io.stereov.singularity.global.util.CriteriaBuilder
+import io.stereov.singularity.database.core.util.CriteriaBuilder
 import jakarta.annotation.PostConstruct
 import kotlinx.coroutines.runBlocking
 import org.springframework.data.domain.Page

@@ -9,9 +9,14 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.lettuce.core.ExperimentalLettuceCoroutinesApi
 import io.lettuce.core.api.coroutines.RedisCoroutinesCommands
 import io.stereov.singularity.cache.exception.CacheException
+import io.stereov.singularity.email.core.properties.EmailProperties
+import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactive.collect
 import kotlinx.coroutines.reactor.asFlux
+import kotlinx.coroutines.reactor.awaitSingleOrNull
+import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.stereotype.Service
+import java.time.Duration
 
 /**
  * A service for interacting with a Redis cache using coroutine-based commands.
@@ -26,7 +31,9 @@ import org.springframework.stereotype.Service
 @OptIn(ExperimentalLettuceCoroutinesApi::class)
 class CacheService(
     val redisCommands: RedisCoroutinesCommands<String, ByteArray>,
-    val objectMapper: ObjectMapper
+    val objectMapper: ObjectMapper,
+    private val redisTemplate: ReactiveRedisTemplate<String, String>,
+    private val emailProperties: EmailProperties
 ) {
     val logger = KotlinLogging.logger {}
 
@@ -152,6 +159,38 @@ class CacheService(
                 .mapError { ex -> CacheException.Operation("Failed to delete keys with pattern $pattern: ${ex.message}", ex) }
         }
             .map {  }
+    }
 
+    /**
+     * Initiates a cooldown period by storing a key-value pair in a Redis cache, ensuring
+     * the operation is atomic and only occurs if the key does not already exist.
+     *
+     * @param key The unique key associated with the cooldown process. This is used
+     * to identify the cooldown period in the cache.
+     * @param seconds The duration of the cooldown in seconds.
+     * @return A [Result] wrapping a [Boolean] value indicating whether the operation
+     * succeeded (`true`) or failed (`false`), or an error wrapped in [CacheException.Operation].
+     */
+    suspend fun startCooldown(key: String, seconds: Long): Result<Boolean, CacheException.Operation> {
+        logger.debug { "Starting cooldown for identity provider info" }
+
+        return runCatching {
+            redisTemplate.opsForValue()
+                .setIfAbsent(key, "1", Duration.ofSeconds(emailProperties.sendCooldown))
+                .awaitSingle()
+        }
+            .mapError { ex -> CacheException.Operation("Failed to start cooldown for key $key for $seconds seconds: ${ex.message}", ex) }
+    }
+
+    /**
+     * Checks if a cooldown is currently active for the given key in the cache.
+     *
+     * @param key The key to check for an active cooldown.
+     * @return A [Result] containing `true` if a cooldown is active, `false` otherwise, or an error of type [CacheException.Operation].
+     */
+    suspend fun isCooldownActive(key: String): Result<Boolean, CacheException.Operation> {
+        return runCatching { redisTemplate.getExpire(key).awaitSingleOrNull() ?: Duration.ofSeconds(0) }
+            .mapError { ex -> CacheException.Operation("Failed to get cooldown for key $key: ${ex.message}", ex) }
+            .map { it.seconds > 0 }
     }
 }

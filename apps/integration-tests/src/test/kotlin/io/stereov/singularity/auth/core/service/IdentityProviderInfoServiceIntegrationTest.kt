@@ -5,7 +5,7 @@ import io.mockk.coVerify
 import io.mockk.slot
 import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.test.BaseSecurityAlertTest
-import io.stereov.singularity.user.core.model.UserDocument
+import io.stereov.singularity.user.core.model.AccountDocument
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -17,7 +17,7 @@ class IdentityProviderInfoServiceIntegrationTest : BaseSecurityAlertTest() {
         val user = registerOAuth2()
         val req = LoginRequest(user.email!!, "Password$2")
 
-        val userSlot = slot<UserDocument>()
+        val userSlot = slot<AccountDocument>()
         val localeSlot = slot<Locale?>()
 
         coJustRun { identityProviderInfoService.send(
@@ -40,7 +40,7 @@ class IdentityProviderInfoServiceIntegrationTest : BaseSecurityAlertTest() {
         val user = registerOAuth2()
         val req = LoginRequest(user.email!!, "Password$2")
 
-        val userSlot = slot<UserDocument>()
+        val userSlot = slot<AccountDocument>()
         val localeSlot = slot<Locale?>()
 
         coJustRun { identityProviderInfoService.send(
@@ -64,7 +64,7 @@ class IdentityProviderInfoServiceIntegrationTest : BaseSecurityAlertTest() {
         val user = registerUser()
         val req = LoginRequest(user.email!!, user.password!!)
 
-        val userSlot = slot<UserDocument>()
+        val userSlot = slot<AccountDocument>()
         val localeSlot = slot<Locale?>()
 
         coJustRun { identityProviderInfoService.send(
@@ -84,7 +84,7 @@ class IdentityProviderInfoServiceIntegrationTest : BaseSecurityAlertTest() {
         val user = registerUser()
         val req = LoginRequest(user.email!!, "wrong")
 
-        val userSlot = slot<UserDocument>()
+        val userSlot = slot<AccountDocument>()
         val localeSlot = slot<Locale?>()
 
         coJustRun { identityProviderInfoService.send(
@@ -103,7 +103,7 @@ class IdentityProviderInfoServiceIntegrationTest : BaseSecurityAlertTest() {
     @Test fun `login does not send for non-existing user`() = runTest {
         val req = LoginRequest("not@email.com", "wrong")
 
-        val userSlot = slot<UserDocument>()
+        val userSlot = slot<AccountDocument>()
         val localeSlot = slot<Locale?>()
 
         coJustRun { identityProviderInfoService.send(

@@ -4,7 +4,7 @@ import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.email.core.service.EmailService
 import io.stereov.singularity.test.BaseIntegrationTest
 import io.stereov.singularity.auth.core.controller.EmailVerificationController
-import io.stereov.singularity.auth.core.service.token.EmailVerificationTokenService
+import io.stereov.singularity.auth.token.service.EmailVerificationTokenService
 import io.stereov.singularity.auth.core.service.EmailVerificationService
 import org.junit.jupiter.api.Test
 

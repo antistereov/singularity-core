@@ -1,7 +1,7 @@
 package io.stereov.singularity.content.core.component
 
 import com.github.michaelbull.result.getOrElse
-import io.stereov.singularity.auth.core.model.token.AccessType
+import io.stereov.singularity.auth.token.model.AccessType
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.content.core.model.ContentAccessDetails
 import io.stereov.singularity.content.core.model.ContentAccessPermissions

@@ -1,6 +1,7 @@
 package io.stereov.singularity.auth.core.service
 
 import io.mockk.verify
+import io.stereov.singularity.auth.alert.service.NoAccountInfoService
 import io.stereov.singularity.auth.core.model.NoAccountInfoAction
 import io.stereov.singularity.test.BaseMailIntegrationTest
 import jakarta.mail.internet.MimeMessage

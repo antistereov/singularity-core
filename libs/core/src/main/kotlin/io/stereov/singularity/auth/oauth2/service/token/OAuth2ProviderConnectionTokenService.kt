@@ -6,7 +6,7 @@ import io.stereov.singularity.auth.jwt.properties.JwtProperties
 import io.stereov.singularity.auth.jwt.service.JwtService
 import io.stereov.singularity.auth.oauth2.model.token.OAuth2ProviderConnectionToken
 import io.stereov.singularity.global.util.Constants
-import io.stereov.singularity.user.core.model.UserDocument
+import io.stereov.singularity.user.core.model.AccountDocument
 import org.bson.types.ObjectId
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
@@ -40,7 +40,7 @@ class OAuth2ProviderConnectionTokenService(
         return OAuth2ProviderConnectionToken(userId, sessionId, provider, jwt)
     }
 
-    suspend fun extract(tokenValue: String, currentUser: UserDocument): OAuth2ProviderConnectionToken {
+    suspend fun extract(tokenValue: String, currentUser: AccountDocument): OAuth2ProviderConnectionToken {
         logger.debug { "Extracting OAuth2ProviderConnectionToken" }
 
         val jwt = jwtService.decodeJwt(tokenValue, tokenType)

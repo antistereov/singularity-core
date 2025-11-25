@@ -1,5 +1,7 @@
 package io.stereov.singularity.global.filter
 
+import com.github.michaelbull.result.getOrElse
+import com.github.michaelbull.result.runCatching
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
@@ -12,6 +14,7 @@ import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Mono
+import java.net.InetAddress
 
 /**
  * LoggingFilter is an implementation of [WebFilter] responsible for logging incoming HTTP requests
@@ -51,7 +54,8 @@ class LoggingFilter(
         val originString = origin?.let { " with origin $origin" } ?: ""
 
         val ipAddress = exchange.request.getClientIp(geolocationProperties.realIpHeader)
-        val location = geoLocationService.getLocationOrNull(request)
+            ?.let { runCatching { InetAddress.getByName(it) }.getOrElse { null } }
+        val location = ipAddress?.let { geoLocationService.getLocation(ipAddress) }?.getOrElse { null }
         val locationString = location?.let { " (${location.city.names["en"]}, ${location.country.isoCode})" } ?: ""
 
         logger.debug { "Incoming request  - $method $path from $ipAddress$locationString$originString" }

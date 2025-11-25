@@ -1,6 +1,7 @@
 package io.stereov.singularity.auth.core.service
 
 import io.mockk.verify
+import io.stereov.singularity.auth.alert.service.IdentityProviderInfoService
 import io.stereov.singularity.test.BaseMailIntegrationTest
 import jakarta.mail.internet.MimeMessage
 import kotlinx.coroutines.test.runTest

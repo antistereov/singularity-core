@@ -14,7 +14,7 @@ import io.stereov.singularity.content.core.component.AccessCriteria
 import io.stereov.singularity.content.core.model.ContentAccessRole
 import io.stereov.singularity.content.core.properties.ContentProperties
 import io.stereov.singularity.content.core.service.ContentService
-import io.stereov.singularity.global.util.CriteriaBuilder
+import io.stereov.singularity.database.core.util.CriteriaBuilder
 import io.stereov.singularity.global.util.mapContent
 import io.stereov.singularity.global.util.withLocalizedSort
 import io.stereov.singularity.translate.service.TranslateService

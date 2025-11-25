@@ -1,5 +1,6 @@
 package io.stereov.singularity.secrets.core.config
 
+import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.cache.service.CacheService
 import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.secrets.core.component.SecretCache
@@ -38,7 +39,8 @@ class SecretsConfiguration {
     @Bean
     @ConditionalOnMissingBean
     fun secretRotationController(
-        secretRotationService: SecretRotationService
+        secretRotationService: SecretRotationService,
+        authorizationService: AuthorizationService
     ) = SecretRotationController(
         secretRotationService,
         authorizationService

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.warrenstrange.googleauth.GoogleAuthenticator
 import io.mockk.every
 import io.stereov.singularity.WebSpringBootStarterApplication
-import io.stereov.singularity.auth.core.component.CookieCreator
+import io.stereov.singularity.auth.token.component.CookieCreator
 import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.auth.core.dto.request.RegisterUserRequest
 import io.stereov.singularity.auth.core.dto.response.StepUpResponse
@@ -22,6 +22,17 @@ import io.stereov.singularity.auth.oauth2.model.token.OAuth2ProviderConnectionTo
 import io.stereov.singularity.auth.oauth2.model.token.OAuth2TokenType
 import io.stereov.singularity.auth.oauth2.properties.OAuth2Properties
 import io.stereov.singularity.auth.oauth2.service.token.OAuth2ProviderConnectionTokenService
+import io.stereov.singularity.auth.token.model.AccessToken
+import io.stereov.singularity.auth.token.model.RefreshToken
+import io.stereov.singularity.auth.token.model.SessionToken
+import io.stereov.singularity.auth.token.model.SessionTokenType
+import io.stereov.singularity.auth.token.model.StepUpToken
+import io.stereov.singularity.auth.token.service.AccessTokenService
+import io.stereov.singularity.auth.token.service.EmailVerificationTokenService
+import io.stereov.singularity.auth.token.service.PasswordResetTokenService
+import io.stereov.singularity.auth.token.service.RefreshTokenService
+import io.stereov.singularity.auth.token.service.SessionTokenService
+import io.stereov.singularity.auth.token.service.StepUpTokenService
 import io.stereov.singularity.auth.twofactor.dto.request.CompleteStepUpRequest
 import io.stereov.singularity.auth.twofactor.dto.request.EnableEmailTwoFactorMethodRequest
 import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorVerifySetupRequest
@@ -46,7 +57,7 @@ import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.test.config.MockConfig
 import io.stereov.singularity.user.core.model.Role
-import io.stereov.singularity.user.core.model.UserDocument
+import io.stereov.singularity.user.core.model.AccountDocument
 import io.stereov.singularity.user.core.repository.UserRepository
 import io.stereov.singularity.user.core.service.UserService
 import kotlinx.coroutines.runBlocking
@@ -128,7 +139,7 @@ class BaseSpringBootTest() {
     lateinit var cookieCreator: CookieCreator
 
     @Autowired
-    lateinit var stepUpTokenService: StepUpTokenService 
+    lateinit var stepUpTokenService: StepUpTokenService
 
     @Autowired
     lateinit var applicationContext: ApplicationContext
@@ -206,7 +217,7 @@ class BaseSpringBootTest() {
     private val counter = AtomicInteger(0)
 
     data class TestRegisterResponse(
-        val info: UserDocument,
+        val info: AccountDocument,
         val email: String?,
         val password: String?,
         val accessToken: String,
@@ -256,7 +267,7 @@ class BaseSpringBootTest() {
         var stepUpToken = stepUpTokenService.create(user.id, sessionId)
 
         user.updateLastActive()
-        user.addOrUpdatesession(sessionId, SessionInfo(refreshTokenId = refreshTokenId))
+        user.addOrUpdateSession(sessionId, SessionInfo(refreshTokenId = refreshTokenId))
 
         userService.save(user)
 
@@ -342,7 +353,7 @@ class BaseSpringBootTest() {
                 stepUpToken = stepUpTokenService.create(user.id, sessionId)
 
                 user.updateLastActive()
-                user.addOrUpdatesession(sessionId, SessionInfo(refreshTokenId = refreshTokenId))
+                user.addOrUpdateSession(sessionId, SessionInfo(refreshTokenId = refreshTokenId))
 
                 twoFactorToken = twoFactorAuthenticationTokenService.create(user.id).value
             }
@@ -434,7 +445,7 @@ class BaseSpringBootTest() {
         principalId: String = "123456"
     ): TestRegisterResponse {
         val actualEmail = "${counter.getAndIncrement()}$emailSuffix"
-        val user = userService.save(UserDocument.ofIdentityProvider(
+        val user = userService.save(AccountDocument.ofIdentityProvider(
             email = actualEmail,
             provider = provider,
             principalId = principalId,
@@ -509,7 +520,7 @@ class BaseSpringBootTest() {
             ?: throw TokenExtractionException("No StepUpToken found in response")
     }
 
-    suspend fun EntityExchangeResult<*>.extractOAuth2ProviderConnectionToken(user: UserDocument): OAuth2ProviderConnectionToken {
+    suspend fun EntityExchangeResult<*>.extractOAuth2ProviderConnectionToken(user: AccountDocument): OAuth2ProviderConnectionToken {
         return this.responseCookies[OAuth2TokenType.ProviderConnection.cookieName]
             ?.firstOrNull()?.value
             ?.let { oAuth2ProviderConnectionTokenService.extract(it, user) }

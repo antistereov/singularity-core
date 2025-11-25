@@ -2,7 +2,7 @@ package io.stereov.singularity.auth.twofactor.controller
 
 import io.mockk.verify
 import io.stereov.singularity.auth.core.dto.response.MailCooldownResponse
-import io.stereov.singularity.auth.core.model.token.SessionTokenType
+import io.stereov.singularity.auth.token.model.SessionTokenType
 import io.stereov.singularity.auth.twofactor.dto.request.EnableEmailTwoFactorMethodRequest
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
 import io.stereov.singularity.test.BaseMailIntegrationTest

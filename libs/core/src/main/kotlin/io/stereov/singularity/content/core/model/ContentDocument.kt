@@ -3,7 +3,7 @@ package io.stereov.singularity.content.core.model
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.toResultOr
 import io.stereov.singularity.auth.core.model.AuthenticationOutcome
-import io.stereov.singularity.auth.core.model.token.AccessType
+import io.stereov.singularity.auth.token.model.AccessType
 import io.stereov.singularity.content.invitation.model.InvitationDocument
 import io.stereov.singularity.database.core.exception.DatabaseException
 import org.bson.types.ObjectId

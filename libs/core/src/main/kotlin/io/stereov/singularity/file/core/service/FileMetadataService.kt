@@ -15,7 +15,7 @@ import io.stereov.singularity.database.core.exception.DatabaseException
 import io.stereov.singularity.file.core.exception.FileMetadataException
 import io.stereov.singularity.file.core.model.FileMetadataDocument
 import io.stereov.singularity.file.core.repository.FileMetadataRepository
-import io.stereov.singularity.global.util.CriteriaBuilder
+import io.stereov.singularity.database.core.util.CriteriaBuilder
 import io.stereov.singularity.translate.service.TranslateService
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull

@@ -1,6 +1,6 @@
 package io.stereov.singularity.auth.oauth2.controller
 
-import io.stereov.singularity.auth.core.component.CookieCreator
+import io.stereov.singularity.auth.token.component.CookieCreator
 import io.stereov.singularity.auth.core.properties.AuthProperties
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.oauth2.dto.request.OAuth2ProviderConnectionRequest

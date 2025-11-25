@@ -1,6 +1,11 @@
 package io.stereov.singularity.test
 
 import io.mockk.clearMocks
+import io.stereov.singularity.auth.alert.service.IdentityProviderInfoService
+import io.stereov.singularity.auth.alert.service.LoginAlertService
+import io.stereov.singularity.auth.alert.service.NoAccountInfoService
+import io.stereov.singularity.auth.alert.service.RegistrationAlertService
+import io.stereov.singularity.auth.alert.service.SecurityAlertService
 import io.stereov.singularity.auth.core.service.*
 import io.stereov.singularity.test.config.MockSecurityAlertConfig
 import org.junit.jupiter.api.BeforeEach

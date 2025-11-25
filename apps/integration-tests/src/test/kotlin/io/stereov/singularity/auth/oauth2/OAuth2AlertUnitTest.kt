@@ -7,12 +7,12 @@ import io.mockk.slot
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
 import io.stereov.singularity.auth.core.model.SecurityAlertType
 import io.stereov.singularity.auth.core.model.SessionInfo
-import io.stereov.singularity.auth.core.service.LoginAlertService
-import io.stereov.singularity.auth.core.service.SecurityAlertService
+import io.stereov.singularity.auth.alert.service.LoginAlertService
+import io.stereov.singularity.auth.alert.service.SecurityAlertService
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
 import io.stereov.singularity.test.BaseOAuth2FlowTest
 import io.stereov.singularity.test.config.MockSecurityAlertConfig
-import io.stereov.singularity.user.core.model.UserDocument
+import io.stereov.singularity.user.core.model.AccountDocument
 import io.stereov.singularity.user.core.model.identity.UserIdentity
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -28,7 +28,7 @@ import java.util.*
 class OAuth2AlertUnitTest : BaseOAuth2FlowTest() {
 
     @Test fun `login works with locale and session`() = runTest {
-        val loginUserSlot = slot<UserDocument>()
+        val loginUserSlot = slot<AccountDocument>()
         val loginLocaleSlot = slot<Locale?>()
         val loginSessionSlot = slot<SessionInfo>()
 
@@ -102,7 +102,7 @@ class OAuth2AlertUnitTest : BaseOAuth2FlowTest() {
 
         val sessionToken = sessionTokenService.create(SessionInfoRequest())
 
-        val loginUserSlot = slot<UserDocument>()
+        val loginUserSlot = slot<AccountDocument>()
         val loginLocaleSlot = slot<Locale?>()
         val loginSessionSlot = slot<SessionInfo>()
 
@@ -134,7 +134,7 @@ class OAuth2AlertUnitTest : BaseOAuth2FlowTest() {
     }
 
     @Test fun `connect works without locale`() = runTest {
-        val userSlot = slot<UserDocument>()
+        val userSlot = slot<AccountDocument>()
         val localeSlot = slot<Locale?>()
         val alertTypeSlot = slot<SecurityAlertType>()
         val providerKeySlot = slot<String?>()
@@ -193,7 +193,7 @@ class OAuth2AlertUnitTest : BaseOAuth2FlowTest() {
         assertEquals("github", providerKeySlot.captured)
     }
     @Test fun `connect works with locale`() = runTest {
-        val userSlot = slot<UserDocument>()
+        val userSlot = slot<AccountDocument>()
         val localeSlot = slot<Locale?>()
         val alertTypeSlot = slot<SecurityAlertType>()
         val providerKeySlot = slot<String?>()
@@ -372,7 +372,7 @@ class OAuth2AlertUnitTest : BaseOAuth2FlowTest() {
         user.info.sensitive.identities["github"] = UserIdentity(principalId = "1234", password = null)
         userService.save(user.info)
 
-        val userSlot = slot<UserDocument>()
+        val userSlot = slot<AccountDocument>()
         val localeSlot = slot<Locale?>()
         val alertTypeSlot = slot<SecurityAlertType>()
         val providerKeySlot = slot<String?>()
@@ -405,7 +405,7 @@ class OAuth2AlertUnitTest : BaseOAuth2FlowTest() {
         user.info.sensitive.identities["github"] = UserIdentity(principalId = "1234", password = null)
         userService.save(user.info)
 
-        val userSlot = slot<UserDocument>()
+        val userSlot = slot<AccountDocument>()
         val localeSlot = slot<Locale?>()
         val alertTypeSlot = slot<SecurityAlertType>()
         val providerKeySlot = slot<String?>()

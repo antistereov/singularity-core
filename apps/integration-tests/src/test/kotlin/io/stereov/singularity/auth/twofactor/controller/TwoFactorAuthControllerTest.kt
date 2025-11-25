@@ -3,7 +3,7 @@ package io.stereov.singularity.auth.twofactor.controller
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
 import io.stereov.singularity.auth.core.dto.response.LoginResponse
 import io.stereov.singularity.auth.core.dto.response.StepUpResponse
-import io.stereov.singularity.auth.core.model.token.SessionTokenType
+import io.stereov.singularity.auth.token.model.SessionTokenType
 import io.stereov.singularity.auth.twofactor.dto.request.ChangePreferredTwoFactorMethodRequest
 import io.stereov.singularity.auth.twofactor.dto.request.CompleteLoginRequest
 import io.stereov.singularity.auth.twofactor.dto.request.CompleteStepUpRequest
