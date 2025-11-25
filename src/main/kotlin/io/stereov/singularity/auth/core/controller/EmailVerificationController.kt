@@ -90,7 +90,7 @@ class EmailVerificationController(
 
     @GetMapping("/cooldown")
     @Operation(
-        summary = "Get Remaining Email Verification Cooldown",
+        summary = "Get Remaining Email Verification CooldownActive",
         description = """
             Get the remaining time in seconds until you can send another email verification email.
             
@@ -191,7 +191,7 @@ class EmailVerificationController(
             ),
             ApiResponse(
                 responseCode = "429",
-                description = "Cooldown is active. You have to wait until you can send another email.",
+                description = "CooldownActive is active. You have to wait until you can send another email.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
             ApiResponse(

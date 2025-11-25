@@ -1,11 +1,11 @@
 package io.stereov.singularity.auth.core.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.auth.alert.service.SecurityAlertService
 import io.stereov.singularity.auth.core.exception.AuthException
 import io.stereov.singularity.auth.core.exception.model.EmailAlreadyVerifiedException
-import io.stereov.singularity.auth.core.model.SecurityAlertType
-import io.stereov.singularity.auth.core.properties.SecurityAlertProperties
-import io.stereov.singularity.auth.core.service.token.EmailVerificationTokenService
+import io.stereov.singularity.auth.alert.properties.SecurityAlertProperties
+import io.stereov.singularity.auth.token.service.EmailVerificationTokenService
 import io.stereov.singularity.auth.guest.exception.model.GuestCannotPerformThisActionException
 import io.stereov.singularity.email.core.exception.model.EmailCooldownException
 import io.stereov.singularity.email.core.properties.EmailProperties
@@ -13,6 +13,9 @@ import io.stereov.singularity.email.core.service.EmailService
 import io.stereov.singularity.email.core.util.EmailConstants
 import io.stereov.singularity.email.template.service.TemplateService
 import io.stereov.singularity.email.template.util.TemplateBuilder
+import io.stereov.singularity.email.template.util.build
+import io.stereov.singularity.email.template.util.replacePlaceholders
+import io.stereov.singularity.email.template.util.translate
 import io.stereov.singularity.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.global.properties.UiProperties
@@ -20,7 +23,7 @@ import io.stereov.singularity.translate.model.TranslateKey
 import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.core.mapper.UserMapper
-import io.stereov.singularity.user.core.model.UserDocument
+import io.stereov.singularity.user.core.model.AccountDocument
 import io.stereov.singularity.user.core.service.UserService
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.data.redis.core.ReactiveRedisTemplate
@@ -86,7 +89,7 @@ class EmailVerificationService(
         val savedUser = userService.save(user)
 
         if (isEmailUpdate && emailProperties.enable && securityAlertProperties.emailChanged) {
-            securityAlertService.send(savedUser, locale, SecurityAlertType.EMAIL_CHANGED, oldEmail = oldEmail, newEmail = newEmail)
+            securityAlertService.sendEmailChanged( oldEmail = oldEmail, newEmail = newEmail, user = savedUser, locale = locale)
         }
 
         return userMapper.toResponse(savedUser)
@@ -128,7 +131,7 @@ suspend fun getRemainingCooldown(email: String): Long {
      *
      * @param user The user to send the verification email to.
      */
-    suspend fun sendVerificationEmail(user: UserDocument, locale: Locale?, newEmail: String? = null): Long {
+    suspend fun sendVerificationEmail(user: AccountDocument, locale: Locale?, newEmail: String? = null): Long {
         logger.debug { "Sending verification email for user ${user.id}" }
 
         if (user.isGuest) {

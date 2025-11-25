@@ -1,6 +1,8 @@
 package io.stereov.singularity.auth.core.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.auth.alert.service.NoAccountInfoService
+import io.stereov.singularity.auth.alert.service.SecurityAlertService
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.dto.request.ResetPasswordRequest
 import io.stereov.singularity.auth.core.dto.request.SendPasswordResetRequest
@@ -9,8 +11,8 @@ import io.stereov.singularity.auth.core.exception.AuthException
 import io.stereov.singularity.auth.core.model.IdentityProvider
 import io.stereov.singularity.auth.core.model.NoAccountInfoAction
 import io.stereov.singularity.auth.core.model.SecurityAlertType
-import io.stereov.singularity.auth.core.properties.SecurityAlertProperties
-import io.stereov.singularity.auth.core.service.token.PasswordResetTokenService
+import io.stereov.singularity.auth.alert.properties.SecurityAlertProperties
+import io.stereov.singularity.auth.token.service.PasswordResetTokenService
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.email.core.exception.model.EmailCooldownException
 import io.stereov.singularity.email.core.properties.EmailProperties
@@ -24,7 +26,7 @@ import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.translate.model.TranslateKey
 import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.user.core.exception.model.UserDoesNotExistException
-import io.stereov.singularity.user.core.model.UserDocument
+import io.stereov.singularity.user.core.model.AccountDocument
 import io.stereov.singularity.user.core.model.identity.UserIdentity
 import io.stereov.singularity.user.core.service.UserService
 import kotlinx.coroutines.reactor.awaitSingleOrNull
@@ -132,7 +134,7 @@ class PasswordResetService(
         return if (remainingTtl.seconds > 0) remainingTtl.seconds else 0
     }
 
-    private suspend fun sendPasswordResetEmail(user: UserDocument, locale: Locale?) {
+    private suspend fun sendPasswordResetEmail(user: AccountDocument, locale: Locale?) {
         logger.debug { "Sending password reset email to ${user.sensitive.email}" }
 
         val email = user.requireNotGuestAndGetEmail()
@@ -156,7 +158,7 @@ class PasswordResetService(
         startCooldown(email)
     }
 
-    suspend fun generatePasswordResetUri(user: UserDocument): String {
+    suspend fun generatePasswordResetUri(user: AccountDocument): String {
         val secret = user.sensitive.security.password.resetSecret
         val token = passwordResetTokenService.create(user.id, secret)
         return "${uiProperties.passwordResetUri}?token=$token"

@@ -32,6 +32,6 @@ class ApplicationConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun globalExceptionHandler() = SingularityExceptionHandler()
+    fun singularityExceptionHandler() = SingularityExceptionHandler()
 
 }

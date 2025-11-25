@@ -1,9 +1,9 @@
 package io.stereov.singularity.auth.core.filter
 
 import com.github.michaelbull.result.getOrElse
-import io.stereov.singularity.auth.core.exception.AccessTokenExtractionException
-import io.stereov.singularity.auth.core.model.token.AuthenticationFilterExceptionToken
-import io.stereov.singularity.auth.core.service.token.AccessTokenService
+import io.stereov.singularity.auth.token.exception.AccessTokenExtractionException
+import io.stereov.singularity.auth.token.model.AuthenticationFilterExceptionToken
+import io.stereov.singularity.auth.token.service.AccessTokenService
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.mono
 import org.springframework.security.core.context.ReactiveSecurityContextHolder

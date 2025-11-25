@@ -2,16 +2,16 @@ package io.stereov.singularity.auth.twofactor.config
 
 import com.warrenstrange.googleauth.GoogleAuthenticator
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
-import io.stereov.singularity.auth.core.component.CookieCreator
-import io.stereov.singularity.auth.core.component.TokenValueExtractor
+import io.stereov.singularity.auth.token.component.CookieCreator
+import io.stereov.singularity.auth.token.component.TokenValueExtractor
 import io.stereov.singularity.auth.core.properties.AuthProperties
-import io.stereov.singularity.auth.core.properties.SecurityAlertProperties
+import io.stereov.singularity.auth.alert.properties.SecurityAlertProperties
 import io.stereov.singularity.auth.core.service.AuthorizationService
-import io.stereov.singularity.auth.core.service.SecurityAlertService
-import io.stereov.singularity.auth.core.service.token.AccessTokenService
-import io.stereov.singularity.auth.core.service.token.RefreshTokenService
-import io.stereov.singularity.auth.core.service.token.SessionTokenService
-import io.stereov.singularity.auth.core.service.token.StepUpTokenService
+import io.stereov.singularity.auth.alert.service.SecurityAlertService
+import io.stereov.singularity.auth.token.service.AccessTokenService
+import io.stereov.singularity.auth.token.service.RefreshTokenService
+import io.stereov.singularity.auth.token.service.SessionTokenService
+import io.stereov.singularity.auth.token.service.StepUpTokenService
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
 import io.stereov.singularity.auth.jwt.properties.JwtProperties
 import io.stereov.singularity.auth.jwt.service.JwtService

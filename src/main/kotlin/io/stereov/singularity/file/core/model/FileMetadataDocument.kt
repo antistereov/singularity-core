@@ -1,6 +1,6 @@
 package io.stereov.singularity.file.core.model
 
-import io.stereov.singularity.auth.core.model.token.AccessType
+import io.stereov.singularity.auth.token.model.AccessType
 import io.stereov.singularity.content.core.model.ContentAccessDetails
 import io.stereov.singularity.content.core.model.ContentDocument
 import org.bson.types.ObjectId

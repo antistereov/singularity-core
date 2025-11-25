@@ -2,11 +2,11 @@ package io.stereov.singularity.auth.core.service
 
 import com.github.michaelbull.result.*
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.auth.core.exception.AccessTokenExtractionException
+import io.stereov.singularity.auth.token.exception.AccessTokenExtractionException
 import io.stereov.singularity.auth.core.model.AuthenticationOutcome
-import io.stereov.singularity.auth.core.model.token.AuthenticationFilterExceptionToken
-import io.stereov.singularity.auth.core.model.token.StepUpToken
-import io.stereov.singularity.auth.core.service.token.StepUpTokenService
+import io.stereov.singularity.auth.token.model.AuthenticationFilterExceptionToken
+import io.stereov.singularity.auth.token.model.StepUpToken
+import io.stereov.singularity.auth.token.service.StepUpTokenService
 import io.stereov.singularity.auth.jwt.exception.TokenExtractionException
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.security.core.context.ReactiveSecurityContextHolder

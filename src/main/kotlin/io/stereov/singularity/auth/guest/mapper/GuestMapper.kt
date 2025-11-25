@@ -2,8 +2,8 @@ package io.stereov.singularity.auth.guest.mapper
 
 import io.stereov.singularity.auth.core.model.SessionInfo
 import io.stereov.singularity.user.core.model.Role
-import io.stereov.singularity.user.core.model.SensitiveUserData
-import io.stereov.singularity.user.core.model.UserDocument
+import io.stereov.singularity.user.core.model.SensitiveAccountData
+import io.stereov.singularity.user.core.model.AccountDocument
 import io.stereov.singularity.user.core.model.UserSecurityDetails
 import org.bson.types.ObjectId
 import org.springframework.stereotype.Component
@@ -22,13 +22,13 @@ class GuestMapper() {
         sessions: MutableMap<UUID, SessionInfo> = mutableMapOf(),
         mailTwoFactorCodeExpiresIn: Long,
         avatarFileKey: String? = null,
-    ) = UserDocument(
+    ) = AccountDocument(
         _id = id,
         createdAt = created,
         lastActive = lastActive,
         roles = mutableSetOf(Role.GUEST),
         groups = mutableSetOf(),
-        sensitive = SensitiveUserData(
+        sensitive = SensitiveAccountData(
             name = name,
             email = null,
             identities = mutableMapOf(),

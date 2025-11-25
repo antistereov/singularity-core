@@ -4,11 +4,11 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.model.IdentityProvider
 import io.stereov.singularity.auth.core.model.SecurityAlertType
-import io.stereov.singularity.auth.core.properties.SecurityAlertProperties
+import io.stereov.singularity.auth.alert.properties.SecurityAlertProperties
 import io.stereov.singularity.auth.core.service.AuthorizationService
-import io.stereov.singularity.auth.core.service.SecurityAlertService
-import io.stereov.singularity.auth.core.service.token.AccessTokenService
-import io.stereov.singularity.auth.core.service.token.StepUpTokenService
+import io.stereov.singularity.auth.alert.service.SecurityAlertService
+import io.stereov.singularity.auth.token.service.AccessTokenService
+import io.stereov.singularity.auth.token.service.StepUpTokenService
 import io.stereov.singularity.auth.guest.exception.model.GuestCannotPerformThisActionException
 import io.stereov.singularity.auth.jwt.exception.model.TokenExpiredException
 import io.stereov.singularity.auth.oauth2.dto.request.AddPasswordAuthenticationRequest
@@ -21,7 +21,7 @@ import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.global.exception.model.DocumentNotFoundException
 import io.stereov.singularity.user.core.model.Role
-import io.stereov.singularity.user.core.model.UserDocument
+import io.stereov.singularity.user.core.model.AccountDocument
 import io.stereov.singularity.user.core.model.identity.UserIdentity
 import io.stereov.singularity.user.core.service.UserService
 import org.springframework.stereotype.Service
@@ -44,7 +44,7 @@ class IdentityProviderService(
 
     private val logger = KotlinLogging.logger {}
 
-    suspend fun connect(req: AddPasswordAuthenticationRequest): UserDocument {
+    suspend fun connect(req: AddPasswordAuthenticationRequest): AccountDocument {
         logger.debug { "Creating password identity" }
 
         authorizationService.requireStepUp()
@@ -72,7 +72,7 @@ class IdentityProviderService(
         stepUpTokenValue: String?,
         exchange: ServerWebExchange,
         locale: Locale?
-    ): Pair<UserDocument, OAuth2AuthenticationService.OAuth2Action> {
+    ): Pair<AccountDocument, OAuth2AuthenticationService.OAuth2Action> {
         logger.debug { "Connecting a new OAuth2 provider $provider to user" }
 
         val accessToken = accessTokenService.extractOrOAuth2FlowException(exchange)
@@ -154,7 +154,7 @@ class IdentityProviderService(
         return savedUser to action
     }
 
-    suspend fun disconnect(provider: String, locale: Locale?): UserDocument {
+    suspend fun disconnect(provider: String, locale: Locale?): AccountDocument {
         logger.debug { "Disconnecting provider $provider from user" }
 
         authorizationService.requireStepUp()

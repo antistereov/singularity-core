@@ -1,15 +1,15 @@
 package io.stereov.singularity.auth.oauth2.component
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.auth.core.component.CookieCreator
-import io.stereov.singularity.auth.core.model.token.SessionToken
-import io.stereov.singularity.auth.core.model.token.SessionTokenType
-import io.stereov.singularity.auth.core.properties.SecurityAlertProperties
-import io.stereov.singularity.auth.core.service.LoginAlertService
-import io.stereov.singularity.auth.core.service.token.AccessTokenService
-import io.stereov.singularity.auth.core.service.token.RefreshTokenService
-import io.stereov.singularity.auth.core.service.token.SessionTokenService
-import io.stereov.singularity.auth.core.service.token.StepUpTokenService
+import io.stereov.singularity.auth.token.component.CookieCreator
+import io.stereov.singularity.auth.token.model.SessionToken
+import io.stereov.singularity.auth.token.model.SessionTokenType
+import io.stereov.singularity.auth.alert.properties.SecurityAlertProperties
+import io.stereov.singularity.auth.alert.service.LoginAlertService
+import io.stereov.singularity.auth.token.service.AccessTokenService
+import io.stereov.singularity.auth.token.service.RefreshTokenService
+import io.stereov.singularity.auth.token.service.SessionTokenService
+import io.stereov.singularity.auth.token.service.StepUpTokenService
 import io.stereov.singularity.auth.jwt.exception.model.TokenExpiredException
 import io.stereov.singularity.auth.oauth2.exception.model.OAuth2FlowException
 import io.stereov.singularity.auth.oauth2.model.OAuth2ErrorCode

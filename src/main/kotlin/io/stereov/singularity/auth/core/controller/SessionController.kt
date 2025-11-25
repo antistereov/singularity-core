@@ -1,14 +1,14 @@
 package io.stereov.singularity.auth.core.controller
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.auth.core.component.CookieCreator
+import io.stereov.singularity.auth.token.component.CookieCreator
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
 import io.stereov.singularity.auth.core.dto.response.GenerateSessionTokenResponse
 import io.stereov.singularity.auth.core.dto.response.SessionInfoResponse
 import io.stereov.singularity.auth.core.mapper.SessionMapper
-import io.stereov.singularity.auth.core.model.token.SessionTokenType
+import io.stereov.singularity.auth.token.model.SessionTokenType
 import io.stereov.singularity.auth.core.service.SessionService
-import io.stereov.singularity.auth.core.service.token.SessionTokenService
+import io.stereov.singularity.auth.token.service.SessionTokenService
 import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.global.model.SuccessResponse

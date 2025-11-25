@@ -6,9 +6,9 @@ import io.stereov.singularity.auth.core.exception.AuthenticationException
 import io.stereov.singularity.auth.core.exception.model.TwoFactorMethodDisabledException
 import io.stereov.singularity.auth.core.model.IdentityProvider
 import io.stereov.singularity.auth.core.model.SecurityAlertType
-import io.stereov.singularity.auth.core.properties.SecurityAlertProperties
+import io.stereov.singularity.auth.alert.properties.SecurityAlertProperties
 import io.stereov.singularity.auth.core.service.AuthorizationService
-import io.stereov.singularity.auth.core.service.SecurityAlertService
+import io.stereov.singularity.auth.alert.service.SecurityAlertService
 import io.stereov.singularity.auth.twofactor.dto.response.TwoFactorSetupResponse
 import io.stereov.singularity.auth.twofactor.exception.model.CannotDisableOnly2FAMethodException
 import io.stereov.singularity.auth.twofactor.exception.model.InvalidTwoFactorCodeException
@@ -24,7 +24,7 @@ import io.stereov.singularity.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.core.mapper.UserMapper
-import io.stereov.singularity.user.core.model.UserDocument
+import io.stereov.singularity.user.core.model.AccountDocument
 import io.stereov.singularity.user.core.service.UserService
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ServerWebExchange
@@ -139,7 +139,7 @@ class TotpAuthenticationService(
      * @throws InvalidDocumentException If the user document does not contain a two-factor authentication secret.
      * @throws InvalidTwoFactorCodeException If the two-factor code is invalid.
      */
-    suspend fun validateCode(user: UserDocument, code: Int): UserDocument {
+    suspend fun validateCode(user: AccountDocument, code: Int): AccountDocument {
         if (!user.sensitive.security.twoFactor.totp.enabled)
             throw TwoFactorMethodDisabledException(TwoFactorMethod.TOTP)
 
@@ -151,7 +151,7 @@ class TotpAuthenticationService(
         throw InvalidTwoFactorCodeException()
     }
 
-    suspend fun recoverUser(exchange: ServerWebExchange, recoveryCode: String): UserDocument {
+    suspend fun recoverUser(exchange: ServerWebExchange, recoveryCode: String): AccountDocument {
         logger.debug { "Recovering user" }
 
         val userId = twoFactorAuthTokenService.extract(exchange).userId

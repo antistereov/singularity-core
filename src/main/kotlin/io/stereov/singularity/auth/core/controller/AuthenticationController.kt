@@ -2,7 +2,7 @@ package io.stereov.singularity.auth.core.controller
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.auth.core.component.CookieCreator
+import io.stereov.singularity.auth.token.component.CookieCreator
 import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.auth.core.dto.request.RegisterUserRequest
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
@@ -11,22 +11,21 @@ import io.stereov.singularity.auth.core.dto.response.AuthenticationStatusRespons
 import io.stereov.singularity.auth.core.dto.response.LoginResponse
 import io.stereov.singularity.auth.core.dto.response.RefreshTokenResponse
 import io.stereov.singularity.auth.core.dto.response.StepUpResponse
-import io.stereov.singularity.auth.core.model.token.SessionTokenType
+import io.stereov.singularity.auth.token.model.SessionTokenType
 import io.stereov.singularity.auth.core.properties.AuthProperties
-import io.stereov.singularity.auth.core.properties.SecurityAlertProperties
+import io.stereov.singularity.auth.alert.properties.SecurityAlertProperties
 import io.stereov.singularity.auth.core.service.AuthenticationService
 import io.stereov.singularity.auth.core.service.AuthorizationService
-import io.stereov.singularity.auth.core.service.LoginAlertService
-import io.stereov.singularity.auth.core.service.token.AccessTokenService
-import io.stereov.singularity.auth.core.service.token.RefreshTokenService
-import io.stereov.singularity.auth.core.service.token.StepUpTokenService
+import io.stereov.singularity.auth.alert.service.LoginAlertService
+import io.stereov.singularity.auth.token.service.AccessTokenService
+import io.stereov.singularity.auth.token.service.RefreshTokenService
+import io.stereov.singularity.auth.token.service.StepUpTokenService
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
 import io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException
 import io.stereov.singularity.auth.oauth2.model.token.OAuth2TokenType
 import io.stereov.singularity.auth.twofactor.model.token.TwoFactorTokenType
 import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthenticationService
 import io.stereov.singularity.auth.twofactor.service.token.TwoFactorAuthenticationTokenService
-import io.stereov.singularity.email.core.exception.model.EmailCooldownException
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.global.model.ErrorResponse

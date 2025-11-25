@@ -1,14 +1,14 @@
 package io.stereov.singularity.auth.twofactor.controller
 
-import io.stereov.singularity.auth.core.component.CookieCreator
+import io.stereov.singularity.auth.token.component.CookieCreator
 import io.stereov.singularity.auth.core.dto.response.LoginResponse
 import io.stereov.singularity.auth.core.dto.response.StepUpResponse
 import io.stereov.singularity.auth.core.exception.model.UserAlreadyAuthenticatedException
 import io.stereov.singularity.auth.core.properties.AuthProperties
 import io.stereov.singularity.auth.core.service.AuthorizationService
-import io.stereov.singularity.auth.core.service.token.AccessTokenService
-import io.stereov.singularity.auth.core.service.token.RefreshTokenService
-import io.stereov.singularity.auth.core.service.token.StepUpTokenService
+import io.stereov.singularity.auth.token.service.AccessTokenService
+import io.stereov.singularity.auth.token.service.RefreshTokenService
+import io.stereov.singularity.auth.token.service.StepUpTokenService
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
 import io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException
 import io.stereov.singularity.auth.twofactor.dto.request.ChangePreferredTwoFactorMethodRequest

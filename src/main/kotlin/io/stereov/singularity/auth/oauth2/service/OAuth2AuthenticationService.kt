@@ -1,14 +1,14 @@
 package io.stereov.singularity.auth.oauth2.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.auth.core.service.IdentityProviderInfoService
-import io.stereov.singularity.auth.core.service.token.AccessTokenService
+import io.stereov.singularity.auth.alert.service.IdentityProviderInfoService
+import io.stereov.singularity.auth.token.service.AccessTokenService
 import io.stereov.singularity.auth.oauth2.exception.model.OAuth2FlowException
 import io.stereov.singularity.auth.oauth2.model.OAuth2ErrorCode
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.file.download.service.DownloadService
-import io.stereov.singularity.user.core.model.UserDocument
+import io.stereov.singularity.user.core.model.AccountDocument
 import io.stereov.singularity.user.core.service.UserService
 import io.stereov.singularity.user.settings.service.UserSettingsService
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -44,7 +44,7 @@ class OAuth2AuthenticationService(
          exchange: ServerWebExchange,
          stepUp: Boolean,
          locale: Locale?
-     ): Pair<UserDocument, OAuth2Action> {
+     ): Pair<AccountDocument, OAuth2Action> {
          logger.debug { "Finding or creating user after OAuth2 authentication" }
 
          val provider = oauth2Authentication.authorizedClientRegistrationId
@@ -74,7 +74,7 @@ class OAuth2AuthenticationService(
          }
     }
 
-    private suspend fun handleLogin(user: UserDocument, authenticated: Boolean, stepUp: Boolean): UserDocument {
+    private suspend fun handleLogin(user: AccountDocument, authenticated: Boolean, stepUp: Boolean): AccountDocument {
         logger.debug { "Handling OAuth2 login for user ${user.id}" }
 
         if (authenticated && !stepUp)
@@ -91,7 +91,7 @@ class OAuth2AuthenticationService(
         authenticated: Boolean,
         oauth2User: OAuth2User,
         locale: Locale?
-    ): UserDocument {
+    ): AccountDocument {
         logger.debug { "Handling registration after OAuth2 registration" }
 
         if (authenticated)
@@ -108,7 +108,7 @@ class OAuth2AuthenticationService(
 
         }
 
-        val user = UserDocument.ofIdentityProvider(
+        val user = AccountDocument.ofIdentityProvider(
             name = name,
             email = email,
             provider = provider,
@@ -140,7 +140,7 @@ class OAuth2AuthenticationService(
         stepUpTokenValue: String?,
         exchange: ServerWebExchange,
         locale: Locale?
-    ): Pair<UserDocument, OAuth2Action> {
+    ): Pair<AccountDocument, OAuth2Action> {
         logger.debug { "Handling connection" }
 
         return identityProviderService.connect(

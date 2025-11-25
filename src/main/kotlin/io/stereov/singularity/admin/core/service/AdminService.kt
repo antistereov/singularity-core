@@ -12,7 +12,7 @@ import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.core.mapper.UserMapper
 import io.stereov.singularity.user.core.model.Role
-import io.stereov.singularity.user.core.model.UserDocument
+import io.stereov.singularity.user.core.model.AccountDocument
 import io.stereov.singularity.user.core.service.UserService
 import jakarta.annotation.PostConstruct
 import kotlinx.coroutines.flow.count
@@ -78,7 +78,7 @@ class AdminService(
         if (!this.userService.existsByEmail(appProperties.rootEmail) && appProperties.createRootUser) {
             this.logger.info { "Creating root account" }
 
-            val rootUser = UserDocument.ofPassword(
+            val rootUser = AccountDocument.ofPassword(
                 email = appProperties.rootEmail,
                 password = hashService.hashBcrypt(appProperties.rootPassword),
                 name = "Root",

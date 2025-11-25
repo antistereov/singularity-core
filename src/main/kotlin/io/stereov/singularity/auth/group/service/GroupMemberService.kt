@@ -5,7 +5,7 @@ import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.global.exception.model.DocumentNotFoundException
 import io.stereov.singularity.user.core.model.Role
-import io.stereov.singularity.user.core.model.UserDocument
+import io.stereov.singularity.user.core.model.AccountDocument
 import io.stereov.singularity.user.core.service.UserService
 import org.bson.types.ObjectId
 import org.springframework.stereotype.Service
@@ -20,7 +20,7 @@ class GroupMemberService(
 
     private val logger = KotlinLogging.logger {}
 
-    suspend fun add(userId: ObjectId, groupKey: String): UserDocument {
+    suspend fun add(userId: ObjectId, groupKey: String): AccountDocument {
         logger.debug { "Adding user \"$userId\" to group \"$groupKey\"" }
 
         authService.requireRole(Role.ADMIN)
@@ -37,7 +37,7 @@ class GroupMemberService(
         return savedUser
     }
 
-    suspend fun remove(userId: ObjectId, groupKey: String): UserDocument {
+    suspend fun remove(userId: ObjectId, groupKey: String): AccountDocument {
         logger.debug { "Removing user \"$userId\" from group \"$groupKey\""}
 
         authService.requireRole(Role.ADMIN)

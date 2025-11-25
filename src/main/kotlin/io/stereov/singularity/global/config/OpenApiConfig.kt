@@ -5,7 +5,7 @@ import io.stereov.singularity.auth.core.controller.AuthenticationController
 import io.stereov.singularity.auth.core.controller.EmailVerificationController
 import io.stereov.singularity.auth.core.controller.PasswordResetController
 import io.stereov.singularity.auth.core.controller.SessionController
-import io.stereov.singularity.auth.core.model.token.SessionTokenType
+import io.stereov.singularity.auth.token.model.SessionTokenType
 import io.stereov.singularity.auth.group.controller.GroupController
 import io.stereov.singularity.auth.group.controller.GroupMemberController
 import io.stereov.singularity.auth.guest.controller.GuestController

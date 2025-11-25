@@ -1,11 +1,11 @@
 package io.stereov.singularity.auth.guest.controller
 
-import io.stereov.singularity.auth.core.component.CookieCreator
+import io.stereov.singularity.auth.token.component.CookieCreator
 import io.stereov.singularity.auth.core.exception.model.UserAlreadyAuthenticatedException
 import io.stereov.singularity.auth.core.properties.AuthProperties
 import io.stereov.singularity.auth.core.service.AuthorizationService
-import io.stereov.singularity.auth.core.service.token.AccessTokenService
-import io.stereov.singularity.auth.core.service.token.RefreshTokenService
+import io.stereov.singularity.auth.token.service.AccessTokenService
+import io.stereov.singularity.auth.token.service.RefreshTokenService
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
 import io.stereov.singularity.auth.guest.dto.request.ConvertToUserRequest
 import io.stereov.singularity.auth.guest.dto.request.CreateGuestRequest

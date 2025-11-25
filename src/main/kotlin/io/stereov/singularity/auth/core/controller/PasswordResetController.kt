@@ -93,7 +93,7 @@ class PasswordResetController(
 
     @GetMapping("/reset/cooldown")
     @Operation(
-        summary = "Get Remaining Password Reset Cooldown",
+        summary = "Get Remaining Password Reset CooldownActive",
         description = """
             Get the remaining time in seconds until you can send another password reset request.
             
@@ -160,7 +160,7 @@ class PasswordResetController(
             ),
             ApiResponse(
                 responseCode = "429",
-                description = "Cooldown is active. You have to wait until you can send another email.",
+                description = "CooldownActive is active. You have to wait until you can send another email.",
                 content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             ),
             ApiResponse(

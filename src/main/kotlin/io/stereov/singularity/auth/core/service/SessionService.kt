@@ -4,7 +4,7 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.model.SessionInfo
-import io.stereov.singularity.user.core.model.UserDocument
+import io.stereov.singularity.user.core.model.AccountDocument
 import io.stereov.singularity.user.core.service.UserService
 import org.springframework.stereotype.Service
 import java.util.*
@@ -30,9 +30,9 @@ class SessionService(
      *
      * @param sessionId The ID of the session to remove.
      *
-     * @return The updated [UserDocument] of the user.
+     * @return The updated [AccountDocument] of the user.
      */
-    suspend fun deleteSession(sessionId: UUID): UserDocument {
+    suspend fun deleteSession(sessionId: UUID): AccountDocument {
         logger.debug { "Deleting session $sessionId" }
 
         val user = authorizationService.getUser()
@@ -47,9 +47,9 @@ class SessionService(
     /**
      * Logs out the user from all sessions and returns the updated user document.
      *
-     * @return The [UserDocument] of the logged-out user.
+     * @return The [AccountDocument] of the logged-out user.
      */
-    suspend fun deleteAllSessions(): UserDocument {
+    suspend fun deleteAllSessions(): AccountDocument {
         logger.debug { "Logging out all sessions" }
 
         val user = authorizationService.getUser()
