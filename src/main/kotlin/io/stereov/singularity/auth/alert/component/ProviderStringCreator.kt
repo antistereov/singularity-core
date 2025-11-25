@@ -5,7 +5,7 @@ import io.stereov.singularity.auth.oauth2.util.getWellKnownProvider
 import io.stereov.singularity.email.core.util.EmailConstants
 import io.stereov.singularity.translate.model.TranslateKey
 import io.stereov.singularity.translate.service.TranslateService
-import io.stereov.singularity.user.core.model.AccountDocument
+import io.stereov.singularity.user.core.model.UserDocument
 import org.springframework.stereotype.Component
 import java.util.*
 
@@ -34,7 +34,7 @@ class ProviderStringCreator(
      * @param actualLocale The locale used for translations.
      * @return A localized string listing the available identity providers, or an error message if none are found.
      */
-    suspend fun getProvidersString(user: AccountDocument, actualLocale: Locale): String {
+    suspend fun getProvidersString(user: UserDocument, actualLocale: Locale): String {
         val providers = user.sensitive.identities.keys.map { getWellKnownProvider(it) }
         val passwordProviderString = translateService.translateResourceKey(
             TranslateKey("password_login"),

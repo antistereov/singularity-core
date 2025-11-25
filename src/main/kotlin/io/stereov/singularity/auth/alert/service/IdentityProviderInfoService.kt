@@ -19,7 +19,7 @@ import io.stereov.singularity.email.template.util.translate
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.translate.model.TranslateKey
 import io.stereov.singularity.translate.service.TranslateService
-import io.stereov.singularity.user.core.model.AccountDocument
+import io.stereov.singularity.user.core.model.UserDocument
 import jakarta.mail.internet.MimeMessage
 import org.springframework.stereotype.Service
 import java.util.*
@@ -65,7 +65,7 @@ class IdentityProviderInfoService(
      *         in the event of a failure.
      */
     suspend fun send(
-        user: AccountDocument.User,
+        user: UserDocument,
         locale: Locale?,
     ): Result<MimeMessage, AlertException> = coroutineBinding {
         logger.debug { "Sending no identity provider info email to user ${user.id}" }

@@ -14,7 +14,7 @@ import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.user.core.exception.model.EmailAlreadyTakenException
 import io.stereov.singularity.user.core.model.Role
-import io.stereov.singularity.user.core.model.AccountDocument
+import io.stereov.singularity.user.core.model.UserDocument
 import io.stereov.singularity.user.core.model.UserSecurityDetails
 import io.stereov.singularity.user.core.model.identity.UserIdentity
 import io.stereov.singularity.user.core.service.UserService
@@ -36,7 +36,7 @@ class GuestService(
 
     private val logger = KotlinLogging.logger {}
 
-    suspend fun createGuest(req: CreateGuestRequest): AccountDocument.Guest {
+    suspend fun createGuest(req: CreateGuestRequest): UserDocument.Guest {
         logger.debug { "Creating guest with name ${req.name}" }
 
         val userDocument = guestMapper.createGuest(
@@ -51,10 +51,10 @@ class GuestService(
         accountId: ObjectId,
         req: ConvertToUserRequest,
         locale: Locale?
-    ): AccountDocument.Guest {
+    ): UserDocument.Guest {
         val user = userService.findById(accountId)
 
-        if (user is AccountDocument.User)
+        if (user is UserDocument.User)
             throw AccountIsAlreadyUserException("Cannot convert account to user: account is already user")
 
         if (userService.existsByEmail(req.email))

@@ -16,7 +16,7 @@ import io.stereov.singularity.email.template.util.translate
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.translate.model.TranslateKey
 import io.stereov.singularity.translate.service.TranslateService
-import io.stereov.singularity.user.core.model.AccountDocument
+import io.stereov.singularity.user.core.model.UserDocument
 import jakarta.mail.internet.MimeMessage
 import org.springframework.stereotype.Service
 import java.util.*
@@ -50,7 +50,7 @@ class RegistrationAlertService(
      */
     suspend fun send(
         email: String,
-        user: AccountDocument,
+        user: UserDocument,
         locale: Locale?
     ): Result<MimeMessage, AlertException> = coroutineBinding {
         logger.debug { "Sending registration alert email for user ${user.id}" }

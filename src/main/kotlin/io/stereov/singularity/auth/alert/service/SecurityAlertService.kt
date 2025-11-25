@@ -20,7 +20,7 @@ import io.stereov.singularity.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.translate.model.TranslateKey
 import io.stereov.singularity.translate.service.TranslateService
-import io.stereov.singularity.user.core.model.AccountDocument
+import io.stereov.singularity.user.core.model.UserDocument
 import jakarta.mail.internet.MimeMessage
 import org.springframework.stereotype.Service
 import java.util.*
@@ -39,7 +39,7 @@ class SecurityAlertService(
     suspend fun sendEmailChanged(
         oldEmail: String,
         newEmail: String,
-        user: AccountDocument,
+        user: UserDocument,
         locale: Locale?
     ): Result<MimeMessage, AlertException> {
         return send(
@@ -52,7 +52,7 @@ class SecurityAlertService(
     }
 
     suspend fun send(
-        user: AccountDocument,
+        user: UserDocument,
         locale: Locale?,
         alertType: SecurityAlertType,
         providerKey: String? = null,
