@@ -1,9 +1,9 @@
-package io.stereov.singularity.user.group.controller
+package io.stereov.singularity.principal.group.controller
 
-import io.stereov.singularity.user.group.model.GroupDocument
-import io.stereov.singularity.user.group.model.GroupTranslation
+import io.stereov.singularity.principal.group.model.Group
+import io.stereov.singularity.principal.group.model.GroupTranslation
 import io.stereov.singularity.test.BaseIntegrationTest
-import io.stereov.singularity.user.core.dto.response.UserResponse
+import io.stereov.singularity.principal.core.dto.response.UserResponse
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -16,7 +16,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
         val user = registerUser()
 
         val group = groupRepository.save(
-            GroupDocument(
+            Group(
                 null,
                 "pilots",
                 mutableMapOf(
@@ -61,7 +61,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
         val user = registerUser()
 
         val group = groupRepository.save(
-            GroupDocument(
+            Group(
                 null,
                 "pilots",
                 mutableMapOf(
@@ -84,7 +84,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
         val user = registerUser()
 
         val group = groupRepository.save(
-            GroupDocument(
+            Group(
                 null,
                 "pilots",
                 mutableMapOf(
@@ -110,7 +110,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
         userService.deleteById(user.info.id)
 
         val group = groupRepository.save(
-            GroupDocument(
+            Group(
                 null,
                 "pilots",
                 mutableMapOf(
@@ -132,7 +132,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
         val user = registerUser(groups = listOf("pilots"))
 
         val group = groupRepository.save(
-            GroupDocument(
+            Group(
                 null,
                 "pilots",
                 mutableMapOf(
@@ -175,7 +175,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
         val user = registerUser(groups = listOf("pilots"))
 
         val group = groupRepository.save(
-            GroupDocument(
+            Group(
                 null,
                 "pilots",
                 mutableMapOf(
@@ -197,7 +197,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
         val user = registerUser(groups = listOf("pilots"))
 
         val group = groupRepository.save(
-            GroupDocument(
+            Group(
                 null,
                 "pilots",
                 mutableMapOf(
@@ -222,7 +222,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
         userService.deleteById(user.info.id)
 
         val group = groupRepository.save(
-            GroupDocument(
+            Group(
                 null,
                 "pilots",
                 mutableMapOf(

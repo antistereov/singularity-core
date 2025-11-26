@@ -24,10 +24,10 @@ import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.translate.model.TranslateKey
 import io.stereov.singularity.translate.service.TranslateService
-import io.stereov.singularity.user.core.exception.model.UserDoesNotExistException
-import io.stereov.singularity.user.core.model.User
-import io.stereov.singularity.user.core.model.identity.UserIdentity
-import io.stereov.singularity.user.core.service.UserService
+import io.stereov.singularity.principal.core.exception.model.UserDoesNotExistException
+import io.stereov.singularity.principal.core.model.User
+import io.stereov.singularity.principal.core.model.identity.UserIdentity
+import io.stereov.singularity.principal.core.service.UserService
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.stereotype.Service

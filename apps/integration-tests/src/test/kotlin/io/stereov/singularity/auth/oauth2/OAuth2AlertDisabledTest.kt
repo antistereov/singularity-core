@@ -4,7 +4,6 @@ import io.mockk.*
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
 import io.stereov.singularity.test.BaseOAuth2FlowTest
 import io.stereov.singularity.test.config.MockMailSenderConfig
-import io.stereov.singularity.user.core.model.identity.UserIdentity
 import jakarta.mail.internet.MimeMessage
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals

@@ -9,8 +9,8 @@ import io.stereov.singularity.file.image.properties.ImageProperties
 import io.stereov.singularity.file.local.properties.LocalFileStorageProperties
 import io.stereov.singularity.file.util.MockFilePart
 import io.stereov.singularity.test.BaseOAuth2FlowTest
-import io.stereov.singularity.user.core.exception.model.UserDoesNotExistException
-import io.stereov.singularity.user.core.model.Role
+import io.stereov.singularity.principal.core.exception.model.UserDoesNotExistException
+import io.stereov.singularity.principal.core.model.Role
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest

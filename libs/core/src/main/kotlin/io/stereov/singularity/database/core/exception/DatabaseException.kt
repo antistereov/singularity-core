@@ -61,44 +61,4 @@ sealed class DatabaseException(
         "Exception representing a general failure related to database operations.",
         cause
     )
-
-    /**
-     * Exception thrown when a database transaction has been successfully committed, but a later
-     * side effect, such as publishing an event or updating a cache, fails.
-     *
-     * Extends [DatabaseException].
-     *
-     * @param msg The error message providing details about the specific failure.
-     * @param cause The underlying cause of the exception, if any.
-     *
-     * @property code `POST_DATABASE_COMMIT_SIDE_EFFECT_FAILURE`
-     * @property status [HttpStatus.OK]
-     */
-    class PostCommitSideEffect(msg: String, cause: Throwable? = null) : DatabaseException(
-        msg,
-        "POST_DATABASE_COMMIT_SIDE_EFFECT_FAILURE",
-        HttpStatus.OK,
-        "Exception thrown when a database transaction has been successfully committed, but a later" +
-                " side effect, such as publishing an event or updating a cache, fails.",
-        cause
-    )
-
-    /**
-     * Indicates an invalid document stored in the database.
-     *
-     * This exception extends [DatabaseException].
-     *
-     * @param msg The error message providing details about the specific failure.
-     * @param cause The underlying cause of the exception, if any.
-     *
-     * @property code `INVALID_DATABASE_OBJECT`
-     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
-     */
-    class InvalidDocument(msg: String, cause: Throwable? = null) : DatabaseException(
-        msg,
-        "INVALID_DATABASE_OBJECT",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Indicates an invalid document stored in the database.",
-        cause
-    )
 }

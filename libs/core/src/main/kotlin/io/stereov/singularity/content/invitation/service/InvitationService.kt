@@ -21,7 +21,7 @@ import io.stereov.singularity.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.translate.model.TranslateKey
 import io.stereov.singularity.translate.service.TranslateService
-import io.stereov.singularity.user.core.service.UserService
+import io.stereov.singularity.principal.core.service.UserService
 import kotlinx.coroutines.reactive.awaitLast
 import org.bson.types.ObjectId
 import org.springframework.context.ApplicationContext

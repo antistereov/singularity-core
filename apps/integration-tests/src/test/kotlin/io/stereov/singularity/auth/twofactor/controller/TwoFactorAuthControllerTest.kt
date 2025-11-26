@@ -10,7 +10,7 @@ import io.stereov.singularity.auth.twofactor.dto.request.CompleteStepUpRequest
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
 import io.stereov.singularity.auth.twofactor.model.token.TwoFactorTokenType
 import io.stereov.singularity.test.BaseMailIntegrationTest
-import io.stereov.singularity.user.core.dto.response.UserResponse
+import io.stereov.singularity.principal.core.dto.response.UserResponse
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test

@@ -1,7 +1,7 @@
 package io.stereov.singularity.content.core
 
 import io.stereov.singularity.auth.token.model.AccessType
-import io.stereov.singularity.user.group.model.KnownGroups
+import io.stereov.singularity.principal.group.model.KnownGroups
 import io.stereov.singularity.content.article.dto.response.ArticleOverviewResponse
 import io.stereov.singularity.content.article.model.ArticleState
 import io.stereov.singularity.content.core.model.ContentAccessRole

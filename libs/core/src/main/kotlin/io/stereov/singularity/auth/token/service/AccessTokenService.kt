@@ -18,9 +18,9 @@ import io.stereov.singularity.auth.oauth2.exception.model.OAuth2FlowException
 import io.stereov.singularity.auth.oauth2.model.OAuth2ErrorCode
 import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.global.util.Random
-import io.stereov.singularity.user.core.model.Principal
-import io.stereov.singularity.user.core.model.Role
-import io.stereov.singularity.user.core.model.sensitve.SensitivePrincipalData
+import io.stereov.singularity.principal.core.model.Principal
+import io.stereov.singularity.principal.core.model.Role
+import io.stereov.singularity.principal.core.model.sensitve.SensitivePrincipalData
 import org.bson.types.ObjectId
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
 import org.springframework.stereotype.Service

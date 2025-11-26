@@ -6,7 +6,7 @@ import com.github.michaelbull.result.coroutines.runSuspendCatching
 import io.stereov.singularity.auth.core.exception.AuthenticationException
 import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.auth.core.service.AuthorizationService
-import io.stereov.singularity.user.group.model.KnownGroups
+import io.stereov.singularity.principal.group.model.KnownGroups
 import io.stereov.singularity.content.core.component.AccessCriteria
 import io.stereov.singularity.content.core.exception.ContentException
 import io.stereov.singularity.content.core.model.ContentAccessRole

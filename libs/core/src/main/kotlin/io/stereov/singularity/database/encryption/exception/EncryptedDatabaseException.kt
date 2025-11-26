@@ -96,36 +96,13 @@ sealed class EncryptedDatabaseException(
      * @param cause The underlying cause of this exception, if available.
      *
      * @property code `POST_DATABASE_COMMIT_SIDE_EFFECT_FAILURE`
-     * @property status [HttpStatus.OK]
-     *
-     * @see DatabaseException.PostCommitSideEffect
+     * @property status [HttpStatus.MULTI_STATUS]
      */
     class PostCommitSideEffect(msg: String, cause: Throwable? = null) : EncryptedDatabaseException(
         msg,
         "POST_DATABASE_COMMIT_SIDE_EFFECT_FAILURE",
-        HttpStatus.OK,
+        HttpStatus.MULTI_STATUS,
         "Exception thrown when a post-commit side effect fails after a database operation has been successfully committed.",
-        cause
-    )
-
-    /**
-     * Indicates an invalid document stored in the database.
-     *
-     * This exception is a subclass of [EncryptedDatabaseException].
-     *
-     * @param msg The error message describing the specific side effect failure.
-     * @param cause The underlying cause of this exception, if available.
-     *
-     * @property code `INVALID_DATABASE_OBJECT`.
-     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
-     *
-     * @see DatabaseException.InvalidDocument
-     */
-    class InvalidDocument(msg: String, cause: Throwable? = null) : EncryptedDatabaseException(
-        msg,
-        "INVALID_DATABASE_OBJECT",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Indicates an invalid document stored in the database.",
         cause
     )
 
@@ -145,8 +122,6 @@ sealed class EncryptedDatabaseException(
             return when (ex) {
                 is DatabaseException.Database -> Database(ex.message, ex.cause)
                 is DatabaseException.NotFound -> NotFound(ex.message, ex.cause)
-                is DatabaseException.PostCommitSideEffect -> PostCommitSideEffect(ex.message, ex.cause)
-                is DatabaseException.InvalidDocument -> InvalidDocument(ex.message, ex.cause)
             }
         }
     }

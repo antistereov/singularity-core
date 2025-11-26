@@ -17,11 +17,11 @@ import io.stereov.singularity.auth.token.model.SessionTokenType
 import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.global.util.getClientIp
-import io.stereov.singularity.user.core.model.Principal
-import io.stereov.singularity.user.core.model.Role
-import io.stereov.singularity.user.core.model.sensitve.SensitivePrincipalData
-import io.stereov.singularity.user.core.service.PrincipalService
-import io.stereov.singularity.user.core.service.UserService
+import io.stereov.singularity.principal.core.model.Principal
+import io.stereov.singularity.principal.core.model.Role
+import io.stereov.singularity.principal.core.model.sensitve.SensitivePrincipalData
+import io.stereov.singularity.principal.core.service.PrincipalService
+import io.stereov.singularity.principal.core.service.UserService
 import org.bson.types.ObjectId
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
 import org.springframework.stereotype.Service

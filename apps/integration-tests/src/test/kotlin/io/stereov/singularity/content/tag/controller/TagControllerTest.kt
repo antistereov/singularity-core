@@ -1,6 +1,6 @@
 package io.stereov.singularity.content.tag.controller
 
-import io.stereov.singularity.user.group.model.KnownGroups
+import io.stereov.singularity.principal.group.model.KnownGroups
 import io.stereov.singularity.content.tag.dto.CreateTagRequest
 import io.stereov.singularity.content.tag.dto.TagResponse
 import io.stereov.singularity.content.tag.dto.UpdateTagRequest

@@ -1,7 +1,7 @@
 package io.stereov.singularity.content.invitation.controller
 
 import io.mockk.verify
-import io.stereov.singularity.user.group.model.KnownGroups
+import io.stereov.singularity.principal.group.model.KnownGroups
 import io.stereov.singularity.content.core.dto.request.InviteUserToContentRequest
 import io.stereov.singularity.content.core.dto.response.ExtendedContentAccessDetailsResponse
 import io.stereov.singularity.content.core.model.ContentAccessRole

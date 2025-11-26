@@ -1,9 +1,9 @@
 package io.stereov.singularity.content.article.controller
 
 import io.stereov.singularity.auth.token.model.AccessType
-import io.stereov.singularity.user.group.model.GroupDocument
-import io.stereov.singularity.user.group.model.GroupTranslation
-import io.stereov.singularity.user.group.model.KnownGroups
+import io.stereov.singularity.principal.group.model.Group
+import io.stereov.singularity.principal.group.model.GroupTranslation
+import io.stereov.singularity.principal.group.model.KnownGroups
 import io.stereov.singularity.content.article.dto.request.ChangeArticleStateRequest
 import io.stereov.singularity.content.article.dto.request.CreateArticleRequest
 import io.stereov.singularity.content.article.dto.request.UpdateArticleRequest
@@ -19,7 +19,7 @@ import io.stereov.singularity.file.core.model.FileMetadataDocument
 import io.stereov.singularity.file.image.properties.ImageProperties
 import io.stereov.singularity.file.local.properties.LocalFileStorageProperties
 import io.stereov.singularity.test.BaseArticleTest
-import io.stereov.singularity.user.core.model.Role
+import io.stereov.singularity.principal.core.model.Role
 import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.awaitFirst
@@ -1267,15 +1267,15 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         val maintainer = registerUser()
         val editor = registerUser()
         val viewer = registerUser()
-        val maintainerGroup = groupService.save(GroupDocument(
+        val maintainerGroup = groupService.save(Group(
             key = "maintainer",
             translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Maintainer"))
         ))
-        val editorGroup = groupService.save(GroupDocument(
+        val editorGroup = groupService.save(Group(
             key = "editor",
             translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Editor"))
         ))
-        val viewerGroup = groupService.save(GroupDocument(
+        val viewerGroup = groupService.save(Group(
             key = "viewer",
             translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Viewer"))
         ))
@@ -1386,15 +1386,15 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         val maintainer = registerUser()
         val editor = registerUser()
         val viewer = registerUser()
-        val maintainerGroup = groupService.save(GroupDocument(
+        val maintainerGroup = groupService.save(Group(
             key = "maintainer",
             translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Maintainer"))
         ))
-        val editorGroup = groupService.save(GroupDocument(
+        val editorGroup = groupService.save(Group(
             key = "editor",
             translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Editor"))
         ))
-        val viewerGroup = groupService.save(GroupDocument(
+        val viewerGroup = groupService.save(Group(
             key = "viewer",
             translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Viewer"))
         ))
@@ -1480,15 +1480,15 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         val maintainer = registerUser()
         val editor = registerUser()
         val viewer = registerUser()
-        val maintainerGroup = groupService.save(GroupDocument(
+        val maintainerGroup = groupService.save(Group(
             key = "maintainer",
             translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Maintainer"))
         ))
-        val editorGroup = groupService.save(GroupDocument(
+        val editorGroup = groupService.save(Group(
             key = "editor",
             translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Editor"))
         ))
-        val viewerGroup = groupService.save(GroupDocument(
+        val viewerGroup = groupService.save(Group(
             key = "viewer",
             translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Viewer"))
         ))
@@ -1585,15 +1585,15 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         val maintainer = registerUser()
         val editor = registerUser()
         val viewer = registerUser()
-        val maintainerGroup = groupService.save(GroupDocument(
+        val maintainerGroup = groupService.save(Group(
             key = "maintainer",
             translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Maintainer"))
         ))
-        val editorGroup = groupService.save(GroupDocument(
+        val editorGroup = groupService.save(Group(
             key = "editor",
             translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Editor"))
         ))
-        val viewerGroup = groupService.save(GroupDocument(
+        val viewerGroup = groupService.save(Group(
             key = "viewer",
             translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Viewer"))
         ))
@@ -1700,15 +1700,15 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         val maintainer = registerUser()
         val editor = registerUser()
         val viewer = registerUser()
-        val maintainerGroup = groupService.save(GroupDocument(
+        val maintainerGroup = groupService.save(Group(
             key = "maintainer",
             translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Maintainer"))
         ))
-        val editorGroup = groupService.save(GroupDocument(
+        val editorGroup = groupService.save(Group(
             key = "editor",
             translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Editor"))
         ))
-        val viewerGroup = groupService.save(GroupDocument(
+        val viewerGroup = groupService.save(Group(
             key = "viewer",
             translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Viewer"))
         ))
@@ -1793,15 +1793,15 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         val maintainer = registerUser()
         val editor = registerUser()
         val viewer = registerUser()
-        val maintainerGroup = groupService.save(GroupDocument(
+        val maintainerGroup = groupService.save(Group(
             key = "maintainer",
             translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Maintainer"))
         ))
-        val editorGroup = groupService.save(GroupDocument(
+        val editorGroup = groupService.save(Group(
             key = "editor",
             translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Editor"))
         ))
-        val viewerGroup = groupService.save(GroupDocument(
+        val viewerGroup = groupService.save(Group(
             key = "viewer",
             translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Viewer"))
         ))
@@ -1898,11 +1898,11 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         val maintainer = registerUser()
         val editor = registerUser()
         val viewer = registerUser()
-        val editorGroup = groupService.save(GroupDocument(
+        val editorGroup = groupService.save(Group(
             key = "editor",
             translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Editor"))
         ))
-        val viewerGroup = groupService.save(GroupDocument(
+        val viewerGroup = groupService.save(Group(
             key = "viewer",
             translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Viewer"))
         ))
@@ -1937,15 +1937,15 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         userService.deleteById(maintainer.info.id)
         val editor = registerUser()
         val viewer = registerUser()
-        val maintainerGroup = groupService.save(GroupDocument(
+        val maintainerGroup = groupService.save(Group(
             key = "maintainer",
             translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Maintainer"))
         ))
-        val editorGroup = groupService.save(GroupDocument(
+        val editorGroup = groupService.save(Group(
             key = "editor",
             translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Editor"))
         ))
-        val viewerGroup = groupService.save(GroupDocument(
+        val viewerGroup = groupService.save(Group(
             key = "viewer",
             translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Viewer"))
         ))
@@ -1983,15 +1983,15 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         val maintainer = registerUser()
         val editor = registerUser()
         val viewer = registerUser()
-        val maintainerGroup = groupService.save(GroupDocument(
+        val maintainerGroup = groupService.save(Group(
             key = "maintainer",
             translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Maintainer"))
         ))
-        val editorGroup = groupService.save(GroupDocument(
+        val editorGroup = groupService.save(Group(
             key = "editor",
             translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Editor"))
         ))
-        val viewerGroup = groupService.save(GroupDocument(
+        val viewerGroup = groupService.save(Group(
             key = "viewer",
             translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Viewer"))
         ))
@@ -2026,15 +2026,15 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         val maintainer = registerUser()
         val editor = registerUser()
         val viewer = registerUser()
-        val maintainerGroup = groupService.save(GroupDocument(
+        val maintainerGroup = groupService.save(Group(
             key = "maintainer",
             translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Maintainer"))
         ))
-        val editorGroup = groupService.save(GroupDocument(
+        val editorGroup = groupService.save(Group(
             key = "editor",
             translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Editor"))
         ))
-        val viewerGroup = groupService.save(GroupDocument(
+        val viewerGroup = groupService.save(Group(
             key = "viewer",
             translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Viewer"))
         ))
@@ -2068,15 +2068,15 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         val maintainer = registerUser()
         val editor = registerUser()
         val viewer = registerUser()
-        val maintainerGroup = groupService.save(GroupDocument(
+        val maintainerGroup = groupService.save(Group(
             key = "maintainer",
             translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Maintainer"))
         ))
-        val editorGroup = groupService.save(GroupDocument(
+        val editorGroup = groupService.save(Group(
             key = "editor",
             translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Editor"))
         ))
-        val viewerGroup = groupService.save(GroupDocument(
+        val viewerGroup = groupService.save(Group(
             key = "viewer",
             translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Viewer"))
         ))

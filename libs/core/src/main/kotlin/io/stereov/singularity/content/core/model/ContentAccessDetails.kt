@@ -4,7 +4,7 @@ import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.auth.token.model.AccessType
 import io.stereov.singularity.content.core.dto.request.UpdateContentAccessRequest
 import io.stereov.singularity.content.core.dto.response.ContentAccessDetailsResponse
-import io.stereov.singularity.user.core.model.Role
+import io.stereov.singularity.principal.core.model.Role
 import org.bson.types.ObjectId
 
 data class ContentAccessDetails(

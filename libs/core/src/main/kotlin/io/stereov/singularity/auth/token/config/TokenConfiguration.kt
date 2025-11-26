@@ -12,7 +12,8 @@ import io.stereov.singularity.auth.token.service.*
 import io.stereov.singularity.database.encryption.service.EncryptionService
 import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.global.properties.AppProperties
-import io.stereov.singularity.user.core.service.UserService
+import io.stereov.singularity.principal.core.service.PrincipalService
+import io.stereov.singularity.principal.core.service.UserService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean
@@ -81,6 +82,7 @@ class TokenConfiguration {
         geolocationProperties: GeolocationProperties,
         userService: UserService,
         tokenValueExtractor: TokenValueExtractor,
+        principalService: PrincipalService
     ) = RefreshTokenService(
         jwtService,
         jwtProperties,

@@ -9,11 +9,11 @@ import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProper
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.global.properties.AppProperties
-import io.stereov.singularity.user.core.dto.response.UserResponse
-import io.stereov.singularity.user.core.mapper.PrincipalMapper
-import io.stereov.singularity.user.core.model.Role
-import io.stereov.singularity.user.core.model.User
-import io.stereov.singularity.user.core.service.UserService
+import io.stereov.singularity.principal.core.dto.response.UserResponse
+import io.stereov.singularity.principal.core.mapper.PrincipalMapper
+import io.stereov.singularity.principal.core.model.Role
+import io.stereov.singularity.principal.core.model.User
+import io.stereov.singularity.principal.core.service.UserService
 import jakarta.annotation.PostConstruct
 import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.runBlocking

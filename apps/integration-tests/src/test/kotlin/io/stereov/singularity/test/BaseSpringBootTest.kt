@@ -11,12 +11,12 @@ import io.stereov.singularity.auth.core.dto.response.StepUpResponse
 import io.stereov.singularity.auth.core.model.SessionInfo
 import io.stereov.singularity.auth.core.model.token.*
 import io.stereov.singularity.auth.core.service.token.*
-import io.stereov.singularity.user.group.model.GroupDocument
-import io.stereov.singularity.user.group.model.GroupTranslation
-import io.stereov.singularity.user.group.repository.GroupRepository
-import io.stereov.singularity.user.group.service.GroupService
-import io.stereov.singularity.user.core.dto.request.CreateGuestRequest
-import io.stereov.singularity.user.core.dto.response.CreateGuestResponse
+import io.stereov.singularity.principal.group.model.Group
+import io.stereov.singularity.principal.group.model.GroupTranslation
+import io.stereov.singularity.principal.group.repository.GroupRepository
+import io.stereov.singularity.principal.group.service.GroupService
+import io.stereov.singularity.principal.core.dto.request.CreateGuestRequest
+import io.stereov.singularity.principal.core.dto.response.CreateGuestResponse
 import io.stereov.singularity.auth.jwt.exception.TokenExtractionException
 import io.stereov.singularity.auth.oauth2.model.token.OAuth2ProviderConnectionToken
 import io.stereov.singularity.auth.oauth2.model.token.OAuth2TokenType
@@ -56,10 +56,10 @@ import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.test.config.MockConfig
-import io.stereov.singularity.user.core.model.Role
-import io.stereov.singularity.user.core.model.User
-import io.stereov.singularity.user.core.repository.UserRepository
-import io.stereov.singularity.user.core.service.UserService
+import io.stereov.singularity.principal.core.model.Role
+import io.stereov.singularity.principal.core.model.User
+import io.stereov.singularity.principal.core.repository.UserRepository
+import io.stereov.singularity.principal.core.service.UserService
 import kotlinx.coroutines.runBlocking
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.AfterEach
@@ -232,8 +232,8 @@ class BaseSpringBootTest() {
         val email2faCode: String,
     )
 
-    suspend fun createGroup(key: String = "test-group"): GroupDocument {
-        val group = GroupDocument(key = key, translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Test")))
+    suspend fun createGroup(key: String = "test-group"): Group {
+        val group = Group(key = key, translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Test")))
         return groupService.save(group)
     }
 

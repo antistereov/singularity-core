@@ -6,9 +6,9 @@ import io.stereov.singularity.auth.core.controller.EmailVerificationController
 import io.stereov.singularity.auth.core.controller.PasswordResetController
 import io.stereov.singularity.auth.core.controller.SessionController
 import io.stereov.singularity.auth.token.model.SessionTokenType
-import io.stereov.singularity.user.group.controller.GroupController
-import io.stereov.singularity.user.group.controller.GroupMemberController
-import io.stereov.singularity.user.core.controller.GuestController
+import io.stereov.singularity.principal.group.controller.GroupController
+import io.stereov.singularity.principal.group.controller.GroupMemberController
+import io.stereov.singularity.principal.core.controller.GuestController
 import io.stereov.singularity.auth.oauth2.controller.IdentityProviderController
 import io.stereov.singularity.auth.oauth2.controller.OAuth2ProviderController
 import io.stereov.singularity.auth.twofactor.controller.EmailAuthenticationController
@@ -23,8 +23,8 @@ import io.stereov.singularity.content.tag.controller.TagController
 import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.model.OpenApiConstants
-import io.stereov.singularity.user.core.controller.UserController
-import io.stereov.singularity.user.settings.controller.UserSettingsController
+import io.stereov.singularity.principal.core.controller.UserController
+import io.stereov.singularity.principal.settings.controller.UserSettingsController
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType
 import io.swagger.v3.oas.annotations.security.SecurityScheme

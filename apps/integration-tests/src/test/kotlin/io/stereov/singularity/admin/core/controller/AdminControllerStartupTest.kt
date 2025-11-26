@@ -1,7 +1,7 @@
 package io.stereov.singularity.admin.core.controller
 
 import io.stereov.singularity.test.BaseSpringBootTest
-import io.stereov.singularity.user.core.model.Role
+import io.stereov.singularity.principal.core.model.Role
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test

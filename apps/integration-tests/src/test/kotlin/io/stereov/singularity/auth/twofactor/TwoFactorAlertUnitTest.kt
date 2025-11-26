@@ -9,7 +9,7 @@ import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorVerifySetupReq
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
 import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.test.BaseSecurityAlertTest
-import io.stereov.singularity.user.core.model.User
+import io.stereov.singularity.principal.core.model.User
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

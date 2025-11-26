@@ -8,9 +8,9 @@ import io.stereov.singularity.auth.oauth2.model.OAuth2ErrorCode
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.file.download.service.DownloadService
-import io.stereov.singularity.user.core.model.User
-import io.stereov.singularity.user.core.service.UserService
-import io.stereov.singularity.user.settings.service.UserSettingsService
+import io.stereov.singularity.principal.core.model.User
+import io.stereov.singularity.principal.core.service.UserService
+import io.stereov.singularity.principal.settings.service.UserSettingsService
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
 import org.springframework.security.oauth2.core.user.OAuth2User

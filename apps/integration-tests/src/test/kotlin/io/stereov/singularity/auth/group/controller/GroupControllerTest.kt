@@ -1,10 +1,10 @@
-package io.stereov.singularity.user.group.controller
+package io.stereov.singularity.principal.group.controller
 
-import io.stereov.singularity.user.group.dto.request.CreateGroupRequest
-import io.stereov.singularity.user.group.dto.request.UpdateGroupRequest
-import io.stereov.singularity.user.group.dto.response.GroupResponse
-import io.stereov.singularity.user.group.model.GroupDocument
-import io.stereov.singularity.user.group.model.GroupTranslation
+import io.stereov.singularity.principal.group.dto.request.CreateGroupRequest
+import io.stereov.singularity.principal.group.dto.request.UpdateGroupRequest
+import io.stereov.singularity.principal.group.dto.response.GroupResponse
+import io.stereov.singularity.principal.group.model.Group
+import io.stereov.singularity.principal.group.model.GroupTranslation
 import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions
@@ -15,7 +15,7 @@ import java.util.*
 class GroupControllerTest() : BaseIntegrationTest() {
 
     data class GroupPage(
-        val content: List<io.stereov.singularity.user.group.dto.response.GroupResponse> = emptyList(),
+        val content: List<io.stereov.singularity.principal.group.dto.response.GroupResponse> = emptyList(),
         val pageNumber: Int,
         val pageSize: Int,
         val numberOfElements: Int,
@@ -187,7 +187,7 @@ class GroupControllerTest() : BaseIntegrationTest() {
     @Test fun `getGroups works`() = runTest {
         val admin = createAdmin()
 
-        groupRepository.save(GroupDocument(
+        groupRepository.save(Group(
             null,
             "pilots",
                 mutableMapOf(
@@ -195,7 +195,7 @@ class GroupControllerTest() : BaseIntegrationTest() {
                     Locale.GERMAN to GroupTranslation("Piloten", "Menschen, die fliegen")
                 ),
         ))
-        groupRepository.save(GroupDocument(
+        groupRepository.save(Group(
             null,
             "passengers",
                 mutableMapOf(
@@ -312,7 +312,7 @@ class GroupControllerTest() : BaseIntegrationTest() {
     @Test fun `getGroupByKey works`() = runTest {
         val admin = createAdmin()
 
-        groupRepository.save(GroupDocument(
+        groupRepository.save(Group(
             null,
             "pilots",
             mutableMapOf(
@@ -389,7 +389,7 @@ class GroupControllerTest() : BaseIntegrationTest() {
     @Test fun `updateGroup works`() = runTest {
         val admin = createAdmin()
 
-        val group = GroupDocument(
+        val group = Group(
             null,
             "pilots",
             mutableMapOf(
@@ -445,7 +445,7 @@ class GroupControllerTest() : BaseIntegrationTest() {
     @Test fun `updateGroup delete and put is okay`() = runTest {
         val admin = createAdmin()
 
-        val group = GroupDocument(
+        val group = Group(
             null,
             "pilots",
             mutableMapOf(
@@ -485,7 +485,7 @@ class GroupControllerTest() : BaseIntegrationTest() {
     @Test fun `updateGroup default locale needs translation`() = runTest {
         val admin = createAdmin()
 
-        val group = groupRepository.save(GroupDocument(
+        val group = groupRepository.save(Group(
             null,
             "pilots",
             mutableMapOf(
@@ -512,7 +512,7 @@ class GroupControllerTest() : BaseIntegrationTest() {
         Assertions.assertEquals(group.translations, updatedGroup.translations)
     }
     @Test fun `updateGroup requires authentication`() = runTest {
-        val group = GroupDocument(
+        val group = Group(
             null,
             "pilots",
             mutableMapOf(
@@ -539,7 +539,7 @@ class GroupControllerTest() : BaseIntegrationTest() {
     @Test fun `updateGroup requires admin`() = runTest {
         val user = registerUser()
 
-        val group = GroupDocument(
+        val group = Group(
             null,
             "pilots",
             mutableMapOf(
@@ -567,7 +567,7 @@ class GroupControllerTest() : BaseIntegrationTest() {
     @Test fun `updateGroup requires body`() = runTest {
         val admin = createAdmin()
 
-        val group = GroupDocument(
+        val group = Group(
             null,
             "pilots",
             mutableMapOf(
@@ -589,7 +589,7 @@ class GroupControllerTest() : BaseIntegrationTest() {
         val admin = createAdmin()
         val user = registerUser(groups = listOf("pilots"))
 
-        val group = groupRepository.save(GroupDocument(
+        val group = groupRepository.save(Group(
             null,
             "pilots",
             mutableMapOf(
@@ -614,7 +614,7 @@ class GroupControllerTest() : BaseIntegrationTest() {
     @Test fun `deleteGroup requires authentication`() = runTest {
         val user = registerUser(groups = listOf("pilots"))
 
-        val group = groupRepository.save(GroupDocument(
+        val group = groupRepository.save(Group(
             null,
             "pilots",
             mutableMapOf(
@@ -638,7 +638,7 @@ class GroupControllerTest() : BaseIntegrationTest() {
     @Test fun `deleteGroup requires admin`() = runTest {
         val user = registerUser(groups = listOf("pilots"))
 
-        val group = groupRepository.save(GroupDocument(
+        val group = groupRepository.save(Group(
             null,
             "pilots",
             mutableMapOf(
@@ -664,7 +664,7 @@ class GroupControllerTest() : BaseIntegrationTest() {
         val admin = createAdmin()
         val user = registerUser(groups = listOf("pilots"))
 
-        val group = groupRepository.save(GroupDocument(
+        val group = groupRepository.save(Group(
             null,
             "pilots",
             mutableMapOf(

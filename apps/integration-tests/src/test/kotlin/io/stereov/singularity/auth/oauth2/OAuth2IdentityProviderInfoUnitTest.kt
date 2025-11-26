@@ -9,7 +9,7 @@ import io.stereov.singularity.auth.alert.service.IdentityProviderInfoService
 import io.stereov.singularity.auth.oauth2.model.OAuth2ErrorCode
 import io.stereov.singularity.test.BaseOAuth2FlowTest
 import io.stereov.singularity.test.config.MockSecurityAlertConfig
-import io.stereov.singularity.user.core.model.User
+import io.stereov.singularity.principal.core.model.User
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach

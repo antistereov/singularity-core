@@ -12,8 +12,8 @@ import io.stereov.singularity.auth.alert.service.SecurityAlertService
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
 import io.stereov.singularity.test.BaseOAuth2FlowTest
 import io.stereov.singularity.test.config.MockSecurityAlertConfig
-import io.stereov.singularity.user.core.model.User
-import io.stereov.singularity.user.core.model.identity.UserIdentity
+import io.stereov.singularity.principal.core.model.User
+import io.stereov.singularity.principal.core.model.identity.UserIdentity
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach

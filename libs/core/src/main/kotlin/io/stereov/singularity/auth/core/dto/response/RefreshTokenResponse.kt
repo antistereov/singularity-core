@@ -1,6 +1,6 @@
 package io.stereov.singularity.auth.core.dto.response
 
-import io.stereov.singularity.user.core.dto.response.UserResponse
+import io.stereov.singularity.principal.core.dto.response.UserResponse
 
 data class RefreshTokenResponse(
     val user: UserResponse,

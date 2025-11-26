@@ -5,7 +5,7 @@ import com.github.michaelbull.result.toResultOr
 import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.auth.token.model.AccessType
 import io.stereov.singularity.content.invitation.model.InvitationDocument
-import io.stereov.singularity.database.core.exception.DatabaseException
+import io.stereov.singularity.database.core.exception.DocumentException
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Transient
 import java.time.Instant
@@ -20,8 +20,8 @@ interface ContentDocument<T: ContentDocument<T>> {
     var tags: MutableSet<String>
 
     @get:Transient
-    val id: Result<ObjectId, DatabaseException.InvalidDocument>
-        get() = _id.toResultOr { DatabaseException.InvalidDocument("The document does not contain an ID") }
+    val id: Result<ObjectId, DocumentException.Invalid>
+        get() = _id.toResultOr { DocumentException.Invalid("The document does not contain an ID") }
 
     @get:Transient
     val isPublic: Boolean
