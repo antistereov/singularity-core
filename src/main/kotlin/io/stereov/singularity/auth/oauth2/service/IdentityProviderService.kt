@@ -2,7 +2,6 @@ package io.stereov.singularity.auth.oauth2.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
-import io.stereov.singularity.auth.core.model.IdentityProvider
 import io.stereov.singularity.auth.core.model.SecurityAlertType
 import io.stereov.singularity.auth.alert.properties.SecurityAlertProperties
 import io.stereov.singularity.auth.core.service.AuthorizationService
@@ -21,7 +20,7 @@ import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.global.exception.model.DocumentNotFoundException
 import io.stereov.singularity.user.core.model.Role
-import io.stereov.singularity.user.core.model.AccountDocument
+import io.stereov.singularity.user.core.model.User
 import io.stereov.singularity.user.core.model.identity.UserIdentity
 import io.stereov.singularity.user.core.service.UserService
 import org.springframework.stereotype.Service
@@ -44,7 +43,7 @@ class IdentityProviderService(
 
     private val logger = KotlinLogging.logger {}
 
-    suspend fun connect(req: AddPasswordAuthenticationRequest): AccountDocument {
+    suspend fun connect(req: AddPasswordAuthenticationRequest): User {
         logger.debug { "Creating password identity" }
 
         authorizationService.requireStepUp()
@@ -72,7 +71,7 @@ class IdentityProviderService(
         stepUpTokenValue: String?,
         exchange: ServerWebExchange,
         locale: Locale?
-    ): Pair<AccountDocument, OAuth2AuthenticationService.OAuth2Action> {
+    ): Pair<User, OAuth2AuthenticationService.OAuth2Action> {
         logger.debug { "Connecting a new OAuth2 provider $provider to user" }
 
         val accessToken = accessTokenService.extractOrOAuth2FlowException(exchange)
@@ -154,7 +153,7 @@ class IdentityProviderService(
         return savedUser to action
     }
 
-    suspend fun disconnect(provider: String, locale: Locale?): AccountDocument {
+    suspend fun disconnect(provider: String, locale: Locale?): User {
         logger.debug { "Disconnecting provider $provider from user" }
 
         authorizationService.requireStepUp()

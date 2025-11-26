@@ -106,6 +106,29 @@ sealed class RefreshTokenCreationException(
         cause
     )
 
+    /**
+     * Indicates an invalid principal document associated with a refresh token creation process.
+     *
+     * This exception is a specific type of [RefreshTokenCreationException] that is thrown when the
+     * principal document linked to the access token is deemed invalid. It provides relevant
+     * contextual information such as the error message, unique error code, HTTP status, and an
+     * optional cause.
+     *
+     * @param msg The error message describing the invalid principal issue.
+     * @param cause The underlying cause of this exception, if available.
+     *
+     * @property code `REFRESH_TOKEN_INVALID_PRINCIPAL_DOCUMENT_FAILURE`
+     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
+     * @property description "Indicates that the principal document associated with the access token is invalid."
+     */
+    class InvalidPrincipal(msg: String, cause: Throwable? = null) : RefreshTokenCreationException(
+        msg,
+        "REFRESH_TOKEN_INVALID_PRINCIPAL_DOCUMENT_FAILURE",
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        "Indicates that the principal document associated with the access token is invalid.",
+        cause
+    )
+
     companion object {
         /**
          * Maps a given [TokenCreationException] to a corresponding [RefreshTokenCreationException].

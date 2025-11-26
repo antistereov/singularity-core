@@ -6,7 +6,7 @@ import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.user.core.dto.response.UserResponse
-import io.stereov.singularity.user.core.mapper.UserMapper
+import io.stereov.singularity.user.core.mapper.PrincipalMapper
 import io.stereov.singularity.user.settings.dto.request.ChangeEmailRequest
 import io.stereov.singularity.user.settings.dto.request.ChangePasswordRequest
 import io.stereov.singularity.user.settings.dto.request.ChangeUserRequest
@@ -32,7 +32,7 @@ import java.util.*
     description = "Operations related to user settings."
 )
 class UserSettingsController(
-    private val userMapper: UserMapper,
+    private val principalMapper: PrincipalMapper,
     private val userSettingsService: UserSettingsService,
     private val cookieCreator: CookieCreator,
     private val authorizationService: AuthorizationService
@@ -69,7 +69,7 @@ class UserSettingsController(
     suspend fun getAuthorizedUser(): ResponseEntity<UserResponse> {
         val user = authorizationService.getUser()
 
-        return ResponseEntity.ok(userMapper.toResponse(user))
+        return ResponseEntity.ok(principalMapper.toResponse(user))
     }
 
     @PutMapping("/email")
@@ -192,7 +192,7 @@ class UserSettingsController(
         val user = userSettingsService.changePassword(payload, locale)
 
         return ResponseEntity.ok().body(
-            userMapper.toResponse(user)
+            principalMapper.toResponse(user)
         )
     }
 
@@ -228,7 +228,7 @@ class UserSettingsController(
         val user = userSettingsService.changeUser(payload)
 
         return ResponseEntity.ok().body(
-            userMapper.toResponse(user)
+            principalMapper.toResponse(user)
         )
     }
 

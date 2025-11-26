@@ -35,7 +35,7 @@ import io.stereov.singularity.email.template.service.TemplateService
 import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.translate.service.TranslateService
-import io.stereov.singularity.user.core.mapper.UserMapper
+import io.stereov.singularity.user.core.mapper.PrincipalMapper
 import io.stereov.singularity.user.core.service.UserService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
@@ -62,13 +62,13 @@ class TwoFactorAuthConfiguration {
     fun mailAuthenticationController(
         emailAuthenticationService: EmailAuthenticationService,
         authorizationService: AuthorizationService,
-        userMapper: UserMapper,
+        principalMapper: PrincipalMapper,
         twoFactorAuthTokenService: TwoFactorAuthenticationTokenService,
         userService: UserService
     ) = EmailAuthenticationController(
         emailAuthenticationService,
         authorizationService,
-        userMapper,
+        principalMapper,
         twoFactorAuthTokenService,
         userService
     )
@@ -81,7 +81,7 @@ class TwoFactorAuthConfiguration {
         accessTokenService: AccessTokenService,
         refreshTokenService: RefreshTokenService,
         stepUpTokenService: StepUpTokenService,
-        userMapper: UserMapper,
+        principalMapper: PrincipalMapper,
         authProperties: AuthProperties,
         sessionTokenService: SessionTokenService,
     ) = TotpAuthenticationController(
@@ -90,7 +90,7 @@ class TwoFactorAuthConfiguration {
         accessTokenService,
         refreshTokenService,
         stepUpTokenService,
-        userMapper,
+        principalMapper,
         authProperties,
         sessionTokenService,
     )
@@ -101,7 +101,7 @@ class TwoFactorAuthConfiguration {
         twoFactorAuthenticationService: TwoFactorAuthenticationService,
         authProperties: AuthProperties,
         geolocationService: GeolocationService,
-        userMapper: UserMapper,
+        principalMapper: PrincipalMapper,
         accessTokenService: AccessTokenService,
         refreshTokenService: RefreshTokenService,
         stepUpTokenService: StepUpTokenService,
@@ -112,7 +112,7 @@ class TwoFactorAuthConfiguration {
             twoFactorAuthenticationService,
             authProperties,
             geolocationService,
-            userMapper,
+            principalMapper,
             accessTokenService,
             refreshTokenService,
             stepUpTokenService,
@@ -191,7 +191,7 @@ class TwoFactorAuthConfiguration {
         hashService: HashService,
         userService: UserService,
         accessTokenCache: AccessTokenCache,
-        userMapper: UserMapper,
+        principalMapper: PrincipalMapper,
         twoFactorAuthTokenService: TwoFactorAuthenticationTokenService,
         securityAlertProperties: SecurityAlertProperties,
         securityAlertService: SecurityAlertService,
@@ -204,7 +204,7 @@ class TwoFactorAuthConfiguration {
         hashService,
         userService,
         accessTokenCache,
-        userMapper,
+        principalMapper,
         twoFactorAuthTokenService,
         securityAlertProperties,
         securityAlertService,

@@ -104,4 +104,27 @@ sealed class AccessTokenCreationException(
         "Represents an exception that occurs when there is a failure related to the secret required for creating an access token.",
         cause
     )
+
+    /**
+     * Indicates an invalid principal document associated with an access token creation process.
+     *
+     * This exception is a specific type of [AccessTokenCreationException] that is thrown when the
+     * principal document linked to the access token is deemed invalid. It provides relevant
+     * contextual information such as the error message, unique error code, HTTP status, and an
+     * optional cause.
+     *
+     * @param msg The error message describing the invalid principal issue.
+     * @param cause The underlying cause of this exception, if available.
+     *
+     * @property code `ACCESS_TOKEN_INVALID_PRINCIPAL_DOCUMENT_FAILURE`
+     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
+     * @property description "Indicates that the principal document associated with the access token is invalid."
+     */
+    class InvalidPrincipal(msg: String, cause: Throwable? = null) : AccessTokenCreationException(
+        msg,
+        "ACCESS_TOKEN_INVALID_PRINCIPAL_DOCUMENT_FAILURE",
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        "Indicates that the principal document associated with the access token is invalid.",
+        cause
+    )
 }

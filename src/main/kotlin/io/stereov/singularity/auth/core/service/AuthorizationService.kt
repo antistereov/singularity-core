@@ -64,7 +64,7 @@ class AuthorizationService(
 
         return stepUpTokenService.extract(
             exchange,
-            authentication.userId,
+            authentication.principalId,
             authentication.sessionId
         )
     }

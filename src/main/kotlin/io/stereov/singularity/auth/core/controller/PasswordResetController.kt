@@ -135,7 +135,7 @@ class PasswordResetController(
             >**Note:** If email is disabled, there is no way to reset the password.
             
             If there is no account associated with the given email address, 
-            a [No Account Information](https://singularity.stereov.io/docs/guides/auth/security-alerts#no-account-information)
+            a [No Principal Information](https://singularity.stereov.io/docs/guides/auth/security-alerts#no-account-information)
             email will be sent to the given email address.
             
             ### Locale

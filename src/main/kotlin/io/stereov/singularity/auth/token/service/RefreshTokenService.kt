@@ -17,7 +17,10 @@ import io.stereov.singularity.auth.token.model.SessionTokenType
 import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.global.util.getClientIp
-import io.stereov.singularity.user.core.model.UserDocument
+import io.stereov.singularity.user.core.model.Principal
+import io.stereov.singularity.user.core.model.Role
+import io.stereov.singularity.user.core.model.sensitve.SensitivePrincipalData
+import io.stereov.singularity.user.core.service.PrincipalService
 import io.stereov.singularity.user.core.service.UserService
 import org.bson.types.ObjectId
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
@@ -41,7 +44,8 @@ class RefreshTokenService(
     private val geolocationService: GeolocationService,
     private val geolocationProperties: GeolocationProperties,
     private val userService: UserService,
-    private val tokenValueExtractor: TokenValueExtractor
+    private val tokenValueExtractor: TokenValueExtractor,
+    private val principalService: PrincipalService
 ) {
 
     private val logger = KotlinLogging.logger {}
@@ -50,7 +54,7 @@ class RefreshTokenService(
     /**
      * Creates a new [RefreshToken] for a user session and automatically updates the user sessions.
      *
-     * @param user The user document associated with the [RefreshToken].
+     * @param principal The user document associated with the [RefreshToken].
      * @param sessionId The unique identifier of the user's session.
      * @param sessionInfo Optional session information about the user's browser and operating system.
      * @param exchange The server web exchange containing request context.
@@ -58,37 +62,41 @@ class RefreshTokenService(
      * @return A [Result] containing the created [RefreshToken] on success or a [RefreshTokenCreationException] on failure.
      */
     suspend fun create(
-        user: UserDocument,
+        principal: Principal<out Role, out SensitivePrincipalData>,
         sessionId: UUID,
         sessionInfo: SessionInfoRequest?,
         exchange: ServerWebExchange
     ): Result<RefreshToken, RefreshTokenCreationException> = coroutineBinding {
+        val id = principal.id
+            .mapError { ex -> RefreshTokenCreationException.InvalidPrincipal("Failed to generate refresh token because the associated principal document contains no ID: ${ex.message}", ex) }
+            .bind()
+
         val refreshTokenId = Random.generateString(20)
             .mapError { ex ->
                 RefreshTokenCreationException.Failed("Failed to create refresh token because no refresh token ID could be generated: ${ex.message}", ex)
             }
             .bind()
 
-        updateSessions(exchange, user, sessionId, sessionInfo, refreshTokenId)
+        updateSessions(exchange, principal, sessionId, sessionInfo, refreshTokenId)
             .mapError { ex ->
-                RefreshTokenCreationException.Failed("Failed to create refresh token because updating session in the user document for user ${user.id} failed: ${ex.message}", ex)
+                RefreshTokenCreationException.Failed("Failed to create refresh token because updating session in the user document for user ${principal.id} failed: ${ex.message}", ex)
             }
-            .andThen { doCreate(user.id, sessionId, refreshTokenId) }
+            .andThen { doCreate(id, sessionId, refreshTokenId) }
             .bind()
     }
 
     private suspend fun doCreate(
-        userId: ObjectId,
+        principalId: ObjectId,
         sessionId: UUID,
         tokenId: String,
         issuedAt: Instant = Instant.now()
     ): Result<RefreshToken, RefreshTokenCreationException> = coroutineBinding {
-        logger.debug { "Creating refresh token for user $userId and session $sessionId" }
+        logger.debug { "Creating refresh token for user $principalId and session $sessionId" }
 
         val claims = runCatching {
             JwtClaimsSet.builder()
                 .id(tokenId)
-                .subject(userId.toHexString())
+                .subject(principalId.toHexString())
                 .issuedAt(issuedAt)
                 .expiresAt(issuedAt.plusSeconds(jwtProperties.refreshExpiresIn))
                 .claim(Constants.JWT_SESSION_CLAIM, sessionId)
@@ -100,18 +108,18 @@ class RefreshTokenService(
         jwtService.encodeJwt(claims, tokenType.cookieName)
             .mapError { ex -> RefreshTokenCreationException.fromTokenCreationException(ex) }
             .map { jwt ->
-                RefreshToken(userId, sessionId, tokenId, jwt)
+                RefreshToken(principalId, sessionId, tokenId, jwt)
             }
             .bind()
     }
 
     private suspend fun updateSessions(
         exchange: ServerWebExchange,
-        user: UserDocument,
+        principal: Principal<out Role, out SensitivePrincipalData>,
         sessionId: UUID,
         sessionInfo: SessionInfoRequest?,
         tokenId: String
-    ): Result<UserDocument, RefreshTokenCreationException.SessionUpdate> = coroutineBinding {
+    ): Result<Principal<out Role, out SensitivePrincipalData>, RefreshTokenCreationException.SessionUpdate> = coroutineBinding {
         val ipAddress = exchange.request.getClientIp(geolocationProperties.realIpHeader)
             ?.let { ip -> 
                 runCatching { InetAddress.getByName(ip) }
@@ -143,10 +151,10 @@ class RefreshTokenService(
             location = location
         )
 
-        user.updateLastActive()
-        user.addOrUpdateSession(sessionId, sessionInfo)
+        principal.updateLastActive()
+        principal.addOrUpdateSession(sessionId, sessionInfo)
 
-        userService.save(user)
+        principalService.save(principal)
             .mapError { ex -> RefreshTokenCreationException.SessionUpdate("Failed to save user after updating sessions when creating refresh token: ${ex.message}", ex) }
             .bind()
     }

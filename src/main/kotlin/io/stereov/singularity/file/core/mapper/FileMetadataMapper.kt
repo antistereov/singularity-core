@@ -1,7 +1,10 @@
 package io.stereov.singularity.file.core.mapper
 
+import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.binding
 import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.content.core.dto.response.ContentAccessDetailsResponse
+import io.stereov.singularity.database.core.exception.DatabaseException
 import io.stereov.singularity.file.core.dto.FileMetadataResponse
 import io.stereov.singularity.file.core.dto.FileRenditionResponse
 import io.stereov.singularity.file.core.model.FileMetadataDocument
@@ -55,27 +58,29 @@ class FileMetadataMapper {
     )
 
     /**
-     * Converts a [FileMetadataDocument], an authenticated user, and renditions map into a
-     * [FileMetadataResponse] object.
+     * Converts a [FileMetadataDocument] into a [FileMetadataResponse] while incorporating authentication
+     * outcomes and file renditions.
      *
-     * @param doc The file metadata document containing metadata details, such as access permissions,
-     *            creation and update timestamps, and renditions.
-     * @param authentication The authenticated user information, used to evaluate access permissions.
-     * @param renditions A map of renditions where each key corresponds to a rendition identifier,
-     *   and value is the associated [FileRenditionResponse].
-     * @return A [FileMetadataResponse] object constructed from the provided metadata document,
-     *   authentication context, and rendition map.
+     * @param doc The [FileMetadataDocument] containing the metadata details to be transformed.
+     * @param authenticationOutcome The outcome of the authentication process used to determine access details.
+     * @param renditions A map of file rendition keys to their corresponding [FileRenditionResponse] objects.
+     * @return A [Result] wrapping a [FileMetadataResponse] if the operation is successful, or a
+     * [DatabaseException.InvalidDocument] if the document contains no ID.
      */
     fun toMetadataResponse(
         doc: FileMetadataDocument,
-        authentication: AuthenticationOutcome.Authenticated,
+        authenticationOutcome: AuthenticationOutcome,
         renditions: Map<String, FileRenditionResponse>
-    ) = FileMetadataResponse(
-        id = doc.id,
-        key = doc.key,
-        createdAt = doc.createdAt,
-        updatedAt = doc.updatedAt,
-        access = ContentAccessDetailsResponse.create(doc.access, authentication),
-        renditions = renditions,
-    )
+    ): Result<FileMetadataResponse, DatabaseException.InvalidDocument> = binding {
+        val id = doc.id.bind()
+
+        FileMetadataResponse(
+            id = id,
+            key = doc.key,
+            createdAt = doc.createdAt,
+            updatedAt = doc.updatedAt,
+            access = ContentAccessDetailsResponse.create(doc.access, authenticationOutcome),
+            renditions = renditions,
+        )
+    }
 }

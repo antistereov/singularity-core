@@ -11,7 +11,7 @@ import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.file.image.service.ImageStore
-import io.stereov.singularity.user.core.mapper.UserMapper
+import io.stereov.singularity.user.core.mapper.PrincipalMapper
 import io.stereov.singularity.user.core.service.UserService
 import io.stereov.singularity.user.settings.controller.UserSettingsController
 import io.stereov.singularity.user.settings.service.UserSettingsService
@@ -29,11 +29,11 @@ class UserSettingsConfiguration {
     @Bean
     @ConditionalOnMissingBean
     fun userSettingsController(
-        userMapper: UserMapper,
+        principalMapper: PrincipalMapper,
         userSettingsService: UserSettingsService,
         cookieCreator: CookieCreator,
         authorizationService: AuthorizationService
-    ) = UserSettingsController(userMapper, userSettingsService, cookieCreator, authorizationService)
+    ) = UserSettingsController(principalMapper, userSettingsService, cookieCreator, authorizationService)
 
     // Service
 
@@ -46,7 +46,7 @@ class UserSettingsConfiguration {
         hashService: HashService,
         fileStorage: FileStorage,
         accessTokenCache: AccessTokenCache,
-        userMapper: UserMapper,
+        principalMapper: PrincipalMapper,
         emailProperties: EmailProperties,
         securityAlertProperties: SecurityAlertProperties,
         securityAlertService: SecurityAlertService,
@@ -58,7 +58,7 @@ class UserSettingsConfiguration {
         hashService,
         fileStorage,
         accessTokenCache,
-        userMapper,
+        principalMapper,
         emailProperties,
         securityAlertProperties,
         securityAlertService,

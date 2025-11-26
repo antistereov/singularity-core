@@ -17,7 +17,7 @@ import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailProperties
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.global.exception.model.MissingRequestParameterException
-import io.stereov.singularity.user.core.model.AccountDocument
+import io.stereov.singularity.user.core.model.User
 import io.stereov.singularity.user.core.service.UserService
 import org.springframework.stereotype.Service
 import java.util.*
@@ -46,12 +46,12 @@ class AuthenticationService(
      *
      * @param payload The login request containing the user's email and password.
      *
-     * @return The [AccountDocument] of the logged-in user.
+     * @return The [User] of the logged-in user.
      *
      * @throws InvalidCredentialsException If the email or password is invalid.
      * @throws io.stereov.singularity.auth.core.exception.AuthException If the user document does not contain an ID.
      */
-    suspend fun login(payload: LoginRequest, locale: Locale?): AccountDocument {
+    suspend fun login(payload: LoginRequest, locale: Locale?): User {
         logger.debug { "Logging in user ${payload.email}" }
 
         if (authorizationService.isAuthenticated())
@@ -60,7 +60,7 @@ class AuthenticationService(
         val user = userService.findByEmailOrNull(payload.email)
             ?: throw InvalidCredentialsException()
 
-        val password = runCatching { user.validateLoginTypeAndGetPassword() }
+        val password = runCatching { user.getPassword() }
             .getOrElse {
                 if (emailProperties.enable) {
                     identityProviderInfoService.send(user, locale)
@@ -80,7 +80,7 @@ class AuthenticationService(
      *
      * @param payload The registration request containing the user's email, password, and name.
      *
-     * @return The [AccountDocument] of the registered user.
+     * @return The [User] of the registered user.
      */
     suspend fun register(payload: RegisterUserRequest, sendEmail: Boolean, locale: Locale?) {
         logger.debug { "Registering user ${payload.email}" }
@@ -99,7 +99,7 @@ class AuthenticationService(
             return
         }
 
-        val userDocument = AccountDocument.ofPassword(
+        val userDocument = User.ofPassword(
             email = payload.email,
             password = hashService.hashBcrypt(payload.password),
             name = payload.name,
@@ -116,7 +116,7 @@ class AuthenticationService(
         return
     }
 
-    suspend fun logout(): AccountDocument {
+    suspend fun logout(): User {
         logger.debug { "Logging out user" }
 
         val userId = authorizationService.getUserId()
@@ -128,7 +128,7 @@ class AuthenticationService(
         return sessionService.deleteSession(sessionId)
     }
 
-    suspend fun stepUp(req: StepUpRequest?): AccountDocument {
+    suspend fun stepUp(req: StepUpRequest?): User {
         logger.debug { "Executing step up" }
 
         val user = authorizationService.getUser()

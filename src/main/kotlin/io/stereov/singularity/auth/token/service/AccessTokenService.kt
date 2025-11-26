@@ -18,8 +18,9 @@ import io.stereov.singularity.auth.oauth2.exception.model.OAuth2FlowException
 import io.stereov.singularity.auth.oauth2.model.OAuth2ErrorCode
 import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.global.util.Random
+import io.stereov.singularity.user.core.model.Principal
 import io.stereov.singularity.user.core.model.Role
-import io.stereov.singularity.user.core.model.AccountDocument
+import io.stereov.singularity.user.core.model.sensitve.SensitivePrincipalData
 import org.bson.types.ObjectId
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
 import org.springframework.stereotype.Service
@@ -50,23 +51,26 @@ class AccessTokenService(
     /**
      * Creates an access token for a specified user and session.
      *
-     * @param user The user document containing the user's information, including ID, roles, and groups.
+     * @param principal The user document containing the user's information, including ID, roles, and groups.
      * @param sessionId The identifier of the session for which the token is being created.
      * @param issuedAt The timestamp representing when the token is issued. Defaults to the current time.
      * @return A [Result] containing either the created [AccessToken] or an [AccessTokenCreationException] in case of a failure.
      */
     suspend fun create(
-        user: AccountDocument,
+        principal: Principal<out Role, out SensitivePrincipalData>,
         sessionId: UUID,
         issuedAt: Instant = Instant.now()
     ): Result<AccessToken, AccessTokenCreationException> = coroutineBinding {
-        logger.debug { "Creating access token for user ${user.id} and session $sessionId" }
+        val id = principal.id
+            .mapError { ex -> AccessTokenCreationException.InvalidPrincipal("Failed to generate access token because the associated principal document contains no ID: ${ex.message}", ex) }
+            .bind()
+        logger.debug { "Creating access token for user ${principal.id} and session $sessionId" }
 
         val tokenId = Random.generateString(20)
             .mapError { ex -> AccessTokenCreationException.Failed("Failed to generate token id: ${ex.message}", ex) }
             .bind()
 
-        runCatching { accessTokenCache.allowTokenId(user.id, sessionId, tokenId) }
+        runCatching { accessTokenCache.allowTokenId(id, sessionId, tokenId) }
             .mapError { ex -> AccessTokenCreationException.Cache("Failed to cache access token: ${ex.message}", ex) }
             .bind()
 
@@ -74,10 +78,10 @@ class AccessTokenService(
             JwtClaimsSet.builder()
                 .issuedAt(issuedAt)
                 .expiresAt(issuedAt.plusSeconds(jwtProperties.expiresIn))
-                .subject(user.id.toHexString())
-                .claim(Constants.JWT_ROLES_CLAIM, user.roles)
+                .subject(id.toHexString())
+                .claim(Constants.JWT_ROLES_CLAIM, principal.roles)
                 .claim(Constants.JWT_SESSION_CLAIM, sessionId)
-                .claim(Constants.JWT_GROUPS_CLAIM, user.groups)
+                .claim(Constants.JWT_GROUPS_CLAIM, principal.groups)
                 .id(tokenId)
                 .build()
         }
@@ -90,7 +94,7 @@ class AccessTokenService(
                 is TokenCreationException.Secret -> AccessTokenCreationException.Secret("Failed to fetch current JWT secret: ${ex.message}", ex)
             } }
             .map { jwt ->
-                AccessToken(user.id, sessionId, tokenId, user.roles, user.groups, jwt)
+                AccessToken(id, sessionId, tokenId, principal.roles, principal.groups, jwt)
             }
             .bind()
     }
@@ -181,7 +185,7 @@ class AccessTokenService(
                                     .toResultOr { AccessTokenExtractionException.Invalid("Cannot decode role $raw") }
                                     .bind()
                                 val r = Role.fromString(s)
-                                    .toResultOr { AccessTokenExtractionException.Invalid("Unknown role $s") }
+                                    .mapError { ex -> AccessTokenExtractionException.Invalid("Unknown role $s: ${ex.message}", ex) }
                                     .bind()
                                 parsed += r
                             }

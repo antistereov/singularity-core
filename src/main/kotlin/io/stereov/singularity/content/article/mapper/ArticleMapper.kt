@@ -12,8 +12,8 @@ import io.stereov.singularity.content.tag.service.TagService
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.translate.service.TranslateService
-import io.stereov.singularity.user.core.mapper.UserMapper
-import io.stereov.singularity.user.core.model.AccountDocument
+import io.stereov.singularity.user.core.mapper.PrincipalMapper
+import io.stereov.singularity.user.core.model.User
 import io.stereov.singularity.user.core.service.UserService
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
@@ -29,7 +29,7 @@ class ArticleMapper(
     private val tagMapper: TagMapper,
     private val tagService: TagService,
     private val fileStorage: FileStorage,
-    private val userMapper: UserMapper,
+    private val principalMapper: PrincipalMapper,
 ) {
 
     fun createOverview(article: FullArticleResponse): ArticleOverviewResponse {
@@ -73,7 +73,7 @@ class ArticleMapper(
         )
     }
 
-    suspend fun createFullResponse(article: Article, locale: Locale?, owner: AccountDocument? = null): FullArticleResponse {
+    suspend fun createFullResponse(article: Article, locale: Locale?, owner: User? = null): FullArticleResponse {
         val currentUser = authorizationService.getAuthenticationOrNull()
 
         val actualOwner = owner ?: userService.findByIdOrNull(article.access.ownerId)
@@ -90,7 +90,7 @@ class ArticleMapper(
             createdAt = article.createdAt,
             publishedAt = article.publishedAt,
             updatedAt = article.updatedAt,
-            owner = actualOwner?.let { userMapper.toOverview(it) },
+            owner = actualOwner?.let { principalMapper.toOverview(it) },
             path = article.path,
             state = article.state,
             colors = article.colors,

@@ -31,7 +31,7 @@ import io.stereov.singularity.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.global.model.SuccessResponse
-import io.stereov.singularity.user.core.mapper.UserMapper
+import io.stereov.singularity.user.core.mapper.PrincipalMapper
 import io.stereov.singularity.user.core.service.UserService
 import io.swagger.v3.oas.annotations.ExternalDocumentation
 import io.swagger.v3.oas.annotations.Operation
@@ -54,7 +54,7 @@ import java.util.*
 )
 class AuthenticationController(
     private val authenticationService: AuthenticationService,
-    private val userMapper: UserMapper,
+    private val principalMapper: PrincipalMapper,
     private val authProperties: AuthProperties,
     private val geoLocationService: GeolocationService,
     private val twoFactorAuthenticationTokenService: TwoFactorAuthenticationTokenService,
@@ -87,7 +87,7 @@ class AuthenticationController(
             - The `password` must be at least 8 characters long and include at least one uppercase letter, 
               one lowercase letter, one number, and one special character (!@#$%^&*()_+={}[]|\:;'"<>,.?/).
 
-            ### Behavior for Registering Account with Existing Email
+            ### Behavior for Registering Principal with Existing Email
             
             If the email is already connected to an existing account, a [warning](https://singularity.stereov.io/docs/guides/auth/security-alerts#core-identity-alerts)
             will be sent to the corresponding email address informing the user
@@ -222,7 +222,7 @@ class AuthenticationController(
                 .header("Set-Cookie", cookieCreator.createCookie(twoFactorAuthenticationToken).toString())
                 .body(
                     LoginResponse(
-                        user = userMapper.toResponse(user),
+                        user = principalMapper.toResponse(user),
                         twoFactorRequired = true,
                         twoFactorMethods = user.twoFactorMethods,
                         twoFactorAuthenticationToken = if (authProperties.allowHeaderAuthentication) twoFactorAuthenticationToken.value else null,
@@ -239,7 +239,7 @@ class AuthenticationController(
         val refreshToken = refreshTokenService.create(user, sessionId, payload.session, exchange)
 
         val res = LoginResponse(
-            user = userMapper.toResponse(user),
+            user = principalMapper.toResponse(user),
             accessToken = if (authProperties.allowHeaderAuthentication) accessToken.value else null,
             refreshToken = if (authProperties.allowHeaderAuthentication) refreshToken.value else null,
             twoFactorRequired = false,
@@ -360,7 +360,7 @@ class AuthenticationController(
         val newRefreshToken = refreshTokenService.create(user, refreshToken.sessionId, sessionInfo, exchange)
 
         val res = RefreshTokenResponse(
-            userMapper.toResponse(user),
+            principalMapper.toResponse(user),
             if (authProperties.allowHeaderAuthentication) newAccessToken.value else null,
             if (authProperties.allowHeaderAuthentication) newRefreshToken.value else null,
         )

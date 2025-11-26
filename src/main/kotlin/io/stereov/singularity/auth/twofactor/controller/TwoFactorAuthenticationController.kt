@@ -19,7 +19,7 @@ import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthenticationServ
 import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.user.core.dto.response.UserResponse
-import io.stereov.singularity.user.core.mapper.UserMapper
+import io.stereov.singularity.user.core.mapper.PrincipalMapper
 import io.swagger.v3.oas.annotations.ExternalDocumentation
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -45,7 +45,7 @@ class TwoFactorAuthenticationController(
     private val twoFactorAuthService: TwoFactorAuthenticationService,
     private val authProperties: AuthProperties,
     private val geolocationService: GeolocationService,
-    private val userMapper: UserMapper,
+    private val principalMapper: PrincipalMapper,
     private val accessTokenService: AccessTokenService,
     private val refreshTokenService: RefreshTokenService,
     private val stepUpTokenService: StepUpTokenService,
@@ -134,7 +134,7 @@ class TwoFactorAuthenticationController(
 
         val res = LoginResponse(
             twoFactorRequired = false,
-            user = userMapper.toResponse(user),
+            user = principalMapper.toResponse(user),
             accessToken = if (authProperties.allowHeaderAuthentication) accessToken.value else null,
             refreshToken = if (authProperties.allowHeaderAuthentication) refreshToken.value else null,
             twoFactorMethods = null,
@@ -271,7 +271,7 @@ class TwoFactorAuthenticationController(
         @RequestBody req: ChangePreferredTwoFactorMethodRequest
     ): ResponseEntity<UserResponse> {
         return ResponseEntity.ok(
-            userMapper.toResponse(twoFactorAuthService.updatePreferredMethod(req))
+            principalMapper.toResponse(twoFactorAuthService.updatePreferredMethod(req))
         )
     }
 }
