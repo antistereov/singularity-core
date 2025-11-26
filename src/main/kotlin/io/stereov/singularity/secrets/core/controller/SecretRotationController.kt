@@ -1,16 +1,16 @@
 package io.stereov.singularity.secrets.core.controller
 
 import com.github.michaelbull.result.getOrThrow
-import io.stereov.singularity.auth.token.exception.AccessTokenExtractionException
 import io.stereov.singularity.auth.core.exception.AuthenticationException
 import io.stereov.singularity.auth.core.service.AuthorizationService
+import io.stereov.singularity.auth.token.exception.AccessTokenExtractionException
 import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.global.model.SuccessResponse
+import io.stereov.singularity.principal.core.model.Role
 import io.stereov.singularity.secrets.core.dto.RotationStatusResponse
 import io.stereov.singularity.secrets.core.exception.SecretRotationException
 import io.stereov.singularity.secrets.core.service.SecretRotationService
-import io.stereov.singularity.user.core.model.Role
 import io.swagger.v3.oas.annotations.ExternalDocumentation
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -71,7 +71,7 @@ class SecretRotationController(
             .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
             .requireAuthentication()
             .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it } }
-            .requireRole(Role.ADMIN)
+            .requireRole(Role.User.ADMIN)
             .getOrThrow { when (it) { is AuthenticationException.RoleRequired -> it } }
 
         if (secretRotationService.rotationOngoing()) {
@@ -117,7 +117,7 @@ class SecretRotationController(
             .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
             .requireAuthentication()
             .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it } }
-            .requireRole(Role.ADMIN)
+            .requireRole(Role.User.ADMIN)
             .getOrThrow { when (it) { is AuthenticationException.RoleRequired -> it } }
 
         return ResponseEntity.ok(

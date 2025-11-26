@@ -1,6 +1,6 @@
 package io.stereov.singularity.auth.token.model
 
-import io.stereov.singularity.user.core.model.Role
+import io.stereov.singularity.principal.core.model.Role
 import org.bson.types.ObjectId
 import org.springframework.security.oauth2.jwt.Jwt
 import java.util.*

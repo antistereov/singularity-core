@@ -4,7 +4,7 @@ import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.binding
 import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.content.core.dto.response.ContentAccessDetailsResponse
-import io.stereov.singularity.database.core.exception.DatabaseException
+import io.stereov.singularity.database.core.exception.DocumentException
 import io.stereov.singularity.file.core.dto.FileMetadataResponse
 import io.stereov.singularity.file.core.dto.FileRenditionResponse
 import io.stereov.singularity.file.core.model.FileMetadataDocument
@@ -65,13 +65,13 @@ class FileMetadataMapper {
      * @param authenticationOutcome The outcome of the authentication process used to determine access details.
      * @param renditions A map of file rendition keys to their corresponding [FileRenditionResponse] objects.
      * @return A [Result] wrapping a [FileMetadataResponse] if the operation is successful, or a
-     * [DatabaseException.InvalidDocument] if the document contains no ID.
+     * [DocumentException.Invalid] if the document contains no ID.
      */
     fun toMetadataResponse(
         doc: FileMetadataDocument,
         authenticationOutcome: AuthenticationOutcome,
         renditions: Map<String, FileRenditionResponse>
-    ): Result<FileMetadataResponse, DatabaseException.InvalidDocument> = binding {
+    ): Result<FileMetadataResponse, DocumentException.Invalid> = binding {
         val id = doc.id.bind()
 
         FileMetadataResponse(

@@ -1,6 +1,6 @@
 package io.stereov.singularity.global.properties
 
-import io.stereov.singularity.user.group.dto.request.CreateGroupRequest
+import io.stereov.singularity.principal.group.dto.request.CreateGroupRequest
 import io.stereov.singularity.global.util.toSlug
 import org.springframework.boot.context.properties.ConfigurationProperties
 import java.util.*

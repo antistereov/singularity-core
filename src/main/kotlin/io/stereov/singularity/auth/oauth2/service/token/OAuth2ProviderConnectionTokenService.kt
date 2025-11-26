@@ -6,7 +6,7 @@ import io.stereov.singularity.auth.jwt.properties.JwtProperties
 import io.stereov.singularity.auth.jwt.service.JwtService
 import io.stereov.singularity.auth.oauth2.model.token.OAuth2ProviderConnectionToken
 import io.stereov.singularity.global.util.Constants
-import io.stereov.singularity.user.core.model.User
+import io.stereov.singularity.principal.core.model.User
 import org.bson.types.ObjectId
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.security.oauth2.jwt.JwtClaimsSet

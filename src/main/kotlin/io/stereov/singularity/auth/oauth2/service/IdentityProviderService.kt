@@ -19,10 +19,10 @@ import io.stereov.singularity.auth.oauth2.service.token.OAuth2ProviderConnection
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.global.exception.model.DocumentNotFoundException
-import io.stereov.singularity.user.core.model.Role
-import io.stereov.singularity.user.core.model.User
-import io.stereov.singularity.user.core.model.identity.UserIdentity
-import io.stereov.singularity.user.core.service.UserService
+import io.stereov.singularity.principal.core.model.Role
+import io.stereov.singularity.principal.core.model.User
+import io.stereov.singularity.principal.core.model.identity.UserIdentity
+import io.stereov.singularity.principal.core.service.UserService
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ServerWebExchange
 import java.util.*

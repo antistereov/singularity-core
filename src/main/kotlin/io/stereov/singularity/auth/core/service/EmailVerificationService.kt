@@ -26,10 +26,10 @@ import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.translate.model.TranslateKey
 import io.stereov.singularity.translate.service.TranslateService
-import io.stereov.singularity.user.core.dto.response.UserResponse
-import io.stereov.singularity.user.core.mapper.PrincipalMapper
-import io.stereov.singularity.user.core.model.User
-import io.stereov.singularity.user.core.service.UserService
+import io.stereov.singularity.principal.core.dto.response.UserResponse
+import io.stereov.singularity.principal.core.mapper.PrincipalMapper
+import io.stereov.singularity.principal.core.model.User
+import io.stereov.singularity.principal.core.service.UserService
 import jakarta.mail.internet.MimeMessage
 import org.springframework.stereotype.Service
 import java.util.*

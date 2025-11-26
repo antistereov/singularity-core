@@ -3,7 +3,7 @@ package io.stereov.singularity.content.core.service
 import io.github.oshai.kotlinlogging.KLogger
 import io.stereov.singularity.auth.core.exception.model.NotAuthorizedException
 import io.stereov.singularity.auth.core.service.AuthorizationService
-import io.stereov.singularity.user.group.service.GroupService
+import io.stereov.singularity.principal.group.service.GroupService
 import io.stereov.singularity.content.core.dto.request.AcceptInvitationToContentRequest
 import io.stereov.singularity.content.core.dto.request.InviteUserToContentRequest
 import io.stereov.singularity.content.core.dto.request.UpdateContentAccessRequest
@@ -20,9 +20,9 @@ import io.stereov.singularity.content.invitation.service.InvitationService
 import io.stereov.singularity.global.exception.model.DocumentNotFoundException
 import io.stereov.singularity.translate.model.TranslateKey
 import io.stereov.singularity.translate.service.TranslateService
-import io.stereov.singularity.user.core.mapper.PrincipalMapper
-import io.stereov.singularity.user.core.model.Role
-import io.stereov.singularity.user.core.service.UserService
+import io.stereov.singularity.principal.core.mapper.PrincipalMapper
+import io.stereov.singularity.principal.core.model.Role
+import io.stereov.singularity.principal.core.service.UserService
 import org.bson.types.ObjectId
 import java.util.*
 

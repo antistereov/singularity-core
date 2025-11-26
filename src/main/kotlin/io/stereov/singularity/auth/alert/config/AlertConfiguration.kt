@@ -4,6 +4,7 @@ import io.stereov.singularity.auth.alert.component.ProviderStringCreator
 import io.stereov.singularity.auth.alert.properties.SecurityAlertProperties
 import io.stereov.singularity.auth.alert.service.*
 import io.stereov.singularity.auth.core.service.PasswordResetService
+import io.stereov.singularity.cache.service.CacheService
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.email.core.service.EmailService
 import io.stereov.singularity.email.template.service.TemplateService
@@ -15,7 +16,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.data.redis.core.ReactiveRedisTemplate
 
 @Configuration
 @AutoConfiguration(
@@ -45,19 +45,18 @@ class AlertConfiguration {
         emailService: EmailService,
         templateService: TemplateService,
         providerStringCreator: ProviderStringCreator,
-        redisTemplate: ReactiveRedisTemplate<String, String>,
         emailProperties: EmailProperties,
-        passwordResetService: PasswordResetService
+        passwordResetService: PasswordResetService,
+        cacheService: CacheService
     ) = IdentityProviderInfoService(
         appProperties,
         translateService,
         emailService,
         templateService,
         providerStringCreator,
-        redisTemplate,
-        emailProperties,
         passwordResetService,
-        cacheService
+        cacheService,
+        emailProperties,
     )
 
     @Bean
@@ -81,14 +80,14 @@ class AlertConfiguration {
         translateService: TranslateService,
         emailService: EmailService,
         templateService: TemplateService,
-        redisTemplate: ReactiveRedisTemplate<String, String>,
+        cacheService: CacheService,
         emailProperties: EmailProperties
     ) = NoAccountInfoService(
         appProperties,
         translateService,
         emailService,
         templateService,
-        redisTemplate,
+        cacheService,
         emailProperties
     )
 

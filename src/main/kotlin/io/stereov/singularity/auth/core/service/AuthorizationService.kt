@@ -2,12 +2,12 @@ package io.stereov.singularity.auth.core.service
 
 import com.github.michaelbull.result.*
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.auth.token.exception.AccessTokenExtractionException
 import io.stereov.singularity.auth.core.model.AuthenticationOutcome
+import io.stereov.singularity.auth.token.exception.AccessTokenExtractionException
+import io.stereov.singularity.auth.token.exception.StepUpTokenExtractionException
 import io.stereov.singularity.auth.token.model.AuthenticationFilterExceptionToken
 import io.stereov.singularity.auth.token.model.StepUpToken
 import io.stereov.singularity.auth.token.service.StepUpTokenService
-import io.stereov.singularity.auth.jwt.exception.TokenExtractionException
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.stereotype.Service
@@ -54,12 +54,12 @@ class AuthorizationService(
      * @param authentication The authenticated user's authentication details, including user ID and session ID.
      * @param exchange The server web exchange that contains the current HTTP request and response.
      * @return A [Result] containing the extracted [StepUpToken] if the extraction is successful,
-     *   or a [TokenExtractionException] if an error occurs during token extraction.
+     *   or a [StepUpTokenExtractionException] if an error occurs during token extraction.
      */
     suspend fun requireStepUp(
         authentication: AuthenticationOutcome.Authenticated,
         exchange: ServerWebExchange
-    ): Result<StepUpToken, TokenExtractionException> {
+    ): Result<StepUpToken, StepUpTokenExtractionException> {
         logger.debug { "Validating step up" }
 
         return stepUpTokenService.extract(

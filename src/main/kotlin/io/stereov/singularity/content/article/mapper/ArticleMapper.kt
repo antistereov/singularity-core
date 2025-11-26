@@ -12,9 +12,9 @@ import io.stereov.singularity.content.tag.service.TagService
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.translate.service.TranslateService
-import io.stereov.singularity.user.core.mapper.PrincipalMapper
-import io.stereov.singularity.user.core.model.User
-import io.stereov.singularity.user.core.service.UserService
+import io.stereov.singularity.principal.core.mapper.PrincipalMapper
+import io.stereov.singularity.principal.core.model.User
+import io.stereov.singularity.principal.core.service.UserService
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 import java.util.*

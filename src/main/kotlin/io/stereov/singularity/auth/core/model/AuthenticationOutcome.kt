@@ -5,7 +5,7 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.exception.AuthenticationException
-import io.stereov.singularity.user.core.model.Role
+import io.stereov.singularity.principal.core.model.Role
 import org.bson.types.ObjectId
 import org.springframework.security.authentication.AbstractAuthenticationToken
 import org.springframework.security.core.GrantedAuthority
@@ -48,7 +48,6 @@ sealed class AuthenticationOutcome(
      * @property groups A set of groups the authenticated user belongs to.
      * @property sessionId The session identifier associated with this authentication.
      * @property tokenId The token identifier for the user's access token.
-     * @property accessToken The access token containing details about the authenticated user and their scope.
      */
     class Authenticated(
         val principalId: ObjectId,

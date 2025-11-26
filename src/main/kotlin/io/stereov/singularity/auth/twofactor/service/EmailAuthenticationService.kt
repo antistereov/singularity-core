@@ -25,8 +25,8 @@ import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.translate.model.TranslateKey
 import io.stereov.singularity.translate.service.TranslateService
-import io.stereov.singularity.user.core.model.User
-import io.stereov.singularity.user.core.service.UserService
+import io.stereov.singularity.principal.core.model.User
+import io.stereov.singularity.principal.core.service.UserService
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.bson.types.ObjectId
 import org.springframework.data.redis.core.ReactiveRedisTemplate
