@@ -61,7 +61,7 @@ class RateLimitService(
             .getOrThrow()
             .requireAuthentication()
             .getOrThrow()
-            .userId
+            .principalId
     }
         .onErrorResume { Mono.empty() }
         .flatMap { userId ->

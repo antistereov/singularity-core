@@ -4,7 +4,6 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.exception.AuthenticationException
 import io.stereov.singularity.auth.core.exception.model.TwoFactorMethodDisabledException
-import io.stereov.singularity.auth.core.model.IdentityProvider
 import io.stereov.singularity.auth.core.model.SecurityAlertType
 import io.stereov.singularity.auth.alert.properties.SecurityAlertProperties
 import io.stereov.singularity.auth.core.service.AuthorizationService
@@ -23,8 +22,8 @@ import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.user.core.dto.response.UserResponse
-import io.stereov.singularity.user.core.mapper.UserMapper
-import io.stereov.singularity.user.core.model.AccountDocument
+import io.stereov.singularity.user.core.mapper.PrincipalMapper
+import io.stereov.singularity.user.core.model.User
 import io.stereov.singularity.user.core.service.UserService
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ServerWebExchange
@@ -39,7 +38,7 @@ class TotpAuthenticationService(
     private val hashService: HashService,
     private val userService: UserService,
     private val accessTokenCache: AccessTokenCache,
-    private val userMapper: UserMapper,
+    private val principalMapper: PrincipalMapper,
     private val twoFactorAuthTokenService: TwoFactorAuthenticationTokenService,
     private val securityAlertProperties: SecurityAlertProperties,
     private val securityAlertService: SecurityAlertService,
@@ -127,7 +126,7 @@ class TotpAuthenticationService(
             )
         }
 
-        return userMapper.toResponse(savedUser)
+        return principalMapper.toResponse(savedUser)
     }
 
     /**
@@ -139,7 +138,7 @@ class TotpAuthenticationService(
      * @throws InvalidDocumentException If the user document does not contain a two-factor authentication secret.
      * @throws InvalidTwoFactorCodeException If the two-factor code is invalid.
      */
-    suspend fun validateCode(user: AccountDocument, code: Int): AccountDocument {
+    suspend fun validateCode(user: User, code: Int): User {
         if (!user.sensitive.security.twoFactor.totp.enabled)
             throw TwoFactorMethodDisabledException(TwoFactorMethod.TOTP)
 
@@ -151,7 +150,7 @@ class TotpAuthenticationService(
         throw InvalidTwoFactorCodeException()
     }
 
-    suspend fun recoverUser(exchange: ServerWebExchange, recoveryCode: String): AccountDocument {
+    suspend fun recoverUser(exchange: ServerWebExchange, recoveryCode: String): User {
         logger.debug { "Recovering user" }
 
         val userId = twoFactorAuthTokenService.extract(exchange).userId
@@ -204,7 +203,7 @@ class TotpAuthenticationService(
             )
         }
 
-        return userMapper.toResponse(savedUser)
+        return principalMapper.toResponse(savedUser)
     }
 
 }

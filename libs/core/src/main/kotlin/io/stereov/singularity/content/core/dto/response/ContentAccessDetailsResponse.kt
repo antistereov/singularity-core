@@ -1,5 +1,6 @@
 package io.stereov.singularity.content.core.dto.response
 
+import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.auth.token.model.AccessType
 import io.stereov.singularity.content.core.model.ContentAccessDetails
 import io.stereov.singularity.content.core.model.ContentAccessRole
@@ -13,9 +14,9 @@ data class ContentAccessDetailsResponse(
 ) {
 
     companion object {
-        fun create(contentAccessDetails: ContentAccessDetails, authentication: AuthenticationToken?): ContentAccessDetailsResponse {
-            val canEdit = authentication?.let { contentAccessDetails.hasAccess(authentication, ContentAccessRole.EDITOR) } ?: false
-            val canDelete = authentication?.let { contentAccessDetails.hasAccess(authentication, ContentAccessRole.MAINTAINER) } ?: false
+        fun create(contentAccessDetails: ContentAccessDetails, authenticationOutcome: AuthenticationOutcome): ContentAccessDetailsResponse {
+            val canEdit = contentAccessDetails.hasAccess(authenticationOutcome, ContentAccessRole.EDITOR)
+            val canDelete =  contentAccessDetails.hasAccess(authenticationOutcome, ContentAccessRole.MAINTAINER)
 
             return ContentAccessDetailsResponse(
                 ownerId = contentAccessDetails.ownerId,

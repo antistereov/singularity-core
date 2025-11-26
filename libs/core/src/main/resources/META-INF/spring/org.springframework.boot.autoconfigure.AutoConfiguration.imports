@@ -3,8 +3,7 @@ io.stereov.singularity.admin.core.config.AdminConfiguration
 io.stereov.singularity.auth.alert.config.AlertConfiguration
 io.stereov.singularity.auth.core.config.AuthenticationConfiguration
 io.stereov.singularity.auth.geolocation.config.GeolocationConfiguration
-io.stereov.singularity.auth.group.config.GroupConfiguration
-io.stereov.singularity.auth.guest.config.GuestConfiguration
+io.stereov.singularity.user.group.config.GroupConfiguration
 io.stereov.singularity.auth.jwt.config.JwtConfiguration
 io.stereov.singularity.auth.oauth2.config.OAuth2Configuration
 io.stereov.singularity.auth.token.config.TokenConfiguration
@@ -17,6 +16,7 @@ io.stereov.singularity.content.article.config.ArticleConfiguration
 io.stereov.singularity.content.core.config.ContentConfiguration
 io.stereov.singularity.content.invitation.config.InvitationConfiguration
 io.stereov.singularity.content.tag.config.TagConfiguration
+
 io.stereov.singularity.translate.config.TranslateConfiguration
 
 io.stereov.singularity.database.core.config.DatabaseConfiguration

@@ -10,9 +10,9 @@ import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.user.core.dto.response.UserResponse
-import io.stereov.singularity.user.core.mapper.UserMapper
+import io.stereov.singularity.user.core.mapper.PrincipalMapper
 import io.stereov.singularity.user.core.model.Role
-import io.stereov.singularity.user.core.model.AccountDocument
+import io.stereov.singularity.user.core.model.User
 import io.stereov.singularity.user.core.service.UserService
 import jakarta.annotation.PostConstruct
 import kotlinx.coroutines.flow.count
@@ -28,7 +28,7 @@ class AdminService(
     private val twoFactorEmailCodeProperties: TwoFactorEmailCodeProperties,
     private val emailProperties: EmailProperties,
     private val authorizationService: AuthorizationService,
-    private val userMapper: UserMapper,
+    private val principalMapper: PrincipalMapper,
     private val accessTokenCache: AccessTokenCache
 ) {
 
@@ -54,7 +54,7 @@ class AdminService(
 
         accessTokenCache.invalidateAllTokens(user.id)
 
-        return userMapper.toResponse(updatedUser)
+        return principalMapper.toResponse(updatedUser)
     }
 
     suspend fun revokeAdminRole(userId: ObjectId): UserResponse {
@@ -71,14 +71,14 @@ class AdminService(
 
         accessTokenCache.invalidateAllTokens(user.id)
 
-        return userMapper.toResponse(updatedUser)
+        return principalMapper.toResponse(updatedUser)
     }
 
     private suspend fun initRootAccount() {
         if (!this.userService.existsByEmail(appProperties.rootEmail) && appProperties.createRootUser) {
             this.logger.info { "Creating root account" }
 
-            val rootUser = AccountDocument.ofPassword(
+            val rootUser = User.ofPassword(
                 email = appProperties.rootEmail,
                 password = hashService.hashBcrypt(appProperties.rootPassword),
                 name = "Root",

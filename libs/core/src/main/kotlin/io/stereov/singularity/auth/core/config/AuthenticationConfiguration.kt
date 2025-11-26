@@ -29,7 +29,7 @@ import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.translate.service.TranslateService
-import io.stereov.singularity.user.core.mapper.UserMapper
+import io.stereov.singularity.user.core.mapper.PrincipalMapper
 import io.stereov.singularity.user.core.service.UserService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
@@ -66,7 +66,7 @@ class AuthenticationConfiguration {
     @ConditionalOnMissingBean
     fun authenticationController(
         authenticationService: AuthenticationService,
-        userMapper: UserMapper,
+        principalMapper: PrincipalMapper,
         authProperties: AuthProperties,
         geoLocationService: GeolocationService,
         twoFactorAuthenticationTokenService: TwoFactorAuthenticationTokenService,
@@ -84,7 +84,7 @@ class AuthenticationConfiguration {
         ): AuthenticationController {
         return AuthenticationController(
             authenticationService,
-            userMapper,
+            principalMapper,
             authProperties,
             geoLocationService,
             twoFactorAuthenticationTokenService,
@@ -183,7 +183,7 @@ class AuthenticationConfiguration {
     fun emailVerificationService(
         userService: UserService,
         emailVerificationTokenService: EmailVerificationTokenService,
-        userMapper: UserMapper,
+        principalMapper: PrincipalMapper,
         redisTemplate: ReactiveRedisTemplate<String, String>,
         emailProperties: EmailProperties,
         uiProperties: UiProperties,
@@ -196,7 +196,7 @@ class AuthenticationConfiguration {
     ) = EmailVerificationService(
         userService,
         emailVerificationTokenService,
-        userMapper,
+        principalMapper,
         redisTemplate,
         emailProperties,
         uiProperties,

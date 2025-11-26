@@ -1,9 +1,9 @@
 package io.stereov.singularity.content.article.controller
 
 import io.stereov.singularity.auth.token.model.AccessType
-import io.stereov.singularity.auth.group.model.GroupDocument
-import io.stereov.singularity.auth.group.model.GroupTranslation
-import io.stereov.singularity.auth.group.model.KnownGroups
+import io.stereov.singularity.user.group.model.GroupDocument
+import io.stereov.singularity.user.group.model.GroupTranslation
+import io.stereov.singularity.user.group.model.KnownGroups
 import io.stereov.singularity.content.article.dto.request.ChangeArticleStateRequest
 import io.stereov.singularity.content.article.dto.request.CreateArticleRequest
 import io.stereov.singularity.content.article.dto.request.UpdateArticleRequest

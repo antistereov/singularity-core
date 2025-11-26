@@ -4,7 +4,6 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.exception.AuthenticationException
 import io.stereov.singularity.auth.core.exception.model.WrongIdentityProviderException
-import io.stereov.singularity.auth.core.model.IdentityProvider
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.twofactor.dto.request.ChangePreferredTwoFactorMethodRequest
 import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorAuthenticationRequest
@@ -12,7 +11,7 @@ import io.stereov.singularity.auth.twofactor.exception.model.InvalidTwoFactorReq
 import io.stereov.singularity.auth.twofactor.exception.model.TwoFactorMethodDisabledException
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
 import io.stereov.singularity.auth.twofactor.service.token.TwoFactorAuthenticationTokenService
-import io.stereov.singularity.user.core.model.AccountDocument
+import io.stereov.singularity.user.core.model.User
 import io.stereov.singularity.user.core.service.UserService
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ServerWebExchange
@@ -30,7 +29,7 @@ class TwoFactorAuthenticationService(
     private val logger: KLogger
         get() = KotlinLogging.logger {}
 
-    suspend fun handleTwoFactor(user: AccountDocument, locale: Locale?) {
+    suspend fun handleTwoFactor(user: User, locale: Locale?) {
 
         if (user.sensitive.security.twoFactor.preferred == TwoFactorMethod.EMAIL) {
             emailAuthenticationService.sendMail(user, locale)
@@ -46,7 +45,7 @@ class TwoFactorAuthenticationService(
      * @throws io.stereov.singularity.global.exception.model.InvalidDocumentException If the user document does not contain a two-factor authentication secret.
      * @throws AuthenticationException If the two-factor code is invalid.
      */
-    suspend fun validateTwoFactor(exchange: ServerWebExchange, req: TwoFactorAuthenticationRequest): AccountDocument {
+    suspend fun validateTwoFactor(exchange: ServerWebExchange, req: TwoFactorAuthenticationRequest): User {
         logger.debug { "Validating two factor code" }
 
         val token = twoFactorAuthTokenService.extract(exchange)
@@ -66,7 +65,7 @@ class TwoFactorAuthenticationService(
         throw InvalidTwoFactorRequestException("2FA failed: no valid code found in request, available methods: ${user.twoFactorMethods}")
     }
 
-    suspend fun updatePreferredMethod(req: ChangePreferredTwoFactorMethodRequest): AccountDocument {
+    suspend fun updatePreferredMethod(req: ChangePreferredTwoFactorMethodRequest): User {
         logger.debug { "Changing preferred 2FA method to ${req.method}" }
 
         val user = authorizationService.getUser()

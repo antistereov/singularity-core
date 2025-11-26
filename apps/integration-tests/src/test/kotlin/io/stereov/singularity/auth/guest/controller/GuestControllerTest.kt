@@ -1,11 +1,10 @@
 package io.stereov.singularity.auth.guest.controller
 
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
-import io.stereov.singularity.auth.core.model.IdentityProvider
-import io.stereov.singularity.auth.guest.dto.request.ConvertToUserRequest
-import io.stereov.singularity.auth.guest.dto.request.CreateGuestRequest
-import io.stereov.singularity.auth.guest.dto.response.ConvertToUserResponse
-import io.stereov.singularity.auth.guest.dto.response.CreateGuestResponse
+import io.stereov.singularity.user.core.dto.request.ConvertToUserRequest
+import io.stereov.singularity.user.core.dto.request.CreateGuestRequest
+import io.stereov.singularity.user.core.dto.response.ConvertToUserResponse
+import io.stereov.singularity.user.core.dto.response.CreateGuestResponse
 import io.stereov.singularity.test.BaseIntegrationTest
 import io.stereov.singularity.user.core.model.Role
 import kotlinx.coroutines.flow.toList

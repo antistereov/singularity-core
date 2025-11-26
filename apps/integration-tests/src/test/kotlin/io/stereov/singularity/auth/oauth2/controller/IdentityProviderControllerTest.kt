@@ -2,7 +2,6 @@ package io.stereov.singularity.auth.oauth2.controller
 
 import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.auth.core.dto.response.IdentityProviderResponse
-import io.stereov.singularity.auth.core.model.IdentityProvider
 import io.stereov.singularity.auth.oauth2.dto.request.AddPasswordAuthenticationRequest
 import io.stereov.singularity.test.BaseIntegrationTest
 import io.stereov.singularity.user.core.dto.response.UserResponse

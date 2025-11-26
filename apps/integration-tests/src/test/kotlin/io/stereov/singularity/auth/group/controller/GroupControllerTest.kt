@@ -1,10 +1,10 @@
-package io.stereov.singularity.auth.group.controller
+package io.stereov.singularity.user.group.controller
 
-import io.stereov.singularity.auth.group.dto.request.CreateGroupRequest
-import io.stereov.singularity.auth.group.dto.request.UpdateGroupRequest
-import io.stereov.singularity.auth.group.dto.response.GroupResponse
-import io.stereov.singularity.auth.group.model.GroupDocument
-import io.stereov.singularity.auth.group.model.GroupTranslation
+import io.stereov.singularity.user.group.dto.request.CreateGroupRequest
+import io.stereov.singularity.user.group.dto.request.UpdateGroupRequest
+import io.stereov.singularity.user.group.dto.response.GroupResponse
+import io.stereov.singularity.user.group.model.GroupDocument
+import io.stereov.singularity.user.group.model.GroupTranslation
 import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions
@@ -15,7 +15,7 @@ import java.util.*
 class GroupControllerTest() : BaseIntegrationTest() {
 
     data class GroupPage(
-        val content: List<GroupResponse> = emptyList(),
+        val content: List<io.stereov.singularity.user.group.dto.response.GroupResponse> = emptyList(),
         val pageNumber: Int,
         val pageSize: Int,
         val numberOfElements: Int,

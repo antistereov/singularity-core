@@ -10,7 +10,7 @@ import io.stereov.singularity.global.model.SendEmailResponse
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.global.model.SuccessResponse
 import io.stereov.singularity.user.core.dto.response.UserResponse
-import io.stereov.singularity.user.core.mapper.UserMapper
+import io.stereov.singularity.user.core.mapper.PrincipalMapper
 import io.stereov.singularity.user.core.service.UserService
 import io.swagger.v3.oas.annotations.ExternalDocumentation
 import io.swagger.v3.oas.annotations.Operation
@@ -32,7 +32,7 @@ import java.util.*
 class EmailAuthenticationController(
     private val emailAuthenticationService: EmailAuthenticationService,
     private val authorizationService: AuthorizationService,
-    private val userMapper: UserMapper,
+    private val principalMapper: PrincipalMapper,
     private val twoFactorAuthenticationTokenService: TwoFactorAuthenticationTokenService,
     private val userService: UserService
 ) {
@@ -200,7 +200,7 @@ class EmailAuthenticationController(
         @RequestParam locale: Locale?
     ): ResponseEntity<UserResponse> {
         return ResponseEntity.ok(
-            userMapper.toResponse(emailAuthenticationService.enable(payload, locale))
+            principalMapper.toResponse(emailAuthenticationService.enable(payload, locale))
         )
     }
 
@@ -259,7 +259,7 @@ class EmailAuthenticationController(
         @RequestParam locale: Locale?
     ): ResponseEntity<UserResponse> {
         return ResponseEntity.ok(
-            userMapper.toResponse(emailAuthenticationService.disable(locale))
+            principalMapper.toResponse(emailAuthenticationService.disable(locale))
         )
     }
 

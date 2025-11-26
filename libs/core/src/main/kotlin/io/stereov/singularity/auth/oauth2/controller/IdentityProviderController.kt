@@ -7,7 +7,7 @@ import io.stereov.singularity.auth.oauth2.service.IdentityProviderService
 import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.user.core.dto.response.UserResponse
-import io.stereov.singularity.user.core.mapper.UserMapper
+import io.stereov.singularity.user.core.mapper.PrincipalMapper
 import io.swagger.v3.oas.annotations.ExternalDocumentation
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -28,7 +28,7 @@ import java.util.*
 class IdentityProviderController(
     private val identityProviderService: IdentityProviderService,
     private val authorizationService: AuthorizationService,
-    private val userMapper: UserMapper,
+    private val principalMapper: PrincipalMapper,
 ) {
 
     @GetMapping("me/providers")
@@ -116,7 +116,7 @@ class IdentityProviderController(
     suspend fun addPasswordAuthentication(@RequestBody @Valid req: AddPasswordAuthenticationRequest): ResponseEntity<UserResponse> {
         val user = identityProviderService.connect(req)
 
-        return ResponseEntity.ok(userMapper.toResponse(user))
+        return ResponseEntity.ok(principalMapper.toResponse(user))
     }
 
     @DeleteMapping("me/providers/{provider}")
@@ -173,6 +173,6 @@ class IdentityProviderController(
     ): ResponseEntity<UserResponse> {
         val user = identityProviderService.disconnect(provider, locale)
 
-        return ResponseEntity.ok(userMapper.toResponse(user))
+        return ResponseEntity.ok(principalMapper.toResponse(user))
     }
 }

@@ -88,6 +88,7 @@ class TokenConfiguration {
         geolocationProperties,
         userService,
         tokenValueExtractor,
+        principalService,
     )
 
     @Bean

@@ -11,7 +11,7 @@ import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.global.properties.AppProperties
-import io.stereov.singularity.user.core.mapper.UserMapper
+import io.stereov.singularity.user.core.mapper.PrincipalMapper
 import io.stereov.singularity.user.core.service.UserService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
@@ -54,7 +54,7 @@ class AdminConfiguration {
         twoFactorEmailCodeProperties: TwoFactorEmailCodeProperties,
         emailProperties: EmailProperties,
         authorizationService: AuthorizationService,
-        userMapper: UserMapper,
+        principalMapper: PrincipalMapper,
         accessTokenCache: AccessTokenCache
     ): AdminService {
         return AdminService(
@@ -64,7 +64,7 @@ class AdminConfiguration {
             twoFactorEmailCodeProperties,
             emailProperties,
             authorizationService,
-            userMapper,
+            principalMapper,
             accessTokenCache
         )
     }

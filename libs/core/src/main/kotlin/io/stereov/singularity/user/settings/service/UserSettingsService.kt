@@ -5,7 +5,6 @@ import io.stereov.singularity.auth.alert.properties.SecurityAlertProperties
 import io.stereov.singularity.auth.alert.service.SecurityAlertService
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.exception.model.WrongIdentityProviderException
-import io.stereov.singularity.auth.core.model.IdentityProvider
 import io.stereov.singularity.auth.core.model.SecurityAlertType
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.core.service.EmailVerificationService
@@ -15,8 +14,8 @@ import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.file.image.service.ImageStore
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import io.stereov.singularity.user.core.exception.model.EmailAlreadyTakenException
-import io.stereov.singularity.user.core.mapper.UserMapper
-import io.stereov.singularity.user.core.model.UserDocument
+import io.stereov.singularity.user.core.mapper.PrincipalMapper
+import io.stereov.singularity.user.core.model.User
 import io.stereov.singularity.user.core.service.UserService
 import io.stereov.singularity.user.settings.dto.request.ChangeEmailRequest
 import io.stereov.singularity.user.settings.dto.request.ChangePasswordRequest
@@ -36,7 +35,7 @@ class UserSettingsService(
     private val hashService: HashService,
     private val fileStorage: FileStorage,
     private val accessTokenCache: AccessTokenCache,
-    private val userMapper: UserMapper,
+    private val principalMapper: PrincipalMapper,
     private val emailProperties: EmailProperties,
     private val securityAlertProperties: SecurityAlertProperties,
     private val securityAlertService: SecurityAlertService,
@@ -67,7 +66,7 @@ class UserSettingsService(
         }
     }
 
-    suspend fun changePassword(payload: ChangePasswordRequest, locale: Locale?): UserDocument {
+    suspend fun changePassword(payload: ChangePasswordRequest, locale: Locale?): User {
         logger.debug { "Changing password" }
 
         val user = authorizationService.getUser()
@@ -87,7 +86,7 @@ class UserSettingsService(
         return updatedUser
     }
 
-    suspend fun changeUser(payload: ChangeUserRequest): UserDocument {
+    suspend fun changeUser(payload: ChangeUserRequest): User {
         val user = authorizationService.getUser()
 
         if (payload.name != null) user.sensitive.name = payload.name
@@ -119,10 +118,10 @@ class UserSettingsService(
             .key
 
         val savedUser = userService.save(user)
-        return userMapper.toResponse(savedUser)
+        return principalMapper.toResponse(savedUser)
     }
 
-    suspend fun setAvatar(user: UserDocument, file: DownloadedFile): UserDocument {
+    suspend fun setAvatar(user: User, file: DownloadedFile): User {
         logger.debug { "Setting avatar for user ${user.id} from URL ${file.url}" }
         val currentAvatar = user.sensitive.avatarFileKey
 
@@ -151,7 +150,7 @@ class UserSettingsService(
 
         val savedUser = userService.save(user)
 
-        return userMapper.toResponse(savedUser)
+        return principalMapper.toResponse(savedUser)
     }
 
     suspend fun deleteUser() {

@@ -24,7 +24,7 @@ import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.file.download.service.DownloadService
 import io.stereov.singularity.global.config.ApplicationConfiguration
-import io.stereov.singularity.user.core.mapper.UserMapper
+import io.stereov.singularity.user.core.mapper.PrincipalMapper
 import io.stereov.singularity.user.core.service.UserService
 import io.stereov.singularity.user.settings.service.UserSettingsService
 import org.springframework.boot.autoconfigure.AutoConfiguration
@@ -49,11 +49,11 @@ class OAuth2Configuration {
     fun identityProviderController(
         identityProviderService: IdentityProviderService,
         authorizationService: AuthorizationService,
-        userMapper: UserMapper,
+        principalMapper: PrincipalMapper,
     ) = IdentityProviderController(
         identityProviderService,
         authorizationService,
-        userMapper,
+        principalMapper,
     )
 
     @Bean

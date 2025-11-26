@@ -213,7 +213,7 @@ class CoolStuffManagementService(
     override val authorizationService: AuthorizationService,
     override val invitationService: InvitationService,
     override val userService: UserService,
-    override val userMapper: UserMapper,
+    override val principalMapper: UserMapper,
 
     // Custom dependency
     private val coolStuffMapper: CoolStuffMapper,
@@ -314,4 +314,3 @@ A `CoolStuff` with given `key` can be deleted through the endpoint:
 * **Endpoint:** [`DELETE /api/content/cool-stuff/{key}`](../../api/delete-content-object-by-key.api.mdx)
 * **Requirements:** Only [`MAINTAINER`](../content/introduction.md#object-specific-roles-shared-state)s of the requested article
   can perform this action.
-

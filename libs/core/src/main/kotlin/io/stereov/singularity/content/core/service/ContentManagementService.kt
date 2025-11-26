@@ -3,7 +3,7 @@ package io.stereov.singularity.content.core.service
 import io.github.oshai.kotlinlogging.KLogger
 import io.stereov.singularity.auth.core.exception.model.NotAuthorizedException
 import io.stereov.singularity.auth.core.service.AuthorizationService
-import io.stereov.singularity.auth.group.service.GroupService
+import io.stereov.singularity.user.group.service.GroupService
 import io.stereov.singularity.content.core.dto.request.AcceptInvitationToContentRequest
 import io.stereov.singularity.content.core.dto.request.InviteUserToContentRequest
 import io.stereov.singularity.content.core.dto.request.UpdateContentAccessRequest
@@ -20,7 +20,7 @@ import io.stereov.singularity.content.invitation.service.InvitationService
 import io.stereov.singularity.global.exception.model.DocumentNotFoundException
 import io.stereov.singularity.translate.model.TranslateKey
 import io.stereov.singularity.translate.service.TranslateService
-import io.stereov.singularity.user.core.mapper.UserMapper
+import io.stereov.singularity.user.core.mapper.PrincipalMapper
 import io.stereov.singularity.user.core.model.Role
 import io.stereov.singularity.user.core.service.UserService
 import org.bson.types.ObjectId
@@ -32,7 +32,7 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
     abstract val contentService: ContentService<T>
     abstract val authorizationService: AuthorizationService
     abstract val invitationService: InvitationService
-    abstract val userMapper: UserMapper
+    abstract val principalMapper: PrincipalMapper
     abstract val translateService: TranslateService
     abstract val groupService: GroupService
 
@@ -206,7 +206,7 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
             val foundUser = userService.findByIdOrNull(ObjectId(id))
 
             if (foundUser != null) {
-                users.add(UserContentAccessDetails(userMapper.toOverview(foundUser), ContentAccessRole.MAINTAINER))
+                users.add(UserContentAccessDetails(principalMapper.toOverview(foundUser), ContentAccessRole.MAINTAINER))
             } else {
                 content.access.users.maintainer.remove(id)
             }
@@ -216,7 +216,7 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
             val foundUser = userService.findByIdOrNull(ObjectId(id))
 
             if (foundUser != null) {
-                users.add(UserContentAccessDetails(userMapper.toOverview(foundUser), ContentAccessRole.EDITOR))
+                users.add(UserContentAccessDetails(principalMapper.toOverview(foundUser), ContentAccessRole.EDITOR))
             } else {
                 content.access.users.editor.remove(id)
             }
@@ -226,7 +226,7 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
             val foundUser = userService.findByIdOrNull(ObjectId(id))
 
             if (foundUser != null) {
-                users.add(UserContentAccessDetails(userMapper.toOverview(foundUser), ContentAccessRole.VIEWER))
+                users.add(UserContentAccessDetails(principalMapper.toOverview(foundUser), ContentAccessRole.VIEWER))
             } else {
                 content.access.users.viewer.remove(id)
             }

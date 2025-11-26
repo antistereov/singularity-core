@@ -1,20 +1,25 @@
 package io.stereov.singularity.user.core.controller
 
+import com.github.michaelbull.result.get
+import com.github.michaelbull.result.getOrThrow
+import io.stereov.singularity.auth.core.exception.AuthenticationException
 import io.stereov.singularity.auth.core.service.AuthorizationService
+import io.stereov.singularity.auth.token.exception.AccessTokenExtractionException
+import io.stereov.singularity.database.encryption.exception.EncryptedDatabaseException
+import io.stereov.singularity.file.core.exception.FileException
 import io.stereov.singularity.file.core.service.FileStorage
-import io.stereov.singularity.global.model.ErrorResponse
+import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.global.model.PageableRequest
 import io.stereov.singularity.global.model.SuccessResponse
 import io.stereov.singularity.global.util.mapContent
 import io.stereov.singularity.user.core.dto.response.UserOverviewResponse
-import io.stereov.singularity.user.core.mapper.UserMapper
+import io.stereov.singularity.user.core.exception.PrincipalMapperException
+import io.stereov.singularity.user.core.mapper.PrincipalMapper
 import io.stereov.singularity.user.core.model.Role
 import io.stereov.singularity.user.core.service.UserService
 import io.swagger.v3.oas.annotations.ExternalDocumentation
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.media.Content
-import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -33,7 +38,7 @@ import java.time.Instant
 class UserController(
     private val userService: UserService,
     private val authorizationService: AuthorizationService,
-    private val userMapper: UserMapper,
+    private val principalMapper: PrincipalMapper,
     private val fileStorage: FileStorage,
 ) {
 
@@ -50,21 +55,33 @@ class UserController(
             ApiResponse(
                 responseCode = "200",
                 description = "The user information",
-            ),
-            ApiResponse(
-                responseCode = "404",
-                description = "No user with given ID found.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
+            )
         ]
     )
+    @ThrowsDomainError([
+        EncryptedDatabaseException::class,
+        AccessTokenExtractionException::class,
+        PrincipalMapperException::class
+    ])
     suspend fun getUserById(
         @PathVariable id: ObjectId
     ): ResponseEntity<UserOverviewResponse> {
 
-        val user = userService.findById(id)
+        val user = userService.findById(id).getOrThrow { when (it) {
+            is EncryptedDatabaseException -> it
+        } }
 
-        return ResponseEntity.ok().body(userMapper.toOverview(user))
+        val authenticationOutcome = authorizationService.getAuthenticationOutcome()
+            .getOrThrow { when (it) {
+                is AccessTokenExtractionException -> it
+            } }
+
+        val userOverview = principalMapper.toOverview(user, authenticationOutcome)
+            .getOrThrow { when (it) {
+                is PrincipalMapperException -> it
+            } }
+
+        return ResponseEntity.ok().body(userOverview)
     }
 
     @GetMapping
@@ -100,19 +117,16 @@ class UserController(
             ApiResponse(
                 responseCode = "200",
                 description = "The users.",
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "Invalid or expired AccessToken.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "403",
-                description = "AccessToken does permit [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) access.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
     )
+    @ThrowsDomainError([
+        AccessTokenExtractionException::class,
+        AuthenticationException.AuthenticationRequired::class,
+        AuthenticationException.RoleRequired::class,
+        EncryptedDatabaseException::class,
+        PrincipalMapperException::class
+    ])
     suspend fun getUsers(
         @RequestParam page: Int = 0,
         @RequestParam size: Int = 10,
@@ -126,22 +140,33 @@ class UserController(
         @RequestParam(required = false) lastActiveAfter: Instant?,
         @RequestParam(required = false) lastActiveBefore: Instant?
     ): ResponseEntity<Page<UserOverviewResponse>> {
-        authorizationService.requireRole(Role.ADMIN)
+        val authenticationOutcome = authorizationService.getAuthenticationOutcome()
+            .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
+            .requireAuthentication()
+            .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it } }
+            .requireRole(Role.User.ADMIN)
+            .getOrThrow { when (it) { is AuthenticationException.RoleRequired -> it } }
+
+        val mappedRoles = roles?.mapNotNull { Role.fromString(it).get() }?.toSet()
 
         val users = userService.findAllPaginated(
             pageable = PageableRequest(page, size, sort).toPageable(),
             email = email,
-            roles = roles?.map { Role.fromString(it) }?.toSet(),
+            roles = mappedRoles,
             groups = groups,
             identityKeys = identities,
             createdAtAfter = createdAtAfter,
             createdAtBefore = createdAtBefore,
             lastActiveAfter = lastActiveAfter,
             lastActiveBefore = lastActiveBefore
-        )
+        ).getOrThrow { when (it) { is EncryptedDatabaseException -> it } }
 
-        return ResponseEntity.ok()
-            .body(users.mapContent { userMapper.toOverview(it) })
+        val mappedUsers = users.mapContent {
+            principalMapper.toOverview(it, authenticationOutcome)
+                .getOrThrow { ex -> when (ex) { is PrincipalMapperException -> ex } }
+        }
+
+        return ResponseEntity.ok().body(mappedUsers)
     }
 
     @DeleteMapping("{id}")
@@ -166,28 +191,34 @@ class UserController(
             ApiResponse(
                 responseCode = "200",
                 description = "The users.",
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "Invalid or expired AccessToken.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "403",
-                description = "AccessToken does permit [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) access.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
     )
+    @ThrowsDomainError([
+        AccessTokenExtractionException::class,
+        AuthenticationException.AuthenticationRequired::class,
+        AuthenticationException.RoleRequired::class,
+        EncryptedDatabaseException::class,
+        FileException::class,
+    ])
     suspend fun deleteUserById(
         @PathVariable id: ObjectId
     ): ResponseEntity<SuccessResponse> {
-
-        authorizationService.requireRole(Role.ADMIN)
+        authorizationService.getAuthenticationOutcome()
+            .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
+            .requireAuthentication()
+            .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it } }
+            .requireRole(Role.User.ADMIN)
+            .getOrThrow { when (it) { is AuthenticationException.RoleRequired -> it } }
 
         val user = userService.findById(id)
-        user.sensitive.avatarFileKey?.let { fileStorage.remove(it) }
+            .getOrThrow { when (it) { is EncryptedDatabaseException -> it } }
+
+        user.sensitive.avatarFileKey?.let {
+            fileStorage.remove(it).getOrThrow { ex -> when (ex) { is FileException -> ex } }
+        }
         userService.deleteById(id)
+            .getOrThrow { when (it) { is EncryptedDatabaseException.Database -> it } }
 
         return ResponseEntity.ok(SuccessResponse())
     }

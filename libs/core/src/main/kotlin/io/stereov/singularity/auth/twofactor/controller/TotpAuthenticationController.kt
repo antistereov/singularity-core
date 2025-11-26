@@ -15,7 +15,7 @@ import io.stereov.singularity.auth.twofactor.service.TotpAuthenticationService
 import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.user.core.dto.response.UserResponse
-import io.stereov.singularity.user.core.mapper.UserMapper
+import io.stereov.singularity.user.core.mapper.PrincipalMapper
 import io.swagger.v3.oas.annotations.ExternalDocumentation
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -39,7 +39,7 @@ class TotpAuthenticationController(
     private val accessTokenService: AccessTokenService,
     private val refreshTokenService: RefreshTokenService,
     private val stepUpTokenService: StepUpTokenService,
-    private val userMapper: UserMapper,
+    private val principalMapper: PrincipalMapper,
     private val authProperties: AuthProperties,
     private val sessionTokenService: SessionTokenService,
 ) {
@@ -312,7 +312,7 @@ class TotpAuthenticationController(
         val stepUpToken = stepUpTokenService.createForRecovery(user.id, sessionId, exchange)
 
         val res = TwoFactorRecoveryResponse(
-            userMapper.toResponse(user),
+            principalMapper.toResponse(user),
             if (authProperties.allowHeaderAuthentication) accessToken.value else null,
             if (authProperties.allowHeaderAuthentication) refreshToken.value else null,
             if (authProperties.allowHeaderAuthentication) stepUpToken.value else null,

@@ -66,7 +66,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(info.email, user.sensitive.email)
         assertEquals(mutableSetOf(Role.USER), user.roles)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         val githubIdentity = requireNotNull(identities["github"])
@@ -393,7 +393,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(info.email, user.sensitive.email)
         assertEquals(mutableSetOf(Role.USER), user.roles)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         assertNull(identities["github"])
@@ -571,7 +571,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(info.email, user.sensitive.email)
         assertEquals(mutableSetOf(Role.USER), user.roles)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         val githubIdentity = requireNotNull(identities["github"])
@@ -685,7 +685,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(info.email, user.sensitive.email)
         assertEquals(mutableSetOf(Role.USER), user.roles)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         val githubIdentity = requireNotNull(identities["github"])
@@ -737,7 +737,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(info.email, user.sensitive.email)
         assertEquals(mutableSetOf(Role.USER), user.roles)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         val githubIdentity = requireNotNull(identities["github"])
@@ -800,7 +800,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(info.email, user.sensitive.email)
         assertEquals(mutableSetOf(Role.USER), user.roles)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         val githubIdentity = requireNotNull(identities["github"])
@@ -857,7 +857,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(1, userService.findAll().toList().size)
         assertEquals(mutableSetOf(Role.USER), user.roles)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         val githubIdentity = requireNotNull(identities["github"])
@@ -907,7 +907,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(1, userService.findAll().toList().size)
         assertEquals(mutableSetOf(Role.USER), user.roles)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         val githubIdentity = requireNotNull(identities["github"])
@@ -964,7 +964,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(1, userService.findAll().toList().size)
         assertEquals(mutableSetOf(Role.USER), user.roles)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         val githubIdentity = requireNotNull(identities["github"])
@@ -1018,7 +1018,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         assertTrue(user.sensitive.sessions.isEmpty())
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         val githubIdentity = requireNotNull(identities["github"])
@@ -1068,7 +1068,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(1, userService.findAll().toList().size)
         assertEquals(mutableSetOf(Role.USER), user.roles)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         assertTrue(user.sensitive.sessions.isEmpty())
@@ -1122,7 +1122,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(1, userService.findAll().toList().size)
         assertEquals(mutableSetOf(Role.USER), user.roles)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         assertTrue(user.sensitive.sessions.isEmpty())
@@ -1178,7 +1178,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         assertTrue(user.sensitive.sessions.isEmpty())
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         val githubIdentity = requireNotNull(identities["github"])
@@ -1231,7 +1231,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         assertTrue(user.sensitive.sessions.isEmpty())
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         val githubIdentity = requireNotNull(identities["github"])
@@ -1282,7 +1282,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(1, userService.findAll().toList().size)
         assertEquals(mutableSetOf(Role.USER), user.roles)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         assertTrue(user.sensitive.sessions.isEmpty())
@@ -1341,7 +1341,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         assertTrue(user.sensitive.sessions.isEmpty())
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         val githubIdentity = requireNotNull(identities["github"])
@@ -1396,7 +1396,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         assertTrue(user.sensitive.sessions.isEmpty())
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         val githubIdentity = requireNotNull(identities["github"])
@@ -1451,7 +1451,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         assertTrue(user.sensitive.sessions.isEmpty())
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         val githubIdentity = requireNotNull(identities["github"])
@@ -1508,7 +1508,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(registeredUser.email, user.sensitive.email)
         assertEquals(mutableSetOf(Role.USER), user.roles)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(2, identities.size)
 
         val githubIdentity = requireNotNull(identities["github"])
@@ -1566,7 +1566,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(1, userService.findAll().toList().size)
         assertEquals(mutableSetOf(Role.USER), user.roles)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         assertNull(identities["github"])
@@ -1615,7 +1615,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(1, userService.findAll().toList().size)
         assertEquals(mutableSetOf(Role.USER), user.roles)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         assertNull(identities["github"])
@@ -1670,7 +1670,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(1, userService.findAll().toList().size)
         assertEquals(mutableSetOf(Role.USER), user.roles)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         assertNull(identities["github"])
@@ -1722,7 +1722,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(1, userService.findAll().toList().size)
         assertEquals(mutableSetOf(Role.USER), user.roles)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         assertNull(identities["github"])
@@ -1774,7 +1774,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(1, userService.findAll().toList().size)
         assertEquals(mutableSetOf(Role.USER), user.roles)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         assertNull(identities["github"])
@@ -1827,7 +1827,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(1, userService.findAll().toList().size)
         assertEquals(mutableSetOf(Role.USER), user.roles)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         assertNull(identities["github"])
@@ -1880,7 +1880,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(1, userService.findAll().toList().size)
         assertEquals(mutableSetOf(Role.USER), user.roles)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         assertNull(identities["github"])
@@ -1933,7 +1933,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(1, userService.findAll().toList().size)
         assertEquals(mutableSetOf(Role.USER), user.roles)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         assertNull(identities["github"])
@@ -1986,7 +1986,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(1, userService.findAll().toList().size)
         assertEquals(mutableSetOf(Role.USER), user.roles)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         assertNull(identities["github"])
@@ -2039,7 +2039,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(1, userService.findAll().toList().size)
         assertEquals(mutableSetOf(Role.USER), user.roles)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         assertNull(identities["github"])
@@ -2092,7 +2092,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(1, userService.findAll().toList().size)
         assertEquals(mutableSetOf(Role.USER), user.roles)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         assertNull(identities["github"])
@@ -2145,7 +2145,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(1, userService.findAll().toList().size)
         assertEquals(mutableSetOf(Role.USER), user.roles)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         assertNull(identities["github"])
@@ -2195,7 +2195,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(1, userService.findAll().toList().size)
         assertEquals(mutableSetOf(Role.USER), user.roles)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         assertNull(identities["github"])
@@ -2246,7 +2246,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(1, userService.findAll().toList().size)
         assertEquals(mutableSetOf(Role.USER), user.roles)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         assertNull(identities["github"])
@@ -2299,7 +2299,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(1, userService.findAll().toList().size)
         assertEquals(mutableSetOf(Role.USER), user.roles)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         assertNull(identities["github"])
@@ -2352,7 +2352,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(1, userService.findAll().toList().size)
         assertEquals(mutableSetOf(Role.USER), user.roles)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         assertNull(identities["github"])
@@ -2406,7 +2406,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(1, userService.findAll().toList().size)
         assertEquals(mutableSetOf(Role.USER), user.roles)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         assertNull(identities["github"])
@@ -2459,7 +2459,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(1, userService.findAll().toList().size)
         assertEquals(mutableSetOf(Role.USER), user.roles)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         assertNull(identities["github"])
@@ -2512,7 +2512,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(1, userService.findAll().toList().size)
         assertEquals(mutableSetOf(Role.USER), user.roles)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         assertNull(identities["github"])
@@ -2566,7 +2566,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(info.email, user.sensitive.email)
         assertEquals(mutableSetOf(Role.USER), user.roles)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         val githubIdentity = requireNotNull(identities["github"])
@@ -2624,7 +2624,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(1, userService.findAll().toList().size)
         assertEquals(mutableSetOf(Role.USER), user.roles)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         val githubIdentity = requireNotNull(identities["github"])
@@ -2675,7 +2675,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(1, userService.findAll().toList().size)
         assertEquals(mutableSetOf(Role.USER), user.roles)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         val githubIdentity = requireNotNull(identities["github"])
@@ -2733,7 +2733,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(1, userService.findAll().toList().size)
         assertEquals(mutableSetOf(Role.USER), user.roles)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         val githubIdentity = requireNotNull(identities["github"])
@@ -2788,7 +2788,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         assertTrue(user.sensitive.sessions.isEmpty())
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         val githubIdentity = requireNotNull(identities["github"])
@@ -2839,7 +2839,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(1, userService.findAll().toList().size)
         assertEquals(mutableSetOf(Role.USER), user.roles)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         assertTrue(user.sensitive.sessions.isEmpty())
@@ -2894,7 +2894,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(1, userService.findAll().toList().size)
         assertEquals(mutableSetOf(Role.USER), user.roles)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         assertTrue(user.sensitive.sessions.isEmpty())
@@ -2950,7 +2950,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         assertEquals(1, user.sensitive.sessions.size)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         val githubIdentity = requireNotNull(identities["github"])
@@ -3004,7 +3004,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         assertEquals(1, user.sensitive.sessions.size)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         val githubIdentity = requireNotNull(identities["github"])
@@ -3058,7 +3058,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         assertEquals(1, user.sensitive.sessions.size)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         val githubIdentity = requireNotNull(identities["github"])
@@ -3113,7 +3113,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         assertTrue(user.sensitive.sessions.isEmpty())
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         val githubIdentity = requireNotNull(identities["github"])
@@ -3167,7 +3167,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         assertTrue(user.sensitive.sessions.isEmpty())
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         val githubIdentity = requireNotNull(identities["github"])
@@ -3219,7 +3219,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(1, userService.findAll().toList().size)
         assertEquals(mutableSetOf(Role.USER), user.roles)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         assertTrue(user.sensitive.sessions.isEmpty())
@@ -3278,7 +3278,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         assertEquals(1, user.sensitive.sessions.size)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         val githubIdentity = requireNotNull(identities["github"])
@@ -3333,7 +3333,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         assertEquals(1, user.sensitive.sessions.size)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         val githubIdentity = requireNotNull(identities["github"])
@@ -3388,7 +3388,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         assertEquals(1, user.sensitive.sessions.size)
 
-        val identities = user.sensitive.identities
+        val identities = user.sensitive.providers
         assertEquals(1, identities.size)
 
         val githubIdentity = requireNotNull(identities["github"])

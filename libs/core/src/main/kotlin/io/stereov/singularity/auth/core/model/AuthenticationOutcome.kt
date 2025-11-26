@@ -39,11 +39,11 @@ sealed class AuthenticationOutcome(
     /**
      * Represents a successful authentication outcome.
      *
-     * This class holds the details of an authenticated user, including their identifier, roles, groups,
+     * This class holds the details of an authenticated principal, including their identifier, roles, groups,
      * session ID, token ID, and the associated access token. It extends [AuthenticationOutcome]
      * and provides additional context about the authenticated user's abilities and session.
      *
-     * @property userId The unique identifier for the authenticated user.
+     * @property principalId The unique identifier for the authenticated principal.
      * @property roles A set of roles assigned to the authenticated user.
      * @property groups A set of groups the authenticated user belongs to.
      * @property sessionId The session identifier associated with this authentication.
@@ -51,7 +51,7 @@ sealed class AuthenticationOutcome(
      * @property accessToken The access token containing details about the authenticated user and their scope.
      */
     class Authenticated(
-        val userId: ObjectId,
+        val principalId: ObjectId,
         val roles: Set<Role>,
         val groups: Set<String>,
         val sessionId: UUID,
@@ -59,21 +59,21 @@ sealed class AuthenticationOutcome(
     ) : AuthenticationOutcome(
         authorities = roles.map { SimpleGrantedAuthority("ROLE_$it") },
     ) {
-        override fun getPrincipal(): ObjectId = userId
+        override fun getPrincipal(): ObjectId = principalId
 
         fun requireRole(role: Role): Result<Authenticated, AuthenticationException.RoleRequired> {
             logger.debug { "Validating authorization: role $role" }
 
             return when (roles.contains(role)) {
                 true -> Ok(this)
-                false -> Err(AuthenticationException.RoleRequired("Failed to perform this action: role ${role.name} is required"))
+                false -> Err(AuthenticationException.RoleRequired("Failed to perform this action: role ${role.value} is required"))
             }
         }
 
         fun requireGroupMembership(groupKey: String): Result<Authenticated, AuthenticationException.GroupMembershipRequired> {
             logger.debug { "Checking if the current user is part of the group \"$groupKey\"" }
 
-            return when (groups.contains(groupKey) || roles.contains(Role.ADMIN)) {
+            return when (groups.contains(groupKey) || roles.contains(Role.User.ADMIN)) {
                 true -> Ok(this)
                 false -> Err(AuthenticationException.GroupMembershipRequired("Failed to perform this action: user must be a member of group $groupKey"))
             }

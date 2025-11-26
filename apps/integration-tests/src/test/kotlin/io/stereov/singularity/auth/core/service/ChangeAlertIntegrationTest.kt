@@ -7,7 +7,7 @@ import io.stereov.singularity.auth.core.dto.request.ResetPasswordRequest
 import io.stereov.singularity.auth.core.model.SecurityAlertType
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
 import io.stereov.singularity.test.BaseSecurityAlertTest
-import io.stereov.singularity.user.core.model.AccountDocument
+import io.stereov.singularity.user.core.model.User
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -21,7 +21,7 @@ class ChangeAlertIntegrationTest : BaseSecurityAlertTest() {
         user.info.clearSessions()
         userService.save(user.info)
 
-        val userSlot = slot<AccountDocument>()
+        val userSlot = slot<User>()
         val localeSlot = slot<Locale?>()
         val alertTypeSlot = slot<SecurityAlertType>()
         val providerKeySlot = slot<String?>()
@@ -56,7 +56,7 @@ class ChangeAlertIntegrationTest : BaseSecurityAlertTest() {
         user.info.clearSessions()
         userService.save(user.info)
 
-        val userSlot = slot<AccountDocument>()
+        val userSlot = slot<User>()
         val localeSlot = slot<Locale?>()
         val alertTypeSlot = slot<SecurityAlertType>()
         val providerKeySlot = slot<String?>()
@@ -92,7 +92,7 @@ class ChangeAlertIntegrationTest : BaseSecurityAlertTest() {
         user.info.clearSessions()
         userService.save(user.info)
 
-        val userSlot = slot<AccountDocument>()
+        val userSlot = slot<User>()
         val localeSlot = slot<Locale?>()
         val alertTypeSlot = slot<SecurityAlertType>()
         val providerKeySlot = slot<String?>()
@@ -132,7 +132,7 @@ class ChangeAlertIntegrationTest : BaseSecurityAlertTest() {
         user.info.clearSessions()
         userService.save(user.info)
 
-        val userSlot = slot<AccountDocument>()
+        val userSlot = slot<User>()
         val localeSlot = slot<Locale?>()
         val alertTypeSlot = slot<SecurityAlertType>()
         val providerKeySlot = slot<String?>()

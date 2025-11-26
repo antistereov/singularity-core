@@ -11,12 +11,12 @@ import io.stereov.singularity.auth.core.dto.response.StepUpResponse
 import io.stereov.singularity.auth.core.model.SessionInfo
 import io.stereov.singularity.auth.core.model.token.*
 import io.stereov.singularity.auth.core.service.token.*
-import io.stereov.singularity.auth.group.model.GroupDocument
-import io.stereov.singularity.auth.group.model.GroupTranslation
-import io.stereov.singularity.auth.group.repository.GroupRepository
-import io.stereov.singularity.auth.group.service.GroupService
-import io.stereov.singularity.auth.guest.dto.request.CreateGuestRequest
-import io.stereov.singularity.auth.guest.dto.response.CreateGuestResponse
+import io.stereov.singularity.user.group.model.GroupDocument
+import io.stereov.singularity.user.group.model.GroupTranslation
+import io.stereov.singularity.user.group.repository.GroupRepository
+import io.stereov.singularity.user.group.service.GroupService
+import io.stereov.singularity.user.core.dto.request.CreateGuestRequest
+import io.stereov.singularity.user.core.dto.response.CreateGuestResponse
 import io.stereov.singularity.auth.jwt.exception.TokenExtractionException
 import io.stereov.singularity.auth.oauth2.model.token.OAuth2ProviderConnectionToken
 import io.stereov.singularity.auth.oauth2.model.token.OAuth2TokenType
@@ -57,7 +57,7 @@ import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.test.config.MockConfig
 import io.stereov.singularity.user.core.model.Role
-import io.stereov.singularity.user.core.model.AccountDocument
+import io.stereov.singularity.user.core.model.User
 import io.stereov.singularity.user.core.repository.UserRepository
 import io.stereov.singularity.user.core.service.UserService
 import kotlinx.coroutines.runBlocking
@@ -217,7 +217,7 @@ class BaseSpringBootTest() {
     private val counter = AtomicInteger(0)
 
     data class TestRegisterResponse(
-        val info: AccountDocument,
+        val info: User,
         val email: String?,
         val password: String?,
         val accessToken: String,
@@ -445,7 +445,7 @@ class BaseSpringBootTest() {
         principalId: String = "123456"
     ): TestRegisterResponse {
         val actualEmail = "${counter.getAndIncrement()}$emailSuffix"
-        val user = userService.save(AccountDocument.ofIdentityProvider(
+        val user = userService.save(User.ofIdentityProvider(
             email = actualEmail,
             provider = provider,
             principalId = principalId,
@@ -520,7 +520,7 @@ class BaseSpringBootTest() {
             ?: throw TokenExtractionException("No StepUpToken found in response")
     }
 
-    suspend fun EntityExchangeResult<*>.extractOAuth2ProviderConnectionToken(user: AccountDocument): OAuth2ProviderConnectionToken {
+    suspend fun EntityExchangeResult<*>.extractOAuth2ProviderConnectionToken(user: User): OAuth2ProviderConnectionToken {
         return this.responseCookies[OAuth2TokenType.ProviderConnection.cookieName]
             ?.firstOrNull()?.value
             ?.let { oAuth2ProviderConnectionTokenService.extract(it, user) }

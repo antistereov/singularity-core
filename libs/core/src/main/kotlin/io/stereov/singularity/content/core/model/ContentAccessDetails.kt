@@ -53,16 +53,16 @@ data class ContentAccessDetails(
         return when (authentication) {
             is AuthenticationOutcome.None -> role == ContentAccessRole.VIEWER && isPublic
             is AuthenticationOutcome.Authenticated -> {
-                val isAdmin = authentication.roles.contains(Role.ADMIN)
-                val isOwner = authentication.userId == ownerId
+                val isAdmin = authentication.roles.contains(Role.User.ADMIN)
+                val isOwner = authentication.principalId == ownerId
 
-                val userIsMaintainer = hasAccess(ContentAccessSubject.USER, authentication.userId.toString(), ContentAccessRole.MAINTAINER)
+                val userIsMaintainer = hasAccess(ContentAccessSubject.USER, authentication.principalId.toString(), ContentAccessRole.MAINTAINER)
                 val groupIsMaintainer = authentication.groups.any { groupId -> hasAccess(ContentAccessSubject.GROUP, groupId, ContentAccessRole.MAINTAINER) }
 
-                val userIsEditor = hasAccess(ContentAccessSubject.USER, authentication.userId.toString(), ContentAccessRole.EDITOR)
+                val userIsEditor = hasAccess(ContentAccessSubject.USER, authentication.principalId.toString(), ContentAccessRole.EDITOR)
                 val groupIsEditor = authentication.groups.any { groupId -> hasAccess(ContentAccessSubject.GROUP, groupId, ContentAccessRole.EDITOR) }
 
-                val userIsViewer = hasAccess(ContentAccessSubject.USER, authentication.userId.toString(), ContentAccessRole.VIEWER)
+                val userIsViewer = hasAccess(ContentAccessSubject.USER, authentication.principalId.toString(), ContentAccessRole.VIEWER)
                 val groupIsViewer = authentication.groups.any { groupId -> hasAccess(ContentAccessSubject.GROUP, groupId, ContentAccessRole.VIEWER) }
 
                 when (role) {

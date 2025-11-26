@@ -1,5 +1,8 @@
 package io.stereov.singularity.auth.core.service
 
+import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.coroutines.coroutineBinding
+import com.github.michaelbull.result.mapError
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.alert.service.SecurityAlertService
 import io.stereov.singularity.auth.core.exception.AuthException
@@ -7,8 +10,10 @@ import io.stereov.singularity.auth.core.exception.model.EmailAlreadyVerifiedExce
 import io.stereov.singularity.auth.alert.properties.SecurityAlertProperties
 import io.stereov.singularity.auth.token.service.EmailVerificationTokenService
 import io.stereov.singularity.auth.guest.exception.model.GuestCannotPerformThisActionException
-import io.stereov.singularity.email.core.exception.model.EmailCooldownException
+import io.stereov.singularity.cache.service.CacheService
+import io.stereov.singularity.email.core.exception.EmailException
 import io.stereov.singularity.email.core.properties.EmailProperties
+import io.stereov.singularity.email.core.service.CooldownEmailService
 import io.stereov.singularity.email.core.service.EmailService
 import io.stereov.singularity.email.core.util.EmailConstants
 import io.stereov.singularity.email.template.service.TemplateService
@@ -22,22 +27,20 @@ import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.translate.model.TranslateKey
 import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.user.core.dto.response.UserResponse
-import io.stereov.singularity.user.core.mapper.UserMapper
-import io.stereov.singularity.user.core.model.AccountDocument
+import io.stereov.singularity.user.core.mapper.PrincipalMapper
+import io.stereov.singularity.user.core.model.User
 import io.stereov.singularity.user.core.service.UserService
-import kotlinx.coroutines.reactor.awaitSingleOrNull
-import org.springframework.data.redis.core.ReactiveRedisTemplate
+import jakarta.mail.internet.MimeMessage
 import org.springframework.stereotype.Service
-import java.time.Duration
 import java.util.*
 
 @Service
 class EmailVerificationService(
     private val userService: UserService,
     private val emailVerificationTokenService: EmailVerificationTokenService,
-    private val userMapper: UserMapper,
-    private val redisTemplate: ReactiveRedisTemplate<String, String>,
-    private val emailProperties: EmailProperties,
+    private val principalMapper: PrincipalMapper,
+    override val cacheService: CacheService,
+    override val emailProperties: EmailProperties,
     private val uiProperties: UiProperties,
     private val translateService: TranslateService,
     private val emailService: EmailService,
@@ -45,9 +48,9 @@ class EmailVerificationService(
     private val appProperties: AppProperties,
     private val securityAlertService: SecurityAlertService,
     private val securityAlertProperties: SecurityAlertProperties,
-) {
+) : CooldownEmailService {
 
-    private val logger = KotlinLogging.logger {}
+    override val logger = KotlinLogging.logger {}
 
     /**
      * Verifies the email address of the user.
@@ -92,28 +95,7 @@ class EmailVerificationService(
             securityAlertService.sendEmailChanged( oldEmail = oldEmail, newEmail = newEmail, user = savedUser, locale = locale)
         }
 
-        return userMapper.toResponse(savedUser)
-    }
-
-suspend fun getRemainingCooldown(email: String): Long {
-        logger.debug { "Getting remaining cooldown for email verification" }
-
-        val key = "email-verification-cooldown:$email"
-        val remainingTtl = redisTemplate.getExpire(key).awaitSingleOrNull() ?: Duration.ofSeconds(-1)
-
-        return if (remainingTtl.seconds > 0) remainingTtl.seconds else 0
-    }
-
-    suspend fun startCooldown(email: String): Boolean {
-        logger.debug { "Starting cooldown for email verification" }
-
-        val key = "email-verification-cooldown:$email"
-        val isNewKey = redisTemplate.opsForValue()
-            .setIfAbsent(key, "1", Duration.ofSeconds(emailProperties.sendCooldown))
-            .awaitSingleOrNull()
-            ?: false
-
-        return isNewKey
+        return principalMapper.toResponse(savedUser)
     }
 
     /**
@@ -131,25 +113,23 @@ suspend fun getRemainingCooldown(email: String): Long {
      *
      * @param user The user to send the verification email to.
      */
-    suspend fun sendVerificationEmail(user: AccountDocument, locale: Locale?, newEmail: String? = null): Long {
+    suspend fun sendVerificationEmail(
+        user: User,
+        locale: Locale?,
+        newEmail: String? = null
+    ): Result<MimeMessage, EmailException> = coroutineBinding {
         logger.debug { "Sending verification email for user ${user.id}" }
 
-        if (user.isGuest) {
-            throw GuestCannotPerformThisActionException("Failed to send verification email: a guest cannot verify an email address")
-        }
-
-        val email = newEmail
-            ?: user.sensitive.email
-            ?: throw InvalidDocumentException("No email address saved in user document")
-
+        val email = newEmail ?: user.sensitive.email
         val actualLocale = locale ?: appProperties.locale
 
-        val remainingCooldown = getRemainingCooldown(email)
-        if (remainingCooldown > 0) {
-            throw EmailCooldownException(remainingCooldown)
-        }
+        isCooldownActive(email)
+            .mapError { ex ->  }
+            .bind()
 
         startCooldown(email)
+            .mapError { ex -> }
+            .bind()
 
         val secret = user.sensitive.security.email.verificationSecret
 

@@ -1,20 +1,26 @@
 package io.stereov.singularity.user.core.service
 
-import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.*
+import com.github.michaelbull.result.coroutines.coroutineBinding
+import com.github.michaelbull.result.coroutines.runSuspendCatching
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.database.core.util.CriteriaBuilder
 import io.stereov.singularity.database.encryption.exception.EncryptedDatabaseException
+import io.stereov.singularity.database.encryption.exception.EncryptionException
 import io.stereov.singularity.database.encryption.model.Encrypted
 import io.stereov.singularity.database.encryption.service.EncryptionSecretService
 import io.stereov.singularity.database.encryption.service.EncryptionService
 import io.stereov.singularity.database.encryption.service.SensitiveCrudService
 import io.stereov.singularity.database.hash.service.HashService
-import io.stereov.singularity.global.util.CriteriaBuilder
-import io.stereov.singularity.user.core.exception.model.UserDoesNotExistException
-import io.stereov.singularity.user.core.model.EncryptedUserDocument
+import io.stereov.singularity.user.core.exception.ExistsUserByEmailException
+import io.stereov.singularity.user.core.exception.FindUserByEmailException
+import io.stereov.singularity.user.core.exception.FindUserByProviderIdentityException
 import io.stereov.singularity.user.core.model.Role
-import io.stereov.singularity.user.core.model.SensitiveUserData
-import io.stereov.singularity.user.core.model.UserDocument
+import io.stereov.singularity.user.core.model.User
+import io.stereov.singularity.user.core.model.encrypted.EncryptedUser
+import io.stereov.singularity.user.core.model.identity.HashedUserIdentities
 import io.stereov.singularity.user.core.model.identity.HashedUserIdentity
+import io.stereov.singularity.user.core.model.sensitve.SensitiveUserData
 import io.stereov.singularity.user.core.repository.UserRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -31,32 +37,36 @@ class UserService(
     override val reactiveMongoTemplate: ReactiveMongoTemplate,
     private val hashService: HashService,
     override val encryptionSecretService: EncryptionSecretService,
-) : SensitiveCrudService<SensitiveUserData, UserDocument, EncryptedUserDocument>() {
+) : SensitiveCrudService<SensitiveUserData, User, EncryptedUser>() {
 
     override val logger = KotlinLogging.logger {}
     override val sensitiveClazz = SensitiveUserData::class.java
-    override val encryptedDocumentClazz= EncryptedUserDocument::class.java
+    override val encryptedDocumentClazz= EncryptedUser::class.java
 
     override suspend fun doEncrypt(
-        document: UserDocument,
+        document: User,
         encryptedSensitive: Encrypted<SensitiveUserData>,
-    ): EncryptedUserDocument {
+    ): Result<EncryptedUser, EncryptionException> = coroutineBinding {
 
-        val hashedEmail = document.sensitive.email?.let { hashService.hashSearchableHmacSha256(it) }
-        val hashedIdentities = document.sensitive.identities
+        val hashedEmail = hashService.hashSearchableHmacSha256(document.email)
+            .mapError { ex -> EncryptionException.ObjectMapping("Failed to encrypt user document because no searchable hash of email could be generated: ${ex.message}", ex) }
+            .bind()
+
+        val hashedProviders = document.sensitive.identities.providers
             .map { (provider, identity) ->
-                val hashedUserIdentity = HashedUserIdentity(
-                    password = identity.password,
-                    principalId = identity.principalId?.let { hashService.hashSearchableHmacSha256(it) },
+                val hashedUserIdentities = HashedUserIdentity.Provider(
+                    principalId = identity.principalId.let { hashService.hashSearchableHmacSha256(it) }
+                        .mapError { ex -> EncryptionException.ObjectMapping("Failed to encrypt user document because no searchable hash of principal ID could be generated for provider $provider: ${ex.message}", ex) }
+                        .bind(),
                 )
-                provider to hashedUserIdentity
+                provider to hashedUserIdentities
             }.toMap()
+        val hashedPassword = document.sensitive.identities.password?.let {  HashedUserIdentity.Password(it.password) }
 
-
-        return EncryptedUserDocument(
+        EncryptedUser(
             document._id,
             hashedEmail,
-            hashedIdentities,
+            HashedUserIdentities(hashedPassword, hashedProviders),
             document.roles,
             document.groups,
             document.createdAt,
@@ -66,88 +76,128 @@ class UserService(
     }
 
     override suspend fun doDecrypt(
-        encrypted: EncryptedUserDocument,
+        encrypted: EncryptedUser,
         decryptedSensitive: SensitiveUserData,
-    ): UserDocument {
-        return UserDocument(
+    ): Result<User, EncryptionException> {
+        return Ok(
+            User(
             encrypted._id,
             encrypted.createdAt,
             encrypted.lastActive,
-            encrypted.roles,
-            encrypted.groups,
+            encrypted.roles.contains(Role.User.ADMIN),
+            encrypted.groups.toMutableSet(),
             decryptedSensitive
-        )
+        ))
     }
 
     /**
      * Finds a user by their email address.
      *
-     * @param email The email address of the user to find.
-     *
-     * @return The [UserDocument] of the found user.
-     *
-     * @throws io.stereov.singularity.user.core.exception.model.UserDoesNotExistException If no user is found with the given email.
+     * @param email The email address of the user to search for.
+     * @return A [Result] containing the [User] if found, or a [FindUserByEmailException]
+     * describing the failure if an error occurs.
      */
-    suspend fun findByEmail(email: String): UserDocument {
+    suspend fun findByEmail(email: String): Result<User, FindUserByEmailException> = coroutineBinding {
         logger.debug { "Fetching user with email $email" }
 
         val hashedEmail = hashService.hashSearchableHmacSha256(email)
-        val encrypted =  this.repository.findByEmail(hashedEmail)
-            ?: throw UserDoesNotExistException("No user found with email $email")
+            .mapError { ex -> FindUserByEmailException.HashFailure("Failed to hash email $email: ${ex.message}", ex) }
+            .bind()
+        val encrypted =  runSuspendCatching { repository.findByEmail(hashedEmail) }
+            .mapError { ex -> FindUserByEmailException.Database("Failed to find user by email: ${ex.message}", ex) }
+            .flatMap { it.toResultOr { FindUserByEmailException.NotFound("No user found with email $email") } }
+            .bind()
 
-        return this.decrypt(encrypted)
+        decrypt(encrypted)
+            .mapError { ex -> FindUserByEmailException.Encryption("Failed to decrypt user data: ${ex.message}", ex) }
+            .bind()
     }
 
     /**
-     * Finds a user by their email address, returning null if not found.
+     * Checks whether a user with the specified email already exists in the system.
      *
-     * @param email The email address of the user to find.
-     *
-     * @return The [UserDocument] of the found user, or null if not found.
+     * @param email The email address to check for existence.
+     * @return A [Result] containing true if the email exists, false if it does not exist,
+     * or an [ExistsUserByEmailException] if an error occurs during the process.
      */
-    suspend fun findByEmailOrNull(email: String): UserDocument? {
-        logger.debug { "Fetching user with email $email" }
-
-        val hashedEmail = hashService.hashSearchableHmacSha256(email)
-        return this.repository.findByEmail(hashedEmail)
-            ?.let { this.decrypt(it) }
-    }
-
-    /**
-     * Checks if a user exists by their email address.
-     *
-     * @param email The email address to check.
-     *
-     * @return True if a user with the given email exists, false otherwise.
-     */
-    suspend fun existsByEmail(email: String): Boolean {
+    suspend fun existsByEmail(email: String): Result<Boolean, ExistsUserByEmailException> = coroutineBinding {
         logger.debug { "Checking if email $email already exists" }
 
         val hashedEmail = hashService.hashSearchableHmacSha256(email)
-        return this.repository.existsByEmail(hashedEmail)
+            .mapError { ex -> ExistsUserByEmailException.HashFailure("Failed to hash email $email: ${ex.message}", ex) }
+            .bind()
+        
+        runSuspendCatching { repository.existsByEmail(hashedEmail) }
+            .mapError { ex -> ExistsUserByEmailException.Database("Failed to check existence of user document with email $email: ${ex.message}", ex) }
+            .bind()
     }
 
-    suspend fun findByIdentityOrNull(provider: String, principalId: String): UserDocument? {
+    /**
+     * Finds a user by their provider and principal ID.
+     *
+     * @param provider The name of the identity provider (e.g., Google, Facebook).
+     * @param principalId The principal ID associated with the user in the specified provider.
+     * @return A [Result] wrapping the [User] object if found and successfully processed,
+     *  or an instance of [FindUserByProviderIdentityException] if an error occurs.
+     */
+    @Suppress("UNUSED")
+    suspend fun findByProviderIdentity(
+        provider: String, 
+        principalId: String
+    ): Result<User, FindUserByProviderIdentityException> = coroutineBinding {
         logger.debug { "Finding user by principal ID $principalId and provider $provider" }
 
         val hashedPrincipalId = hashService.hashSearchableHmacSha256(principalId)
-        val user = repository.findByIdentity(provider, hashedPrincipalId)
+            .mapError { ex -> FindUserByProviderIdentityException.HashFailure("Failed to hash principal ID $principalId: ${ex.message}", ex) }
+            .bind()
+        val user = runSuspendCatching { repository.findByIdentity(provider, hashedPrincipalId) }
+            .mapError { ex -> FindUserByProviderIdentityException.Database("Failed to find user by provider identity: ${ex.message}", ex) }
+            .andThen { it.toResultOr { FindUserByProviderIdentityException.NotFound("No user found with provider identity $provider:$principalId") } }
+            .bind()
 
-        return user?.let { decrypt(it) }
+        decrypt(user)
+            .mapError { ex -> FindUserByProviderIdentityException.Encryption("Failed to decrypt user document: ${ex.message}", ex) }
+            .bind()
     }
 
-    suspend fun findAllByRolesContaining(role: Role): Flow<UserDocument> {
+    /**
+     * Finds all users that have the specified role.
+     *
+     * @param role The [Role] to search for within the users.
+     * @return A flow emitting [Result]s containing [User]s with the given role or an [EncryptionException] in case of decryption failure.
+     */
+    suspend fun findAllByRolesContaining(role: Role): Flow<Result<User, EncryptionException>> {
         logger.debug { "Finding all users with role $role" }
 
         return repository.findAllByRolesContaining(role).map { decrypt(it) }
     }
 
-    suspend fun findAllByGroupContaining(group: String): Flow<UserDocument> {
+    /**
+     * Finds all users whose group memberships contain the specified group identifier.
+     *
+     * @param group The group identifier to search for in user group memberships.
+     * @return A [Flow] of [Result]s containing either the decrypted [User] or an [EncryptionException].
+     */
+    suspend fun findAllByGroupContaining(group: String): Flow<Result<User, EncryptionException>> {
         logger.debug { "Finding all users with group membership $group" }
 
         return repository.findAllByGroupsContaining(group).map { decrypt(it) }
     }
 
+    /**
+     * Fetches a paginated list of users based on various filter criteria.
+     *
+     * @param pageable the pagination information including page number, size, and sort order
+     * @param email an email address to filter users, or null to ignore this filter
+     * @param roles a set of roles to filter users, or null to ignore this filter
+     * @param groups a set of groups to filter users, or null to ignore this filter
+     * @param createdAtBefore a timestamp to filter users created before this date, or null to ignore this filter
+     * @param createdAtAfter a timestamp to filter users created after this date, or null to ignore this filter
+     * @param lastActiveBefore a timestamp to filter users who were last active before this date, or null to ignore this filter
+     * @param lastActiveAfter a timestamp to filter users who were last active after this date, or null to ignore this filter
+     * @param identityKeys a set of identity keys to filter users by associated identities, or null to ignore this filter
+     * @return A [Result] result containing a [Page] of matching [User]s or an [EncryptedDatabaseException] if an exception occurs
+     */
     suspend fun findAllPaginated(
         pageable: Pageable,
         email: String?,
@@ -158,16 +208,16 @@ class UserService(
         lastActiveBefore: Instant?,
         lastActiveAfter: Instant?,
         identityKeys: Set<String>?
-    ): Result<Page<UserDocument>, EncryptedDatabaseException> {
+    ): Result<Page<User>, EncryptedDatabaseException> {
         logger.debug { "Finding ${encryptedDocumentClazz.simpleName}: page ${pageable.pageNumber}, size: ${pageable.pageSize}, sort: ${pageable.sort}" }
 
         val criteria = CriteriaBuilder()
-            .isEqualTo(EncryptedUserDocument::email, email?.let { hashService.hashSearchableHmacSha256(it) })
-            .isIn(EncryptedUserDocument::roles, roles)
-            .isIn(EncryptedUserDocument::groups, groups)
-            .compare(EncryptedUserDocument::createdAt, createdAtBefore, createdAtAfter)
-            .compare(EncryptedUserDocument::lastActive, lastActiveBefore, lastActiveAfter)
-            .existsAny(identityKeys, EncryptedUserDocument::identities)
+            .isEqualTo(EncryptedUser::email, email?.let { hashService.hashSearchableHmacSha256(it) })
+            .isIn(EncryptedUser::roles, roles)
+            .isIn(EncryptedUser::groups, groups)
+            .compare(EncryptedUser::createdAt, createdAtBefore, createdAtAfter)
+            .compare(EncryptedUser::lastActive, lastActiveBefore, lastActiveAfter)
+            .existsAny(identityKeys, EncryptedUser::identities)
             .build()
 
         return findAllPaginated(pageable, criteria)

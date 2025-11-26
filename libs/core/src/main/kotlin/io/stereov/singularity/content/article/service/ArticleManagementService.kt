@@ -2,7 +2,7 @@ package io.stereov.singularity.content.article.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.service.AuthorizationService
-import io.stereov.singularity.auth.group.service.GroupService
+import io.stereov.singularity.user.group.service.GroupService
 import io.stereov.singularity.content.article.dto.request.ChangeArticleStateRequest
 import io.stereov.singularity.content.article.dto.request.CreateArticleRequest
 import io.stereov.singularity.content.article.dto.request.UpdateArticleRequest
@@ -26,7 +26,7 @@ import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.file.image.service.ImageStore
 import io.stereov.singularity.global.util.toSlug
 import io.stereov.singularity.translate.service.TranslateService
-import io.stereov.singularity.user.core.mapper.UserMapper
+import io.stereov.singularity.user.core.mapper.PrincipalMapper
 import io.stereov.singularity.user.core.service.UserService
 import org.bson.types.ObjectId
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -43,7 +43,7 @@ class ArticleManagementService(
     override val invitationService: InvitationService,
     override val translateService: TranslateService,
     override val userService: UserService,
-    override val userMapper: UserMapper,
+    override val principalMapper: PrincipalMapper,
     private val fileStorage: FileStorage,
     private val articleMapper: ArticleMapper,
     private val imageStore: ImageStore,

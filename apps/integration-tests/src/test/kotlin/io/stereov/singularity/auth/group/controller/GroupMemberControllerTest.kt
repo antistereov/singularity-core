@@ -1,7 +1,7 @@
-package io.stereov.singularity.auth.group.controller
+package io.stereov.singularity.user.group.controller
 
-import io.stereov.singularity.auth.group.model.GroupDocument
-import io.stereov.singularity.auth.group.model.GroupTranslation
+import io.stereov.singularity.user.group.model.GroupDocument
+import io.stereov.singularity.user.group.model.GroupTranslation
 import io.stereov.singularity.test.BaseIntegrationTest
 import io.stereov.singularity.user.core.dto.response.UserResponse
 import kotlinx.coroutines.test.runTest

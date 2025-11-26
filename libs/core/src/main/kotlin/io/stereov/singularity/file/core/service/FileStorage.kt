@@ -37,7 +37,7 @@ abstract class FileStorage {
     /**
      * Uploads a file and associates it with the provided key and metadata.
      *
-     * This function performs several operations including verifying the file's content type,
+     * This function performs several operations, including verifying the file's content type,
      * checking if a file with the given key already exists, uploading the file rendition,
      * and saving metadata associated with the uploaded file.
      *
@@ -80,7 +80,7 @@ abstract class FileStorage {
         val metadata = metadataService.save(FileMetadataDocument(
             id = null,
             key = key.key,
-            ownerId = authentication.userId,
+            ownerId = authentication.principalId,
             isPublic = isPublic,
             renditions = mapOf(FileMetadataDocument.ORIGINAL_RENDITION to metadataMapper.toRendition(upload)),
         )).flatMapEither(
@@ -88,7 +88,7 @@ abstract class FileStorage {
             { ex -> handleOutOfSync(key.key, ex) }
         ).bind()
 
-        createResponse(authentication, metadata).bind()
+        createResponse(metadata, authentication).bind()
 
     }
 
@@ -135,7 +135,7 @@ abstract class FileStorage {
         val doc = metadataService.save(FileMetadataDocument(
             id = null,
             key = key,
-            ownerId = authentication.userId,
+            ownerId = authentication.principalId,
             isPublic = isPublic,
             renditions = uploads.map { (id, upload) -> id to metadataMapper.toRendition(upload) }.toMap()
         ))
@@ -156,7 +156,7 @@ abstract class FileStorage {
                 }
             ).bind()
 
-        createResponse(authentication, doc).bind()
+        createResponse(doc, authentication).bind()
     }
 
     /**
@@ -291,13 +291,13 @@ abstract class FileStorage {
      * @param key The unique key identifying the file whose metadata is to be retrieved.
      * @return A [Result] containing the [FileMetadataResponse] on success, or a [FileException] if an error occurs.
      */
-    suspend fun metadataResponseByKey(authentication: AuthenticationOutcome.Authenticated, key: String): Result<FileMetadataResponse, FileException> {
+    suspend fun metadataResponseByKey(key: String, authentication: AuthenticationOutcome): Result<FileMetadataResponse, FileException> {
         logger.debug { "Creating metadata response for file with key \"$key\"" }
 
         return metadataService.findByKey(key)
             .mapError { ex -> FileException.Metadata("No metadata found for file with key $key: ${ex.message}", ex) }
             .andThen { metadata ->
-                createResponse(authentication,metadata)
+                createResponse(metadata, authentication)
             }
     }
 
@@ -308,14 +308,14 @@ abstract class FileStorage {
      * corresponding rendition responses, generates rendition URLs, and constructs
      * a comprehensive metadata response.
      *
-     * @param authentication The authentication token of the user requesting the metadata response.
+     * @param authenticationOutcome The authentication token of the user requesting the metadata response.
      * @param doc The file metadata document containing the file's metadata and renditions.
      * @return A [Result] containing the [FileMetadataResponse] representing the metadata,
      * or a [FileException] if an error occurs during the response creation process.
      */
     suspend fun createResponse(
-        authentication: AuthenticationOutcome.Authenticated,
-        doc: FileMetadataDocument
+        doc: FileMetadataDocument,
+        authenticationOutcome: AuthenticationOutcome,
     ): Result<FileMetadataResponse, FileException> = coroutineBinding {
         val renditions = doc.renditions.map { (id, rend) ->
             id to metadataMapper.toRenditionResponse(rend, getRenditionUrl(rend.key).bind())
@@ -323,9 +323,11 @@ abstract class FileStorage {
 
         metadataMapper.toMetadataResponse(
             doc = doc,
-            authentication = authentication,
+            authenticationOutcome = authenticationOutcome,
             renditions = renditions
         )
+            .mapError { ex -> FileException.Metadata("Failed to create file response of invalid metadata document: ${ex.message}", ex) }
+            .bind()
     }
 
     protected suspend fun resolveMetadataSyncConflicts(

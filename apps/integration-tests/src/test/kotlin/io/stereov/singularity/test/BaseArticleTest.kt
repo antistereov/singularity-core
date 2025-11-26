@@ -1,6 +1,6 @@
 package io.stereov.singularity.test
 
-import io.stereov.singularity.auth.group.model.KnownGroups
+import io.stereov.singularity.user.group.model.KnownGroups
 import io.stereov.singularity.content.article.dto.request.CreateArticleRequest
 import io.stereov.singularity.content.article.dto.response.FullArticleResponse
 import io.stereov.singularity.content.article.mapper.ArticleMapper
