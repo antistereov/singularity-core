@@ -1,13 +1,12 @@
 package io.stereov.singularity.principal.core.service
 
-import com.github.michaelbull.result.Result
-import com.github.michaelbull.result.andThen
+import com.github.michaelbull.result.*
 import com.github.michaelbull.result.coroutines.coroutineBinding
 import com.github.michaelbull.result.coroutines.runSuspendCatching
-import com.github.michaelbull.result.mapError
-import com.github.michaelbull.result.toResultOr
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.database.encryption.exception.EncryptedDatabaseException
+import io.stereov.singularity.database.encryption.exception.DeleteEncryptedDocumentByIdException
+import io.stereov.singularity.database.encryption.exception.ExistsEncryptedDocumentByIdException
+import io.stereov.singularity.database.encryption.exception.SaveEncryptedDocumentException
 import io.stereov.singularity.principal.core.exception.FindPrincipalByIdException
 import io.stereov.singularity.principal.core.model.Guest
 import io.stereov.singularity.principal.core.model.Principal
@@ -73,10 +72,10 @@ class PrincipalService(
      *
      * @param id The unique ObjectId of the principal to check for existence.
      * @return A [Result] containing a [Boolean] indicating whether the principal exists
-     *   or a [FindPrincipalByIdException] if an error occurs during the check.
+     *   or a [ExistsEncryptedDocumentByIdException] if an error occurs during the check.
      */
     @Suppress("UNUSED")
-    suspend fun existsById(id: ObjectId): Result<Boolean, FindPrincipalByIdException> = coroutineBinding {
+    suspend fun existsById(id: ObjectId): Result<Boolean, ExistsEncryptedDocumentByIdException> = coroutineBinding {
         logger.debug { "Checking existence of principal with id $id" }
 
         val query = Query.query(Criteria.where("_id").`is`(id))
@@ -85,8 +84,8 @@ class PrincipalService(
             reactiveMongoTemplate.exists<EncryptedPrincipal<Role, SensitivePrincipalData>>(query, "principals")
                 .awaitSingleOrNull()
         }
-            .mapError { ex -> FindPrincipalByIdException.Database("Failed to check existence of principal with id $id from database", ex) }
-            .andThen { it.toResultOr { FindPrincipalByIdException.NotFound("No principal found with id $id") }}
+            .mapError { ex -> ExistsEncryptedDocumentByIdException.Database("Failed to check existence of principal with id $id from database", ex) }
+            .andThen { it.toResultOr { ExistsEncryptedDocumentByIdException.Database("No principal found with id $id") }}
             .bind()
     }
 
@@ -96,14 +95,30 @@ class PrincipalService(
      * @param document The [Principal] object containing [Role] and [SensitivePrincipalData]
      *                 to be saved. It can either be a [User] or a [Guest].
      * @return A [Result] containing the saved [Principal]
-     * on success, or an [EncryptedDatabaseException] if an error occurs during saving.
+     * on success, or an [SaveEncryptedDocumentException] if an error occurs during saving.
      */
     suspend fun save(
         document: Principal<out Role, out SensitivePrincipalData>
-    ): Result<Principal<out Role, out SensitivePrincipalData>, EncryptedDatabaseException> {
+    ): Result<Principal<out Role, out SensitivePrincipalData>, SaveEncryptedDocumentException> {
         return when (document) {
             is User -> userService.save(document)
             is Guest -> guestService.save(document)
         }
+    }
+
+    /**
+     * Deletes a principal document from the database by its unique ID.
+     *
+     * @param id The unique [ObjectId] of the principal document to be deleted.
+     * @return A [Result] containing [Unit] on successful deletion, or a [DeleteEncryptedDocumentByIdException]
+     * if an error occurs during the deletion process.
+     */
+    suspend fun deleteById(id: ObjectId): Result<Unit, DeleteEncryptedDocumentByIdException> {
+        return runSuspendCatching {
+            reactiveMongoTemplate.remove(Criteria.where("_id").`is`(id), "principals")
+                .awaitSingleOrNull()
+        }
+            .mapError { ex -> DeleteEncryptedDocumentByIdException.Database("Failed to delete principal with id ${id}: ${ex.message}", ex) }
+            .map { }
     }
 }

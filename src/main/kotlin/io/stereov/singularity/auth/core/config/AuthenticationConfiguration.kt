@@ -18,7 +18,7 @@ import io.stereov.singularity.auth.token.service.*
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailProperties
 import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthenticationService
-import io.stereov.singularity.auth.twofactor.service.token.TwoFactorAuthenticationTokenService
+import io.stereov.singularity.auth.token.service.TwoFactorAuthenticationTokenService
 import io.stereov.singularity.cache.service.CacheService
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.email.core.properties.EmailProperties
@@ -97,7 +97,8 @@ class AuthenticationConfiguration {
             authorizationService,
             loginAlertService,
             securityAlertProperties,
-            emailProperties
+            emailProperties,
+            principalService
         )
     }
     
@@ -106,7 +107,13 @@ class AuthenticationConfiguration {
     fun emailVerificationController(
         emailVerificationService: EmailVerificationService,
         authorizationService: AuthorizationService
-    ) = EmailVerificationController(emailVerificationService, authorizationService)
+    ) = EmailVerificationController(
+        emailVerificationService,
+        authorizationService,
+        emailVerificationTokenService,
+        userService,
+        principalMapper
+    )
     
     @Bean
     @ConditionalOnMissingBean
@@ -127,6 +134,8 @@ class AuthenticationConfiguration {
             cookieCreator,
             sessionTokenService,
             sessionMapper,
+            authorizationService,
+            principalService,
         )
     }
 
@@ -167,6 +176,7 @@ class AuthenticationConfiguration {
             registrationAlertService,
             securityAlertProperties,
             identityProviderInfoService,
+            principalService,
         )
     }
 
@@ -248,6 +258,6 @@ class AuthenticationConfiguration {
         userService: UserService,
         authorizationService: AuthorizationService,
         accessTokenCache: AccessTokenCache,
-    ) = SessionService(userService, authorizationService, accessTokenCache)
+    ) = SessionService(userService, authorizationService, accessTokenCache, principalService)
 
 }

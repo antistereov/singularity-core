@@ -1,9 +1,8 @@
 package io.stereov.singularity.auth.twofactor.service
 
+import com.github.michaelbull.result.getOrThrow
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
-import io.stereov.singularity.auth.core.exception.model.TwoFactorMethodDisabledException
-import io.stereov.singularity.auth.core.exception.model.WrongIdentityProviderException
 import io.stereov.singularity.auth.core.model.SecurityAlertType
 import io.stereov.singularity.auth.alert.properties.SecurityAlertProperties
 import io.stereov.singularity.auth.core.service.AuthorizationService
@@ -13,14 +12,17 @@ import io.stereov.singularity.auth.twofactor.exception.model.CannotDisableOnly2F
 import io.stereov.singularity.auth.twofactor.exception.model.InvalidTwoFactorCodeException
 import io.stereov.singularity.auth.twofactor.exception.model.TwoFactorCodeExpiredException
 import io.stereov.singularity.auth.twofactor.exception.model.TwoFactorMethodAlreadyEnabledException
+import io.stereov.singularity.auth.twofactor.exception.model.TwoFactorMethodDisabledException
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties
-import io.stereov.singularity.email.core.exception.model.EmailCooldownException
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.email.core.service.EmailService
 import io.stereov.singularity.email.core.util.EmailConstants
 import io.stereov.singularity.email.template.service.TemplateService
 import io.stereov.singularity.email.template.util.TemplateBuilder
+import io.stereov.singularity.email.template.util.build
+import io.stereov.singularity.email.template.util.replacePlaceholders
+import io.stereov.singularity.email.template.util.translate
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.translate.model.TranslateKey
@@ -31,6 +33,7 @@ import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.bson.types.ObjectId
 import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.stereotype.Service
+import software.amazon.awssdk.identity.spi.IdentityProvider
 import java.time.Duration
 import java.time.Instant
 import java.util.*
@@ -56,7 +59,7 @@ class EmailAuthenticationService(
     suspend fun sendMail(user: User, locale: Locale?) {
         logger.debug { "Generating new code and sending email" }
 
-        val code = Random.generateInt()
+        val code = Random.generateInt().getOrThrow()
         user.sensitive.security.twoFactor.email.code = code
         user.sensitive.security.twoFactor.email.expiresAt = Instant.now().plusSeconds(twoFactorEmailCodeProperties.expiresIn)
 
@@ -164,11 +167,10 @@ class EmailAuthenticationService(
         accessTokenCache.invalidateAllTokens(user.id)
 
         if (securityAlertProperties.twoFactorAdded  && emailProperties.enable) {
-            securityAlertService.send(
+            securityAlertService.sendTwoFactorAdded(
                 user,
-                locale,
-                SecurityAlertType.TWO_FACTOR_ADDED,
-                twoFactorMethod = TwoFactorMethod.EMAIL
+                twoFactorMethod = TwoFactorMethod.EMAIL,
+                locale
             )
         }
 
@@ -191,7 +193,7 @@ class EmailAuthenticationService(
 
         val savedUser = userService.save(user)
         if (securityAlertProperties.twoFactorRemoved && emailProperties.enable) {
-            securityAlertService.send(
+            securityAlertService.sendTwoFactorRemoved(
                 user,
                 locale,
                 SecurityAlertType.TWO_FACTOR_REMOVED,

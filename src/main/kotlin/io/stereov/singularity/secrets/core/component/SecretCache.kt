@@ -51,7 +51,7 @@ class SecretCache(
     /**
      * Retrieves a cached secret associated with the given key.
      *
-     * This function uses the underlying cache service to fetch a `Secret` object
+     * This function uses the underlying cache service to fetch a `HashSecret` object
      * stored under a key derived using a prefixed naming convention. If the key
      * does not exist or another issue arises, a `CacheException` will be returned.
      *

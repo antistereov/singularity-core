@@ -1,10 +1,12 @@
 package io.stereov.singularity.email.core.service
 
 import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.map
 import io.github.oshai.kotlinlogging.KLogger
 import io.stereov.singularity.cache.exception.CacheException
 import io.stereov.singularity.cache.service.CacheService
 import io.stereov.singularity.email.core.properties.EmailProperties
+import java.time.Duration
 
 /**
  * A service providing email cooldown functionality to restrict repetitive email actions within a certain time period.
@@ -28,12 +30,20 @@ interface CooldownEmailService {
     suspend fun isCooldownActive(email: String): Result<Boolean, CacheException.Operation> {
         logger.debug { "Getting remaining cooldown" }
 
-        return cacheService.isCooldownActive(getCooldownCacheKey(email))
+        return cacheService.getRemainingCooldown(getCooldownCacheKey(email))
+            .map { it.seconds >= 0 }
     }
 
-    suspend fun startCooldown(email: String): Result<Boolean, CacheException.Operation> {
+    suspend fun getRemainingCooldown(email: String): Result<Duration, CacheException.Operation> {
+        logger.debug { "Getting remaining cooldown" }
+
+        return cacheService.getRemainingCooldown(getCooldownCacheKey(email))
+    }
+
+    suspend fun startCooldown(email: String): Result<Long, CacheException.Operation> {
         logger.debug { "Starting cooldown" }
 
         return cacheService.startCooldown(getCooldownCacheKey(email), emailProperties.sendCooldown)
+            .map { emailProperties.sendCooldown }
     }
 }

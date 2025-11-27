@@ -2,10 +2,10 @@ package io.stereov.singularity.principal.core.service
 
 import com.github.michaelbull.result.*
 import com.github.michaelbull.result.coroutines.coroutineBinding
-import io.github.oshai.kotlinlogging.KotlinLogging.logger
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.service.EmailVerificationService
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties
+import io.stereov.singularity.database.encryption.exception.SaveEncryptedDocumentException
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.principal.core.dto.request.ConvertToUserRequest
@@ -28,8 +28,6 @@ class ConvertGuestToUserService(
     private val emailVerificationService: EmailVerificationService,
     private val hashService: HashService
 ) {
-
-    private val logger = logger {}
 
     /**
      * Converts a guest user to a fully registered user by validating and processing the provided request.
@@ -89,16 +87,21 @@ class ConvertGuestToUserService(
         )
 
         val savedUserDocument = userService.save(user)
-            .mapError { ex -> ConvertGuestToUserException.Database("Failed to save user: ${ex.message}", ex) }
+            .mapError { ex -> when (ex) {
+                is SaveEncryptedDocumentException.PostCommitSideEffect -> ConvertGuestToUserException.PostCommitSideEffect("Failed to decrypt user after successful commit: ${ex.message}")
+                else -> ConvertGuestToUserException.Database("Failed to save user: ${ex.message}", ex)
+            } }
             .bind()
-
-        accessTokenCache.invalidateAllTokens(principalId)
-            .onFailure { ex -> logger.error(ex) { "Failed to invalidate all access tokens for principal $principalId" } }
 
         if (emailEnabled) {
             emailVerificationService.sendVerificationEmail(savedUserDocument, locale)
-                .onFailure { ex -> logger.error(ex) { "Failed to send verification email for user ${savedUserDocument.id}"} }
+                .mapError { ex -> ConvertGuestToUserException.PostCommitSideEffect("Failed to send verification email for user ${savedUserDocument.id}: ${ex.message}", ex) }
+                .bind()
         }
+
+        accessTokenCache.invalidateAllTokens(principalId)
+            .mapError { ex -> ConvertGuestToUserException.PostCommitSideEffect("Failed to invalidate all access tokens for principal $principalId", ex) }
+            .bind()
 
         savedUserDocument
     }

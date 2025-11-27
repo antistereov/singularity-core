@@ -47,4 +47,4 @@ io.stereov.singularity.secrets.local.config.LocalSecretStoreConfiguration
 io.stereov.singularity.secrets.vault.config.VaultSecretStoreConfiguration
 
 io.stereov.singularity.principal.core.config.UserConfiguration
-io.stereov.singularity.principal.settings.config.UserSettingsConfiguration
+io.stereov.singularity.principal.settings.config.PrincipalSettingsConfiguration

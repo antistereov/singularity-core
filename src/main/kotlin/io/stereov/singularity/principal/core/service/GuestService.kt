@@ -3,8 +3,8 @@ package io.stereov.singularity.principal.core.service
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.database.encryption.exception.EncryptedDatabaseException
 import io.stereov.singularity.database.encryption.exception.EncryptionException
+import io.stereov.singularity.database.encryption.exception.SaveEncryptedDocumentException
 import io.stereov.singularity.database.encryption.model.Encrypted
 import io.stereov.singularity.database.encryption.service.EncryptionSecretService
 import io.stereov.singularity.database.encryption.service.EncryptionService
@@ -75,9 +75,9 @@ class GuestService (
      * Creates a new guest based on the provided request details.
      *
      * @param req the request object containing the guest's name and session information
-     * @return a [Result] containing the created [Guest] on success, or an [EncryptedDatabaseException] in case of an error
+     * @return a [Result] containing the created [Guest] on success, or an [SaveEncryptedDocumentException] in case of an error
      */
-    suspend fun createGuest(req: CreateGuestRequest): Result<Guest, EncryptedDatabaseException> {
+    suspend fun createGuest(req: CreateGuestRequest): Result<Guest, SaveEncryptedDocumentException> {
         logger.debug { "Creating guest with name ${req.name}" }
 
         val user = guestMapper.createGuest(

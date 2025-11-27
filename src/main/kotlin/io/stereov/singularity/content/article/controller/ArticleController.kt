@@ -39,7 +39,7 @@ class ArticleController(
             
             ### Locale
             Tags can have multiple translations for `name` and `description`.
-            You can specify a `locale` to get the corresponding translation.
+            You can specify a `locale` to generate the corresponding translation.
             
             If no locale is specified, the applications default locale will be used.
             You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).
@@ -86,7 +86,7 @@ class ArticleController(
             
             ### Locale
             Tags can have multiple translations for `name` and `description`.
-            You can specify a `locale` to get the corresponding translation.
+            You can specify a `locale` to generate the corresponding translation.
             
             If no locale is specified, the applications default locale will be used.
             You can learn more about configuring the default locale [here](https://singularity.stereov.io/docs/guides/configuration).

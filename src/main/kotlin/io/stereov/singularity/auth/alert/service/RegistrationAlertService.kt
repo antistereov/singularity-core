@@ -6,6 +6,7 @@ import com.github.michaelbull.result.mapError
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.alert.component.ProviderStringCreator
 import io.stereov.singularity.auth.alert.exception.AlertException
+import io.stereov.singularity.email.core.exception.EmailException
 import io.stereov.singularity.email.core.service.EmailService
 import io.stereov.singularity.email.core.util.EmailConstants
 import io.stereov.singularity.email.template.service.TemplateService
@@ -14,9 +15,9 @@ import io.stereov.singularity.email.template.util.build
 import io.stereov.singularity.email.template.util.replacePlaceholders
 import io.stereov.singularity.email.template.util.translate
 import io.stereov.singularity.global.properties.AppProperties
+import io.stereov.singularity.principal.core.model.User
 import io.stereov.singularity.translate.model.TranslateKey
 import io.stereov.singularity.translate.service.TranslateService
-import io.stereov.singularity.principal.core.model.User
 import jakarta.mail.internet.MimeMessage
 import org.springframework.stereotype.Service
 import java.util.*
@@ -43,13 +44,11 @@ class RegistrationAlertService(
     /**
      * Sends a registration alert email to the specified recipient.
      *
-     * @param email The email address of the recipient.
      * @param user The user document containing information about the user for whom the alert is being sent.
      * @param locale The locale to use for translating email content. If null, a default application locale will be used.
      * @return A [Result] wrapping either the sent [MimeMessage] on success or an [AlertException] on failure.
      */
     suspend fun send(
-        email: String,
         user: User,
         locale: Locale?
     ): Result<MimeMessage, AlertException> = coroutineBinding {
@@ -69,8 +68,13 @@ class RegistrationAlertService(
             .mapError { ex -> AlertException.Template("Failed to create template for registration alert: ${ex.message}", ex) }
             .bind()
 
-        emailService.sendEmail(email, subject, content, actualLocale)
-            .mapError { ex -> AlertException.Send("Failed to send registration alert: ${ex.message}", ex) }
+        emailService.sendEmail(user.email, subject, content, actualLocale)
+            .mapError { when (it) {
+                is EmailException.Send -> AlertException.Send("Failed to send verification email: ${it.message}", it)
+                is EmailException.Disabled -> AlertException.EmailDisabled(it.message)
+                is EmailException.Template -> AlertException.Template("Failed to create template for verification email: ${it.message}", it)
+                is EmailException.Authentication -> AlertException.EmailAuthentication("Failed to send verification email due to an authentication failure: ${it.message}", it)
+            } }
             .bind()
     }
 }

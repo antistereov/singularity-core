@@ -5,8 +5,8 @@ import com.github.michaelbull.result.coroutines.coroutineBinding
 import com.github.michaelbull.result.coroutines.runSuspendCatching
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.database.core.util.CriteriaBuilder
-import io.stereov.singularity.database.encryption.exception.EncryptedDatabaseException
 import io.stereov.singularity.database.encryption.exception.EncryptionException
+import io.stereov.singularity.database.encryption.exception.FindAllEncryptedDocumentsPaginatedException
 import io.stereov.singularity.database.encryption.model.Encrypted
 import io.stereov.singularity.database.encryption.service.EncryptionSecretService
 import io.stereov.singularity.database.encryption.service.EncryptionService
@@ -128,7 +128,7 @@ class UserService(
         logger.debug { "Checking if email $email already exists" }
 
         val hashedEmail = hashService.hashSearchableHmacSha256(email)
-            .mapError { ex -> ExistsUserByEmailException.HashFailure("Failed to hash email $email: ${ex.message}", ex) }
+            .mapError { ex -> ExistsUserByEmailException.Hash("Failed to hash email $email: ${ex.message}", ex) }
             .bind()
         
         runSuspendCatching { repository.existsByEmail(hashedEmail) }
@@ -200,7 +200,7 @@ class UserService(
      * @param lastActiveBefore a timestamp to filter users who were last active before this date, or null to ignore this filter
      * @param lastActiveAfter a timestamp to filter users who were last active after this date, or null to ignore this filter
      * @param identityKeys a set of identity keys to filter users by associated identities, or null to ignore this filter
-     * @return A [Result] result containing a [Page] of matching [User]s or an [EncryptedDatabaseException] if an exception occurs
+     * @return A [Result] result containing a [Page] of matching [User]s or an [FindAllEncryptedDocumentsPaginatedException] if an exception occurs
      */
     suspend fun findAllPaginated(
         pageable: Pageable,
@@ -212,7 +212,7 @@ class UserService(
         lastActiveBefore: Instant?,
         lastActiveAfter: Instant?,
         identityKeys: Set<String>?
-    ): Result<Page<User>, EncryptedDatabaseException> {
+    ): Result<Page<User>, FindAllEncryptedDocumentsPaginatedException> {
         logger.debug { "Finding ${encryptedDocumentClazz.simpleName}: page ${pageable.pageNumber}, size: ${pageable.pageSize}, sort: ${pageable.sort}" }
 
         val criteria = CriteriaBuilder()

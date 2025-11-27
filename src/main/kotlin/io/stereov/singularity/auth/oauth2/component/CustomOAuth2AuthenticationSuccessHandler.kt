@@ -13,11 +13,11 @@ import io.stereov.singularity.auth.token.service.StepUpTokenService
 import io.stereov.singularity.auth.jwt.exception.model.TokenExpiredException
 import io.stereov.singularity.auth.oauth2.exception.model.OAuth2FlowException
 import io.stereov.singularity.auth.oauth2.model.OAuth2ErrorCode
-import io.stereov.singularity.auth.oauth2.model.token.OAuth2StateToken
-import io.stereov.singularity.auth.oauth2.model.token.OAuth2TokenType
+import io.stereov.singularity.auth.token.model.OAuth2StateToken
+import io.stereov.singularity.auth.token.model.OAuth2TokenType
 import io.stereov.singularity.auth.oauth2.properties.OAuth2Properties
 import io.stereov.singularity.auth.oauth2.service.OAuth2AuthenticationService
-import io.stereov.singularity.auth.oauth2.service.token.OAuth2StateTokenService
+import io.stereov.singularity.auth.token.service.OAuth2StateTokenService
 import io.stereov.singularity.email.core.properties.EmailProperties
 import kotlinx.coroutines.reactor.mono
 import org.apache.http.client.utils.URIBuilder

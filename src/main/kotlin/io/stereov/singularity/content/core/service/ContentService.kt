@@ -6,7 +6,6 @@ import com.github.michaelbull.result.coroutines.runSuspendCatching
 import io.stereov.singularity.auth.core.exception.AuthenticationException
 import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.auth.core.service.AuthorizationService
-import io.stereov.singularity.principal.group.model.KnownGroups
 import io.stereov.singularity.content.core.component.AccessCriteria
 import io.stereov.singularity.content.core.exception.ContentException
 import io.stereov.singularity.content.core.model.ContentAccessRole
@@ -14,7 +13,9 @@ import io.stereov.singularity.content.core.model.ContentDocument
 import io.stereov.singularity.content.core.properties.ContentProperties
 import io.stereov.singularity.content.core.repository.ContentRepository
 import io.stereov.singularity.database.core.exception.DatabaseException
+import io.stereov.singularity.database.core.exception.SaveDocumentException
 import io.stereov.singularity.database.core.service.CrudService
+import io.stereov.singularity.principal.group.model.KnownGroups
 import io.stereov.singularity.translate.service.TranslateService
 import java.net.URI
 import java.net.URL
@@ -147,7 +148,7 @@ abstract class ContentService<T: ContentDocument<T>> : CrudService<T>  {
      * @param doc The document to be saved. The `updatedAt` property of this document is updated before saving.
      * @return A result containing the saved document if successful, or a [DatabaseException.Database] in case of a failure.
      */
-    override suspend fun save(doc: T): Result<T, DatabaseException.Database> {
+    override suspend fun save(doc: T): Result<T, SaveDocumentException> {
         doc.updatedAt = Instant.now()
         return super.save(doc)
     }

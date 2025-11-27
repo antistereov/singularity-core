@@ -5,17 +5,6 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
 import org.hibernate.validator.constraints.Length
 
-/**
- * # Change password request.
- *
- * This data class represents a request to change a user's password.
- * It contains the old password, new password, and a two-factor authentication code.
- *
- * @property oldPassword The user's current password.
- * @property newPassword The new password to be set.
- *
- * @author <a href="https://github.com/antistereov">antistereov</a>
- */
 data class ChangePasswordRequest(
     val oldPassword: String,
     @field:Length(min = 8, message = "The password must be at least 8 characters long.")

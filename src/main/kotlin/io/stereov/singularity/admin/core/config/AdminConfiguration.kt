@@ -1,7 +1,6 @@
 package io.stereov.singularity.admin.core.config
 
 import io.stereov.singularity.admin.core.controller.AdminController
-import io.stereov.singularity.admin.core.exception.handler.AdminExceptionHandler
 import io.stereov.singularity.admin.core.service.AdminService
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.service.AuthorizationService
@@ -33,15 +32,19 @@ class AdminConfiguration {
     @ConditionalOnMissingBean
     fun adminController(
         adminService: AdminService,
+        userService: UserService,
+        authorizationService: AuthorizationService,
+        principalMapper: PrincipalMapper,
+        accessTokenCache: AccessTokenCache
     ): AdminController {
-        return AdminController(adminService)
+        return AdminController(
+            adminService,
+            accessTokenCache,
+            authorizationService,
+            userService,
+            principalMapper
+        )
     }
-
-    // ExceptionHandler
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun adminExceptionHandler() = AdminExceptionHandler()
 
     // Services
 
@@ -53,9 +56,6 @@ class AdminConfiguration {
         appProperties: AppProperties,
         twoFactorEmailCodeProperties: TwoFactorEmailCodeProperties,
         emailProperties: EmailProperties,
-        authorizationService: AuthorizationService,
-        principalMapper: PrincipalMapper,
-        accessTokenCache: AccessTokenCache
     ): AdminService {
         return AdminService(
             userService,
@@ -63,9 +63,6 @@ class AdminConfiguration {
             hashService,
             twoFactorEmailCodeProperties,
             emailProperties,
-            authorizationService,
-            principalMapper,
-            accessTokenCache
         )
     }
 }

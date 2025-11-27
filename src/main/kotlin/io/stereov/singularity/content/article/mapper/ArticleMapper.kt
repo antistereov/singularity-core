@@ -1,6 +1,7 @@
 package io.stereov.singularity.content.article.mapper
 
-import io.stereov.singularity.auth.core.service.AuthorizationService
+import com.github.michaelbull.result.Ok
+import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.content.article.dto.response.ArticleOverviewResponse
 import io.stereov.singularity.content.article.dto.response.FullArticleResponse
 import io.stereov.singularity.content.article.model.Article
@@ -23,7 +24,6 @@ import java.util.*
 @ConditionalOnProperty(prefix = "singularity.content.articles", value = ["enable"], havingValue = "true", matchIfMissing = true)
 class ArticleMapper(
     private val appProperties: AppProperties,
-    private val authorizationService: AuthorizationService,
     private val userService: UserService,
     private val translateService: TranslateService,
     private val tagMapper: TagMapper,
@@ -73,11 +73,15 @@ class ArticleMapper(
         )
     }
 
-    suspend fun createFullResponse(article: Article, locale: Locale?, owner: User? = null): FullArticleResponse {
-        val currentUser = authorizationService.getAuthenticationOrNull()
+    suspend fun createFullResponse(
+        article: Article,
+        locale: Locale?,
+        authenticationOutcome: AuthenticationOutcome,
+        owner: User? = null
+    ): FullArticleResponse {
 
-        val actualOwner = owner ?: userService.findByIdOrNull(article.access.ownerId)
-        val access = ContentAccessDetailsResponse.create(article.access, currentUser)
+        val actualOwner = owner?.let { Ok(it) } ?: userService.findById(article.access.ownerId)
+        val access = ContentAccessDetailsResponse.create(article.access, authenticationOutcome)
         val (articleLang, translation) = translateService.translate(article, locale)
 
         val tags = article.tags.map { key -> tagMapper.createTagResponse(tagService.findByKey(key), articleLang) }

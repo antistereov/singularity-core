@@ -69,7 +69,7 @@ class ArticleService(
             ArticleTranslation::summary,
         ))
 
-        val criteria = CriteriaBuilder(accessCriteria.getAccessCriteria(roles))
+        val criteria = CriteriaBuilder(accessCriteria.generate(roles))
             .compare(Article::createdAt, createdAtBefore, createdAtAfter)
             .compare(Article::updatedAt, updatedAtBefore, updatedAtAfter)
             .compare(Article::publishedAt, publishedAtBefore, publishedAtAfter)

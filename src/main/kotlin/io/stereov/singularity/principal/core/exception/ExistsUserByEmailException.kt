@@ -38,7 +38,7 @@ sealed class ExistsUserByEmailException(
      * @property code `USER_HASH_FAILURE`
      * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
      */
-    class HashFailure(msg: String, cause: Throwable? = null) : ExistsUserByEmailException(
+    class Hash(msg: String, cause: Throwable? = null) : ExistsUserByEmailException(
         msg,
         "USER_HASH_FAILURE",
         HttpStatus.INTERNAL_SERVER_ERROR,

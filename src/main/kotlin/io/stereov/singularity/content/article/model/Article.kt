@@ -2,7 +2,6 @@ package io.stereov.singularity.content.article.model
 
 import io.stereov.singularity.content.core.model.ContentAccessDetails
 import io.stereov.singularity.content.core.model.ContentDocument
-import io.stereov.singularity.global.exception.model.InvalidDocumentException
 import io.stereov.singularity.translate.model.Translatable
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
@@ -13,7 +12,7 @@ import java.util.*
 
 @Document(collection = "articles")
 data class Article(
-    @Id private val _id: ObjectId? = null,
+    @Id override val _id: ObjectId? = null,
     @Indexed(unique = true) override var key: String,
     override var createdAt: Instant = Instant.now(),
     override var updatedAt: Instant = Instant.now(),
@@ -28,11 +27,7 @@ data class Article(
     override val translations: MutableMap<Locale, ArticleTranslation> = mutableMapOf(),
 ) : ContentDocument<Article>, Translatable<ArticleTranslation> {
 
-    override val id: ObjectId
-        get() = _id ?: throw InvalidDocumentException("No id found")
-
     companion object {
         const val CONTENT_TYPE = "articles"
     }
-
 }

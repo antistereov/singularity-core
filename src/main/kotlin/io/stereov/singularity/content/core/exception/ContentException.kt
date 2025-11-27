@@ -29,9 +29,8 @@ sealed class ContentException(
          */
         fun fromDatabaseException(ex: DatabaseException): ContentException {
             return when (ex) {
-                is DatabaseException.Database -> Database(ex.message ?: ex.code, ex.cause)
-                is DatabaseException.NotFound -> NotFound(ex.message ?: ex.code, ex.cause)
-                is DatabaseException.PostCommitSideEffect -> PostCommitSideEffect(ex.message ?: ex.code, ex.cause)
+                is DatabaseException.Database -> Database(ex.message, ex.cause)
+                is DatabaseException.NotFound -> NotFound(ex.message, ex.cause)
             }
         }
     }

@@ -36,7 +36,7 @@ class VaultSecretStore(
         return runCatching {
             vaultOperations.read(secretPath).awaitSingle()?.data
         }
-            .mapError { ex -> SecretStoreException.Operation("Failed to get secret with key $key from vault: ${ex.message}", ex) }
+            .mapError { ex -> SecretStoreException.Operation("Failed to generate secret with key $key from vault: ${ex.message}", ex) }
             .flatMap { data ->
                 if (data != null) {
                     Ok(data)

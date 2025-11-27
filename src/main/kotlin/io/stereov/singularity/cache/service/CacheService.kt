@@ -22,9 +22,9 @@ import java.time.Duration
  * A service for interacting with a Redis cache using coroutine-based commands.
  *
  * This service provides functionality to store, retrieve, check, and delete cached data in Redis.
- * It utilizes an object mapper for serialization/deserialization and supports error handling via custom exceptions.
+ * It uses an object mapper for serialization/deserialization and supports error handling via custom exceptions.
  *
- * @property redisCommands The Redis coroutine commands interface used for communication with the Redis server.
+ * @property redisCommands The Redis coroutine commands the interface used for communication with the Redis server.
  * @property objectMapper The object mapper instance used for serializing and deserializing objects to/from JSON.
  */
 @Service
@@ -43,7 +43,7 @@ class CacheService(
      * If the expiration time is provided, the key will automatically expire after the specified time.
      *
      * @param key The key under which the value is to be stored.
-     * @param value The value to store, must be serializable.
+     * @param value The value to store; must be serializable.
      * @param expiresIn Optional. The time-to-live for the key in seconds. If null, the key will not expire.
      * @return A [Result] containing the original value if the operation was successful, or a [CacheException] if an error occurred.
      */
@@ -105,7 +105,7 @@ class CacheService(
         logger.debug { "Getting value for key: $key" }
 
         return runSuspendCatching { redisCommands.get(key) }
-            .mapError { ex -> CacheException.Operation("Failed to get value for key $key: ${ex.message}", ex) }
+            .mapError { ex -> CacheException.Operation("Failed to generate value for key $key: ${ex.message}", ex) }
             .andThen { value ->
                 if (value != null) {
                     runCatching { objectMapper.readValue<T>(value) }
@@ -183,14 +183,14 @@ class CacheService(
     }
 
     /**
-     * Checks if a cooldown is currently active for the given key in the cache.
+     * Retrieves the remaining cooldown duration for the specified key.
      *
-     * @param key The key to check for an active cooldown.
-     * @return A [Result] containing `true` if a cooldown is active, `false` otherwise, or an error of type [CacheException.Operation].
+     * @param key The key for which to retrieve the cooldown duration.
+     * @return A [Result] containing the remaining cooldown as a [Duration] if successful,
+     *  or a [CacheException.Operation] in case of an error.
      */
-    suspend fun isCooldownActive(key: String): Result<Boolean, CacheException.Operation> {
+    suspend fun getRemainingCooldown(key: String): Result<Duration, CacheException.Operation> {
         return runCatching { redisTemplate.getExpire(key).awaitSingleOrNull() ?: Duration.ofSeconds(0) }
-            .mapError { ex -> CacheException.Operation("Failed to get cooldown for key $key: ${ex.message}", ex) }
-            .map { it.seconds > 0 }
+            .mapError { ex -> CacheException.Operation("Failed to generate cooldown for key $key: ${ex.message}", ex) }
     }
 }

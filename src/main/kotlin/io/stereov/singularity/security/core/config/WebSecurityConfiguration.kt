@@ -11,7 +11,7 @@ import io.stereov.singularity.auth.oauth2.component.CustomOAuth2AuthenticationSu
 import io.stereov.singularity.auth.oauth2.component.CustomOAuth2AuthorizationRequestResolver
 import io.stereov.singularity.auth.oauth2.properties.OAuth2Properties
 import io.stereov.singularity.auth.oauth2.service.OAuth2AuthenticationService
-import io.stereov.singularity.auth.oauth2.service.token.OAuth2StateTokenService
+import io.stereov.singularity.auth.token.service.OAuth2StateTokenService
 import io.stereov.singularity.auth.token.component.CookieCreator
 import io.stereov.singularity.auth.token.service.AccessTokenService
 import io.stereov.singularity.auth.token.service.RefreshTokenService

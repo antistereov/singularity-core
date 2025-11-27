@@ -190,7 +190,7 @@ class S3FileStorage(
         }
             .mapError { ex ->
                 FileException.Operation(
-                    "Failed to get url for rendition with key $key: ${ex.message}",
+                    "Failed to generate url for rendition with key $key: ${ex.message}",
                     ex
                 )
             }

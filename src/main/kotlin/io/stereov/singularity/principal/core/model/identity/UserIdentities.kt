@@ -14,6 +14,6 @@ package io.stereov.singularity.principal.core.model.identity
  * provider-based identities associated with a single user.
  */
 data class UserIdentities(
-    val password: UserIdentity.Password? = null,
+    var password: UserIdentity.Password? = null,
     val providers: MutableMap<String, UserIdentity.Provider> = mutableMapOf(),
 )

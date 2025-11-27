@@ -1,17 +1,27 @@
 package io.stereov.singularity.auth.core.controller
 
+import com.github.michaelbull.result.getOrThrow
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.auth.token.component.CookieCreator
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
 import io.stereov.singularity.auth.core.dto.response.GenerateSessionTokenResponse
 import io.stereov.singularity.auth.core.dto.response.SessionInfoResponse
+import io.stereov.singularity.auth.core.exception.AuthenticationException
 import io.stereov.singularity.auth.core.mapper.SessionMapper
-import io.stereov.singularity.auth.token.model.SessionTokenType
+import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.core.service.SessionService
+import io.stereov.singularity.auth.jwt.exception.TokenCreationException
+import io.stereov.singularity.auth.token.component.CookieCreator
+import io.stereov.singularity.auth.token.exception.AccessTokenExtractionException
+import io.stereov.singularity.auth.token.exception.CookieException
+import io.stereov.singularity.auth.token.model.SessionTokenType
 import io.stereov.singularity.auth.token.service.SessionTokenService
+import io.stereov.singularity.database.encryption.exception.SaveEncryptedDocumentException
+import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.global.model.SuccessResponse
+import io.stereov.singularity.principal.core.exception.FindPrincipalByIdException
+import io.stereov.singularity.principal.core.service.PrincipalService
 import io.swagger.v3.oas.annotations.ExternalDocumentation
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -34,6 +44,8 @@ class SessionController(
     private val cookieCreator: CookieCreator,
     private val sessionTokenService: SessionTokenService,
     private val sessionMapper: SessionMapper,
+    private val authorizationService: AuthorizationService,
+    private val principalService: PrincipalService,
 ) {
 
     private val logger = KotlinLogging.logger {}
@@ -58,16 +70,23 @@ class SessionController(
             ApiResponse(
                 responseCode = "200",
                 description = "The list of active sessions.",
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "Invalid or expired AccessToken.",
-                content = [Content(schema = Schema(ErrorResponse::class))]
             )
         ]
     )
+    @ThrowsDomainError([
+        AccessTokenExtractionException::class,
+        AuthenticationException.AuthenticationRequired::class,
+        FindPrincipalByIdException::class
+    ])
     suspend fun getActiveSessions(): ResponseEntity<List<SessionInfoResponse>> {
-        val sessions = sessionService.getSessions()
+        val principalId = authorizationService.getAuthenticationOutcome()
+            .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
+            .requireAuthentication()
+            .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it } }
+            .principalId
+
+        val sessions = sessionService.getSessions(principalId)
+            .getOrThrow { when (it) { is FindPrincipalByIdException -> it } }
 
         return ResponseEntity.ok(sessionMapper.toSessionInfoResponse(sessions))
     }
@@ -90,14 +109,22 @@ class SessionController(
             )
         ]
     )
+    @ThrowsDomainError([
+        TokenCreationException::class,
+        CookieException.Creation::class
+    ])
     suspend fun generateSessionToken(
         @RequestBody sessionInfo: SessionInfoRequest?,
         @RequestParam locale: Locale?
     ): ResponseEntity<GenerateSessionTokenResponse> {
         val token = sessionTokenService.create(sessionInfo, locale = locale)
+            .getOrThrow { when (it) { is TokenCreationException -> it } }
+
+        val cookie = cookieCreator.createCookie(token, sameSite = "Lax")
+            .getOrThrow { when (it) { is CookieException.Creation -> it } }
 
         return ResponseEntity.ok()
-            .header("Set-Cookie", cookieCreator.createCookie(token, sameSite = "Lax").toString())
+            .header("Set-Cookie", cookie.toString())
             .body(GenerateSessionTokenResponse(token.value))
     }
 
@@ -122,19 +149,30 @@ class SessionController(
             ApiResponse(
                 responseCode = "200",
                 description = "The list of active sessions.",
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "Invalid or expired AccessToken.",
-                content = [Content(schema = Schema(ErrorResponse::class))]
             )
         ]
 
     )
+    @ThrowsDomainError([
+        AccessTokenExtractionException::class,
+        AuthenticationException.AuthenticationRequired::class,
+        FindPrincipalByIdException::class,
+        SaveEncryptedDocumentException::class
+    ])
     suspend fun deleteSession(@PathVariable sessionId: UUID): ResponseEntity<List<SessionInfoResponse>> {
-        val updatedUser = sessionService.deleteSession(sessionId)
+        val principalId = authorizationService.getAuthenticationOutcome()
+            .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
+            .requireAuthentication()
+            .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it } }
+            .principalId
 
-        return ResponseEntity.ok(sessionMapper.toSessionInfoResponse(updatedUser.sensitive.sessions))
+        val principal = principalService.findById(principalId)
+            .getOrThrow { when (it) { is FindPrincipalByIdException -> it }}
+
+        val updatedPrincipal = sessionService.deleteSession(principal, sessionId)
+            .getOrThrow { when (it) { is SaveEncryptedDocumentException -> it } }
+
+        return ResponseEntity.ok(sessionMapper.toSessionInfoResponse(updatedPrincipal.sensitive.sessions))
     }
 
     @DeleteMapping
@@ -168,14 +206,34 @@ class SessionController(
             )
         ],
     )
+    @ThrowsDomainError([
+        AccessTokenExtractionException::class,
+        AuthenticationException.AuthenticationRequired::class,
+        FindPrincipalByIdException::class,
+        CookieException.Creation::class,
+        SaveEncryptedDocumentException::class
+    ])
     suspend fun deleteAllSessions(): ResponseEntity<SuccessResponse> {
         logger.debug { "Logging out user from all sessions" }
 
-        val clearAccessToken = cookieCreator.clearCookie(SessionTokenType.Access)
-        val clearRefreshToken = cookieCreator.clearCookie(SessionTokenType.Refresh)
-        val clearStepUpToken = cookieCreator.clearCookie(SessionTokenType.StepUp)
+        val principalId = authorizationService.getAuthenticationOutcome()
+            .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
+            .requireAuthentication()
+            .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it } }
+            .principalId
 
-        sessionService.deleteAllSessions()
+        val principal = principalService.findById(principalId)
+            .getOrThrow { when (it) { is FindPrincipalByIdException -> it }}
+
+        val clearAccessToken = cookieCreator.clearCookie(SessionTokenType.Access)
+            .getOrThrow { when (it) { is CookieException.Creation -> it } }
+        val clearRefreshToken = cookieCreator.clearCookie(SessionTokenType.Refresh)
+            .getOrThrow { when (it) { is CookieException.Creation -> it } }
+        val clearStepUpToken = cookieCreator.clearCookie(SessionTokenType.StepUp)
+            .getOrThrow { when (it) { is CookieException.Creation -> it } }
+
+        sessionService.deleteAllSessions(principal)
+            .getOrThrow { when (it) { is SaveEncryptedDocumentException -> it } }
 
         return ResponseEntity.ok()
             .header("Set-Cookie", clearAccessToken.toString())

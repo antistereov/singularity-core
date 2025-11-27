@@ -1,37 +1,44 @@
 package io.stereov.singularity.auth.core.service
 
+import com.github.michaelbull.result.*
+import com.github.michaelbull.result.coroutines.coroutineBinding
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.auth.alert.properties.SecurityAlertProperties
 import io.stereov.singularity.auth.alert.service.NoAccountInfoService
 import io.stereov.singularity.auth.alert.service.SecurityAlertService
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.dto.request.ResetPasswordRequest
 import io.stereov.singularity.auth.core.dto.request.SendPasswordResetRequest
-import io.stereov.singularity.auth.core.dto.response.MailCooldownResponse
-import io.stereov.singularity.auth.core.exception.AuthException
+import io.stereov.singularity.auth.core.exception.ResetPasswordException
+import io.stereov.singularity.auth.core.exception.SendPasswordResetException
 import io.stereov.singularity.auth.core.model.NoAccountInfoAction
-import io.stereov.singularity.auth.core.model.SecurityAlertType
-import io.stereov.singularity.auth.alert.properties.SecurityAlertProperties
+import io.stereov.singularity.auth.token.model.PasswordResetToken
 import io.stereov.singularity.auth.token.service.PasswordResetTokenService
+import io.stereov.singularity.cache.service.CacheService
+import io.stereov.singularity.database.encryption.exception.FindEncryptedDocumentByIdException
+import io.stereov.singularity.database.encryption.exception.SaveEncryptedDocumentException
 import io.stereov.singularity.database.hash.service.HashService
-import io.stereov.singularity.email.core.exception.model.EmailCooldownException
+import io.stereov.singularity.email.core.exception.EmailException
 import io.stereov.singularity.email.core.properties.EmailProperties
+import io.stereov.singularity.email.core.service.CooldownEmailService
 import io.stereov.singularity.email.core.service.EmailService
 import io.stereov.singularity.email.core.util.EmailConstants
 import io.stereov.singularity.email.template.service.TemplateService
 import io.stereov.singularity.email.template.util.TemplateBuilder
+import io.stereov.singularity.email.template.util.build
+import io.stereov.singularity.email.template.util.replacePlaceholders
+import io.stereov.singularity.email.template.util.translate
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.global.util.Random
-import io.stereov.singularity.translate.model.TranslateKey
-import io.stereov.singularity.translate.service.TranslateService
-import io.stereov.singularity.principal.core.exception.model.UserDoesNotExistException
+import io.stereov.singularity.principal.core.exception.FindUserByEmailException
+import io.stereov.singularity.principal.core.exception.PrincipalException
 import io.stereov.singularity.principal.core.model.User
 import io.stereov.singularity.principal.core.model.identity.UserIdentity
 import io.stereov.singularity.principal.core.service.UserService
-import kotlinx.coroutines.reactor.awaitSingleOrNull
-import org.springframework.data.redis.core.ReactiveRedisTemplate
+import io.stereov.singularity.translate.model.TranslateKey
+import io.stereov.singularity.translate.service.TranslateService
 import org.springframework.stereotype.Service
-import java.time.Duration
 import java.util.*
 
 @Service
@@ -39,107 +46,119 @@ class PasswordResetService(
     private val userService: UserService,
     private val passwordResetTokenService: PasswordResetTokenService,
     private val hashService: HashService,
-    private val redisTemplate: ReactiveRedisTemplate<String, String>,
-    private val emailProperties: EmailProperties,
+    override val cacheService: CacheService,
+    override val emailProperties: EmailProperties,
     private val uiProperties: UiProperties,
     private val translateService: TranslateService,
     private val emailService: EmailService,
     private val templateService: TemplateService,
-    private val accessTokenCache: AccessTokenCache,
     private val appProperties: AppProperties,
     private val securityAlertService: SecurityAlertService,
     private val securityAlertProperties: SecurityAlertProperties,
-    private val noAccountInfoService: NoAccountInfoService
-) {
+    private val noAccountInfoService: NoAccountInfoService,
+    private val accessTokenCache: AccessTokenCache
+) : CooldownEmailService {
 
-    private val logger = KotlinLogging.logger {}
+    override val logger = KotlinLogging.logger {}
+    override val slug = "password_reset"
 
-    suspend fun sendPasswordReset(req: SendPasswordResetRequest, locale: Locale?) {
+    suspend fun sendPasswordReset(
+        req: SendPasswordResetRequest,
+        locale: Locale?
+    ): Result<Long, SendPasswordResetException> = coroutineBinding {
         logger.debug { "Sending password reset email" }
 
         val remainingCooldown = getRemainingCooldown(req.email)
-        if (remainingCooldown > 0) {
-            throw EmailCooldownException(remainingCooldown)
+            .mapError { ex -> SendPasswordResetException.CooldownCache("Failed to retrieve cooldown: ${ex.message}", ex) }
+            .bind()
+
+        if (remainingCooldown.seconds > 0) {
+            Err(SendPasswordResetException.CooldownActive("Cooldown is still active for password reset"))
+                .bind()
         }
 
-        try {
-            val user = userService.findByEmail(req.email)
-            return sendPasswordResetEmail(user, locale)
-        } catch (_: UserDoesNotExistException) {
-            noAccountInfoService.send(req.email, NoAccountInfoAction.PASSWORD_RESET, locale)
-            startCooldown(req.email)
-            return
-        }
+        userService.findByEmail(req.email)
+            .flatMapEither(
+                success = { user -> sendPasswordResetEmail(user, locale) },
+                failure = { ex ->
+                    when (ex) {
+                        is FindUserByEmailException.NotFound -> {
+                            noAccountInfoService.send(req.email, NoAccountInfoAction.PASSWORD_RESET, locale)
+                                .onFailure { ex -> logger.error(ex) { "Failed to send no account info email"} }
+                            startCooldown(req.email)
+                                .mapError { ex -> SendPasswordResetException.CooldownCache("Failed to start cooldown: ${ex.message}", ex) }
+                        }
+                        else -> Err(SendPasswordResetException.Database("Failed to find user by email: ${ex.message}", ex))
+                    } }
+            )
+            .bind()
     }
 
-    suspend fun resetPassword(token: String, req: ResetPasswordRequest, locale: Locale?) {
+    suspend fun resetPassword(
+        token: PasswordResetToken,
+        req: ResetPasswordRequest, locale: Locale?
+    ): Result<Unit, ResetPasswordException> = coroutineBinding {
         logger.debug { "Resetting password "}
 
-        val resetToken = passwordResetTokenService.extract(token)
-        val user = userService.findById(resetToken.userId)
+        val user = userService.findById(token.userId)
+            .mapError { ex -> when (ex) {
+                is FindEncryptedDocumentByIdException.NotFound -> ResetPasswordException.UserNotFound("User not found")
+                else -> ResetPasswordException.Database("Failed to find user by id: ${ex.message}", ex)
+            } }
+            .bind()
 
         val savedSecret = user.sensitive.security.password.resetSecret
 
-        val tokenIsValid = resetToken.secret == savedSecret
+        val tokenIsValid = token.secret == savedSecret
 
         if (!tokenIsValid) {
-            throw AuthException("Password request secret does not match")
+            Err(ResetPasswordException.InvalidToken("The provided token does not match the user's reset secret"))
+                .bind()
         }
 
-        user.sensitive.security.password.resetSecret = Random.generateString(20)
-        val passwordIdentity = user.sensitive.identities[IdentityProvider.PASSWORD]
+        user.sensitive.security.password.resetSecret = Random.generateString(20).getOrThrow()
+        val passwordIdentity = user.sensitive.identities.password
         val newPasswordHash = hashService.hashBcrypt(req.newPassword)
+            .mapError { ex -> ResetPasswordException.Hash("Failed to hash new password: ${ex.message}", ex) }
+            .bind()
+
         if (passwordIdentity != null) {
             passwordIdentity.password = newPasswordHash
         } else {
-            user.sensitive.identities[IdentityProvider.PASSWORD] = UserIdentity.ofPassword(newPasswordHash)
+            user.sensitive.identities.password = UserIdentity.ofPassword(newPasswordHash)
         }
         user.clearSessions()
-        accessTokenCache.invalidateAllTokens(user.id)
 
         val updatedUser = userService.save(user)
+            .mapError { ex -> when (ex) {
+                is SaveEncryptedDocumentException.PostCommitSideEffect -> ResetPasswordException.PostCommitSideEffect("Failed to decrypt user after successful commit: ${ex.message}", ex)
+                else -> ResetPasswordException.Database("Failed to save updated user: ${ex.message}", ex)
+            } }
+            .bind()
 
         if (emailProperties.enable && securityAlertProperties.passwordChanged) {
-            securityAlertService.send(updatedUser, locale, SecurityAlertType.PASSWORD_CHANGED)
+            securityAlertService.sendPasswordChanged(updatedUser, locale)
+                .mapError { ex -> ResetPasswordException.PostCommitSideEffect("Failed to send password changed alert: ${ex.message}", ex) }
+                .bind()
         }
+
+        accessTokenCache.invalidateAllTokens(token.userId)
+            .mapError { ex -> ResetPasswordException.PostCommitSideEffect("Failed to invalidate all tokens: ${ex.message}", ex) }
+            .bind()
     }
 
-    suspend fun getRemainingCooldown(req: SendPasswordResetRequest): MailCooldownResponse {
-        logger.debug { "Getting remaining password reset cooldown" }
-
-        val remaining = getRemainingCooldown(req.email)
-
-        return MailCooldownResponse(remaining)
-    }
-
-    suspend fun startCooldown(email: String): Boolean {
-        logger.debug { "Starting cooldown for password reset" }
-
-        val key = "password-reset-cooldown:$email"
-        val isNewKey = redisTemplate.opsForValue()
-            .setIfAbsent(key, "1", Duration.ofSeconds(emailProperties.sendCooldown))
-            .awaitSingleOrNull()
-            ?: false
-
-        return isNewKey
-    }
-
-    suspend fun getRemainingCooldown(email: String): Long {
-        logger.debug { "Getting remaining cooldown for password resets" }
-
-        val key = "password-reset-cooldown:$email"
-        val remainingTtl = redisTemplate.getExpire(key).awaitSingleOrNull() ?: Duration.ofSeconds(-1)
-
-        return if (remainingTtl.seconds > 0) remainingTtl.seconds else 0
-    }
-
-    private suspend fun sendPasswordResetEmail(user: User, locale: Locale?) {
+    private suspend fun sendPasswordResetEmail(
+        user: User,
+        locale: Locale?
+    ): Result<Long, SendPasswordResetException> = coroutineBinding {
         logger.debug { "Sending password reset email to ${user.sensitive.email}" }
 
-        val email = user.requireNotGuestAndGetEmail()
+        val email = user.email
         val actualLocale = locale ?: appProperties.locale
 
         val passwordResetUri = generatePasswordResetUri(user)
+            .mapError { ex -> SendPasswordResetException.Token("Failed to generate password reset URI: ${ex.message}", ex) }
+            .bind()
 
         val slug = "password_reset"
         val templatePath = "${EmailConstants.TEMPLATE_DIR}/$slug.html"
@@ -152,14 +171,27 @@ class PasswordResetService(
                 "reset_uri" to passwordResetUri
             )))
             .build()
+            .mapError { ex -> SendPasswordResetException.Template("Failed to create template for password reset: ${ex.message}", ex) }
+            .bind()
 
         emailService.sendEmail(email, subject, content, actualLocale)
+            .mapError { when (it) {
+                is EmailException.Send -> SendPasswordResetException.Send("Failed to send password reset: ${it.message}", it)
+                is EmailException.Disabled -> SendPasswordResetException.EmailDisabled(it.message)
+                is EmailException.Template -> SendPasswordResetException.Template("Failed to create template for password reset: ${it.message}", it)
+                is EmailException.Authentication -> SendPasswordResetException.EmailAuthentication("Failed to send password reset due to an authentication failure: ${it.message}", it)
+            } }
+            .bind()
+
         startCooldown(email)
+            .mapError { ex -> SendPasswordResetException.CooldownCache("Failed to start cooldown: ${ex.message}", ex) }
+            .bind()
     }
 
-    suspend fun generatePasswordResetUri(user: User): String {
+    suspend fun generatePasswordResetUri(user: User): Result<String, PrincipalException.InvalidDocument> = coroutineBinding {
+        val userId = user.id.bind()
         val secret = user.sensitive.security.password.resetSecret
-        val token = passwordResetTokenService.create(user.id, secret)
-        return "${uiProperties.passwordResetUri}?token=$token"
+        val token = passwordResetTokenService.create(userId, secret)
+        "${uiProperties.passwordResetUri}?token=$token"
     }
 }

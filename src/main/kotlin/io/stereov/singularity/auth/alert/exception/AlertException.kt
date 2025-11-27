@@ -95,11 +95,19 @@ sealed class AlertException(
         cause
     )
 
-    class EmailMissing(msg: String, cause: Throwable? = null) : AlertException(
+    class EmailAuthentication(msg: String, cause: Throwable? = null) : AlertException(
         msg,
-        "USER_HAS_NO_EMAIL",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Thrown when a stored user document does not contain an email address.",
+        "EMAIL_AUTHENTICATION_FAILURE",
+        HttpStatus.UNAUTHORIZED,
+        "Thrown when an email authentication failure occurs.",
+        cause
+    )
+
+    class EmailDisabled(msg: String, cause: Throwable? = null) : AlertException(
+        msg,
+        "EMAIL_DISABLED",
+        HttpStatus.FORBIDDEN,
+        "Thrown when an email is disabled.",
         cause
     )
 }

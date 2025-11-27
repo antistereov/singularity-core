@@ -1,5 +1,6 @@
 package io.stereov.singularity.global.exception
 
+import io.stereov.singularity.database.encryption.exception.SaveEncryptedDocumentException
 import org.springframework.http.HttpStatus
 
 /**
@@ -23,4 +24,27 @@ open class SingularityException(
     cause: Throwable? = null,
 ) : RuntimeException(cause) {
     override val message: String = msg
+
+    /**
+     * Exception indicating that a post-commit side effect has failed.
+     *
+     * This exception is a subclass of [SingularityException] and is typically used
+     * to signal failure in executing operations that occur as a side effect following
+     * the successful commitment of a primary operation.
+     *
+     * @param msg A message providing details about the specific failure.
+     * @param cause The underlying cause of this exception, if available.
+     *
+     * @property code `POST_COMMIT_SIDE_EFFECT_FAILURE`
+     * @property status [HttpStatus.MULTI_STATUS]
+     *
+     * @see SaveEncryptedDocumentException.PostCommitSideEffect
+     */
+    class PostCommitSideEffect(msg: String, cause: Throwable? = null) : SingularityException(
+        msg,
+        "POST_COMMIT_SIDE_EFFECT_FAILURE",
+        HttpStatus.MULTI_STATUS,
+        "Exception thrown when a post-commit side effect fails.",
+        cause
+    )
 }

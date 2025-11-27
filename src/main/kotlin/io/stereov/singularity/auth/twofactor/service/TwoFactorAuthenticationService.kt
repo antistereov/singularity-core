@@ -10,7 +10,7 @@ import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorAuthentication
 import io.stereov.singularity.auth.twofactor.exception.model.InvalidTwoFactorRequestException
 import io.stereov.singularity.auth.twofactor.exception.model.TwoFactorMethodDisabledException
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
-import io.stereov.singularity.auth.twofactor.service.token.TwoFactorAuthenticationTokenService
+import io.stereov.singularity.auth.token.service.TwoFactorAuthenticationTokenService
 import io.stereov.singularity.principal.core.model.User
 import io.stereov.singularity.principal.core.service.UserService
 import org.springframework.stereotype.Service

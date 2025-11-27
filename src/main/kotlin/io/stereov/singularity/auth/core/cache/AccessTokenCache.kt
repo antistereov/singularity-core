@@ -69,16 +69,16 @@ class AccessTokenCache(
     /**
      * Invalidates a specific token for the given user and session by removing it from the cache.
      *
-     * @param userId The unique identifier of the user.
+     * @param principalId The unique identifier of the user.
      * @param sessionId The unique identifier of the session associated with the token.
      * @param tokenId The unique identifier of the token to be invalidated.
      * @return A [Result] containing a Boolean that indicates whether the token was successfully invalidated
      * (`true` if the token was removed, `false` if it did not exist). If the operation fails, a [CacheException] is returned.
      */
-    suspend fun invalidateToken(userId: ObjectId, sessionId: UUID, tokenId: String): Result<Boolean, CacheException> {
-        logger.trace { "Removing token for user $userId" }
+    suspend fun invalidateToken(principalId: ObjectId, sessionId: UUID, tokenId: String): Result<Boolean, CacheException> {
+        logger.trace { "Removing token for user $principalId" }
 
-        val key = "$activeTokenKey:${userId.toHexString()}:${sessionId}:$tokenId"
+        val key = "$activeTokenKey:${principalId.toHexString()}:${sessionId}:$tokenId"
         return cacheService.delete(key).map { it == 1L }
     }
 
@@ -98,13 +98,13 @@ class AccessTokenCache(
     /**
      * Invalidates all active tokens associated with a specific user by removing them from the cache.
      *
-     * @param userId The unique identifier of the user whose tokens need to be invalidated.
+     * @param principalId The unique identifier of the user whose tokens need to be invalidated.
      * @return A [Result] that, if successful, indicates that all tokens were invalidated.
      * If the operation fails, a [CacheException] is returned.
      */
-    suspend fun invalidateAllTokens(userId: ObjectId): Result<Unit, CacheException> {
-        logger.trace { "Invalidating all tokens for user $userId" }
+    suspend fun invalidateAllTokens(principalId: ObjectId): Result<Unit, CacheException> {
+        logger.trace { "Invalidating all tokens for user $principalId" }
 
-        return cacheService.deleteAll("$activeTokenKey:$userId:*")
+        return cacheService.deleteAll("$activeTokenKey:$principalId:*")
     }
 }

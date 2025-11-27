@@ -13,7 +13,7 @@ import io.stereov.singularity.auth.token.exception.CookieException
 import io.stereov.singularity.auth.token.exception.RefreshTokenCreationException
 import io.stereov.singularity.auth.token.service.AccessTokenService
 import io.stereov.singularity.auth.token.service.RefreshTokenService
-import io.stereov.singularity.database.encryption.exception.EncryptedDatabaseException
+import io.stereov.singularity.database.encryption.exception.SaveEncryptedDocumentException
 import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.principal.core.dto.request.ConvertToUserRequest
@@ -88,7 +88,7 @@ class GuestController(
     )
     @ThrowsDomainError([
         AuthenticationException.AlreadyAuthenticated::class,
-        EncryptedDatabaseException::class,
+        SaveEncryptedDocumentException::class,
         AccessTokenCreationException::class,
         RefreshTokenCreationException::class,
         PrincipalMapperException::class,
@@ -103,7 +103,7 @@ class GuestController(
             throw AuthenticationException.AlreadyAuthenticated("Cannot create GUEST account: user is already authenticated")
 
         val guest = guestService.createGuest(req)
-            .getOrThrow { when (it) { is EncryptedDatabaseException -> it } }
+            .getOrThrow { when (it) { is SaveEncryptedDocumentException -> it } }
 
         val sessionId = UUID.randomUUID()
 

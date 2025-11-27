@@ -5,7 +5,9 @@ import com.github.michaelbull.result.getOrThrow
 import io.stereov.singularity.auth.core.exception.AuthenticationException
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.token.exception.AccessTokenExtractionException
-import io.stereov.singularity.database.encryption.exception.EncryptedDatabaseException
+import io.stereov.singularity.database.encryption.exception.DeleteEncryptedDocumentByIdException
+import io.stereov.singularity.database.encryption.exception.FindAllEncryptedDocumentsPaginatedException
+import io.stereov.singularity.database.encryption.exception.FindEncryptedDocumentByIdException
 import io.stereov.singularity.file.core.exception.FileException
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.global.annotation.ThrowsDomainError
@@ -59,7 +61,7 @@ class UserController(
         ]
     )
     @ThrowsDomainError([
-        EncryptedDatabaseException::class,
+        FindEncryptedDocumentByIdException::class,
         AccessTokenExtractionException::class,
         PrincipalMapperException::class
     ])
@@ -68,7 +70,7 @@ class UserController(
     ): ResponseEntity<UserOverviewResponse> {
 
         val user = userService.findById(id).getOrThrow { when (it) {
-            is EncryptedDatabaseException -> it
+            is FindEncryptedDocumentByIdException -> it
         } }
 
         val authenticationOutcome = authorizationService.getAuthenticationOutcome()
@@ -124,7 +126,7 @@ class UserController(
         AccessTokenExtractionException::class,
         AuthenticationException.AuthenticationRequired::class,
         AuthenticationException.RoleRequired::class,
-        EncryptedDatabaseException::class,
+        FindAllEncryptedDocumentsPaginatedException::class,
         PrincipalMapperException::class
     ])
     suspend fun getUsers(
@@ -159,7 +161,7 @@ class UserController(
             createdAtBefore = createdAtBefore,
             lastActiveAfter = lastActiveAfter,
             lastActiveBefore = lastActiveBefore
-        ).getOrThrow { when (it) { is EncryptedDatabaseException -> it } }
+        ).getOrThrow { when (it) { is FindAllEncryptedDocumentsPaginatedException -> it } }
 
         val mappedUsers = users.mapContent {
             principalMapper.toOverview(it, authenticationOutcome)
@@ -198,8 +200,9 @@ class UserController(
         AccessTokenExtractionException::class,
         AuthenticationException.AuthenticationRequired::class,
         AuthenticationException.RoleRequired::class,
-        EncryptedDatabaseException::class,
+        FindEncryptedDocumentByIdException::class,
         FileException::class,
+        DeleteEncryptedDocumentByIdException::class,
     ])
     suspend fun deleteUserById(
         @PathVariable id: ObjectId
@@ -212,13 +215,13 @@ class UserController(
             .getOrThrow { when (it) { is AuthenticationException.RoleRequired -> it } }
 
         val user = userService.findById(id)
-            .getOrThrow { when (it) { is EncryptedDatabaseException -> it } }
+            .getOrThrow { when (it) { is FindEncryptedDocumentByIdException -> it } }
 
         user.sensitive.avatarFileKey?.let {
             fileStorage.remove(it).getOrThrow { ex -> when (ex) { is FileException -> ex } }
         }
         userService.deleteById(id)
-            .getOrThrow { when (it) { is EncryptedDatabaseException.Database -> it } }
+            .getOrThrow { when (it) { is DeleteEncryptedDocumentByIdException -> it } }
 
         return ResponseEntity.ok(SuccessResponse())
     }

@@ -59,7 +59,7 @@ class FileMetadataService(
     private suspend fun renditionQuery(key: String, authorized: Boolean = false): Query {
         val criteria = CriteriaBuilder()
             .hasElement(FileMetadataDocument::renditionKeys, key)
-        if (authorized) criteria.add(accessCriteria.getAccessCriteria())
+        if (authorized) criteria.add(accessCriteria.generate())
         return criteria.query()
     }
 
@@ -77,7 +77,7 @@ class FileMetadataService(
             reactiveMongoTemplate.find<FileMetadataDocument>(renditionQuery(key))
                 .awaitFirstOrNull()
         }.mapError { ex ->
-            FileMetadataException.Database("Failed to get metadata with key $key: ${ex.message}", ex)
+            FileMetadataException.Database("Failed to generate metadata with key $key: ${ex.message}", ex)
         }
             .andThen { metadata ->
                 metadata.toResultOr { FileMetadataException.NotFound("No metadata for key $key found") }

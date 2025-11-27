@@ -1,10 +1,13 @@
 package io.stereov.singularity.principal.group.service
 
-import com.github.michaelbull.result.*
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.coroutines.coroutineBinding
+import com.github.michaelbull.result.mapError
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
-import io.stereov.singularity.database.encryption.exception.EncryptedDatabaseException
+import io.stereov.singularity.database.encryption.exception.FindEncryptedDocumentByIdException
+import io.stereov.singularity.database.encryption.exception.SaveEncryptedDocumentException
 import io.stereov.singularity.principal.core.model.User
 import io.stereov.singularity.principal.core.service.UserService
 import io.stereov.singularity.principal.group.exception.GroupMemberException
@@ -48,24 +51,27 @@ class GroupMemberService(
                 .bind()
         }
 
-        val user = userService.findById(userId)
+        var user = userService.findById(userId)
             .mapError { ex -> when(ex) {
-                is EncryptedDatabaseException.NotFound -> GroupMemberException.UserNotFound("User with ID $userId does not exist")
+                is FindEncryptedDocumentByIdException.NotFound -> GroupMemberException.UserNotFound("User with ID $userId does not exist")
                 else -> GroupMemberException.Database("Failed to find user with ID $userId: ${ex.message}", ex)
             } }
             .bind()
 
         user.groups.add(groupKey)
 
-        userService.save(user)
-            .mapError { ex -> GroupMemberException.Database("Failed to save updated user to database: ${ex.message}", ex) }
-            .onSuccess {
-                accessTokenCache.invalidateAllTokens(userId)
-                    .onFailure { exception ->
-                        logger.error(exception) { "Failed to invalidate all access tokens for user $userId" }
-                    }
-            }
+        user = userService.save(user)
+            .mapError { ex -> when (ex) {
+                is SaveEncryptedDocumentException.PostCommitSideEffect -> GroupMemberException.PostCommitSideEffect("Failed to save updated user to database after successful commit: ${ex.message}", ex)
+                else -> GroupMemberException.Database("Failed to save updated user to database: ${ex.message}", ex)
+            } }
             .bind()
+
+        accessTokenCache.invalidateAllTokens(userId)
+            .mapError { ex -> GroupMemberException.PostCommitSideEffect("Failed to invalidate all access tokens for user $userId: ${ex.message}", ex) }
+            .bind()
+
+        user
     }
 
     /**
@@ -91,23 +97,26 @@ class GroupMemberService(
                 .bind()
         }
 
-        val user = userService.findById(userId)
+        var user = userService.findById(userId)
             .mapError { ex -> when(ex) {
-                is EncryptedDatabaseException.NotFound -> GroupMemberException.UserNotFound("User with ID $userId does not exist")
+                is FindEncryptedDocumentByIdException.NotFound -> GroupMemberException.UserNotFound("User with ID $userId does not exist")
                 else -> GroupMemberException.Database("Failed to find user with ID $userId: ${ex.message}", ex)
             } }
             .bind()
 
         user.groups.remove(groupKey)
 
-        userService.save(user)
-            .mapError { ex -> GroupMemberException.Database("Failed to save updated user to database: ${ex.message}", ex) }
-            .onSuccess {
-                accessTokenCache.invalidateAllTokens(userId)
-                    .onFailure { exception ->
-                        logger.error(exception) { "Failed to invalidate all access tokens for user $userId" }
-                    }
-            }
+        user = userService.save(user)
+            .mapError { ex -> when (ex) {
+                is SaveEncryptedDocumentException.PostCommitSideEffect -> GroupMemberException.PostCommitSideEffect("Failed to save updated user to database after successful commit: ${ex.message}", ex)
+                else -> GroupMemberException.Database("Failed to save updated user to database: ${ex.message}", ex)
+            } }
             .bind()
+
+        accessTokenCache.invalidateAllTokens(userId)
+            .mapError { ex -> GroupMemberException.PostCommitSideEffect("Failed to invalidate all access tokens for user $userId: ${ex.message}", ex) }
+            .bind()
+
+        user
     }
 }

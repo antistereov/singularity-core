@@ -1,24 +1,20 @@
 package io.stereov.singularity.auth.twofactor.config
 
 import com.warrenstrange.googleauth.GoogleAuthenticator
-import io.stereov.singularity.auth.core.cache.AccessTokenCache
-import io.stereov.singularity.auth.token.component.CookieCreator
-import io.stereov.singularity.auth.token.component.TokenValueExtractor
-import io.stereov.singularity.auth.core.properties.AuthProperties
 import io.stereov.singularity.auth.alert.properties.SecurityAlertProperties
-import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.alert.service.SecurityAlertService
-import io.stereov.singularity.auth.token.service.AccessTokenService
-import io.stereov.singularity.auth.token.service.RefreshTokenService
-import io.stereov.singularity.auth.token.service.SessionTokenService
-import io.stereov.singularity.auth.token.service.StepUpTokenService
+import io.stereov.singularity.auth.core.cache.AccessTokenCache
+import io.stereov.singularity.auth.core.properties.AuthProperties
+import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
 import io.stereov.singularity.auth.jwt.properties.JwtProperties
 import io.stereov.singularity.auth.jwt.service.JwtService
+import io.stereov.singularity.auth.token.component.CookieCreator
+import io.stereov.singularity.auth.token.component.TokenValueExtractor
+import io.stereov.singularity.auth.token.service.*
 import io.stereov.singularity.auth.twofactor.controller.EmailAuthenticationController
 import io.stereov.singularity.auth.twofactor.controller.TotpAuthenticationController
 import io.stereov.singularity.auth.twofactor.controller.TwoFactorAuthenticationController
-import io.stereov.singularity.auth.twofactor.exception.handler.TwoFactorAuthExceptionHandler
 import io.stereov.singularity.auth.twofactor.properties.TotpRecoveryCodeProperties
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailProperties
@@ -26,17 +22,15 @@ import io.stereov.singularity.auth.twofactor.service.EmailAuthenticationService
 import io.stereov.singularity.auth.twofactor.service.TotpAuthenticationService
 import io.stereov.singularity.auth.twofactor.service.TotpService
 import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthenticationService
-import io.stereov.singularity.auth.twofactor.service.token.TotpSetupTokenService
-import io.stereov.singularity.auth.twofactor.service.token.TwoFactorAuthenticationTokenService
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.email.core.service.EmailService
 import io.stereov.singularity.email.template.service.TemplateService
 import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.global.properties.AppProperties
-import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.principal.core.mapper.PrincipalMapper
 import io.stereov.singularity.principal.core.service.UserService
+import io.stereov.singularity.translate.service.TranslateService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -120,12 +114,6 @@ class TwoFactorAuthConfiguration {
             authorizationService,
         )
     }
-
-    // Exception Handler
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun twoFactorAuthExceptionHandler() = TwoFactorAuthExceptionHandler()
 
     // Service
 

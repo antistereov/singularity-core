@@ -193,7 +193,7 @@ class GroupService(
                     .bind()
                 
                 if (errors.isNotEmpty()) {
-                    Err(DeleteGroupByKeyException.MemberUpdate("Failed to get ${errors.size} affected users: ${errors.joinToString("; ") { it.message }}"))
+                    Err(DeleteGroupByKeyException.MemberUpdate("Failed to generate ${errors.size} affected users: ${errors.joinToString("; ") { it.message }}"))
                         .bind()
                 }
             }
