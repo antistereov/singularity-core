@@ -1,6 +1,4 @@
-package io.stereov.singularity.auth.oauth2.model.token
-
-import io.stereov.singularity.auth.token.model.SecurityTokenType
+package io.stereov.singularity.auth.token.model
 
 interface OAuth2TokenType {
 

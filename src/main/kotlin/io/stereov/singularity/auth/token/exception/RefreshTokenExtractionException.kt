@@ -31,7 +31,7 @@ sealed class RefreshTokenExtractionException(
      * @param msg The error message describing the cause of the exception.
      * @param cause The underlying cause of the exception, if available.
      *
-     * @property code The error code `INVALID_REFRESH_TOKEN`
+     * @property code The error code `REFRESH_TOKEN_INVALID`
      * @property status The status [HttpStatus.UNAUTHORIZED]
      *
      * @see TokenExtractionException.Invalid
@@ -50,7 +50,7 @@ sealed class RefreshTokenExtractionException(
      * @param msg The error message describing the cause of the exception.
      * @param cause The underlying cause of the exception, if available.
      *
-     * @property code The error code `INVALID_REFRESH_TOKEN`
+     * @property code The error code `REFRESH_TOKEN_EXPIRED`
      * @property status The status [HttpStatus.UNAUTHORIZED]
      *
      * @see TokenExtractionException.Expired
@@ -69,7 +69,7 @@ sealed class RefreshTokenExtractionException(
      * @param msg The error message describing the cause of the exception.
      * @param cause The underlying cause of the exception, if available.
      *
-     * @property code `REFRESH_TOKEN_ALLOWLIST_READING_FAILURE`
+     * @property code `REFRESH_TOKEN_MISSING`
      * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
      *
      * @see TokenExtractionException.Missing

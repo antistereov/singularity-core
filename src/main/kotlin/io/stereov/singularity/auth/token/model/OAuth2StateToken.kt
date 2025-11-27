@@ -1,4 +1,4 @@
-package io.stereov.singularity.auth.oauth2.model.token
+package io.stereov.singularity.auth.token.model
 
 import io.stereov.singularity.global.model.Token
 import org.springframework.security.oauth2.jwt.Jwt
