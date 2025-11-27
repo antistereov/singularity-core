@@ -252,7 +252,7 @@ class GeolocationDatabaseService(
         return@withContext runCatching {
             cityDb?.city(ipAddress)
         }
-            .mapError { ex -> GeolocationException.Get("Failed to get geolocation for IP address $ipAddress: ${ex.message}", ex) }
+            .mapError { ex -> GeolocationException.Get("Failed to generate geolocation for IP address $ipAddress: ${ex.message}", ex) }
             .andThen { it .toResultOr { GeolocationException.Init("GeoIP2-City database is not initialized. Cannot resolve IP address $ipAddress") }  }
     }
 }

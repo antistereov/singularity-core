@@ -45,7 +45,8 @@ class HashService(
      * Hashes the given input string using the BCrypt hashing algorithm.
      *
      * This method generates a secured hash for the provided input using the BCrypt algorithm
-     * with a default salt strength of 10. The resulting hash is encapsulated in a [Hash] object.
+     * with the default salt strength of 10.
+     * The resulting hash is encapsulated in a [Hash] object.
      *
      * @param input The input string to be hashed.
      * @return A [Result] containing the hashed data as a [Hash] object.
@@ -69,7 +70,7 @@ class HashService(
         val normalized = input.trim().lowercase()
 
         val secret = hashSecretService.getCurrentSecret()
-            .mapError { ex -> HashException.Secret("Failed to get current hash secret: ${ex.message}", ex) }
+            .mapError { ex -> HashException.Secret("Failed to generate current hash secret: ${ex.message}", ex) }
             .bind()
         val secretKeyBytes = runCatching { Base64.getDecoder().decode(secret.value) }
             .mapError { ex -> HashException.Encoding("Failed to decode hash secret: ${ex.message}", ex) }

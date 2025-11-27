@@ -7,6 +7,4 @@ import org.springframework.boot.autoconfigure.AutoConfiguration
     ApplicationConfiguration::class,
     MongoConfiguration::class
 ])
-class DatabaseConfiguration {
-
-}
+class DatabaseConfiguration

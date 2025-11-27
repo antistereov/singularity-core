@@ -5,7 +5,7 @@ import io.stereov.singularity.auth.core.properties.AuthProperties
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.oauth2.dto.request.OAuth2ProviderConnectionRequest
 import io.stereov.singularity.auth.oauth2.dto.response.OAuth2ProviderConnectionTokenResponse
-import io.stereov.singularity.auth.oauth2.service.token.OAuth2ProviderConnectionTokenService
+import io.stereov.singularity.auth.token.service.OAuth2ProviderConnectionTokenService
 import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.swagger.v3.oas.annotations.ExternalDocumentation

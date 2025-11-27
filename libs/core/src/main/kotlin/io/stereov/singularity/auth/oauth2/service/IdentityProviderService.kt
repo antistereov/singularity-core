@@ -2,7 +2,6 @@ package io.stereov.singularity.auth.oauth2.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
-import io.stereov.singularity.auth.core.model.SecurityAlertType
 import io.stereov.singularity.auth.alert.properties.SecurityAlertProperties
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.alert.service.SecurityAlertService
@@ -15,7 +14,7 @@ import io.stereov.singularity.auth.oauth2.exception.model.CannotDisconnectIdenti
 import io.stereov.singularity.auth.oauth2.exception.model.OAuth2FlowException
 import io.stereov.singularity.auth.oauth2.exception.model.PasswordIdentityAlreadyAddedException
 import io.stereov.singularity.auth.oauth2.model.OAuth2ErrorCode
-import io.stereov.singularity.auth.oauth2.service.token.OAuth2ProviderConnectionTokenService
+import io.stereov.singularity.auth.token.service.OAuth2ProviderConnectionTokenService
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.global.exception.model.DocumentNotFoundException
@@ -25,6 +24,7 @@ import io.stereov.singularity.principal.core.model.identity.UserIdentity
 import io.stereov.singularity.principal.core.service.UserService
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ServerWebExchange
+import software.amazon.awssdk.identity.spi.IdentityProvider
 import java.util.*
 
 @Service
@@ -143,7 +143,7 @@ class IdentityProviderService(
         val savedUser = userService.save(user)
 
         if (emailProperties.enable && securityAlertProperties.oauth2ProviderConnected && !isGuest) {
-            securityAlertService.send(savedUser, locale, SecurityAlertType.OAUTH_CONNECTED, provider)
+            securityAlertService.sendOAuth2Connected(savedUser, provider, locale )
         }
         val action = when (isGuest) {
             true -> OAuth2AuthenticationService.OAuth2Action.GUEST_CONVERSION
@@ -175,7 +175,7 @@ class IdentityProviderService(
         val savedUser = userService.save(user)
 
         if (emailProperties.enable && securityAlertProperties.oauth2ProviderDisconnected) {
-            securityAlertService.send(savedUser, locale, SecurityAlertType.OAUTH_DISCONNECTED, provider)
+            securityAlertService.sendOAuth2Disconnected(savedUser, provider, locale)
         }
 
         return savedUser

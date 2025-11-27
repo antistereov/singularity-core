@@ -1,6 +1,6 @@
 package io.stereov.singularity.auth.oauth2.component
 
-import io.stereov.singularity.auth.oauth2.service.token.OAuth2StateTokenService
+import io.stereov.singularity.auth.token.service.OAuth2StateTokenService
 import io.stereov.singularity.global.util.Constants
 import kotlinx.coroutines.reactor.mono
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository

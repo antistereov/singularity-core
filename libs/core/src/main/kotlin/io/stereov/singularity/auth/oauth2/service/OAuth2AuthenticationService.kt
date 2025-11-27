@@ -10,7 +10,7 @@ import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.file.download.service.DownloadService
 import io.stereov.singularity.principal.core.model.User
 import io.stereov.singularity.principal.core.service.UserService
-import io.stereov.singularity.principal.settings.service.UserSettingsService
+import io.stereov.singularity.principal.settings.service.PrincipalSettingsService
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
 import org.springframework.security.oauth2.core.user.OAuth2User
@@ -25,7 +25,7 @@ class OAuth2AuthenticationService(
     private val twoFactorEmailCodeProperties: TwoFactorEmailCodeProperties,
     private val identityProviderService: IdentityProviderService,
     private val accessTokenService: AccessTokenService,
-    private val userSettingsService: UserSettingsService,
+    private val principalSettingsService: PrincipalSettingsService,
     private val downloadService: DownloadService,
     private val identityProviderInfoService: IdentityProviderInfoService,
     private val emailProperties: EmailProperties,
@@ -128,7 +128,7 @@ class OAuth2AuthenticationService(
                     logger.debug(ex) { "Failed to download avatar" }
                     return savedUser
                 }
-            userSettingsService.setAvatar(savedUser, avatar)
+            principalSettingsService.setAvatar(savedUser, avatar)
         }
     }
 

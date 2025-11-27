@@ -23,7 +23,7 @@ sealed interface UserIdentity {
      * @see Hash
      * @see UserIdentity
      */
-    class Password(val password: Hash) : UserIdentity
+    class Password(var password: Hash) : UserIdentity
 
     /**
      * Represents a provider-based user identity in the system.

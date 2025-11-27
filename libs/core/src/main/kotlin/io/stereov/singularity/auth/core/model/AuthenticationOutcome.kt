@@ -27,6 +27,7 @@ sealed class AuthenticationOutcome(
     override fun isAuthenticated() = this is Authenticated
 
     protected val logger = KotlinLogging.logger {}
+    abstract override fun getPrincipal(): ObjectId?
 
     fun requireAuthentication(): Result<Authenticated, AuthenticationException.AuthenticationRequired> {
         return if (this is Authenticated) {
@@ -49,7 +50,7 @@ sealed class AuthenticationOutcome(
      * @property sessionId The session identifier associated with this authentication.
      * @property tokenId The token identifier for the user's access token.
      */
-    class Authenticated(
+    open class Authenticated(
         val principalId: ObjectId,
         val roles: Set<Role>,
         val groups: Set<String>,

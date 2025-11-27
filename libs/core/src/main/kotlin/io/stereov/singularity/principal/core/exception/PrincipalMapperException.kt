@@ -1,10 +1,11 @@
 package io.stereov.singularity.principal.core.exception
 
 import io.stereov.singularity.global.exception.SingularityException
+import io.stereov.singularity.principal.core.model.Principal
 import org.springframework.http.HttpStatus
 
 /**
- * Represents exceptions related to user mapping operations.
+ * Represents exceptions related to [Principal] mapping operations.
  *
  * This sealed class serves as a base for specific exceptions that may occur
  * during the processes of mapping user-related data, such as avatars or documents.
@@ -61,9 +62,9 @@ sealed class PrincipalMapperException(
      */
     class InvalidDocument(msg: String, cause: Throwable? = null) : PrincipalMapperException(
         msg,
-        "INVALID_USER_DOCUMENT",
+        "INVALID_PRINCIPAL_DOCUMENT",
         HttpStatus.INTERNAL_SERVER_ERROR,
-        "Failed to map user document because it is invalid.",
+        "Failed to map principal document because it is invalid.",
         cause
     )
 }

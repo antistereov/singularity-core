@@ -4,7 +4,7 @@ import io.stereov.singularity.auth.core.dto.response.MailCooldownResponse
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.twofactor.dto.request.EnableEmailTwoFactorMethodRequest
 import io.stereov.singularity.auth.twofactor.service.EmailAuthenticationService
-import io.stereov.singularity.auth.twofactor.service.token.TwoFactorAuthenticationTokenService
+import io.stereov.singularity.auth.token.service.TwoFactorAuthenticationTokenService
 import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.model.SendEmailResponse
 import io.stereov.singularity.global.model.OpenApiConstants

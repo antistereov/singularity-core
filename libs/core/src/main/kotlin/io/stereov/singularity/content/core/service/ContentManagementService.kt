@@ -1,5 +1,6 @@
 package io.stereov.singularity.content.core.service
 
+import com.github.michaelbull.result.Result
 import io.github.oshai.kotlinlogging.KLogger
 import io.stereov.singularity.auth.core.exception.model.NotAuthorizedException
 import io.stereov.singularity.auth.core.service.AuthorizationService
@@ -11,6 +12,7 @@ import io.stereov.singularity.content.core.dto.request.UpdateOwnerRequest
 import io.stereov.singularity.content.core.dto.response.ContentResponse
 import io.stereov.singularity.content.core.dto.response.ExtendedContentAccessDetailsResponse
 import io.stereov.singularity.content.core.dto.response.UserContentAccessDetails
+import io.stereov.singularity.content.core.exception.ContentException
 import io.stereov.singularity.content.core.model.ContentAccessRole
 import io.stereov.singularity.content.core.model.ContentAccessSubject
 import io.stereov.singularity.content.core.model.ContentDocument
@@ -39,7 +41,7 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
     abstract val contentType: String
     abstract val logger: KLogger
 
-    abstract suspend fun updateAccess(key: String, req: UpdateContentAccessRequest, locale: Locale?): ContentResponse<T>
+    abstract suspend fun updateAccess(key: String, req: UpdateContentAccessRequest, locale: Locale?): Result<ContentResponse<T>, ContentException>
     protected suspend fun doUpdateAccess(key: String, req: UpdateContentAccessRequest): T {
         logger.debug { "Updating access of key \"$key\"" }
 

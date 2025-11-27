@@ -9,8 +9,8 @@ import io.stereov.singularity.auth.core.dto.response.LoginResponse
 import io.stereov.singularity.auth.core.dto.response.RefreshTokenResponse
 import io.stereov.singularity.auth.core.dto.response.StepUpResponse
 import io.stereov.singularity.auth.token.model.SessionTokenType
-import io.stereov.singularity.auth.oauth2.model.token.OAuth2TokenType
-import io.stereov.singularity.auth.twofactor.model.token.TwoFactorTokenType
+import io.stereov.singularity.auth.token.model.OAuth2TokenType
+import io.stereov.singularity.auth.token.model.TwoFactorTokenType
 import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.test.BaseIntegrationTest
 import io.stereov.singularity.principal.core.dto.response.UserResponse

@@ -2,7 +2,6 @@ package io.stereov.singularity.content.invitation.config
 
 import io.stereov.singularity.auth.jwt.service.JwtService
 import io.stereov.singularity.content.invitation.controller.InvitationController
-import io.stereov.singularity.content.invitation.exception.handler.InvitationExceptionHandler
 import io.stereov.singularity.content.invitation.properties.InvitationProperties
 import io.stereov.singularity.content.invitation.repository.InvitationRepository
 import io.stereov.singularity.content.invitation.service.InvitationService
@@ -14,8 +13,8 @@ import io.stereov.singularity.email.core.service.EmailService
 import io.stereov.singularity.email.template.service.TemplateService
 import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.global.properties.AppProperties
-import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.principal.core.service.UserService
+import io.stereov.singularity.translate.service.TranslateService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -80,10 +79,4 @@ class InvitationConfiguration {
         invitationService: InvitationService,
         context: ApplicationContext
     ) = InvitationController(invitationService, context)
-
-    // Exception Handler
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun invitationExceptionHandler() = InvitationExceptionHandler()
 }

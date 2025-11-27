@@ -14,7 +14,7 @@ import io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException
 import io.stereov.singularity.auth.twofactor.dto.request.ChangePreferredTwoFactorMethodRequest
 import io.stereov.singularity.auth.twofactor.dto.request.CompleteLoginRequest
 import io.stereov.singularity.auth.twofactor.dto.request.CompleteStepUpRequest
-import io.stereov.singularity.auth.twofactor.model.token.TwoFactorTokenType
+import io.stereov.singularity.auth.token.model.TwoFactorTokenType
 import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthenticationService
 import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.model.OpenApiConstants

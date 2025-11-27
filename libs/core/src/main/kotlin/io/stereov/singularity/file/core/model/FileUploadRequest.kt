@@ -35,7 +35,7 @@ sealed interface FileUploadRequest {
      *
      * @property key The unique identifier for the file, represented by a [FileKey].
      * @property contentType The MIME type of the file (e.g., image/jpeg, application/pdf).
-     * @property data The file part content being uploaded.
+     * @property data The file-part content being uploaded.
      * @property width The width of the file in pixels, if applicable (e.g., for images or videos).
      * @property height The height of the file in pixels, if applicable (e.g., for images or videos).
      */

@@ -1,5 +1,6 @@
 package io.stereov.singularity.principal.core.exception
 
+import io.stereov.singularity.database.encryption.exception.SaveEncryptedDocumentException
 import io.stereov.singularity.global.exception.SingularityException
 import org.springframework.http.HttpStatus
 
@@ -131,6 +132,29 @@ sealed class ConvertGuestToUserException(
         "GUEST_HASH_FAILURE",
         HttpStatus.INTERNAL_SERVER_ERROR,
         "Failed to generate or verify hash.",
+        cause
+    )
+
+    /**
+     * Exception indicating that a post-commit side effect has failed.
+     *
+     * This exception is a subclass of [ConvertGuestToUserException] and is typically used
+     * to signal failure in executing operations that occur as a side effect following
+     * the successful commitment of a primary operation.
+     *
+     * @param msg A message providing details about the specific failure.
+     * @param cause The underlying cause of this exception, if available.
+     *
+     * @property code `POST_COMMIT_SIDE_EFFECT_FAILURE`
+     * @property status [HttpStatus.MULTI_STATUS]
+     *
+     * @see SaveEncryptedDocumentException.PostCommitSideEffect
+     */
+    class PostCommitSideEffect(msg: String, cause: Throwable? = null) : ConvertGuestToUserException(
+        msg,
+        "POST_COMMIT_SIDE_EFFECT_FAILURE",
+        HttpStatus.MULTI_STATUS,
+        "Exception thrown when a post-commit side effect fails.",
         cause
     )
 }

@@ -4,8 +4,8 @@ import com.github.michaelbull.result.*
 import com.github.michaelbull.result.coroutines.coroutineBinding
 import com.github.michaelbull.result.coroutines.runSuspendCatching
 import io.github.oshai.kotlinlogging.KLogger
-import io.stereov.singularity.database.encryption.exception.EncryptedDatabaseException
-import io.stereov.singularity.database.encryption.exception.EncryptionException
+import io.stereov.singularity.database.core.exception.DatabaseException
+import io.stereov.singularity.database.encryption.exception.*
 import io.stereov.singularity.database.encryption.model.Encrypted
 import io.stereov.singularity.database.encryption.model.EncryptedSensitiveDocument
 import io.stereov.singularity.database.encryption.model.SensitiveDocument
@@ -95,17 +95,19 @@ abstract class SensitiveCrudService<SensitiveData, DecryptedDocument: SensitiveD
      * Checks if a document with the specified ID exists in the database.
      *
      * This method verifies the existence of a document in the database using its unique identifier.
-     * If an error occurs during the query, it encapsulates the failure within an [EncryptedDatabaseException.Database].
+     * If an error occurs during the query,
+     * it encapsulates the failure within an [ExistsEncryptedDocumentByIdException].
      *
      * @param id The unique identifier of the document to check for existence.
-     * @return A [Result] containing `true` if the document exists, `false` otherwise, or an [EncryptedDatabaseException.Database] if an error occurs during the operation.
+     * @return A [Result] containing `true` if the document exists, `false` otherwise,
+     * or an [ExistsEncryptedDocumentByIdException] if an error occurs during the operation.
      */
     @Suppress("UNUSED")
-    suspend fun existsById(id: ObjectId): Result<Boolean, EncryptedDatabaseException.Database> {
-        logger.debug { "Checking if document with ID $id exists" }
+    suspend fun existsById(id: ObjectId): Result<Boolean, ExistsEncryptedDocumentByIdException> {
+        logger.debug { "Checking if ${sensitiveClazz.simpleName} with ID $id exists" }
 
         return runSuspendCatching { repository.existsById(id) }
-            .mapError { ex -> EncryptedDatabaseException.Database("Failed to check existence of ${sensitiveClazz.simpleName} with ID $id: ${ex.message}", ex) }
+            .mapError { ex -> ExistsEncryptedDocumentByIdException.Database("Failed to check existence of ${sensitiveClazz.simpleName} with ID $id: ${ex.message}", ex) }
     }
 
     /**
@@ -116,16 +118,20 @@ abstract class SensitiveCrudService<SensitiveData, DecryptedDocument: SensitiveD
      * or decryption process are encapsulated in the resulting error type.
      *
      * @param id The unique identifier of the document to be retrieved and decrypted.
-     * @return A [Result] containing the decrypted document on success, or an [EncryptedDatabaseException]
+     * @return A [Result] containing the decrypted document on success, or an [FindEncryptedDocumentByIdException]
      * if an error occurs during the retrieval or decryption process.
      */
-    suspend fun findById(id: ObjectId): Result<DecryptedDocument, EncryptedDatabaseException> {
-        logger.debug { "Finding document by ID: $id" }
+    suspend fun findById(id: ObjectId): Result<DecryptedDocument, FindEncryptedDocumentByIdException> {
+        logger.debug { "Finding ${sensitiveClazz.simpleName} by ID: $id" }
 
         return findEncryptedById(id)
+            .mapError { when (it) {
+                is FindEncryptedDocumentEncryptedByIdException.Database -> FindEncryptedDocumentByIdException.Database(it.message, it.cause)
+                is FindEncryptedDocumentEncryptedByIdException.NotFound -> FindEncryptedDocumentByIdException.NotFound(it.message, it.cause)
+            } }
             .andThen { encrypted ->
                 decrypt(encrypted)
-                    .mapError { ex -> EncryptedDatabaseException.Encryption("Failed to decrypt ${sensitiveClazz.simpleName} with ID $id: ${ex.message}", ex) }
+                    .mapError { ex -> FindEncryptedDocumentByIdException.Encryption("Failed to decrypt ${sensitiveClazz.simpleName} with ID $id: ${ex.message}", ex) }
             }
     }
 
@@ -137,17 +143,17 @@ abstract class SensitiveCrudService<SensitiveData, DecryptedDocument: SensitiveD
      * in the result. The retrieval process does not decrypt the document.
      *
      * @param id The unique identifier of the encrypted document to be fetched.
-     * @return A [Result] containing the encrypted document on success, or an [EncryptedDatabaseException]
+     * @return A [Result] containing the encrypted document on success, or an [FindEncryptedDocumentEncryptedByIdException]
      * if an error occurs during the retrieval process.
      */
-    suspend fun findEncryptedById(id: ObjectId): Result<EncryptedDocument, EncryptedDatabaseException> {
-        logger.debug { "Getting encrypted document with ID: $id" }
+    suspend fun findEncryptedById(id: ObjectId): Result<EncryptedDocument, FindEncryptedDocumentEncryptedByIdException> {
+        logger.debug { "Getting encrypted ${sensitiveClazz.simpleName} with ID: $id" }
 
         return runSuspendCatching { repository.findById(id) }
-            .mapError { ex -> EncryptedDatabaseException.Database("Failed to fetch ${sensitiveClazz.simpleName} by ID $id: ${ex.message}", ex) }
+            .mapError { ex -> FindEncryptedDocumentEncryptedByIdException.Database("Failed to fetch ${sensitiveClazz.simpleName} by ID $id: ${ex.message}", ex) }
             .andThen { encrypted ->
                 encrypted
-                    .toResultOr { EncryptedDatabaseException.NotFound("No ${sensitiveClazz.simpleName} with ID $id found") }
+                    .toResultOr { FindEncryptedDocumentEncryptedByIdException.NotFound("No ${sensitiveClazz.simpleName} with ID $id found") }
             }
     }
 
@@ -159,25 +165,25 @@ abstract class SensitiveCrudService<SensitiveData, DecryptedDocument: SensitiveD
      * or post-commit decryption are encapsulated in the resulting error type.
      *
      * @param document The decrypted document to be saved.
-     * @return A [Result] containing the decrypted document on success, or an [EncryptedDatabaseException]
+     * @return A [Result] containing the decrypted document on success, or an [SaveEncryptedDocumentException]
      * if an error occurs during the process.
      */
     suspend fun save(
         document: DecryptedDocument
-    ): Result<DecryptedDocument, EncryptedDatabaseException> = coroutineBinding {
+    ): Result<DecryptedDocument, SaveEncryptedDocumentException> = coroutineBinding {
         logger.debug { "Saving ${sensitiveClazz.simpleName}" }
 
         val encryptedDoc = encrypt(document)
-            .mapError { ex -> EncryptedDatabaseException.Encryption("Failed to encrypt ${sensitiveClazz.simpleName}: ${ex.message}", ex) }
+            .mapError { ex -> SaveEncryptedDocumentException.Encryption("Failed to encrypt ${sensitiveClazz.simpleName}: ${ex.message}", ex) }
             .bind()
         val savedDoc = runSuspendCatching { repository.save(encryptedDoc) }
-            .mapError { ex -> EncryptedDatabaseException.Database("Failed to save ${sensitiveClazz.simpleName}: ${ex.message}", ex) }
+            .mapError { ex -> SaveEncryptedDocumentException.Database("Failed to save ${sensitiveClazz.simpleName}: ${ex.message}", ex) }
             .bind()
 
         logger.debug { "Successfully saved ${sensitiveClazz.simpleName}" }
 
         decrypt(savedDoc)
-            .mapError { ex -> EncryptedDatabaseException.PostCommitSideEffect("Failed to decrypt ${sensitiveClazz.simpleName} after it was saved to the database successfully: ${ex.message}", ex) }
+            .mapError { ex -> SaveEncryptedDocumentException.PostCommitSideEffect("Failed to decrypt ${sensitiveClazz.simpleName} after it was saved to the database successfully: ${ex.message}", ex) }
             .bind()
     }
 
@@ -190,25 +196,25 @@ abstract class SensitiveCrudService<SensitiveData, DecryptedDocument: SensitiveD
      * encapsulated in the resulting error type.
      *
      * @param documents The list of decrypted documents to be saved.
-     * @return A [Result] containing the list of decrypted documents on success, or an [EncryptedDatabaseException]
+     * @return A [Result] containing the list of decrypted documents on success, or an [SaveAllEncryptedDocumentsException]
      * if an error occurs during the process.
      */
     suspend fun saveAll(
         documents: List<DecryptedDocument>
-    ): Result<List<DecryptedDocument>, EncryptedDatabaseException> = coroutineBinding {
-        logger.debug { "Saving all documents" }
+    ): Result<List<DecryptedDocument>, SaveAllEncryptedDocumentsException> = coroutineBinding {
+        logger.debug { "Saving all ${sensitiveClazz.simpleName}s" }
 
         val encryptedDocs = documents.map {
             encrypt(it)
-                .mapError { ex -> EncryptedDatabaseException.Encryption("Failed to encrypt ${sensitiveClazz.simpleName}: ${ex.message}", ex) }
+                .mapError { ex -> SaveAllEncryptedDocumentsException.Encryption("Failed to encrypt ${sensitiveClazz.simpleName}: ${ex.message}", ex) }
                 .bind()
         }
         runSuspendCatching { repository.saveAll(encryptedDocs) }
-            .mapError { ex -> EncryptedDatabaseException.Database("Failed to save ${sensitiveClazz.simpleName}s: ${ex.message}", ex) }
+            .mapError { ex -> SaveAllEncryptedDocumentsException.Database("Failed to save ${sensitiveClazz.simpleName}s: ${ex.message}", ex) }
             .map { encrypted ->
                 encrypted.map {
                     decrypt(it)
-                        .mapError { ex -> EncryptedDatabaseException.PostCommitSideEffect("Failed to decrypt ${sensitiveClazz.simpleName}s after successfully saving to databse: ${ex.message}", ex) }
+                        .mapError { ex -> SaveAllEncryptedDocumentsException.PostCommitSideEffect("Failed to decrypt ${sensitiveClazz.simpleName}s after successfully saving to database: ${ex.message}", ex) }
                         .bind()
                 }.toList()
             }
@@ -224,13 +230,13 @@ abstract class SensitiveCrudService<SensitiveData, DecryptedDocument: SensitiveD
      * will be encapsulated in the resulting error type.
      *
      * @param id The unique identifier of the document to delete.
-     * @return A [Result] containing [Unit] on successful deletion, or an [EncryptedDatabaseException.Database] if an error occurs.
+     * @return A [Result] containing [Unit] on successful deletion, or an [DeleteEncryptedDocumentByIdException] if an error occurs.
      */
-    open suspend fun deleteById(id: ObjectId): Result<Unit, EncryptedDatabaseException.Database> {
-        logger.debug { "Deleting document by ID $id" }
+    open suspend fun deleteById(id: ObjectId): Result<Unit, DeleteEncryptedDocumentByIdException> {
+        logger.debug { "Deleting ${sensitiveClazz.simpleName} by ID $id" }
 
         return runSuspendCatching { repository.deleteById(id) }
-            .mapError { ex -> EncryptedDatabaseException.Database("Failed to delete ${sensitiveClazz.simpleName} by ID: ${ex.message}", ex) }
+            .mapError { ex -> DeleteEncryptedDocumentByIdException.Database("Failed to delete ${sensitiveClazz.simpleName} by ID: ${ex.message}", ex) }
     }
 
     /**
@@ -240,30 +246,34 @@ abstract class SensitiveCrudService<SensitiveData, DecryptedDocument: SensitiveD
      * errors encountered during this operation, including issues in the database layer,
      * will be encapsulated in the resulting error type.
      *
-     * @return A [Result] containing [Unit] on successful deletion, or an [EncryptedDatabaseException.Database] if an error occurs.
+     * @return A [Result] containing [Unit] on successful deletion, or an [DeleteAllEncryptedDocumentsException] if an error occurs.
      */
-    suspend fun deleteAll(): Result<Unit, EncryptedDatabaseException.Database> {
-        logger.debug { "Deleting all documents" }
+    suspend fun deleteAll(): Result<Unit, DeleteAllEncryptedDocumentsException> {
+        logger.debug { "Deleting all ${sensitiveClazz.simpleName}s" }
 
         return runSuspendCatching { repository.deleteAll() }
-            .mapError { ex -> EncryptedDatabaseException.Database("Failed to delete all ${sensitiveClazz.simpleName}s: ${ex.message}", ex) }
+            .mapError { ex -> DeleteAllEncryptedDocumentsException.Database("Failed to delete all ${sensitiveClazz.simpleName}s: ${ex.message}", ex) }
     }
 
     /**
-     * Retrieves and decrypts all documents managed by the repository.
+     * Suspends the current coroutine to find and decrypt all documents of the specified sensitive class type.
      *
-     * This method fetches all encrypted documents from the database and attempts to decrypt each document.
-     * Any errors encountered during the decryption process are encapsulated within the resulting error type.
+     * This method retrieves a flow of encrypted documents from the repository,
+     * attempts to decrypt each document,
+     * and returns the result of the operation.
+     * If an error occurs during the operation, it wraps the error into
+     * a custom exception type for further handling.
      *
-     * @return A [Flow] emitting [Result] objects, where each result contains either a decrypted document
-     *         on success or an [EncryptedDatabaseException.Encryption] in case of decryption failure.
+     * @return A [Result] containing either a [Flow] of decrypted documents or an exception if the operation fails.
+     * The failure can be represented by a [DatabaseException.Database] or an [EncryptionException].
      */
-    suspend fun findAll(): Flow<Result<DecryptedDocument, EncryptedDatabaseException.Encryption>> {
-        logger.debug { "Finding all user accounts" }
+    suspend fun findAll(): Result<Flow<Result<DecryptedDocument, EncryptionException>>, DatabaseException.Database> {
+        logger.debug { "Finding all ${sensitiveClazz.simpleName}s" }
 
-        return repository.findAll().map {
-            decrypt(it)
-                .mapError { ex -> EncryptedDatabaseException.Encryption("Failed to decrypt ${sensitiveClazz.simpleName}: ${ex.message}", ex) }
+        return runSuspendCatching { repository.findAll() }
+            .mapError { ex -> DatabaseException.Database("Failed to find all ${sensitiveClazz.simpleName}s: ${ex.message} ",  ex) }
+            .map { all ->
+                all.map { decrypt(it) }
         }
     }
 
@@ -274,15 +284,15 @@ abstract class SensitiveCrudService<SensitiveData, DecryptedDocument: SensitiveD
      * changed, the rotation is skipped for that entry.
      *
      * @return A [Result] encapsulating either a successful operation as [Unit], or an
-     * [EncryptedDatabaseException] representing the reason for failure during the rotation process.
+     * [RotateEncryptedDocumentSecretException] representing the reason for failure during the rotation process.
      */
-    open suspend fun rotateSecret(): Result<Unit, EncryptedDatabaseException> = coroutineBinding {
+    open suspend fun rotateSecret(): Result<Unit, RotateEncryptedDocumentSecretException> = coroutineBinding {
         logger.debug { "Rotating encryption secret" }
 
         repository.findAll()
             .map {
                 val secretKey = encryptionSecretService.getCurrentSecret()
-                    .mapError { ex -> EncryptedDatabaseException.Encryption("Failed to get current secret: ${ex.message}", ex) }
+                    .mapError { ex -> RotateEncryptedDocumentSecretException.Encryption("Failed to generate current secret: ${ex.message}", ex) }
                     .bind().key
                 if (it.sensitive.secretKey == secretKey) {
                     logger.debug { "Skipping rotation of document ${it._id}: Encryption secret did not change" }
@@ -291,12 +301,14 @@ abstract class SensitiveCrudService<SensitiveData, DecryptedDocument: SensitiveD
 
                 logger.debug { "Rotating key of document ${it._id}" }
                 val decrypted = decrypt(it)
-                    .mapError { ex -> EncryptedDatabaseException.Encryption("Failed to decrypt ${sensitiveClazz.simpleName}: ${ex.message}", ex) }
+                    .mapError { ex -> RotateEncryptedDocumentSecretException.Encryption("Failed to decrypt ${sensitiveClazz.simpleName}: ${ex.message}", ex) }
                     .bind()
-                val newlyEncrypted = encrypt(decrypted)
-                    .mapError { ex -> EncryptedDatabaseException.Encryption("Failed to encrypt ${sensitiveClazz.simpleName}: ${ex.message}", ex) }
-                    .bind()
-                repository.save(newlyEncrypted)
+                save(decrypted)
+                    .mapError { ex -> when (ex) {
+                        is SaveEncryptedDocumentException.Encryption -> RotateEncryptedDocumentSecretException.Encryption("Failed to re-encrypt ${sensitiveClazz.simpleName}: ${ex.message}", ex.cause)
+                        is SaveEncryptedDocumentException.Database -> RotateEncryptedDocumentSecretException.Database("Failed to save ${sensitiveClazz.simpleName}: ${ex.message}", ex.cause)
+                        is SaveEncryptedDocumentException.PostCommitSideEffect -> RotateEncryptedDocumentSecretException.PostCommitSideEffect("Failed to decrypt ${sensitiveClazz.simpleName} after re-encrypting it successfully: ${ex.message}", ex.cause)
+                    } }
             }
             .onCompletion {
                 logger.debug { "Key successfully rotated" }
@@ -310,24 +322,25 @@ abstract class SensitiveCrudService<SensitiveData, DecryptedDocument: SensitiveD
      *
      * @param pageable the pagination information, including page number, page size, and sorting options
      * @param criteria the optional criteria used to filter the documents; defaults to null if no criteria are provided
-     * @return a [Result] containing a [Page] of decrypted documents if the operation is successful, or an [EncryptedDatabaseException]
+     * @return a [Result] containing a [Page] of decrypted documents if the operation is successful,
+     * or an [FindAllEncryptedDocumentsPaginatedException]
      *         in case an error occurs during database interaction or decryption
      */
     suspend fun findAllPaginated(
         pageable: Pageable,
         criteria: Criteria? = null
-    ): Result<Page<DecryptedDocument>, EncryptedDatabaseException> = coroutineBinding {
+    ): Result<Page<DecryptedDocument>, FindAllEncryptedDocumentsPaginatedException> = coroutineBinding {
         logger.debug { "Finding ${encryptedDocumentClazz.simpleName}: page ${pageable.pageNumber}, size: ${pageable.pageSize}, sort: ${pageable.sort}" }
 
         val query = runCatching { criteria?.let { Query(it) } ?: Query() }
-            .mapError { ex -> EncryptedDatabaseException.Database("Failed to create query: ${ex.message}", ex) }
+            .mapError { ex -> FindAllEncryptedDocumentsPaginatedException.Database("Failed to create query: ${ex.message}", ex) }
             .bind()
 
         logger.debug { "Executing count with query: $query" }
 
         val count = runSuspendCatching { reactiveMongoTemplate.count(query, encryptedDocumentClazz).awaitFirstOrElse { 0 } }
             .mapError { ex ->
-                EncryptedDatabaseException.Database(
+                FindAllEncryptedDocumentsPaginatedException.Database(
                     "Failed to count ${sensitiveClazz.simpleName} with given criteria: ${ex.message}",
                     ex
                 )
@@ -336,7 +349,7 @@ abstract class SensitiveCrudService<SensitiveData, DecryptedDocument: SensitiveD
 
         val paginatedQuery = runCatching { query.with(pageable) }
             .mapError { ex ->
-                EncryptedDatabaseException.Database(
+                FindAllEncryptedDocumentsPaginatedException.Database(
                     "Failed to create paginated query for ${sensitiveClazz.simpleName}: ${ex.message}",
                     ex
                 )
@@ -349,12 +362,12 @@ abstract class SensitiveCrudService<SensitiveData, DecryptedDocument: SensitiveD
                 .collectList()
                 .awaitFirstOrElse { emptyList() }
         }
-            .mapError { ex -> EncryptedDatabaseException.Database("Failed to fetch page of ${sensitiveClazz.simpleName}: ${ex.message}", ex) }
+            .mapError { ex -> FindAllEncryptedDocumentsPaginatedException.Database("Failed to fetch page of ${sensitiveClazz.simpleName}: ${ex.message}", ex) }
             .bind()
 
         val decrypted = encrypted.map {
             decrypt(it)
-                .mapError { ex -> EncryptedDatabaseException.Encryption("Failed to decrypt ${sensitiveClazz.simpleName}: ${ex.message}", ex) }
+                .mapError { ex -> FindAllEncryptedDocumentsPaginatedException.Encryption("Failed to decrypt ${sensitiveClazz.simpleName}: ${ex.message}", ex) }
                 .bind()
         }
 

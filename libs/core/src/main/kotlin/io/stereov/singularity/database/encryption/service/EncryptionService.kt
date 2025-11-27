@@ -88,7 +88,7 @@ class EncryptionService(
             .bind()
 
         runCatching { Cipher.getInstance("AES/ECB/PKCS5Padding") }
-            .mapError { ex -> EncryptionException.Cipher("Failed to get cipher instance: ${ex.message}", ex) }
+            .mapError { ex -> EncryptionException.Cipher("Failed to generate cipher instance: ${ex.message}", ex) }
             .flatMap { cipher ->
                 runCatching { cipher.init(Cipher.ENCRYPT_MODE, secretEncryptionKey) }
                     .mapError { ex -> EncryptionException.Cipher("Failed to initialize cipher instance: ${ex.message}", ex) }
@@ -140,7 +140,7 @@ class EncryptionService(
             .bind()
 
         runCatching { Cipher.getInstance("AES/ECB/PKCS5Padding") }
-            .mapError { ex -> EncryptionException.Cipher("Failed to get cipher instance: ${ex.message}", ex) }
+            .mapError { ex -> EncryptionException.Cipher("Failed to generate cipher instance: ${ex.message}", ex) }
             .flatMap { cipher ->
                 runCatching { cipher.init(Cipher.DECRYPT_MODE, secretEncryptionKey) }
                     .mapError { ex ->

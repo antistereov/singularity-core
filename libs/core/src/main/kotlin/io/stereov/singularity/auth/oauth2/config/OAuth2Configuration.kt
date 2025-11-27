@@ -1,24 +1,23 @@
 package io.stereov.singularity.auth.oauth2.config
 
-import io.stereov.singularity.auth.core.cache.AccessTokenCache
-import io.stereov.singularity.auth.token.component.CookieCreator
-import io.stereov.singularity.auth.core.properties.AuthProperties
 import io.stereov.singularity.auth.alert.properties.SecurityAlertProperties
-import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.alert.service.IdentityProviderInfoService
 import io.stereov.singularity.auth.alert.service.SecurityAlertService
-import io.stereov.singularity.auth.token.service.AccessTokenService
-import io.stereov.singularity.auth.token.service.StepUpTokenService
+import io.stereov.singularity.auth.core.cache.AccessTokenCache
+import io.stereov.singularity.auth.core.properties.AuthProperties
+import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.jwt.properties.JwtProperties
 import io.stereov.singularity.auth.jwt.service.JwtService
 import io.stereov.singularity.auth.oauth2.controller.IdentityProviderController
 import io.stereov.singularity.auth.oauth2.controller.OAuth2ProviderController
-import io.stereov.singularity.auth.oauth2.exception.handler.OAuth2ExceptionHandler
 import io.stereov.singularity.auth.oauth2.properties.OAuth2Properties
 import io.stereov.singularity.auth.oauth2.service.IdentityProviderService
 import io.stereov.singularity.auth.oauth2.service.OAuth2AuthenticationService
-import io.stereov.singularity.auth.oauth2.service.token.OAuth2ProviderConnectionTokenService
-import io.stereov.singularity.auth.oauth2.service.token.OAuth2StateTokenService
+import io.stereov.singularity.auth.token.component.CookieCreator
+import io.stereov.singularity.auth.token.service.AccessTokenService
+import io.stereov.singularity.auth.token.service.OAuth2ProviderConnectionTokenService
+import io.stereov.singularity.auth.token.service.OAuth2StateTokenService
+import io.stereov.singularity.auth.token.service.StepUpTokenService
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.email.core.properties.EmailProperties
@@ -26,7 +25,7 @@ import io.stereov.singularity.file.download.service.DownloadService
 import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.principal.core.mapper.PrincipalMapper
 import io.stereov.singularity.principal.core.service.UserService
-import io.stereov.singularity.principal.settings.service.UserSettingsService
+import io.stereov.singularity.principal.settings.service.PrincipalSettingsService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -70,12 +69,6 @@ class OAuth2Configuration {
         authProperties,
         cookieCreator
     )
-
-    // ExceptionHandler
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun oauth2ExceptionHandler() = OAuth2ExceptionHandler()
 
     // Service
 
@@ -129,7 +122,7 @@ class OAuth2Configuration {
         twoFactorEmailCodeProperties: TwoFactorEmailCodeProperties,
         identityProviderService: IdentityProviderService,
         accessTokenService: AccessTokenService,
-        userSettingsService: UserSettingsService,
+        principalSettingsService: PrincipalSettingsService,
         downloadService: DownloadService,
         identityProviderInfoService: IdentityProviderInfoService,
         emailProperties: EmailProperties
@@ -138,7 +131,7 @@ class OAuth2Configuration {
         twoFactorEmailCodeProperties,
         identityProviderService,
         accessTokenService,
-        userSettingsService,
+        principalSettingsService,
         downloadService,
         identityProviderInfoService,
         emailProperties,

@@ -121,7 +121,7 @@ class LocalFileStorage(
         val size = runCatching { Files.size(filePath).toString() }
             .mapError { ex ->
                 FileException.Operation(
-                    "Failed to get file size of file with key $key: ${ex.message}",
+                    "Failed to generate file size of file with key $key: ${ex.message}",
                     ex
                 )
             }

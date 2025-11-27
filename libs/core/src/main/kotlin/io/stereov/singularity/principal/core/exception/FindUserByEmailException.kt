@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus
  *
  * This sealed class extends [SingularityException], providing a structured way to handle various
  * error scenarios encountered during the process of locating a user by their email address.
- * Each specific subclass represents a particular type of failure, offering additional context
+ * Each subclass represents a particular type of failure, offering additional context
  * such as error codes, HTTP status, detailed descriptions, and optionally the underlying cause.
  *
  * @param msg The error message describing the exception.

@@ -10,7 +10,7 @@ import io.stereov.singularity.auth.twofactor.dto.request.TotpRecoveryRequest
 import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorVerifySetupRequest
 import io.stereov.singularity.auth.twofactor.dto.response.TwoFactorRecoveryResponse
 import io.stereov.singularity.auth.twofactor.dto.response.TwoFactorSetupResponse
-import io.stereov.singularity.auth.twofactor.model.token.TwoFactorTokenType
+import io.stereov.singularity.auth.token.model.TwoFactorTokenType
 import io.stereov.singularity.auth.twofactor.service.TotpAuthenticationService
 import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.model.OpenApiConstants

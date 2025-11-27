@@ -213,7 +213,7 @@ abstract class FileStorage {
                     return@coroutineBinding false
                 }
             )
-            .mapError { ex -> FileException.Metadata("Failed to get metadata for file with key $key: ${ex.message}", ex) }
+            .mapError { ex -> FileException.Metadata("Failed to generate metadata for file with key $key: ${ex.message}", ex) }
             .bind()
 
         metadata.renditions.values.map {rendition ->

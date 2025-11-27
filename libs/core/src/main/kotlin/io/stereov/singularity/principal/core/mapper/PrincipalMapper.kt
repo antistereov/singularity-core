@@ -35,7 +35,7 @@ class PrincipalMapper(
      */
     suspend fun toResponse(
         principal: Principal<out Role, out SensitivePrincipalData>,
-        authenticationOutcome: AuthenticationOutcome
+        authenticationOutcome: AuthenticationOutcome = AuthenticationOutcome.None()
     ): Result<UserResponse, PrincipalMapperException> = coroutineBinding {
         logger.debug { "Creating UserResponse for user with id \"${principal.id}\"" }
         

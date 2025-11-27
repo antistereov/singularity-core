@@ -10,7 +10,7 @@ import io.stereov.singularity.test.BaseMailIntegrationTest
 import io.stereov.singularity.principal.core.dto.response.UserResponse
 import io.stereov.singularity.principal.settings.dto.request.ChangeEmailRequest
 import io.stereov.singularity.principal.settings.dto.request.ChangePasswordRequest
-import io.stereov.singularity.principal.settings.dto.request.ChangeUserRequest
+import io.stereov.singularity.principal.settings.dto.request.ChangePrincipalRequest
 import io.stereov.singularity.principal.settings.dto.response.ChangeEmailResponse
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
@@ -550,7 +550,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
         val res = webTestClient.put()
             .uri("/api/users/me")
             .accessTokenCookie(accessToken)
-            .bodyValue(ChangeUserRequest(newName))
+            .bodyValue(ChangePrincipalRequest(newName))
             .exchange()
             .expectStatus().isOk
             .expectBody(UserResponse::class.java)
@@ -568,7 +568,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
 
         webTestClient.put()
             .uri("/api/users/me")
-            .bodyValue(ChangeUserRequest(newName))
+            .bodyValue(ChangePrincipalRequest(newName))
             .exchange()
             .expectStatus().isUnauthorized
 

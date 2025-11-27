@@ -6,6 +6,7 @@ import com.github.michaelbull.result.mapError
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.alert.exception.AlertException
 import io.stereov.singularity.auth.core.model.SessionInfo
+import io.stereov.singularity.email.core.exception.EmailException
 import io.stereov.singularity.email.core.service.EmailService
 import io.stereov.singularity.email.core.util.EmailConstants
 import io.stereov.singularity.email.template.service.TemplateService
@@ -14,9 +15,9 @@ import io.stereov.singularity.email.template.util.build
 import io.stereov.singularity.email.template.util.replacePlaceholders
 import io.stereov.singularity.email.template.util.translate
 import io.stereov.singularity.global.properties.AppProperties
+import io.stereov.singularity.principal.core.model.User
 import io.stereov.singularity.translate.model.TranslateKey
 import io.stereov.singularity.translate.service.TranslateService
-import io.stereov.singularity.principal.core.model.User
 import jakarta.mail.internet.MimeMessage
 import org.springframework.stereotype.Service
 import java.util.*
@@ -83,7 +84,12 @@ class LoginAlertService(
             .bind()
 
         emailService.sendEmail(email, subject, content, actualLocale)
-            .mapError { ex -> AlertException.Send("Failed to send login alert: ${ex.message}", ex) }
+            .mapError { when (it) {
+                is EmailException.Send -> AlertException.Send("Failed to send verification email: ${it.message}", it)
+                is EmailException.Disabled -> AlertException.EmailDisabled(it.message)
+                is EmailException.Template -> AlertException.Template("Failed to create template for verification email: ${it.message}", it)
+                is EmailException.Authentication -> AlertException.EmailAuthentication("Failed to send verification email due to an authentication failure: ${it.message}", it)
+            } }
             .bind()
     }
 }

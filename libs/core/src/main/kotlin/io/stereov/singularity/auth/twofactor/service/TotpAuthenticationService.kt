@@ -15,8 +15,8 @@ import io.stereov.singularity.auth.twofactor.exception.model.MissingPasswordIden
 import io.stereov.singularity.auth.twofactor.exception.model.TwoFactorMethodAlreadyEnabledException
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
 import io.stereov.singularity.auth.twofactor.properties.TotpRecoveryCodeProperties
-import io.stereov.singularity.auth.twofactor.service.token.TotpSetupTokenService
-import io.stereov.singularity.auth.twofactor.service.token.TwoFactorAuthenticationTokenService
+import io.stereov.singularity.auth.token.service.TotpSetupTokenService
+import io.stereov.singularity.auth.token.service.TwoFactorAuthenticationTokenService
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.global.exception.model.InvalidDocumentException
@@ -27,6 +27,7 @@ import io.stereov.singularity.principal.core.model.User
 import io.stereov.singularity.principal.core.service.UserService
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ServerWebExchange
+import software.amazon.awssdk.identity.spi.IdentityProvider
 import java.util.*
 
 @Service

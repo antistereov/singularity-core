@@ -18,6 +18,6 @@ import java.util.*
  * UUID as the key and session-specific details encapsulated within [SessionInfo].
  */
 sealed interface SensitivePrincipalData {
-    val name: String
+    var name: String
     val sessions: MutableMap<UUID, SessionInfo>
 }

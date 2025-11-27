@@ -14,7 +14,7 @@ import io.stereov.singularity.auth.oauth2.controller.OAuth2ProviderController
 import io.stereov.singularity.auth.twofactor.controller.EmailAuthenticationController
 import io.stereov.singularity.auth.twofactor.controller.TotpAuthenticationController
 import io.stereov.singularity.auth.twofactor.controller.TwoFactorAuthenticationController
-import io.stereov.singularity.auth.twofactor.model.token.TwoFactorTokenType
+import io.stereov.singularity.auth.token.model.TwoFactorTokenType
 import io.stereov.singularity.content.article.controller.ArticleController
 import io.stereov.singularity.content.article.controller.ArticleManagementController
 import io.stereov.singularity.content.core.controller.ContentManagementController
@@ -24,7 +24,7 @@ import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.principal.core.controller.UserController
-import io.stereov.singularity.principal.settings.controller.UserSettingsController
+import io.stereov.singularity.principal.settings.controller.PrincipalSettingsController
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType
 import io.swagger.v3.oas.annotations.security.SecurityScheme
@@ -316,13 +316,13 @@ class OpenApiConfig() {
         // Profile Management
 
         sortedOperationIds.addAll(listOf(
-            UserSettingsController::getAuthorizedUser.name,
-            UserSettingsController::updateAuthorizedUser.name,
-            UserSettingsController::changeEmailOfAuthorizedUser.name,
-            UserSettingsController::changePasswordOfAuthorizedUser.name,
-            UserSettingsController::setAvatarOfAuthorizedUser.name,
-            UserSettingsController::deleteAvatarOfAuthorizedUser.name,
-            UserSettingsController::deleteAuthorizedUser.name
+            PrincipalSettingsController::getAuthorizedPrincipal.name,
+            PrincipalSettingsController::updateAuthorizedUser.name,
+            PrincipalSettingsController::changeEmailOfAuthorizedUser.name,
+            PrincipalSettingsController::changePasswordOfAuthorizedUser.name,
+            PrincipalSettingsController::setAvatarOfAuthorizedUser.name,
+            PrincipalSettingsController::deleteAvatarOfAuthorizedUser.name,
+            PrincipalSettingsController::deleteAuthorizedPrincipal.name
         ))
 
         // Articles
