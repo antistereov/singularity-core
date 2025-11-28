@@ -24,6 +24,7 @@ import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.file.download.service.DownloadService
 import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.principal.core.mapper.PrincipalMapper
+import io.stereov.singularity.principal.core.service.PrincipalService
 import io.stereov.singularity.principal.core.service.UserService
 import io.stereov.singularity.principal.settings.service.PrincipalSettingsService
 import org.springframework.boot.autoconfigure.AutoConfiguration
@@ -49,10 +50,12 @@ class OAuth2Configuration {
         identityProviderService: IdentityProviderService,
         authorizationService: AuthorizationService,
         principalMapper: PrincipalMapper,
+        userService: UserService,
     ) = IdentityProviderController(
         identityProviderService,
         authorizationService,
         principalMapper,
+        userService,
     )
 
     @Bean
@@ -77,25 +80,27 @@ class OAuth2Configuration {
     fun identityProviderService(
         userService: UserService,
         oAuth2ProviderConnectionTokenService: OAuth2ProviderConnectionTokenService,
-        authorizationService: AuthorizationService,
         hashService: HashService,
         accessTokenCache: AccessTokenCache,
         accessTokenService: AccessTokenService,
         stepUpTokenService: StepUpTokenService,
         emailProperties: EmailProperties,
         securityAlertService: SecurityAlertService,
-        securityAlertProperties: SecurityAlertProperties
+        securityAlertProperties: SecurityAlertProperties,
+        principalService: PrincipalService,
+        twoFactorEmailProperties: TwoFactorEmailCodeProperties
     ) = IdentityProviderService(
         userService,
         oAuth2ProviderConnectionTokenService,
-        authorizationService,
         hashService,
         accessTokenCache,
         accessTokenService,
         stepUpTokenService,
         emailProperties,
         securityAlertService,
-        securityAlertProperties
+        securityAlertProperties,
+        principalService,
+        twoFactorEmailProperties
     )
     
     @Bean

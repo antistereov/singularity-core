@@ -4,18 +4,18 @@ import com.github.michaelbull.result.*
 import com.github.michaelbull.result.coroutines.coroutineBinding
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
-import io.stereov.singularity.auth.token.component.TokenValueExtractor
-import io.stereov.singularity.auth.token.exception.AccessTokenCreationException
-import io.stereov.singularity.auth.token.exception.AccessTokenExtractionException
 import io.stereov.singularity.auth.core.model.AuthenticationOutcome
-import io.stereov.singularity.auth.token.model.AccessToken
-import io.stereov.singularity.auth.token.model.SessionTokenType
 import io.stereov.singularity.auth.jwt.exception.TokenCreationException
 import io.stereov.singularity.auth.jwt.exception.TokenExtractionException
 import io.stereov.singularity.auth.jwt.properties.JwtProperties
 import io.stereov.singularity.auth.jwt.service.JwtService
-import io.stereov.singularity.auth.oauth2.exception.model.OAuth2FlowException
+import io.stereov.singularity.auth.oauth2.exception.OAuth2FlowException
 import io.stereov.singularity.auth.oauth2.model.OAuth2ErrorCode
+import io.stereov.singularity.auth.token.component.TokenValueExtractor
+import io.stereov.singularity.auth.token.exception.AccessTokenCreationException
+import io.stereov.singularity.auth.token.exception.AccessTokenExtractionException
+import io.stereov.singularity.auth.token.model.AccessToken
+import io.stereov.singularity.auth.token.model.SessionTokenType
 import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.principal.core.model.Principal
@@ -116,12 +116,20 @@ class AccessTokenService(
             )
     }
 
-    suspend fun extractOrOAuth2FlowException(exchange: ServerWebExchange): AccessToken {
+    /**
+     * Extracts authentication from the provided ServerWebExchange or throws an OAuth2FlowException
+     * if the process encounters any errors such as expired or invalid access tokens.
+     *
+     * @param exchange the ServerWebExchange containing the request and response information
+     * @return the extracted authentication outcome if successful
+     * @throws OAuth2FlowException if the access token is expired, invalid, or missing
+     */
+    suspend fun extractOrOAuth2FlowException(exchange: ServerWebExchange): AuthenticationOutcome.Authenticated {
 
-        return runCatching { extractOrNull(exchange) }
+        val authenticationOutcome =  extract(exchange)
             .getOrElse { exception ->
                 when (exception) {
-                    is TokenExpiredException -> throw OAuth2FlowException(
+                    is AccessTokenExtractionException.Expired -> throw OAuth2FlowException(
                         OAuth2ErrorCode.ACCESS_TOKEN_EXPIRED,
                         "Failed to connect a new provider to the current user. AccessToken expired.",
                         exception
@@ -133,10 +141,11 @@ class AccessTokenService(
                         exception
                     )
                 }
-            } ?: throw OAuth2FlowException(
-            OAuth2ErrorCode.ACCESS_TOKEN_MISSING,
-            "Failed to connect a new provider to the current user: AccessToken is invalid"
-        )
+            }
+            return when (authenticationOutcome) {
+                is AuthenticationOutcome.Authenticated -> authenticationOutcome
+                is AuthenticationOutcome.None -> throw OAuth2FlowException(OAuth2ErrorCode.ACCESS_TOKEN_MISSING, "Failed to connect a new provider to the current user: AccessToken is invalid")
+            }
     }
 
     /**

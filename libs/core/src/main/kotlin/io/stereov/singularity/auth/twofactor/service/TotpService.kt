@@ -1,41 +1,58 @@
 package io.stereov.singularity.auth.twofactor.service
 
+import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.mapError
+import com.github.michaelbull.result.runCatching
 import com.warrenstrange.googleauth.GoogleAuthenticator
+import io.stereov.singularity.auth.twofactor.exception.TotpException
 import org.springframework.stereotype.Service
 
+/**
+ * A service for handling TOTP (Time-based One-Time Password) related operations such as
+ * generating secrets, validating codes, and generating passwords.
+ *
+ * This service uses the [GoogleAuthenticator] library to manage TOTP-based authentication.
+ */
 @Service
 class TotpService(
     private val gAuth: GoogleAuthenticator,
 ) {
 
     /**
-     * Generates a new secret key for two-factor authentication.
+     * Generates a new TOTP secret key.
      *
-     * @return A string representing the generated secret key.
+     * @return A [Result] containing the generated secret key as a string if successful,
+     * or an instance of [TotpException.GenerateSecret] if an error occurs.
      */
-    fun generateSecretKey(): String {
-        return gAuth.createCredentials().key
+    fun generateSecretKey(): Result<String, TotpException.GenerateSecret> {
+        return runCatching { gAuth.createCredentials().key }
+            .mapError { ex -> TotpException.GenerateSecret("Failed to generate TOTP secret: ${ex.message}", ex) }
+    }
+
+
+    /**
+     * Validates whether the provided TOTP code is valid for the given secret key.
+     *
+     * @param secret The secret key corresponding to the TOTP code.
+     * @param code The TOTP code to validate.
+     * @return A [Result] containing `true` if the code is valid, `false` otherwise,
+     * or an instance of [TotpException.Validation] in case of an error.
+     */
+    fun codeIsValid(secret: String, code: Int): Result<Boolean, TotpException.Validation> {
+        return runCatching { gAuth.authorize(secret, code) }
+            .mapError { ex -> TotpException.Validation("Failed to validate TOTP code: ${ex.message}", ex) }
     }
 
     /**
-     * Validates a two-factor authentication code against a given secret key.
+     * Generates a TOTP password based on the provided secret key.
      *
-     * @param secret The secret key used for validation.
-     * @param code The two-factor authentication code to validate.
-     *
-     * @return True if the code is valid, false otherwise.
+     * @param secret The secret key used to generate the TOTP password.
+     * @return A [Result] containing the generated TOTP password as an integer if successful,
+     * or an instance of [TotpException.GeneratePassword] if an error occurs during the generation process.
      */
-    fun codeIsValid(secret: String, code: Int): Boolean {
-        return gAuth.authorize(secret, code)
-    }
-
-    /**
-     * Generates a time-based one-time password (TOTP) using the given secret key.
-     *
-     * @param secret The secret key used to generate the TOTP.
-     */
-    fun getTotpPassword(secret: String): Int {
-        return gAuth.getTotpPassword(secret)
+    fun getTotpPassword(secret: String): Result<Int, TotpException.GeneratePassword> {
+        return runCatching { gAuth.getTotpPassword(secret) }
+            .mapError { ex -> TotpException.GeneratePassword("Failed to generate TOTP: ${ex.message}", ex) }
     }
 
     /**

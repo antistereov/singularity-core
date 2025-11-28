@@ -1,5 +1,6 @@
 package io.stereov.singularity.auth.oauth2.component
 
+import com.github.michaelbull.result.getOrThrow
 import io.stereov.singularity.auth.token.service.OAuth2StateTokenService
 import io.stereov.singularity.global.util.Constants
 import kotlinx.coroutines.reactor.mono
@@ -42,7 +43,7 @@ class CustomOAuth2AuthorizationRequestResolver(
             request.state,
             redirectUri,
             stepUp,
-        )
+        ).getOrThrow()
 
         val req = OAuth2AuthorizationRequest.from(request)
             .state(oAuth2StateToken.value)
