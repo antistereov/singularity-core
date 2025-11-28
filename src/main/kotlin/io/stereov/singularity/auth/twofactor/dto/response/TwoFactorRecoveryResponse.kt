@@ -7,5 +7,4 @@ data class TwoFactorRecoveryResponse(
     val accessToken: String?,
     val refreshToken: String?,
     val stepUpToken: String?,
-    val sessionToken: String?,
 )

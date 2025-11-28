@@ -5,16 +5,13 @@ import io.stereov.singularity.auth.core.controller.AuthenticationController
 import io.stereov.singularity.auth.core.controller.EmailVerificationController
 import io.stereov.singularity.auth.core.controller.PasswordResetController
 import io.stereov.singularity.auth.core.controller.SessionController
-import io.stereov.singularity.auth.token.model.SessionTokenType
-import io.stereov.singularity.principal.group.controller.GroupController
-import io.stereov.singularity.principal.group.controller.GroupMemberController
-import io.stereov.singularity.principal.core.controller.GuestController
 import io.stereov.singularity.auth.oauth2.controller.IdentityProviderController
 import io.stereov.singularity.auth.oauth2.controller.OAuth2ProviderController
+import io.stereov.singularity.auth.token.model.SessionTokenType
+import io.stereov.singularity.auth.token.model.TwoFactorTokenType
 import io.stereov.singularity.auth.twofactor.controller.EmailAuthenticationController
 import io.stereov.singularity.auth.twofactor.controller.TotpAuthenticationController
 import io.stereov.singularity.auth.twofactor.controller.TwoFactorAuthenticationController
-import io.stereov.singularity.auth.token.model.TwoFactorTokenType
 import io.stereov.singularity.content.article.controller.ArticleController
 import io.stereov.singularity.content.article.controller.ArticleManagementController
 import io.stereov.singularity.content.core.controller.ContentManagementController
@@ -23,7 +20,10 @@ import io.stereov.singularity.content.tag.controller.TagController
 import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.model.OpenApiConstants
+import io.stereov.singularity.principal.core.controller.GuestController
 import io.stereov.singularity.principal.core.controller.UserController
+import io.stereov.singularity.principal.group.controller.GroupController
+import io.stereov.singularity.principal.group.controller.GroupMemberController
 import io.stereov.singularity.principal.settings.controller.PrincipalSettingsController
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType
@@ -130,7 +130,7 @@ class OpenApiConfig() {
                 errorKClass.sealedSubclasses.forEach { concreteErrorClass ->
 
                     val apiError = concreteErrorClass.objectInstance
-                        ?: concreteErrorClass.primaryConstructor?.call()
+                        ?: concreteErrorClass.primaryConstructor?.call("", null)
                         ?: return@forEach
 
                     val responseCode = apiError.status.value().toString()

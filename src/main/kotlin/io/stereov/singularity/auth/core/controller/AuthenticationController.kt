@@ -4,7 +4,8 @@ import com.github.michaelbull.result.getOrThrow
 import com.github.michaelbull.result.onFailure
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.auth.token.component.CookieCreator
+import io.stereov.singularity.auth.alert.properties.SecurityAlertProperties
+import io.stereov.singularity.auth.alert.service.LoginAlertService
 import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.auth.core.dto.request.RegisterUserRequest
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
@@ -13,33 +14,22 @@ import io.stereov.singularity.auth.core.dto.response.AuthenticationStatusRespons
 import io.stereov.singularity.auth.core.dto.response.LoginResponse
 import io.stereov.singularity.auth.core.dto.response.RefreshTokenResponse
 import io.stereov.singularity.auth.core.dto.response.StepUpResponse
-import io.stereov.singularity.auth.token.model.SessionTokenType
+import io.stereov.singularity.auth.core.exception.*
+import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.auth.core.properties.AuthProperties
-import io.stereov.singularity.auth.alert.properties.SecurityAlertProperties
 import io.stereov.singularity.auth.core.service.AuthenticationService
 import io.stereov.singularity.auth.core.service.AuthorizationService
-import io.stereov.singularity.auth.alert.service.LoginAlertService
-import io.stereov.singularity.auth.core.exception.AuthenticationException
-import io.stereov.singularity.auth.core.exception.LoginException
-import io.stereov.singularity.auth.core.exception.LogoutException
-import io.stereov.singularity.auth.core.exception.RegisterException
-import io.stereov.singularity.auth.core.exception.StepUpException
-import io.stereov.singularity.auth.core.model.AuthenticationOutcome
+import io.stereov.singularity.auth.geolocation.service.GeolocationService
+import io.stereov.singularity.auth.token.component.CookieCreator
+import io.stereov.singularity.auth.token.exception.*
+import io.stereov.singularity.auth.token.model.OAuth2TokenType
+import io.stereov.singularity.auth.token.model.SessionTokenType
+import io.stereov.singularity.auth.token.model.TwoFactorTokenType
 import io.stereov.singularity.auth.token.service.AccessTokenService
 import io.stereov.singularity.auth.token.service.RefreshTokenService
 import io.stereov.singularity.auth.token.service.StepUpTokenService
-import io.stereov.singularity.auth.geolocation.service.GeolocationService
-import io.stereov.singularity.auth.token.exception.AccessTokenCreationException
-import io.stereov.singularity.auth.token.exception.AccessTokenExtractionException
-import io.stereov.singularity.auth.token.exception.CookieException
-import io.stereov.singularity.auth.token.exception.RefreshTokenCreationException
-import io.stereov.singularity.auth.token.exception.RefreshTokenExtractionException
-import io.stereov.singularity.auth.token.exception.StepUpTokenCreationException
-import io.stereov.singularity.auth.token.exception.TwoFactorAuthenticationTokenCreationException
-import io.stereov.singularity.auth.token.model.OAuth2TokenType
-import io.stereov.singularity.auth.token.model.TwoFactorTokenType
-import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthenticationService
 import io.stereov.singularity.auth.token.service.TwoFactorAuthenticationTokenService
+import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthenticationService
 import io.stereov.singularity.database.encryption.exception.FindEncryptedDocumentByIdException
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.global.annotation.ThrowsDomainError
@@ -584,11 +574,6 @@ class AuthenticationController(
         val authenticationOutcome = authorizationService.getAuthenticationOutcome()
             .getOrThrow { when (it) { is AccessTokenExtractionException -> it }}
 
-        val sessionId = when (authenticationOutcome) {
-            is AuthenticationOutcome.Authenticated -> authenticationOutcome.sessionId
-            is AuthenticationOutcome.None -> null
-        }
-
         val authorizedUserId = when (authenticationOutcome) {
             is AuthenticationOutcome.Authenticated -> authenticationOutcome.principalId
             is AuthenticationOutcome.None -> null
@@ -607,15 +592,17 @@ class AuthenticationController(
         } else null
         val stepUp = stepUpToken != null
 
-        val (twoFactorMethods, preferredTwoFactorMethod) = if (twoFactorRequired && twoFactorToken != null) {
-            val user = userService.findById(twoFactorToken.userId)
+        val user = if (authorizedUserId != null || twoFactorToken != null) {
+            userService.findById(authorizedUserId ?: twoFactorToken!!.userId)
+                .getOrThrow { when (it) { is FindEncryptedDocumentByIdException -> it } }
+        } else null
 
-            user.twoFactorMethods to user.preferredTwoFactorMethod
+        val (twoFactorMethods, preferredTwoFactorMethod) = if (twoFactorToken != null && twoFactorRequired) {
+
+            user!!.twoFactorMethods to user.preferredTwoFactorMethod.getOrNull()
         } else null to null
 
-        val emailVerified = authorizedUserId
-            ?.let { userService.findByIdOrNull(it) }
-            ?.sensitive?.security?.email?.verified
+        val emailVerified = user?.sensitive?.security?.email?.verified
 
         return ResponseEntity.ok(
             AuthenticationStatusResponse(

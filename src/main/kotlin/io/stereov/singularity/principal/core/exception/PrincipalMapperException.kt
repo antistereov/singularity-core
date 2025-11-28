@@ -37,12 +37,12 @@ sealed class PrincipalMapperException(
      * @param cause The underlying cause of the exception, if available.
      *
      * @property code `USER_AVATAR_MAPPING_FAILURE`
-     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
+     * @property status [HttpStatus.MULTI_STATUS]
      */
     class Avatar(msg: String, cause: Throwable? = null) : PrincipalMapperException(
         msg,
         "USER_AVATAR_MAPPING_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        HttpStatus.MULTI_STATUS,
         "Failed to map avatar metadata.",
         cause
     )
@@ -58,12 +58,12 @@ sealed class PrincipalMapperException(
      * @param cause The underlying cause of the exception, if available.
      *
      * @property code `INVALID_USER_DOCUMENT`
-     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
+     * @property status [HttpStatus.MULTI_STATUS]
      */
     class InvalidDocument(msg: String, cause: Throwable? = null) : PrincipalMapperException(
         msg,
         "INVALID_PRINCIPAL_DOCUMENT",
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        HttpStatus.MULTI_STATUS,
         "Failed to map principal document because it is invalid.",
         cause
     )

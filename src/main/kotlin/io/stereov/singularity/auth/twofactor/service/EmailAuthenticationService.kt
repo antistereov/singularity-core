@@ -1,21 +1,20 @@
 package io.stereov.singularity.auth.twofactor.service
 
-import com.github.michaelbull.result.getOrThrow
+import com.github.michaelbull.result.*
+import com.github.michaelbull.result.coroutines.coroutineBinding
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.auth.core.cache.AccessTokenCache
-import io.stereov.singularity.auth.core.model.SecurityAlertType
 import io.stereov.singularity.auth.alert.properties.SecurityAlertProperties
-import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.alert.service.SecurityAlertService
+import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.twofactor.dto.request.EnableEmailTwoFactorMethodRequest
-import io.stereov.singularity.auth.twofactor.exception.model.CannotDisableOnly2FAMethodException
-import io.stereov.singularity.auth.twofactor.exception.model.InvalidTwoFactorCodeException
-import io.stereov.singularity.auth.twofactor.exception.model.TwoFactorCodeExpiredException
-import io.stereov.singularity.auth.twofactor.exception.model.TwoFactorMethodAlreadyEnabledException
-import io.stereov.singularity.auth.twofactor.exception.model.TwoFactorMethodDisabledException
+import io.stereov.singularity.auth.twofactor.exception.*
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties
+import io.stereov.singularity.cache.service.CacheService
+import io.stereov.singularity.database.encryption.exception.SaveEncryptedDocumentException
+import io.stereov.singularity.email.core.exception.EmailException
 import io.stereov.singularity.email.core.properties.EmailProperties
+import io.stereov.singularity.email.core.service.CooldownEmailService
 import io.stereov.singularity.email.core.service.EmailService
 import io.stereov.singularity.email.core.util.EmailConstants
 import io.stereov.singularity.email.template.service.TemplateService
@@ -25,38 +24,52 @@ import io.stereov.singularity.email.template.util.replacePlaceholders
 import io.stereov.singularity.email.template.util.translate
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.global.util.Random
-import io.stereov.singularity.translate.model.TranslateKey
-import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.principal.core.model.User
 import io.stereov.singularity.principal.core.service.UserService
-import kotlinx.coroutines.reactor.awaitSingleOrNull
-import org.bson.types.ObjectId
-import org.springframework.data.redis.core.ReactiveRedisTemplate
+import io.stereov.singularity.translate.model.TranslateKey
+import io.stereov.singularity.translate.service.TranslateService
 import org.springframework.stereotype.Service
-import software.amazon.awssdk.identity.spi.IdentityProvider
-import java.time.Duration
 import java.time.Instant
 import java.util.*
 
+/**
+ * A service responsible for handling email-based authentication operations, including
+ * sending and validating two-factor authentication (2FA) codes, enabling and disabling
+ * email-based 2FA, and sending authentication-related emails.
+ *
+ * The service integrates with user management, email delivery, and caching components
+ * to provide secure and localized email-based authentication functionalities. This class
+ * is designed to handle exceptions and return structured results for each operation.
+ */
 @Service
 class EmailAuthenticationService(
     private val twoFactorEmailCodeProperties: TwoFactorEmailCodeProperties,
     private val userService: UserService,
     private val translateService: TranslateService,
     private val templateService: TemplateService,
-    private val redisTemplate: ReactiveRedisTemplate<String, String>,
+    override val cacheService: CacheService,
     private val emailService: EmailService,
-    private val emailProperties: EmailProperties,
-    private val authorizationService: AuthorizationService,
+    override val emailProperties: EmailProperties,
     private val accessTokenCache: AccessTokenCache,
     private val appProperties: AppProperties,
     private val securityAlertProperties: SecurityAlertProperties,
     private val securityAlertService: SecurityAlertService
-) {
+) : CooldownEmailService {
 
-    private val logger = KotlinLogging.logger {}
+    override val logger = KotlinLogging.logger {}
+    override val slug = "email_authentication"
 
-    suspend fun sendMail(user: User, locale: Locale?) {
+    /**
+     * Sends an authentication email with a generated verification code to the specified user.
+     *
+     * @param user The user to whom the authentication email will be sent.
+     * @param locale Optional locale to customize the email's language and content. If null, a default locale is used.
+     * @return A [Result] encapsulating either success (Unit) or a [SendEmailAuthenticationException] if an error occurred.
+     */
+    suspend fun sendMail(
+        user: User,
+        locale: Locale?
+    ): Result<Long, SendEmailAuthenticationException> = coroutineBinding {
         logger.debug { "Generating new code and sending email" }
 
         val code = Random.generateInt().getOrThrow()
@@ -64,33 +77,75 @@ class EmailAuthenticationService(
         user.sensitive.security.twoFactor.email.expiresAt = Instant.now().plusSeconds(twoFactorEmailCodeProperties.expiresIn)
 
         userService.save(user)
+            .mapError { ex -> SendEmailAuthenticationException.Database("Failed to save user: ${ex.message}", ex) }
+            .bind()
 
-        sendAuthenticationEmail(user, code, locale)
+        sendAuthenticationEmail(user, code, locale).bind()
     }
 
-    suspend fun validateCode(user: User, code: String): User {
+    /**
+     * Validates a two-factor authentication (2FA) code for the specified user.
+     *
+     * @param user The user for whom the 2FA code is being validated.
+     * @param code The 2FA code to validate.
+     * @return A [Result] wrapping the validated [User] on success or a [ValidateTwoFactorException] on failure.
+     */
+    suspend fun validateCode(
+        user: User,
+        code: String
+    ): Result<User, ValidateTwoFactorException> = coroutineBinding {
         logger.debug { "Validating 2FA code" }
 
-        if (!user.sensitive.security.twoFactor.email.enabled)
-            throw TwoFactorMethodDisabledException(TwoFactorMethod.EMAIL)
+        if (!user.sensitive.security.twoFactor.email.enabled) {
+            Err(ValidateTwoFactorException.TwoFactorDisabled("Cannot validate code: 2FA method is disabled"))
+                .bind()
+        }
 
         doValidateCode(user, code)
+            .mapError { ex -> ValidateTwoFactorException.fromValidateEmailTwoFactorCode(ex) }
+            .bind()
 
-        return userService.save(user)
+        user.sensitive.security.twoFactor.email.code = Random.generateInt().getOrThrow()
+        user.sensitive.security.twoFactor.email.expiresAt = Instant.now().plusSeconds(twoFactorEmailCodeProperties.expiresIn)
+
+        userService.save(user)
+            .mapError { ex -> when (ex) {
+                is SaveEncryptedDocumentException.PostCommitSideEffect ->
+                    ValidateTwoFactorException.PostCommitSideEffect("Failed to decrypt user after successful commit: ${ex.message}", ex)
+                else -> ValidateTwoFactorException.Database("Failed to save user: ${ex.message}", ex)
+            } }
+            .bind()
     }
 
-    suspend fun sendAuthenticationEmail(user: User, code: String, locale: Locale?) {
+    /**
+     * Sends an authentication email to the specified user with a verification code.
+     * Optionally considers a locale for email content localization.
+     *
+     * @param user The user to whom the authentication email will be sent.
+     * @param code The verification code to include in the email.
+     * @param locale The locale to use for email content localization, or null to use the application default.
+     * @return A [Result] type wrapping a [Unit] on success or a [SendEmailAuthenticationException] on failure.
+     */
+    suspend fun sendAuthenticationEmail(
+        user: User,
+        code: String,
+        locale: Locale?
+    ): Result<Long, SendEmailAuthenticationException> = coroutineBinding {
         logger.debug { "Sending verification email to ${user.sensitive.email}" }
 
-        val userId = user.id
         val actualLocale = locale ?: appProperties.locale
 
-        if (!user.sensitive.identities.contains(IdentityProvider.PASSWORD))
-            throw WrongIdentityProviderException("Cannot enable email as 2FA method: password authentication required")
+        if (user.sensitive.identities.password == null) {
+            Err(SendEmailAuthenticationException.NoPasswordSet("Cannot send email authentication: user did not set up authentication using a password."))
+                .bind()
+        }
 
-        val remainingCooldown = getRemainingCooldown(userId)
-        if (remainingCooldown > 0) {
-            throw EmailCooldownException(remainingCooldown)
+        val remainingCooldown = getRemainingCooldown(user.email)
+            .mapError { ex -> SendEmailAuthenticationException.CooldownCache("Failed to get remaining cooldown: ${ex.message}", ex) }
+            .bind()
+        if (remainingCooldown.seconds > 0) {
+            Err(SendEmailAuthenticationException.CooldownActive("Cannot send email authentication: cooldown is still active"))
+                .bind()
         }
 
         val slug = "email_authentication"
@@ -106,65 +161,93 @@ class EmailAuthenticationService(
                 "code" to code
             )))
             .build()
+            .mapError { ex -> SendEmailAuthenticationException.Template("Failed to create template for email authentication: ${ex.message}", ex)    }
+            .bind()
 
-        emailService.sendEmail(user.requireNotGuestAndGetEmail(), subject, content, actualLocale)
-        startCooldown(userId)
+        emailService.sendEmail(user.email, subject, content, actualLocale)
+            .mapError { when (it) {
+                is EmailException.Send -> SendEmailAuthenticationException.Send("Failed to send verification email: ${it.message}", it)
+                is EmailException.Disabled -> SendEmailAuthenticationException.EmailDisabled(it.message)
+                is EmailException.Template -> SendEmailAuthenticationException.Template("Failed to create template for verification email: ${it.message}", it)
+                is EmailException.Authentication -> SendEmailAuthenticationException.EmailAuthentication("Failed to send verification email due to an authentication failure: ${it.message}", it)
+            } }
+
+        startCooldown(user.email)
+            .mapError { ex -> SendEmailAuthenticationException.PostCommitSideEffect("Failed to start cooldown: ${ex.message}", ex) }
+            .bind()
     }
 
-    suspend fun getRemainingCooldown(userId: ObjectId): Long {
-        logger.debug { "Getting remaining cooldown for email authentication" }
-
-        val key = "email-authentication-cooldown:$userId"
-        val remainingTtl = redisTemplate.getExpire(key).awaitSingleOrNull() ?: Duration.ofSeconds(-1)
-
-        return if (remainingTtl.seconds > 0) remainingTtl.seconds else 0
-    }
-
-    private suspend fun doValidateCode(user: User, code: String) {
+    private suspend fun doValidateCode(user: User, code: String): Result<Unit, ValidateEmailTwoFactorCodeException> {
         val details = user.sensitive.security.twoFactor.email
 
-        if (details.expiresAt.isBefore(Instant.now()))
-            throw TwoFactorCodeExpiredException("The code is expired. Please request a new email.")
-        if (details.code != code)
-            throw InvalidTwoFactorCodeException("Wrong code.")
+        if (details.expiresAt.isBefore(Instant.now())) {
+            return Err(ValidateEmailTwoFactorCodeException.Expired("The code is expired. Please request a new email."))
+        }
+        if (details.code != code) {
+            return Err(ValidateEmailTwoFactorCodeException.WrongCode("The code is invalid."))
+        }
 
-        details.code = Random.generateInt()
-        details.expiresAt = Instant.now().plusSeconds(twoFactorEmailCodeProperties.expiresIn)
+        return Ok(Unit)
     }
 
-    private suspend fun startCooldown(userId: ObjectId): Boolean {
-        logger.debug { "Starting cooldown for email authentication" }
-
-        val key = "email-authentication-cooldown:$userId"
-        val isNewKey = redisTemplate.opsForValue()
-            .setIfAbsent(key, "1", Duration.ofSeconds(emailProperties.sendCooldown))
-            .awaitSingleOrNull()
-            ?: false
-
-        return isNewKey
-    }
-
-    suspend fun enable(req: EnableEmailTwoFactorMethodRequest, locale: Locale?): User {
+    /**
+     * Enables email as a two-factor authentication (2FA) method for a user.
+     *
+     * This method ensures the user meets the prerequisites for enabling email-based 2FA,
+     * such as having a password and the method not already being enabled. It validates
+     * the provided two-factor authentication code, updates the user's configuration to
+     * enable email 2FA, saves the updated user information, invalidates any existing
+     * access tokens, and optionally sends a security alert if configured.
+     *
+     * @param req the request containing the code necessary to enable email as a 2FA method
+     * @param user the user object for whom email 2FA is to be enabled
+     * @param locale an optional locale for localized operations, such as sending security alerts
+     * @return a [Result] containing the updated [User] object if successful, or
+     *   an [EnableEmailAuthenticationException] if an error occurs during the process
+     */
+    suspend fun enable(
+        req: EnableEmailTwoFactorMethodRequest,
+        user: User,
+        locale: Locale?
+    ): Result<User, EnableEmailAuthenticationException> = coroutineBinding {
         logger.debug { "Enabling email as 2FA method" }
 
-        val user = authorizationService.getUser()
-        authorizationService.requireStepUp()
+        if (user.sensitive.identities.password == null) {
+            Err(EnableEmailAuthenticationException.NoPasswordSet("Cannot enable email as 2FA method: user did not set up authentication using a password."))
+                .bind()
+        }
 
-        if (!user.sensitive.identities.contains(IdentityProvider.PASSWORD))
-            throw WrongIdentityProviderException("Cannot enable email as 2FA method: password authentication required")
-
-        if (user.sensitive.security.twoFactor.email.enabled)
-            throw TwoFactorMethodAlreadyEnabledException("Mail is already enabled as 2FA method")
+        if (user.sensitive.security.twoFactor.email.enabled) {
+            Err(EnableEmailAuthenticationException.AlreadyEnabled("Cannot enable email as 2FA method: method is already enabled."))
+                .bind()
+        }
 
         doValidateCode(user, req.code)
+            .mapError { ex -> EnableEmailAuthenticationException.fromValidateEmailTwoFactorCode(ex) }
+            .bind()
 
+        user.sensitive.security.twoFactor.email.code = Random.generateInt().getOrThrow()
+        user.sensitive.security.twoFactor.email.expiresAt = Instant.now().plusSeconds(twoFactorEmailCodeProperties.expiresIn)
         user.sensitive.security.twoFactor.email.enabled = true
 
-        if (user.twoFactorMethods.size == 1)
+        if (user.twoFactorMethods.size == 1) {
             user.sensitive.security.twoFactor.preferred = TwoFactorMethod.EMAIL
+        }
 
         val savedUser = userService.save(user)
-        accessTokenCache.invalidateAllTokens(user.id)
+            .mapError { ex -> when (ex) {
+                is SaveEncryptedDocumentException.PostCommitSideEffect -> EnableEmailAuthenticationException.PostCommitSideEffect("Failed to decrypt user after successful commit: ${ex.message}", ex)
+                else -> EnableEmailAuthenticationException.Database("Failed to save user: ${ex.message}", ex)
+            } }
+            .bind()
+
+        user.id
+            .andThen { userId ->
+                accessTokenCache.invalidateAllTokens(userId)
+                    .mapError { ex -> EnableEmailAuthenticationException.PostCommitSideEffect("Failed to invalidate all tokens: ${ex.message}", ex) }
+            }
+            .mapError { ex -> EnableEmailAuthenticationException.PostCommitSideEffect("Failed to invalidate all tokens: ${ex.message}", ex) }
+            .bind()
 
         if (securityAlertProperties.twoFactorAdded  && emailProperties.enable) {
             securityAlertService.sendTwoFactorAdded(
@@ -172,36 +255,57 @@ class EmailAuthenticationService(
                 twoFactorMethod = TwoFactorMethod.EMAIL,
                 locale
             )
+                .mapError { ex -> EnableEmailAuthenticationException.PostCommitSideEffect("Failed to send security alert: ${ex.message}", ex) }
+                .bind()
         }
 
-        return savedUser
+        savedUser
     }
 
-    suspend fun disable(locale: Locale?): User {
+    /**
+     * Disables email as a two-factor authentication (2FA) method for a given user.
+     *
+     * @param user The user for whom the email 2FA method is being disabled.
+     * @param locale The preferred locale used to send notifications, if applicable. Can be null.
+     * @return A [Result] object containing the updated [User] if the operation succeeds,
+     *  or a [DisableEmailAuthenticationException] if an error occurs during the process.
+     */
+    suspend fun disable(
+        user: User,
+        locale: Locale?
+    ): Result<User, DisableEmailAuthenticationException> = coroutineBinding {
         logger.debug { "Disabling email as 2FA method" }
 
-        val user = authorizationService.getUser()
-        authorizationService.requireStepUp()
+        if (!user.sensitive.security.twoFactor.email.enabled) {
+            Err(DisableEmailAuthenticationException.AlreadyDisabled("Cannot disable email as 2FA method: method is already disabled."))
+                .bind()
+        }
 
-        if (!user.sensitive.security.twoFactor.email.enabled)
-            throw TwoFactorMethodDisabledException(TwoFactorMethod.EMAIL)
-
-        if (user.twoFactorMethods.size == 1 && user.sensitive.security.twoFactor.email.enabled)
-            throw CannotDisableOnly2FAMethodException("Failed to disable email: it not allowed to disable the only configured 2FA method.")
+        if (user.twoFactorMethods.size == 1 && user.sensitive.security.twoFactor.email.enabled) {
+            Err(DisableEmailAuthenticationException.CannotDisableOnlyTwoFactorMethod("Cannot disable email as 2FA method: it is the only configured 2FA method."))
+                .bind()
+        }
 
         user.sensitive.security.twoFactor.email.enabled = false
 
         val savedUser = userService.save(user)
+            .mapError { ex -> when (ex) {
+                is SaveEncryptedDocumentException.PostCommitSideEffect -> DisableEmailAuthenticationException.PostCommitSideEffect("Failed to decrypt user after successful commit: ${ex.message}", ex)
+                else -> DisableEmailAuthenticationException.Database("Failed to save user: ${ex.message}", ex)
+            }}
+            .bind()
+
         if (securityAlertProperties.twoFactorRemoved && emailProperties.enable) {
             securityAlertService.sendTwoFactorRemoved(
                 user,
+                twoFactorMethod = TwoFactorMethod.EMAIL,
                 locale,
-                SecurityAlertType.TWO_FACTOR_REMOVED,
-                twoFactorMethod = TwoFactorMethod.EMAIL
             )
+                .mapError { ex -> DisableEmailAuthenticationException.PostCommitSideEffect("Failed to send security alert: ${ex.message}", ex) }
+                .bind()
         }
 
-        return savedUser
+        savedUser
     }
 
 }

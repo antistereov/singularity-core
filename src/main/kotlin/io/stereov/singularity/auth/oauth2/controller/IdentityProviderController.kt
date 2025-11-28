@@ -1,13 +1,23 @@
 package io.stereov.singularity.auth.oauth2.controller
 
+import com.github.michaelbull.result.getOrThrow
 import io.stereov.singularity.auth.core.dto.response.IdentityProviderResponse
+import io.stereov.singularity.auth.core.exception.AuthenticationException
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.oauth2.dto.request.AddPasswordAuthenticationRequest
+import io.stereov.singularity.auth.oauth2.exception.DisconnectProviderException
+import io.stereov.singularity.auth.oauth2.exception.SetPasswordException
 import io.stereov.singularity.auth.oauth2.service.IdentityProviderService
-import io.stereov.singularity.global.model.ErrorResponse
+import io.stereov.singularity.auth.token.exception.AccessTokenExtractionException
+import io.stereov.singularity.auth.token.exception.StepUpTokenExtractionException
+import io.stereov.singularity.database.encryption.exception.FindEncryptedDocumentByIdException
+import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.principal.core.dto.response.UserResponse
+import io.stereov.singularity.principal.core.exception.PrincipalMapperException
 import io.stereov.singularity.principal.core.mapper.PrincipalMapper
+import io.stereov.singularity.principal.core.model.identity.UserIdentity
+import io.stereov.singularity.principal.core.service.UserService
 import io.swagger.v3.oas.annotations.ExternalDocumentation
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -19,6 +29,7 @@ import jakarta.validation.Valid
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.server.ServerWebExchange
 import java.util.*
 
 @RestController
@@ -29,6 +40,7 @@ class IdentityProviderController(
     private val identityProviderService: IdentityProviderService,
     private val authorizationService: AuthorizationService,
     private val principalMapper: PrincipalMapper,
+    private val userService: UserService,
 ) {
 
     @GetMapping("me/providers")
@@ -52,17 +64,32 @@ class IdentityProviderController(
             ApiResponse(
                 responseCode = "200",
                 description = "The list of identity providers.",
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "Invalid `AccessToken`.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
     )
+    @ThrowsDomainError([
+        AccessTokenExtractionException::class,
+        AuthenticationException.AuthenticationRequired::class,
+        FindEncryptedDocumentByIdException::class,
+    ])
     suspend fun getIdentityProviders(): ResponseEntity<List<IdentityProviderResponse>> {
-        val identityProviders = authorizationService.getUser().sensitive.identities
+        val userId = authorizationService.getAuthenticationOutcome()
+            .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
+            .requireAuthentication()
+            .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it } }
+            .principalId
+
+        val user = userService.findById(userId)
+            .getOrThrow { when (it) { is FindEncryptedDocumentByIdException -> it } }
+
+        val identityProviders = user.sensitive.identities.providers
             .map { IdentityProviderResponse(it.key) }
+            .toMutableList()
+            .apply {
+                if (user.sensitive.identities.password != null) {
+                    add(IdentityProviderResponse(UserIdentity.PASSWORD_IDENTITY))
+                }
+            }
 
         return ResponseEntity.ok(identityProviders)
     }
@@ -95,28 +122,39 @@ class IdentityProviderController(
                 responseCode = "200",
                 description = "Success.",
                 content = [Content(schema = Schema(implementation = UserResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "304",
-                description = "User already created a password identity.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "400",
-                description = "Guests are not allowed to add a password identity this way. They need to be converted to users.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "Invalid `AccessToken` or `StepUpToken`.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
+            )
         ]
     )
-    suspend fun addPasswordAuthentication(@RequestBody @Valid req: AddPasswordAuthenticationRequest): ResponseEntity<UserResponse> {
-        val user = identityProviderService.connect(req)
+    @ThrowsDomainError([
+        AccessTokenExtractionException::class,
+        AuthenticationException.AuthenticationRequired::class,
+        StepUpTokenExtractionException::class,
+        FindEncryptedDocumentByIdException::class,
+        SetPasswordException::class,
+        PrincipalMapperException::class
+    ])
+    suspend fun addPasswordAuthentication(
+        @RequestBody @Valid req: AddPasswordAuthenticationRequest,
+        exchange: ServerWebExchange
+    ): ResponseEntity<UserResponse> {
+        val authentication = authorizationService.getAuthenticationOutcome()
+            .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
+            .requireAuthentication()
+            .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it } }
 
-        return ResponseEntity.ok(principalMapper.toResponse(user))
+        authorizationService.requireStepUp(authentication, exchange)
+            .getOrThrow { when (it) { is StepUpTokenExtractionException -> it } }
+
+        var user = userService.findById(authentication.principalId)
+            .getOrThrow { when (it) { is FindEncryptedDocumentByIdException -> it } }
+
+        user = identityProviderService.setPassword(req, user)
+            .getOrThrow { when (it) { is SetPasswordException -> it } }
+
+        val response = principalMapper.toResponse(user)
+            .getOrThrow { when (it) { is PrincipalMapperException -> it } }
+
+        return ResponseEntity.ok(response)
     }
 
     @DeleteMapping("me/providers/{provider}")
@@ -150,29 +188,38 @@ class IdentityProviderController(
                 description = "Success.",
                 content = [Content(schema = Schema(implementation = UserResponse::class))]
             ),
-            ApiResponse(
-                responseCode = "400",
-                description = "Deleting the password identity or the only registered identity is forbidden.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "Invalid `AccessToken` or `StepUpToken`.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "404",
-                description = "The requested provider is not connected.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
         ]
     )
+    @ThrowsDomainError([
+        AccessTokenExtractionException::class,
+        AuthenticationException.AuthenticationRequired::class,
+        StepUpTokenExtractionException::class,
+        FindEncryptedDocumentByIdException::class,
+        DisconnectProviderException::class,
+        PrincipalMapperException::class
+    ])
     suspend fun deleteIdentityProvider(
         @PathVariable provider: String,
-        @RequestParam locale: Locale?
+        @RequestParam locale: Locale?,
+        exchange: ServerWebExchange
     ): ResponseEntity<UserResponse> {
-        val user = identityProviderService.disconnect(provider, locale)
+        val authentication = authorizationService.getAuthenticationOutcome()
+            .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
+            .requireAuthentication()
+            .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it } }
 
-        return ResponseEntity.ok(principalMapper.toResponse(user))
+        authorizationService.requireStepUp(authentication, exchange)
+            .getOrThrow { when (it) { is StepUpTokenExtractionException -> it } }
+
+        var user = userService.findById(authentication.principalId)
+            .getOrThrow { when (it) { is FindEncryptedDocumentByIdException -> it } }
+
+        user = identityProviderService.disconnect(provider, user, locale)
+            .getOrThrow { when (it) { is DisconnectProviderException -> it } }
+
+        val response = principalMapper.toResponse(user)
+            .getOrThrow { when (it) { is PrincipalMapperException -> it } }
+
+        return ResponseEntity.ok(response)
     }
 }

@@ -1,7 +1,7 @@
 package io.stereov.singularity.translate.service
 
 import com.github.michaelbull.result.Result
-import io.stereov.singularity.database.core.exception.DatabaseException
+import io.stereov.singularity.database.core.exception.FindAllDocumentsPaginatedException
 import io.stereov.singularity.database.core.service.CrudService
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.translate.model.Translatable
@@ -35,13 +35,13 @@ interface TranslatableCrudService<C: Any, T: Translatable<C>> : CrudService<T> {
      * @param pageable Configuration for pagination and sorting.
      * @param criteria Optional criteria used to filter the entities.
      * @param locale The locale to be used for resolving field translations. If not provided, a default locale is applied.
-     * @return A [Result] containing the paginated [Page] of entities or a [DatabaseException.Database] in case of an error.
+     * @return A [Result] containing the paginated [Page] of entities or a [FindAllDocumentsPaginatedException] in case of an error.
      */
     suspend fun findAllPaginated(
         pageable: Pageable,
         criteria: Criteria? = null,
         locale: Locale?
-    ): Result<Page<T>, DatabaseException.Database> {
+    ): Result<Page<T>, FindAllDocumentsPaginatedException> {
 
         val actualLocale = locale ?: appProperties.locale
         val actualPageable = pageable.withLocalizedSort(actualLocale, fieldNames)
