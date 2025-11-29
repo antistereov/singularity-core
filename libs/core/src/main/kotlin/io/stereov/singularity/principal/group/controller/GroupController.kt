@@ -5,6 +5,8 @@ import io.stereov.singularity.auth.core.exception.AuthenticationException
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.token.exception.AccessTokenExtractionException
 import io.stereov.singularity.database.core.exception.DatabaseException
+import io.stereov.singularity.database.core.exception.FindAllDocumentsPaginatedException
+import io.stereov.singularity.database.core.exception.FindDocumentByKeyException
 import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.global.model.PageableRequest
@@ -15,7 +17,6 @@ import io.stereov.singularity.principal.group.dto.request.UpdateGroupRequest
 import io.stereov.singularity.principal.group.dto.response.GroupResponse
 import io.stereov.singularity.principal.group.exception.CreateGroupException
 import io.stereov.singularity.principal.group.exception.DeleteGroupByKeyException
-import io.stereov.singularity.principal.group.exception.FindGroupByKeyException
 import io.stereov.singularity.principal.group.exception.UpdateGroupException
 import io.stereov.singularity.principal.group.mapper.GroupMapper
 import io.stereov.singularity.principal.group.service.GroupService
@@ -162,7 +163,7 @@ class GroupController(
             .getOrThrow { when (it) { is AuthenticationException.RoleRequired -> it } }
 
         val pages = service.findAllPaginated(PageableRequest(page, size, sort).toPageable(), locale = locale)
-            .getOrThrow { when (it) { is DatabaseException.Database -> it } }
+            .getOrThrow { when (it) { is FindAllDocumentsPaginatedException -> it } }
         val responses = pages.content.map { group ->
             groupMapper.createGroupResponse(group, locale)
                 .getOrThrow { when (it) { is TranslateException.NoTranslations -> it } }
@@ -212,7 +213,7 @@ class GroupController(
         AccessTokenExtractionException::class,
         AuthenticationException.AuthenticationRequired::class,
         AuthenticationException.RoleRequired::class,
-        FindGroupByKeyException::class,
+        FindDocumentByKeyException::class,
         TranslateException.NoTranslations::class,
     ])
     suspend fun getGroupByKey(
@@ -227,7 +228,7 @@ class GroupController(
             .getOrThrow { when (it) { is AuthenticationException.RoleRequired -> it } }
 
         val group = service.findByKey(key)
-            .getOrThrow { when (it) { is FindGroupByKeyException -> it } }
+            .getOrThrow { when (it) { is FindDocumentByKeyException -> it } }
         val response = groupMapper.createGroupResponse(group, locale)
             .getOrThrow { when (it) { is TranslateException.NoTranslations -> it } }
 
@@ -338,7 +339,7 @@ class GroupController(
             .requireRole(Role.User.ADMIN)
             .getOrThrow { when (it) { is AuthenticationException.RoleRequired -> it } }
 
-        service.deleteByKey(key)
+        service.deleteByKeyAndUpdateMembers(key)
             .getOrThrow { when (it) { is DeleteGroupByKeyException -> it } }
         return ResponseEntity.ok(SuccessResponse())
     }

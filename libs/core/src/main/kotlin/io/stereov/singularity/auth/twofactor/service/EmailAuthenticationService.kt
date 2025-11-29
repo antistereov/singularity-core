@@ -12,7 +12,6 @@ import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties
 import io.stereov.singularity.cache.service.CacheService
 import io.stereov.singularity.database.encryption.exception.SaveEncryptedDocumentException
-import io.stereov.singularity.email.core.exception.EmailException
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.email.core.service.CooldownEmailService
 import io.stereov.singularity.email.core.service.EmailService
@@ -97,7 +96,7 @@ class EmailAuthenticationService(
         logger.debug { "Validating 2FA code" }
 
         if (!user.sensitive.security.twoFactor.email.enabled) {
-            Err(ValidateTwoFactorException.TwoFactorDisabled("Cannot validate code: 2FA method is disabled"))
+            Err(ValidateTwoFactorException.TwoFactorAuthenticationDisabled("Cannot validate code: 2FA method is disabled"))
                 .bind()
         }
 
@@ -165,12 +164,7 @@ class EmailAuthenticationService(
             .bind()
 
         emailService.sendEmail(user.email, subject, content, actualLocale)
-            .mapError { when (it) {
-                is EmailException.Send -> SendEmailAuthenticationException.Send("Failed to send verification email: ${it.message}", it)
-                is EmailException.Disabled -> SendEmailAuthenticationException.EmailDisabled(it.message)
-                is EmailException.Template -> SendEmailAuthenticationException.Template("Failed to create template for verification email: ${it.message}", it)
-                is EmailException.Authentication -> SendEmailAuthenticationException.EmailAuthentication("Failed to send verification email due to an authentication failure: ${it.message}", it)
-            } }
+            .mapError { SendEmailAuthenticationException.from(it) }
 
         startCooldown(user.email)
             .mapError { ex -> SendEmailAuthenticationException.PostCommitSideEffect("Failed to start cooldown: ${ex.message}", ex) }

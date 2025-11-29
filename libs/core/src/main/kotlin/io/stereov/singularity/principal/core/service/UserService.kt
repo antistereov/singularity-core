@@ -105,11 +105,11 @@ class UserService(
         logger.debug { "Fetching user with email $email" }
 
         val hashedEmail = hashService.hashSearchableHmacSha256(email)
-            .mapError { ex -> FindUserByEmailException.HashFailure("Failed to hash email $email: ${ex.message}", ex) }
+            .mapError { ex -> FindUserByEmailException.Hash("Failed to hash email $email: ${ex.message}", ex) }
             .bind()
         val encrypted =  runSuspendCatching { repository.findByEmail(hashedEmail) }
             .mapError { ex -> FindUserByEmailException.Database("Failed to find user by email: ${ex.message}", ex) }
-            .flatMap { it.toResultOr { FindUserByEmailException.NotFound("No user found with email $email") } }
+            .flatMap { it.toResultOr { FindUserByEmailException.UserNotFound("No user found with email $email") } }
             .bind()
 
         decrypt(encrypted)
@@ -152,7 +152,7 @@ class UserService(
         logger.debug { "Finding user by principal ID $principalId and provider $provider" }
 
         val hashedPrincipalId = hashService.hashSearchableHmacSha256(principalId)
-            .mapError { ex -> FindUserByProviderIdentityException.HashFailure("Failed to hash principal ID $principalId: ${ex.message}", ex) }
+            .mapError { ex -> FindUserByProviderIdentityException.Hash("Failed to hash principal ID $principalId: ${ex.message}", ex) }
             .bind()
         val user = runSuspendCatching { repository.findByIdentity(provider, hashedPrincipalId) }
             .mapError { ex -> FindUserByProviderIdentityException.Database("Failed to find user by provider identity: ${ex.message}", ex) }

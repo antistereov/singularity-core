@@ -79,7 +79,7 @@ class AuthenticationService(
 
         val user = userService.findByEmail(payload.email)
             .mapError { when (it) {
-                is FindUserByEmailException.NotFound -> LoginException.InvalidCredentials("Login failed: invalid credentials")
+                is FindUserByEmailException.UserNotFound -> LoginException.InvalidCredentials("Login failed: invalid credentials")
                 else -> LoginException.Database("Login failed: database failure", it)
             } }
             .bind()
@@ -129,7 +129,7 @@ class AuthenticationService(
 
         val user = userService.findByEmail(payload.email)
             .recoverIf(
-                { it is FindUserByEmailException.NotFound },
+                { it is FindUserByEmailException.UserNotFound },
                 { null }
             )
             .mapError { ex -> RegisterException.Database("Registration failed: database failure", ex) }

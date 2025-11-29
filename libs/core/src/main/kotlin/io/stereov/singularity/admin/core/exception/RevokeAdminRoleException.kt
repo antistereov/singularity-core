@@ -1,5 +1,7 @@
 package io.stereov.singularity.admin.core.exception
 
+import io.stereov.singularity.database.core.exception.DatabaseFailure
+import io.stereov.singularity.database.core.exception.PostCommitSideEffectFailure
 import io.stereov.singularity.database.encryption.exception.SaveEncryptedDocumentException
 import io.stereov.singularity.global.exception.SingularityException
 import org.springframework.http.HttpStatus
@@ -28,14 +30,13 @@ sealed class RevokeAdminRoleException(
      * @param msg The error message providing details about the failure.
      * @param cause The underlying cause of this exception, if any.
      *
-     * @property code `DATABASE_FAILURE`
-     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
+     * @see DatabaseFailure
      */
     class Database(msg: String, cause: Throwable? = null) : RevokeAdminRoleException(
         msg,
-        "DATABASE_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Exception thrown when an encrypted database operation fails.",
+        DatabaseFailure.CODE,
+        DatabaseFailure.STATUS,
+        DatabaseFailure.DESCRIPTION,
         cause
     )
 
@@ -49,16 +50,15 @@ sealed class RevokeAdminRoleException(
      * @param msg A message providing details about the specific failure.
      * @param cause The underlying cause of this exception, if available.
      *
-     * @property code `POST_COMMIT_SIDE_EFFECT_FAILURE`
-     * @property status [HttpStatus.MULTI_STATUS]
+     * @see PostCommitSideEffect
      *
      * @see SaveEncryptedDocumentException.PostCommitSideEffect
      */
     class PostCommitSideEffect(msg: String, cause: Throwable? = null) : RevokeAdminRoleException(
         msg,
-        "POST_COMMIT_SIDE_EFFECT_FAILURE",
-        HttpStatus.MULTI_STATUS,
-        "Exception thrown when a post-commit side effect fails.",
+        PostCommitSideEffectFailure.CODE,
+        PostCommitSideEffectFailure.STATUS,
+        PostCommitSideEffectFailure.DESCRIPTION,
         cause
     )
 }

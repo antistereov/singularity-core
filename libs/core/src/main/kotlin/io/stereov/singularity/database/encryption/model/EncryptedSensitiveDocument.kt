@@ -1,5 +1,6 @@
 package io.stereov.singularity.database.encryption.model
 
+import io.stereov.singularity.database.core.model.WithId
 import org.bson.types.ObjectId
 
 /**
@@ -13,8 +14,8 @@ import org.bson.types.ObjectId
  * @property _id The unique identifier for the document, represented as an optional `ObjectId`.
  * @property sensitive The encrypted sensitive data contained in the document, represented as an `Encrypted` object.
  */
-interface EncryptedSensitiveDocument<T> {
+interface EncryptedSensitiveDocument<T> : WithId {
 
-    val _id: ObjectId?
+    override val _id: ObjectId?
     val sensitive: Encrypted<T>
 }

@@ -1,14 +1,17 @@
 package io.stereov.singularity.content.article.controller
 
+import com.github.michaelbull.result.getOrThrow
+import io.stereov.singularity.auth.core.service.AuthorizationService
+import io.stereov.singularity.auth.token.exception.AccessTokenExtractionException
 import io.stereov.singularity.content.article.dto.response.ArticleOverviewResponse
 import io.stereov.singularity.content.article.dto.response.FullArticleResponse
+import io.stereov.singularity.content.article.exception.GetArticleResponseByKeyException
+import io.stereov.singularity.content.article.exception.GetArticleResponsesException
 import io.stereov.singularity.content.article.service.ArticleService
-import io.stereov.singularity.global.model.ErrorResponse
+import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.PageableRequest
 import io.swagger.v3.oas.annotations.ExternalDocumentation
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.media.Content
-import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -24,6 +27,7 @@ import java.util.*
 @ConditionalOnProperty(prefix = "singularity.content.articles", value = ["enable"], havingValue = "true", matchIfMissing = true)
 class ArticleController(
     private val service: ArticleService,
+    private val authorizationService: AuthorizationService,
 ) {
 
     @GetMapping("/{key}")
@@ -50,27 +54,23 @@ class ArticleController(
                 responseCode = "200",
                 description = "The metadata of the file with `key`.",
             ),
-            ApiResponse(
-                responseCode = "403",
-                description = "`AccessToken` does not belong to a user with " +
-                        "[`EDITOR`](https://singularity.stereov.io/docs/guides/content/introduction#object-specific-roles-shared-state) " +
-                        "access on this article.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "404",
-                description = "No article with given key exists.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
         ]
     )
+    @ThrowsDomainError([
+        AccessTokenExtractionException::class,
+        GetArticleResponseByKeyException::class
+    ])
     suspend fun getArticleByKey(
         @PathVariable key: String,
         @RequestParam locale: Locale?
     ): ResponseEntity<FullArticleResponse> {
-        return ResponseEntity.ok(
-            service.getResponseByKey(key, locale)
-        )
+        val authenticationOutcome = authorizationService.getAuthenticationOutcome()
+            .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
+
+        val response = service.getResponseByKey(key, authenticationOutcome, locale)
+            .getOrThrow { when (it) { is GetArticleResponseByKeyException -> it } }
+
+        return ResponseEntity.ok(response)
     }
 
     @GetMapping
@@ -99,6 +99,10 @@ class ArticleController(
             )
         ]
     )
+    @ThrowsDomainError([
+        AccessTokenExtractionException::class,
+        GetArticleResponsesException::class
+    ])
     suspend fun getArticles(
         @RequestParam page: Int = 0,
         @RequestParam size: Int = 10,
@@ -116,8 +120,12 @@ class ArticleController(
         @RequestParam publishedAtAfter: Instant?,
         @RequestParam locale: Locale?,
     ): ResponseEntity<Page<ArticleOverviewResponse>> {
-        return ResponseEntity.ok(service.getArticles(
+        val authenticationOutcome = authorizationService.getAuthenticationOutcome()
+            .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
+
+        val response = service.getArticles(
             PageableRequest(page, size, sort).toPageable(),
+            authenticationOutcome,
             title,
             content,
             state,
@@ -130,6 +138,8 @@ class ArticleController(
             publishedAtBefore,
             publishedAtAfter,
             locale
-        ))
+        ).getOrThrow { when (it) { is GetArticleResponsesException -> it } }
+
+        return ResponseEntity.ok(response)
     }
 }

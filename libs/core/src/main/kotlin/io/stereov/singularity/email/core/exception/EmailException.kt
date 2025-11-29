@@ -29,14 +29,13 @@ sealed class EmailException(
      * @param msg The error message describing the exception.
      * @param cause The underlying cause of the exception, if any.
      *
-     * @property code `EMAIL_DISABLED`
-     * @property status [HttpStatus.SERVICE_UNAVAILABLE]
+     * @see EmailDisabledFailure
      */
     class Disabled(msg: String, cause: Throwable? = null) : EmailException(
         msg,
-        "EMAIL_DISABLED",
-        HttpStatus.SERVICE_UNAVAILABLE,
-        "Thrown when email functionality is disabled in the application.",
+        EmailDisabledFailure.CODE,
+        EmailDisabledFailure.STATUS,
+        EmailDisabledFailure.DESCRIPTION,
         cause
     )
 
@@ -48,14 +47,13 @@ sealed class EmailException(
      * @param msg The error message describing the exception.
      * @param cause The underlying cause of the exception, if any.
      *
-     * @property code `EMAIL_TEMPLATE_FAILURE`
-     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
+     * @see EmailTemplateFailure
      */
     class Template(msg: String, cause: Throwable? = null): EmailException(
         msg,
-        "EMAIL_TEMPLATE_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Thrown when there is a failure related to email template creation.",
+        EmailTemplateFailure.CODE,
+        EmailTemplateFailure.STATUS,
+        EmailTemplateFailure.DESCRIPTION,
         cause
     )
 
@@ -67,14 +65,13 @@ sealed class EmailException(
      * @param msg The error message describing the exception.
      * @param cause The underlying cause of the exception, if any.
      *
-     * @property code `EMAIL_AUTHENTICATION_FAILURE`
-     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
+     * @see EmailAuthenticationFailure
      */
     class Authentication(msg: String, cause: Throwable? = null): EmailException(
         msg,
-        "EMAIL_AUTHENTICATION_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Thrown when there is a failure related to email authentication.",
+        EmailAuthenticationFailure.CODE,
+        EmailAuthenticationFailure.STATUS,
+        EmailAuthenticationFailure.DESCRIPTION,
         cause
     )
 
@@ -86,14 +83,15 @@ sealed class EmailException(
      * @param msg The error message describing the issue.
      * @param cause The underlying cause of the exception, if any.
      *
-     * @property code `EMAIL_SEND_FAILURE`
-     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
+     * @see EmailSendFailure
      */
     class Send(msg: String, cause: Throwable? = null): EmailException(
         msg,
-        "EMAIL_SEND_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Represents an exception that occurs when an email cannot be sent.",
+        EmailSendFailure.CODE,
+        EmailSendFailure.STATUS,
+        EmailSendFailure.DESCRIPTION,
         cause
-    )
+    ) {
+
+    }
 }

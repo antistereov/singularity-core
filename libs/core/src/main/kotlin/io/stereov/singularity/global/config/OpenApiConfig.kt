@@ -84,7 +84,7 @@ import kotlin.reflect.full.primaryConstructor
     type = SecuritySchemeType.APIKEY,
     `in` = SecuritySchemeIn.HEADER,
     paramName = SessionTokenType.StepUp.HEADER,
-    description = "Token for step up authentication allowing access of secure resources." +
+    description = "EmailVerificationTokenCreation for step up authentication allowing access of secure resources." +
             "You can learn more [here](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)."
 )
 @SecurityScheme(
@@ -92,7 +92,7 @@ import kotlin.reflect.full.primaryConstructor
     type = SecuritySchemeType.APIKEY,
     `in` = SecuritySchemeIn.COOKIE,
     paramName = SessionTokenType.StepUp.COOKIE_NAME,
-    description = "Token for step up authentication allowing access of secure resources." +
+    description = "EmailVerificationTokenCreation for step up authentication allowing access of secure resources." +
             "You can learn more [here](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)."
 )
 
@@ -101,7 +101,7 @@ import kotlin.reflect.full.primaryConstructor
     type = SecuritySchemeType.APIKEY,
     `in` = SecuritySchemeIn.HEADER,
     paramName = TwoFactorTokenType.Authentication.HEADER,
-    description = "Token for successful authentication with email and password, indicating 2FA is required." +
+    description = "EmailVerificationTokenCreation for successful authentication with email and password, indicating 2FA is required." +
             "You can learn more [here](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token)."
 )
 @SecurityScheme(
@@ -109,7 +109,7 @@ import kotlin.reflect.full.primaryConstructor
     type = SecuritySchemeType.APIKEY,
     `in` = SecuritySchemeIn.COOKIE,
     paramName = TwoFactorTokenType.Authentication.COOKIE_NAME,
-    description = "Token for successful authentication with email and password, indicating 2FA is required." +
+    description = "EmailVerificationTokenCreation for successful authentication with email and password, indicating 2FA is required." +
             "You can learn more [here](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token)."
 )
 

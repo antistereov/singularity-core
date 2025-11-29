@@ -45,9 +45,14 @@ class ArticleConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun articleController(articleService: ArticleService): ArticleController {
-        return ArticleController(articleService)
-    }
+    fun articleController(
+        articleService: ArticleService,
+        authorizationService: AuthorizationService,
+    ) = ArticleController(
+        articleService,
+        authorizationService
+    )
+
 
     @Bean
     @ConditionalOnMissingBean
@@ -65,7 +70,6 @@ class ArticleConfiguration {
     @ConditionalOnMissingBean
     fun articleMapper(
         appProperties: AppProperties,
-        authorizationService: AuthorizationService,
         userService: UserService,
         translateService: TranslateService,
         tagMapper: TagMapper,
@@ -74,7 +78,6 @@ class ArticleConfiguration {
         principalMapper: PrincipalMapper,
     ) = ArticleMapper(
         appProperties,
-        authorizationService,
         userService,
         translateService,
         tagMapper,

@@ -30,13 +30,14 @@ import io.stereov.singularity.auth.token.service.RefreshTokenService
 import io.stereov.singularity.auth.token.service.StepUpTokenService
 import io.stereov.singularity.auth.token.service.TwoFactorAuthenticationTokenService
 import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthenticationService
-import io.stereov.singularity.database.encryption.exception.FindEncryptedDocumentByIdException
+import io.stereov.singularity.database.core.exception.DocumentException
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.global.model.SuccessResponse
 import io.stereov.singularity.global.util.getOrNull
 import io.stereov.singularity.principal.core.exception.FindPrincipalByIdException
+import io.stereov.singularity.principal.core.exception.FindUserByIdException
 import io.stereov.singularity.principal.core.exception.PrincipalException
 import io.stereov.singularity.principal.core.exception.PrincipalMapperException
 import io.stereov.singularity.principal.core.mapper.PrincipalMapper
@@ -119,7 +120,7 @@ class AuthenticationController(
             )
         ]
     )
-    @ThrowsDomainError([RegisterException::class,])
+    @ThrowsDomainError([RegisterException::class])
     suspend fun register(
         @RequestBody @Valid payload: RegisterUserRequest,
         @RequestParam("send-email") sendEmail: Boolean = true,
@@ -198,7 +199,7 @@ class AuthenticationController(
     )
     @ThrowsDomainError([
         LoginException::class,
-        PrincipalException.InvalidDocument::class,
+        DocumentException.Invalid::class,
         TwoFactorAuthenticationTokenCreationException::class,
         PrincipalMapperException::class,
         CookieException.Creation::class,
@@ -219,7 +220,7 @@ class AuthenticationController(
             twoFactorAuthenticationService.handleTwoFactor(user, locale)
                 .onFailure { ex -> logger.error(ex) { "Failed to handle two factor authentication" } }
 
-            val userId = user.id.getOrThrow { when (it) { is PrincipalException.InvalidDocument -> it }}
+            val userId = user.id.getOrThrow { when (it) { is DocumentException.Invalid -> it }}
 
             val twoFactorAuthenticationToken = twoFactorAuthenticationTokenService.create(userId)
                 .getOrThrow { when (it) { is TwoFactorAuthenticationTokenCreationException -> it } }
@@ -346,7 +347,7 @@ class AuthenticationController(
 
     @PostMapping("/refresh")
     @Operation(
-        summary = "Refresh Access Token",
+        summary = "Refresh Access EmailVerificationTokenCreation",
         description = """
             Request a new [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token).
             
@@ -375,7 +376,7 @@ class AuthenticationController(
     )
     @ThrowsDomainError([
         RefreshTokenExtractionException::class,
-        FindEncryptedDocumentByIdException::class,
+        FindUserByIdException::class,
         AccessTokenCreationException::class,
         RefreshTokenCreationException::class,
         PrincipalMapperException::class,
@@ -391,7 +392,7 @@ class AuthenticationController(
             .getOrThrow { when (it) { is RefreshTokenExtractionException -> it } }
 
         val user = userService.findById(refreshToken.userId)
-            .getOrThrow { when (it) { is FindEncryptedDocumentByIdException -> it } }
+            .getOrThrow { FindUserByIdException.from(it) }
 
         val newAccessToken = accessTokenService.create(user, refreshToken.sessionId)
             .getOrThrow { when (it) { is AccessTokenCreationException -> it } }
@@ -476,7 +477,7 @@ class AuthenticationController(
         AccessTokenExtractionException::class,
         AuthenticationException.AuthenticationRequired::class,
         FindPrincipalByIdException::class,
-        PrincipalException.InvalidDocument::class,
+        DocumentException.Invalid::class,
         TwoFactorAuthenticationTokenCreationException::class,
         StepUpException::class,
         StepUpTokenCreationException::class,
@@ -499,7 +500,7 @@ class AuthenticationController(
 
         principal = authenticationService.stepUp(principal, sessionId, req)
             .getOrThrow { when (it) { is StepUpException -> it } }
-        val principalId = principal.id.getOrThrow { when (it) { is PrincipalException.InvalidDocument -> it } }
+        val principalId = principal.id.getOrThrow { when (it) { is DocumentException.Invalid -> it } }
 
         if (principal is User && principal.twoFactorEnabled) {
             twoFactorAuthenticationService.handleTwoFactor(principal, locale)
@@ -570,6 +571,10 @@ class AuthenticationController(
             )
         ]
     )
+    @ThrowsDomainError([
+        AccessTokenExtractionException::class,
+        FindUserByIdException::class,
+    ])
     suspend fun getAuthenticationStatus(exchange: ServerWebExchange): ResponseEntity<AuthenticationStatusResponse> {
         val authenticationOutcome = authorizationService.getAuthenticationOutcome()
             .getOrThrow { when (it) { is AccessTokenExtractionException -> it }}
@@ -582,19 +587,21 @@ class AuthenticationController(
             is AuthenticationOutcome.Authenticated -> authenticationOutcome.sessionId
             is AuthenticationOutcome.None -> null
         }
-        val twoFactorToken = twoFactorAuthenticationTokenService.extract(exchange).getOrNull()
+        val twoFactorToken = twoFactorAuthenticationTokenService.extract(exchange)
+            .getOrNull()
 
         val authorized = authorizedUserId != null
         val twoFactorRequired = if (authorized) false else (twoFactorToken != null)
 
         val stepUpToken = if (authorized && currentSessionId != null) {
-            stepUpTokenService.extract(exchange, authorizedUserId, currentSessionId).getOrNull()
+            stepUpTokenService.extract(exchange, authorizedUserId, currentSessionId)
+                .getOrNull()
         } else null
         val stepUp = stepUpToken != null
 
         val user = if (authorizedUserId != null || twoFactorToken != null) {
             userService.findById(authorizedUserId ?: twoFactorToken!!.userId)
-                .getOrThrow { when (it) { is FindEncryptedDocumentByIdException -> it } }
+                .getOrThrow { FindUserByIdException.from(it) }
         } else null
 
         val (twoFactorMethods, preferredTwoFactorMethod) = if (twoFactorToken != null && twoFactorRequired) {

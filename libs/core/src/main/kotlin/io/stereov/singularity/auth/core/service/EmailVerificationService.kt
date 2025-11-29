@@ -15,7 +15,6 @@ import io.stereov.singularity.auth.token.service.EmailVerificationTokenService
 import io.stereov.singularity.cache.service.CacheService
 import io.stereov.singularity.database.encryption.exception.FindEncryptedDocumentByIdException
 import io.stereov.singularity.database.encryption.exception.SaveEncryptedDocumentException
-import io.stereov.singularity.email.core.exception.EmailException
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.email.core.service.CooldownEmailService
 import io.stereov.singularity.email.core.service.EmailService
@@ -27,7 +26,6 @@ import io.stereov.singularity.email.template.util.replacePlaceholders
 import io.stereov.singularity.email.template.util.translate
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.global.properties.UiProperties
-import io.stereov.singularity.principal.core.dto.response.UserResponse
 import io.stereov.singularity.principal.core.model.User
 import io.stereov.singularity.principal.core.service.UserService
 import io.stereov.singularity.translate.model.TranslateKey
@@ -54,14 +52,11 @@ class EmailVerificationService(
     override val slug = "email_verification"
 
     /**
-     * Verifies the email address of a user using the provided email verification token and updates the user's email
-     * verification status or email address if needed.
+     * Verifies a user's email using the provided token and updates the user's email or verification status as necessary.
      *
-     * @param token The email verification token containing the user ID, new email, and a secret for verification.
-     * @param authenticationOutcome The current authentication context or outcome associated with the user.
-     * @param locale The locale to use for localization, such as sending email notifications (nullable).
-     * @return A [Result] that contains a [UserResponse] if the email was successfully verified, or a [VerifyEmailException]
-     * if an error occurred during verification.
+     * @param token The email verification token containing user details and a secret for validation.
+     * @param locale The locale used for any locale-specific operations, such as localization of notifications, or null if not specified.
+     * @return A [Result] containing the verified [User] on success or a [VerifyEmailException] on failure.
      */
     suspend fun verifyEmail(
         token: EmailVerificationToken,
@@ -163,7 +158,7 @@ class EmailVerificationService(
             .bind()
 
         val token = emailVerificationTokenService.create(userId, email, secret)
-            .mapError { ex -> SendVerificationEmailException.Token("Failed to create verification token: ${ex.message}", ex) }
+            .mapError { ex -> SendVerificationEmailException.EmailVerificationTokenCreation("Failed to create verification token: ${ex.message}", ex) }
             .bind()
 
         val verificationUrl = generateVerificationUri(token)
@@ -183,12 +178,7 @@ class EmailVerificationService(
             .bind()
 
         emailService.sendEmail(email, subject, content, actualLocale)
-            .mapError { when (it) {
-                is EmailException.Send -> SendVerificationEmailException.Send("Failed to send verification email: ${it.message}", it)
-                is EmailException.Disabled -> SendVerificationEmailException.EmailDisabled(it.message)
-                is EmailException.Template -> SendVerificationEmailException.Template("Failed to create template for verification email: ${it.message}", it)
-                is EmailException.Authentication -> SendVerificationEmailException.EmailAuthentication("Failed to send verification email due to an authentication failure: ${it.message}", it)
-            } }
+            .mapError { SendVerificationEmailException.from(it) }
             .bind()
 
         remainingCooldown

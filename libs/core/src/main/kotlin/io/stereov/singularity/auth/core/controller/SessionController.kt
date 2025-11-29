@@ -105,7 +105,7 @@ class SessionController(
         responses = [
             ApiResponse(
                 responseCode = "200",
-                description = "Token generated. The token will be returned if header authentication is enabled",
+                description = "EmailVerificationTokenCreation generated. The token will be returned if header authentication is enabled",
             )
         ]
     )

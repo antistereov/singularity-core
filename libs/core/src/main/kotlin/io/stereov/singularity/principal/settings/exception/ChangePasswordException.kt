@@ -1,7 +1,11 @@
 package io.stereov.singularity.principal.settings.exception
 
+import io.stereov.singularity.database.core.exception.DatabaseFailure
+import io.stereov.singularity.database.core.exception.PostCommitSideEffectFailure
 import io.stereov.singularity.database.encryption.exception.SaveEncryptedDocumentException
+import io.stereov.singularity.database.hash.exception.HashFailure
 import io.stereov.singularity.global.exception.SingularityException
+import io.stereov.singularity.principal.core.exception.NoPasswordProvider
 import org.springframework.http.HttpStatus
 
 /**
@@ -39,9 +43,9 @@ sealed class ChangePasswordException(
      */
     class NoPasswordSet(msg: String, cause: Throwable? = null) : ChangePasswordException(
         msg,
-        "NO_PASSWORD_SET",
-        HttpStatus.BAD_REQUEST,
-        "User does not have a password set.",
+        NoPasswordProvider.CODE,
+        NoPasswordProvider.STATUS,
+        NoPasswordProvider.DESCRIPTION,
         cause
     )
 
@@ -55,14 +59,13 @@ sealed class ChangePasswordException(
      * @param msg A message providing details about the context of the failure.
      * @param cause The optional underlying cause of the exception.
      *
-     * @property code `DATABASE_FAILURE`
-     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
+     * @see DatabaseFailure
      */
     class Database(msg: String, cause: Throwable? = null) : ChangePasswordException(
         msg,
-        "DATABASE_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Failed to update user document in database.",
+        DatabaseFailure.CODE,
+        DatabaseFailure.STATUS,
+        DatabaseFailure.DESCRIPTION,
         cause
     )
 
@@ -76,14 +79,13 @@ sealed class ChangePasswordException(
      * @param msg The message providing details about the context of the error.
      * @param cause The optional underlying cause of the exception.
      *
-     * @property code `HASHING_FAILURE`
-     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
+     * @see HashFailure
      */
     class Hashing(msg: String, cause: Throwable? = null) : ChangePasswordException(
         msg,
-        "HASHING_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Failed to hash user password.",
+        HashFailure.CODE,
+        HashFailure.STATUS,
+        HashFailure.DESCRIPTION,
         cause
     )
 
@@ -97,16 +99,14 @@ sealed class ChangePasswordException(
      * @param msg A message providing details about the specific failure.
      * @param cause The underlying cause of this exception, if available.
      *
-     * @property code `POST_COMMIT_SIDE_EFFECT_FAILURE`
-     * @property status [HttpStatus.MULTI_STATUS]
-     *
+     * @see PostCommitSideEffect
      * @see SaveEncryptedDocumentException.PostCommitSideEffect
      */
     class PostCommitSideEffect(msg: String, cause: Throwable? = null) : ChangePasswordException(
         msg,
-        "POST_COMMIT_SIDE_EFFECT_FAILURE",
-        HttpStatus.MULTI_STATUS,
-        "Exception thrown when a post-commit side effect fails.",
+        PostCommitSideEffectFailure.CODE,
+        PostCommitSideEffectFailure.STATUS,
+        PostCommitSideEffectFailure.DESCRIPTION,
         cause
     )
 }

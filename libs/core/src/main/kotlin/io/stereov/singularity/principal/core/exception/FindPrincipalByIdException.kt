@@ -1,5 +1,7 @@
 package io.stereov.singularity.principal.core.exception
 
+import io.stereov.singularity.database.core.exception.DatabaseFailure
+import io.stereov.singularity.database.encryption.exception.DatabaseEncryptionFailure
 import io.stereov.singularity.global.exception.SingularityException
 import org.springframework.http.HttpStatus
 
@@ -43,7 +45,7 @@ sealed class FindPrincipalByIdException(
         msg,
         "PRINCIPAL_NOT_FOUND",
         HttpStatus.NOT_FOUND,
-        "No principal with specified email found.",
+        "No principal with specified ID found.",
         cause
     )
 
@@ -58,14 +60,13 @@ sealed class FindPrincipalByIdException(
      * @param msg A message providing additional context or details about the failure.
      * @param cause The root cause of the exception, if applicable.
      *
-     * @property code `PRINCIPAL_DB_FAILURE`
-     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
+     * @see DatabaseFailure
      */
     class Database(msg: String, cause: Throwable? = null) : FindPrincipalByIdException(
         msg,
-        "PRINCIPAL_DB_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Failed to retrieve principal from database.",
+        DatabaseFailure.CODE,
+        DatabaseFailure.STATUS,
+        DatabaseFailure.DESCRIPTION,
         cause
     )
 
@@ -79,14 +80,13 @@ sealed class FindPrincipalByIdException(
      * @param msg The error message providing details about the failure.
      * @param cause The underlying cause of the exception, if available.
      *
-     * @property code `PRINCIPAL_ENCRYPTION_FAILURE`
-     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
+     * @see DatabaseEncryptionFailure
      */
     class Encryption(msg: String, cause: Throwable? = null) : FindPrincipalByIdException(
         msg,
-        "PRINCIPAL_ENCRYPTION_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Failed to encrypt or decrypt principal data.",
+        DatabaseEncryptionFailure.CODE,
+        DatabaseEncryptionFailure.STATUS,
+        DatabaseEncryptionFailure.DESCRIPTION,
         cause
     )
 }

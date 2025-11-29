@@ -1,12 +1,9 @@
 package io.stereov.singularity.principal.core.model
 
-import com.github.michaelbull.result.Result
 import io.github.oshai.kotlinlogging.KLogger
 import io.stereov.singularity.auth.core.model.SessionInfo
 import io.stereov.singularity.database.encryption.model.SensitiveDocument
-import io.stereov.singularity.principal.core.exception.PrincipalException
 import io.stereov.singularity.principal.core.model.sensitve.SensitivePrincipalData
-import org.bson.types.ObjectId
 import java.time.Instant
 import java.util.*
 
@@ -21,7 +18,6 @@ import java.util.*
  * @param S The type of sensitive data associated with the principal, constrained by [SensitivePrincipalData].
  */
 sealed interface Principal<R: Role, S: SensitivePrincipalData> : SensitiveDocument<S> {
-    val id: Result<ObjectId, PrincipalException.InvalidDocument>
     val createdAt: Instant
     var lastActive: Instant
     val roles: Set<R>

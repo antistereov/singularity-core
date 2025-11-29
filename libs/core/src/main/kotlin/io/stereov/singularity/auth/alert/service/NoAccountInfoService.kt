@@ -6,7 +6,6 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.alert.exception.AlertException
 import io.stereov.singularity.auth.core.model.NoAccountInfoAction
 import io.stereov.singularity.cache.service.CacheService
-import io.stereov.singularity.email.core.exception.EmailException
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.email.core.service.CooldownEmailService
 import io.stereov.singularity.email.core.service.EmailService
@@ -94,12 +93,7 @@ class NoAccountInfoService(
             .bind()
 
         emailService.sendEmail(email, subject, content, actualLocale)
-            .mapError { when (it) {
-                is EmailException.Send -> AlertException.Send("Failed to send verification email: ${it.message}", it)
-                is EmailException.Disabled -> AlertException.EmailDisabled(it.message)
-                is EmailException.Template -> AlertException.Template("Failed to create template for verification email: ${it.message}", it)
-                is EmailException.Authentication -> AlertException.EmailAuthentication("Failed to send verification email due to an authentication failure: ${it.message}", it)
-            } }
+            .mapError { AlertException.from(it) }
             .flatMapBoth(
                 success = { mimeMessage ->
                     startCooldown(email)

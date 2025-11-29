@@ -39,9 +39,16 @@ sealed class TranslateException(
      */
     class NoTranslations(msg: String, cause: Throwable? = null) : TranslateException(
         msg,
-        "NO_TRANSLATIONS",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Exception indicating that no translations are available for a given request.",
+        CODE,
+        STATUS,
+        DESCRIPTION,
         cause
-    )
+    ) {
+        companion object {
+            const val CODE = "NO_TRANSLATIONS"
+            val STATUS = HttpStatus.INTERNAL_SERVER_ERROR
+            val DESCRIPTION = "Exception indicating that no translations are available for a given request."
+        }
+
+    }
 }

@@ -1,5 +1,6 @@
 package io.stereov.singularity.global.exception
 
+import io.stereov.singularity.database.core.exception.PostCommitSideEffectFailure
 import io.stereov.singularity.database.encryption.exception.SaveEncryptedDocumentException
 import org.springframework.http.HttpStatus
 
@@ -35,16 +36,15 @@ open class SingularityException(
      * @param msg A message providing details about the specific failure.
      * @param cause The underlying cause of this exception, if available.
      *
-     * @property code `POST_COMMIT_SIDE_EFFECT_FAILURE`
-     * @property status [HttpStatus.MULTI_STATUS]
+     * @see PostCommitSideEffect
      *
      * @see SaveEncryptedDocumentException.PostCommitSideEffect
      */
     class PostCommitSideEffect(msg: String, cause: Throwable? = null) : SingularityException(
         msg,
-        "POST_COMMIT_SIDE_EFFECT_FAILURE",
-        HttpStatus.MULTI_STATUS,
-        "Exception thrown when a post-commit side effect fails.",
+        PostCommitSideEffectFailure.CODE,
+        PostCommitSideEffectFailure.STATUS,
+        PostCommitSideEffectFailure.DESCRIPTION,
         cause
     )
 }

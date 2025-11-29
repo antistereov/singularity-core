@@ -63,9 +63,11 @@ class ContentConfiguration {
     @Bean
     @ConditionalOnMissingBean
     fun contentManagementController(
-        context: ApplicationContext
+        context: ApplicationContext,
+        authorizationService: AuthorizationService,
     ) = ContentManagementController(
-        context
+        context,
+        authorizationService,
     )
 
     // Component

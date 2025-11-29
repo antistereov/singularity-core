@@ -9,11 +9,11 @@ import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.exception.AuthenticationException
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.token.exception.AccessTokenExtractionException
-import io.stereov.singularity.database.encryption.exception.FindEncryptedDocumentByIdException
 import io.stereov.singularity.database.encryption.exception.SaveEncryptedDocumentException
 import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.principal.core.dto.response.UserResponse
+import io.stereov.singularity.principal.core.exception.FindUserByIdException
 import io.stereov.singularity.principal.core.exception.PrincipalMapperException
 import io.stereov.singularity.principal.core.mapper.PrincipalMapper
 import io.stereov.singularity.principal.core.model.Role
@@ -69,7 +69,7 @@ class AdminController(
         AccessTokenExtractionException::class,
         AuthenticationException.AuthenticationRequired::class,
         AuthenticationException.RoleRequired::class,
-        FindEncryptedDocumentByIdException::class,
+        FindUserByIdException::class,
         SaveEncryptedDocumentException::class,
         PrincipalMapperException::class
     ])
@@ -87,7 +87,7 @@ class AdminController(
             .onFailure { ex -> logger.error(ex) { "Failed to invalidate all tokens for user $userId" } }
 
         var user = userService.findById(userId)
-            .getOrThrow { when (it) { is FindEncryptedDocumentByIdException -> it } }
+            .getOrThrow { FindUserByIdException.from(it) }
         user = adminService.addAdminRole(user)
             .getOrThrow { when (it) { is SaveEncryptedDocumentException -> it } }
 
@@ -126,7 +126,7 @@ class AdminController(
         AccessTokenExtractionException::class,
         AuthenticationException.AuthenticationRequired::class,
         AuthenticationException.RoleRequired::class,
-        FindEncryptedDocumentByIdException::class,
+        FindUserByIdException::class,
         RevokeAdminRoleException::class,
         PrincipalMapperException::class
     ])
@@ -144,7 +144,7 @@ class AdminController(
             .onFailure { ex -> logger.error(ex) { "Failed to invalidate all tokens for user $userId" } }
 
         var user = userService.findById(userId)
-            .getOrThrow { when (it) { is FindEncryptedDocumentByIdException -> it } }
+            .getOrThrow { FindUserByIdException.from(it) }
 
         accessTokenCache.invalidateAllTokens(userId)
             .onFailure { ex -> logger.error(ex) { "Failed to invalidate all tokens for user $userId" } }

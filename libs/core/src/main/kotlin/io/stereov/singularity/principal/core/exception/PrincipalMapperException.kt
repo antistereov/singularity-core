@@ -57,14 +57,13 @@ sealed class PrincipalMapperException(
      * @param msg A message describing the details of the invalid document error.
      * @param cause The underlying cause of the exception, if available.
      *
-     * @property code `INVALID_USER_DOCUMENT`
-     * @property status [HttpStatus.MULTI_STATUS]
+     * @see InvalidPrincipalDocumentFailure
      */
     class InvalidDocument(msg: String, cause: Throwable? = null) : PrincipalMapperException(
         msg,
-        "INVALID_PRINCIPAL_DOCUMENT",
-        HttpStatus.MULTI_STATUS,
-        "Failed to map principal document because it is invalid.",
+        InvalidPrincipalDocumentFailure.CODE,
+        InvalidPrincipalDocumentFailure.STATUS,
+        InvalidPrincipalDocumentFailure.DESCRIPTION,
         cause
     )
 }

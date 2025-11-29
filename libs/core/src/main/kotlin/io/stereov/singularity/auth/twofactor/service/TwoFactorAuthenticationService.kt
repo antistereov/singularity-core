@@ -82,7 +82,7 @@ class TwoFactorAuthenticationService(
                 .bind()
         }
         if (!user.twoFactorEnabled) {
-            Err(ValidateTwoFactorException.TwoFactorDisabled("Failed to validate two factor code: user does not have two factor enabled."))
+            Err(ValidateTwoFactorException.TwoFactorAuthenticationDisabled("Failed to validate two factor code: user does not have two factor enabled."))
                 .bind()
         }
 
@@ -95,7 +95,7 @@ class TwoFactorAuthenticationService(
         }
 
         if (result == null) {
-            Err(ValidateTwoFactorException.InvalidRequest("Failed to validate two factor code: at least one of the two factor methods is required."))
+            Err(ValidateTwoFactorException.No2faCodeProvided("Failed to validate two factor code: at least one of the two factor methods is required."))
                 .bind()
         }
 

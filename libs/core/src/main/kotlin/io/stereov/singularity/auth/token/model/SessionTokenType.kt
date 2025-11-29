@@ -20,14 +20,14 @@ object SessionTokenType {
     }
     object StepUp : SecurityTokenType {
         const val COOKIE_NAME = "step_up_token"
-        const val HEADER = "X-Step-Up-Token"
+        const val HEADER = "X-Step-Up-EmailVerificationTokenCreation"
 
         override val header = HEADER
         override val cookieName = COOKIE_NAME
     }
     object Session : SecurityTokenType {
         const val COOKIE_NAME = "session_token"
-        const val HEADER = "X-Session-Token"
+        const val HEADER = "X-Session-EmailVerificationTokenCreation"
 
         override val header = HEADER
         override val cookieName = COOKIE_NAME

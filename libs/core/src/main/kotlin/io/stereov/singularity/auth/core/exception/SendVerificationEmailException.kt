@@ -1,5 +1,7 @@
 package io.stereov.singularity.auth.core.exception
 
+import io.stereov.singularity.database.core.exception.DatabaseFailure
+import io.stereov.singularity.email.core.exception.*
 import io.stereov.singularity.global.exception.SingularityException
 import org.springframework.http.HttpStatus
 
@@ -56,14 +58,13 @@ sealed class SendVerificationEmailException(
      * @param msg The error message describing the failure to send the alert.
      * @param cause The underlying cause of the exception, if available.
      *
-     * @property code `ALERT_SEND_FAILURE`
-     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
+     * @see EmailSendFailure
      */
     class Send(msg: String, cause: Throwable? = null) : SendVerificationEmailException(
         msg,
-        "ALERT_SEND_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Thrown when an alert cannot be sent due to an exception that occurred in the mail sender.",
+        EmailSendFailure.CODE,
+        EmailSendFailure.STATUS,
+        EmailSendFailure.DESCRIPTION,
         cause
     )
 
@@ -77,14 +78,13 @@ sealed class SendVerificationEmailException(
      * @param msg The error message describing the context of the email authentication failure.
      * @param cause The optional underlying cause of the exception that triggered the failure.
      *
-     * @property code `EMAIL_AUTHENTICATION_FAILURE`
-     * @property status [HttpStatus.UNAUTHORIZED]
+     * @see EmailAuthenticationFailure
      */
     class EmailAuthentication(msg: String, cause: Throwable? = null) : SendVerificationEmailException(
         msg,
-        "EMAIL_AUTHENTICATION_FAILURE",
-        HttpStatus.UNAUTHORIZED,
-        "Thrown when an email authentication failure occurs.",
+        EmailAuthenticationFailure.CODE,
+        EmailAuthenticationFailure.STATUS,
+        EmailAuthenticationFailure.DESCRIPTION,
         cause
     )
 
@@ -98,14 +98,13 @@ sealed class SendVerificationEmailException(
      * @param msg The exception message providing details about the context of the error.
      * @param cause The optional underlying cause of the exception.
      *
-     * @property code `EMAIL_DISABLED`
-     * @property status [HttpStatus.SERVICE_UNAVAILABLE]
+     * @see EmailDisabledFailure
      */
     class EmailDisabled(msg: String, cause: Throwable? = null) : SendVerificationEmailException(
         msg,
-        "EMAIL_DISABLED",
-        HttpStatus.SERVICE_UNAVAILABLE,
-        "Thrown when an email is disabled.",
+        EmailDisabledFailure.CODE,
+        EmailDisabledFailure.STATUS,
+        EmailDisabledFailure.DESCRIPTION,
         cause
     )
 
@@ -121,14 +120,13 @@ sealed class SendVerificationEmailException(
      * @param msg The error message describing the cooldown restriction.
      * @param cause The underlying cause of the exception, if available.
      *
-     * @property code `ALERT_COOLDOWN_ACTIVE`
-     * @property status [HttpStatus.TOO_MANY_REQUESTS]
+     * @see EmailCooldownActiveFailure
      */
     class CooldownActive(msg: String, cause: Throwable? = null) : SendVerificationEmailException(
         msg,
-        "ALERT_COOLDOWN_ACTIVE",
-        HttpStatus.TOO_MANY_REQUESTS,
-        "Thrown when an alert message was requested but the cooldown is active.",
+        EmailCooldownActiveFailure.CODE,
+        EmailCooldownActiveFailure.STATUS,
+        EmailCooldownActiveFailure.DESCRIPTION,
         cause,
     )
 
@@ -141,12 +139,14 @@ sealed class SendVerificationEmailException(
      *
      * @param msg The error message describing the exception.
      * @param cause The underlying cause of the exception, if available.
+     *
+     * @see EmailCooldownCacheFailure
      */
     class CooldownCache(msg: String, cause: Throwable? = null) : SendVerificationEmailException(
         msg,
-        "ALERT_COOLDOWN_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Thrown when an exception occurs when setting or getting cooldown.",
+        EmailCooldownCacheFailure.CODE,
+        EmailCooldownCacheFailure.STATUS,
+        EmailCooldownCacheFailure.DESCRIPTION,
         cause
     )
 
@@ -165,9 +165,9 @@ sealed class SendVerificationEmailException(
      */
     class Template(msg: String, cause: Throwable? = null) : SendVerificationEmailException(
         msg,
-        "ALERT_TEMPLATE_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Thrown when an exception occurred when creating the alert email template.",
+        EmailTemplateFailure.CODE,
+        EmailTemplateFailure.STATUS,
+        EmailTemplateFailure.DESCRIPTION,
         cause
     )
 
@@ -181,14 +181,13 @@ sealed class SendVerificationEmailException(
      * @param msg The exception message providing details about the context of the error.
      * @param cause The optional underlying cause of the exception.
      *
-     * @property code `DATABASE_FAILURE`
-     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
+     * @see DatabaseFailure
      */
     class Database(msg: String, cause: Throwable? = null) : SendVerificationEmailException(
         msg,
-        "DATABASE_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Exception thrown when an encrypted database operation fails.",
+        DatabaseFailure.CODE,
+        DatabaseFailure.STATUS,
+        DatabaseFailure.DESCRIPTION,
         cause
     )
 
@@ -204,12 +203,24 @@ sealed class SendVerificationEmailException(
      *
      * @property code `TOKEN_GENERATION_FAILURE`
      * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
+     *
+     * @see io.stereov.singularity.auth.jwt.exception.TokenCreationException
      */
-    class Token(msg: String, cause: Throwable? = null) : SendVerificationEmailException(
+    class EmailVerificationTokenCreation(msg: String, cause: Throwable? = null) : SendVerificationEmailException(
         msg,
-        "TOKEN_GENERATION_FAILURE",
+        "EMAIL_VERIFICATION_TOKEN_CREATION_FAILURE",
         HttpStatus.INTERNAL_SERVER_ERROR,
-        "Exception thrown when an error occurs during token generation.",
+        "Exception thrown when an error occurs during token creation.",
         cause
     )
+
+    companion object {
+
+        fun from(ex: EmailException) = when (ex) {
+            is EmailException.Send -> Send(ex.message, ex.cause)
+            is EmailException.Disabled -> EmailDisabled(ex.message, ex.cause)
+            is EmailException.Template -> Template(ex.message, ex.cause)
+            is EmailException.Authentication -> EmailAuthentication(ex.message, ex.cause)
+        }
+    }
 }

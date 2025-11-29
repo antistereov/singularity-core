@@ -1,21 +1,28 @@
 package io.stereov.singularity.content.tag.controller
 
+import com.github.michaelbull.result.getOrThrow
+import io.stereov.singularity.auth.core.exception.AuthenticationException
 import io.stereov.singularity.auth.core.service.AuthorizationService
-import io.stereov.singularity.principal.group.model.KnownGroups
+import io.stereov.singularity.auth.token.exception.AccessTokenExtractionException
 import io.stereov.singularity.content.tag.dto.CreateTagRequest
 import io.stereov.singularity.content.tag.dto.TagResponse
 import io.stereov.singularity.content.tag.dto.UpdateTagRequest
+import io.stereov.singularity.content.tag.exception.CreateTagException
+import io.stereov.singularity.content.tag.exception.UpdateTagException
 import io.stereov.singularity.content.tag.mapper.TagMapper
 import io.stereov.singularity.content.tag.service.TagService
-import io.stereov.singularity.global.model.ErrorResponse
+import io.stereov.singularity.database.core.exception.DeleteDocumentByKeyException
+import io.stereov.singularity.database.core.exception.FindAllDocumentsPaginatedException
+import io.stereov.singularity.database.core.exception.FindDocumentByKeyException
+import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.global.model.PageableRequest
 import io.stereov.singularity.global.model.SuccessResponse
 import io.stereov.singularity.global.util.mapContent
+import io.stereov.singularity.principal.group.model.KnownGroups
+import io.stereov.singularity.translate.exception.TranslateException
 import io.swagger.v3.oas.annotations.ExternalDocumentation
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.media.Content
-import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -61,30 +68,30 @@ class TagController(
             ApiResponse(
                 responseCode = "200",
                 description = "The newly created tag.",
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "Invalid or expired `AccessToken`.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "403",
-                description = "`AccessToken` does not contain group membership " +
-                        "[`CONTRIBUTOR`](https://singularity.stereov.io/docs/guides/content/introduction#global-server-group-contributor) access.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "409",
-                description = "A tag with the given `key` already exists.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
     )
+    @ThrowsDomainError([
+        AccessTokenExtractionException::class,
+        AuthenticationException.AuthenticationRequired::class,
+        AuthenticationException.GroupMembershipRequired::class,
+        CreateTagException::class,
+        TranslateException.NoTranslations::class
+    ])
     suspend fun createTag(@RequestBody req: CreateTagRequest): ResponseEntity<TagResponse> {
-        authorizationService.requireGroupMembership(KnownGroups.CONTRIBUTOR)
-        return ResponseEntity.ok(
-            tagMapper.createTagResponse(service.create(req), req.locale)
-        )
+        authorizationService.getAuthenticationOutcome()
+            .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
+            .requireAuthentication()
+            .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it } }
+            .requireGroupMembership(KnownGroups.CONTRIBUTOR)
+            .getOrThrow { when (it) { is AuthenticationException.GroupMembershipRequired -> it } }
+
+        val tag = service.create(req)
+            .getOrThrow { when (it) { is CreateTagException -> it } }
+        val response = tagMapper.createTagResponse(tag, req.locale)
+            .getOrThrow { when (it) { is TranslateException.NoTranslations -> it } }
+
+        return ResponseEntity.ok(response)
     }
 
     @GetMapping("/{key}")
@@ -107,21 +114,23 @@ class TagController(
             ApiResponse(
                 responseCode = "200",
                 description = "The tag with `key`.",
-            ),
-            ApiResponse(
-                responseCode = "404",
-                description = "No tag with given key exists.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
+            )
         ]
     )
+    @ThrowsDomainError([
+        FindDocumentByKeyException::class,
+        TranslateException.NoTranslations::class
+    ])
     suspend fun getTagByKey(
         @PathVariable key: String,
         @RequestParam locale: Locale?
     ): ResponseEntity<TagResponse> {
-        return ResponseEntity.ok(
-            tagMapper.createTagResponse(service.findByKey(key), locale)
-        )
+        val tag = service.findByKey(key)
+            .getOrThrow { when (it) { is FindDocumentByKeyException -> it } }
+        val response = tagMapper.createTagResponse(tag, locale)
+            .getOrThrow { when (it) { is TranslateException.NoTranslations -> it } }
+
+        return ResponseEntity.ok(response)
     }
 
     @GetMapping
@@ -147,6 +156,10 @@ class TagController(
             ),
         ]
     )
+    @ThrowsDomainError([
+        FindAllDocumentsPaginatedException::class,
+        TranslateException.NoTranslations::class
+    ])
     suspend fun getTags(
         @RequestParam page: Int = 0,
         @RequestParam size: Int = 10,
@@ -162,9 +175,13 @@ class TagController(
             name,
             description,
             locale
-        )
+        ).getOrThrow { when (it) { is FindAllDocumentsPaginatedException -> it } }
+        val response = res.mapContent { tag ->
+            tagMapper.createTagResponse(tag, locale)
+                .getOrThrow { when (it) { is TranslateException.NoTranslations -> it } }
+        }
 
-        return ResponseEntity.ok(res.mapContent { tagMapper.createTagResponse(it, locale) })
+        return ResponseEntity.ok(response)
     }
 
     @PatchMapping("/{key}")
@@ -197,32 +214,34 @@ class TagController(
             ApiResponse(
                 responseCode = "200",
                 description = "The updated tag",
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "Invalid or expired `AccessToken`.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "403",
-                description = "`AccessToken` does not contain group membership " +
-                        "[`CONTRIBUTOR`](https://singularity.stereov.io/docs/guides/content/introduction#global-server-group-contributor) access.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "404",
-                description = "No tag with `key` found.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
     )
+    @ThrowsDomainError([
+        AccessTokenExtractionException::class,
+        AuthenticationException.AuthenticationRequired::class,
+        AuthenticationException.GroupMembershipRequired::class,
+        UpdateTagException::class,
+        TranslateException.NoTranslations::class
+    ])
     suspend fun updateTag(
         @PathVariable key: String,
         @RequestBody req: UpdateTagRequest,
         @RequestParam locale: Locale?
     ): ResponseEntity<TagResponse> {
-        authorizationService.requireGroupMembership(KnownGroups.CONTRIBUTOR)
-        return ResponseEntity.ok(tagMapper.createTagResponse(service.updateTag(key, req), locale))
+        authorizationService.getAuthenticationOutcome()
+            .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
+            .requireAuthentication()
+            .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it } }
+            .requireGroupMembership(KnownGroups.CONTRIBUTOR)
+            .getOrThrow { when (it) { is AuthenticationException.GroupMembershipRequired -> it } }
+
+        val tag = service.updateTag(key, req)
+            .getOrThrow { when (it) { is UpdateTagException -> it } }
+        val response = tagMapper.createTagResponse(tag, locale)
+            .getOrThrow { when (it) { is TranslateException.NoTranslations -> it } }
+
+        return ResponseEntity.ok(response)
     }
 
     @Operation(
@@ -254,28 +273,25 @@ class TagController(
                 responseCode = "200",
                 description = "The updated tag",
             ),
-            ApiResponse(
-                responseCode = "401",
-                description = "Invalid or expired `AccessToken`.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "403",
-                description = "`AccessToken` does not contain group membership " +
-                        "[`CONTRIBUTOR`](https://singularity.stereov.io/docs/guides/content/introduction#global-server-group-contributor) access.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "404",
-                description = "No tag with `key` found.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            )
         ]
     )
     @DeleteMapping("/{key}")
+    @ThrowsDomainError([
+        AccessTokenExtractionException::class,
+        AuthenticationException.AuthenticationRequired::class,
+        AuthenticationException.GroupMembershipRequired::class,
+        DeleteDocumentByKeyException::class
+    ])
     suspend fun deleteTag(@PathVariable key: String): ResponseEntity<SuccessResponse> {
-        authorizationService.requireGroupMembership(KnownGroups.CONTRIBUTOR)
+        authorizationService.getAuthenticationOutcome()
+            .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
+            .requireAuthentication()
+            .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it } }
+            .requireGroupMembership(KnownGroups.CONTRIBUTOR)
+            .getOrThrow { when (it) { is AuthenticationException.GroupMembershipRequired -> it } }
+
         service.deleteByKey(key)
+            .getOrThrow { when (it) { is DeleteDocumentByKeyException -> it } }
         return ResponseEntity.ok(SuccessResponse())
     }
 

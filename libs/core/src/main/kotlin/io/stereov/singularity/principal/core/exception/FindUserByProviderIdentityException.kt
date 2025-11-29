@@ -1,5 +1,8 @@
 package io.stereov.singularity.principal.core.exception
 
+import io.stereov.singularity.database.core.exception.DatabaseFailure
+import io.stereov.singularity.database.encryption.exception.DatabaseEncryptionFailure
+import io.stereov.singularity.database.hash.exception.HashFailure
 import io.stereov.singularity.global.exception.SingularityException
 import org.springframework.http.HttpStatus
 
@@ -38,14 +41,13 @@ sealed class FindUserByProviderIdentityException(
      * @param msg A message describing the details of the error.
      * @param cause The underlying cause of the exception, if available.
      *
-     * @property code `USER_NOT_FOUND`
-     * @property status [HttpStatus.NOT_FOUND]
+     * @see UserNotFoundFailure
      */
     class NotFound(msg: String, cause: Throwable? = null) : FindUserByProviderIdentityException(
         msg,
-        "USER_NOT_FOUND",
-        HttpStatus.NOT_FOUND,
-        "No user with specified email found.",
+        UserNotFoundFailure.CODE,
+        UserNotFoundFailure.STATUS,
+        UserNotFoundFailure.DESCRIPTION,
         cause
     )
 
@@ -59,14 +61,13 @@ sealed class FindUserByProviderIdentityException(
      * @param msg A message describing the details of the error.
      * @param cause The underlying cause of the exception, if available.
      *
-     * @property code `USER_HASH_FAILURE`
-     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
+     * @see HashFailure
      */
-    class HashFailure(msg: String, cause: Throwable? = null) : FindUserByProviderIdentityException(
+    class Hash(msg: String, cause: Throwable? = null) : FindUserByProviderIdentityException(
         msg,
-        "USER_HASH_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Failed to generate or verify hash.",
+        HashFailure.CODE,
+        HashFailure.STATUS,
+        HashFailure.DESCRIPTION,
         cause
     )
 
@@ -80,14 +81,13 @@ sealed class FindUserByProviderIdentityException(
      * @param msg A message describing the error encountered during the database operation.
      * @param cause The underlying cause of the failure, if available.
      *
-     * @property code `USER_DB_FAILURE`
-     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
+     * @see DatabaseFailure
      */
     class Database(msg: String, cause: Throwable? = null) : FindUserByProviderIdentityException(
         msg,
-        "USER_DB_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Failed to retrieve user from database.",
+        DatabaseFailure.CODE,
+        DatabaseFailure.STATUS,
+        DatabaseFailure.DESCRIPTION,
         cause
     )
 
@@ -102,14 +102,13 @@ sealed class FindUserByProviderIdentityException(
      * @param msg The error message providing context for the exception.
      * @param cause The underlying cause of the exception, if available.
      *
-     * @property code `USER_ENCRYPTION_FAILURE`
-     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
+     * @see DatabaseEncryptionFailure
      */
     class Encryption(msg: String, cause: Throwable? = null) : FindUserByProviderIdentityException(
         msg,
-        "USER_ENCRYPTION_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Failed to encrypt or decrypt user data.",
+        DatabaseEncryptionFailure.CODE,
+        DatabaseEncryptionFailure.STATUS,
+        DatabaseEncryptionFailure.DESCRIPTION,
         cause
     )
 }

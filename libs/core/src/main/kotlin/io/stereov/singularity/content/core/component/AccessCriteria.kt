@@ -75,7 +75,7 @@ class AccessCriteria(
     suspend fun generate(roles: Set<String> = emptySet()): Criteria {
         val authenticationOutcome = authorizationService.getAuthenticationOutcome().getOrNull()
         val userId = authenticationOutcome?.principal
-            ?: return if (roles.isEmpty() || roles.any { runCatching { ContentAccessRole.fromString(it) }.getOrNull() == ContentAccessRole.VIEWER }) {
+            ?: return if (roles.isEmpty() || roles.any { ContentAccessRole.fromString(it).getOrNull() == ContentAccessRole.VIEWER }) {
                 isPublic
             } else {
                 Criteria.where("_id").`is`("")
@@ -100,16 +100,16 @@ class AccessCriteria(
         if (roles.isEmpty()) return allAccessCriteria
 
         val criteriaList = mutableSetOf<Criteria>()
-        if (roles.any { runCatching { ContentAccessRole.fromString(it) }.getOrNull() == ContentAccessRole.VIEWER }) {
+        if (roles.any { ContentAccessRole.fromString(it).getOrNull() == ContentAccessRole.VIEWER }) {
             criteriaList.add(canViewGroup(groups))
             criteriaList.add(canViewUser(userId))
             criteriaList.add(isPublic)
         }
-        if (roles.any { runCatching { ContentAccessRole.fromString(it) }.getOrNull() == ContentAccessRole.EDITOR }) {
+        if (roles.any { ContentAccessRole.fromString(it).getOrNull() == ContentAccessRole.EDITOR }) {
             criteriaList.add(canEditGroup(groups))
             criteriaList.add(canEditUser(userId))
         }
-        if (roles.any { runCatching { ContentAccessRole.fromString(it) }.getOrNull() == ContentAccessRole.MAINTAINER }) {
+        if (roles.any { ContentAccessRole.fromString(it).getOrNull() == ContentAccessRole.MAINTAINER }) {
             criteriaList.add(isMaintainerGroup(groups))
             criteriaList.add(isMaintainerUser(userId))
         }

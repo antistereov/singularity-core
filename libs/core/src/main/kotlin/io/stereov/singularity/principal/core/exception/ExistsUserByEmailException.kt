@@ -1,5 +1,7 @@
 package io.stereov.singularity.principal.core.exception
 
+import io.stereov.singularity.database.core.exception.DatabaseFailure
+import io.stereov.singularity.database.hash.exception.HashFailure
 import io.stereov.singularity.global.exception.SingularityException
 import org.springframework.http.HttpStatus
 
@@ -35,14 +37,13 @@ sealed class ExistsUserByEmailException(
      * @param msg A message describing the details of the error.
      * @param cause The underlying cause of the exception, if available.
      *
-     * @property code `USER_HASH_FAILURE`
-     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
+     * @see HashFailure
      */
     class Hash(msg: String, cause: Throwable? = null) : ExistsUserByEmailException(
         msg,
-        "USER_HASH_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Failed to generate or verify hash.",
+        HashFailure.CODE,
+        HashFailure.STATUS,
+        HashFailure.DESCRIPTION,
         cause
     )
 
@@ -57,14 +58,13 @@ sealed class ExistsUserByEmailException(
      * @param msg A message describing the details of the error.
      * @param cause The underlying cause of the exception, if available.
      *
-     * @property code `USER_DB_FAILURE`
-     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
+     * @see DatabaseFailure
      */
     class Database(msg: String, cause: Throwable? = null) : ExistsUserByEmailException(
         msg,
-        "USER_DB_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Failed to retrieve user from database.",
+        DatabaseFailure.CODE,
+        DatabaseFailure.STATUS,
+        DatabaseFailure.DESCRIPTION,
         cause
     )
 }

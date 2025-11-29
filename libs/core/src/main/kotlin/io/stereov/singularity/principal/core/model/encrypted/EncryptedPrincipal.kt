@@ -1,5 +1,6 @@
 package io.stereov.singularity.principal.core.model.encrypted
 
+import io.stereov.singularity.database.core.model.WithId
 import io.stereov.singularity.database.encryption.model.Encrypted
 import io.stereov.singularity.database.encryption.model.EncryptedSensitiveDocument
 import io.stereov.singularity.principal.core.model.Role
@@ -24,7 +25,7 @@ import java.time.Instant
  * @property lastActive The timestamp indicating the last recorded activity of the principal.
  * @property sensitive The sensitive information associated with the principal, stored as an encrypted object.
  */
-sealed interface EncryptedPrincipal<R: Role, S: SensitivePrincipalData> : EncryptedSensitiveDocument<S> {
+sealed interface EncryptedPrincipal<R: Role, S: SensitivePrincipalData> : EncryptedSensitiveDocument<S>, WithId {
     val roles: Set<R>
     val groups: Set<String>
     val createdAt: Instant

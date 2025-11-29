@@ -1,6 +1,9 @@
 package io.stereov.singularity.principal.core.exception
 
+import io.stereov.singularity.database.core.exception.DatabaseFailure
+import io.stereov.singularity.database.core.exception.PostCommitSideEffectFailure
 import io.stereov.singularity.database.encryption.exception.SaveEncryptedDocumentException
+import io.stereov.singularity.database.hash.exception.HashFailure
 import io.stereov.singularity.global.exception.SingularityException
 import org.springframework.http.HttpStatus
 
@@ -82,14 +85,13 @@ sealed class ConvertGuestToUserException(
      * @param msg A message providing the details about the error.
      * @param cause The underlying cause of the exception, if available.
      *
-     * @property code `USER_DB_FAILURE`
-     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
-     */
+     * @see DatabaseFailure
+    */
     class Database(msg: String, cause: Throwable? = null) : ConvertGuestToUserException(
         msg,
-        "USER_DB_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Failed to retrieve guest from database.",
+        DatabaseFailure.CODE,
+        DatabaseFailure.STATUS,
+        DatabaseFailure.DESCRIPTION,
         cause
     )
 
@@ -129,9 +131,9 @@ sealed class ConvertGuestToUserException(
      */
     class Hash(msg: String, cause: Throwable? = null) : ConvertGuestToUserException(
         msg,
-        "GUEST_HASH_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Failed to generate or verify hash.",
+        HashFailure.CODE,
+        HashFailure.STATUS,
+        HashFailure.DESCRIPTION,
         cause
     )
 
@@ -145,16 +147,15 @@ sealed class ConvertGuestToUserException(
      * @param msg A message providing details about the specific failure.
      * @param cause The underlying cause of this exception, if available.
      *
-     * @property code `POST_COMMIT_SIDE_EFFECT_FAILURE`
-     * @property status [HttpStatus.MULTI_STATUS]
+     * @see PostCommitSideEffect
      *
      * @see SaveEncryptedDocumentException.PostCommitSideEffect
      */
     class PostCommitSideEffect(msg: String, cause: Throwable? = null) : ConvertGuestToUserException(
         msg,
-        "POST_COMMIT_SIDE_EFFECT_FAILURE",
-        HttpStatus.MULTI_STATUS,
-        "Exception thrown when a post-commit side effect fails.",
+        PostCommitSideEffectFailure.CODE,
+        PostCommitSideEffectFailure.STATUS,
+        PostCommitSideEffectFailure.DESCRIPTION,
         cause
     )
 }

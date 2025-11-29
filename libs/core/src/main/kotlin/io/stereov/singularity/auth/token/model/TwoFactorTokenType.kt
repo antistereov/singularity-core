@@ -4,7 +4,7 @@ interface TwoFactorTokenType {
 
     object Authentication : SecurityTokenType {
         const val COOKIE_NAME = "two_factor_authentication_token"
-        const val HEADER = "X-Two-Factor-Authentication-Token"
+        const val HEADER = "X-Two-Factor-Authentication-EmailVerificationTokenCreation"
 
         override val header = HEADER
         override val cookieName = COOKIE_NAME

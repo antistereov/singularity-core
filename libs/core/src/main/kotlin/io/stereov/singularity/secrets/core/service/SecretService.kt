@@ -57,7 +57,7 @@ abstract class SecretService(
      * Loads the current secret from the secret store and updates the in-memory cache.
      *
      * This method attempts to retrieve the secret associated with the actual key from the secret store.
-     * If the secret is not found (`SecretStoreException.NotFound`), it triggers the creation of a new secret
+     * If the secret is not found (`SecretStoreException.UserNotFound`), it triggers the creation of a new secret
      * by calling `updateSecret`. Once successfully obtained, the secret is cached in memory.
      *
      * @return A [Result] containing the [Secret] if successful, or a [SecretStoreException] in case of failure.

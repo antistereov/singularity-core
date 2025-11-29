@@ -34,14 +34,13 @@ sealed class ExistsDocumentByIdException(
      * @param msg The error message describing the database failure.
      * @param cause The root cause of this exception, if applicable.
      *
-     * @property code A constant error code `DATABASE_FAILURE`.
-     * @property status The associated HTTP status is [HttpStatus.INTERNAL_SERVER_ERROR].
+     * @see DatabaseFailure
      */
     class Database(msg: String, cause: Throwable? = null) : ExistsDocumentByIdException(
         msg,
-        "DATABASE_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Exception representing a general failure related to database operations.",
+        DatabaseFailure.CODE,
+        DatabaseFailure.STATUS,
+        DatabaseFailure.DESCRIPTION,
         cause
     )
 }

@@ -1,7 +1,10 @@
 package io.stereov.singularity.principal.group.exception
 
+import io.stereov.singularity.database.core.exception.DatabaseFailure
+import io.stereov.singularity.database.core.exception.PostCommitSideEffectFailure
 import io.stereov.singularity.database.encryption.exception.SaveEncryptedDocumentException
 import io.stereov.singularity.global.exception.SingularityException
+import io.stereov.singularity.principal.core.exception.UserNotFoundFailure
 import org.springframework.http.HttpStatus
 
 /**
@@ -52,14 +55,13 @@ sealed class GroupMemberException(
      * @param msg A descriptive message explaining the issue encountered.
      * @param cause The optional underlying cause of the exception.
      *
-     * @property code `USER_NOT_FOUND`
-     * @property status [HttpStatus.NOT_FOUND]
+     * @see UserNotFound
      */
     class UserNotFound(msg: String, cause: Throwable? = null) : GroupMemberException(
         msg,
-        "USER_NOT_FOUND",
-        HttpStatus.NOT_FOUND,
-        "No user with specified id found.",
+        UserNotFoundFailure.CODE,
+        UserNotFoundFailure.STATUS,
+        UserNotFoundFailure.DESCRIPTION,
         cause
     )
 
@@ -71,14 +73,13 @@ sealed class GroupMemberException(
      * @param msg A descriptive message outlining the nature of the database failure.
      * @param cause The optional underlying cause of the exception.
      *
-     * @property code `GROUP_MEMBER_DB_FAILURE`
-     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
+     * @see DatabaseFailure
      */
     class Database(msg: String, cause: Throwable? = null) : GroupMemberException(
         msg,
-        "GROUP_MEMBER_DB_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Failed to retrieve group member from database.",
+        DatabaseFailure.CODE,
+        DatabaseFailure.STATUS,
+        DatabaseFailure.DESCRIPTION,
         cause
     )
 
@@ -92,16 +93,15 @@ sealed class GroupMemberException(
      * @param msg A message providing details about the specific failure.
      * @param cause The underlying cause of this exception, if available.
      *
-     * @property code `POST_COMMIT_SIDE_EFFECT_FAILURE`
-     * @property status [HttpStatus.MULTI_STATUS]
+     * @see PostCommitSideEffect
      *
      * @see SaveEncryptedDocumentException.PostCommitSideEffect
      */
     class PostCommitSideEffect(msg: String, cause: Throwable? = null) : GroupMemberException(
         msg,
-        "POST_COMMIT_SIDE_EFFECT_FAILURE",
-        HttpStatus.MULTI_STATUS,
-        "Exception thrown when a post-commit side effect fails.",
+        PostCommitSideEffectFailure.CODE,
+        PostCommitSideEffectFailure.STATUS,
+        PostCommitSideEffectFailure.DESCRIPTION,
         cause
     )
 }

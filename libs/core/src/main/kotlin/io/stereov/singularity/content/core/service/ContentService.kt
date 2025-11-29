@@ -2,20 +2,18 @@ package io.stereov.singularity.content.core.service
 
 import com.github.michaelbull.result.*
 import com.github.michaelbull.result.coroutines.coroutineBinding
-import com.github.michaelbull.result.coroutines.runSuspendCatching
-import io.stereov.singularity.auth.core.exception.AuthenticationException
 import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.content.core.component.AccessCriteria
 import io.stereov.singularity.content.core.exception.ContentException
+import io.stereov.singularity.content.core.exception.FindContentAuthorizedException
 import io.stereov.singularity.content.core.model.ContentAccessRole
 import io.stereov.singularity.content.core.model.ContentDocument
 import io.stereov.singularity.content.core.properties.ContentProperties
 import io.stereov.singularity.content.core.repository.ContentRepository
 import io.stereov.singularity.database.core.exception.DatabaseException
 import io.stereov.singularity.database.core.exception.SaveDocumentException
-import io.stereov.singularity.database.core.service.CrudService
-import io.stereov.singularity.principal.group.model.KnownGroups
+import io.stereov.singularity.database.core.service.CrudServiceWithKey
 import io.stereov.singularity.translate.service.TranslateService
 import java.net.URI
 import java.net.URL
@@ -26,7 +24,7 @@ import java.time.Instant
  *
  * @param T The type of content document that this service manages. It must extend from [ContentDocument].
  */
-abstract class ContentService<T: ContentDocument<T>> : CrudService<T>  {
+abstract class ContentService<T: ContentDocument<T>> : CrudServiceWithKey<T>  {
 
     abstract override val repository: ContentRepository<T>
     abstract val authorizationService: AuthorizationService
@@ -49,74 +47,6 @@ abstract class ContentService<T: ContentDocument<T>> : CrudService<T>  {
                 .replace("{contentKey}", key)
         ).toURL()
     }.mapError { ex -> IllegalArgumentException("The given string violates RFC 2396", ex) }
-
-    /**
-     * Finds an entity by its unique key in the database.
-     * This method returns a result that contains the entity if found or an appropriate exception
-     * in case of an error or if the entity is not found.
-     *
-     * @param key The unique identifier of the entity to search for.
-     * @return A [Result] containing the entity of type [T] if found, or an instance of [DatabaseException]
-     * in case of a database error or if the entity is not found.
-     */
-    suspend fun findByKey(key: String): Result<T, DatabaseException>  {
-        logger.debug { "Finding ${collectionClazz.simpleName} by key \"$key\"" }
-
-        return runSuspendCatching { repository.findByKey(key) }
-            .mapError { ex -> DatabaseException.Database("Failed to find ${collectionClazz.simpleName}: ${ex.message}", ex) }
-            .andThen { it.toResultOr { DatabaseException.NotFound("No ${collectionClazz.simpleName} with key $key found") } }
-    }
-
-    /**
-     * Deletes an entity associated with the specified key from the database.
-     *
-     * This method attempts to remove the entity identified by the provided key
-     * and handles any database-related errors that might occur during the operation.
-     *
-     * @param key The unique identifier of the entity to be deleted.
-     * @return A [Result] containing [Unit] if the entity was successfully deleted,
-     * or a [DatabaseException.Database] if an error occurred during the operation.
-     */
-    open suspend fun deleteByKey(key: String): Result<Unit, DatabaseException.Database> {
-        logger.debug { "Deleting ${collectionClazz.simpleName} with key \"$key\"" }
-
-        return runSuspendCatching { repository.deleteByKey(key) }
-            .mapError { ex -> DatabaseException.Database("Failed to delete ${collectionClazz.simpleName} with key $key: ${ex.message}", ex) }
-    }
-
-    /**
-     * Checks if an entity with the specified key exists in the database.
-     *
-     * This method performs a database existence check for an entity identified by the given key.
-     * If successful, it returns a boolean wrapped in a `Result`, indicating the existence of the entity.
-     * In case of a database-related error, an instance of `DatabaseException.Database` is returned.
-     *
-     * @param key The unique identifier of the entity to check for its existence in the database.
-     * @return A [Result] containing `true` if the entity exists, `false` otherwise, or a [DatabaseException.Database]
-     * in case of an error during the operation.
-     */
-    open suspend fun existsByKey(key: String): Result<Boolean, DatabaseException.Database> {
-        logger.debug { "Checking if ${collectionClazz.simpleName} with key \"$key\" exists" }
-
-        return runSuspendCatching { repository.existsByKey(key) }
-            .mapError { ex -> DatabaseException.Database("Failed to check existence of ${collectionClazz.simpleName} by key $key: ${ex.message}", ex) }
-    }
-
-    /**
-     * Validates that the authenticated user belongs to the Contributor group.
-     * If the user is not a member of the required group, an error is returned.
-     *
-     * @param authentication The authenticated user whose group membership is being validated.
-     * @return A [Result] containing the authenticated user if they belong to the Contributor group,
-     *   or an [AuthenticationException.GroupMembershipRequired] if the membership check fails.
-     */
-    fun requireContributorGroupMembership(
-        authentication: AuthenticationOutcome.Authenticated
-    ): Result<AuthenticationOutcome.Authenticated, AuthenticationException.GroupMembershipRequired> {
-        logger.debug { "Validate that user belongs to Editor group" }
-
-        return authentication.requireGroupMembership(KnownGroups.CONTRIBUTOR)
-    }
 
     /**
      * Validates if the authenticated user has the required access role to perform an action
@@ -171,13 +101,15 @@ abstract class ContentService<T: ContentDocument<T>> : CrudService<T>  {
         key: String,
         authenticationOutcome: AuthenticationOutcome,
         role: ContentAccessRole
-    ): Result<T, ContentException> = coroutineBinding {
+    ): Result<T, FindContentAuthorizedException> = coroutineBinding {
         logger.debug { "Finding ${collectionClazz.simpleName} by key \"$key\" and validating permission: $role" }
 
         val content = findByKey(key)
-            .mapError { ex -> ContentException.fromDatabaseException(ex) }
+            .mapError { ex -> FindContentAuthorizedException.from(ex) }
             .bind()
 
-        requireAuthorization(authenticationOutcome, content, role).bind()
+        requireAuthorization(authenticationOutcome, content, role)
+            .mapError { ex -> FindContentAuthorizedException.NotAuthorized(ex.message, ex.cause) }
+            .bind()
     }
 }

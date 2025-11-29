@@ -1,5 +1,7 @@
 package io.stereov.singularity.auth.core.exception
 
+import io.stereov.singularity.database.core.exception.DatabaseFailure
+import io.stereov.singularity.database.hash.exception.HashFailure
 import io.stereov.singularity.global.exception.SingularityException
 import org.springframework.http.HttpStatus
 
@@ -101,16 +103,15 @@ sealed class StepUpException(
      * @param msg The exception message describing the hashing error.
      * @param cause The optional underlying cause of the exception.
      *
-     * @property code `HASHING_FAILURE`
-     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
+     * @see HashFailure
      *
      * @see io.stereov.singularity.database.hash.exception.HashException.Hashing
      */
     class Hashing(msg: String, cause: Throwable? = null) : StepUpException(
         msg,
-        "HASHING_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Indicates that an error occurred during password hashing.",
+        HashFailure.CODE,
+        HashFailure.STATUS,
+        HashFailure.DESCRIPTION,
         cause
     )
 
@@ -124,14 +125,13 @@ sealed class StepUpException(
      * @param msg The exception message providing details about the context of the error.
      * @param cause The optional underlying cause of the exception.
      *
-     * @property code `INVALID_CREDENTIALS`
-     * @property statxus [HttpStatus.UNAUTHORIZED]
+     * @see InvalidCredentialsFailure
      */
     class InvalidCredentials(msg: String, cause: Throwable? = null) : StepUpException(
         msg,
-        "INVALID_CREDENTIALS",
-        HttpStatus.UNAUTHORIZED,
-        "Indicates that the provided credentials are invalid.",
+        InvalidCredentialsFailure.CODE,
+        InvalidCredentialsFailure.STATUS,
+        InvalidCredentialsFailure.DESCRIPTION,
         cause
     )
 
@@ -145,14 +145,13 @@ sealed class StepUpException(
      * @param msg A message providing details about the context of the error.
      * @param cause The optional underlying cause of the exception.
      *
-     * @property code `DATABASE_FAILURE`
-     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
+     * @see DatabaseFailure
      */
     class Database(msg: String, cause: Throwable? = null) : StepUpException(
         msg,
-        "DATABASE_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Exception thrown when an encrypted database operation fails.",
+        DatabaseFailure.CODE,
+        DatabaseFailure.STATUS,
+        DatabaseFailure.DESCRIPTION,
         cause
     )
 }

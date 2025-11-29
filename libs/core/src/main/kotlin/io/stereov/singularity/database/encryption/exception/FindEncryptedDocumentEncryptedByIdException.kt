@@ -1,6 +1,8 @@
 package io.stereov.singularity.database.encryption.exception
 
+import io.stereov.singularity.database.core.exception.DatabaseEntityNotFound
 import io.stereov.singularity.database.core.exception.DatabaseException
+import io.stereov.singularity.database.core.exception.DatabaseFailure
 import io.stereov.singularity.global.exception.SingularityException
 import org.springframework.http.HttpStatus
 
@@ -34,16 +36,14 @@ sealed class FindEncryptedDocumentEncryptedByIdException(
      * @param msg A detailed message describing the missing entity and its context.
      * @param cause The underlying exception, if available, that caused this error.
      *
-     * @property code `DATABASE_ENTITY_NOT_FOUND`
-     * @property status [HttpStatus.NOT_FOUND]
-     *
+     * @see DatabaseEntityNotFound
      * @see DatabaseException.NotFound
      */
     class NotFound(msg: String, cause: Throwable? = null) : FindEncryptedDocumentEncryptedByIdException(
         msg,
-        "DATABASE_ENTITY_NOT_FOUND",
-        HttpStatus.NOT_FOUND,
-        "Exception thrown when an entity is not found in the encrypted database.",
+        DatabaseEntityNotFound.CODE,
+        DatabaseEntityNotFound.STATUS,
+        DatabaseEntityNotFound.DESCRIPTION,
         cause
     )
 
@@ -55,16 +55,15 @@ sealed class FindEncryptedDocumentEncryptedByIdException(
      * @param msg The error message providing details about the failure.
      * @param cause The underlying cause of this exception, if any.
      *
-     * @property code `DATABASE_FAILURE`
-     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
+     * @see DatabaseFailure
      *
      * @see DatabaseException.Database
      */
     class Database(msg: String, cause: Throwable? = null) : FindEncryptedDocumentEncryptedByIdException(
         msg,
-        "DATABASE_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Exception thrown when an encrypted database operation fails.",
+        DatabaseFailure.CODE,
+        DatabaseFailure.STATUS,
+        DatabaseFailure.DESCRIPTION,
         cause
     )
 }

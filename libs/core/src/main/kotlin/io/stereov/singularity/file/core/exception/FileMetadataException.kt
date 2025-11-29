@@ -1,5 +1,6 @@
 package io.stereov.singularity.file.core.exception
 
+import io.stereov.singularity.database.core.exception.DatabaseFailure
 import io.stereov.singularity.global.exception.SingularityException
 import org.springframework.http.HttpStatus
 
@@ -51,14 +52,13 @@ sealed class FileMetadataException(
      * @param msg A detailed message describing the error.
      * @param cause The root cause of this exception, if available.
      *
-     * @property code `DATABASE_FAILURE`
-     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
+     * @see DatabaseFailure
      */
     class Database(msg: String, cause: Throwable? = null) : FileMetadataException(
         msg,
-        "DATABASE_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Represents an exception related to operations with file metadata arising from database-related issues.",
+        DatabaseFailure.CODE,
+        DatabaseFailure.STATUS,
+        DatabaseFailure.DESCRIPTION,
         cause
     )
 }

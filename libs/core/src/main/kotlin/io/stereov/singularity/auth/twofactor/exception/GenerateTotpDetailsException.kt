@@ -1,6 +1,8 @@
 package io.stereov.singularity.auth.twofactor.exception
 
 import io.stereov.singularity.global.exception.SingularityException
+import io.stereov.singularity.principal.core.exception.InvalidUserDocumentFailure
+import io.stereov.singularity.principal.core.exception.NoPasswordProvider
 import org.springframework.http.HttpStatus
 
 sealed class GenerateTotpDetailsException (
@@ -13,33 +15,33 @@ sealed class GenerateTotpDetailsException (
 
     class AlreadyEnabled(msg: String, cause: Throwable? = null) : GenerateTotpDetailsException(
         msg,
-        "TWO_FACTOR_ALREADY_ENABLED",
-        HttpStatus.NOT_MODIFIED,
-        "Two factor authentication is already enabled for this user.",
+        TwoFactorMethodAlreadyEnabledFailure.CODE,
+        TwoFactorMethodAlreadyEnabledFailure.STATUS,
+        TwoFactorMethodAlreadyEnabledFailure.DESCRIPTION,
         cause
     )
 
     class Totp(msg: String, cause: Throwable? = null) : GenerateTotpDetailsException(
         msg,
-        "TOTP_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Exception thrown when an operation with TOTP fails.",
+        TotpFailure.CODE,
+        TotpFailure.STATUS,
+        TotpFailure.DESCRIPTION,
         cause
     )
 
     class NoPasswordSet(msg: String, cause: Throwable? = null) : GenerateTotpDetailsException(
         msg,
-        "NO_PASSWORD_SET",
-        HttpStatus.BAD_REQUEST,
-        "User does not have a password set.",
+        NoPasswordProvider.CODE,
+        NoPasswordProvider.STATUS,
+        NoPasswordProvider.DESCRIPTION,
         cause
     )
 
     class InvalidDocument(msg: String, cause: Throwable? = null) : GenerateTotpDetailsException(
         msg,
-        "INVALID_USER_DOCUMENT",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Invalid user document.",
+        InvalidUserDocumentFailure.CODE,
+        InvalidUserDocumentFailure.STATUS,
+        InvalidUserDocumentFailure.DESCRIPTION,
         cause
     )
 

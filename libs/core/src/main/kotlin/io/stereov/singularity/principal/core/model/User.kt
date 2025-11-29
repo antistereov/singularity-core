@@ -5,8 +5,8 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.model.SessionInfo
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
+import io.stereov.singularity.database.core.exception.DocumentException
 import io.stereov.singularity.database.hash.model.Hash
-import io.stereov.singularity.principal.core.exception.PrincipalException
 import io.stereov.singularity.principal.core.exception.UserException
 import io.stereov.singularity.principal.core.model.identity.UserIdentities
 import io.stereov.singularity.principal.core.model.identity.UserIdentity
@@ -37,7 +37,7 @@ import java.util.*
  * @property preferredTwoFactorMethod Retrieves the preferred two-factor authentication method as a [Result].
  */
 data class User(
-    var _id: ObjectId? = null,
+    override var _id: ObjectId? = null,
     override val createdAt: Instant = Instant.now(),
     override var lastActive: Instant = Instant.now(),
     var isAdmin: Boolean = false,
@@ -56,10 +56,7 @@ data class User(
     val email
         get() = sensitive.email
 
-    override val id: Result<ObjectId, PrincipalException.InvalidDocument>
-        get() = this._id.toResultOr { PrincipalException.InvalidDocument("The user document does not have an ID") }
-
-    val fileStoragePath: Result<String, PrincipalException.InvalidDocument>
+    val fileStoragePath: Result<String, DocumentException.Invalid>
         get() = id.map { "users/$it" }
 
     val twoFactorEnabled: Boolean

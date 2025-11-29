@@ -17,10 +17,10 @@ import io.stereov.singularity.auth.twofactor.exception.GenerateTotpDetailsExcept
 import io.stereov.singularity.auth.twofactor.exception.TotpUserRecoveryException
 import io.stereov.singularity.auth.twofactor.exception.ValidateTotpSetupException
 import io.stereov.singularity.auth.twofactor.service.TotpAuthenticationService
-import io.stereov.singularity.database.encryption.exception.FindEncryptedDocumentByIdException
 import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.principal.core.dto.response.UserResponse
+import io.stereov.singularity.principal.core.exception.FindUserByIdException
 import io.stereov.singularity.principal.core.exception.PrincipalMapperException
 import io.stereov.singularity.principal.core.mapper.PrincipalMapper
 import io.stereov.singularity.principal.core.service.UserService
@@ -103,7 +103,7 @@ class TotpAuthenticationController(
         AccessTokenExtractionException::class,
         AuthenticationException.AuthenticationRequired::class,
         StepUpTokenExtractionException::class,
-        FindEncryptedDocumentByIdException::class,
+        FindUserByIdException::class,
         GenerateTotpDetailsException::class
     ])
     suspend fun getTotpSetupDetails(
@@ -118,7 +118,7 @@ class TotpAuthenticationController(
             .getOrThrow { when (it) { is StepUpTokenExtractionException -> it } }
 
         val user = userService.findById(authentication.principalId)
-            .getOrThrow { when (it) { is FindEncryptedDocumentByIdException -> it } }
+            .getOrThrow { FindUserByIdException.from(it) }
 
         val res = totpAuthenticationService.getTotpDetails(user)
             .getOrThrow { when (it) { is GenerateTotpDetailsException -> it } }
@@ -176,7 +176,7 @@ class TotpAuthenticationController(
         AccessTokenExtractionException::class,
         AuthenticationException.AuthenticationRequired::class,
         StepUpTokenExtractionException::class,
-        FindEncryptedDocumentByIdException::class,
+        FindUserByIdException::class,
         TotpSetupTokenExtractionException::class,
         ValidateTotpSetupException::class,
         PrincipalMapperException::class
@@ -195,7 +195,7 @@ class TotpAuthenticationController(
             .getOrThrow { when (it) { is StepUpTokenExtractionException -> it } }
 
         var user = userService.findById(authentication.principalId)
-            .getOrThrow { when (it) { is FindEncryptedDocumentByIdException -> it } }
+            .getOrThrow { FindUserByIdException.from(it) }
 
         val token = totpSetupTokenService.validate(setupRequest.token, authentication.principalId)
             .getOrThrow { when (it) { is TotpSetupTokenExtractionException -> it } }
@@ -254,7 +254,7 @@ class TotpAuthenticationController(
         AccessTokenExtractionException::class,
         AuthenticationException.AuthenticationRequired::class,
         StepUpTokenExtractionException::class,
-        FindEncryptedDocumentByIdException::class,
+        FindUserByIdException::class,
         DisableTotpException::class,
         PrincipalMapperException::class
     ])
@@ -271,7 +271,7 @@ class TotpAuthenticationController(
             .getOrThrow { when (it) { is StepUpTokenExtractionException -> it } }
 
         var user = userService.findById(authentication.principalId)
-            .getOrThrow { when (it) { is FindEncryptedDocumentByIdException -> it } }
+            .getOrThrow { FindUserByIdException.from(it) }
 
         user = totpAuthenticationService.disable(user, locale)
             .getOrThrow { when (it) { is DisableTotpException -> it } }

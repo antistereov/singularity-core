@@ -26,14 +26,13 @@ sealed class FileException(msg: String, code: String, status: HttpStatus, descri
      * @param msg A descriptive message providing details about the exception.
      * @param cause The underlying cause of the exception, if available.
      *
-     * @property code `UNSUPPORTED_MEDIA_TYPE`
-     * @property status [HttpStatus.UNSUPPORTED_MEDIA_TYPE]
+     * @see UnsupportedMediaTypeFailure
      */
     class UnsupportedMediaType(msg: String, cause: Throwable? = null) : FileException(
         msg,
-        "UNSUPPORTED_MEDIA_TYPE",
-        HttpStatus.UNSUPPORTED_MEDIA_TYPE,
-        "Thrown to indicate that a file operation failed due to an unsupported media type.",
+        UnsupportedMediaTypeFailure.CODE,
+        UnsupportedMediaTypeFailure.STATUS,
+        UnsupportedMediaTypeFailure.DESCRIPTION,
         cause
     )
 

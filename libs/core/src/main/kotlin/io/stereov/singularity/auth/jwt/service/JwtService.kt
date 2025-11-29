@@ -26,7 +26,7 @@ class JwtService(
     private val tokenTypeClaim = "token_type"
 
     /**
-     * Decodes a JSON Web Token (JWT) and validates its type and expiration details.
+     * Decodes a JSON Web EmailVerificationTokenCreation (JWT) and validates its type and expiration details.
      *
      * @param token The JWT to decode.
      * @param tokenType The expected token type to validate against.
@@ -44,22 +44,22 @@ class JwtService(
         }
 
         if (jwt.claims[tokenTypeClaim] != tokenType)
-            return Err(TokenExtractionException.Invalid("Token is not of type $tokenType"))
+            return Err(TokenExtractionException.Invalid("EmailVerificationTokenCreation is not of type $tokenType"))
 
         if (jwt.notBefore != null && jwt.notBefore > Instant.now()) {
-            return Err(TokenExtractionException.Invalid("Token not valid before ${jwt.notBefore}"))
+            return Err(TokenExtractionException.Invalid("EmailVerificationTokenCreation not valid before ${jwt.notBefore}"))
         }
 
         val expiresAt = jwt.expiresAt
             ?: return Err(TokenExtractionException.Invalid("JWT does not contain expiration information"))
 
-        if (expiresAt <= Instant.now()) return Err(TokenExtractionException.Expired("Token is expired"))
+        if (expiresAt <= Instant.now()) return Err(TokenExtractionException.Expired("EmailVerificationTokenCreation is expired"))
 
         return Ok(jwt)
     }
 
     /**
-     * Encodes a JSON Web Token (JWT) using specified claims and token type.
+     * Encodes a JSON Web EmailVerificationTokenCreation (JWT) using specified claims and token type.
      *
      * @param claims The set of claims to include in the JWT.
      * @param tokenType The type of token to associate with the JWT.

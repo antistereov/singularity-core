@@ -38,11 +38,18 @@ sealed class PasswordResetTokenExtractionException(
      */
     class Invalid(msg: String, cause: Throwable? = null) : PasswordResetTokenExtractionException(
         msg,
-        "PASSWORD_RESET_TOKEN_INVALID",
-        HttpStatus.UNAUTHORIZED,
-        "Indicates that the password reset token cannot be decoded.",
+        CODE,
+        STATUS,
+        DESCRIPTION,
         cause
-    )
+    ) {
+
+        companion object {
+            const val CODE = "PASSWORD_RESET_TOKEN_INVALID"
+            const val DESCRIPTION = "Indicates that the password reset token cannot be decoded."
+            val STATUS = HttpStatus.UNAUTHORIZED
+        }
+    }
 
     /**
      * Indicates that the [PasswordResetToken] is expired.

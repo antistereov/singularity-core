@@ -1,6 +1,11 @@
 package io.stereov.singularity.content.article.service
 
+import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.coroutines.coroutineBinding
+import com.github.michaelbull.result.mapError
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.lettuce.core.KillArgs.Builder.user
+import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.principal.group.service.GroupService
 import io.stereov.singularity.content.article.dto.request.ChangeArticleStateRequest
@@ -18,6 +23,9 @@ import io.stereov.singularity.content.core.dto.request.InviteUserToContentReques
 import io.stereov.singularity.content.core.dto.request.UpdateContentAccessRequest
 import io.stereov.singularity.content.core.dto.request.UpdateOwnerRequest
 import io.stereov.singularity.content.core.dto.response.ExtendedContentAccessDetailsResponse
+import io.stereov.singularity.content.core.exception.AcceptContentInvitationException
+import io.stereov.singularity.content.core.exception.InviteUserException
+import io.stereov.singularity.content.core.exception.SetContentTrustedStateException
 import io.stereov.singularity.content.core.model.ContentAccessDetails
 import io.stereov.singularity.content.core.model.ContentAccessRole
 import io.stereov.singularity.content.core.service.ContentManagementService
@@ -27,6 +35,7 @@ import io.stereov.singularity.file.image.service.ImageStore
 import io.stereov.singularity.global.util.toSlug
 import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.principal.core.mapper.PrincipalMapper
+import io.stereov.singularity.principal.core.model.User
 import io.stereov.singularity.principal.core.service.UserService
 import org.bson.types.ObjectId
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -53,11 +62,13 @@ class ArticleManagementService(
     override val logger = KotlinLogging.logger {}
     override val contentType = Article.CONTENT_TYPE
 
-    suspend fun create(req: CreateArticleRequest, locale: Locale?): FullArticleResponse {
+    suspend fun create(
+        req: CreateArticleRequest,
+        authenticationOutcome: AuthenticationOutcome.Authenticated,
+        owner: User,
+        locale: Locale?
+    ): FullArticleResponse {
         logger.debug { "Creating article with title ${req.title}" }
-
-        contentService.requireContributorGroupMembership()
-        val user = authorizationService.getUser()
 
         if (req.title.isBlank())
             throw InvalidArticleRequestException("Title cannot be blank")
@@ -66,7 +77,7 @@ class ArticleManagementService(
         val article = createArticle(req, key, user.id)
         val savedArticle = contentService.save(article)
 
-        return articleMapper.createFullResponse(savedArticle, locale,user)
+        return articleMapper.createFullResponse(savedArticle, authenticationOutcome, locale,user)
     }
 
     private fun createArticle(req: CreateArticleRequest, key: String, ownerId: ObjectId): Article {
@@ -88,11 +99,25 @@ class ArticleManagementService(
         )
     }
 
-    override suspend fun setTrustedState(key: String, trusted: Boolean, locale: Locale?): FullArticleResponse {
-        return articleMapper.createFullResponse(doSetTrustedState(key, trusted), locale)
+    override suspend fun setTrustedState(
+        key: String,
+        authenticationOutcome: AuthenticationOutcome,
+        trusted: Boolean,
+        locale: Locale?
+    ): Result<FullArticleResponse, SetContentTrustedStateException> = coroutineBinding{
+        val article = doSetTrustedState(key, trusted).bind()
+
+        articleMapper.createFullResponse(article, authenticationOutcome, locale)
+            .mapError { ex -> SetContentTrustedStateException.ResponseMapping("Failed to map response: ${ex.message}", ex) }
+            .bind()
     }
 
-    override suspend fun inviteUser(key: String, req: InviteUserToContentRequest, locale: Locale?): ExtendedContentAccessDetailsResponse {
+    override suspend fun inviteUser(
+        key: String,
+        req: InviteUserToContentRequest,
+        inviter: User,
+        locale: Locale?
+    ): Result<ExtendedContentAccessDetailsResponse, InviteUserException> {
         logger.debug { "Inviting user with email \"${req.email}\" to role ${req.role} on article with key \"$key\"" }
 
         val article = contentService.findByKey(key)
@@ -101,7 +126,10 @@ class ArticleManagementService(
         return doInviteUser(key, req, title, contentService.getUri(key).toString(), locale)
     }
 
-    override suspend fun acceptInvitation(req: AcceptInvitationToContentRequest, locale: Locale?): FullArticleResponse {
+    override suspend fun acceptInvitation(
+        req: AcceptInvitationToContentRequest,
+        locale: Locale?
+    ): Result<FullArticleResponse, AcceptContentInvitationException> {
         logger.debug { "Accepting invitation" }
 
         val article = doAcceptInvitation(req)
