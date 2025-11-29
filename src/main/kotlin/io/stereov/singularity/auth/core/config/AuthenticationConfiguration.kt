@@ -18,7 +18,6 @@ import io.stereov.singularity.auth.token.service.*
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailProperties
 import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthenticationService
-import io.stereov.singularity.auth.token.service.TwoFactorAuthenticationTokenService
 import io.stereov.singularity.cache.service.CacheService
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.email.core.properties.EmailProperties
@@ -29,6 +28,7 @@ import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.principal.core.mapper.PrincipalMapper
+import io.stereov.singularity.principal.core.service.PrincipalService
 import io.stereov.singularity.principal.core.service.UserService
 import io.stereov.singularity.translate.service.TranslateService
 import org.springframework.boot.autoconfigure.AutoConfiguration
@@ -36,7 +36,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.data.redis.core.ReactiveRedisTemplate
 
 @Configuration
 @AutoConfiguration(
@@ -80,7 +79,7 @@ class AuthenticationConfiguration {
         loginAlertService: LoginAlertService,
         securityAlertProperties: SecurityAlertProperties,
         emailProperties: EmailProperties,
-
+        principalService: PrincipalService
         ): AuthenticationController {
         return AuthenticationController(
             authenticationService,
@@ -106,7 +105,10 @@ class AuthenticationConfiguration {
     @ConditionalOnMissingBean
     fun emailVerificationController(
         emailVerificationService: EmailVerificationService,
-        authorizationService: AuthorizationService
+        authorizationService: AuthorizationService,
+        emailVerificationTokenService: EmailVerificationTokenService,
+        userService: UserService,
+        principalMapper: PrincipalMapper
     ) = EmailVerificationController(
         emailVerificationService,
         authorizationService,
@@ -118,8 +120,12 @@ class AuthenticationConfiguration {
     @Bean
     @ConditionalOnMissingBean
     fun passwordResetController(
-        passwordResetService: PasswordResetService
-    ) = PasswordResetController(passwordResetService)
+        passwordResetService: PasswordResetService,
+        passwordResetTokenService: PasswordResetTokenService,
+    ) = PasswordResetController(
+        passwordResetService,
+        passwordResetTokenService,
+    )
 
     @Bean
     @ConditionalOnMissingBean
@@ -127,7 +133,9 @@ class AuthenticationConfiguration {
         sessionService: SessionService,
         cookieCreator: CookieCreator,
         sessionTokenService: SessionTokenService,
-        sessionMapper: SessionMapper
+        sessionMapper: SessionMapper,
+        authorizationService: AuthorizationService,
+        principalService: PrincipalService
     ): SessionController {
         return SessionController(
             sessionService,
@@ -161,7 +169,8 @@ class AuthenticationConfiguration {
         twoFactorEmailProperties: TwoFactorEmailProperties,
         registrationAlertService: RegistrationAlertService,
         securityAlertProperties: SecurityAlertProperties,
-        identityProviderInfoService: IdentityProviderInfoService
+        identityProviderInfoService: IdentityProviderInfoService,
+        principalService: PrincipalService
     ): AuthenticationService {
         return AuthenticationService(
             userService,
@@ -193,7 +202,6 @@ class AuthenticationConfiguration {
     fun emailVerificationService(
         userService: UserService,
         emailVerificationTokenService: EmailVerificationTokenService,
-        principalMapper: PrincipalMapper,
         cacheService: CacheService,
         emailProperties: EmailProperties,
         uiProperties: UiProperties,
@@ -206,7 +214,6 @@ class AuthenticationConfiguration {
     ) = EmailVerificationService(
         userService,
         emailVerificationTokenService,
-        principalMapper,
         cacheService,
         emailProperties,
         uiProperties,
@@ -224,7 +231,7 @@ class AuthenticationConfiguration {
         userService: UserService,
         passwordResetTokenService: PasswordResetTokenService,
         hashService: HashService,
-        redisTemplate: ReactiveRedisTemplate<String, String>,
+        cacheService: CacheService,
         emailProperties: EmailProperties,
         uiProperties: UiProperties,
         translateService: TranslateService,
@@ -239,25 +246,25 @@ class AuthenticationConfiguration {
         userService,
         passwordResetTokenService,
         hashService,
-        redisTemplate,
+        cacheService,
         emailProperties,
         uiProperties,
         translateService,
         emailService,
         templateService,
-        accessTokenCache,
         appProperties,
         securityAlertService,
         securityAlertProperties,
-        noAccountInfoService
+        noAccountInfoService,
+        accessTokenCache,
     )
 
     @Bean
     @ConditionalOnMissingBean
     fun sessionService(
-        userService: UserService,
-        authorizationService: AuthorizationService,
-        accessTokenCache: AccessTokenCache,
-    ) = SessionService(userService, authorizationService, accessTokenCache, principalService)
+        principalService: PrincipalService
+    ) = SessionService(
+        principalService,
+    )
 
 }

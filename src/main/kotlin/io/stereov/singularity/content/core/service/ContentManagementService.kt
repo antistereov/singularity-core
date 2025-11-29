@@ -5,7 +5,6 @@ import com.github.michaelbull.result.coroutines.coroutineBinding
 import io.github.oshai.kotlinlogging.KLogger
 import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.auth.core.service.AuthorizationService
-import io.stereov.singularity.content.core.dto.request.AcceptInvitationToContentRequest
 import io.stereov.singularity.content.core.dto.request.InviteUserToContentRequest
 import io.stereov.singularity.content.core.dto.request.UpdateContentAccessRequest
 import io.stereov.singularity.content.core.dto.request.UpdateOwnerRequest
@@ -16,9 +15,11 @@ import io.stereov.singularity.content.core.exception.*
 import io.stereov.singularity.content.core.model.ContentAccessRole
 import io.stereov.singularity.content.core.model.ContentAccessSubject
 import io.stereov.singularity.content.core.model.ContentDocument
+import io.stereov.singularity.content.invitation.mapper.InvitationMapper
 import io.stereov.singularity.content.invitation.model.Invitation
 import io.stereov.singularity.content.invitation.model.InvitationToken
 import io.stereov.singularity.content.invitation.service.InvitationService
+import io.stereov.singularity.database.core.exception.DocumentException
 import io.stereov.singularity.database.core.exception.FindDocumentByKeyException
 import io.stereov.singularity.database.encryption.exception.FindEncryptedDocumentByIdException
 import io.stereov.singularity.principal.core.exception.FindUserByEmailException
@@ -40,6 +41,7 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
     abstract val principalMapper: PrincipalMapper
     abstract val translateService: TranslateService
     abstract val groupService: GroupService
+    abstract val invitationMapper: InvitationMapper
 
     abstract val contentType: String
     abstract val logger: KLogger
@@ -92,6 +94,7 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
         key: String,
         req: InviteUserToContentRequest,
         inviter: User,
+        authenticationOutcome: AuthenticationOutcome,
         locale: Locale?
     ): Result<ExtendedContentAccessDetailsResponse, InviteUserException>
     protected suspend fun doInviteUser(
@@ -142,7 +145,7 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
             .bind()
     }
 
-    abstract suspend fun acceptInvitation(req: AcceptInvitationToContentRequest, locale: Locale?): Result<T, AcceptContentInvitationException>
+    abstract suspend fun acceptInvitation(token: InvitationToken, authenticationOutcome: AuthenticationOutcome, locale: Locale?): Result<ContentResponse<T>, AcceptContentInvitationException>
     protected suspend fun doAcceptInvitation(token: InvitationToken): Result<T, AcceptContentInvitationException> = coroutineBinding {
         logger.debug { "Accepting invitation" }
 
@@ -215,7 +218,12 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
             .bind()
     }
 
-    abstract suspend fun updateOwner(key: String, req: UpdateOwnerRequest, currentUserId: ObjectId, locale: Locale?): Result<ContentResponse<T>, UpdateContentOwnerException>
+    abstract suspend fun updateOwner(
+        key: String,
+        req: UpdateOwnerRequest,
+        authenticationOutcome: AuthenticationOutcome.Authenticated,
+        locale: Locale?
+    ): Result<ContentResponse<T>, UpdateContentOwnerException>
     protected suspend fun doUpdateOwner(
         key: String,
         req: UpdateOwnerRequest,
@@ -268,8 +276,9 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
     suspend fun deleteInvitation(
         contentKey: String,
         invitationId: ObjectId,
+        authenticationOutcome: AuthenticationOutcome
     ): Result<T, DeleteContentInvitationException> = coroutineBinding {
-        val content = contentService.findByKey(contentKey)
+        val content = contentService.findAuthorizedByKey(contentKey, authenticationOutcome, ContentAccessRole.MAINTAINER)
             .mapError { ex -> DeleteContentInvitationException.from(ex) }
             .bind()
 
@@ -280,27 +289,14 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
             .bind()
     }
 
-    /**
-     * Fetches the extended access details for content identified by the provided key.
-     * This includes fetching and processing user access information, invitations, and updating the access details in the database.
-     *
-     * @param key The unique identifier of the content for which the extended access details are being retrieved.
-     * @param authenticationOutcome The result of the authentication process for the requesting user.
-     * @return A [Result] containing [ExtendedContentAccessDetailsResponse] with the extended access details if successful,
-     *   or [GenerateExtendedContentAccessDetailsException] in case of failure.
-     */
     suspend fun extendedContentAccessDetails(
-        key: String,
+        content: T,
         authenticationOutcome: AuthenticationOutcome
     ): Result<ExtendedContentAccessDetailsResponse, GenerateExtendedContentAccessDetailsException> = coroutineBinding {
-        logger.debug { "Fetching extended content access details for article with key \"$key\"" }
+        logger.debug { "Fetching extended content access details for article with key \"${content.key}\"" }
 
         val invitations = mutableListOf<Invitation>()
         val invitationIds = mutableListOf<ObjectId>()
-
-        val content = contentService.findAuthorizedByKey(key, authenticationOutcome, ContentAccessRole.MAINTAINER)
-            .mapError { GenerateExtendedContentAccessDetailsException.from(it) }
-            .bind()
 
         content.access.invitations.forEach { invitationId ->
             invitationService.findById(invitationId)
@@ -320,7 +316,11 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
         val users = mutableListOf<UserContentAccessDetails>()
 
         content.access.users.maintainer.forEach { id ->
-            userService.findById(ObjectId(id))
+            val objectId = runCatching { ObjectId(id) }
+                .mapError { ex -> GenerateExtendedContentAccessDetailsException.InvalidDocument("Failed to parse user ID $id: ${ex.message}", ex) }
+                .bind()
+
+            userService.findById(objectId)
                 .map { user ->
                     val overview = principalMapper.toOverview(user, authenticationOutcome)
                         .mapError { ex -> GenerateExtendedContentAccessDetailsException.Database("Failed to map user to overview: ${ex.message}", ex) }
@@ -336,7 +336,11 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
         }
 
         content.access.users.editor.forEach { id ->
-            userService.findById(ObjectId(id))
+            val objectId = runCatching { ObjectId(id) }
+                .mapError { ex -> GenerateExtendedContentAccessDetailsException.InvalidDocument("Failed to parse user ID $id: ${ex.message}", ex) }
+                .bind()
+
+            userService.findById(objectId)
                 .map { user ->
                     val overview = principalMapper.toOverview(user, authenticationOutcome)
                         .mapError { ex -> GenerateExtendedContentAccessDetailsException.Database("Failed to map user to overview: ${ex.message}", ex) }
@@ -352,7 +356,11 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
         }
 
         content.access.users.viewer.forEach { id ->
-            userService.findById(ObjectId(id))
+            val objectId = runCatching { ObjectId(id) }
+                .mapError { ex -> GenerateExtendedContentAccessDetailsException.InvalidDocument("Failed to parse user ID $id: ${ex.message}", ex) }
+                .bind()
+
+            userService.findById(objectId)
                 .map { user ->
                     val overview = principalMapper.toOverview(user, authenticationOutcome)
                         .mapError { ex -> GenerateExtendedContentAccessDetailsException.Database("Failed to map user to overview: ${ex.message}", ex) }
@@ -371,6 +379,36 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
             .mapError { ex -> GenerateExtendedContentAccessDetailsException.Database("Failed to save updated content to database: ${ex.message}", ex) }
             .bind()
 
-        ExtendedContentAccessDetailsResponse.create(updatedContent.access, invitations, users)
+        val invitationResponses = invitations.map {
+            invitationMapper.toInvitationResponse(it)
+                .mapError {ex ->  when (ex) {
+                    is DocumentException.Invalid -> GenerateExtendedContentAccessDetailsException.InvalidDocument("Failed to map invitation to response: ${ex.message}", ex)
+                } }
+                .bind()
+        }
+
+        ExtendedContentAccessDetailsResponse.create(updatedContent.access, invitationResponses, users)
+    }
+
+    /**
+     * Fetches the extended access details for content identified by the provided key.
+     * This includes fetching and processing user access information, invitations, and updating the access details in the database.
+     *
+     * @param key The unique identifier of the content for which the extended access details are being retrieved.
+     * @param authenticationOutcome The result of the authentication process for the requesting user.
+     * @return A [Result] containing [ExtendedContentAccessDetailsResponse] with the extended access details if successful,
+     *   or [GenerateExtendedContentAccessDetailsException] in case of failure.
+     */
+    suspend fun extendedContentAccessDetails(
+        key: String,
+        authenticationOutcome: AuthenticationOutcome
+    ): Result<ExtendedContentAccessDetailsResponse, GenerateExtendedContentAccessDetailsException> = coroutineBinding {
+        logger.debug { "Fetching extended content access details for article with key \"$key\"" }
+
+        val content = contentService.findAuthorizedByKey(key, authenticationOutcome, ContentAccessRole.MAINTAINER)
+            .mapError { GenerateExtendedContentAccessDetailsException.from(it) }
+            .bind()
+
+        extendedContentAccessDetails(content, authenticationOutcome).bind()
     }
 }

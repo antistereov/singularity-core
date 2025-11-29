@@ -4,6 +4,7 @@ import com.github.michaelbull.result.*
 import com.github.michaelbull.result.coroutines.coroutineBinding
 import com.github.michaelbull.result.coroutines.runSuspendCatching
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.content.core.model.ContentDocument
 import io.stereov.singularity.content.core.util.findContentManagementService
 import io.stereov.singularity.content.invitation.exception.AcceptInvitationException
@@ -225,7 +226,10 @@ class InvitationService(
      * @param id the ObjectId of the invitation to be deleted
      * @return A [Result] containing Unit if the operation is successful, or a [DeleteInvitationByIdException] if an error occurs
      */
-    suspend fun <T: ContentDocument<T>> deleteInvitationById(id: ObjectId): Result<Unit, DeleteInvitationByIdException> = coroutineBinding {
+    suspend fun <T: ContentDocument<T>> deleteInvitationById(
+        id: ObjectId,
+        authenticationOutcome: AuthenticationOutcome,
+    ): Result<Unit, DeleteInvitationByIdException> = coroutineBinding {
         val invitation = findById(id)
             .mapError { when (it) {
                 is FindEncryptedDocumentByIdException.NotFound -> DeleteInvitationByIdException.InvitationNotFound("No invitation found for ID $id")
@@ -239,8 +243,10 @@ class InvitationService(
             .toResultOr { DeleteInvitationByIdException.InvalidInvitation("No key found in invitation") }
             .bind()
         applicationContext.findContentManagementService(contentType)
-            .deleteInvitation(key, id)
-            .mapError { ex -> DeleteInvitationByIdException.Database("Failed to delete invitation from content: ${ex.message}", ex) }
+            .mapError { ex -> DeleteInvitationByIdException.ContentTypeNotFound("Failed to find content management service for content type $contentType: ${ex.message}", ex)}
+            .bind()
+            .deleteInvitation(key, id, authenticationOutcome)
+            .mapError { DeleteInvitationByIdException.from(it) }
             .bind()
 
         deleteById(id)

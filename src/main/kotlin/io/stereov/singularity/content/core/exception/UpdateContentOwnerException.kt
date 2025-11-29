@@ -1,6 +1,7 @@
 package io.stereov.singularity.content.core.exception
 
 import io.stereov.singularity.database.core.exception.DatabaseFailure
+import io.stereov.singularity.global.exception.ResponseMappingFailure
 import io.stereov.singularity.global.exception.SingularityException
 import io.stereov.singularity.principal.core.exception.UserNotFoundFailure
 import org.springframework.http.HttpStatus
@@ -42,6 +43,14 @@ sealed class UpdateContentOwnerException(
         UserNotFoundFailure.CODE,
         UserNotFoundFailure.STATUS,
         UserNotFoundFailure.DESCRIPTION,
+        cause
+    )
+
+    class ResponseMapping(msg: String, cause: Throwable? = null) : UpdateContentOwnerException(
+        msg,
+        ResponseMappingFailure.CODE,
+        ResponseMappingFailure.STATUS,
+        ResponseMappingFailure.DESCRIPTION,
         cause
     )
 

@@ -2,7 +2,10 @@ package io.stereov.singularity.auth.twofactor.model
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue
-import io.stereov.singularity.auth.twofactor.exception.model.InvalidTwoFactorMethodException
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
+import io.stereov.singularity.auth.twofactor.exception.TwoFactorMethodException
 
 enum class TwoFactorMethod(val value: String) {
 
@@ -17,11 +20,12 @@ enum class TwoFactorMethod(val value: String) {
     companion object {
         @JvmStatic
         @JsonCreator
-        fun ofString(input: String): TwoFactorMethod {
+
+        fun ofString(input: String): Result<TwoFactorMethod, TwoFactorMethodException> {
             return when (input.lowercase()) {
-                "totp" -> TOTP
-                "email" -> EMAIL
-                else -> throw InvalidTwoFactorMethodException(input)
+                "totp" -> Ok(TOTP)
+                "email" -> Ok(EMAIL)
+                else -> Err(TwoFactorMethodException.Invalid("No two-factor authentication method \"$input\" found"))
             }
         }
     }

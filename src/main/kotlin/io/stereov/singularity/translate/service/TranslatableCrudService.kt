@@ -2,6 +2,7 @@ package io.stereov.singularity.translate.service
 
 import com.github.michaelbull.result.Result
 import io.stereov.singularity.database.core.exception.FindAllDocumentsPaginatedException
+import io.stereov.singularity.database.core.model.WithId
 import io.stereov.singularity.database.core.service.CrudService
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.translate.model.Translatable
@@ -20,7 +21,7 @@ import kotlin.reflect.full.memberProperties
  * @param C The type of the content that can be translated.
  * @param T The type of the translatable entity managed by this service.
  */
-interface TranslatableCrudService<C: Any, T: Translatable<C>> : CrudService<T> {
+interface TranslatableCrudService<C: Any, T> : CrudService<T> where T : Translatable<C>, T: WithId  {
 
     val contentClass: Class<C>
     val appProperties: AppProperties

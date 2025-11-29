@@ -12,6 +12,7 @@ import io.stereov.singularity.content.article.service.ArticleService
 import io.stereov.singularity.content.core.component.AccessCriteria
 import io.stereov.singularity.content.core.config.ContentConfiguration
 import io.stereov.singularity.content.core.properties.ContentProperties
+import io.stereov.singularity.content.invitation.mapper.InvitationMapper
 import io.stereov.singularity.content.invitation.service.InvitationService
 import io.stereov.singularity.content.tag.mapper.TagMapper
 import io.stereov.singularity.content.tag.service.TagService
@@ -58,9 +59,11 @@ class ArticleConfiguration {
     @ConditionalOnMissingBean
     fun articleManagementController(
         articleManagementService: ArticleManagementService,
+        authorizationService: AuthorizationService,
     ): ArticleManagementController {
         return ArticleManagementController(
             articleManagementService,
+            authorizationService,
         )
     }
 
@@ -122,7 +125,8 @@ class ArticleConfiguration {
         principalMapper: PrincipalMapper,
         articleMapper: ArticleMapper,
         imageStore: ImageStore,
-        groupService: GroupService
+        groupService: GroupService,
+        invitationMapper: InvitationMapper
     ): ArticleManagementService {
         return ArticleManagementService(
             articleService,
@@ -134,7 +138,8 @@ class ArticleConfiguration {
             fileStorage,
             articleMapper,
             imageStore,
-            groupService
+            groupService,
+            invitationMapper,
         )
     }
 }

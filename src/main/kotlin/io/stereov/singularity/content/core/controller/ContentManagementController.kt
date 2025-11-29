@@ -10,6 +10,7 @@ import io.stereov.singularity.content.core.dto.response.ContentResponse
 import io.stereov.singularity.content.core.dto.response.ExtendedContentAccessDetailsResponse
 import io.stereov.singularity.content.core.exception.*
 import io.stereov.singularity.content.core.util.findContentManagementService
+import io.stereov.singularity.content.invitation.exception.ContentManagementException
 import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.global.model.SuccessResponse
@@ -74,6 +75,7 @@ class ContentManagementController(
     @ThrowsDomainError([
         AccessTokenExtractionException::class,
         AuthenticationException.AuthenticationRequired::class,
+        ContentManagementException::class,
         UpdateContentAccessException::class,
     ])
     suspend fun updateContentObjectAccess(
@@ -87,7 +89,9 @@ class ContentManagementController(
             .requireAuthentication()
             .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it} }
 
-        val response = context.findContentManagementService(contentType).updateAccess(key, req, authenticationOutcome, locale)
+        val response = context.findContentManagementService(contentType)
+            .getOrThrow { when (it) { is ContentManagementException -> it } }
+            .updateAccess(key, req, authenticationOutcome, locale)
             .getOrThrow { when (it) { is UpdateContentAccessException -> it } }
 
         return ResponseEntity.ok(response)
@@ -134,6 +138,7 @@ class ContentManagementController(
     @ThrowsDomainError([
         AccessTokenExtractionException::class,
         AuthenticationException.AuthenticationRequired::class,
+        ContentManagementException::class,
         GenerateExtendedContentAccessDetailsException::class,
     ])
     suspend fun getContentObjectAccessDetails(
@@ -145,7 +150,9 @@ class ContentManagementController(
             .requireAuthentication()
             .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it} }
 
-        val response = context.findContentManagementService(contentType).extendedContentAccessDetails(key, authenticationOutcome)
+        val response = context.findContentManagementService(contentType)
+            .getOrThrow { when (it) { is ContentManagementException -> it } }
+            .extendedContentAccessDetails(key, authenticationOutcome)
             .getOrThrow { when (it) { is GenerateExtendedContentAccessDetailsException -> it } }
 
         return ResponseEntity.ok(response)
@@ -190,6 +197,7 @@ class ContentManagementController(
     @ThrowsDomainError([
         AccessTokenExtractionException::class,
         AuthenticationException.AuthenticationRequired::class,
+        ContentManagementException::class,
         DeleteContentByKeyException::class,
     ])
     suspend fun deleteContentObjectByKey(
@@ -201,7 +209,9 @@ class ContentManagementController(
             .requireAuthentication()
             .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it} }
 
-        context.findContentManagementService(contentType).deleteByKey(key, authenticationOutcome)
+        context.findContentManagementService(contentType)
+            .getOrThrow { when (it) { is ContentManagementException -> it } }
+            .deleteByKey(key, authenticationOutcome)
             .getOrThrow { when (it) { is DeleteContentByKeyException -> it } }
 
         return ResponseEntity.ok(SuccessResponse())
@@ -251,6 +261,7 @@ class ContentManagementController(
         AccessTokenExtractionException::class,
         AuthenticationException.AuthenticationRequired::class,
         AuthenticationException.RoleRequired::class,
+        ContentManagementException::class,
         SetContentTrustedStateException::class,
     ])
     suspend fun updateContentObjectTrustedState(
@@ -266,7 +277,9 @@ class ContentManagementController(
             .requireRole(Role.User.ADMIN)
             .getOrThrow { when (it) { is AuthenticationException.RoleRequired -> it } }
 
-        val res = context.findContentManagementService(contentType).setTrustedState(key, authenticationOutcome, trusted, locale)
+        val res = context.findContentManagementService(contentType)
+            .getOrThrow { when (it) { is ContentManagementException -> it } }
+            .setTrustedState(key, authenticationOutcome, trusted, locale)
             .getOrThrow { when (it) { is SetContentTrustedStateException -> it } }
 
         return ResponseEntity.ok(res)
@@ -314,19 +327,26 @@ class ContentManagementController(
             ),
         ]
     )
+    @ThrowsDomainError([
+        AccessTokenExtractionException::class,
+        AuthenticationException.AuthenticationRequired::class,
+        ContentManagementException::class,
+        UpdateContentOwnerException::class,
+    ])
     suspend fun updateContentObjectOwner(
         @PathVariable contentType: String,
         @PathVariable key: String,
         @RequestBody req: UpdateOwnerRequest,
         @RequestParam locale: Locale?
     ): ResponseEntity<ContentResponse<*>> {
-        val userId = authorizationService.getAuthenticationOutcome()
+        val authenticationOutcome = authorizationService.getAuthenticationOutcome()
             .getOrThrow { when (it) { is AccessTokenExtractionException -> it} }
             .requireAuthentication()
             .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it} }
-            .principalId
 
-        val res = context.findContentManagementService(contentType).updateOwner(key, req, userId, locale)
+        val res = context.findContentManagementService(contentType)
+            .getOrThrow { when (it) { is ContentManagementException -> it } }
+            .updateOwner(key, req, authenticationOutcome, locale)
             .getOrThrow { when (it) { is UpdateContentOwnerException -> it } }
         return ResponseEntity.ok(res)
     }

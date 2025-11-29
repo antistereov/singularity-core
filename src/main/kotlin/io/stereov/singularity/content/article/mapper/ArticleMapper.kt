@@ -1,7 +1,10 @@
 package io.stereov.singularity.content.article.mapper
 
-import com.github.michaelbull.result.*
+import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.coroutines.coroutineBinding
+import com.github.michaelbull.result.map
+import com.github.michaelbull.result.mapError
+import com.github.michaelbull.result.recoverIf
 import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.content.article.dto.response.ArticleOverviewResponse
 import io.stereov.singularity.content.article.dto.response.FullArticleResponse
@@ -17,9 +20,9 @@ import io.stereov.singularity.database.encryption.exception.FindEncryptedDocumen
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.principal.core.mapper.PrincipalMapper
-import io.stereov.singularity.principal.core.model.User
 import io.stereov.singularity.principal.core.service.UserService
 import io.stereov.singularity.translate.service.TranslateService
+import org.bson.types.ObjectId
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 import java.util.*
@@ -81,17 +84,15 @@ class ArticleMapper(
         article: Article,
         authenticationOutcome: AuthenticationOutcome,
         locale: Locale?,
-        owner: User? = null
+        ownerId: ObjectId? = null
     ): Result<FullArticleResponse, CreateFullArticleResponseException> = coroutineBinding {
-
-        val actualOwner = (
-                owner?.let { Ok(it) }
-                    ?: userService.findById(article.access.ownerId)
-                        .mapError { when (it) {
-                            is FindEncryptedDocumentByIdException.NotFound -> CreateFullArticleResponseException.OwnerNotFound("Owner of article with key ${article.key} does not exist")
-                            else -> CreateFullArticleResponseException.Database("Failed to find owner of article with key ${article.key}: ${it.message}", it) }
-                        }
-        ).bind()
+        val actualOwnerId = ownerId ?: article.access.ownerId
+        val actualOwner = userService.findById(actualOwnerId)
+            .mapError { when (it) {
+                is FindEncryptedDocumentByIdException.NotFound -> CreateFullArticleResponseException.OwnerNotFound("Owner of article with key ${article.key} does not exist")
+                else -> CreateFullArticleResponseException.Database("Failed to find owner of article with key ${article.key}: ${it.message}", it) }
+            }
+            .bind()
 
         val access = ContentAccessDetailsResponse.create(article.access, authenticationOutcome)
         val (articleLang, translation) = translateService.translate(article, locale)
