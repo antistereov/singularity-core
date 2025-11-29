@@ -11,11 +11,11 @@ import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.content.core.component.AccessCriteria
 import io.stereov.singularity.content.core.properties.ContentProperties
 import io.stereov.singularity.content.core.service.ContentService
-import io.stereov.singularity.database.core.exception.DatabaseException
+import io.stereov.singularity.database.core.exception.SaveDocumentException
+import io.stereov.singularity.database.core.util.CriteriaBuilder
 import io.stereov.singularity.file.core.exception.FileMetadataException
 import io.stereov.singularity.file.core.model.FileMetadataDocument
 import io.stereov.singularity.file.core.repository.FileMetadataRepository
-import io.stereov.singularity.database.core.util.CriteriaBuilder
 import io.stereov.singularity.translate.service.TranslateService
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -135,10 +135,10 @@ class FileMetadataService(
      * fields of the document based on its renditions before saving it.
      *
      * @param doc The [FileMetadataDocument] to be saved. This document contains metadata and renditions information.
-     * @return A [Result] containing the saved [FileMetadataDocument] if the operation is successful, or a [DatabaseException.Database]
+     * @return A [Result] containing the saved [FileMetadataDocument] if the operation is successful, or a [SaveDocumentException]
      * if an error occurs during the save process.
      */
-    override suspend fun save(doc: FileMetadataDocument): Result<FileMetadataDocument, DatabaseException.Database> {
+    override suspend fun save(doc: FileMetadataDocument): Result<FileMetadataDocument, SaveDocumentException> {
         doc.renditionKeys = doc.renditions.values.map { it.key }.toSet()
         doc.contentTypes = doc.renditions.values.map { it.contentType }.toSet()
 

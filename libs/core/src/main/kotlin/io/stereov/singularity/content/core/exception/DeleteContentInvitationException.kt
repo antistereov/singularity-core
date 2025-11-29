@@ -29,6 +29,14 @@ sealed class DeleteContentInvitationException(
         cause
     )
 
+    class NotAuthorized(msg: String, cause: Throwable? = null) : DeleteContentInvitationException(
+        msg,
+        NotAuthorizedFailure.CODE,
+        NotAuthorizedFailure.STATUS,
+        NotAuthorizedFailure.DESCRIPTION,
+        cause
+    )
+
 
     companion object {
 
@@ -36,6 +44,14 @@ sealed class DeleteContentInvitationException(
             return when (ex) {
                 is FindDocumentByKeyException.Database -> Database(ex.message, ex.cause)
                 is FindDocumentByKeyException.NotFound -> ContentNotFound(ex.message, ex.cause)
+            }
+        }
+
+        fun from(ex: FindContentAuthorizedException): DeleteContentInvitationException {
+            return when (ex) {
+                is FindContentAuthorizedException.Database -> Database(ex.message, ex.cause)
+                is FindContentAuthorizedException.NotFound -> ContentNotFound(ex.message, ex.cause)
+                is FindContentAuthorizedException.NotAuthorized -> NotAuthorized(ex.message, ex.cause)
             }
         }
     }

@@ -1,16 +1,23 @@
 package io.stereov.singularity.content.article.controller
 
+import com.github.michaelbull.result.getOrThrow
+import io.stereov.singularity.auth.core.exception.AuthenticationException
+import io.stereov.singularity.auth.core.service.AuthorizationService
+import io.stereov.singularity.auth.token.exception.AccessTokenExtractionException
 import io.stereov.singularity.content.article.dto.request.ChangeArticleStateRequest
 import io.stereov.singularity.content.article.dto.request.CreateArticleRequest
 import io.stereov.singularity.content.article.dto.request.UpdateArticleRequest
 import io.stereov.singularity.content.article.dto.response.FullArticleResponse
+import io.stereov.singularity.content.article.exception.ChangeArticleImageException
+import io.stereov.singularity.content.article.exception.ChangeArticleStateException
+import io.stereov.singularity.content.article.exception.CreateArticleException
+import io.stereov.singularity.content.article.exception.UpdateArticleException
 import io.stereov.singularity.content.article.service.ArticleManagementService
-import io.stereov.singularity.global.model.ErrorResponse
+import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.OpenApiConstants
+import io.stereov.singularity.principal.group.model.KnownGroups
 import io.swagger.v3.oas.annotations.ExternalDocumentation
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.media.Content
-import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -26,6 +33,7 @@ import java.util.*
 @ConditionalOnProperty(prefix = "singularity.content.articles", value = ["enable"], havingValue = "true", matchIfMissing = true)
 class ArticleManagementController(
     private val service: ArticleManagementService,
+    private val authorizationService: AuthorizationService,
 ) {
 
     @PostMapping
@@ -58,31 +66,29 @@ class ArticleManagementController(
                 responseCode = "200",
                 description = "The newly created article.",
             ),
-            ApiResponse(
-                responseCode = "401",
-                description = "Invalid or expired `AccessToken`.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "403",
-                description = "`AccessToken` does not contain group membership " +
-                        "[`CONTRIBUTOR`](https://singularity.stereov.io/docs/guides/content/introduction#global-server-group-contributor) access.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "409",
-                description = "An article with the given `key` already exists.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            )
         ]
     )
+    @ThrowsDomainError([
+        AccessTokenExtractionException::class,
+        AuthenticationException.AuthenticationRequired::class,
+        AuthenticationException.GroupMembershipRequired::class,
+        CreateArticleException::class,
+    ])
     suspend fun createArticle(
         @RequestBody req: CreateArticleRequest,
         @RequestParam locale: Locale?
     ): ResponseEntity<FullArticleResponse> {
-        return ResponseEntity.ok(
-            service.create(req, locale)
-        )
+        val authenticationOutcome = authorizationService.getAuthenticationOutcome()
+            .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
+            .requireAuthentication()
+            .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it } }
+            .requireGroupMembership(KnownGroups.CONTRIBUTOR)
+            .getOrThrow { when (it) { is AuthenticationException.GroupMembershipRequired -> it } }
+
+        val response = service.create(req, authenticationOutcome, locale)
+            .getOrThrow { when (it) { is CreateArticleException -> it } }
+
+        return ResponseEntity.ok(response)
     }
 
     @PatchMapping ("/{key}")
@@ -115,31 +121,27 @@ class ArticleManagementController(
                 responseCode = "200",
                 description = "The updated article.",
             ),
-            ApiResponse(
-                responseCode = "401",
-                description = "Invalid or expired `AccessToken`.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "403",
-                description = "`AccessToken` does not belong to a user with " +
-                        "[`EDITOR`](https://singularity.stereov.io/docs/guides/content/introduction#object-specific-roles-shared-state) " +
-                        "access on this article.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "404",
-                description = "No article with the given `key` exists.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            )
         ]
     )
+    @ThrowsDomainError([
+        AccessTokenExtractionException::class,
+        AuthenticationException.AuthenticationRequired::class,
+        UpdateArticleException::class,
+    ])
     suspend fun updateArticle(
         @PathVariable key: String,
         @RequestBody req: UpdateArticleRequest,
         @RequestParam locale: Locale?
     ): ResponseEntity<FullArticleResponse> {
-        return ResponseEntity.ok(service.updateArticle(key, req, locale))
+        val authenticationOutcome = authorizationService.getAuthenticationOutcome()
+            .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
+            .requireAuthentication()
+            .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it } }
+
+        val response = service.updateArticle(key, req, authenticationOutcome, locale)
+            .getOrThrow { when (it) { is UpdateArticleException -> it } }
+
+        return ResponseEntity.ok(response)
     }
 
     @PutMapping("/{key}/image")
@@ -172,28 +174,6 @@ class ArticleManagementController(
                 responseCode = "200",
                 description = "The updated article.",
             ),
-            ApiResponse(
-                responseCode = "401",
-                description = "Invalid or expired `AccessToken`.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "403",
-                description = "`AccessToken` does not belong to a user with " +
-                        "[`EDITOR`](https://singularity.stereov.io/docs/guides/content/introduction#object-specific-roles-shared-state) " +
-                        "access on this article.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "404",
-                description = "No article with the given `key` exists.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "413",
-                description = "File is too large.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
         ]
     )
     suspend fun updateArticleImage(
@@ -201,9 +181,15 @@ class ArticleManagementController(
         @RequestPart file: FilePart,
         @RequestParam locale: Locale?
     ): ResponseEntity<FullArticleResponse> {
-        return ResponseEntity.ok().body(
-            service.changeImage(key, file, locale)
-        )
+        val authenticationOutcome = authorizationService.getAuthenticationOutcome()
+            .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
+            .requireAuthentication()
+            .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it } }
+
+        val response = service.changeImage(key, file, authenticationOutcome, locale)
+            .getOrThrow { when (it) { is ChangeArticleImageException -> it } }
+
+        return ResponseEntity.ok().body(response)
     }
 
     @PutMapping("/{key}/state")
@@ -235,23 +221,6 @@ class ArticleManagementController(
             ApiResponse(
                 responseCode = "200",
                 description = "The updated article.",
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "Invalid or expired `AccessToken`.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "403",
-                description = "`AccessToken` does not belong to a user with " +
-                        "[`EDITOR`](https://singularity.stereov.io/docs/guides/content/introduction#object-specific-roles-shared-state) " +
-                        "access on this article.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "404",
-                description = "No article with the given `key` exists.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
     )
@@ -260,6 +229,14 @@ class ArticleManagementController(
         @RequestBody req: ChangeArticleStateRequest,
         @RequestParam locale: Locale?
     ): ResponseEntity<FullArticleResponse> {
-        return ResponseEntity.ok(service.changeState(key, req, locale))
+        val authenticationOutcome = authorizationService.getAuthenticationOutcome()
+            .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
+            .requireAuthentication()
+            .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it } }
+
+        val response = service.changeState(key, req, authenticationOutcome, locale)
+            .getOrThrow { when (it) { is ChangeArticleStateException -> it } }
+
+        return ResponseEntity.ok(response)
     }
 }

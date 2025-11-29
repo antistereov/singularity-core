@@ -3,6 +3,7 @@ package io.stereov.singularity.content.core.exception
 import io.stereov.singularity.content.invitation.exception.AcceptInvitationException
 import io.stereov.singularity.database.core.exception.DatabaseFailure
 import io.stereov.singularity.database.core.exception.PostCommitSideEffectFailure
+import io.stereov.singularity.global.exception.ResponseMappingFailure
 import io.stereov.singularity.global.exception.SingularityException
 import io.stereov.singularity.principal.core.exception.UserNotFoundFailure
 import org.springframework.http.HttpStatus
@@ -61,6 +62,14 @@ sealed class AcceptContentInvitationException(
         "CONTENT_NOT_FOUND",
         HttpStatus.NOT_FOUND,
         "Content not found.",
+        cause
+    )
+
+    class ResponseMapping(msg: String, cause: Throwable? = null) : AcceptContentInvitationException(
+        msg,
+        ResponseMappingFailure.CODE,
+        ResponseMappingFailure.STATUS,
+        ResponseMappingFailure.DESCRIPTION,
         cause
     )
 

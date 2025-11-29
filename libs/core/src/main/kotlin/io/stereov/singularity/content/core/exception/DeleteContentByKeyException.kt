@@ -36,7 +36,6 @@ sealed class DeleteContentByKeyException(
         cause
     )
 
-
     companion object {
 
         fun from(ex: FindContentAuthorizedException): DeleteContentByKeyException {

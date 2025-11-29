@@ -1,5 +1,6 @@
 package io.stereov.singularity.content.invitation.config
 
+import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.jwt.service.JwtService
 import io.stereov.singularity.content.invitation.controller.InvitationController
 import io.stereov.singularity.content.invitation.mapper.InvitationMapper
@@ -40,8 +41,17 @@ class InvitationConfiguration {
     @ConditionalOnMissingBean
     fun invitationController(
         invitationService: InvitationService,
-        context: ApplicationContext
-    ) = InvitationController(invitationService, context)
+        context: ApplicationContext,
+        authorizationService: AuthorizationService,
+        invitationTokenService: InvitationTokenService,
+        userService: UserService,
+    ) = InvitationController(
+        invitationService,
+        context,
+        authorizationService,
+        invitationTokenService,
+        userService
+    )
 
     // Mapper
 
