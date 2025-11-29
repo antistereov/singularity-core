@@ -1,5 +1,6 @@
 package io.stereov.singularity.principal.group.exception
 
+import io.stereov.singularity.database.core.exception.DatabaseFailure
 import io.stereov.singularity.global.exception.SingularityException
 import org.springframework.http.HttpStatus
 
@@ -73,14 +74,13 @@ sealed class UpdateGroupException(
      * @param msg A descriptive message providing context about the database failure.
      * @param cause The optional underlying cause of the exception.
      *
-     * @property code `GROUP_DB_FAILURE`
-     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
+     * @see DatabaseFailure
      */
     class Database(msg: String, cause: Throwable? = null) : UpdateGroupException(
         msg,
-        "GROUP_DB_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Failed to retrieve group from database.",
+        DatabaseFailure.CODE,
+        DatabaseFailure.STATUS,
+        DatabaseFailure.DESCRIPTION,
         cause
     )
 }

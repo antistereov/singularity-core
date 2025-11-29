@@ -10,10 +10,10 @@ import io.stereov.singularity.auth.oauth2.exception.SetPasswordException
 import io.stereov.singularity.auth.oauth2.service.IdentityProviderService
 import io.stereov.singularity.auth.token.exception.AccessTokenExtractionException
 import io.stereov.singularity.auth.token.exception.StepUpTokenExtractionException
-import io.stereov.singularity.database.encryption.exception.FindEncryptedDocumentByIdException
 import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.principal.core.dto.response.UserResponse
+import io.stereov.singularity.principal.core.exception.FindUserByIdException
 import io.stereov.singularity.principal.core.exception.PrincipalMapperException
 import io.stereov.singularity.principal.core.mapper.PrincipalMapper
 import io.stereov.singularity.principal.core.model.identity.UserIdentity
@@ -70,7 +70,7 @@ class IdentityProviderController(
     @ThrowsDomainError([
         AccessTokenExtractionException::class,
         AuthenticationException.AuthenticationRequired::class,
-        FindEncryptedDocumentByIdException::class,
+        FindUserByIdException::class,
     ])
     suspend fun getIdentityProviders(): ResponseEntity<List<IdentityProviderResponse>> {
         val userId = authorizationService.getAuthenticationOutcome()
@@ -80,7 +80,7 @@ class IdentityProviderController(
             .principalId
 
         val user = userService.findById(userId)
-            .getOrThrow { when (it) { is FindEncryptedDocumentByIdException -> it } }
+            .getOrThrow { FindUserByIdException.from(it) }
 
         val identityProviders = user.sensitive.identities.providers
             .map { IdentityProviderResponse(it.key) }
@@ -129,7 +129,7 @@ class IdentityProviderController(
         AccessTokenExtractionException::class,
         AuthenticationException.AuthenticationRequired::class,
         StepUpTokenExtractionException::class,
-        FindEncryptedDocumentByIdException::class,
+        FindUserByIdException::class,
         SetPasswordException::class,
         PrincipalMapperException::class
     ])
@@ -146,7 +146,7 @@ class IdentityProviderController(
             .getOrThrow { when (it) { is StepUpTokenExtractionException -> it } }
 
         var user = userService.findById(authentication.principalId)
-            .getOrThrow { when (it) { is FindEncryptedDocumentByIdException -> it } }
+            .getOrThrow { FindUserByIdException.from(it) }
 
         user = identityProviderService.setPassword(req, user)
             .getOrThrow { when (it) { is SetPasswordException -> it } }
@@ -194,7 +194,7 @@ class IdentityProviderController(
         AccessTokenExtractionException::class,
         AuthenticationException.AuthenticationRequired::class,
         StepUpTokenExtractionException::class,
-        FindEncryptedDocumentByIdException::class,
+        FindUserByIdException::class,
         DisconnectProviderException::class,
         PrincipalMapperException::class
     ])
@@ -212,7 +212,7 @@ class IdentityProviderController(
             .getOrThrow { when (it) { is StepUpTokenExtractionException -> it } }
 
         var user = userService.findById(authentication.principalId)
-            .getOrThrow { when (it) { is FindEncryptedDocumentByIdException -> it } }
+            .getOrThrow { FindUserByIdException.from(it) }
 
         user = identityProviderService.disconnect(provider, user, locale)
             .getOrThrow { when (it) { is DisconnectProviderException -> it } }

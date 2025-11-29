@@ -1,6 +1,11 @@
 package io.stereov.singularity.auth.twofactor.exception
 
+import io.stereov.singularity.database.core.exception.DatabaseFailure
+import io.stereov.singularity.database.core.exception.PostCommitSideEffectFailure
+import io.stereov.singularity.database.hash.exception.HashFailure
 import io.stereov.singularity.global.exception.SingularityException
+import io.stereov.singularity.principal.core.exception.InvalidUserDocumentFailure
+import io.stereov.singularity.principal.core.exception.NoPasswordProvider
 import org.springframework.http.HttpStatus
 
 sealed class ValidateTotpSetupException (
@@ -13,66 +18,66 @@ sealed class ValidateTotpSetupException (
 
     class AlreadyEnabled(msg: String, cause: Throwable? = null) : ValidateTotpSetupException(
         msg,
-        "TWO_FACTOR_ALREADY_ENABLED",
-        HttpStatus.NOT_MODIFIED,
-        "Two factor authentication is already enabled for this user.",
+        TwoFactorMethodAlreadyEnabledFailure.CODE,
+        TwoFactorMethodAlreadyEnabledFailure.STATUS,
+        TwoFactorMethodAlreadyEnabledFailure.DESCRIPTION,
         cause
     )
 
     class Totp(msg: String, cause: Throwable? = null) : ValidateTotpSetupException(
         msg,
-        "TOTP_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Exception thrown when an operation with TOTP fails.",
+        TotpFailure.CODE,
+        TotpFailure.STATUS,
+        TotpFailure.DESCRIPTION,
         cause
     )
 
     class NoPasswordSet(msg: String, cause: Throwable? = null) : ValidateTotpSetupException(
         msg,
-        "NO_PASSWORD_SET",
-        HttpStatus.BAD_REQUEST,
-        "User does not have a password set.",
+        NoPasswordProvider.CODE,
+        NoPasswordProvider.STATUS,
+        NoPasswordProvider.DESCRIPTION,
         cause
     )
 
     class InvalidDocument(msg: String, cause: Throwable? = null) : ValidateTotpSetupException(
         msg,
-        "INVALID_USER_DOCUMENT",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Invalid user document.",
+        InvalidUserDocumentFailure.CODE,
+        InvalidUserDocumentFailure.STATUS,
+        InvalidUserDocumentFailure.DESCRIPTION,
         cause
     )
 
 
     class Database(msg: String, cause: Throwable? = null) : ValidateTotpSetupException(
         msg,
-        "DATABASE_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Exception thrown when an operation with database fails.",
+        DatabaseFailure.CODE,
+        DatabaseFailure.STATUS,
+        DatabaseFailure.DESCRIPTION,
         cause
     )
 
     class WrongCode(msg: String, cause: Throwable? = null) : ValidateTotpSetupException(
         msg,
-        "WRONG_CODE",
-        HttpStatus.UNAUTHORIZED,
-        "Wrong TOTP code.",
+        WrongTwoFactorCodeFailure.CODE,
+        WrongTwoFactorCodeFailure.STATUS,
+        WrongTwoFactorCodeFailure.DESCRIPTION,
         cause
     )
 
     class Hash(msg: String, cause: Throwable? = null) : ValidateTotpSetupException(
         msg,
-        "HASH_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Exception thrown when an operation with hash fails.",
+        HashFailure.CODE,
+        HashFailure.STATUS,
+        HashFailure.DESCRIPTION,
         cause
     )
 
     class PostCommitSideEffect(msg: String, cause: Throwable? = null) : ValidateTotpSetupException(
         msg,
-        "POST_COMMIT_SIDE_EFFECT_FAILURE",
-        HttpStatus.MULTI_STATUS,
-        "Exception thrown when a side effect fails after the operation was successfully committed.",
+        PostCommitSideEffectFailure.CODE,
+        PostCommitSideEffectFailure.STATUS,
+        PostCommitSideEffectFailure.DESCRIPTION,
         cause
     )
 }

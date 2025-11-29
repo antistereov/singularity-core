@@ -1,4 +1,4 @@
-package io.stereov.singularity.principal.group.exception
+package io.stereov.singularity.database.core.exception
 
 import io.stereov.singularity.global.exception.SingularityException
 import org.springframework.http.HttpStatus
@@ -14,7 +14,7 @@ import org.springframework.http.HttpStatus
  * @param description A detailed description providing more context about the error.
  * @param cause The underlying cause of the exception, if available.
  */
-sealed class FindGroupByKeyException(
+sealed class FindDocumentByKeyException(
     msg: String,
     code: String,
     status: HttpStatus,
@@ -25,41 +25,39 @@ sealed class FindGroupByKeyException(
     /**
      * Exception used to indicate that a group with the specified key was not found.
      *
-     * This exception extends [FindGroupByKeyException] and is specifically intended to represent
+     * This exception extends [FindDocumentByKeyException] and is specifically intended to represent
      * scenarios where the requested group cannot be located in the system.
      *
      * @param msg A descriptive message providing context for the error.
      * @param cause The optional underlying cause of the exception.
      *
-     * @property code `GROUP_NOT_FOUND`
-     * @property status [HttpStatus.NOT_FOUND]
+     * @see DatabaseEntityNotFound
      */
-    class NotFound(msg: String, cause: Throwable? = null) : FindGroupByKeyException(
+    class NotFound(msg: String, cause: Throwable? = null) : FindDocumentByKeyException(
         msg,
-        "GROUP_NOT_FOUND",
-        HttpStatus.NOT_FOUND,
-        "No group with specified key found.",
+        DatabaseEntityNotFound.CODE,
+        DatabaseEntityNotFound.STATUS,
+        DatabaseEntityNotFound.DESCRIPTION,
         cause
     )
 
     /**
      * Represents a database-related exception occurring when attempting to retrieve a group.
      *
-     * This exception is a specific type of [FindGroupByKeyException] intended to indicate failures
+     * This exception is a specific type of [FindDocumentByKeyException] intended to indicate failures
      * that are directly related to interactions with the database, such as connectivity issues or
      * data retrieval failures.
      *
      * @param msg A descriptive message providing additional context about the error.
      * @param cause The underlying cause of the exception, if available.
      *
-     * @property code `GROUP_DB_FAILURE`
-     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
+     * @see DatabaseFailure
      */
-    class Database(msg: String, cause: Throwable? = null) : FindGroupByKeyException(
+    class Database(msg: String, cause: Throwable? = null) : FindDocumentByKeyException(
         msg,
-        "GROUP_DB_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Failed to retrieve group from database.",
+        DatabaseFailure.CODE,
+        DatabaseFailure.STATUS,
+        DatabaseFailure.DESCRIPTION,
         cause
     )
 }

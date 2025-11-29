@@ -1,6 +1,12 @@
 package io.stereov.singularity.auth.twofactor.exception
 
+import io.stereov.singularity.database.core.exception.DatabaseFailure
+import io.stereov.singularity.database.core.exception.PostCommitSideEffectFailure
 import io.stereov.singularity.global.exception.SingularityException
+import io.stereov.singularity.principal.core.exception.InvalidUserDocumentFailure
+import io.stereov.singularity.principal.core.exception.NoPasswordProvider
+import io.stereov.singularity.principal.core.exception.TwoFactorAuthenticationDisabledFailure
+import io.stereov.singularity.principal.core.exception.UserNotFoundFailure
 import org.springframework.http.HttpStatus
 
 sealed class ValidateTwoFactorException (
@@ -13,47 +19,47 @@ sealed class ValidateTwoFactorException (
 
     class UserNotFound(msg: String, cause: Throwable? = null) : ValidateTwoFactorException(
         msg,
-        "USER_NOT_FOUND",
-        HttpStatus.NOT_FOUND,
-        "User not found.",
+        UserNotFoundFailure.CODE,
+        UserNotFoundFailure.STATUS,
+        UserNotFoundFailure.DESCRIPTION,
         cause
     )
 
     class Database(msg: String, cause: Throwable? = null) : ValidateTwoFactorException(
         msg,
-        "DATABASE_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Exception thrown when an encrypted database operation fails.",
+        DatabaseFailure.CODE,
+        DatabaseFailure.STATUS,
+        DatabaseFailure.DESCRIPTION,
         cause
     )
 
     class NoPasswordSet(msg: String, cause: Throwable? = null) : ValidateTwoFactorException(
         msg,
-        "NO_PASSWORD_SET",
-        HttpStatus.BAD_REQUEST,
-        "User does not have a password set.",
+        NoPasswordProvider.CODE,
+        NoPasswordProvider.STATUS,
+        NoPasswordProvider.DESCRIPTION,
         cause
     )
 
-    class TwoFactorDisabled(msg: String, cause: Throwable? = null) : ValidateTwoFactorException(
+    class TwoFactorAuthenticationDisabled(msg: String, cause: Throwable? = null) : ValidateTwoFactorException(
         msg,
-        "TWO_FACTOR_DISABLED",
-        HttpStatus.BAD_REQUEST,
-        "Two factor authentication is disabled for this user.",
+        TwoFactorAuthenticationDisabledFailure.CODE,
+        TwoFactorAuthenticationDisabledFailure.STATUS,
+        TwoFactorAuthenticationDisabledFailure.DESCRIPTION,
         cause
     )
 
     class InvalidDocument(msg: String, cause: Throwable? = null) : ValidateTwoFactorException(
         msg,
-        "INVALID_USER_DOCUMENT",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Invalid user document.",
+        InvalidUserDocumentFailure.CODE,
+        InvalidUserDocumentFailure.STATUS,
+        InvalidUserDocumentFailure.DESCRIPTION,
         cause
     )
 
-    class InvalidRequest(msg: String, cause: Throwable? = null) : ValidateTwoFactorException(
+    class No2faCodeProvided(msg: String, cause: Throwable? = null) : ValidateTwoFactorException(
         msg,
-        "INVALID_REQUEST",
+        "NO_2FA_CODE_PROVIDED",
         HttpStatus.BAD_REQUEST,
         "Invalid request: at least one of email or totp must be provided.",
         cause
@@ -61,25 +67,25 @@ sealed class ValidateTwoFactorException (
 
     class Expired(msg: String, cause: Throwable? = null) : ValidateTwoFactorException(
         msg,
-        "TWO_FACTOR_CODE_EXPIRED",
-        HttpStatus.UNAUTHORIZED,
-        "Two factor code has expired.",
+        TwoFactorCodeExpiredFailure.CODE,
+        TwoFactorCodeExpiredFailure.STATUS,
+        TwoFactorCodeExpiredFailure.DESCRIPTION,
         cause
     )
 
     class WrongCode(msg: String, cause: Throwable? = null) : ValidateTwoFactorException(
         msg,
-        "WRONG_TWO_FACTOR_CODE",
-        HttpStatus.UNAUTHORIZED,
-        "Wrong two factor code.",
+        WrongTwoFactorCodeFailure.CODE,
+        WrongTwoFactorCodeFailure.STATUS,
+        WrongTwoFactorCodeFailure.DESCRIPTION,
         cause
     )
 
     class PostCommitSideEffect(msg: String, cause: Throwable? = null) : ValidateTwoFactorException(
         msg,
-        "POST_COMMIT_SIDE_EFFECT_FAILURE",
-        HttpStatus.MULTI_STATUS,
-        "An error occurred during after the operation was successfully committed.",
+        PostCommitSideEffectFailure.CODE,
+        PostCommitSideEffectFailure.STATUS,
+        PostCommitSideEffectFailure.DESCRIPTION,
         cause
     )
 

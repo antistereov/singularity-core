@@ -1,8 +1,6 @@
 package io.stereov.singularity.principal.group.model
 
-import com.github.michaelbull.result.Result
-import com.github.michaelbull.result.toResultOr
-import io.stereov.singularity.database.core.exception.DocumentException
+import io.stereov.singularity.database.core.model.WithKey
 import io.stereov.singularity.translate.model.Translatable
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
@@ -25,11 +23,7 @@ import java.util.*
  */
 @Document(collection = "groups")
 data class Group(
-    @Id private val _id: ObjectId? = null,
-    @Indexed(unique = true) var key: String,
+    @Id override val _id: ObjectId? = null,
+    @Indexed(unique = true) override var key: String,
     override val translations: MutableMap<Locale, GroupTranslation>,
-) : Translatable<GroupTranslation> {
-
-    val id: Result<ObjectId, DocumentException.Invalid>
-        get() = _id.toResultOr { DocumentException.Invalid("Group document does not contain an ID") }
-}
+) : Translatable<GroupTranslation>, WithKey

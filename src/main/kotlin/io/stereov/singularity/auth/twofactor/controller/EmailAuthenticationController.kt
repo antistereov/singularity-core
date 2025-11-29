@@ -14,13 +14,13 @@ import io.stereov.singularity.auth.twofactor.exception.EnableEmailAuthentication
 import io.stereov.singularity.auth.twofactor.exception.SendEmailAuthenticationException
 import io.stereov.singularity.auth.twofactor.service.EmailAuthenticationService
 import io.stereov.singularity.cache.exception.CacheException
-import io.stereov.singularity.database.encryption.exception.FindEncryptedDocumentByIdException
 import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.global.model.SendEmailResponse
 import io.stereov.singularity.global.model.SuccessResponse
 import io.stereov.singularity.global.util.getOrNull
 import io.stereov.singularity.principal.core.dto.response.UserResponse
+import io.stereov.singularity.principal.core.exception.FindUserByIdException
 import io.stereov.singularity.principal.core.exception.PrincipalMapperException
 import io.stereov.singularity.principal.core.mapper.PrincipalMapper
 import io.stereov.singularity.principal.core.service.UserService
@@ -112,7 +112,7 @@ class EmailAuthenticationController(
     @ThrowsDomainError([
         AccessTokenExtractionException::class,
         TwoFactorAuthenticationTokenExtractionException::class,
-        FindEncryptedDocumentByIdException::class,
+        FindUserByIdException::class,
         SendEmailAuthenticationException::class,
     ])
     suspend fun sendEmailTwoFactorCode(
@@ -129,7 +129,7 @@ class EmailAuthenticationController(
                 .userId
 
         val user = userService.findById(userId)
-            .getOrThrow { when (it) { is FindEncryptedDocumentByIdException -> it } }
+            .getOrThrow { FindUserByIdException.from(it) }
 
         val remainingCooldown = emailAuthenticationService.sendMail(user, locale)
             .getOrThrow { when (it) { is SendEmailAuthenticationException -> it } }
@@ -189,7 +189,7 @@ class EmailAuthenticationController(
         AccessTokenExtractionException::class,
         AuthenticationException.AuthenticationRequired::class,
         StepUpTokenExtractionException::class,
-        FindEncryptedDocumentByIdException::class,
+        FindUserByIdException::class,
         EnableEmailAuthenticationException::class,
         PrincipalMapperException::class,
     ])
@@ -207,7 +207,7 @@ class EmailAuthenticationController(
             .getOrThrow { when (it) { is StepUpTokenExtractionException -> it } }
 
         var user = userService.findById(authentication.principalId)
-            .getOrThrow { when (it) { is FindEncryptedDocumentByIdException -> it } }
+            .getOrThrow { FindUserByIdException.from(it) }
 
         user = emailAuthenticationService.enable(payload, user, locale)
             .getOrThrow { when (it) { is EnableEmailAuthenticationException -> it } }
@@ -263,7 +263,7 @@ class EmailAuthenticationController(
         AccessTokenExtractionException::class,
         AuthenticationException.AuthenticationRequired::class,
         StepUpTokenExtractionException::class,
-        FindEncryptedDocumentByIdException::class,
+        FindUserByIdException::class,
         DisableEmailAuthenticationException::class,
         PrincipalMapperException::class,
     ])
@@ -281,7 +281,7 @@ class EmailAuthenticationController(
             .getOrThrow { when (it) { is StepUpTokenExtractionException -> it } }
 
         var user = userService.findById(authentication.principalId)
-            .getOrThrow { when (it) { is FindEncryptedDocumentByIdException -> it } }
+            .getOrThrow { FindUserByIdException.from(it) }
 
         user = emailAuthenticationService.disable(user, locale)
             .getOrThrow { when (it) { is DisableEmailAuthenticationException -> it } }
@@ -322,7 +322,7 @@ class EmailAuthenticationController(
     @ThrowsDomainError([
         AccessTokenExtractionException::class,
         TwoFactorAuthenticationTokenExtractionException::class,
-        FindEncryptedDocumentByIdException::class,
+        FindUserByIdException::class,
         CacheException.Operation::class,
     ])
     suspend fun getRemainingEmailTwoFactorCooldown(
@@ -338,7 +338,7 @@ class EmailAuthenticationController(
                 .userId
 
         val user = userService.findById(userId)
-            .getOrThrow { when (it) { is FindEncryptedDocumentByIdException -> it }}
+            .getOrThrow { FindUserByIdException.from(it) }
 
         val remainingCooldown = emailAuthenticationService.getRemainingCooldown(user.email)
             .getOrThrow { when (it) { is CacheException.Operation -> it } }

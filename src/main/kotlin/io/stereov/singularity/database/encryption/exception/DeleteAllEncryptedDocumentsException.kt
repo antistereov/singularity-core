@@ -1,6 +1,7 @@
 package io.stereov.singularity.database.encryption.exception
 
 import io.stereov.singularity.database.core.exception.DatabaseException
+import io.stereov.singularity.database.core.exception.DatabaseFailure
 import io.stereov.singularity.global.exception.SingularityException
 import org.springframework.http.HttpStatus
 
@@ -34,16 +35,15 @@ sealed class DeleteAllEncryptedDocumentsException(
      * @param msg The error message providing details about the failure.
      * @param cause The underlying cause of this exception, if any.
      *
-     * @property code `DATABASE_FAILURE`
-     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
+     * @see DatabaseFailure
      *
      * @see DatabaseException.Database
      */
     class Database(msg: String, cause: Throwable? = null) : DeleteAllEncryptedDocumentsException(
         msg,
-        "DATABASE_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Exception thrown when an encrypted database operation fails.",
+        DatabaseFailure.CODE,
+        DatabaseFailure.STATUS,
+        DatabaseFailure.DESCRIPTION,
         cause
     )
 }

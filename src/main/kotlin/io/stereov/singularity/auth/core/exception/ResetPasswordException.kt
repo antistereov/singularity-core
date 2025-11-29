@@ -1,7 +1,12 @@
 package io.stereov.singularity.auth.core.exception
 
+import io.stereov.singularity.auth.token.exception.PasswordResetTokenExtractionException
+import io.stereov.singularity.database.core.exception.DatabaseFailure
+import io.stereov.singularity.database.core.exception.PostCommitSideEffectFailure
 import io.stereov.singularity.database.encryption.exception.SaveEncryptedDocumentException
+import io.stereov.singularity.database.hash.exception.HashFailure
 import io.stereov.singularity.global.exception.SingularityException
+import io.stereov.singularity.principal.core.exception.UserNotFoundFailure
 import org.springframework.http.HttpStatus
 
 /**
@@ -34,14 +39,13 @@ sealed class ResetPasswordException(
      * @param msg The exception message providing details about the context of the error.
      * @param cause The optional underlying cause of the exception.
      *
-     * @property code `USER_NOT_FOUND`
-     * @property status [HttpStatus.NOT_FOUND]
+     * @see UserNotFound
      */
     class UserNotFound(msg: String, cause: Throwable? = null) : ResetPasswordException(
         msg,
-        "USER_NOT_FOUND",
-        HttpStatus.NOT_FOUND,
-        "User not found.",
+        UserNotFoundFailure.CODE,
+        UserNotFoundFailure.STATUS,
+        UserNotFoundFailure.DESCRIPTION,
         cause
     )
 
@@ -55,14 +59,13 @@ sealed class ResetPasswordException(
      * @param msg A message providing details about the context of the error.
      * @param cause The optional underlying cause of the exception.
      *
-     * @property code `DATABASE_FAILURE`
-     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
+     * @see DatabaseFailure
      */
     class Database(msg: String, cause: Throwable? = null) : ResetPasswordException(
         msg,
-        "DATABASE_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Exception thrown when an encrypted database operation fails.",
+        DatabaseFailure.CODE,
+        DatabaseFailure.STATUS,
+        DatabaseFailure.DESCRIPTION,
         cause
     )
 
@@ -78,14 +81,13 @@ sealed class ResetPasswordException(
      * @param msg The exception message describing the context of the error.
      * @param cause The optional underlying cause of the exception.
      *
-     * @property code `INVALID_TOKEN`
-     * @property status [HttpStatus.UNAUTHORIZED]
+     * @see PasswordResetTokenExtractionException.Invalid
      */
     class InvalidToken(msg: String, cause: Throwable? = null) : ResetPasswordException(
         msg,
-        "INVALID_TOKEN",
-        HttpStatus.UNAUTHORIZED,
-        "The provided token does not match the user's verification secret.",
+        PasswordResetTokenExtractionException.Invalid.CODE,
+        PasswordResetTokenExtractionException.Invalid.STATUS,
+        PasswordResetTokenExtractionException.Invalid.DESCRIPTION,
         cause
     )
 
@@ -99,14 +101,13 @@ sealed class ResetPasswordException(
      * @param msg The error message describing the exception.
      * @param cause The optional underlying cause of the exception.
      *
-     * @property code `HASH_FAILURE`
-     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
+     * @see HashFailure
      */
     class Hash(msg: String, cause: Throwable? = null) : ResetPasswordException(
         msg,
-        "HASH_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Exception thrown when an error occurs during hashing operations.",
+        HashFailure.CODE,
+        HashFailure.STATUS,
+        HashFailure.DESCRIPTION,
         cause
     )
 
@@ -120,16 +121,15 @@ sealed class ResetPasswordException(
      * @param msg A message providing details about the specific failure.
      * @param cause The underlying cause of this exception, if available.
      *
-     * @property code `POST_COMMIT_SIDE_EFFECT_FAILURE`
-     * @property status [HttpStatus.MULTI_STATUS]
+     * @see PostCommitSideEffect
      *
      * @see SaveEncryptedDocumentException.PostCommitSideEffect
      */
     class PostCommitSideEffect(msg: String, cause: Throwable? = null) : ResetPasswordException(
         msg,
-        "POST_COMMIT_SIDE_EFFECT_FAILURE",
-        HttpStatus.MULTI_STATUS,
-        "Exception thrown when a post-commit side effect fails.",
+        PostCommitSideEffectFailure.CODE,
+        PostCommitSideEffectFailure.STATUS,
+        PostCommitSideEffectFailure.DESCRIPTION,
         cause
     )
 }

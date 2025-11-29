@@ -38,11 +38,18 @@ sealed class EmailVerificationTokenExtractionException(
      */
     class Invalid(msg: String, cause: Throwable? = null) : EmailVerificationTokenExtractionException(
         msg,
-        "EMAIL_VERIFICATION_TOKEN_INVALID",
-        HttpStatus.UNAUTHORIZED,
-        "Indicates that the email verification token cannot be decoded.",
+        CODE,
+        STATUS,
+        DESCRIPTION,
         cause
-    )
+    ) {
+
+        companion object {
+            const val CODE = "EMAIL_VERIFICATION_TOKEN_INVALID"
+            const val DESCRIPTION = "Indicates that the email verification token cannot be decoded."
+            val STATUS = HttpStatus.UNAUTHORIZED
+        }
+    }
 
     /**
      * Indicates that the [EmailVerificationToken] is expired.

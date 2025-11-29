@@ -35,14 +35,13 @@ sealed class UserException(
      * @param msg A message describing the details of the error.
      * @param cause The underlying cause of the exception, if available.
      *
-     * @property code `NO_PASSWORD_PROVIDER`
-     * @property status [HttpStatus.BAD_REQUEST]
+     * @see NoPasswordProvider
      */
     class NoPassword(msg: String, cause: Throwable? = null) : UserException(
         msg,
-        "NO_PASSWORD_PROVIDER",
-        HttpStatus.BAD_REQUEST,
-        "Thrown when trying to access a password of a user that did not configure password authentication.",
+        NoPasswordProvider.CODE,
+        NoPasswordProvider.STATUS,
+        NoPasswordProvider.DESCRIPTION,
         cause,
     )
 
@@ -57,14 +56,13 @@ sealed class UserException(
      * @param msg A message providing details about the error.
      * @param cause The underlying cause of the exception, if available.
      *
-     * @property code `TWO_FACTOR_DISABLED`
-     * @property status [HttpStatus.BAD_REQUEST]
+     * @see TwoFactorAuthenticationDisabledFailure
      */
     class TwoFactorDisabled(msg: String, cause: Throwable? = null) : UserException(
         msg,
-        "TWO_FACTOR_DISABLED",
-        HttpStatus.BAD_REQUEST,
-        "Thrown when trying to access a two-factor secret of a user that has not enabled two-factor authentication.",
+        TwoFactorAuthenticationDisabledFailure.CODE,
+        TwoFactorAuthenticationDisabledFailure.STATUS,
+        TwoFactorAuthenticationDisabledFailure.DESCRIPTION,
         cause
     )
 }

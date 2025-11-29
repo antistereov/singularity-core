@@ -1,7 +1,11 @@
 package io.stereov.singularity.auth.core.exception
 
+import io.stereov.singularity.auth.token.exception.EmailVerificationTokenExtractionException
+import io.stereov.singularity.database.core.exception.DatabaseFailure
+import io.stereov.singularity.database.core.exception.PostCommitSideEffectFailure
 import io.stereov.singularity.database.encryption.exception.SaveEncryptedDocumentException
 import io.stereov.singularity.global.exception.SingularityException
+import io.stereov.singularity.principal.core.exception.UserNotFoundFailure
 import org.springframework.http.HttpStatus
 
 /**
@@ -59,14 +63,13 @@ sealed class VerifyEmailException(
      * @param msg The error message providing details about the exception.
      * @param cause The optional underlying cause of the exception.
      *
-     * @property code `USER_NOT_FOUND`
-     * @property status [HttpStatus.NOT_FOUND]
+     * @see UserNotFoundFailure
      */
     class UserNotFound(msg: String, cause: Throwable? = null) : VerifyEmailException(
         msg,
-        "USER_NOT_FOUND",
-        HttpStatus.NOT_FOUND,
-        "User not found.",
+        UserNotFoundFailure.CODE,
+        UserNotFoundFailure.STATUS,
+        UserNotFoundFailure.DESCRIPTION,
         cause
     )
 
@@ -80,14 +83,13 @@ sealed class VerifyEmailException(
      * @param msg A message providing details about the context of the error.
      * @param cause The optional underlying cause of the exception.
      *
-     * @property code `DATABASE_FAILURE`
-     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
+     * @see DatabaseFailure
      */
     class Database(msg: String, cause: Throwable? = null) : VerifyEmailException(
         msg,
-        "DATABASE_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Exception thrown when an encrypted database operation fails.",
+        DatabaseFailure.CODE,
+        DatabaseFailure.STATUS,
+        DatabaseFailure.DESCRIPTION,
         cause
     )
 
@@ -101,12 +103,14 @@ sealed class VerifyEmailException(
      *
      * @property code `INVALID_TOKEN`
      * @property status [HttpStatus.UNAUTHORIZED]
+     *
+     * @see EmailVerificationTokenExtractionException.Invalid
      */
     class InvalidToken(msg: String, cause: Throwable? = null) : VerifyEmailException(
         msg,
-        "INVALID_TOKEN",
-        HttpStatus.UNAUTHORIZED,
-        "The provided token does not match the user's verification secret.",
+        EmailVerificationTokenExtractionException.Invalid.CODE,
+        EmailVerificationTokenExtractionException.Invalid.STATUS,
+        EmailVerificationTokenExtractionException.Invalid.DESCRIPTION,
         cause
     )
 
@@ -120,16 +124,15 @@ sealed class VerifyEmailException(
      * @param msg A message providing details about the specific failure.
      * @param cause The underlying cause of this exception, if available.
      *
-     * @property code `POST_COMMIT_SIDE_EFFECT_FAILURE`
-     * @property status [HttpStatus.MULTI_STATUS]
+     * @see PostCommitSideEffect
      *
      * @see SaveEncryptedDocumentException.PostCommitSideEffect
      */
     class PostCommitSideEffect(msg: String, cause: Throwable? = null) : VerifyEmailException(
         msg,
-        "POST_COMMIT_SIDE_EFFECT_FAILURE",
-        HttpStatus.MULTI_STATUS,
-        "Exception thrown when a post-commit side effect fails.",
+        PostCommitSideEffectFailure.CODE,
+        PostCommitSideEffectFailure.STATUS,
+        PostCommitSideEffectFailure.DESCRIPTION,
         cause
     )
 }

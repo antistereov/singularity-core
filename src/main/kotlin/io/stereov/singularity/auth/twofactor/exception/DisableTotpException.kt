@@ -1,6 +1,12 @@
 package io.stereov.singularity.auth.twofactor.exception
 
+import io.stereov.singularity.database.core.exception.DatabaseFailure
+import io.stereov.singularity.database.core.exception.PostCommitSideEffectFailure
+import io.stereov.singularity.database.hash.exception.HashFailure
 import io.stereov.singularity.global.exception.SingularityException
+import io.stereov.singularity.principal.core.exception.InvalidUserDocumentFailure
+import io.stereov.singularity.principal.core.exception.NoPasswordProvider
+import io.stereov.singularity.principal.core.exception.UserNotFoundFailure
 import org.springframework.http.HttpStatus
 
 sealed class DisableTotpException (
@@ -13,65 +19,65 @@ sealed class DisableTotpException (
 
     class AlreadyDisabled(msg: String, cause: Throwable? = null) : DisableTotpException(
         msg,
-        "TWO_FACTOR_ALREADY_DISABLED",
-        HttpStatus.NOT_MODIFIED,
-        "Two factor authentication is already disabled for this user.",
+        TwoFactorMethodAlreadyDisabledFailure.CODE,
+        TwoFactorMethodAlreadyDisabledFailure.STATUS,
+        TwoFactorMethodAlreadyDisabledFailure.DESCRIPTION,
         cause
     )
 
     class CannotDisableOnlyTwoFactorMethod(msg: String, cause: Throwable? = null) : DisableTotpException(
         msg,
-        "CANNOT_DISABLE_ONLY_TWO_FACTOR_METHOD",
-        HttpStatus.BAD_REQUEST,
-        "Cannot disable the configured only two factor method.",
+        CannotDisableOnlyTwoFactorMethodFailure.CODE,
+        CannotDisableOnlyTwoFactorMethodFailure.STATUS,
+        CannotDisableOnlyTwoFactorMethodFailure.DESCRIPTION,
         cause
     )
 
     class UserNotFound(msg: String, cause: Throwable? = null) : DisableTotpException(
         msg,
-        "USER_NOT_FOUND",
-        HttpStatus.NOT_FOUND,
-        "User not found.",
+        UserNotFoundFailure.CODE,
+        UserNotFoundFailure.STATUS,
+        UserNotFoundFailure.DESCRIPTION,
         cause
     )
 
     class NoPasswordSet(msg: String, cause: Throwable? = null) : DisableTotpException(
         msg,
-        "NO_PASSWORD_SET",
-        HttpStatus.BAD_REQUEST,
-        "User does not have a password set.",
+        NoPasswordProvider.CODE,
+        NoPasswordProvider.STATUS,
+        NoPasswordProvider.DESCRIPTION,
         cause
     )
 
     class InvalidDocument(msg: String, cause: Throwable? = null) : DisableTotpException(
         msg,
-        "INVALID_USER_DOCUMENT",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Invalid user document.",
+        InvalidUserDocumentFailure.CODE,
+        InvalidUserDocumentFailure.STATUS,
+        InvalidUserDocumentFailure.DESCRIPTION,
         cause
     )
 
     class Database(msg: String, cause: Throwable? = null) : DisableTotpException(
         msg,
-        "DATABASE_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Exception thrown when an operation with database fails.",
+        DatabaseFailure.CODE,
+        DatabaseFailure.STATUS,
+        DatabaseFailure.DESCRIPTION,
         cause
     )
 
     class Hash(msg: String, cause: Throwable? = null) : DisableTotpException(
         msg,
-        "HASH_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Exception thrown when an operation with hash fails.",
+        HashFailure.CODE,
+        HashFailure.STATUS,
+        HashFailure.DESCRIPTION,
         cause
     )
 
     class PostCommitSideEffect(msg: String, cause: Throwable? = null) : DisableTotpException(
         msg,
-        "POST_COMMIT_SIDE_EFFECT_FAILURE",
-        HttpStatus.MULTI_STATUS,
-        "Exception thrown when a side effect fails after the operation was successfully committed.",
+        PostCommitSideEffectFailure.CODE,
+        PostCommitSideEffectFailure.STATUS,
+        PostCommitSideEffectFailure.DESCRIPTION,
         cause
     )
 }

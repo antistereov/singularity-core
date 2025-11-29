@@ -11,11 +11,11 @@ import io.stereov.singularity.auth.token.exception.AccessTokenExtractionExceptio
 import io.stereov.singularity.auth.token.exception.EmailVerificationTokenExtractionException
 import io.stereov.singularity.auth.token.service.EmailVerificationTokenService
 import io.stereov.singularity.cache.exception.CacheException
-import io.stereov.singularity.database.encryption.exception.FindEncryptedDocumentByIdException
 import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.global.model.SendEmailResponse
 import io.stereov.singularity.principal.core.dto.response.UserResponse
+import io.stereov.singularity.principal.core.exception.FindUserByIdException
 import io.stereov.singularity.principal.core.exception.PrincipalMapperException
 import io.stereov.singularity.principal.core.mapper.PrincipalMapper
 import io.stereov.singularity.principal.core.service.UserService
@@ -128,7 +128,7 @@ class EmailVerificationController(
     @ThrowsDomainError([
         AccessTokenExtractionException::class,
         AuthenticationException.AuthenticationRequired::class,
-        FindEncryptedDocumentByIdException::class,
+        FindUserByIdException::class,
         CacheException.Operation::class
     ])
     suspend fun getRemainingEmailVerificationCooldown(): ResponseEntity<MailCooldownResponse> {
@@ -139,7 +139,7 @@ class EmailVerificationController(
             .principalId
 
         val email = userService.findById(principalId)
-            .getOrThrow { when (it) { is FindEncryptedDocumentByIdException -> it } }
+            .getOrThrow { FindUserByIdException.from(it) }
             .email
 
         val remainingCooldown = emailVerificationService.getRemainingCooldown(email)
@@ -203,7 +203,7 @@ class EmailVerificationController(
     @ThrowsDomainError([
         AccessTokenExtractionException::class,
         AuthenticationException.AuthenticationRequired::class,
-        FindEncryptedDocumentByIdException::class,
+        FindUserByIdException::class,
         SendVerificationEmailException::class
     ])
     suspend fun sendEmailVerificationEmail(
@@ -216,7 +216,7 @@ class EmailVerificationController(
             .principalId
 
         val user = userService.findById(principalId)
-            .getOrThrow { when (it) { is FindEncryptedDocumentByIdException -> it } }
+            .getOrThrow { FindUserByIdException.from(it) }
 
         val cooldown = emailVerificationService.sendVerificationEmail(user, locale)
             .getOrThrow { when (it) { is SendVerificationEmailException -> it } }

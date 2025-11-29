@@ -2,9 +2,9 @@ package io.stereov.singularity.principal.group.service
 
 import com.github.michaelbull.result.*
 import com.github.michaelbull.result.coroutines.coroutineBinding
-import com.github.michaelbull.result.coroutines.runSuspendCatching
 import io.github.oshai.kotlinlogging.KotlinLogging.logger
-import io.stereov.singularity.database.core.exception.DatabaseException
+import io.stereov.singularity.database.core.exception.FindDocumentByKeyException
+import io.stereov.singularity.database.core.service.CrudServiceWithKey
 import io.stereov.singularity.database.encryption.exception.EncryptionException
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.principal.core.model.User
@@ -13,7 +13,6 @@ import io.stereov.singularity.principal.group.dto.request.CreateGroupRequest
 import io.stereov.singularity.principal.group.dto.request.UpdateGroupRequest
 import io.stereov.singularity.principal.group.exception.CreateGroupException
 import io.stereov.singularity.principal.group.exception.DeleteGroupByKeyException
-import io.stereov.singularity.principal.group.exception.FindGroupByKeyException
 import io.stereov.singularity.principal.group.exception.UpdateGroupException
 import io.stereov.singularity.principal.group.mapper.GroupMapper
 import io.stereov.singularity.principal.group.model.Group
@@ -40,7 +39,7 @@ class GroupService(
     override val reactiveMongoTemplate: ReactiveMongoTemplate,
     private val groupMapper: GroupMapper,
     private val userService: UserService
-) : TranslatableCrudService<GroupTranslation, Group> {
+) : TranslatableCrudService<GroupTranslation, Group>, CrudServiceWithKey<Group> {
 
     override val logger = logger {}
     override val collectionClazz = Group::class.java
@@ -89,35 +88,6 @@ class GroupService(
     }
 
     /**
-     * Suspends and retrieves a group document by the provided key.
-     *
-     * @param key The unique key identifying the group to be retrieved.
-     * @return A [Result] containing the [Group] if found, or a [FindGroupByKeyException]
-     *  detailing the failure reason if the operation is unsuccessful.
-     */
-    suspend fun findByKey(key: String): Result<Group, FindGroupByKeyException> {
-        logger.debug { "Finding group by key \"$key\"" }
-
-        return runSuspendCatching { repository.findByKey(key) }
-            .mapError { ex -> FindGroupByKeyException.Database("Failed to check existence of group with key $key: ${ex.message}", ex) }
-            .andThen { it.toResultOr { FindGroupByKeyException.NotFound("No group with key \"$key\" found") }}
-    }
-
-    /**
-     * Checks if a group with the specified key exists in the database.
-     *
-     * @param key The unique key to check for existence in the database.
-     * @return A [Result] containing true if the group exists, false otherwise.
-     *  Returns a failure with [DatabaseException.Database] in case of an error.
-     */
-    suspend fun existsByKey(key: String): Result<Boolean, DatabaseException.Database> {
-        logger.debug { "Checking if group with key \"$key\" exists" }
-
-        return runSuspendCatching { repository.existsByKey(key) }
-            .mapError { ex -> DatabaseException.Database("Failed to check existence of group with key $key: ${ex.message}", ex) }
-    }
-
-    /**
      * Updates a group document identified by the provided key with the data specified in the request.
      *
      * @param key The unique key identifying the group to be updated.
@@ -133,7 +103,7 @@ class GroupService(
 
         val group = findByKey(key)
             .mapError { ex -> when (ex) {
-                is FindGroupByKeyException.NotFound -> UpdateGroupException.NotFound("No group with key \"$key\" found")
+                is FindDocumentByKeyException.NotFound -> UpdateGroupException.NotFound("No group with key \"$key\" found")
                 else -> UpdateGroupException.Database("Failed to find group with key $key: ${ex.message}", ex) }
             }
             .bind()
@@ -161,7 +131,7 @@ class GroupService(
      * if an error occurs during the deletion process, such as issues with database operations
      * or failure to update users.
      */
-    suspend fun deleteByKey(key: String): Result<Unit, DeleteGroupByKeyException> = coroutineBinding {
+    suspend fun deleteByKeyAndUpdateMembers(key: String): Result<Unit, DeleteGroupByKeyException> = coroutineBinding {
         logger.debug { "Deleting group with key \"$key\"" }
 
         val exists = existsByKey(key)
@@ -198,8 +168,8 @@ class GroupService(
                 }
             }
 
-        runSuspendCatching { repository.deleteByKey(key) }
-        .mapError { ex -> DeleteGroupByKeyException.Database("Failed to delete group with key $key: ${ex.message}", ex) }
+        deleteByKey(key)
+            .mapError { ex -> DeleteGroupByKeyException.Database("Failed to delete group with key $key: ${ex.message}", ex) }
             .bind()
     }
 }

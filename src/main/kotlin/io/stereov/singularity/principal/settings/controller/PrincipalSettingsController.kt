@@ -11,8 +11,6 @@ import io.stereov.singularity.auth.token.exception.CookieException
 import io.stereov.singularity.auth.token.exception.StepUpTokenExtractionException
 import io.stereov.singularity.auth.token.model.SessionTokenType
 import io.stereov.singularity.database.encryption.exception.DeleteEncryptedDocumentByIdException
-import io.stereov.singularity.database.encryption.exception.FindEncryptedDocumentByIdException
-import io.stereov.singularity.database.encryption.exception.FindEncryptedDocumentEncryptedByIdException
 import io.stereov.singularity.database.encryption.exception.SaveEncryptedDocumentException
 import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.exception.SingularityException
@@ -20,6 +18,7 @@ import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.global.model.SuccessResponse
 import io.stereov.singularity.principal.core.dto.response.UserResponse
 import io.stereov.singularity.principal.core.exception.FindPrincipalByIdException
+import io.stereov.singularity.principal.core.exception.FindUserByIdException
 import io.stereov.singularity.principal.core.exception.PrincipalMapperException
 import io.stereov.singularity.principal.core.mapper.PrincipalMapper
 import io.stereov.singularity.principal.core.service.PrincipalService
@@ -154,7 +153,7 @@ class PrincipalSettingsController(
         AccessTokenExtractionException::class,
         AuthenticationException.AuthenticationRequired::class,
         StepUpTokenExtractionException::class,
-        FindEncryptedDocumentByIdException::class,
+        FindUserByIdException::class,
         ChangeEmailException::class
     ])
     suspend fun changeEmailOfAuthorizedUser(
@@ -171,7 +170,7 @@ class PrincipalSettingsController(
             .getOrThrow { when (it) { is StepUpTokenExtractionException -> it } }
 
         val user = userService.findById(authentication.principalId)
-            .getOrThrow { when (it) { is FindEncryptedDocumentByIdException -> it } }
+            .getOrThrow { FindUserByIdException.from(it) }
 
         val cooldown = principalSettingsService.changeEmail(payload, user, locale)
             .getOrThrow { when (it) { is ChangeEmailException -> it } }
@@ -222,7 +221,7 @@ class PrincipalSettingsController(
         AccessTokenExtractionException::class,
         AuthenticationException.AuthenticationRequired::class,
         StepUpTokenExtractionException::class,
-        FindEncryptedDocumentByIdException::class,
+        FindUserByIdException::class,
         ChangePasswordException::class,
         PrincipalMapperException::class
     ])
@@ -240,7 +239,7 @@ class PrincipalSettingsController(
             .getOrThrow { when (it) { is StepUpTokenExtractionException -> it } }
 
         var user = userService.findById(authentication.principalId)
-            .getOrThrow { when (it) { is FindEncryptedDocumentByIdException -> it } }
+            .getOrThrow { FindUserByIdException.from(it) }
 
         user = principalSettingsService.changePassword(payload, user, locale)
             .getOrThrow { when (it) { is ChangePasswordException -> it } }
@@ -326,7 +325,7 @@ class PrincipalSettingsController(
     @ThrowsDomainError([
         AccessTokenExtractionException::class,
         AuthenticationException.AuthenticationRequired::class,
-        FindEncryptedDocumentByIdException::class,
+        FindUserByIdException::class,
         SetUserAvatarException::class,
         PrincipalMapperException::class
     ])
@@ -339,7 +338,7 @@ class PrincipalSettingsController(
             .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it } }
         val userId = authentication.principalId
         var user = userService.findById(userId)
-            .getOrThrow { when (it) { is FindEncryptedDocumentByIdException -> it } }
+            .getOrThrow { FindUserByIdException.from(it) }
         user = principalSettingsService.setAvatar(file, user, authentication)
             .getOrThrow { when (it) { is SetUserAvatarException -> it } }
 
@@ -375,7 +374,7 @@ class PrincipalSettingsController(
     @ThrowsDomainError([
         AccessTokenExtractionException::class,
         AuthenticationException.AuthenticationRequired::class,
-        FindEncryptedDocumentEncryptedByIdException::class,
+        FindUserByIdException::class,
         DeleteUserAvatarException::class,
         PrincipalMapperException::class
     ])
@@ -386,7 +385,7 @@ class PrincipalSettingsController(
             .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it } }
         val userId = authentication.principalId
         var user = userService.findById(userId)
-            .getOrThrow { when (it) { is FindEncryptedDocumentByIdException -> it } }
+            .getOrThrow { FindUserByIdException.from(it) }
 
         user = principalSettingsService.deleteAvatar(user)
             .getOrThrow { when (it) { is DeleteUserAvatarException -> it } }

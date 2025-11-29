@@ -1,5 +1,7 @@
 package io.stereov.singularity.auth.oauth2.exception
 
+import io.stereov.singularity.database.core.exception.DatabaseFailure
+import io.stereov.singularity.database.core.exception.PostCommitSideEffectFailure
 import io.stereov.singularity.global.exception.SingularityException
 import org.springframework.http.HttpStatus
 
@@ -37,17 +39,17 @@ sealed class DisconnectProviderException(
 
     class Database(msg: String, cause: Throwable? = null) : DisconnectProviderException(
         msg,
-        "DATABASE_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Failed to delete provider from database.",
+        DatabaseFailure.CODE,
+        DatabaseFailure.STATUS,
+        DatabaseFailure.DESCRIPTION,
         cause
     )
 
     class PostCommitSideEffect(msg: String, cause: Throwable? = null) : DisconnectProviderException(
         msg,
-        "POST_COMMIT_SIDE_EFFECT_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Failed to execute post commit side effect.",
+        PostCommitSideEffectFailure.CODE,
+        PostCommitSideEffectFailure.STATUS,
+        PostCommitSideEffectFailure.DESCRIPTION,
         cause
     )
 }

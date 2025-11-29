@@ -13,17 +13,17 @@ sealed class ValidateEmailTwoFactorCodeException (
 
     class Expired(msg: String, cause: Throwable? = null) : ValidateEmailTwoFactorCodeException(
         msg,
-        "TWO_FACTOR_CODE_EXPIRED",
-        HttpStatus.UNAUTHORIZED,
-        "Two factor code has expired.",
+        TwoFactorCodeExpiredFailure.CODE,
+        TwoFactorCodeExpiredFailure.STATUS,
+        TwoFactorCodeExpiredFailure.DESCRIPTION,
         cause
     )
 
     class WrongCode(msg: String, cause: Throwable? = null) : ValidateEmailTwoFactorCodeException(
         msg,
-        "WRONG_TWO_FACTOR_CODE",
-        HttpStatus.UNAUTHORIZED,
-        "Wrong two factor code.",
+        WrongTwoFactorCodeFailure.CODE,
+        WrongTwoFactorCodeFailure.STATUS,
+        WrongTwoFactorCodeFailure.DESCRIPTION,
         cause
     )
 }

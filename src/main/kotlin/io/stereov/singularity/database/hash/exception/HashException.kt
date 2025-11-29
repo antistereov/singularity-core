@@ -72,14 +72,13 @@ sealed class HashException(
      * @param msg The error message describing the exception.
      * @param cause The underlying cause of the exception, if any.
      *
-     * @property code `HASHING_FAILURE`
-     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
+     * @see HashFailure
      */
     class Hashing(msg: String, cause: Throwable? = null): HashException(
         msg,
-        "HASHING_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Represents an exception that occurs during the hashing process.",
+        HashFailure.CODE,
+        HashFailure.STATUS,
+        HashFailure.DESCRIPTION,
         cause
     )
 }

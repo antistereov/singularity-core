@@ -24,7 +24,7 @@ import java.util.*
  * Service responsible for creating, validating, and managing step-up tokens for users.
  * Step-up tokens are used to confirm additional levels of authentication during a user session.
  *
- * This service uses JWT (JSON Web Token) for encoding and decoding tokens, managing expiration,
+ * This service uses JWT (JSON Web EmailVerificationTokenCreation) for encoding and decoding tokens, managing expiration,
  * and securely associating tokens with specific user IDs and session details.
  */
 @Service

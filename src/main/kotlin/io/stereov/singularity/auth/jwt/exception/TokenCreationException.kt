@@ -27,7 +27,7 @@ sealed class TokenCreationException(
 ) : SingularityException(msg, code, status, description, cause) {
 
     /**
-     * Represents an exception that occurs during the encoding process of a JSON Web Token (JWT).
+     * Represents an exception that occurs during the encoding process of a JSON Web EmailVerificationTokenCreation (JWT).
      *
      * This exception is a subclass of [TokenCreationException].
      *
@@ -41,13 +41,13 @@ sealed class TokenCreationException(
         msg,
         "TOKEN_ENCODING_FAILURE",
         HttpStatus.INTERNAL_SERVER_ERROR,
-        "Represents an exception that occurs during the encoding process of a JSON Web Token (JWT).",
+        "Represents an exception that occurs during the encoding process of a JSON Web EmailVerificationTokenCreation (JWT).",
         cause
     )
 
     /**
      * Represents an exception that occurs when there is a failure related to the secret
-     * required for creating a JSON Web Token (JWT).
+     * required for creating a JSON Web EmailVerificationTokenCreation (JWT).
      *
      * This exception is a subclass of [TokenCreationException].
      *
@@ -61,7 +61,7 @@ sealed class TokenCreationException(
         msg,
         "TOKEN_SECRET_FAILURE",
         HttpStatus.INTERNAL_SERVER_ERROR,
-        "Represents an exception that occurs when there is a failure related to the secret required for creating a JSON Web Token (JWT).",
+        "Represents an exception that occurs when there is a failure related to the secret required for creating a JSON Web EmailVerificationTokenCreation (JWT).",
         cause
     )
 }

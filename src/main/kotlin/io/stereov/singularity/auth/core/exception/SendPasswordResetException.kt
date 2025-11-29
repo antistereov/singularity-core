@@ -1,5 +1,7 @@
 package io.stereov.singularity.auth.core.exception
 
+import io.stereov.singularity.database.core.exception.DatabaseFailure
+import io.stereov.singularity.email.core.exception.*
 import io.stereov.singularity.global.exception.SingularityException
 import org.springframework.http.HttpStatus
 
@@ -36,14 +38,13 @@ sealed class SendPasswordResetException(
      * @param msg The error message describing the failure to send the alert.
      * @param cause The underlying cause of the exception, if available.
      *
-     * @property code `ALERT_SEND_FAILURE`
-     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
+     * @see EmailSendFailure
      */
     class Send(msg: String, cause: Throwable? = null) : SendPasswordResetException(
         msg,
-        "ALERT_SEND_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Thrown when an alert cannot be sent due to an exception that occurred in the mail sender.",
+        EmailSendFailure.CODE,
+        EmailSendFailure.STATUS,
+        EmailSendFailure.DESCRIPTION,
         cause
     )
 
@@ -59,14 +60,13 @@ sealed class SendPasswordResetException(
      * @param msg The error message describing the exception.
      * @param cause The optional underlying cause of the exception.
      *
-     * @property code `EMAIL_AUTHENTICATION_FAILURE`
-     * @property status [HttpStatus.UNAUTHORIZED]
+     * @see EmailAuthenticationFailure
      */
     class EmailAuthentication(msg: String, cause: Throwable? = null) : SendPasswordResetException(
         msg,
-        "EMAIL_AUTHENTICATION_FAILURE",
-        HttpStatus.UNAUTHORIZED,
-        "Thrown when an email authentication failure occurs.",
+        EmailAuthenticationFailure.CODE,
+        EmailAuthenticationFailure.STATUS,
+        EmailAuthenticationFailure.DESCRIPTION,
         cause
     )
 
@@ -79,14 +79,13 @@ sealed class SendPasswordResetException(
      * @param msg The exception message providing details about the context of the error.
      * @param cause The optional underlying cause of the exception.
      *
-     * @property code `EMAIL_DISABLED`
-     * @property status [HttpStatus.SERVICE_UNAVAILABLE]
+     * @see EmailDisabledFailure
      */
     class EmailDisabled(msg: String, cause: Throwable? = null) : SendPasswordResetException(
         msg,
-        "EMAIL_DISABLED",
-        HttpStatus.SERVICE_UNAVAILABLE,
-        "Thrown when an email is disabled.",
+        EmailDisabledFailure.CODE,
+        EmailDisabledFailure.STATUS,
+        EmailDisabledFailure.DESCRIPTION,
         cause
     )
 
@@ -102,14 +101,13 @@ sealed class SendPasswordResetException(
      * @param msg The error message describing the cooldown restriction.
      * @param cause The underlying cause of the exception, if available.
      *
-     * @property code `ALERT_COOLDOWN_ACTIVE`
-     * @property status [HttpStatus.TOO_MANY_REQUESTS]
+     * @see EmailCooldownActiveFailure
      */
     class CooldownActive(msg: String, cause: Throwable? = null) : SendPasswordResetException(
         msg,
-        "ALERT_COOLDOWN_ACTIVE",
-        HttpStatus.TOO_MANY_REQUESTS,
-        "Thrown when an alert message was requested but the cooldown is active.",
+        EmailCooldownActiveFailure.CODE,
+        EmailCooldownActiveFailure.STATUS,
+        EmailCooldownActiveFailure.DESCRIPTION,
         cause,
     )
 
@@ -122,12 +120,14 @@ sealed class SendPasswordResetException(
      *
      * @param msg The error message describing the exception.
      * @param cause The underlying cause of the exception, if available.
+     *
+     * @see EmailCooldownCacheFailure
      */
     class CooldownCache(msg: String, cause: Throwable? = null) : SendPasswordResetException(
         msg,
-        "ALERT_COOLDOWN_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Thrown when an excpetion occurs when setting or getting cooldown.",
+        EmailCooldownCacheFailure.CODE,
+        EmailCooldownCacheFailure.STATUS,
+        EmailCooldownCacheFailure.DESCRIPTION,
         cause
     )
 
@@ -146,9 +146,9 @@ sealed class SendPasswordResetException(
      */
     class Template(msg: String, cause: Throwable? = null) : SendPasswordResetException(
         msg,
-        "ALERT_TEMPLATE_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Thrown when an exception occurred when creating the alert email template.",
+        EmailTemplateFailure.CODE,
+        EmailTemplateFailure.STATUS,
+        EmailTemplateFailure.DESCRIPTION,
         cause
     )
 
@@ -162,14 +162,13 @@ sealed class SendPasswordResetException(
      * @param msg A message providing context about the error.
      * @param cause The optional underlying cause of the exception.
      *
-     * @property code `DATABASE_FAILURE`
-     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
+     * @see DatabaseFailure
      */
     class Database(msg: String, cause: Throwable? = null) : SendPasswordResetException(
         msg,
-        "DATABASE_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Exception thrown when an encrypted database operation fails.",
+        DatabaseFailure.CODE,
+        DatabaseFailure.STATUS,
+        DatabaseFailure.DESCRIPTION,
         cause
     )
 
@@ -183,14 +182,24 @@ sealed class SendPasswordResetException(
      * @param msg The exception message providing details about the error.
      * @param cause The optional underlying cause of the exception.
      *
-     * @property code `TOKEN_GENERATION_FAILURE`
+     * @property code `PASSWORD_RESET_TOKEN_CREATION_FAILURE`
      * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
      */
     class Token(msg: String, cause: Throwable? = null) : SendPasswordResetException(
         msg,
-        "TOKEN_GENERATION_FAILURE",
+        "PASSWORD_RESET_TOKEN_CREATION_FAILURE",
         HttpStatus.INTERNAL_SERVER_ERROR,
         "Exception thrown when an error occurs during token generation.",
         cause
     )
+
+    companion object {
+
+        fun from(ex: EmailException) = when (ex) {
+            is EmailException.Send -> Send(ex.message, ex.cause)
+            is EmailException.Disabled -> EmailDisabled(ex.message, ex.cause)
+            is EmailException.Template -> Template(ex.message, ex.cause)
+            is EmailException.Authentication -> EmailAuthentication(ex.message, ex.cause)
+        }
+    }
 }

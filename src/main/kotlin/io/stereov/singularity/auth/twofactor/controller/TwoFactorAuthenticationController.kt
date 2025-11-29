@@ -20,11 +20,11 @@ import io.stereov.singularity.auth.twofactor.dto.request.CompleteStepUpRequest
 import io.stereov.singularity.auth.twofactor.exception.ChangePreferredTwoFactorMethodException
 import io.stereov.singularity.auth.twofactor.exception.ValidateTwoFactorException
 import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthenticationService
-import io.stereov.singularity.database.encryption.exception.FindEncryptedDocumentByIdException
+import io.stereov.singularity.database.core.exception.DocumentException
 import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.principal.core.dto.response.UserResponse
-import io.stereov.singularity.principal.core.exception.PrincipalException
+import io.stereov.singularity.principal.core.exception.FindUserByIdException
 import io.stereov.singularity.principal.core.exception.PrincipalMapperException
 import io.stereov.singularity.principal.core.mapper.PrincipalMapper
 import io.stereov.singularity.principal.core.service.UserService
@@ -214,7 +214,7 @@ class TwoFactorAuthenticationController(
         ValidateTwoFactorException::class,
         AccessTokenExtractionException::class,
         AuthenticationException.AuthenticationRequired::class,
-        PrincipalException.InvalidDocument::class,
+        DocumentException.Invalid::class,
         StepUpTokenCreationException::class,
         CookieException.Creation::class
     ])
@@ -236,7 +236,7 @@ class TwoFactorAuthenticationController(
         val sessionId = authentication.sessionId
 
         val userId = user.id
-            .getOrThrow { when (it) { is PrincipalException.InvalidDocument -> it } }
+            .getOrThrow { when (it) { is DocumentException.Invalid -> it } }
 
         if (userId != authentication.principalId) {
             throw TwoFactorAuthenticationTokenExtractionException.Invalid(": TwoFactorAuthenticationToken does not match AccessToken")
@@ -297,7 +297,7 @@ class TwoFactorAuthenticationController(
         AccessTokenExtractionException::class,
         AuthenticationException.AuthenticationRequired::class,
         StepUpTokenExtractionException::class,
-        FindEncryptedDocumentByIdException::class,
+        FindUserByIdException::class,
         ChangePreferredTwoFactorMethodException::class,
         PrincipalMapperException::class
     ])
@@ -314,7 +314,7 @@ class TwoFactorAuthenticationController(
             .getOrThrow { when (it) { is StepUpTokenExtractionException -> it } }
 
         var user = userService.findById(authentication.principalId)
-            .getOrThrow { when (it) { is FindEncryptedDocumentByIdException -> it } }
+            .getOrThrow { FindUserByIdException.from(it) }
 
         user = twoFactorAuthService.changePreferredMethod(req, user)
             .getOrThrow { when (it) { is ChangePreferredTwoFactorMethodException -> it } }

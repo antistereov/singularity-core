@@ -15,10 +15,10 @@ import io.stereov.singularity.auth.core.model.NoAccountInfoAction
 import io.stereov.singularity.auth.token.model.PasswordResetToken
 import io.stereov.singularity.auth.token.service.PasswordResetTokenService
 import io.stereov.singularity.cache.service.CacheService
+import io.stereov.singularity.database.core.exception.DocumentException
 import io.stereov.singularity.database.encryption.exception.FindEncryptedDocumentByIdException
 import io.stereov.singularity.database.encryption.exception.SaveEncryptedDocumentException
 import io.stereov.singularity.database.hash.service.HashService
-import io.stereov.singularity.email.core.exception.EmailException
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.email.core.service.CooldownEmailService
 import io.stereov.singularity.email.core.service.EmailService
@@ -32,7 +32,6 @@ import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.principal.core.exception.FindUserByEmailException
-import io.stereov.singularity.principal.core.exception.PrincipalException
 import io.stereov.singularity.principal.core.model.User
 import io.stereov.singularity.principal.core.model.identity.UserIdentity
 import io.stereov.singularity.principal.core.service.UserService
@@ -82,7 +81,7 @@ class PasswordResetService(
                 success = { user -> sendPasswordResetEmail(user, locale) },
                 failure = { ex ->
                     when (ex) {
-                        is FindUserByEmailException.NotFound -> {
+                        is FindUserByEmailException.UserNotFound -> {
                             noAccountInfoService.send(req.email, NoAccountInfoAction.PASSWORD_RESET, locale)
                                 .onFailure { ex -> logger.error(ex) { "Failed to send no account info email"} }
                             startCooldown(req.email)
@@ -175,12 +174,7 @@ class PasswordResetService(
             .bind()
 
         emailService.sendEmail(email, subject, content, actualLocale)
-            .mapError { when (it) {
-                is EmailException.Send -> SendPasswordResetException.Send("Failed to send password reset: ${it.message}", it)
-                is EmailException.Disabled -> SendPasswordResetException.EmailDisabled(it.message)
-                is EmailException.Template -> SendPasswordResetException.Template("Failed to create template for password reset: ${it.message}", it)
-                is EmailException.Authentication -> SendPasswordResetException.EmailAuthentication("Failed to send password reset due to an authentication failure: ${it.message}", it)
-            } }
+            .mapError { SendPasswordResetException.from(it) }
             .bind()
 
         startCooldown(email)
@@ -188,7 +182,7 @@ class PasswordResetService(
             .bind()
     }
 
-    suspend fun generatePasswordResetUri(user: User): Result<String, PrincipalException.InvalidDocument> = coroutineBinding {
+    suspend fun generatePasswordResetUri(user: User): Result<String, DocumentException.Invalid> = coroutineBinding {
         val userId = user.id.bind()
         val secret = user.sensitive.security.password.resetSecret
         val token = passwordResetTokenService.create(userId, secret)

@@ -34,14 +34,13 @@ sealed class FindAllDocumentsPaginatedException(
      * @param msg A message describing the nature of the database failure.
      * @param cause The underlying cause of the exception, if available.
      *
-     * @property code `DATABASE_FAILURE`
-     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
+     * @see DatabaseFailure
      */
     class Database(msg: String, cause: Throwable? = null) : FindAllDocumentsPaginatedException(
         msg,
-        "DATABASE_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Exception representing a general failure related to database operations.",
+        DatabaseFailure.CODE,
+        DatabaseFailure.STATUS,
+        DatabaseFailure.DESCRIPTION,
         cause
     )
 }

@@ -2,6 +2,7 @@ package io.stereov.singularity.content.invitation.config
 
 import io.stereov.singularity.auth.jwt.service.JwtService
 import io.stereov.singularity.content.invitation.controller.InvitationController
+import io.stereov.singularity.content.invitation.mapper.InvitationMapper
 import io.stereov.singularity.content.invitation.properties.InvitationProperties
 import io.stereov.singularity.content.invitation.repository.InvitationRepository
 import io.stereov.singularity.content.invitation.service.InvitationService
@@ -32,6 +33,21 @@ import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRep
 @EnableReactiveMongoRepositories(basePackageClasses = [InvitationRepository::class])
 @EnableConfigurationProperties(InvitationProperties::class)
 class InvitationConfiguration {
+
+    // Controller
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun invitationController(
+        invitationService: InvitationService,
+        context: ApplicationContext
+    ) = InvitationController(invitationService, context)
+
+    // Mapper
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun invitationMapper() = InvitationMapper()
 
     // Service
 
@@ -71,12 +87,4 @@ class InvitationConfiguration {
     @ConditionalOnMissingBean
     fun invitationTokenService(jwtService: JwtService) = InvitationTokenService(jwtService)
 
-    // Controller
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun invitationController(
-        invitationService: InvitationService,
-        context: ApplicationContext
-    ) = InvitationController(invitationService, context)
 }

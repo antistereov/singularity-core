@@ -96,7 +96,7 @@ class AdminService(
             logger.info { "Creating root account" }
 
             val password = hashService.hashBcrypt(appProperties.rootPassword)
-                .mapError { ex -> InitRootAccountException.HashFailure("Failed to hash root password: ${ex.message}", ex) }
+                .mapError { ex -> InitRootAccountException.Hash("Failed to hash root password: ${ex.message}", ex) }
                 .bind()
 
             val rootUser = User.ofPassword(

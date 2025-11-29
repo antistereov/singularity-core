@@ -1,5 +1,6 @@
 package io.stereov.singularity.auth.core.exception
 
+import io.stereov.singularity.database.core.exception.DatabaseFailure
 import io.stereov.singularity.global.exception.SingularityException
 import org.springframework.http.HttpStatus
 
@@ -36,13 +37,14 @@ sealed class LoginException(
      * @property code `ALREADY_AUTHENTICATED`
      * @property status [HttpStatus.NOT_MODIFIED]
      *
+     * @see AlreadyAuthenticatedFailure
      * @see AuthenticationException.AlreadyAuthenticated
      */
     class AlreadyAuthenticated(msg: String, cause: Throwable? = null) : LoginException(
         msg,
-        "ALREADY_AUTHENTICATED",
-        HttpStatus.NOT_MODIFIED,
-        "User is already authenticated.",
+        AlreadyAuthenticatedFailure.CODE,
+        AlreadyAuthenticatedFailure.STATUS,
+        AlreadyAuthenticatedFailure.DESCRIPTION,
         cause
     )
 
@@ -55,14 +57,13 @@ sealed class LoginException(
      * @param msg The exception message providing details about the context of the error.
      * @param cause The optional underlying cause of the exception.
      *
-     * @property code `INVALID_CREDENTIALS`
-     * @property status [HttpStatus.UNAUTHORIZED]
+     * @see InvalidCredentialsFailure
      */
     class InvalidCredentials(msg: String, cause: Throwable? = null) : LoginException(
         msg,
-        "INVALID_CREDENTIALS",
-        HttpStatus.UNAUTHORIZED,
-        "Indicates that the provided credentials are invalid.",
+        InvalidCredentialsFailure.CODE,
+        InvalidCredentialsFailure.STATUS,
+        InvalidCredentialsFailure.DESCRIPTION,
         cause
     )
 
@@ -76,14 +77,13 @@ sealed class LoginException(
      * @param msg A message providing details about the context of the error.
      * @param cause The optional underlying cause of the exception.
      *
-     * @property code `DATABASE_FAILURE`
-     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
+     * @see DatabaseFailure
      */
     class Database(msg: String, cause: Throwable? = null) : LoginException(
         msg,
-        "DATABASE_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Exception thrown when an encrypted database operation fails.",
+        DatabaseFailure.CODE,
+        DatabaseFailure.STATUS,
+        DatabaseFailure.DESCRIPTION,
         cause
     )
 }

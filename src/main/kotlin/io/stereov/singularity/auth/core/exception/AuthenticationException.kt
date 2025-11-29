@@ -112,9 +112,9 @@ sealed class AuthenticationException(
      */
     class AlreadyAuthenticated(msg: String, cause: Throwable? = null) : AuthenticationException(
         msg,
-        "ALREADY_AUTHENTICATED",
-        HttpStatus.NOT_MODIFIED,
-        "User is already authenticated.",
+        AlreadyAuthenticatedFailure.CODE,
+        AlreadyAuthenticatedFailure.STATUS,
+        AlreadyAuthenticatedFailure.DESCRIPTION,
         cause
     )
 }

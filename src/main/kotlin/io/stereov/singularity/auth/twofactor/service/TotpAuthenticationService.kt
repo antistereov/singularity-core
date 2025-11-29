@@ -181,7 +181,7 @@ class TotpAuthenticationService(
      */
     suspend fun validateCode(user: User, code: Int): Result<User, ValidateTwoFactorException> = coroutineBinding {
         if (!user.sensitive.security.twoFactor.totp.enabled) {
-            Err(ValidateTwoFactorException.TwoFactorDisabled("Cannot validate code: ${TwoFactorMethod.TOTP} is disabled"))
+            Err(ValidateTwoFactorException.TwoFactorAuthenticationDisabled("Cannot validate code: ${TwoFactorMethod.TOTP} is disabled"))
                 .bind()
         }
 

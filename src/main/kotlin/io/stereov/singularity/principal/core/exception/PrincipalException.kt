@@ -34,14 +34,13 @@ sealed class PrincipalException(
      * @param msg A message providing details about the invalid document.
      * @param cause The underlying cause of the exception, if available.
      *
-     * @property code `INVALID_PRINCIPAL_DOCUMENT`
-     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
+     * @see InvalidPrincipalDocumentFailure
      */
     class InvalidDocument(msg: String, cause: Throwable? = null) : PrincipalException(
         msg,
-        "INVALID_PRINCIPAL_DOCUMENT",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Thrown when a requested principal document is invalid.",
+        InvalidPrincipalDocumentFailure.CODE,
+        InvalidPrincipalDocumentFailure.STATUS,
+        InvalidPrincipalDocumentFailure.DESCRIPTION,
         cause
     )
 }

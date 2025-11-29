@@ -1,8 +1,6 @@
 package io.stereov.singularity.principal.core.model
 
-import com.github.michaelbull.result.toResultOr
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.principal.core.exception.PrincipalException
 import io.stereov.singularity.principal.core.model.sensitve.SensitiveGuestData
 import org.bson.types.ObjectId
 import java.time.Instant
@@ -26,14 +24,12 @@ import java.time.Instant
  * and session-related information.
  */
 data class Guest(
-    var _id: ObjectId? = null,
+    override var _id: ObjectId? = null,
     override val createdAt: Instant = Instant.now(),
     override var lastActive: Instant = Instant.now(),
     override val sensitive: SensitiveGuestData
 ) : Principal<Role.Guest, SensitiveGuestData> {
 
-    override val id
-        get() = _id.toResultOr { PrincipalException.InvalidDocument("The guest document does not have an ID") }
     override val logger = KotlinLogging.logger {}
 
     override val groups = emptySet<String>()

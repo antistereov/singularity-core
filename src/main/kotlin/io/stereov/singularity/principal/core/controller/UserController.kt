@@ -7,7 +7,6 @@ import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.token.exception.AccessTokenExtractionException
 import io.stereov.singularity.database.encryption.exception.DeleteEncryptedDocumentByIdException
 import io.stereov.singularity.database.encryption.exception.FindAllEncryptedDocumentsPaginatedException
-import io.stereov.singularity.database.encryption.exception.FindEncryptedDocumentByIdException
 import io.stereov.singularity.file.core.exception.FileException
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.global.annotation.ThrowsDomainError
@@ -16,6 +15,7 @@ import io.stereov.singularity.global.model.PageableRequest
 import io.stereov.singularity.global.model.SuccessResponse
 import io.stereov.singularity.global.util.mapContent
 import io.stereov.singularity.principal.core.dto.response.UserOverviewResponse
+import io.stereov.singularity.principal.core.exception.FindUserByIdException
 import io.stereov.singularity.principal.core.exception.PrincipalMapperException
 import io.stereov.singularity.principal.core.mapper.PrincipalMapper
 import io.stereov.singularity.principal.core.model.Role
@@ -61,7 +61,7 @@ class UserController(
         ]
     )
     @ThrowsDomainError([
-        FindEncryptedDocumentByIdException::class,
+        FindUserByIdException::class,
         AccessTokenExtractionException::class,
         PrincipalMapperException::class
     ])
@@ -69,9 +69,8 @@ class UserController(
         @PathVariable id: ObjectId
     ): ResponseEntity<UserOverviewResponse> {
 
-        val user = userService.findById(id).getOrThrow { when (it) {
-            is FindEncryptedDocumentByIdException -> it
-        } }
+        val user = userService.findById(id)
+            .getOrThrow { FindUserByIdException.from(it) }
 
         val authenticationOutcome = authorizationService.getAuthenticationOutcome()
             .getOrThrow { when (it) {
@@ -200,7 +199,7 @@ class UserController(
         AccessTokenExtractionException::class,
         AuthenticationException.AuthenticationRequired::class,
         AuthenticationException.RoleRequired::class,
-        FindEncryptedDocumentByIdException::class,
+        FindUserByIdException::class,
         FileException::class,
         DeleteEncryptedDocumentByIdException::class,
     ])
@@ -215,7 +214,7 @@ class UserController(
             .getOrThrow { when (it) { is AuthenticationException.RoleRequired -> it } }
 
         val user = userService.findById(id)
-            .getOrThrow { when (it) { is FindEncryptedDocumentByIdException -> it } }
+            .getOrThrow { FindUserByIdException.from(it) }
 
         user.sensitive.avatarFileKey?.let {
             fileStorage.remove(it).getOrThrow { ex -> when (ex) { is FileException -> ex } }

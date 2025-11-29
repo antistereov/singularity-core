@@ -33,14 +33,13 @@ sealed class SaveDocumentException(
      * @param msg The error message providing details about the failure.
      * @param cause The root cause of the exception, if available.
      *
-     * @property code `DATABASE_SAVING_FAILURE`
-     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
+     * @see DatabaseFailure
      */
     class Database(msg: String, cause: Throwable? = null) : SaveDocumentException(
         msg,
-        "DATABASE_SAVING_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Exception representing a general failure related to database saving operations.",
+        DatabaseFailure.CODE,
+        DatabaseFailure.STATUS,
+        DatabaseFailure.DESCRIPTION,
         cause
     )
 }

@@ -5,6 +5,7 @@ import com.github.michaelbull.result.coroutines.coroutineBinding
 import com.github.michaelbull.result.coroutines.runSuspendCatching
 import io.github.oshai.kotlinlogging.KLogger
 import io.stereov.singularity.database.core.exception.*
+import io.stereov.singularity.database.core.model.WithId
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.awaitFirstOrElse
@@ -23,7 +24,7 @@ import org.springframework.data.repository.kotlin.CoroutineCrudRepository
  *
  * @param T The type of the entity managed by this service. It must be a non-simple class.
  */
-interface CrudService<T: Any> {
+interface CrudService<T: WithId> {
 
     val logger: KLogger
 

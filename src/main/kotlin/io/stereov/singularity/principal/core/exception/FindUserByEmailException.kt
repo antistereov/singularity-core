@@ -1,5 +1,8 @@
 package io.stereov.singularity.principal.core.exception
 
+import io.stereov.singularity.database.core.exception.DatabaseFailure
+import io.stereov.singularity.database.encryption.exception.DatabaseEncryptionFailure
+import io.stereov.singularity.database.hash.exception.HashFailure
 import io.stereov.singularity.global.exception.SingularityException
 import org.springframework.http.HttpStatus
 
@@ -34,14 +37,13 @@ sealed class FindUserByEmailException(
      * @param msg A message providing context about the missing user.
      * @param cause The underlying cause of the exception, if available.
      *
-     * @property code `USER_NOT_FOUND`
-     * @property status [HttpStatus.NOT_FOUND]
+     * @see UserNotFoundFailure
      */
-    class NotFound(msg: String, cause: Throwable? = null) : FindUserByEmailException(
+    class UserNotFound(msg: String, cause: Throwable? = null) : FindUserByEmailException(
         msg,
-        "USER_NOT_FOUND",
-        HttpStatus.NOT_FOUND,
-        "No user with specified email found.",
+        UserNotFoundFailure.CODE,
+        UserNotFoundFailure.STATUS,
+        UserNotFoundFailure.DESCRIPTION,
         cause
     )
 
@@ -54,14 +56,13 @@ sealed class FindUserByEmailException(
      * @param msg A message providing detailed context about the hashing failure.
      * @param cause The underlying cause of the exception, if available.
      *
-     * @property code `USER_HASH_FAILURE`
-     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
+     * @see HashFailure
      */
-    class HashFailure(msg: String, cause: Throwable? = null) : FindUserByEmailException(
+    class Hash(msg: String, cause: Throwable? = null) : FindUserByEmailException(
         msg,
-        "USER_HASH_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Failed to generate or verify hash.",
+        HashFailure.CODE,
+        HashFailure.STATUS,
+        HashFailure.DESCRIPTION,
         cause
     )
 
@@ -76,14 +77,13 @@ sealed class FindUserByEmailException(
      * @param msg The error message describing the context of the failure.
      * @param cause The root cause of the exception, if available.
      *
-     * @property code `USER_DB_FAILURE`
-     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
+     * @see DatabaseFailure
      */
     class Database(msg: String, cause: Throwable? = null) : FindUserByEmailException(
         msg,
-        "USER_DB_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Failed to retrieve user from database.",
+        DatabaseFailure.CODE,
+        DatabaseFailure.STATUS,
+        DatabaseFailure.DESCRIPTION,
         cause
     )
 
@@ -99,14 +99,13 @@ sealed class FindUserByEmailException(
      * @param msg A message providing context for the encryption or decryption failure.
      * @param cause The underlying cause of the exception, if available.
      *
-     * @property code `USER_ENCRYPTION_FAILURE`
-     * @property status [HttpStatus.INTERNAL_SERVER_ERROR]
+     * @see DatabaseEncryptionFailure
      */
     class Encryption(msg: String, cause: Throwable? = null) : FindUserByEmailException(
         msg,
-        "USER_ENCRYPTION_FAILURE",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Failed to encrypt or decrypt user data.",
+        DatabaseEncryptionFailure.CODE,
+        DatabaseEncryptionFailure.STATUS,
+        DatabaseEncryptionFailure.DESCRIPTION,
         cause
     )
 }
