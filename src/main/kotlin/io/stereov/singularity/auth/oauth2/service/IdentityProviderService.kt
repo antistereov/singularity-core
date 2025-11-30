@@ -220,12 +220,13 @@ class IdentityProviderService(
                     principal.sensitive.sessions,
                 )
             }
-            is User -> principal
+            is User -> {
+                if (principal.sensitive.identities.providers.containsKey(provider))
+                    throw OAuth2FlowException(OAuth2ErrorCode.PROVIDER_ALREADY_CONNECTED,
+                        "The user already connected the provider $provider")
+                principal
+            }
         }
-
-        if (user.sensitive.identities.providers.containsKey(provider))
-            throw OAuth2FlowException(OAuth2ErrorCode.PROVIDER_ALREADY_CONNECTED,
-                "The user already connected the provider $provider")
 
         val connectionToken = oAuth2ProviderConnectionTokenService.extract(oauth2ProviderConnectionTokenValue, user)
             .getOrThrow { e ->

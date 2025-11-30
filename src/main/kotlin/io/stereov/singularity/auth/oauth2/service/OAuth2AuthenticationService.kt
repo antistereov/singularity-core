@@ -1,11 +1,6 @@
 package io.stereov.singularity.auth.oauth2.service
 
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.flatMapEither
-import com.github.michaelbull.result.getOrElse
-import com.github.michaelbull.result.getOrThrow
-import com.github.michaelbull.result.onFailure
-import com.github.michaelbull.result.recoverIf
+import com.github.michaelbull.result.*
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.alert.service.IdentityProviderInfoService
 import io.stereov.singularity.auth.core.model.AuthenticationOutcome
@@ -25,7 +20,6 @@ import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ServerWebExchange
 import java.util.*
-import kotlin.runCatching
 
 /**
  * Service responsible for handling OAuth2 authentication, user registration, and login processes
@@ -99,7 +93,9 @@ class OAuth2AuthenticationService(
 
          val name = oauth2User.attributes["name"] as? String ?: "User"
 
-         val authenticated = runCatching { accessTokenService.extract(exchange) }.isSuccess
+         val authenticated = accessTokenService.extract(exchange)
+             .map { it.isAuthenticated }
+             .getOrElse { false }
 
          val existingUser = userService.findByProviderIdentity(provider, principalId)
              .recoverIf({ it is FindUserByProviderIdentityException.NotFound }, { null })
