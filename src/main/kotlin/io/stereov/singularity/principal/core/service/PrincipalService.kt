@@ -4,7 +4,9 @@ import com.github.michaelbull.result.*
 import com.github.michaelbull.result.coroutines.coroutineBinding
 import com.github.michaelbull.result.coroutines.runSuspendCatching
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.database.core.exception.DatabaseException
 import io.stereov.singularity.database.encryption.exception.DeleteEncryptedDocumentByIdException
+import io.stereov.singularity.database.encryption.exception.EncryptionException
 import io.stereov.singularity.database.encryption.exception.ExistsEncryptedDocumentByIdException
 import io.stereov.singularity.database.encryption.exception.SaveEncryptedDocumentException
 import io.stereov.singularity.principal.core.exception.FindPrincipalByIdException
@@ -16,6 +18,8 @@ import io.stereov.singularity.principal.core.model.encrypted.EncryptedGuest
 import io.stereov.singularity.principal.core.model.encrypted.EncryptedPrincipal
 import io.stereov.singularity.principal.core.model.encrypted.EncryptedUser
 import io.stereov.singularity.principal.core.model.sensitve.SensitivePrincipalData
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
@@ -120,5 +124,19 @@ class PrincipalService(
         }
             .mapError { ex -> DeleteEncryptedDocumentByIdException.Database("Failed to delete principal with id ${id}: ${ex.message}", ex) }
             .map { }
+    }
+
+    /**
+     * Retrieves a flow of all [Principal] entities, including both [User]s and [Guest]s.
+     * The retrieved principals are decrypted and returned as individual results within the flow.
+     *
+     * @return A [Result] containing a [Flow] of [Result] where each result represents a
+     * [Principal] with decrypted data or an [EncryptionException] if decryption fails.
+     * If an error occurs during the retrieval process from the database, a [DatabaseException.Database] is returned.
+     */
+    suspend fun findAll(): Result<Flow<Result<Principal<out Role, out SensitivePrincipalData>, EncryptionException>>, DatabaseException.Database> = coroutineBinding {
+        val users = userService.findAll().bind()
+        val guests = guestService.findAll().bind()
+        merge(users, guests)
     }
 }

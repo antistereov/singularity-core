@@ -154,6 +154,7 @@ class CustomOAuth2AuthenticationSuccessHandler(
             stepUpTokenValue,
             exchange,
             state.stepUp,
+            sessionId,
             sessionToken.locale
         )
         val accessToken = accessTokenService.create(user, sessionId)

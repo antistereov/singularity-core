@@ -33,7 +33,7 @@ sealed interface Principal<R: Role, S: SensitivePrincipalData> : SensitiveDocume
      *
      * @return The updated [Principal].
      */
-    fun updateLastActive(): Principal<R, S> {
+    fun updateLastActive(): Principal<out R, out S> {
         logger.debug { "Updating last active" }
 
         lastActive = Instant.now()
@@ -50,7 +50,7 @@ sealed interface Principal<R: Role, S: SensitivePrincipalData> : SensitiveDocume
      * refresh token, browser, OS, IP address, and location.
      * @return The updated principal entity after the session is added or updated.
      */
-    fun addOrUpdateSession(sessionId: UUID, sessionInfo: SessionInfo): Principal<R, S> {
+    fun addOrUpdateSession(sessionId: UUID, sessionInfo: SessionInfo): Principal<out R, out S> {
         logger.debug { "Adding or updating session $sessionId" }
 
         removeSession(sessionId)
@@ -65,7 +65,7 @@ sealed interface Principal<R: Role, S: SensitivePrincipalData> : SensitiveDocume
      * @param sessionId The unique identifier of the session to be removed.
      * @return The updated principal entity after the session is removed.
      */
-    fun removeSession(sessionId: UUID): Principal<R, S> {
+    fun removeSession(sessionId: UUID): Principal<out R, out S> {
         logger.debug { "Removing session $sessionId" }
 
         this.sensitive.sessions.remove(sessionId)
@@ -82,7 +82,7 @@ sealed interface Principal<R: Role, S: SensitivePrincipalData> : SensitiveDocume
      *
      * @return The updated principal entity after all sessions have been cleared.
      */
-    fun clearSessions(): Principal<R, S> {
+    fun clearSessions(): Principal<out R, out S> {
         logger.debug { "Clearing sessions" }
 
         sensitive.sessions.clear()

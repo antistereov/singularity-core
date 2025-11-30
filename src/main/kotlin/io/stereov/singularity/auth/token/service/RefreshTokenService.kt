@@ -81,11 +81,11 @@ class RefreshTokenService(
             .mapError { ex ->
                 RefreshTokenCreationException.Failed("Failed to create refresh token because updating session in the user document for user ${principal.id} failed: ${ex.message}", ex)
             }
-            .andThen { doCreate(id, sessionId, refreshTokenId) }
+            .andThen { create(id, sessionId, refreshTokenId) }
             .bind()
     }
 
-    private suspend fun doCreate(
+    suspend fun create(
         principalId: ObjectId,
         sessionId: UUID,
         tokenId: String,
