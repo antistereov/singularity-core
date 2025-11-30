@@ -20,7 +20,7 @@ enum class TwoFactorMethod(val value: String) {
     companion object {
         @JvmStatic
         @JsonCreator
-
+        @Suppress("UNUSED")
         fun ofString(input: String): Result<TwoFactorMethod, TwoFactorMethodException> {
             return when (input.lowercase()) {
                 "totp" -> Ok(TOTP)

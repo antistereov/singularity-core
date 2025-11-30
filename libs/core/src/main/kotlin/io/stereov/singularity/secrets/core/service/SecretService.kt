@@ -65,15 +65,16 @@ abstract class SecretService(
     private suspend fun loadCurrentSecret(): Result<Secret, SecretStoreException> {
         this.logger.trace { "Loading current secret from key manager" }
 
-        return this.secretStore.get(actualKey)
+        return secretStore.get(actualKey)
             .andThenRecoverIf(
                 { ex -> ex is SecretStoreException.NotFound },
                 { updateSecret() }
             )
-            .map { current ->
-                this.currentSecret = current
-                current
+            .andThen { current ->
+                secretStore.get(current.value)
+                    .mapError { ex -> SecretStoreException.NotFound("Failed to load secret with key ${current.value}: ${ex.message}", ex) }
             }
+            .onSuccess { secret -> currentSecret = secret }
     }
 
     /**

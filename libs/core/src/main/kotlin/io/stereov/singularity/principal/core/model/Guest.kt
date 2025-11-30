@@ -7,7 +7,7 @@ import java.time.Instant
 
 /**
  * A data class that represents a Guest entity within the system. This class implements the
- * [Principal] interface with a specific role type of [Role.Guest.GUEST.GUEST] and sensitive data
+ * [Principal] interface with a specific role type of [Role.Guest.GUEST] and sensitive data
  * of type [SensitiveGuestData].
  *
  * The guest entity does not belong to any groups and has limited permissions defined by

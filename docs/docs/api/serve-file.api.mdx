@@ -1,0 +1,66 @@
+---
+id: serve-file
+title: "Get File from Local File Storage"
+description: "Retrieve a file from the [local file storage](../../docs/guides/file-storage/local)."
+sidebar_label: "Get File from Local File Storage"
+hide_title: true
+hide_table_of_contents: true
+api: eJztWVFz27gR/iuobqZz4YiSc7mbafXQKc+WcmoUyZWoS9Iko8AkJKEBCRYApXg8+u/dBSCJlGzX8ckz6Uz8YpEEFrvffruLBW4ahi50o/O+IWRCRTjngoXaSEUXLExkbpQUgqnGx2YjZTpRvDBc5o1OY8yM4mzFCCU4h8yVzIhZMvLeCnIvvaCPPy6NKXSn3dY8X5SCKm6uW9owxeSqxWU7lYluL0oOS7SrGrStrGetD/mHPF5yTVieFpLnhqy5EOSKkULJFUxLCZ+TYLKXHhAYDfrP+aJU8NlIUmpmFTzWj/CsECxjuaFo3YdczmvfW+SdLElCcyIYVTnJpAI7l6C+swwMs0KXUpvOi7Ozs7sN4ohoWia4zg9b/eyqz1qNZoN9AVByKi5gfqNz0yiVAKz/EHqNTbMhC+YW6acgTjO1Yj0YCAsqpguZa2ZX++nsDP/VHT16BcOQCQAPfg3aAf7TyZJlFH+Z64LBOKoUvYah3LDMSjPcCPxwQQ39tZzPgUUb/Gs2fr5tnYjogiV8zhOSyozynDClpCIySUqFLvxRM3Ae1wb8LuT6WedDHpAg+PRrdDHr9Qfd2bj7z2l3En/qBAGJl0quc7Jestw63bpTsf+UDOYDNTIq5lJlIBaW4PmKCp62Ti6wjhwtCsET64f2vzUaXYFxi8zzEyITnZ93J5NZPHrVHc66by/74+6FNaafp6gI02AKNdYemiRMw7P8DAZipH0pOMhu3SaqP/w9GvQfJgqiJpeoGElZItM7JH4zyj3CYy9O6DFLO2/OcBTPomn822jc/5eHpkrCnSHWLM9EEG2JCRihYRD2GTdmj9STyX8Ebj+fGjc0qDeaDo9tuduCuSzzOjqPl/IIDP56agxedd/N4gjiwGtvgyVhVjhqa6oeBs9l8CVfoJexaOyq+Zqb5fb3Z3btwgemU6EYTeGZYvjYTId1tfUNqPD16D//5YToT4eT6eXlaBx3L2avuxf9aBa/u+weR1W9ZqRbO8GGXJdFIRVyC8oIpwQLa+uJxX81ar+ctHbXMnc0GIzeDPqTGApvdNEfvpz1ov5gOnZmjlkBmxVQVKM5FUa5HI8UArZQLmC/58BAnlhmYdoXsKxVAKo0CjioA2BkjcSvu3F0EcVRTQWPNDDVL8ocK/fr7gxOS7VdeknzVODDdleZMUNT2BSBljxZoqcs8VNkMk7Ab1dU36HQaBrPRr3Z5N3w/F5cqmFWX1bT1fFiqIYsDSqpr/PE8QYHQK1lCbJGGzQYvrsyakq/i66pObrsjqO4Pxre5zvLDYvcIV4+3nf71SbRJUBENSptMVSkLNKduw+Xn8RAnde3Oc2FxxEx6+tqA5zJbt1WfCfnd3J+E+T8yowNKVszkAc9I3T5N5vmzQZ6eYB7KbEXXDADAgtqlvDQpgVvU62Z0e0gaDRdp6jweOBhrWjj8JTggmVQ1q0U6EOrQmo981+gZz6aO7B9espWUDEKbM53gj7ubZqgra57NWvZA89LFZVAgtx4WGIMonMpP3NW7VYL/opdH63ZheIlfmcKS1llNgBvaYvhCT7H4JyXgtDaQo6VDCWAL1NSAJJrqdJmNQv81IuQzFilbQdz/8HCA5t+1KNtk4X+AVAI5xaGsK5eaAfYU4acZogBDJ25obP60Jkdir08YpI47IBILi1ZSH6D9AWu2AOK6h7BGVXzGIIHGzV1ANv/Olx5BAZOz4rBNiJQyytYAtRu+h896NgpxFHjH2/iAwMfypgHmfj0FnqXuvd3+Q8EF9Pi5AEBUiHvHUaDLWo2fTmEMHdj0GIPpWWp4OXpcUFdwrI4BgY/zMriLmTuyx1HVP+eOzqNt2EMgx1mYR208H4gtuAvHawbPIOcAyWWX5FXxm6GjzrY8my7npyta5unJ6CY1/YR2aUSfqfk1P9D+L0NJ/hpWvwhcjw0aX1b9PAQ+A+3Z6ANPs9l9di8cplBosv+kZFvmEhkxrYHdLXLjz+R3Y0J6FnubjZIInE/50+yaHoNaoZ4L7K9V9Ew0fYgNTI1XVHLaE4X9pqkaZOU34ZW3rt9s1UL9tRh5f7F5jfYDFe1tNc6QdAD18MY2H1js/JS0DxhQdDBjyHsnevJhfyZTFGX17s13TlvIkqAh0CkWd3deqrKA93EBNoEJYhPtKsKC51FSgoWYsORbmnir8BaOMvpg9cZoMW5N76uSHeH49yeTAFfIEViGPrjrFswQ9H6GqiVOfj8OY0mWSkMDwGPRYmXVH5qc3etRa+gKzB0sQD5Tv+rkgsTQvOEMg8sIBH6xI4gnyIFgAr2iSQCKo07VtNyd5tWMfeSKbzXQKeA1RO/7Xa9C0Ni4mQndXtiB4yDfJOjNH/TFbpuF9Rx+HPrL4RFYdsmeMZd0wQ2QJZSbAuQw3ChKkUS3CshrYKL8FRQScfs/RWhV4m6Q9l9nkQd3ZLyqsSDKJoAK1LbVHBAqkkynii5f4Q5EAylECE0l8lnUmm1tF3ub0EwlIYhFhOk/D6IfInG9hSmcENqN30Yslc4HB24OzYGnmD4+2wxcZkGvh30XdVey9LYZhE7/e+Vj5BQYGVgPasIfXk5WL0gA//+UPR6vW4t8rIl1aLt50KGK0T4onXWYnlraTJ7mYgZxKWg5/DhDF8V0MSBw6pLgQt7u3th18rZ54m7mzxMZzf7pvb71fKTXC37kmnYF9MuBIXys/EMuPH9/3uspzDSnQDAjyDAe39cGj/e3GBmnCqx2eBrqKgKjxTg5wpwQS7jEwj1xRsPDSBEfY9U4DnDiooSlcA75NoxxMtujAuXqMauuufSvmhuf6D0zea/TY+Dzg==
+sidebar_class_name: "get api-method"
+info_path: docs/api/singularity-api
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Get File from Local File Storage"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"get"}
+  path={"/api/assets/**"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Retrieve a file from the [local file storage](../../docs/guides/file-storage/local).
+
+This endpoint will be provided if *Singularity* is configured to use the local file storage implementation
+of file storage. You can learn more [here](http://localhost:3000/docs/guides/file-storage/introduction#configuration).
+
+<ParamsDetails
+  parameters={undefined}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={undefined}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"description":"OK","content":{"*/*":{"schema":{"type":"array","items":{"title":"DataBuffer"}}}}},"400":{"description":"A specific domain error occurred (see list below):\n* **`BAD_FILE_REQUEST`:** Thrown when the file request is malformed or invalid.\n* **`BAD_FILE_REQUEST`:** Thrown when the file request is malformed or invalid.","content":{"application/json":{"schema":{}}}},"401":{"description":"A specific domain error occurred (see list below):\n* **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.\n* **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.\n* **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.\n* **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.","content":{"application/json":{"schema":{}}}},"403":{"description":"A specific domain error occurred (see list below):\n* **`FILE_ACCESS_NOT_AUTHORIZED`:** Thrown when access to the requested file is not permitted.\n* **`FILE_ACCESS_NOT_AUTHORIZED`:** Thrown when access to the requested file is not permitted.","content":{"application/json":{"schema":{}}}},"404":{"description":"A specific domain error occurred (see list below):\n* **`FILE_NOT_FOUND`:** Thrown when the requested file is not found.\n* **`FILE_NOT_FOUND`:** Thrown when the requested file is not found.","content":{"application/json":{"schema":{}}}},"409":{"description":"A specific domain error occurred (see list below):\n* **`FILE_KEY_TAKEN`:** This exception is thrown when attempting to store a file with a file key that is already taken or in use.\n* **`FILE_KEY_TAKEN`:** This exception is thrown when attempting to store a file with a file key that is already taken or in use.","content":{"application/json":{"schema":{}}}},"415":{"description":"A specific domain error occurred (see list below):\n* **`UNSUPPORTED_MEDIA_TYPE`:** Thrown when a request is made with an unsupported media type.\n* **`UNSUPPORTED_MEDIA_TYPE`:** Thrown when a request is made with an unsupported media type.","content":{"application/json":{"schema":{}}}},"500":{"description":"A specific domain error occurred (see list below):\n* **`ACCESS_TOKEN_ALLOWLIST_READING_FAILURE`:** Represents an exception indicating a failure when reading the allowlist for an access token cache.\n* **`FILE_METADATA_FAILURE`:** Thrown to indicate that a failure occurred during the handling of file metadata which is stored in the database.\n* **`FILE_METADATA_OUT_OF_SYNC`:** Represents an exception thrown when file metadata saved in the database is out of sync with the expected state of the actual file.\n* **`FILE_OPERATION_FAILURE`:** Represents an error that occurred during a file operation, such as saving or updating a file.\n* **`FILE_STREAM_FAILURE`:** Thrown when an error occurred during a file stream.\n* **`ACCESS_TOKEN_ALLOWLIST_READING_FAILURE`:** Represents an exception indicating a failure when reading the allowlist for an access token cache.\n* **`FILE_METADATA_FAILURE`:** Thrown to indicate that a failure occurred during the handling of file metadata which is stored in the database.\n* **`FILE_METADATA_OUT_OF_SYNC`:** Represents an exception thrown when file metadata saved in the database is out of sync with the expected state of the actual file.\n* **`FILE_OPERATION_FAILURE`:** Represents an error that occurred during a file operation, such as saving or updating a file.\n* **`FILE_STREAM_FAILURE`:** Thrown when an error occurred during a file stream.","content":{"application/json":{"schema":{}}}}}}
+>
+  
+</StatusCodes>
+
+
+      
