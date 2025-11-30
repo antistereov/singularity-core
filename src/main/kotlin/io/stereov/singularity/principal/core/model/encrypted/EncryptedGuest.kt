@@ -13,7 +13,7 @@ import java.time.Instant
  * Represents an encrypted [Guest] entity within the system.
  *
  * This data class implements the [EncryptedPrincipal] interface, specifically for guests who
- * have the role [Role.Guest.GUEST.GUEST]. It encapsulates the encrypted sensitive
+ * have the role [Role.Guest.GUEST]. It encapsulates the encrypted sensitive
  * information of a guest, along with their roles, groups, creation time, and last
  * active time.
  *
@@ -24,7 +24,7 @@ import java.time.Instant
  * @property createdAt The timestamp indicating when the guest entity was created.
  * @property lastActive The timestamp of the last recorded activity for the guest.
  * @property sensitive The encrypted sensitive data related to the guest.
- * @property roles The set of roles assigned to the guest, limited to [Role.Guest.GUEST.GUEST].
+ * @property roles The set of roles assigned to the guest, limited to [Role.Guest.GUEST].
  * @property groups The set of group identifiers to which the guest belongs, which is empty for guests.
  */
 @Document(collection = "principals")
