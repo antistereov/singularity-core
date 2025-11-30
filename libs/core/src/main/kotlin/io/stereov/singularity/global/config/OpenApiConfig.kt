@@ -138,7 +138,7 @@ class OpenApiConfig() {
 
                     val existingResponse = operation.responses[responseCode]
                     if (existingResponse == null) {
-                        val initialDescription = "A specific domain error occurred (see list below):$descriptionEntry"
+                        val initialDescription = "The following error codes correspond to this status:$descriptionEntry"
 
                         operation.responses.addApiResponse(
                             responseCode,
@@ -148,7 +148,11 @@ class OpenApiConfig() {
                         )
                     } else {
                         val currentDescription = existingResponse.description ?: "A specific domain error occurred (see list below):"
-                        existingResponse.description = currentDescription + descriptionEntry
+                        existingResponse.description = if (currentDescription.contains("`${apiError.code}`:")) {
+                            currentDescription
+                        } else {
+                            currentDescription + descriptionEntry
+                        }
                     }
                 }
             }

@@ -36,7 +36,7 @@ const sidebar: SidebarsConfig = {
         {
           type: "doc",
           id: "api/refresh-access-token",
-          label: "Refresh Access Token",
+          label: "Refresh Access EmailVerificationTokenCreation",
           className: "api-method post",
         },
         {
@@ -66,7 +66,7 @@ const sidebar: SidebarsConfig = {
         {
           type: "doc",
           id: "api/get-remaining-password-reset-cooldown",
-          label: "Get Remaining Password Reset Cooldown",
+          label: "Get Remaining Password Reset CooldownActive",
           className: "api-method get",
         },
         {
@@ -84,7 +84,7 @@ const sidebar: SidebarsConfig = {
         {
           type: "doc",
           id: "api/get-remaining-email-verification-cooldown",
-          label: "Get Remaining Email Verification Cooldown",
+          label: "Get Remaining Email Verification CooldownActive",
           className: "api-method get",
         },
       ],
@@ -161,7 +161,7 @@ const sidebar: SidebarsConfig = {
         {
           type: "doc",
           id: "api/get-remaining-email-two-factor-cooldown",
-          label: "Get Remaining Email 2FA Code Cooldown",
+          label: "Get Remaining Email 2FA Code CooldownActive",
           className: "api-method get",
         },
       ],
@@ -248,7 +248,7 @@ const sidebar: SidebarsConfig = {
         {
           type: "doc",
           id: "api/create-guest-account",
-          label: "Create Guest Account",
+          label: "Create Guest Principal",
           className: "api-method post",
         },
         {
@@ -364,20 +364,20 @@ const sidebar: SidebarsConfig = {
       items: [
         {
           type: "doc",
-          id: "api/get-authorized-user",
-          label: "Get User",
+          id: "api/get-authorized-principal",
+          label: "Get Principal",
           className: "api-method get",
         },
         {
           type: "doc",
           id: "api/update-authorized-user",
-          label: "Update User",
+          label: "Update Principal",
           className: "api-method put",
         },
         {
           type: "doc",
-          id: "api/delete-authorized-user",
-          label: "Delete User",
+          id: "api/delete-authorized-principal",
+          label: "Delete Principal",
           className: "api-method delete",
         },
         {
@@ -418,13 +418,13 @@ const sidebar: SidebarsConfig = {
         {
           type: "doc",
           id: "api/rotate-secret-keys",
-          label: "Trigger Secret Rotation",
+          label: "Trigger HashSecret Rotation",
           className: "api-method post",
         },
         {
           type: "doc",
           id: "api/get-secret-key-rotation-status",
-          label: "Get Secret Rotation Status",
+          label: "Get HashSecret Rotation Status",
           className: "api-method get",
         },
       ],
@@ -619,18 +619,29 @@ const sidebar: SidebarsConfig = {
     },
     {
       type: "category",
+      label: "local-file-storage-controller",
+      link: {
+        type: "generated-index",
+        title: "local-file-storage-controller",
+        slug: "/category/api/local-file-storage-controller",
+      },
+      items: [
+        {
+          type: "doc",
+          id: "api/serve-file",
+          label: "Get File from Local File Storage",
+          className: "api-method get",
+        },
+      ],
+    },
+    {
+      type: "category",
       label: "Schemas",
       items: [
         {
           type: "doc",
-          id: "api/schemas/errorresponse",
-          label: "ErrorResponse",
-          className: "schema",
-        },
-        {
-          type: "doc",
-          id: "api/schemas/changeuserrequest",
-          label: "ChangeUserRequest",
+          id: "api/schemas/changeprincipalrequest",
+          label: "ChangePrincipalRequest",
           className: "schema",
         },
         {
@@ -653,8 +664,32 @@ const sidebar: SidebarsConfig = {
         },
         {
           type: "doc",
+          id: "api/schemas/guest",
+          label: "Guest",
+          className: "schema",
+        },
+        {
+          type: "doc",
+          id: "api/schemas/klogger",
+          label: "KLogger",
+          className: "schema",
+        },
+        {
+          type: "doc",
           id: "api/schemas/objectid",
           label: "ObjectId",
+          className: "schema",
+        },
+        {
+          type: "doc",
+          id: "api/schemas/role",
+          label: "Role",
+          className: "schema",
+        },
+        {
+          type: "doc",
+          id: "api/schemas/user",
+          label: "User",
           className: "schema",
         },
         {
@@ -1025,8 +1060,20 @@ const sidebar: SidebarsConfig = {
         },
         {
           type: "doc",
+          id: "api/schemas/rotationinformation",
+          label: "RotationInformation",
+          className: "schema",
+        },
+        {
+          type: "doc",
           id: "api/schemas/rotationstatusresponse",
           label: "RotationStatusResponse",
+          className: "schema",
+        },
+        {
+          type: "doc",
+          id: "api/schemas/singularityexception",
+          label: "SingularityException",
           className: "schema",
         },
         {
@@ -1075,6 +1122,18 @@ const sidebar: SidebarsConfig = {
           type: "doc",
           id: "api/schemas/mailcooldownresponse",
           label: "MailCooldownResponse",
+          className: "schema",
+        },
+        {
+          type: "doc",
+          id: "api/schemas/databuffer",
+          label: "DataBuffer",
+          className: "schema",
+        },
+        {
+          type: "doc",
+          id: "api/schemas/errorresponse",
+          label: "ErrorResponse",
           className: "schema",
         },
       ],

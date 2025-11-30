@@ -23,7 +23,7 @@ class JwtService(
 ) {
 
     private val logger = KotlinLogging.logger {}
-    private val tokenTypeClaim = "token_type"
+    val tokenTypeClaim = "token_type"
 
     /**
      * Decodes a JSON Web EmailVerificationTokenCreation (JWT) and validates its type and expiration details.

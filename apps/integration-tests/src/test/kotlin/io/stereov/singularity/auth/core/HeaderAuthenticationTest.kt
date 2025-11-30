@@ -1,5 +1,6 @@
 package io.stereov.singularity.auth.core
 
+import com.github.michaelbull.result.getOrThrow
 import io.stereov.singularity.auth.core.dto.response.RefreshTokenResponse
 import io.stereov.singularity.auth.token.model.SessionTokenType
 import io.stereov.singularity.test.BaseSpringBootTest
@@ -54,7 +55,7 @@ class HeaderAuthenticationTest : BaseSpringBootTest() {
     }
     @Test fun `access unexpired token required`() = runTest {
         val user = registerUser()
-        val token = accessTokenService.create(user.info, user.sessionId, Instant.ofEpochSecond(0))
+        val token = accessTokenService.create(user.info, user.sessionId, Instant.ofEpochSecond(0)).getOrThrow()
 
         webTestClient.get()
             .uri("/api/users/me")
@@ -94,7 +95,7 @@ class HeaderAuthenticationTest : BaseSpringBootTest() {
     }
     @Test fun `access invalid session will not be authorized`() = runTest {
         val user = registerUser()
-        val accessToken = accessTokenService.create(user.info, user.sessionId)
+        val accessToken = accessTokenService.create(user.info, user.sessionId).getOrThrow()
 
         webTestClient.get()
             .uri("/api/users/me")
@@ -166,7 +167,8 @@ class HeaderAuthenticationTest : BaseSpringBootTest() {
     }
     @Test fun `refresh requires unexpired token`() = runTest {
         val user = registerUser()
-        val token = refreshTokenService.create(user.info.id, user.sessionId, user.info.sensitive.sessions.values.first().refreshTokenId!!,Instant.ofEpochSecond(0))
+        val token = refreshTokenService.create(user.info.id.getOrThrow(), user.sessionId, user.info.sensitive.sessions.values.first().refreshTokenId!!,Instant.ofEpochSecond(0))
+            .getOrThrow()
 
         webTestClient.post()
             .uri("/api/auth/refresh")
@@ -216,7 +218,7 @@ class HeaderAuthenticationTest : BaseSpringBootTest() {
     }
     @Test fun `refresh invalid session will not be authorized`() = runTest {
         val user = registerUser()
-        val accessToken = accessTokenService.create(user.info, user.sessionId)
+        val accessToken = accessTokenService.create(user.info, user.sessionId).getOrThrow()
 
         webTestClient.get()
             .uri("/api/users/me")
@@ -255,7 +257,7 @@ class HeaderAuthenticationTest : BaseSpringBootTest() {
     }
     @Test fun `stepUp requires unexpired token`() = runTest {
         val user = registerUser()
-        val stepUpToken = stepUpTokenService.create(user.info.id, user.sessionId, Instant.ofEpochSecond(0))
+        val stepUpToken = stepUpTokenService.create(user.info.id.getOrThrow(), user.sessionId, Instant.ofEpochSecond(0)).getOrThrow()
 
         webTestClient.get()
             .uri("/api/auth/2fa/totp/setup")
@@ -285,7 +287,7 @@ class HeaderAuthenticationTest : BaseSpringBootTest() {
     }
     @Test fun `stepUp needs valid unexpired access token`() = runTest {
         val user = registerUser()
-        val accessToken = accessTokenService.create(user.info, user.sessionId, Instant.ofEpochSecond(0))
+        val accessToken = accessTokenService.create(user.info, user.sessionId, Instant.ofEpochSecond(0)).getOrThrow()
 
         webTestClient.get()
             .uri("/api/auth/2fa/totp/setup")
@@ -307,7 +309,7 @@ class HeaderAuthenticationTest : BaseSpringBootTest() {
     }
     @Test fun `stepUp needs access token from matching session`() = runTest {
         val user = registerUser()
-        val stepUpToken = stepUpTokenService.create(user.info.id, UUID.randomUUID())
+        val stepUpToken = stepUpTokenService.create(user.info.id.getOrThrow(), UUID.randomUUID()).getOrThrow()
 
         webTestClient.get()
             .uri("/api/auth/2fa/totp/setup")

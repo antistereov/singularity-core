@@ -1,5 +1,6 @@
 package io.stereov.singularity.auth.twofactor
 
+import com.github.michaelbull.result.getOrThrow
 import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.slot
@@ -8,8 +9,8 @@ import io.stereov.singularity.auth.twofactor.dto.request.EnableEmailTwoFactorMet
 import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorVerifySetupRequest
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
 import io.stereov.singularity.global.util.Random
-import io.stereov.singularity.test.BaseSecurityAlertTest
 import io.stereov.singularity.principal.core.model.User
+import io.stereov.singularity.test.BaseSecurityAlertTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -174,9 +175,9 @@ class TwoFactorAlertUnitTest : BaseSecurityAlertTest() {
             captureNullable(twoFactorMethodSlot),
         ) }
 
-        val secret = totpService.generateSecretKey()
-        val recoveryCode = Random.generateString(10)
-        val token = setupTokenService.create(user.info.id, secret, listOf(recoveryCode))
+        val secret = totpService.generateSecretKey().getOrThrow()
+        val recoveryCode = Random.generateString(10).getOrThrow()
+        val token = setupTokenService.create(user.info.id.getOrThrow(), secret, listOf(recoveryCode)).getOrThrow()
         val code = gAuth.getTotpPassword(secret)
 
         webTestClient.post()
@@ -213,9 +214,9 @@ class TwoFactorAlertUnitTest : BaseSecurityAlertTest() {
             captureNullable(twoFactorMethodSlot),
         ) }
 
-        val secret = totpService.generateSecretKey()
-        val recoveryCode = Random.generateString(10)
-        val token = setupTokenService.create(user.info.id, secret, listOf(recoveryCode))
+        val secret = totpService.generateSecretKey().getOrThrow()
+        val recoveryCode = Random.generateString(10).getOrThrow()
+        val token = setupTokenService.create(user.info.id.getOrThrow(), secret, listOf(recoveryCode)).getOrThrow()
         val code = gAuth.getTotpPassword(secret)
 
         webTestClient.post()

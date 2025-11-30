@@ -1,9 +1,10 @@
 package io.stereov.singularity.principal.group.controller
 
+import com.github.michaelbull.result.getOrThrow
+import io.stereov.singularity.principal.core.dto.response.UserResponse
 import io.stereov.singularity.principal.group.model.Group
 import io.stereov.singularity.principal.group.model.GroupTranslation
 import io.stereov.singularity.test.BaseIntegrationTest
-import io.stereov.singularity.principal.core.dto.response.UserResponse
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -39,7 +40,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
 
         Assertions.assertEquals(setOf(group.key), res.groups)
 
-        val updatedUser = userService.findById(user.info.id)
+        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
 
         Assertions.assertEquals(mutableSetOf(group.key), updatedUser.groups)
     }
@@ -53,7 +54,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
             .exchange()
             .expectStatus().isNotFound
 
-        val updatedUser = userService.findById(user.info.id)
+        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
 
         Assertions.assertEquals(mutableSetOf<String>(), updatedUser.groups)
     }
@@ -76,7 +77,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
             .exchange()
             .expectStatus().isUnauthorized
 
-        val updatedUser = userService.findById(user.info.id)
+        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
 
         Assertions.assertEquals(mutableSetOf<String>(), updatedUser.groups)
     }
@@ -100,14 +101,14 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
             .exchange()
             .expectStatus().isForbidden
 
-        val updatedUser = userService.findById(user.info.id)
+        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
 
         Assertions.assertEquals(mutableSetOf<String>(), updatedUser.groups)
     }
     @Test fun `addMember with non-existing user is not found`() = runTest {
         val admin = createAdmin()
         val user = registerUser()
-        userService.deleteById(user.info.id)
+        userService.deleteById(user.info.id.getOrThrow()).getOrThrow()
 
         val group = groupRepository.save(
             Group(
@@ -155,7 +156,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
 
         Assertions.assertEquals(emptySet<String>(), res.groups)
 
-        val updatedUser = userService.findById(user.info.id)
+        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
         Assertions.assertEquals(emptySet<String>(), updatedUser.groups)
     }
     @Test fun `removeMember with non-existing group is not found`() = runTest {
@@ -168,7 +169,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
             .exchange()
             .expectStatus().isNotFound
 
-        val updatedUser = userService.findById(user.info.id)
+        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
         Assertions.assertEquals(mutableSetOf("pilots"), updatedUser.groups)
     }
     @Test fun `removeMember requires authentication`() = runTest {
@@ -190,7 +191,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
             .exchange()
             .expectStatus().isUnauthorized
 
-        val updatedUser = userService.findById(user.info.id)
+        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
         Assertions.assertEquals(mutableSetOf(group.key), updatedUser.groups)
     }
     @Test fun `removeMember requires admin`() = runTest {
@@ -213,13 +214,13 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
             .exchange()
             .expectStatus().isForbidden
 
-        val updatedUser = userService.findById(user.info.id)
+        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
         Assertions.assertEquals(mutableSetOf(group.key), updatedUser.groups)
     }
     @Test fun `removeMember with non-existing user is not found`() = runTest {
         val admin = createAdmin()
         val user = registerUser(groups = listOf("pilots"))
-        userService.deleteById(user.info.id)
+        userService.deleteById(user.info.id.getOrThrow()).getOrThrow()
 
         val group = groupRepository.save(
             Group(

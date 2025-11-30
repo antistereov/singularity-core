@@ -5,6 +5,7 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.exception.AuthenticationException
+import io.stereov.singularity.auth.token.model.AccessToken
 import io.stereov.singularity.principal.core.model.Role
 import org.bson.types.ObjectId
 import org.springframework.security.authentication.AbstractAuthenticationToken
@@ -54,12 +55,17 @@ sealed class AuthenticationOutcome(
         val principalId: ObjectId,
         val roles: Set<Role>,
         val groups: Set<String>,
-        val sessionId: UUID,
-        val tokenId: String,
+        val accessToken: AccessToken,
     ) : AuthenticationOutcome(
         authorities = roles.map { SimpleGrantedAuthority("ROLE_$it") },
     ) {
         override fun getPrincipal(): ObjectId = principalId
+
+        val sessionId: UUID
+            get() = accessToken.sessionId
+
+        val tokenId: String
+            get() = accessToken.tokenId
 
         fun requireRole(role: Role): Result<Authenticated, AuthenticationException.RoleRequired> {
             logger.debug { "Validating authorization: role $role" }

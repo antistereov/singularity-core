@@ -1,13 +1,14 @@
 package io.stereov.singularity.auth.core.service
 
+import com.github.michaelbull.result.getOrThrow
 import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.slot
 import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
 import io.stereov.singularity.auth.core.model.SessionInfo
-import io.stereov.singularity.test.BaseSecurityAlertTest
 import io.stereov.singularity.principal.core.model.User
+import io.stereov.singularity.test.BaseSecurityAlertTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -37,7 +38,7 @@ class LoginAlertIntegrationTest : BaseSecurityAlertTest() {
             .expectStatus()
             .isOk
 
-        val updatedUser = userService.findById(user.info.id)
+        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
 
         coVerify(exactly = 1) { loginAlertService.send(any(), anyNullable(), anyNullable()) }
         assert(loginUserSlot.isCaptured)
@@ -67,7 +68,7 @@ class LoginAlertIntegrationTest : BaseSecurityAlertTest() {
             .expectStatus()
             .isOk
 
-        val updatedUser = userService.findById(user.info.id)
+        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
 
         coVerify(exactly = 1) { loginAlertService.send(any(), any(), any()) }
         assert(loginUserSlot.isCaptured)

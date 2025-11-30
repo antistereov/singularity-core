@@ -1,12 +1,14 @@
 package io.stereov.singularity.principal.core.controller
 
+import com.github.michaelbull.result.getOrThrow
 import io.stereov.singularity.file.core.model.FileMetadataDocument
 import io.stereov.singularity.file.image.properties.ImageProperties
 import io.stereov.singularity.file.local.properties.LocalFileStorageProperties
-import io.stereov.singularity.test.BaseIntegrationTest
 import io.stereov.singularity.principal.core.dto.response.UserOverviewResponse
 import io.stereov.singularity.principal.core.dto.response.UserResponse
 import io.stereov.singularity.principal.core.model.Role
+import io.stereov.singularity.principal.core.model.identity.UserIdentity
+import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*
@@ -41,7 +43,7 @@ class UserControllerTest() : BaseIntegrationTest() {
         val user = registerUser()
 
         val res = webTestClient.get()
-            .uri("/api/users/${user.info.id}")
+            .uri("/api/users/${user.info.id.getOrThrow()}")
             .exchange()
             .expectStatus().isOk
             .expectBody(UserOverviewResponse::class.java)
@@ -50,13 +52,12 @@ class UserControllerTest() : BaseIntegrationTest() {
 
         requireNotNull(res)
 
-        assertEquals(user.info.id, res.id)
+        assertEquals(user.info.id.getOrThrow(), res.id)
         assertEquals(user.info.sensitive.name, res.name)
-        assertEquals(user.info.sensitive.email, res.email)
     }
     @Test fun `getUserById needs user with id`() = runTest {
         val user = registerUser()
-        userService.deleteById(user.info.id)
+        userService.deleteById(user.info.id.getOrThrow())
 
         webTestClient.get()
             .uri("/api/users/${user.info.id}")
@@ -65,7 +66,7 @@ class UserControllerTest() : BaseIntegrationTest() {
     }
 
     @Test fun `deleteById works`() = runTest {
-        val user = registerUser(roles = listOf(Role.USER, Role.ADMIN))
+        val user = registerUser(roles = listOf(Role.User.USER, Role.User.ADMIN))
 
         webTestClient.delete()
             .uri("/api/users/${user.info.id}")
@@ -73,11 +74,11 @@ class UserControllerTest() : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isOk
 
-        assertTrue(userService.findAll().toList().isEmpty())
+        assertTrue(userService.findAll().getOrThrow().toList().isEmpty())
 
     }
     @Test fun `deleteById deletes avatar`() = runTest {
-        val user = registerUser(roles = listOf(Role.USER, Role.ADMIN))
+        val user = registerUser(roles = listOf(Role.User.USER, Role.User.ADMIN))
 
         val file = ClassPathResource("files/test-image.jpg")
         val res = webTestClient.put()
@@ -104,7 +105,7 @@ class UserControllerTest() : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isOk
 
-        assertTrue(userService.findAll().toList().isEmpty())
+        assertTrue(userService.findAll().getOrThrow().toList().isEmpty())
 
         val imageRenditionsOld = requireNotNull(res?.avatar).renditions
 
@@ -129,9 +130,9 @@ class UserControllerTest() : BaseIntegrationTest() {
 
     }
     @Test fun `deleteById needs user with id`() = runTest {
-        val user = registerUser(roles = listOf(Role.USER, Role.ADMIN))
+        val user = registerUser(roles = listOf(Role.User.USER, Role.User.ADMIN))
         val anotherUser = registerUser()
-        userService.deleteById(anotherUser.info.id)
+        userService.deleteById(anotherUser.info.id.getOrThrow()).getOrThrow()
 
         webTestClient.delete()
             .uri("/api/users/${anotherUser.info.id}")
@@ -139,7 +140,7 @@ class UserControllerTest() : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isNotFound
 
-        assertTrue(userService.existsById(user.info.id))
+        assertTrue(userService.existsById(user.info.id.getOrThrow()).getOrThrow())
     }
     @Test fun `deleteById needs authentication`() = runTest {
         val user = registerUser()
@@ -149,7 +150,7 @@ class UserControllerTest() : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isUnauthorized
 
-        assertTrue(userService.existsById(user.info.id))
+        assertTrue(userService.existsById(user.info.id.getOrThrow()).getOrThrow())
     }
     @Test fun `deleteById needs admin role`() = runTest {
         val user = registerUser()
@@ -160,10 +161,10 @@ class UserControllerTest() : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isForbidden
 
-        assertTrue(userService.existsById(user.info.id))
+        assertTrue(userService.existsById(user.info.id.getOrThrow()).getOrThrow())
     }
     @Test fun `deleteById needs admin role not guest`() = runTest {
-        val user = registerUser(roles = listOf(Role.GUEST))
+        val user = registerUser(roles = listOf(Role.Guest.GUEST))
 
         webTestClient.delete()
             .uri("/api/users/${user.info.id}")
@@ -171,11 +172,11 @@ class UserControllerTest() : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isForbidden
 
-        assertTrue(userService.existsById(user.info.id))
+        assertTrue(userService.existsById(user.info.id.getOrThrow()).getOrThrow())
     }
 
     @Test fun `getUsers works with page, sort and size`() = runTest {
-        val user1 = registerUser(roles = listOf(Role.ADMIN, Role.USER))
+        val user1 = registerUser(roles = listOf(Role.User.ADMIN, Role.User.USER))
         val user2 = registerUser()
         val user3 = registerUser()
         val user4 = registerUser()
@@ -233,7 +234,7 @@ class UserControllerTest() : BaseIntegrationTest() {
         assertEquals(user5.info.id, res2.content.first().id)
     }
     @Test fun `getUsers works with everything`() = runTest {
-        val user1 = registerUser(roles = listOf(Role.ADMIN, Role.USER), groups = listOf("test"))
+        val user1 = registerUser(roles = listOf(Role.User.ADMIN, Role.User.USER), groups = listOf("test"))
         val user5 = registerOAuth2()
         userService.save(user5.info.copy(lastActive = Instant.ofEpochSecond(0), createdAt = Instant.ofEpochSecond(0)))
 
@@ -241,7 +242,7 @@ class UserControllerTest() : BaseIntegrationTest() {
             .queryParam("sort", "createdAt,asc")
             .queryParam("roles", "admin")
             .queryParam("groups", "test")
-            .queryParam("identities", IdentityProvider.PASSWORD)
+            .queryParam("identities", UserIdentity.PASSWORD_IDENTITY)
             .queryParam("createdAtAfter", Instant.now().minusSeconds(10))
             .queryParam("createdAtBefore", Instant.now().plusSeconds(10))
             .queryParam("lastActiveAfter", Instant.now().minusSeconds(10))
@@ -267,7 +268,7 @@ class UserControllerTest() : BaseIntegrationTest() {
         assertEquals(user1.info.id, res.content.first().id)
     }
     @Test fun `getUsers works with email`() = runTest {
-        val user1 = registerUser(roles = listOf(Role.ADMIN, Role.USER))
+        val user1 = registerUser(roles = listOf(Role.User.ADMIN, Role.User.USER))
         registerUser()
 
         val uri = UriComponentsBuilder.fromUriString("/api/users")
@@ -294,7 +295,7 @@ class UserControllerTest() : BaseIntegrationTest() {
         assertEquals(user1.info.id, res.content.first().id)
     }
     @Test fun `getUsers works with email not existing`() = runTest {
-        val user1 = registerUser(roles = listOf(Role.ADMIN, Role.USER))
+        val user1 = registerUser(roles = listOf(Role.User.ADMIN, Role.User.USER))
         registerUser()
 
         val uri = UriComponentsBuilder.fromUriString("/api/users")
@@ -320,14 +321,14 @@ class UserControllerTest() : BaseIntegrationTest() {
         assertEquals(0, res.content.size)
     }
     @Test fun `getUsers works with roles`() = runTest {
-        val user1 = registerUser(roles = listOf(Role.ADMIN, Role.USER))
+        val user1 = registerUser(roles = listOf(Role.User.ADMIN, Role.User.USER))
         registerUser()
 
         val uri = UriComponentsBuilder.fromUriString("/api/users")
             .queryParam("sort", "createdAt,asc")
             .queryParam("page", 0)
             .queryParam("size", 4)
-            .queryParam("roles", Role.ADMIN)
+            .queryParam("roles", Role.User.ADMIN)
             .build()
             .toUri()
 
@@ -347,7 +348,7 @@ class UserControllerTest() : BaseIntegrationTest() {
         assertEquals(user1.info.id, res.content.first().id)
     }
     @Test fun `getUsers works with multiple roles`() = runTest {
-        val user1 = registerUser(roles = listOf(Role.ADMIN, Role.USER))
+        val user1 = registerUser(roles = listOf(Role.User.ADMIN, Role.User.USER))
         registerUser()
 
         val uri = UriComponentsBuilder.fromUriString("/api/users")
@@ -374,7 +375,7 @@ class UserControllerTest() : BaseIntegrationTest() {
         assertEquals(user1.info.id, res.content.first().id)
     }
     @Test fun `getUsers works with groups`() = runTest {
-        val user1 = registerUser(roles = listOf(Role.ADMIN, Role.USER), groups = listOf("test"))
+        val user1 = registerUser(roles = listOf(Role.User.ADMIN, Role.User.USER), groups = listOf("test"))
         registerUser()
 
         val uri = UriComponentsBuilder.fromUriString("/api/users")
@@ -401,7 +402,7 @@ class UserControllerTest() : BaseIntegrationTest() {
         assertEquals(user1.info.id, res.content.first().id)
     }
     @Test fun `getUsers works with multiple groups`() = runTest {
-        val user1 = registerUser(roles = listOf(Role.ADMIN, Role.USER), groups = listOf("test"))
+        val user1 = registerUser(roles = listOf(Role.User.ADMIN, Role.User.USER), groups = listOf("test"))
         registerUser()
 
         val uri = UriComponentsBuilder.fromUriString("/api/users")
@@ -428,14 +429,14 @@ class UserControllerTest() : BaseIntegrationTest() {
         assertEquals(user1.info.id, res.content.first().id)
     }
     @Test fun `getUsers works with identities`() = runTest {
-        val user1 = registerUser(roles = listOf(Role.ADMIN, Role.USER), )
+        val user1 = registerUser(roles = listOf(Role.User.ADMIN, Role.User.USER), )
         registerOAuth2()
 
         val uri = UriComponentsBuilder.fromUriString("/api/users")
             .queryParam("sort", "createdAt,asc")
             .queryParam("page", 0)
             .queryParam("size", 4)
-            .queryParam("identities", IdentityProvider.PASSWORD)
+            .queryParam("identities", UserIdentity.PASSWORD_IDENTITY)
             .build()
             .toUri()
 
@@ -455,14 +456,14 @@ class UserControllerTest() : BaseIntegrationTest() {
         assertEquals(user1.info.id, res.content.first().id)
     }
     @Test fun `getUsers works with multiple identities`() = runTest {
-        val user1 = registerUser(roles = listOf(Role.ADMIN, Role.USER), )
+        val user1 = registerUser(roles = listOf(Role.User.ADMIN, Role.User.USER), )
         registerOAuth2()
 
         val uri = UriComponentsBuilder.fromUriString("/api/users")
             .queryParam("sort", "createdAt,asc")
             .queryParam("page", 0)
             .queryParam("size", 4)
-            .queryParam("identities", "${IdentityProvider.PASSWORD},another")
+            .queryParam("identities", "${UserIdentity.PASSWORD_IDENTITY},another")
             .build()
             .toUri()
 
@@ -482,7 +483,7 @@ class UserControllerTest() : BaseIntegrationTest() {
         assertEquals(user1.info.id, res.content.first().id)
     }
     @Test fun `getUsers works with createdAtAfter`() = runTest {
-        val user1 = registerUser(roles = listOf(Role.ADMIN, Role.USER), )
+        val user1 = registerUser(roles = listOf(Role.User.ADMIN, Role.User.USER), )
         val user2 = registerUser()
         userService.save(user2.info.copy(createdAt = Instant.ofEpochSecond(0)))
 
@@ -510,7 +511,7 @@ class UserControllerTest() : BaseIntegrationTest() {
         assertEquals(user1.info.id, res.content.first().id)
     }
     @Test fun `getUsers works with createdAtBefore`() = runTest {
-        val user1 = registerUser(roles = listOf(Role.ADMIN, Role.USER), )
+        val user1 = registerUser(roles = listOf(Role.User.ADMIN, Role.User.USER), )
         val user2 = registerUser()
         userService.save(user2.info.copy(createdAt = Instant.now().plusSeconds(1000)))
 
@@ -538,7 +539,7 @@ class UserControllerTest() : BaseIntegrationTest() {
         assertEquals(user1.info.id, res.content.first().id)
     }
     @Test fun `getUsers works with lastActiveAfter`() = runTest {
-        val user1 = registerUser(roles = listOf(Role.ADMIN, Role.USER), )
+        val user1 = registerUser(roles = listOf(Role.User.ADMIN, Role.User.USER), )
         val user2 = registerUser()
         userService.save(user2.info.copy(lastActive = Instant.ofEpochSecond(0)))
 
@@ -566,7 +567,7 @@ class UserControllerTest() : BaseIntegrationTest() {
         assertEquals(user1.info.id, res.content.first().id)
     }
     @Test fun `getUsers works with lastActiveBefore`() = runTest {
-        val user1 = registerUser(roles = listOf(Role.ADMIN, Role.USER), )
+        val user1 = registerUser(roles = listOf(Role.User.ADMIN, Role.User.USER), )
         val user2 = registerUser()
         userService.save(user2.info.copy(lastActive = Instant.now().plusSeconds(1000)))
 
@@ -619,7 +620,7 @@ class UserControllerTest() : BaseIntegrationTest() {
             .expectStatus().isForbidden
     }
     @Test fun `getUsers works needs admin role not guest`() = runTest {
-        val user = registerUser(roles = listOf(Role.GUEST))
+        val user = registerUser(roles = listOf(Role.Guest.GUEST))
 
         val uri = UriComponentsBuilder.fromUriString("/api/users")
             .build()

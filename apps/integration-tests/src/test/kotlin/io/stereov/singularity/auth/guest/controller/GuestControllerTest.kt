@@ -1,12 +1,15 @@
 package io.stereov.singularity.auth.guest.controller
 
+import com.github.michaelbull.result.getOrThrow
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
 import io.stereov.singularity.principal.core.dto.request.ConvertToUserRequest
 import io.stereov.singularity.principal.core.dto.request.CreateGuestRequest
 import io.stereov.singularity.principal.core.dto.response.ConvertToUserResponse
 import io.stereov.singularity.principal.core.dto.response.CreateGuestResponse
-import io.stereov.singularity.test.BaseIntegrationTest
+import io.stereov.singularity.principal.core.model.Guest
 import io.stereov.singularity.principal.core.model.Role
+import io.stereov.singularity.principal.core.model.User
+import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions
@@ -28,15 +31,12 @@ class GuestControllerTest : BaseIntegrationTest() {
         val accessToken = result.extractAccessToken()
         val refreshToken = result.extractRefreshToken()
 
-        val guest = userService.findById(accessToken.userId)
+        val guest = principalService.findById(accessToken.userId).getOrThrow()
 
+        Assertions.assertTrue(guest is Guest)
         Assertions.assertEquals(name, guest.sensitive.name)
         Assertions.assertTrue(guest.roles.size == 1)
-        Assertions.assertTrue(guest.roles.contains(Role.GUEST))
-        Assertions.assertNull(guest.sensitive.email)
-        Assertions.assertTrue(guest.sensitive.identities.isEmpty())
-        Assertions.assertFalse(guest.twoFactorEnabled)
-        Assertions.assertFalse(guest.sensitive.security.email.verified)
+        Assertions.assertTrue(guest.roles.contains(Role.Guest.GUEST))
         Assertions.assertEquals(1, guest.sensitive.sessions.size)
 
         Assertions.assertEquals(accessToken.userId, refreshToken.userId)
@@ -56,7 +56,7 @@ class GuestControllerTest : BaseIntegrationTest() {
 
         val accessToken = result.extractAccessToken()
 
-        val guest = userService.findById(accessToken.userId)
+        val guest = principalService.findById(accessToken.userId).getOrThrow()
 
         Assertions.assertEquals(1, guest.sensitive.sessions.size)
         val session = guest.sensitive.sessions[accessToken.sessionId]!!
@@ -74,7 +74,7 @@ class GuestControllerTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isNotModified
 
-        val allUsers = userService.findAll().toList()
+        val allUsers = principalService.findAll().getOrThrow().toList()
         Assertions.assertEquals(1, allUsers.size)
     }
 
@@ -96,7 +96,7 @@ class GuestControllerTest : BaseIntegrationTest() {
         val accessToken = result.extractAccessToken()
         val refreshToken = result.extractRefreshToken()
 
-        val user = userService.findById(guest.info.id)
+        val user = principalService.findById(guest.info.id.getOrThrow()).getOrThrow()
 
         Assertions.assertEquals(user.id, accessToken.userId)
         Assertions.assertEquals(user.id, refreshToken.userId)
@@ -108,14 +108,15 @@ class GuestControllerTest : BaseIntegrationTest() {
         Assertions.assertEquals(session, refreshToken.sessionId)
 
         Assertions.assertEquals(1, user.roles.size)
-        Assertions.assertTrue(user.roles.contains(Role.USER))
-        Assertions.assertFalse(user.isGuest)
+        Assertions.assertTrue(user.roles.contains(Role.User.USER))
+        Assertions.assertFalse(user is Guest)
+
+        require(user is User)
 
         Assertions.assertEquals(email, user.sensitive.email)
-        Assertions.assertTrue(hashService.checkBcrypt(password, user.password!!))
+        Assertions.assertTrue(hashService.checkBcrypt(password, user.password.getOrThrow()).getOrThrow())
 
-        Assertions.assertEquals(1, user.sensitive.identities.size)
-        Assertions.assertEquals(IdentityProvider.PASSWORD, user.sensitive.identities.keys.first())
+        Assertions.assertEquals(0, user.sensitive.identities.providers.size)
         Assertions.assertEquals(guest.info.sensitive.name, user.sensitive.name)
     }
     @Test fun `convertGuestToUser saves session info correctly`() = runTest {
@@ -134,7 +135,7 @@ class GuestControllerTest : BaseIntegrationTest() {
             .returnResult()
 
         val accessToken = result.extractAccessToken()
-        val user = userService.findById(guest.info.id)
+        val user = principalService.findById(guest.info.id.getOrThrow()).getOrThrow()
 
         Assertions.assertEquals(1, user.sensitive.sessions.size)
         val session = user.sensitive.sessions[accessToken.sessionId]!!

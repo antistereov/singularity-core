@@ -1,11 +1,14 @@
 package io.stereov.singularity.cache.service
 
+import com.github.michaelbull.result.getOrThrow
+import io.stereov.singularity.cache.exception.CacheException
 import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.time.delay
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.Duration
 import java.time.Instant
 import java.util.*
@@ -25,78 +28,78 @@ class CacheServiceTest : BaseIntegrationTest() {
 
     @Test fun `save and get works`() = runTest {
         val value = TestData()
-        cacheService.put("key", value)
+        cacheService.put("key", value).getOrThrow()
 
-        assertEquals(value, cacheService.getOrNull<TestData>("key"))
+        assertEquals(value, cacheService.get<TestData>("key").getOrThrow())
     }
     @Test fun `save overrides key`() = runTest {
-        cacheService.put("key", "value")
-        assertEquals("value", cacheService.getOrNull("key"))
+        cacheService.put("key", "value").getOrThrow()
+        assertEquals("value", cacheService.get<String>("key").getOrThrow())
 
-        cacheService.put("key", "value2")
-        assertEquals("value2", cacheService.getOrNull("key"))
+        cacheService.put("key", "value2").getOrThrow()
+        assertEquals("value2", cacheService.get<String>("key").getOrThrow())
     }
     @Test fun `put expiration works`() = runTest {
-        cacheService.put("test", "test", 1)
+        cacheService.put("test", "test", 1).getOrThrow()
 
-        assertTrue(cacheService.exists("test"))
+        assertTrue(cacheService.exists("test").getOrThrow())
 
         runBlocking { delay(Duration.ofMillis(1100)) }
 
-        assertFalse(cacheService.exists("test"))
+        assertFalse(cacheService.exists("test").getOrThrow())
     }
 
     @Test fun `exists works`() = runTest {
-        cacheService.put("test", "test")
+        cacheService.put("test", "test").getOrThrow()
 
-        assertTrue(cacheService.exists("test"))
-        assertFalse(cacheService.exists("te"))
+        assertTrue(cacheService.exists("test").getOrThrow())
+        assertFalse(cacheService.exists("te").getOrThrow())
     }
 
     @Test fun `delete works`() = runTest {
-        cacheService.put("key", "value")
-        assertEquals("value", cacheService.getOrNull("key"))
+        cacheService.put("key", "value").getOrThrow()
+        assertEquals("value", cacheService.get<String>("key").getOrThrow())
 
-        cacheService.delete("key")
-        assertNull(cacheService.getOrNull("key"))
+        cacheService.delete("key").getOrThrow()
+        assertNull(cacheService.get<String>("key").getOrThrow())
     }
     @Test fun `delete works if key does not exists`() = runTest {
         cacheService.delete("key")
     }
 
     @Test fun `getDataOrNul returns null if no key exists`() = runTest {
-        assertNull(cacheService.getOrNull("key"))
+        assertNull(cacheService.get<String>("key").getOrThrow())
     }
     @Test fun `getData throws error if no key exists`() = runTest {
-        assertThrowsExactly(RedisKeyNotFoundException::class.java) {
-            runBlocking { cacheService.get("key") }
+        assertThrows<CacheException.KeyNotFound> {
+            runBlocking { cacheService.get<String>("key") }
         }
     }
 
     @Test fun `deleteAll deletesAll`() = runTest {
-        cacheService.put("key1", "value")
-        cacheService.put("key2", "value")
+        cacheService.put("key1", "value").getOrThrow()
+        cacheService.put("key2", "value").getOrThrow()
 
-        assertEquals("value", cacheService.getOrNull("key1"))
-        assertEquals("value", cacheService.getOrNull("key2"))
+        assertEquals("value", cacheService.get<String>("key1").getOrThrow())
+        assertEquals("value", cacheService.get<String>("key2").getOrThrow())
 
-        cacheService.deleteAll()
+        cacheService.deleteAll().getOrThrow()
 
-        assertNull(cacheService.getOrNull("key1"))
-        assertNull(cacheService.getOrNull("key2"))
+        assertNull(cacheService.get<String>("key1").getOrThrow())
+        assertNull(cacheService.get<String>("key2").getOrThrow())
     }
     @Test fun `deleteAll works if no data exist`() = runTest {
-        cacheService.deleteAll()
+        cacheService.deleteAll().getOrThrow()
     }
     @Test fun `deleteAll works with pattern`() = runTest {
-        cacheService.put("test:1", "test")
-        cacheService.put("test:2", "test")
-        cacheService.put("te:1", "test")
+        cacheService.put("test:1", "test").getOrThrow()
+        cacheService.put("test:2", "test").getOrThrow()
+        cacheService.put("te:1", "test").getOrThrow()
 
-        cacheService.deleteAll("test:*")
+        cacheService.deleteAll("test:*").getOrThrow()
 
-        assertFalse(cacheService.exists("test:1"))
-        assertFalse(cacheService.exists("test:2"))
-        assertTrue(cacheService.exists("te:1"))
+        assertFalse(cacheService.exists("test:1").getOrThrow())
+        assertFalse(cacheService.exists("test:2").getOrThrow())
+        assertTrue(cacheService.exists("te:1").getOrThrow())
     }
 }

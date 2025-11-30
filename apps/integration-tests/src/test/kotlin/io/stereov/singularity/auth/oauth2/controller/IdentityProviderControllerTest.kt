@@ -1,11 +1,12 @@
 package io.stereov.singularity.auth.oauth2.controller
 
+import com.github.michaelbull.result.getOrThrow
 import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.auth.core.dto.response.IdentityProviderResponse
 import io.stereov.singularity.auth.oauth2.dto.request.AddPasswordAuthenticationRequest
-import io.stereov.singularity.test.BaseIntegrationTest
 import io.stereov.singularity.principal.core.dto.response.UserResponse
 import io.stereov.singularity.principal.core.model.identity.UserIdentity
+import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -14,7 +15,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
 
     @Test fun `get works`() = runTest {
         val user = registerUser()
-        user.info.sensitive.identities["github"] = UserIdentity(null, "id")
+        user.info.sensitive.identities.providers["github"] = UserIdentity.ofProvider("id")
         userService.save(user.info)
 
         val res = webTestClient.get()
@@ -27,7 +28,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
         val body = requireNotNull(res.responseBody)
 
         Assertions.assertEquals(listOf(
-            IdentityProviderResponse(IdentityProvider.PASSWORD),
+            IdentityProviderResponse(UserIdentity.PASSWORD_IDENTITY),
             IdentityProviderResponse("github")), body.map { objectMapper.convertValue(it, IdentityProviderResponse::class.java) })
     }
     @Test fun `get works with guest`() = runTest {
@@ -66,12 +67,12 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
 
         val body = requireNotNull(res.responseBody)
 
-        Assertions.assertTrue(body.identityProviders.contains(IdentityProvider.PASSWORD))
+        Assertions.assertTrue(body.identityProviders.contains(UserIdentity.PASSWORD_IDENTITY))
 
-        val updatedUser = userService.findById(user.info.id)
+        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
 
-        Assertions.assertTrue(updatedUser.sensitive.identities.contains(IdentityProvider.PASSWORD))
-        Assertions.assertTrue(hashService.checkBcrypt(req.password, updatedUser.password!!))
+        Assertions.assertTrue(updatedUser.sensitive.identities.password != null)
+        Assertions.assertTrue(hashService.checkBcrypt(req.password, updatedUser.password.getOrThrow()).getOrThrow())
 
         webTestClient.post()
             .uri("/api/auth/login")
@@ -91,9 +92,9 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isBadRequest
 
-        val updatedUser = userService.findById(user.info.id)
-        Assertions.assertFalse(updatedUser.sensitive.identities.contains(IdentityProvider.PASSWORD))
-        Assertions.assertNull(updatedUser.password)
+        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        Assertions.assertFalse(updatedUser.sensitive.identities.password != null)
+        Assertions.assertNull(updatedUser.password.getOrThrow())
     }
     @Test fun `addPassword requires passwort with lower case letter`() = runTest {
         val user = registerOAuth2()
@@ -107,9 +108,9 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isBadRequest
 
-        val updatedUser = userService.findById(user.info.id)
+        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
 
-        Assertions.assertFalse(updatedUser.sensitive.identities.contains(IdentityProvider.PASSWORD))
+        Assertions.assertFalse(updatedUser.sensitive.identities.password != null)
         Assertions.assertNull(updatedUser.password)
     }
     @Test fun `addPassword requires password with upper-case letter`() = runTest {
@@ -124,8 +125,8 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isBadRequest
 
-        val updatedUser = userService.findById(user.info.id)
-        Assertions.assertFalse(updatedUser.sensitive.identities.contains(IdentityProvider.PASSWORD))
+        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        Assertions.assertFalse(updatedUser.sensitive.identities.password != null)
         Assertions.assertNull(updatedUser.password)
     }
     @Test fun `addPassword requires password with number`() = runTest {
@@ -140,8 +141,8 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isBadRequest
 
-        val updatedUser = userService.findById(user.info.id)
-        Assertions.assertFalse(updatedUser.sensitive.identities.contains(IdentityProvider.PASSWORD))
+        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        Assertions.assertFalse(updatedUser.sensitive.identities.password != null)
         Assertions.assertNull(updatedUser.password)
     }
     @Test fun `addPassword requires password with special character`() = runTest {
@@ -156,8 +157,8 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isBadRequest
 
-        val updatedUser = userService.findById(user.info.id)
-        Assertions.assertFalse(updatedUser.sensitive.identities.contains(IdentityProvider.PASSWORD))
+        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        Assertions.assertFalse(updatedUser.sensitive.identities.password != null)
         Assertions.assertNull(updatedUser.password)
     }
     @Test fun `addPassword needs body`() = runTest {
@@ -170,8 +171,8 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isBadRequest
 
-        val updatedUser = userService.findById(user.info.id)
-        Assertions.assertFalse(updatedUser.sensitive.identities.contains(IdentityProvider.PASSWORD))
+        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        Assertions.assertFalse(updatedUser.sensitive.identities.password != null)
         Assertions.assertNull(updatedUser.password)
     }
     @Test fun `addPassword needs access and step-up`() = runTest {
@@ -198,9 +199,9 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isUnauthorized
 
-        val updatedUser = userService.findById(user.info.id)
+        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
 
-        Assertions.assertFalse(updatedUser.sensitive.identities.contains(IdentityProvider.PASSWORD))
+        Assertions.assertFalse(updatedUser.sensitive.identities.password != null)
         Assertions.assertNull(updatedUser.password)
     }
     @Test fun `addPassword does not allow guests`() = runTest {
@@ -246,7 +247,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
 
     @Test fun `delete works`() = runTest {
         val user = registerUser()
-        user.info.sensitive.identities["github"] = UserIdentity(null, "id")
+        user.info.sensitive.identities.providers["github"] = UserIdentity.ofProvider("id")
         userService.save(user.info)
 
         val res = webTestClient.delete()
@@ -260,15 +261,15 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
 
         val body = requireNotNull(res.responseBody)
 
-        Assertions.assertEquals(listOf(IdentityProvider.PASSWORD), body.identityProviders)
+        Assertions.assertEquals(listOf(UserIdentity.PASSWORD_IDENTITY), body.identityProviders)
 
-        val updatedUser = userService.findById(user.info.id)
-        Assertions.assertTrue(updatedUser.sensitive.identities.contains(IdentityProvider.PASSWORD))
-        Assertions.assertTrue(hashService.checkBcrypt(user.password!!, updatedUser.password!!))
+        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        Assertions.assertTrue(updatedUser.sensitive.identities.password != null)
+        Assertions.assertTrue(hashService.checkBcrypt(user.password!!, updatedUser.password.getOrThrow()).getOrThrow())
     }
     @Test fun `delete requires existing identity`() = runTest {
         val user = registerUser()
-        user.info.sensitive.identities["github"] = UserIdentity(null, "id")
+        user.info.sensitive.identities.providers["github"] = UserIdentity.ofProvider("id")
         userService.save(user.info)
 
         webTestClient.delete()
@@ -278,15 +279,15 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isNotFound
 
-        val updatedUser = userService.findById(user.info.id)
-        Assertions.assertEquals(2, updatedUser.sensitive.identities.size)
-        Assertions.assertTrue(updatedUser.sensitive.identities.contains(IdentityProvider.PASSWORD))
-        Assertions.assertTrue(updatedUser.sensitive.identities.contains("github"))
-        Assertions.assertTrue(hashService.checkBcrypt(user.password!!, updatedUser.password!!))
+        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        Assertions.assertEquals(2, updatedUser.sensitive.identities.providers.size)
+        Assertions.assertTrue(updatedUser.sensitive.identities.password != null)
+        Assertions.assertTrue(updatedUser.sensitive.identities.providers.contains("github"))
+        Assertions.assertTrue(hashService.checkBcrypt(user.password!!, updatedUser.password.getOrThrow()).getOrThrow())
     }
     @Test fun `delete requires access and step up`() = runTest {
         val user = registerUser()
-        user.info.sensitive.identities["github"] = UserIdentity(null, "id")
+        user.info.sensitive.identities.providers["github"] = UserIdentity.ofProvider("id")
         userService.save(user.info)
 
         webTestClient.delete()
@@ -306,29 +307,29 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isUnauthorized
 
-        val updatedUser = userService.findById(user.info.id)
-        Assertions.assertEquals(2, updatedUser.sensitive.identities.size)
-        Assertions.assertTrue(updatedUser.sensitive.identities.contains(IdentityProvider.PASSWORD))
-        Assertions.assertTrue(updatedUser.sensitive.identities.contains("github"))
-        Assertions.assertTrue(hashService.checkBcrypt(user.password!!, updatedUser.password!!))
+        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        Assertions.assertEquals(2, updatedUser.sensitive.identities.providers.size)
+        Assertions.assertTrue(updatedUser.sensitive.identities.password != null)
+        Assertions.assertTrue(updatedUser.sensitive.identities.providers.contains("github"))
+        Assertions.assertTrue(hashService.checkBcrypt(user.password!!, updatedUser.password.getOrThrow()).getOrThrow())
     }
     @Test fun `delete cannot delete password`() = runTest {
         val user = registerUser()
-        user.info.sensitive.identities["github"] = UserIdentity(null, "id")
+        user.info.sensitive.identities.providers["github"] = UserIdentity.ofProvider("id")
         userService.save(user.info)
 
         webTestClient.delete()
-            .uri("/api/users/me/providers/${IdentityProvider.PASSWORD}")
+            .uri("/api/users/me/providers/${UserIdentity.PASSWORD_IDENTITY}")
             .accessTokenCookie(user.accessToken)
             .stepUpTokenCookie(user.stepUpToken)
             .exchange()
             .expectStatus().isBadRequest
 
-        val updatedUser = userService.findById(user.info.id)
-        Assertions.assertEquals(2, updatedUser.sensitive.identities.size)
-        Assertions.assertTrue(updatedUser.sensitive.identities.contains(IdentityProvider.PASSWORD))
-        Assertions.assertTrue(updatedUser.sensitive.identities.contains("github"))
-        Assertions.assertTrue(hashService.checkBcrypt(user.password!!, updatedUser.password!!))
+        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        Assertions.assertEquals(2, updatedUser.sensitive.identities.providers.size)
+        Assertions.assertTrue(updatedUser.sensitive.identities.password != null)
+        Assertions.assertTrue(updatedUser.sensitive.identities.providers.contains("github"))
+        Assertions.assertTrue(hashService.checkBcrypt(user.password!!, updatedUser.password.getOrThrow()).getOrThrow())
     }
     @Test fun `delete cannot delete last identity`() = runTest {
         val user = registerOAuth2()
@@ -340,8 +341,8 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isBadRequest
 
-        val updatedUser = userService.findById(user.info.id)
-        Assertions.assertFalse(updatedUser.sensitive.identities.contains(IdentityProvider.PASSWORD))
+        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        Assertions.assertFalse(updatedUser.sensitive.identities.password != null)
         Assertions.assertNull(updatedUser.password)
     }
 }

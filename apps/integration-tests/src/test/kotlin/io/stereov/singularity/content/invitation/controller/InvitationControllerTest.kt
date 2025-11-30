@@ -1,12 +1,13 @@
 package io.stereov.singularity.content.invitation.controller
 
+import com.github.michaelbull.result.getOrThrow
 import io.mockk.verify
-import io.stereov.singularity.principal.group.model.KnownGroups
 import io.stereov.singularity.content.article.dto.response.FullArticleResponse
 import io.stereov.singularity.content.core.dto.request.AcceptInvitationToContentRequest
 import io.stereov.singularity.content.core.dto.request.InviteUserToContentRequest
 import io.stereov.singularity.content.core.dto.response.ExtendedContentAccessDetailsResponse
 import io.stereov.singularity.content.core.model.ContentAccessRole
+import io.stereov.singularity.principal.group.model.KnownGroups
 import io.stereov.singularity.test.BaseArticleTest
 import jakarta.mail.internet.MimeMessage
 import kotlinx.coroutines.flow.count
@@ -48,11 +49,11 @@ class InvitationControllerTest() : BaseArticleTest() {
             .responseBody
             .awaitFirstOrNull()
 
-        val updatedArticle = articleService.findByKey(article.key)
+        val updatedArticle = articleService.findByKey(article.key).getOrThrow()
         assertEquals(1, updatedArticle.access.invitations.size)
         val invitationId = updatedArticle.access.invitations.first()
         assertNotNull(invitationService.findById(invitationId))
-        assertEquals(1, invitationService.findAll().count())
+        assertEquals(1, invitationService.findAll().getOrThrow().count())
 
         verify { mailSender.send(any<MimeMessage>()) }
     }
@@ -73,11 +74,11 @@ class InvitationControllerTest() : BaseArticleTest() {
             .responseBody
             .awaitFirstOrNull()
 
-        val updatedArticle = articleService.findByKey(article.key)
+        val updatedArticle = articleService.findByKey(article.key).getOrThrow()
         assertEquals(1, updatedArticle.access.invitations.size)
         val invitationId = updatedArticle.access.invitations.first()
         assertNotNull(invitationService.findById(invitationId))
-        assertEquals(1, invitationService.findAll().count())
+        assertEquals(1, invitationService.findAll().getOrThrow().count())
 
         verify { mailSender.send(any<MimeMessage>()) }
     }
@@ -97,11 +98,11 @@ class InvitationControllerTest() : BaseArticleTest() {
             .responseBody
             .awaitFirstOrNull()
 
-        val updatedArticle = articleService.findByKey(article.key)
+        val updatedArticle = articleService.findByKey(article.key).getOrThrow()
         assertEquals(1, updatedArticle.access.invitations.size)
         val invitationId = updatedArticle.access.invitations.first()
         assertNotNull(invitationService.findById(invitationId))
-        assertEquals(1, invitationService.findAll().count())
+        assertEquals(1, invitationService.findAll().getOrThrow().count())
 
         verify { mailSender.send(any<MimeMessage>()) }
     }
@@ -119,9 +120,9 @@ class InvitationControllerTest() : BaseArticleTest() {
             .exchange()
             .expectStatus().isForbidden
 
-        val updatedArticle = articleService.findByKey(article.key)
+        val updatedArticle = articleService.findByKey(article.key).getOrThrow()
         assertEquals(0, updatedArticle.access.invitations.size)
-        assertEquals(0, invitationService.findAll().count())
+        assertEquals(0, invitationService.findAll().getOrThrow().count())
 
         verify(exactly = 0) { mailSender.send(any<MimeMessage>()) }
     }
@@ -129,7 +130,7 @@ class InvitationControllerTest() : BaseArticleTest() {
         val owner = registerUser()
         val invited = registerUser()
         val article = saveArticle()
-        article.access.users.editor.add(owner.info.id.toString())
+        article.access.users.editor.add(owner.info.id.getOrThrow().toString())
         articleService.save(article)
 
         webTestClient.post()
@@ -139,8 +140,8 @@ class InvitationControllerTest() : BaseArticleTest() {
             .expectStatus().isUnauthorized
 
         val updatedArticle = articleService.findByKey(article.key)
-        assertEquals(0, updatedArticle.access.invitations.size)
-        assertEquals(0, invitationService.findAll().count())
+        assertEquals(0, updatedArticle.getOrThrow().access.invitations.size)
+        assertEquals(0, invitationService.findAll().getOrThrow().count())
 
         verify(exactly = 0) { mailSender.send(any<MimeMessage>()) }
     }
@@ -158,8 +159,8 @@ class InvitationControllerTest() : BaseArticleTest() {
             .expectStatus().isNotFound
 
         val updatedArticle = articleService.findByKey(article.key)
-        assertEquals(0, updatedArticle.access.invitations.size)
-        assertEquals(0, invitationService.findAll().count())
+        assertEquals(0, updatedArticle.getOrThrow().access.invitations.size)
+        assertEquals(0, invitationService.findAll().getOrThrow().count())
 
         verify(exactly = 0) { mailSender.send(any<MimeMessage>()) }
     }
@@ -175,8 +176,8 @@ class InvitationControllerTest() : BaseArticleTest() {
             .expectStatus().isBadRequest
 
         val updatedArticle = articleService.findByKey(article.key)
-        assertEquals(0, updatedArticle.access.invitations.size)
-        assertEquals(0, invitationService.findAll().count())
+        assertEquals(0, updatedArticle.getOrThrow().access.invitations.size)
+        assertEquals(0, invitationService.findAll().getOrThrow().count())
 
         verify(exactly = 0) { mailSender.send(any<MimeMessage>()) }
     }
@@ -194,10 +195,10 @@ class InvitationControllerTest() : BaseArticleTest() {
             invitedTo = "invitedTo",
             claims = mapOf("key" to article.key, "role" to ContentAccessRole.MAINTAINER),
             locale = null
-        )
+        ).getOrThrow()
 
-        articleService.save(article.addInvitation(invitation))
-        val token = invitationTokenService.create(invitation)
+        articleService.save(article.addInvitation(invitation.id.getOrThrow()))
+        val token = invitationTokenService.create(invitation).getOrThrow()
 
         webTestClient.post()
             .uri("/api/content/oops/invitations/accept")
@@ -218,10 +219,10 @@ class InvitationControllerTest() : BaseArticleTest() {
             invitedTo = "invitedTo",
             claims = mapOf("key" to article.key, "role" to ContentAccessRole.MAINTAINER),
             locale = null
-        )
+        ).getOrThrow()
 
-        articleService.save(article.addInvitation(invitation))
-        val token = invitationTokenService.create(invitation)
+        articleService.save(article.addInvitation(invitation.id.getOrThrow()))
+        val token = invitationTokenService.create(invitation).getOrThrow()
 
          webTestClient.post()
             .uri("/api/content/articles/invitations/accept")
@@ -229,7 +230,7 @@ class InvitationControllerTest() : BaseArticleTest() {
             .exchange()
             .expectStatus().isUnauthorized
 
-        val updated = articleService.findByKey(article.key)
+        val updated = articleService.findByKey(article.key).getOrThrow()
         assertFalse(updated.access.invitations.isEmpty())
         assertFalse(updated.access.users.maintainer.contains(invited.info.id.toString()))
     }
@@ -246,10 +247,10 @@ class InvitationControllerTest() : BaseArticleTest() {
             invitedTo = "invitedTo",
             claims = mapOf("key" to article.key, "role" to ContentAccessRole.MAINTAINER),
             locale = null
-        )
+        ).getOrThrow()
 
-        articleService.save(article.addInvitation(invitation))
-        val token = invitationTokenService.create(invitation)
+        articleService.save(article.addInvitation(invitation.id.getOrThrow()))
+        val token = invitationTokenService.create(invitation).getOrThrow()
 
         val res = webTestClient.post()
             .uri("/api/content/articles/invitations/accept")
@@ -260,7 +261,7 @@ class InvitationControllerTest() : BaseArticleTest() {
             .responseBody
             .awaitFirst()
 
-        val updated = articleService.findByKey(article.key)
+        val updated = articleService.findByKey(article.key).getOrThrow()
 
         assertEquals(article.key, res.key)
         assertTrue(updated.access.invitations.isEmpty())
@@ -279,9 +280,9 @@ class InvitationControllerTest() : BaseArticleTest() {
             invitedTo = "invitedTo",
             claims = mapOf("key" to article.key, "role" to ContentAccessRole.MAINTAINER),
             locale = null
-        )
+        ).getOrThrow()
 
-        articleService.save(article.addInvitation(invitation))
+        articleService.save(article.addInvitation(invitation.id.getOrThrow()))
 
         webTestClient.post()
             .uri("/api/content/articles/invitations/accept")
@@ -289,7 +290,7 @@ class InvitationControllerTest() : BaseArticleTest() {
             .exchange()
             .expectStatus().isUnauthorized
 
-        val updated = articleService.findByKey(article.key)
+        val updated = articleService.findByKey(article.key).getOrThrow()
         assertFalse(updated.access.invitations.isEmpty())
         assertFalse(updated.access.users.maintainer.contains(invited.info.id.toString()))
     }
@@ -307,9 +308,9 @@ class InvitationControllerTest() : BaseArticleTest() {
             claims = mapOf("key" to article.key, "role" to ContentAccessRole.MAINTAINER),
             locale = null,
             issuedAt = Instant.ofEpochSecond(0)
-        )
-        val token = invitationTokenService.create(invitation)
-        articleService.save(article.addInvitation(invitation))
+        ).getOrThrow()
+        val token = invitationTokenService.create(invitation).getOrThrow()
+        articleService.save(article.addInvitation(invitation.id.getOrThrow())).getOrThrow()
 
         webTestClient.post()
             .uri("/api/content/articles/invitations/accept")
@@ -317,7 +318,7 @@ class InvitationControllerTest() : BaseArticleTest() {
             .exchange()
             .expectStatus().isUnauthorized
 
-        val updated = articleService.findByKey(article.key)
+        val updated = articleService.findByKey(article.key).getOrThrow()
         assertFalse(updated.access.invitations.isEmpty())
         assertFalse(updated.access.users.maintainer.contains(invited.info.id.toString()))
     }
@@ -334,9 +335,9 @@ class InvitationControllerTest() : BaseArticleTest() {
             invitedTo = "invitedTo",
             claims = mapOf("key" to "no-key", "role" to ContentAccessRole.MAINTAINER),
             locale = null,
-        )
-        val token = invitationTokenService.create(invitation)
-        articleService.save(article.addInvitation(invitation))
+        ).getOrThrow()
+        val token = invitationTokenService.create(invitation).getOrThrow()
+        articleService.save(article.addInvitation(invitation.id.getOrThrow()))
 
         webTestClient.post()
             .uri("/api/content/articles/invitations/accept")
@@ -344,7 +345,7 @@ class InvitationControllerTest() : BaseArticleTest() {
             .exchange()
             .expectStatus().isNotFound
 
-        val updated = articleService.findByKey(article.key)
+        val updated = articleService.findByKey(article.key).getOrThrow()
         assertFalse(updated.access.invitations.isEmpty())
         assertFalse(updated.access.users.maintainer.contains(invited.info.id.toString()))
     }
@@ -361,9 +362,9 @@ class InvitationControllerTest() : BaseArticleTest() {
             invitedTo = "invitedTo",
             claims = mapOf("key" to article.key, "role" to ContentAccessRole.MAINTAINER),
             locale = null,
-        )
-        val token = invitationTokenService.create(invitation)
-        articleService.save(article.addInvitation(invitation))
+        ).getOrThrow()
+        val token = invitationTokenService.create(invitation).getOrThrow()
+        articleService.save(article.addInvitation(invitation.id.getOrThrow()))
 
         webTestClient.post()
             .uri("/api/content/articles/invitations/accept")
@@ -371,7 +372,7 @@ class InvitationControllerTest() : BaseArticleTest() {
             .exchange()
             .expectStatus().isNotFound
 
-        val updated = articleService.findByKey(article.key)
+        val updated = articleService.findByKey(article.key).getOrThrow()
         assertFalse(updated.access.invitations.isEmpty())
         assertFalse(updated.access.users.maintainer.contains(invited.info.id.toString()))
     }
@@ -391,7 +392,7 @@ class InvitationControllerTest() : BaseArticleTest() {
             .responseBody
             .awaitFirstOrNull()
 
-        val updatedArticle = articleService.findByKey(article.key)
+        val updatedArticle = articleService.findByKey(article.key).getOrThrow()
         assertEquals(1, updatedArticle.access.invitations.size)
         val invitationId = updatedArticle.access.invitations.first()
 
@@ -401,8 +402,8 @@ class InvitationControllerTest() : BaseArticleTest() {
             .exchange()
             .expectStatus().isOk
 
-        val updated = articleService.findByKey(article.key)
-        assertFalse(invitationService.existsById(invitationId))
+        val updated = articleService.findByKey(article.key).getOrThrow()
+        assertFalse(invitationService.existsById(invitationId).getOrThrow())
         assertTrue(updated.access.invitations.isEmpty())
         assertFalse(updated.access.users.maintainer.contains(invited.info.id.toString()))
     }
@@ -421,7 +422,7 @@ class InvitationControllerTest() : BaseArticleTest() {
             .responseBody
             .awaitFirstOrNull()
 
-        val updatedArticle = articleService.findByKey(article.key)
+        val updatedArticle = articleService.findByKey(article.key).getOrThrow()
         assertEquals(1, updatedArticle.access.invitations.size)
         val invitationId = updatedArticle.access.invitations.first()
 
@@ -430,8 +431,8 @@ class InvitationControllerTest() : BaseArticleTest() {
             .exchange()
             .expectStatus().isUnauthorized
 
-        val updated = articleService.findByKey(article.key)
-        assertTrue(invitationService.existsById(invitationId))
+        val updated = articleService.findByKey(article.key).getOrThrow()
+        assertTrue(invitationService.existsById(invitationId).getOrThrow())
         assertFalse(updated.access.invitations.isEmpty())
         assertFalse(updated.access.users.maintainer.contains(invited.info.id.toString()))
     }
@@ -453,7 +454,7 @@ class InvitationControllerTest() : BaseArticleTest() {
             .responseBody
             .awaitFirstOrNull()
 
-        val updatedArticle = articleService.findByKey(article.key)
+        val updatedArticle = articleService.findByKey(article.key).getOrThrow()
         assertEquals(1, updatedArticle.access.invitations.size)
         val invitationId = updatedArticle.access.invitations.first()
 
@@ -463,8 +464,8 @@ class InvitationControllerTest() : BaseArticleTest() {
             .exchange()
             .expectStatus().isForbidden
 
-        val updated = articleService.findByKey(article.key)
-        assertTrue(invitationService.existsById(invitationId))
+        val updated = articleService.findByKey(article.key).getOrThrow()
+        assertTrue(invitationService.existsById(invitationId).getOrThrow())
         assertFalse(updated.access.invitations.isEmpty())
         assertFalse(updated.access.users.maintainer.contains(invited.info.id.toString()))
     }
@@ -483,7 +484,7 @@ class InvitationControllerTest() : BaseArticleTest() {
             .responseBody
             .awaitFirstOrNull()
 
-        val updatedArticle = articleService.findByKey(article.key)
+        val updatedArticle = articleService.findByKey(article.key).getOrThrow()
         assertEquals(1, updatedArticle.access.invitations.size)
         val invitationId = updatedArticle.access.invitations.first()
         articleService.deleteByKey(article.key)
@@ -509,7 +510,7 @@ class InvitationControllerTest() : BaseArticleTest() {
             .responseBody
             .awaitFirstOrNull()
 
-        val updatedArticle = articleService.findByKey(article.key)
+        val updatedArticle = articleService.findByKey(article.key).getOrThrow()
         assertEquals(1, updatedArticle.access.invitations.size)
         val invitationId = updatedArticle.access.invitations.first()
         invitationService.deleteById(invitationId)

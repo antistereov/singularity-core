@@ -1,5 +1,6 @@
-package io.stereov.singularity.principal.group.controller
+package io.stereov.singularity.auth.group.controller
 
+import com.github.michaelbull.result.getOrThrow
 import io.stereov.singularity.principal.group.dto.request.CreateGroupRequest
 import io.stereov.singularity.principal.group.dto.request.UpdateGroupRequest
 import io.stereov.singularity.principal.group.dto.response.GroupResponse
@@ -15,7 +16,7 @@ import java.util.*
 class GroupControllerTest() : BaseIntegrationTest() {
 
     data class GroupPage(
-        val content: List<io.stereov.singularity.principal.group.dto.response.GroupResponse> = emptyList(),
+        val content: List<GroupResponse> = emptyList(),
         val pageNumber: Int,
         val pageSize: Int,
         val numberOfElements: Int,
@@ -422,7 +423,7 @@ class GroupControllerTest() : BaseIntegrationTest() {
         Assertions.assertEquals(req.translations[Locale.ENGLISH]!!.name, res.name)
         Assertions.assertEquals(req.translations[Locale.ENGLISH]!!.description, res.description)
 
-        val updatedGroup = groupService.findByKey("pilots")
+        val updatedGroup = groupService.findByKey("pilots").getOrThrow()
         Assertions.assertTrue(updatedGroup.translations.size == 1)
         Assertions.assertTrue(updatedGroup.translations.contains(Locale.ENGLISH))
         Assertions.assertEquals(req.translations[Locale.ENGLISH]!!.name, updatedGroup.translations[Locale.ENGLISH]!!.name)
@@ -476,7 +477,7 @@ class GroupControllerTest() : BaseIntegrationTest() {
         Assertions.assertEquals(req.translations[Locale.ENGLISH]!!.name, res.name)
         Assertions.assertEquals(req.translations[Locale.ENGLISH]!!.description, res.description)
 
-        val updatedGroup = groupService.findByKey("pilots")
+        val updatedGroup = groupService.findByKey("pilots").getOrThrow()
         Assertions.assertTrue(updatedGroup.translations.size == 1)
         Assertions.assertTrue(updatedGroup.translations.contains(Locale.ENGLISH))
         Assertions.assertEquals(req.translations[Locale.ENGLISH]!!.name, updatedGroup.translations[Locale.ENGLISH]!!.name)
@@ -506,7 +507,7 @@ class GroupControllerTest() : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isBadRequest
 
-        val updatedGroup = groupService.findByKey(group.key)
+        val updatedGroup = groupService.findByKey(group.key).getOrThrow()
 
         Assertions.assertEquals(group.id, updatedGroup.id)
         Assertions.assertEquals(group.translations, updatedGroup.translations)
@@ -604,10 +605,10 @@ class GroupControllerTest() : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isOk
 
-        Assertions.assertFalse(groupService.existsByKey(group.key))
-        Assertions.assertFalse(groupService.existsById(group.id))
+        Assertions.assertFalse(groupService.existsByKey(group.key).getOrThrow())
+        Assertions.assertFalse(groupService.existsById(group.id.getOrThrow()).getOrThrow())
 
-        val updatedUser = userService.findById(user.info.id)
+        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
 
         Assertions.assertTrue(updatedUser.groups.isEmpty())
     }
@@ -628,10 +629,10 @@ class GroupControllerTest() : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isUnauthorized
 
-        Assertions.assertTrue(groupService.existsByKey(group.key))
-        Assertions.assertTrue(groupService.existsById(group.id))
+        Assertions.assertTrue(groupService.existsByKey(group.key).getOrThrow())
+        Assertions.assertTrue(groupService.existsById(group.id.getOrThrow()).getOrThrow())
 
-        val updatedUser = userService.findById(user.info.id)
+        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
 
         Assertions.assertEquals(setOf(group.key),updatedUser.groups)
     }
@@ -653,10 +654,10 @@ class GroupControllerTest() : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isForbidden
 
-        Assertions.assertTrue(groupService.existsByKey(group.key))
-        Assertions.assertTrue(groupService.existsById(group.id))
+        Assertions.assertTrue(groupService.existsByKey(group.key).getOrThrow())
+        Assertions.assertTrue(groupService.existsById(group.id.getOrThrow()).getOrThrow())
 
-        val updatedUser = userService.findById(user.info.id)
+        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
 
         Assertions.assertEquals(setOf(group.key),updatedUser.groups)
     }
@@ -679,10 +680,10 @@ class GroupControllerTest() : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isNotFound
 
-        Assertions.assertTrue(groupService.existsByKey(group.key))
-        Assertions.assertTrue(groupService.existsById(group.id))
+        Assertions.assertTrue(groupService.existsByKey(group.key).getOrThrow())
+        Assertions.assertTrue(groupService.existsById(group.id.getOrThrow()).getOrThrow())
 
-        val updatedUser = userService.findById(user.info.id)
+        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
 
         Assertions.assertEquals(setOf(group.key),updatedUser.groups)
     }

@@ -1,10 +1,11 @@
 package io.stereov.singularity.auth.twofactor.controller
 
+import com.github.michaelbull.result.getOrThrow
 import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
 import io.stereov.singularity.auth.core.dto.response.LoginResponse
-import io.stereov.singularity.auth.token.model.SessionTokenType
 import io.stereov.singularity.auth.jwt.exception.TokenExtractionException
+import io.stereov.singularity.auth.token.model.SessionTokenType
 import io.stereov.singularity.auth.twofactor.dto.request.CompleteStepUpRequest
 import io.stereov.singularity.auth.twofactor.dto.request.TotpRecoveryRequest
 import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorVerifySetupRequest
@@ -12,8 +13,8 @@ import io.stereov.singularity.auth.twofactor.dto.response.TwoFactorRecoveryRespo
 import io.stereov.singularity.auth.twofactor.dto.response.TwoFactorSetupResponse
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
 import io.stereov.singularity.global.util.Random
-import io.stereov.singularity.test.BaseIntegrationTest
 import io.stereov.singularity.principal.core.dto.response.UserResponse
+import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -27,7 +28,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
         val user = registerUser()
         val login = LoginRequest(user.email!!, user.password!!)
 
-        val stepUpToken = stepUpTokenService.create(user.info.id, user.sessionId)
+        val stepUpToken = stepUpTokenService.create(user.info.id.getOrThrow(), user.sessionId).getOrThrow()
 
         val response = webTestClient.get()
             .uri("/api/auth/2fa/totp/setup")
@@ -54,14 +55,14 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
             .returnResult()
             .responseBody
 
-        val userWith2fa = userService.findById(user.info.id)
+        val userWith2fa = userService.findById(user.info.id.getOrThrow()).getOrThrow()
 
         requireNotNull(setupRes)
         assertTrue(userWith2fa.sensitive.security.twoFactor.totp.enabled)
         assertTrue(setupRes.twoFactorAuthEnabled)
         assertEquals(response.secret, userWith2fa.sensitive.security.twoFactor.totp.secret!!)
         response.recoveryCodes.forEach { responseCode ->
-            assertTrue(userWith2fa.sensitive.security.twoFactor.totp.recoveryCodes.any { hashService.checkBcrypt(responseCode, it) })
+            assertTrue(userWith2fa.sensitive.security.twoFactor.totp.recoveryCodes.any { hashService.checkBcrypt(responseCode, it).getOrThrow() })
         }
         val loginRes = webTestClient.post()
             .uri("/api/auth/login")
@@ -121,12 +122,12 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
         val email = "test@email.com"
         val user = registerUser(email)
 
-        val stepUpToken = stepUpTokenService.create(user.info.id, user.sessionId)
+        val stepUpToken = stepUpTokenService.create(user.info.id.getOrThrow(), user.sessionId).getOrThrow()
 
         val response = webTestClient.get()
             .uri("/api/auth/2fa/totp/setup")
             .accessTokenCookie(user.accessToken)
-            .stepUpTokenCookie(cookieCreator.createCookie(stepUpToken).value)
+            .stepUpTokenCookie(cookieCreator.createCookie(stepUpToken).getOrThrow().value)
             .exchange()
             .expectStatus().isOk
             .expectBody(TwoFactorSetupResponse::class.java)
@@ -148,7 +149,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
             .returnResult()
             .responseBody
 
-        val userWith2fa = userService.findById(user.info.id)
+        val userWith2fa = userService.findById(user.info.id.getOrThrow()).getOrThrow()
 
         assertTrue(userWith2fa.sensitive.sessions.isEmpty())
     }
@@ -186,9 +187,9 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
     @Test fun `totp setup validation works`() = runTest {
         val user = registerUser()
 
-        val secret = totpService.generateSecretKey()
-        val recoveryCode = Random.generateString(10)
-        val token = setupTokenService.create(user.info.id, secret, listOf(recoveryCode))
+        val secret = totpService.generateSecretKey().getOrThrow()
+        val recoveryCode = Random.generateString(10).getOrThrow()
+        val token = setupTokenService.create(user.info.id.getOrThrow(), secret, listOf(recoveryCode)).getOrThrow()
         val code = gAuth.getTotpPassword(secret)
 
         val setupRes = webTestClient.post()
@@ -202,21 +203,21 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
             .returnResult()
             .responseBody
 
-        val userWith2fa = userService.findById(user.info.id)
+        val userWith2fa = userService.findById(user.info.id.getOrThrow()).getOrThrow()
 
         requireNotNull(setupRes)
         assertTrue(userWith2fa.sensitive.security.twoFactor.totp.enabled)
         assertTrue(setupRes.twoFactorAuthEnabled)
         assertEquals(secret, userWith2fa.sensitive.security.twoFactor.totp.secret!!)
-        assertTrue(userWith2fa.sensitive.security.twoFactor.totp.recoveryCodes.any { hashService.checkBcrypt(recoveryCode, it) })
+        assertTrue(userWith2fa.sensitive.security.twoFactor.totp.recoveryCodes.any { hashService.checkBcrypt(recoveryCode, it).getOrThrow() })
 
     }
     @Test fun `totp setup validation needs valid token`() = runTest {
         val user = registerUser()
 
-        val secret = totpService.generateSecretKey()
-        val recoveryCode = Random.generateString(10)
-        val token = setupTokenService.create(user.info.id, secret, listOf(recoveryCode))
+        val secret = totpService.generateSecretKey().getOrThrow()
+        val recoveryCode = Random.generateString(10).getOrThrow()
+        val token = setupTokenService.create(user.info.id.getOrThrow(), secret, listOf(recoveryCode)).getOrThrow()
         val code = gAuth.getTotpPassword(secret)
 
         webTestClient.post()
@@ -227,7 +228,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isUnauthorized
 
-        val userWith2fa = userService.findById(user.info.id)
+        val userWith2fa = userService.findById(user.info.id.getOrThrow()).getOrThrow()
 
         assertFalse(userWith2fa.sensitive.security.twoFactor.totp.enabled)
         assertNull(userWith2fa.sensitive.security.twoFactor.totp.secret)
@@ -236,9 +237,9 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
     @Test fun `totp setup validation needs correct code`() = runTest {
         val user = registerUser()
 
-        val secret = totpService.generateSecretKey()
-        val recoveryCode = Random.generateString(10)
-        val token = setupTokenService.create(user.info.id, secret, listOf(recoveryCode))
+        val secret = totpService.generateSecretKey().getOrThrow()
+        val recoveryCode = Random.generateString(10).getOrThrow()
+        val token = setupTokenService.create(user.info.id.getOrThrow(), secret, listOf(recoveryCode)).getOrThrow()
         val code = gAuth.getTotpPassword(secret) + 1
 
         webTestClient.post()
@@ -249,7 +250,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isUnauthorized
 
-        val userWith2fa = userService.findById(user.info.id)
+        val userWith2fa = userService.findById(user.info.id.getOrThrow()).getOrThrow()
 
         assertFalse(userWith2fa.sensitive.security.twoFactor.totp.enabled)
         assertNull(userWith2fa.sensitive.security.twoFactor.totp.secret)
@@ -258,9 +259,9 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
     @Test fun `totp setup validation needs unexpired token`() = runTest {
         val user = registerUser()
 
-        val secret = totpService.generateSecretKey()
-        val recoveryCode = Random.generateString(10)
-        val token = setupTokenService.create(user.info.id, secret, listOf(recoveryCode), Instant.ofEpochSecond(0))
+        val secret = totpService.generateSecretKey().getOrThrow()
+        val recoveryCode = Random.generateString(10).getOrThrow()
+        val token = setupTokenService.create(user.info.id.getOrThrow(), secret, listOf(recoveryCode), Instant.ofEpochSecond(0)).getOrThrow()
         val code = gAuth.getTotpPassword(secret)
 
         webTestClient.post()
@@ -271,7 +272,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isUnauthorized
 
-        val userWith2fa = userService.findById(user.info.id)
+        val userWith2fa = userService.findById(user.info.id.getOrThrow()).getOrThrow()
 
         assertFalse(userWith2fa.sensitive.security.twoFactor.totp.enabled)
         assertNull(userWith2fa.sensitive.security.twoFactor.totp.secret)
@@ -281,9 +282,9 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
         val user = registerUser()
         val anotherUser = registerUser()
 
-        val secret = totpService.generateSecretKey()
-        val recoveryCode = Random.generateString(10)
-        val token = setupTokenService.create(anotherUser.info.id, secret, listOf(recoveryCode))
+        val secret = totpService.generateSecretKey().getOrThrow()
+        val recoveryCode = Random.generateString(10).getOrThrow()
+        val token = setupTokenService.create(anotherUser.info.id.getOrThrow(), secret, listOf(recoveryCode)).getOrThrow()
         val code = gAuth.getTotpPassword(secret)
 
         webTestClient.post()
@@ -294,7 +295,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isUnauthorized
 
-        val userWith2fa = userService.findById(user.info.id)
+        val userWith2fa = userService.findById(user.info.id.getOrThrow()).getOrThrow()
 
         assertFalse(userWith2fa.sensitive.security.twoFactor.totp.enabled)
         assertNull(userWith2fa.sensitive.security.twoFactor.totp.secret)
@@ -303,9 +304,9 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
     @Test fun `totp setup validation needs authentication`() = runTest {
         val user = registerUser()
 
-        val secret = totpService.generateSecretKey()
-        val recoveryCode = Random.generateString(10)
-        val token = setupTokenService.create(user.info.id, secret, listOf(recoveryCode))
+        val secret = totpService.generateSecretKey().getOrThrow()
+        val recoveryCode = Random.generateString(10).getOrThrow()
+        val token = setupTokenService.create(user.info.id.getOrThrow(), secret, listOf(recoveryCode)).getOrThrow()
         val code = gAuth.getTotpPassword(secret)
 
         webTestClient.post()
@@ -315,7 +316,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isUnauthorized
 
-        val userWith2fa = userService.findById(user.info.id)
+        val userWith2fa = userService.findById(user.info.id.getOrThrow()).getOrThrow()
 
         assertFalse(userWith2fa.sensitive.security.twoFactor.totp.enabled)
         assertNull(userWith2fa.sensitive.security.twoFactor.totp.secret)
@@ -324,9 +325,9 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
     @Test fun `totp setup validation needs step-up`() = runTest {
         val user = registerUser()
 
-        val secret = totpService.generateSecretKey()
-        val recoveryCode = Random.generateString(10)
-        val token = setupTokenService.create(user.info.id, secret, listOf(recoveryCode))
+        val secret = totpService.generateSecretKey().getOrThrow()
+        val recoveryCode = Random.generateString(10).getOrThrow()
+        val token = setupTokenService.create(user.info.id.getOrThrow(), secret, listOf(recoveryCode)).getOrThrow()
         val code = gAuth.getTotpPassword(secret)
 
         webTestClient.post()
@@ -336,7 +337,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isUnauthorized
 
-        val userWith2fa = userService.findById(user.info.id)
+        val userWith2fa = userService.findById(user.info.id.getOrThrow()).getOrThrow()
 
         assertFalse(userWith2fa.sensitive.security.twoFactor.totp.enabled)
         assertNull(userWith2fa.sensitive.security.twoFactor.totp.secret)
@@ -345,9 +346,9 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
     @Test fun `totp setup validation requires password authentication`() = runTest {
         val user = registerOAuth2()
 
-        val secret = totpService.generateSecretKey()
-        val recoveryCode = Random.generateString(10)
-        val token = setupTokenService.create(user.info.id, secret, listOf(recoveryCode))
+        val secret = totpService.generateSecretKey().getOrThrow()
+        val recoveryCode = Random.generateString(10).getOrThrow()
+        val token = setupTokenService.create(user.info.id.getOrThrow(), secret, listOf(recoveryCode)).getOrThrow()
         val code = gAuth.getTotpPassword(secret)
 
         webTestClient.post()
@@ -358,7 +359,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isBadRequest
 
-        val userWith2fa = userService.findById(user.info.id)
+        val userWith2fa = userService.findById(user.info.id.getOrThrow()).getOrThrow()
 
         assertFalse(userWith2fa.sensitive.security.twoFactor.totp.enabled)
         assertNull(userWith2fa.sensitive.security.twoFactor.totp.secret)
@@ -367,9 +368,9 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
     @Test fun `totp setup validation is not modified when enabled already`() = runTest {
         val user = registerUser(totpEnabled = true)
 
-        val secret = totpService.generateSecretKey()
-        val recoveryCode = Random.generateString(10)
-        val token = setupTokenService.create(user.info.id, secret, listOf(recoveryCode))
+        val secret = totpService.generateSecretKey().getOrThrow()
+        val recoveryCode = Random.generateString(10).getOrThrow()
+        val token = setupTokenService.create(user.info.id.getOrThrow(), secret, listOf(recoveryCode)).getOrThrow()
         val code = gAuth.getTotpPassword(secret)
 
         webTestClient.post()
@@ -380,7 +381,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isNotModified
 
-        val userWith2fa = userService.findById(user.info.id)
+        val userWith2fa = userService.findById(user.info.id.getOrThrow()).getOrThrow()
 
         assertTrue(userWith2fa.sensitive.security.twoFactor.totp.enabled)
         assertEquals(user.totpSecret, userWith2fa.sensitive.security.twoFactor.totp.secret)
@@ -411,7 +412,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
 
         val accessToken = res.extractAccessToken()
         val refreshToken = res.extractRefreshToken()
-        val stepUpToken = res.extractStepUpToken(user.info.id, accessToken.sessionId)
+        val stepUpToken = res.extractStepUpToken(user.info.id.getOrThrow(), accessToken.sessionId)
 
         assertEquals(user.info.id, accessToken.userId)
         assertEquals(user.info.id, refreshToken.userId)
@@ -420,10 +421,10 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
         assertEquals(refreshToken.sessionId, accessToken.sessionId)
         assertEquals(refreshToken.sessionId, stepUpToken.sessionId)
 
-        val userAfterRecovery = userService.findById(user.info.id)
+        val userAfterRecovery = userService.findById(user.info.id.getOrThrow()).getOrThrow()
         assertTrue(userAfterRecovery.sensitive.security.twoFactor.totp.enabled)
         assertEquals(recoveryCodeCount - 1, userAfterRecovery.sensitive.security.twoFactor.totp.recoveryCodes.size)
-        assertFalse(userAfterRecovery.sensitive.security.twoFactor.totp.recoveryCodes.contains(hashService.hashBcrypt(user.totpRecovery)))
+        assertFalse(userAfterRecovery.sensitive.security.twoFactor.totp.recoveryCodes.contains(hashService.hashBcrypt(user.totpRecovery).getOrThrow()))
     }
     @Test fun `totp recovery works authorized`() = runTest {
         val user = registerUser(totpEnabled = true)
@@ -449,7 +450,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
 
         val accessToken = res.extractAccessToken()
         val refreshToken = res.extractRefreshToken()
-        val stepUpToken = res.extractStepUpToken(user.info.id, accessToken.sessionId)
+        val stepUpToken = res.extractStepUpToken(user.info.id.getOrThrow(), accessToken.sessionId)
 
         assertEquals(user.info.id, accessToken.userId)
         assertEquals(user.info.id, refreshToken.userId)
@@ -458,10 +459,10 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
         assertEquals(refreshToken.sessionId, accessToken.sessionId)
         assertEquals(refreshToken.sessionId, stepUpToken.sessionId)
 
-        val userAfterRecovery = userService.findById(user.info.id)
+        val userAfterRecovery = userService.findById(user.info.id.getOrThrow()).getOrThrow()
         assertTrue(userAfterRecovery.sensitive.security.twoFactor.totp.enabled)
         assertEquals(recoveryCodeCount - 1, userAfterRecovery.sensitive.security.twoFactor.totp.recoveryCodes.size)
-        assertFalse(userAfterRecovery.sensitive.security.twoFactor.totp.recoveryCodes.contains(hashService.hashBcrypt(user.totpRecovery)))
+        assertFalse(userAfterRecovery.sensitive.security.twoFactor.totp.recoveryCodes.contains(hashService.hashBcrypt(user.totpRecovery).getOrThrow()))
     }
     @Test fun `totp recovery needs correct code`() = runTest {
         val user = registerUser(totpEnabled = true)
@@ -492,7 +493,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/auth/2fa/totp/recover")
-            .twoFactorAuthenticationTokenCookie(twoFactorAuthenticationTokenService.create(user.info.id).value)
+            .twoFactorAuthenticationTokenCookie(twoFactorAuthenticationTokenService.create(user.info.id.getOrThrow()).getOrThrow().value)
             .bodyValue(TotpRecoveryRequest("random-code", null))
             .exchange()
             .expectStatus().isBadRequest
@@ -526,7 +527,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
             .returnResult()
             .extractAccessToken()
 
-        val updatedUser = userService.findById(user.info.id)
+        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
 
         assertEquals(2, updatedUser.sensitive.sessions.size)
         assertEquals(req.session!!.browser, updatedUser.sensitive.sessions[accessToken.sessionId]!!.browser)
@@ -554,7 +555,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
         assertTrue(body.twoFactorAuthEnabled)
         assertEquals(listOf(TwoFactorMethod.EMAIL), body.twoFactorMethods)
 
-        val userAfterDisable = userService.findById(user.info.id)
+        val userAfterDisable = userService.findById(user.info.id.getOrThrow()).getOrThrow()
         assertEquals(listOf(TwoFactorMethod.EMAIL), userAfterDisable.twoFactorMethods)
         assertFalse(userAfterDisable.sensitive.security.twoFactor.totp.enabled)
     }
@@ -568,7 +569,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isBadRequest
 
-        val userAfterDisable = userService.findById(user.info.id)
+        val userAfterDisable = userService.findById(user.info.id.getOrThrow()).getOrThrow()
         assertTrue(userAfterDisable.twoFactorEnabled)
         assertTrue(userAfterDisable.sensitive.security.twoFactor.totp.enabled)
     }
@@ -581,7 +582,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isUnauthorized
 
-        val userAfterDisable = userService.findById(user.info.id)
+        val userAfterDisable = userService.findById(user.info.id.getOrThrow()).getOrThrow()
         assertTrue(userAfterDisable.twoFactorEnabled)
         assertTrue(userAfterDisable.sensitive.security.twoFactor.totp.enabled)
     }
@@ -594,7 +595,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isUnauthorized
 
-        val userAfterDisable = userService.findById(user.info.id)
+        val userAfterDisable = userService.findById(user.info.id.getOrThrow()).getOrThrow()
         assertTrue(userAfterDisable.twoFactorEnabled)
         assertTrue(userAfterDisable.sensitive.security.twoFactor.totp.enabled)
     }
@@ -608,7 +609,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isUnauthorized
 
-        val userAfterDisable = userService.findById(user.info.id)
+        val userAfterDisable = userService.findById(user.info.id.getOrThrow()).getOrThrow()
         assertTrue(userAfterDisable.twoFactorEnabled)
         assertTrue(userAfterDisable.sensitive.security.twoFactor.totp.enabled)
     }
@@ -617,12 +618,12 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
 
         webTestClient.delete()
             .uri("/api/auth/2fa/totp")
-            .stepUpTokenCookie(cookieCreator.createCookie(stepUpTokenService.create(user.info.id, user.sessionId, Instant.ofEpochSecond(0))).value)
+            .stepUpTokenCookie(cookieCreator.createCookie(stepUpTokenService.create(user.info.id.getOrThrow(), user.sessionId, Instant.ofEpochSecond(0)).getOrThrow()).getOrThrow().value)
             .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isUnauthorized
 
-        val userAfterDisable = userService.findById(user.info.id)
+        val userAfterDisable = userService.findById(user.info.id.getOrThrow()).getOrThrow()
         assertTrue(userAfterDisable.twoFactorEnabled)
         assertTrue(userAfterDisable.sensitive.security.twoFactor.totp.enabled)
     }
@@ -633,12 +634,12 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
 
         webTestClient.delete()
             .uri("/api/auth/2fa/totp")
-            .stepUpTokenCookie(cookieCreator.createCookie(stepUpTokenService.create(anotherUser.info.id, user.sessionId)).value)
+            .stepUpTokenCookie(cookieCreator.createCookie(stepUpTokenService.create(anotherUser.info.id.getOrThrow(), user.sessionId).getOrThrow()).getOrThrow().value)
             .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isUnauthorized
 
-        val userAfterDisable = userService.findById(user.info.id)
+        val userAfterDisable = userService.findById(user.info.id.getOrThrow()).getOrThrow()
         assertTrue(userAfterDisable.twoFactorEnabled)
         assertTrue(userAfterDisable.sensitive.security.twoFactor.totp.enabled)
     }
@@ -647,13 +648,13 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
 
         webTestClient.delete()
             .uri("/api/auth/2fa/totp")
-            .cookie(SessionTokenType.StepUp.cookieName, cookieCreator.createCookie(stepUpTokenService.create(user.info.id,
-                UUID.randomUUID())).value)
+            .cookie(SessionTokenType.StepUp.cookieName, cookieCreator.createCookie(stepUpTokenService.create(user.info.id.getOrThrow(),
+                UUID.randomUUID()).getOrThrow()).getOrThrow().value)
             .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isUnauthorized
 
-        val userAfterDisable = userService.findById(user.info.id)
+        val userAfterDisable = userService.findById(user.info.id.getOrThrow()).getOrThrow()
         assertTrue(userAfterDisable.twoFactorEnabled)
         assertTrue(userAfterDisable.sensitive.security.twoFactor.totp.enabled)
     }

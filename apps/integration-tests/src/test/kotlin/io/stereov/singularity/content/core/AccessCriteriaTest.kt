@@ -1,12 +1,13 @@
 package io.stereov.singularity.content.core
 
+import com.github.michaelbull.result.getOrThrow
 import io.stereov.singularity.auth.token.model.AccessType
-import io.stereov.singularity.principal.group.model.KnownGroups
 import io.stereov.singularity.content.article.dto.response.ArticleOverviewResponse
 import io.stereov.singularity.content.article.model.ArticleState
 import io.stereov.singularity.content.core.model.ContentAccessRole
 import io.stereov.singularity.content.core.model.ContentAccessSubject
 import io.stereov.singularity.content.tag.dto.CreateTagRequest
+import io.stereov.singularity.principal.group.model.KnownGroups
 import io.stereov.singularity.test.BaseArticleTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions
@@ -105,7 +106,7 @@ class AccessCriteriaTest : BaseArticleTest() {
     fun `getArticles works with user viewer`() = runTest {
         val user = registerUser(emailSuffix = "another@email.com")
         val article = saveArticle()
-        article.share(ContentAccessSubject.USER, user.info.id.toHexString(), ContentAccessRole.VIEWER)
+        article.share(ContentAccessSubject.USER, user.info.id.getOrThrow().toHexString(), ContentAccessRole.VIEWER)
         articleService.save(article)
 
         val res = webTestClient.get()
@@ -125,7 +126,7 @@ class AccessCriteriaTest : BaseArticleTest() {
     fun `getArticles works with user editor`() = runTest {
         val user = registerUser(emailSuffix = "another@email.com")
         val article = saveArticle()
-        article.share(ContentAccessSubject.USER, user.info.id.toHexString(), ContentAccessRole.EDITOR)
+        article.share(ContentAccessSubject.USER, user.info.id.getOrThrow().toHexString(), ContentAccessRole.EDITOR)
         articleService.save(article)
 
         val res = webTestClient.get()
@@ -145,7 +146,7 @@ class AccessCriteriaTest : BaseArticleTest() {
     fun `getArticles works with user admin`() = runTest {
         val user = registerUser(emailSuffix = "another@email.com")
         val article = saveArticle()
-        article.share(ContentAccessSubject.USER, user.info.id.toHexString(), ContentAccessRole.MAINTAINER)
+        article.share(ContentAccessSubject.USER, user.info.id.getOrThrow().toHexString(), ContentAccessRole.MAINTAINER)
         articleService.save(article)
 
         val res = webTestClient.get()
@@ -229,7 +230,7 @@ class AccessCriteriaTest : BaseArticleTest() {
     fun `getArticles correctly filters tags`() = runTest {
         val user = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
         val article = saveArticle(owner = user)
-        val tag = tagService.create(CreateTagRequest("test2", name = "Test", locale = null))
+        val tag = tagService.create(CreateTagRequest("test2", name = "Test", locale = null)).getOrThrow()
 
         article.tags.add(tag.key)
         articleService.save(article)
@@ -253,8 +254,8 @@ class AccessCriteriaTest : BaseArticleTest() {
     fun `getArticles correctly filters when multiple tags`() = runTest {
         val user = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
         val article = saveArticle(owner = user)
-        val tag = tagService.create(CreateTagRequest("test2", name = "Test", locale = null))
-        val anotherTag = tagService.create(CreateTagRequest("test3", name = "Another Test", locale = null))
+        val tag = tagService.create(CreateTagRequest("test2", name = "Test", locale = null)).getOrThrow()
+        val anotherTag = tagService.create(CreateTagRequest("test3", name = "Another Test", locale = null)).getOrThrow()
 
         article.tags.add(tag.key)
         articleService.save(article)
@@ -274,8 +275,8 @@ class AccessCriteriaTest : BaseArticleTest() {
         requireNotNull(res)
 
         Assertions.assertEquals(2, res.totalElements)
-        Assertions.assertTrue(res.content.any { it.id == article.id })
-        Assertions.assertTrue(res.content.any { it.id == anotherArticle.id })
+        Assertions.assertTrue(res.content.any { it.id == article.id.getOrThrow() })
+        Assertions.assertTrue(res.content.any { it.id == anotherArticle.id.getOrThrow() })
     }
 
     @Test
@@ -401,7 +402,7 @@ class AccessCriteriaTest : BaseArticleTest() {
     fun `getLatestArticles works with user viewer`() = runTest {
         val user = registerUser(emailSuffix = "another@email.com")
         val article = saveArticle()
-        article.share(ContentAccessSubject.USER, user.info.id.toHexString(), ContentAccessRole.VIEWER)
+        article.share(ContentAccessSubject.USER, user.info.id.getOrThrow().toHexString(), ContentAccessRole.VIEWER)
         article.state = ArticleState.PUBLISHED
         articleService.save(article)
 
@@ -423,7 +424,7 @@ class AccessCriteriaTest : BaseArticleTest() {
     fun `getLatestArticles works with user editor`() = runTest {
         val user = registerUser(emailSuffix = "another@email.com")
         val article = saveArticle()
-        article.share(ContentAccessSubject.USER, user.info.id.toHexString(), ContentAccessRole.EDITOR)
+        article.share(ContentAccessSubject.USER, user.info.id.getOrThrow().toHexString(), ContentAccessRole.EDITOR)
         article.state = ArticleState.PUBLISHED
         articleService.save(article)
 
@@ -445,7 +446,7 @@ class AccessCriteriaTest : BaseArticleTest() {
     fun `getLatestArticles works with user admin`() = runTest {
         val user = registerUser(emailSuffix = "another@email.com")
         val article = saveArticle()
-        article.share(ContentAccessSubject.USER, user.info.id.toHexString(), ContentAccessRole.MAINTAINER)
+        article.share(ContentAccessSubject.USER, user.info.id.getOrThrow().toHexString(), ContentAccessRole.MAINTAINER)
         article.state = ArticleState.PUBLISHED
         articleService.save(article)
 

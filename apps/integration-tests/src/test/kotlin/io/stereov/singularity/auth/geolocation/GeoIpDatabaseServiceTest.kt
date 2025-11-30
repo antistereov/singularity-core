@@ -1,5 +1,6 @@
 package io.stereov.singularity.auth.geolocation
 
+import com.github.michaelbull.result.getOrThrow
 import io.stereov.singularity.auth.geolocation.service.GeolocationDatabaseService
 import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.test.runTest
@@ -38,7 +39,7 @@ class GeoIpDatabaseServiceTest : BaseIntegrationTest() {
     @Test fun `should download database on initialize`() = runTest {
         assertThat(file.exists())
 
-        val location = geolocationDatabaseService.getCity(InetAddress.getByName("93.128.176.188"))
+        val location = geolocationDatabaseService.getCity(InetAddress.getByName("93.128.176.188")).getOrThrow()
 
         println(location)
 
@@ -51,7 +52,7 @@ class GeoIpDatabaseServiceTest : BaseIntegrationTest() {
 
         geolocationDatabaseService.initialize()
 
-        val location = geolocationDatabaseService.getCity(InetAddress.getByName("93.128.176.188"))
+        val location = geolocationDatabaseService.getCity(InetAddress.getByName("93.128.176.188")).getOrThrow()
 
         println(location)
 
@@ -69,7 +70,7 @@ class GeoIpDatabaseServiceTest : BaseIntegrationTest() {
 
         geolocationDatabaseService.initialize()
 
-        val location = geolocationDatabaseService.getCity(InetAddress.getByName("93.128.176.188"))
+        val location = geolocationDatabaseService.getCity(InetAddress.getByName("93.128.176.188")).getOrThrow()
 
         println(location)
 

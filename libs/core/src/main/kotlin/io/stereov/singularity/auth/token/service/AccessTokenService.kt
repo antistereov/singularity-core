@@ -223,7 +223,7 @@ class AccessTokenService(
                         }
                         .andThen { onAllowlist ->
                             if (onAllowlist) {
-                                Ok(AuthenticationOutcome.Authenticated(userId, roles, groups, sessionId, tokenId, ))
+                                Ok(AuthenticationOutcome.Authenticated(userId, roles, groups, AccessToken(userId, sessionId, tokenId, roles, groups, jwt) ))
                             } else {
                                 Err(AccessTokenExtractionException.Expired("Access token is expired"))
                             }

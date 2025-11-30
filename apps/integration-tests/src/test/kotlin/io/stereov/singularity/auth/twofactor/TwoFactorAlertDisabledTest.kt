@@ -1,5 +1,6 @@
 package io.stereov.singularity.auth.twofactor
 
+import com.github.michaelbull.result.getOrThrow
 import io.mockk.verify
 import io.stereov.singularity.auth.twofactor.dto.request.EnableEmailTwoFactorMethodRequest
 import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorVerifySetupRequest
@@ -81,9 +82,9 @@ class TwoFactorAlertDisabledTest : BaseMailIntegrationTest() {
         user.info.sensitive.security.twoFactor.email.enabled = false
         userService.save(user.info)
 
-        val secret = totpService.generateSecretKey()
-        val recoveryCode = Random.generateString(10)
-        val token = setupTokenService.create(user.info.id, secret, listOf(recoveryCode))
+        val secret = totpService.generateSecretKey().getOrThrow()
+        val recoveryCode = Random.generateString(10).getOrThrow()
+        val token = setupTokenService.create(user.info.id.getOrThrow(), secret, listOf(recoveryCode)).getOrThrow()
         val code = gAuth.getTotpPassword(secret)
 
         webTestClient.post()
@@ -101,9 +102,9 @@ class TwoFactorAlertDisabledTest : BaseMailIntegrationTest() {
         user.info.sensitive.security.twoFactor.email.enabled = false
         userService.save(user.info)
 
-        val secret = totpService.generateSecretKey()
-        val recoveryCode = Random.generateString(10)
-        val token = setupTokenService.create(user.info.id, secret, listOf(recoveryCode))
+        val secret = totpService.generateSecretKey().getOrThrow()
+        val recoveryCode = Random.generateString(10).getOrThrow()
+        val token = setupTokenService.create(user.info.id.getOrThrow(), secret, listOf(recoveryCode)).getOrThrow()
         val code = gAuth.getTotpPassword(secret)
 
         webTestClient.post()

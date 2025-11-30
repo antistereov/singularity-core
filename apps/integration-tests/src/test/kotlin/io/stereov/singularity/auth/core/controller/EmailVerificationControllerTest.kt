@@ -1,5 +1,6 @@
 package io.stereov.singularity.auth.core.controller
 
+import com.github.michaelbull.result.getOrThrow
 import io.mockk.verify
 import io.stereov.singularity.auth.core.dto.response.MailCooldownResponse
 import io.stereov.singularity.test.BaseMailIntegrationTest
@@ -14,7 +15,7 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
 
     @Test fun `verifyEmail works`() = runTest {
         val user = registerUser()
-        val token = emailVerificationTokenService.create(user.info.id, user.info.sensitive.email!! ,user.mailVerificationSecret!!)
+        val token = emailVerificationTokenService.create(user.info.id.getOrThrow(), user.info.sensitive.email ,user.mailVerificationSecret!!).getOrThrow()
 
         assertFalse(user.info.sensitive.security.email.verified)
 
@@ -23,7 +24,7 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isOk
 
-        val verifiedUser = userService.findByEmail(user.info.sensitive.email!!)
+        val verifiedUser = userService.findByEmail(user.info.sensitive.email).getOrThrow()
 
         assertTrue(verifiedUser.sensitive.security.email.verified)
     }
@@ -41,7 +42,7 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
     }
     @Test fun `verifyEmail requires right token`() = runTest {
         val user = registerUser()
-        val token = emailVerificationTokenService.create(user.info.id, user.info.sensitive.email!!, encryptionSecretService.getCurrentSecret().value)
+        val token = emailVerificationTokenService.create(user.info.id.getOrThrow(), user.info.sensitive.email, encryptionSecretService.getCurrentSecret().getOrThrow().value).getOrThrow()
 
         webTestClient.post()
             .uri("/api/auth/email/verification?token=$token")
@@ -50,7 +51,7 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
     }
     @Test fun `verifyEmail requires unexpired token`() = runTest {
         val user = registerUser()
-        val token = emailVerificationTokenService.create(user.info.id, user.info.sensitive.email!!, user.mailVerificationSecret!!, Instant.ofEpochSecond(0))
+        val token = emailVerificationTokenService.create(user.info.id.getOrThrow(), user.info.sensitive.email, user.mailVerificationSecret!!, Instant.ofEpochSecond(0)).getOrThrow()
 
         webTestClient.post()
             .uri("/api/auth/email/verification?token=$token")
@@ -62,7 +63,7 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
         user.info.sensitive.security.email.verified = true
         userService.save(user.info)
 
-        val token = emailVerificationTokenService.create(user.info.id, user.info.sensitive.email!! ,user.mailVerificationSecret!!)
+        val token = emailVerificationTokenService.create(user.info.id.getOrThrow(), user.info.sensitive.email,user.mailVerificationSecret!!).getOrThrow()
 
         webTestClient.post()
             .uri("/api/auth/email/verification?token=$token")
@@ -72,7 +73,7 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
     @Test fun `verifyEmail is bad for guest`() = runTest {
         val guest = createGuest()
 
-        val token = emailVerificationTokenService.create(guest.info.id, "random-email" ,guest.info.sensitive.security.email.verificationSecret)
+        val token = emailVerificationTokenService.create(guest.info.id.getOrThrow(), "random-email" ,guest.info.sensitive.security.email.verificationSecret).getOrThrow()
 
         webTestClient.post()
             .uri("/api/auth/email/verification?token=$token")
@@ -100,7 +101,7 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
     @Test fun `sendVerificationEmail returns not modified when already verified`() = runTest {
         val user = registerUser()
         user.info.sensitive.security.email.verified = true
-        userService.save(user.info)
+        userService.save(user.info).getOrThrow()
 
         webTestClient.post()
             .uri("/api/auth/email/verification/send")

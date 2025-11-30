@@ -1,5 +1,6 @@
 package io.stereov.singularity.auth.geolocation
 
+import com.github.michaelbull.result.getOrThrow
 import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
 import io.stereov.singularity.test.BaseIntegrationTest
@@ -57,7 +58,7 @@ class GeolocationServiceTest : BaseIntegrationTest() {
             .expectStatus()
             .isOk
 
-        val updatedUser = userService.findById(user.info.id)
+        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
         val location = updatedUser.sensitive.sessions.values.first().location
 
         println(location)

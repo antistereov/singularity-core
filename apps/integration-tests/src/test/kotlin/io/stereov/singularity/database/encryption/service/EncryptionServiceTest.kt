@@ -1,5 +1,6 @@
 package io.stereov.singularity.database.encryption.service
 
+import com.github.michaelbull.result.getOrThrow
 import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions
@@ -11,7 +12,7 @@ class EncryptionServiceTest : BaseIntegrationTest() {
     fun rotationWorks() = runTest {
         val user = registerUser()
 
-        val encryptedUser = userService.findEncryptedById(user.info.id)
+        val encryptedUser = userService.findEncryptedById(user.info.id.getOrThrow()).getOrThrow()
         val oldSecret = encryptedUser.sensitive.secretKey
 
         val decryptedUser = userService.decrypt(encryptedUser)
@@ -19,7 +20,7 @@ class EncryptionServiceTest : BaseIntegrationTest() {
         encryptionSecretService.updateSecret()
         userService.rotateSecret()
 
-        val rotatedEncryptedUser = userService.findEncryptedById(user.info.id)
+        val rotatedEncryptedUser = userService.findEncryptedById(user.info.id.getOrThrow()).getOrThrow()
         val newSecret = rotatedEncryptedUser.sensitive.secretKey
 
         Assertions.assertNotEquals(oldSecret, newSecret)

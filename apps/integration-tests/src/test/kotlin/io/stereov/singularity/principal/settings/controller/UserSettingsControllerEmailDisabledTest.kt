@@ -1,8 +1,9 @@
 package io.stereov.singularity.principal.settings.controller
 
-import io.stereov.singularity.test.BaseIntegrationTest
+import com.github.michaelbull.result.getOrThrow
 import io.stereov.singularity.principal.settings.dto.request.ChangeEmailRequest
 import io.stereov.singularity.principal.settings.dto.response.ChangeEmailResponse
+import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -26,8 +27,8 @@ class UserSettingsControllerEmailDisabledTest : BaseIntegrationTest() {
             .responseBody
 
         assertFalse(res!!.verificationRequired)
-        val foundUser = userService.findByEmail(newEmail)
-        assertEquals(user.info.id, foundUser.id)
+        val foundUser = userService.findByEmail(newEmail).getOrThrow()
+        assertEquals(user.info.id, foundUser.id.getOrThrow())
     }
 
 }

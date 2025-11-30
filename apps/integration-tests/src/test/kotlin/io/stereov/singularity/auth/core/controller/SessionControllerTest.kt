@@ -1,5 +1,6 @@
 package io.stereov.singularity.auth.core.controller
 
+import com.github.michaelbull.result.getOrThrow
 import io.stereov.singularity.auth.core.dto.response.SessionInfoResponse
 import io.stereov.singularity.auth.core.model.SessionInfo
 import io.stereov.singularity.test.BaseIntegrationTest
@@ -52,7 +53,7 @@ class SessionControllerTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isOk
 
-        val updatedUser = userService.findById(user.info.id)
+        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
         val sessions = updatedUser.sensitive.sessions
 
         Assertions.assertEquals(0, sessions.size)
@@ -73,7 +74,7 @@ class SessionControllerTest : BaseIntegrationTest() {
             .expectStatus()
             .isOk
 
-        val updatedUser = userService.findById(user.info.id)
+        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
         val sessions = updatedUser.sensitive.sessions
 
         Assertions.assertEquals(0, sessions.size)

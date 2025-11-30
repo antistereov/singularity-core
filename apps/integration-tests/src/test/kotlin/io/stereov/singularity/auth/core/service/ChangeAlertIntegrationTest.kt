@@ -1,13 +1,14 @@
 package io.stereov.singularity.auth.core.service
 
+import com.github.michaelbull.result.getOrThrow
 import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.slot
 import io.stereov.singularity.auth.core.dto.request.ResetPasswordRequest
 import io.stereov.singularity.auth.core.model.SecurityAlertType
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
-import io.stereov.singularity.test.BaseSecurityAlertTest
 import io.stereov.singularity.principal.core.model.User
+import io.stereov.singularity.test.BaseSecurityAlertTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -35,7 +36,7 @@ class ChangeAlertIntegrationTest : BaseSecurityAlertTest() {
             captureNullable(twoFactorMethodSlot),
         ) }
 
-        val token = passwordResetTokenService.create(user.info.id, user.passwordResetSecret!!)
+        val token = passwordResetTokenService.create(user.info.id.getOrThrow(), user.passwordResetSecret!!).getOrThrow()
         val newPassword = "Password$2"
         val req = ResetPasswordRequest(newPassword)
 
@@ -70,7 +71,7 @@ class ChangeAlertIntegrationTest : BaseSecurityAlertTest() {
             captureNullable(twoFactorMethodSlot),
         ) }
 
-        val token = passwordResetTokenService.create(user.info.id, user.passwordResetSecret!!)
+        val token = passwordResetTokenService.create(user.info.id.getOrThrow(), user.passwordResetSecret!!).getOrThrow()
         val newPassword = "Password$2"
         val req = ResetPasswordRequest(newPassword)
 
@@ -111,7 +112,7 @@ class ChangeAlertIntegrationTest : BaseSecurityAlertTest() {
         ) }
         val newEmail = "new@test.com"
 
-        val token = emailVerificationTokenService.create(user.info.id, newEmail,user.mailVerificationSecret!!)
+        val token = emailVerificationTokenService.create(user.info.id.getOrThrow(), newEmail,user.mailVerificationSecret!!).getOrThrow()
         assertFalse(user.info.sensitive.security.email.verified)
 
         webTestClient.post()
@@ -125,7 +126,7 @@ class ChangeAlertIntegrationTest : BaseSecurityAlertTest() {
         assert(localeSlot.isNull)
         assertEquals(SecurityAlertType.EMAIL_CHANGED, alertTypeSlot.captured)
         assertEquals(newEmail, newEmailSlot.captured)
-        assertEquals(user.info.sensitive.email!!, oldEmailSlot.captured)
+        assertEquals(user.info.sensitive.email, oldEmailSlot.captured)
     }
     @Test fun `email verification with locale`() = runTest {
         val user = registerUser()
@@ -151,7 +152,7 @@ class ChangeAlertIntegrationTest : BaseSecurityAlertTest() {
         ) }
         val newEmail = "new@test.com"
 
-        val token = emailVerificationTokenService.create(user.info.id, newEmail ,user.mailVerificationSecret!!)
+        val token = emailVerificationTokenService.create(user.info.id.getOrThrow(), newEmail ,user.mailVerificationSecret!!).getOrThrow()
         assertFalse(user.info.sensitive.security.email.verified)
 
         webTestClient.post()
@@ -165,6 +166,6 @@ class ChangeAlertIntegrationTest : BaseSecurityAlertTest() {
         assertEquals(user.info.id, userSlot.captured.id)
         assertEquals(SecurityAlertType.EMAIL_CHANGED, alertTypeSlot.captured)
         assertEquals(newEmail, newEmailSlot.captured)
-        assertEquals(user.info.sensitive.email!!, oldEmailSlot.captured)
+        assertEquals(user.info.sensitive.email, oldEmailSlot.captured)
     }
 }

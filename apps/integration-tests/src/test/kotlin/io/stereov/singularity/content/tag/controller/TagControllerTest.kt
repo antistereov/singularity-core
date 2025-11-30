@@ -1,12 +1,13 @@
 package io.stereov.singularity.content.tag.controller
 
-import io.stereov.singularity.principal.group.model.KnownGroups
+import com.github.michaelbull.result.getOrThrow
 import io.stereov.singularity.content.tag.dto.CreateTagRequest
 import io.stereov.singularity.content.tag.dto.TagResponse
 import io.stereov.singularity.content.tag.dto.UpdateTagRequest
 import io.stereov.singularity.content.tag.mapper.TagMapper
 import io.stereov.singularity.content.tag.model.TagDocument
 import io.stereov.singularity.content.tag.model.TagTranslation
+import io.stereov.singularity.principal.group.model.KnownGroups
 import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.flow.toList
@@ -40,7 +41,7 @@ class TagControllerTest() : BaseIntegrationTest() {
 
         requireNotNull(res)
 
-        val foundTag = tagService.findByKey("test")
+        val foundTag = tagService.findByKey("test").getOrThrow()
         assertTrue(foundTag.translations.keys.contains(Locale.ENGLISH))
         assertThat(foundTag.translations.keys.size).isEqualTo(1)
 
@@ -61,7 +62,7 @@ class TagControllerTest() : BaseIntegrationTest() {
 
         requireNotNull(res)
 
-        val foundTag = tagService.findByKey("test")
+        val foundTag = tagService.findByKey("test").getOrThrow()
         assertTrue(foundTag.translations.keys.contains(Locale.GERMAN))
         assertThat(foundTag.translations.keys.size).isEqualTo(1)
 
@@ -79,8 +80,8 @@ class TagControllerTest() : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isEqualTo(HttpStatus.CONFLICT)
 
-        assertEquals(1, tagService.findAll().count())
-        val foundTag = tagService.findByKey("test")
+        assertEquals(1, tagService.findAll().getOrThrow().count())
+        val foundTag = tagService.findByKey("test").getOrThrow()
         assertTrue(foundTag.translations.keys.contains(Locale.ENGLISH))
         assertThat(foundTag.translations.keys.size).isEqualTo(1)
     }
@@ -94,7 +95,7 @@ class TagControllerTest() : BaseIntegrationTest() {
 
         requireNotNull(res)
 
-        assertTrue(tagService.findAll().toList().isEmpty())
+        assertTrue(tagService.findAll().getOrThrow().toList().isEmpty())
     }
     @Test fun `create requires editor role`() = runTest {
         val user = registerUser()
@@ -108,7 +109,7 @@ class TagControllerTest() : BaseIntegrationTest() {
 
         requireNotNull(res)
 
-        assertTrue(tagService.findAll().toList().isEmpty())
+        assertTrue(tagService.findAll().getOrThrow().toList().isEmpty())
     }
     @Test fun `create requires body`() = runTest {
         val user = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
@@ -121,7 +122,7 @@ class TagControllerTest() : BaseIntegrationTest() {
 
         requireNotNull(res)
 
-        assertTrue(tagService.findAll().toList().isEmpty())
+        assertTrue(tagService.findAll().getOrThrow().toList().isEmpty())
     }
 
     @Test fun `findByKey works`() = runTest {
@@ -131,7 +132,7 @@ class TagControllerTest() : BaseIntegrationTest() {
                 Locale.ENGLISH to TagTranslation("Test"),
                 Locale.GERMAN to TagTranslation("TestDeutsch")
             )
-        ))
+        )).getOrThrow()
 
         val res = webTestClient.get()
             .uri("/api/content/tags/${tag.key}")
@@ -153,7 +154,7 @@ class TagControllerTest() : BaseIntegrationTest() {
                 Locale.ENGLISH to TagTranslation("Test"),
                 Locale.GERMAN to TagTranslation("TestDeutsch")
             )
-        ))
+        )).getOrThrow()
 
         val res = webTestClient.get()
             .uri("/api/content/tags/${tag.key}?locale=de")
@@ -183,14 +184,14 @@ class TagControllerTest() : BaseIntegrationTest() {
                 Locale.ENGLISH to TagTranslation("Test1", "Desc"),
                 Locale.GERMAN to TagTranslation("TestDeutsch1")
             )
-        ))
+        )).getOrThrow()
         val tag2 = tagService.save(TagDocument(
             key = "test2",
             translations = mutableMapOf(
                 Locale.ENGLISH to TagTranslation("Test2"),
                 Locale.GERMAN to TagTranslation("TestDeutsch2")
             )
-        ))
+        )).getOrThrow()
 
         val res = webTestClient.get()
             .uri("/api/content/tags")
@@ -213,14 +214,14 @@ class TagControllerTest() : BaseIntegrationTest() {
                 Locale.ENGLISH to TagTranslation("Test1", "Desc"),
                 Locale.GERMAN to TagTranslation("TestDeutsch1")
             )
-        ))
+        )).getOrThrow()
         tagService.save(TagDocument(
             key = "test2",
             translations = mutableMapOf(
                 Locale.ENGLISH to TagTranslation("Test2"),
                 Locale.GERMAN to TagTranslation("TestDeutsch2")
             )
-        ))
+        )).getOrThrow()
 
         val res = webTestClient.get()
             .uri("/api/content/tags?name=1")
@@ -242,7 +243,7 @@ class TagControllerTest() : BaseIntegrationTest() {
                 Locale.ENGLISH to TagTranslation("Test1", "Desc"),
                 Locale.GERMAN to TagTranslation("TestDeutsch1")
             )
-        ))
+        )).getOrThrow()
         tagService.save(TagDocument(
             key = "test2",
             translations = mutableMapOf(
@@ -271,14 +272,14 @@ class TagControllerTest() : BaseIntegrationTest() {
                 Locale.ENGLISH to TagTranslation("Test1", "Desc1"),
                 Locale.GERMAN to TagTranslation("TestDeutsch1")
             )
-        ))
+        )).getOrThrow()
         tagService.save(TagDocument(
             key = "test2",
             translations = mutableMapOf(
                 Locale.ENGLISH to TagTranslation("Test2"),
                 Locale.GERMAN to TagTranslation("TestDeutsch2")
             )
-        ))
+        )).getOrThrow()
 
         val res = webTestClient.get()
             .uri("/api/content/tags?description=1")
@@ -300,14 +301,14 @@ class TagControllerTest() : BaseIntegrationTest() {
                 Locale.ENGLISH to TagTranslation("Test1", "Desc"),
                 Locale.GERMAN to TagTranslation("TestDeutsch1")
             )
-        ))
+        )).getOrThrow()
         tagService.save(TagDocument(
             key = "test2",
             translations = mutableMapOf(
                 Locale.ENGLISH to TagTranslation("Test2"),
                 Locale.GERMAN to TagTranslation("TestDeutsch2")
             )
-        ))
+        )).getOrThrow()
 
         val res = webTestClient.get()
             .uri("/api/content/tags?name=Deutsch1&locale=de")
@@ -345,7 +346,7 @@ class TagControllerTest() : BaseIntegrationTest() {
                 Locale.ENGLISH to TagTranslation("Test"),
                 Locale.GERMAN to TagTranslation("TestDeutsch")
             )
-        ))
+        )).getOrThrow()
 
         val req = UpdateTagRequest(
             name = null,
@@ -365,7 +366,7 @@ class TagControllerTest() : BaseIntegrationTest() {
 
         requireNotNull(res)
 
-        val updatedTag = tagService.findById(tag.id)
+        val updatedTag = tagService.findById(tag.id.getOrThrow()).getOrThrow()
         assertEquals(tagMapper.createTagResponse(updatedTag, null), res)
         assertEquals("Test", res.name)
         assertEquals("Test", updatedTag.translations[Locale.ENGLISH]?.name)
@@ -382,7 +383,7 @@ class TagControllerTest() : BaseIntegrationTest() {
                 Locale.ENGLISH to TagTranslation("Test"),
                 Locale.GERMAN to TagTranslation("TestDeutsch")
             )
-        ))
+        )).getOrThrow()
 
         val req = UpdateTagRequest(
             name = null,
@@ -398,7 +399,7 @@ class TagControllerTest() : BaseIntegrationTest() {
             .expectStatus().isBadRequest
 
 
-        val updatedTag = tagService.findById(tag.id)
+        val updatedTag = tagService.findById(tag.id.getOrThrow()).getOrThrow()
         assertEquals("Test", updatedTag.translations[Locale.ENGLISH]?.name)
         assertEquals("", updatedTag.translations[Locale.ENGLISH]?.description)
         assertNull(updatedTag.translations[Locale.JAPANESE])
@@ -413,7 +414,7 @@ class TagControllerTest() : BaseIntegrationTest() {
                 Locale.ENGLISH to TagTranslation("Test"),
                 Locale.GERMAN to TagTranslation("TestDeutsch")
             )
-        ))
+        )).getOrThrow()
 
         val req = UpdateTagRequest(
             name = "TagJap",
@@ -433,7 +434,7 @@ class TagControllerTest() : BaseIntegrationTest() {
 
         requireNotNull(res)
 
-        val updatedTag = tagService.findById(tag.id)
+        val updatedTag = tagService.findById(tag.id.getOrThrow()).getOrThrow()
         assertEquals(tagMapper.createTagResponse(updatedTag, Locale.GERMAN), res)
         assertEquals("TestDeutsch", res.name)
         assertEquals("Test", updatedTag.translations[Locale.ENGLISH]?.name)
@@ -451,7 +452,7 @@ class TagControllerTest() : BaseIntegrationTest() {
                 Locale.ENGLISH to TagTranslation("Test"),
                 Locale.GERMAN to TagTranslation("TestDeutsch")
             )
-        ))
+        )).getOrThrow()
 
         val req = UpdateTagRequest(
             name = "TagJap",
@@ -466,7 +467,7 @@ class TagControllerTest() : BaseIntegrationTest() {
             .expectStatus().isUnauthorized
 
 
-        val updatedTag = tagService.findById(tag.id)
+        val updatedTag = tagService.findById(tag.id.getOrThrow()).getOrThrow()
         assertEquals("Test", updatedTag.translations[Locale.ENGLISH]?.name)
         assertEquals("", updatedTag.translations[Locale.ENGLISH]?.description)
         assertNull(updatedTag.translations[Locale.JAPANESE])
@@ -481,7 +482,7 @@ class TagControllerTest() : BaseIntegrationTest() {
                 Locale.ENGLISH to TagTranslation("Test"),
                 Locale.GERMAN to TagTranslation("TestDeutsch")
             )
-        ))
+        )).getOrThrow()
 
         val req = UpdateTagRequest(
             name = "TagJap",
@@ -497,7 +498,7 @@ class TagControllerTest() : BaseIntegrationTest() {
             .expectStatus().isForbidden
 
 
-        val updatedTag = tagService.findById(tag.id)
+        val updatedTag = tagService.findById(tag.id.getOrThrow()).getOrThrow()
         assertEquals("Test", updatedTag.translations[Locale.ENGLISH]?.name)
         assertEquals("", updatedTag.translations[Locale.ENGLISH]?.description)
         assertNull(updatedTag.translations[Locale.JAPANESE])
@@ -512,7 +513,7 @@ class TagControllerTest() : BaseIntegrationTest() {
                 Locale.ENGLISH to TagTranslation("Test"),
                 Locale.GERMAN to TagTranslation("TestDeutsch")
             )
-        ))
+        )).getOrThrow()
 
         webTestClient.patch()
             .uri("/api/content/tags/${tag.key}")
@@ -521,7 +522,7 @@ class TagControllerTest() : BaseIntegrationTest() {
             .expectStatus().isBadRequest
 
 
-        val updatedTag = tagService.findById(tag.id)
+        val updatedTag = tagService.findById(tag.id.getOrThrow()).getOrThrow()
         assertEquals("Test", updatedTag.translations[Locale.ENGLISH]?.name)
         assertEquals("", updatedTag.translations[Locale.ENGLISH]?.description)
         assertNull(updatedTag.translations[Locale.JAPANESE])
@@ -536,7 +537,7 @@ class TagControllerTest() : BaseIntegrationTest() {
                 Locale.ENGLISH to TagTranslation("Test"),
                 Locale.GERMAN to TagTranslation("TestDeutsch")
             )
-        ))
+        )).getOrThrow()
 
         val req = UpdateTagRequest(
             name = "TagJap",
@@ -552,7 +553,7 @@ class TagControllerTest() : BaseIntegrationTest() {
             .expectStatus().isNotFound
 
 
-        val updatedTag = tagService.findById(tag.id)
+        val updatedTag = tagService.findById(tag.id.getOrThrow()).getOrThrow()
         assertEquals("Test", updatedTag.translations[Locale.ENGLISH]?.name)
         assertEquals("", updatedTag.translations[Locale.ENGLISH]?.description)
         assertNull(updatedTag.translations[Locale.JAPANESE])
@@ -568,7 +569,7 @@ class TagControllerTest() : BaseIntegrationTest() {
                 Locale.ENGLISH to TagTranslation("Test"),
                 Locale.GERMAN to TagTranslation("TestDeutsch")
             )
-        ))
+        )).getOrThrow()
 
         webTestClient.delete()
             .uri("/api/content/tags/${tag.key}")
@@ -576,7 +577,7 @@ class TagControllerTest() : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isOk
 
-        assertTrue(tagService.findAll().toList().isEmpty())
+        assertTrue(tagService.findAll().getOrThrow().toList().isEmpty())
     }
     @Test fun `delete requires authentication`() = runTest {
         val tag = tagService.save(TagDocument(
@@ -585,14 +586,14 @@ class TagControllerTest() : BaseIntegrationTest() {
                 Locale.ENGLISH to TagTranslation("Test"),
                 Locale.GERMAN to TagTranslation("TestDeutsch")
             )
-        ))
+        )).getOrThrow()
 
         webTestClient.delete()
             .uri("/api/content/tags/${tag.key}")
             .exchange()
             .expectStatus().isUnauthorized
 
-        assertFalse(tagService.findAll().toList().isEmpty())
+        assertFalse(tagService.findAll().getOrThrow().toList().isEmpty())
     }
     @Test fun `delete requires editor role`() = runTest {
         val user = registerUser()
@@ -602,7 +603,7 @@ class TagControllerTest() : BaseIntegrationTest() {
                 Locale.ENGLISH to TagTranslation("Test"),
                 Locale.GERMAN to TagTranslation("TestDeutsch")
             )
-        ))
+        )).getOrThrow()
 
         webTestClient.delete()
             .uri("/api/content/tags/${tag.key}")
@@ -610,7 +611,7 @@ class TagControllerTest() : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isForbidden
 
-        assertFalse(tagService.findAll().toList().isEmpty())
+        assertFalse(tagService.findAll().getOrThrow().toList().isEmpty())
     }
     @Test fun `delete requires tag`() = runTest {
         val user = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
@@ -628,6 +629,6 @@ class TagControllerTest() : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isNotFound
 
-        assertFalse(tagService.findAll().toList().isEmpty())
+        assertFalse(tagService.findAll().getOrThrow().toList().isEmpty())
     }
 }

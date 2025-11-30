@@ -78,6 +78,7 @@ class OAuth2AuthenticationService(
          stepUpTokenValue: String?,
          exchange: ServerWebExchange,
          stepUp: Boolean,
+         sessionId: UUID,
          locale: Locale?
      ): Pair<User, OAuth2Action> {
          logger.debug { "Finding or creating user after OAuth2 authentication" }
@@ -108,7 +109,7 @@ class OAuth2AuthenticationService(
 
          return when (oauth2ProviderConnectionTokenValue != null) {
              true -> handleConnection(email, provider, principalId, oauth2ProviderConnectionTokenValue, stepUpTokenValue, exchange, locale)
-             false -> handleRegistration(name, email, provider, principalId, authenticated, oauth2User, locale) to OAuth2Action.REGISTRATION
+             false -> handleRegistration(name, email, provider, principalId, authenticated, oauth2User, sessionId, locale) to OAuth2Action.REGISTRATION
          }
     }
 
@@ -155,6 +156,7 @@ class OAuth2AuthenticationService(
         principalId: String,
         authenticated: Boolean,
         oauth2User: OAuth2User,
+        sessionId: UUID,
         locale: Locale?
     ): User {
         logger.debug { "Handling registration after OAuth2 registration" }
@@ -208,8 +210,8 @@ class OAuth2AuthenticationService(
                             userId,
                             savedUser.roles,
                             savedUser.groups,
-                            UUID.randomUUID(),
-                            ""
+                            accessTokenService.create(savedUser, sessionId)
+                                .getOrThrow { ex -> OAuth2FlowException(OAuth2ErrorCode.SERVER_ERROR, "Failed to create access token after OAuth2 registration", ex) }
                         )
 
                         val user = principalSettingsService.setAvatar(avatar, savedUser, authentication)

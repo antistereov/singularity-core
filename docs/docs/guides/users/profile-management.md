@@ -15,7 +15,7 @@ The system supports the following key operations for managing a personal profile
 
 ### Profile Retrieval
 
-This is accessible to all authenticated users and can be requested through [`GET /api/auth/users/me`](../../api/get-authorized-user.api.mdx).
+This is accessible to all authenticated users and can be requested through [`GET /api/auth/users/me`](../../api/get-authorized-principal.api.mdx).
 
 You can retrieve the full profile information of the currently authenticated user. 
 This includes personal details and connected identity providers.
@@ -71,4 +71,4 @@ that requires a [`StepUpToken`](../auth/tokens.md#step-up-token) in addition to 
 This is a permanent and irreversible action. Upon successful deletion, 
 your session will be terminated and all associated authentication cookies will be cleared from your browser.
 
-This can be requested through [`DELETE /api/auth/users/me`](../../api/delete-authorized-user.api.mdx).
+This can be requested through [`DELETE /api/auth/users/me`](../../api/delete-authorized-principal.api.mdx).

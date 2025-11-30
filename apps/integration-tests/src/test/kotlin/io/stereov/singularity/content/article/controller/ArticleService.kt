@@ -1,13 +1,14 @@
 package io.stereov.singularity.content.article.controller
 
+import com.github.michaelbull.result.getOrThrow
 import io.stereov.singularity.auth.token.model.AccessType
-import io.stereov.singularity.principal.group.model.KnownGroups
 import io.stereov.singularity.content.article.dto.response.FullArticleResponse
 import io.stereov.singularity.content.article.model.ArticleState
 import io.stereov.singularity.content.article.model.ArticleTranslation
 import io.stereov.singularity.content.core.AccessCriteriaTest
 import io.stereov.singularity.content.tag.model.TagDocument
 import io.stereov.singularity.content.tag.model.TagTranslation
+import io.stereov.singularity.principal.group.model.KnownGroups
 import io.stereov.singularity.test.BaseArticleTest
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.runBlocking
@@ -120,7 +121,7 @@ class ArticleService : BaseArticleTest() {
         val owner = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
         val article = saveArticle(owner = owner)
 
-        userService.deleteById(owner.info.id)
+        userService.deleteById(owner.info.id.getOrThrow()).getOrThrow()
 
         val res = webTestClient.get()
             .uri("/api/content/articles/${article.key}")
@@ -432,7 +433,7 @@ class ArticleService : BaseArticleTest() {
         val owner = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
         val article = saveArticle(owner = owner)
 
-        userService.deleteById(owner.info.id)
+        userService.deleteById(owner.info.id.getOrThrow()).getOrThrow()
 
         val res = webTestClient.get()
             .uri("/api/content/articles")
