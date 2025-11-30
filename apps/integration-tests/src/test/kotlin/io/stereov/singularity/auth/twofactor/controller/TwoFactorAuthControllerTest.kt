@@ -11,10 +11,12 @@ import io.stereov.singularity.auth.twofactor.dto.request.CompleteLoginRequest
 import io.stereov.singularity.auth.twofactor.dto.request.CompleteStepUpRequest
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
 import io.stereov.singularity.principal.core.dto.response.UserResponse
+import io.stereov.singularity.principal.core.exception.UserException
 import io.stereov.singularity.test.BaseMailIntegrationTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.Instant
 import java.util.*
 
@@ -730,7 +732,7 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
         Assertions.assertEquals(TwoFactorMethod.TOTP, res.preferredTwoFactorMethod)
 
         val updatedUser = userService.findById(user.id).getOrThrow()
-        Assertions.assertEquals(TwoFactorMethod.TOTP, updatedUser.preferredTwoFactorMethod)
+        Assertions.assertEquals(TwoFactorMethod.TOTP, updatedUser.preferredTwoFactorMethod.getOrThrow())
     }
     @Test fun `changePreferred works when already preferred method`() = runTest {
         val user = registerUser(email2faEnabled = true, totpEnabled = true)
@@ -753,7 +755,7 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
         Assertions.assertEquals(TwoFactorMethod.EMAIL, res.preferredTwoFactorMethod)
 
         val updatedUser = userService.findById(user.id).getOrThrow()
-        Assertions.assertEquals(TwoFactorMethod.EMAIL, updatedUser.preferredTwoFactorMethod)
+        Assertions.assertEquals(TwoFactorMethod.EMAIL, updatedUser.preferredTwoFactorMethod.getOrThrow())
     }
     @Test fun `changePreferred is bad when changing to disabled mail`() = runTest {
         val user = registerUser(totpEnabled = true)
@@ -769,7 +771,7 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
             .expectStatus().isBadRequest
 
         val updatedUser = userService.findById(user.id).getOrThrow()
-        Assertions.assertEquals(TwoFactorMethod.TOTP, updatedUser.preferredTwoFactorMethod)
+        Assertions.assertEquals(TwoFactorMethod.TOTP, updatedUser.preferredTwoFactorMethod.getOrThrow())
     }
     @Test fun `changePreferred is bad when changing to disabled totp`() = runTest {
         val user = registerUser(email2faEnabled = true)
@@ -783,7 +785,7 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
             .expectStatus().isBadRequest
 
         val updatedUser = userService.findById(user.id).getOrThrow()
-        Assertions.assertEquals(TwoFactorMethod.EMAIL, updatedUser.preferredTwoFactorMethod)
+        Assertions.assertEquals(TwoFactorMethod.EMAIL, updatedUser.preferredTwoFactorMethod.getOrThrow())
     }
     @Test fun `changePreferred is bad when no password authentication`() = runTest {
         val user = registerOAuth2()
@@ -797,7 +799,7 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
             .expectStatus().isBadRequest
 
         val updatedUser = userService.findById(user.id).getOrThrow()
-        Assertions.assertNull(updatedUser.preferredTwoFactorMethod)
+        assertThrows<UserException.TwoFactorDisabled> { updatedUser.preferredTwoFactorMethod.getOrThrow() }
     }
     @Test fun `changePreferred needs authentication`() = runTest {
         val user = registerUser(email2faEnabled = true, totpEnabled = true)
@@ -812,7 +814,7 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
             .expectStatus().isUnauthorized
 
         val updatedUser = userService.findById(user.id).getOrThrow()
-        Assertions.assertEquals(TwoFactorMethod.EMAIL, updatedUser.preferredTwoFactorMethod)
+        Assertions.assertEquals(TwoFactorMethod.EMAIL, updatedUser.preferredTwoFactorMethod.getOrThrow())
     }
     @Test fun `changePreferred needs valid access token`() = runTest {
         val user = registerUser(email2faEnabled = true, totpEnabled = true)
@@ -828,7 +830,7 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
             .expectStatus().isUnauthorized
 
         val updatedUser = userService.findById(user.id).getOrThrow()
-        Assertions.assertEquals(TwoFactorMethod.EMAIL, updatedUser.preferredTwoFactorMethod)
+        Assertions.assertEquals(TwoFactorMethod.EMAIL, updatedUser.preferredTwoFactorMethod.getOrThrow())
     }
     @Test fun `changePreferred needs unexpired access token`() = runTest {
         val user = registerUser(email2faEnabled = true, totpEnabled = true)
@@ -844,7 +846,7 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
             .expectStatus().isUnauthorized
 
         val updatedUser = userService.findById(user.id).getOrThrow()
-        Assertions.assertEquals(TwoFactorMethod.EMAIL, updatedUser.preferredTwoFactorMethod)
+        Assertions.assertEquals(TwoFactorMethod.EMAIL, updatedUser.preferredTwoFactorMethod.getOrThrow())
     }
     @Test fun `changePreferred needs step up token`() = runTest {
         val user = registerUser(email2faEnabled = true, totpEnabled = true)
@@ -859,7 +861,7 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
             .expectStatus().isUnauthorized
 
         val updatedUser = userService.findById(user.id).getOrThrow()
-        Assertions.assertEquals(TwoFactorMethod.EMAIL, updatedUser.preferredTwoFactorMethod)
+        Assertions.assertEquals(TwoFactorMethod.EMAIL, updatedUser.preferredTwoFactorMethod.getOrThrow())
     }
     @Test fun `changePreferred needs valid step up token`() = runTest {
         val user = registerUser(email2faEnabled = true, totpEnabled = true)
@@ -875,7 +877,7 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
             .expectStatus().isUnauthorized
 
         val updatedUser = userService.findById(user.id).getOrThrow()
-        Assertions.assertEquals(TwoFactorMethod.EMAIL, updatedUser.preferredTwoFactorMethod)
+        Assertions.assertEquals(TwoFactorMethod.EMAIL, updatedUser.preferredTwoFactorMethod.getOrThrow())
     }
     @Test fun `changePreferred needs unexpired step up token`() = runTest {
         val user = registerUser(email2faEnabled = true, totpEnabled = true)
@@ -891,7 +893,7 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
             .expectStatus().isUnauthorized
 
         val updatedUser = userService.findById(user.id).getOrThrow()
-        Assertions.assertEquals(TwoFactorMethod.EMAIL, updatedUser.preferredTwoFactorMethod)
+        Assertions.assertEquals(TwoFactorMethod.EMAIL, updatedUser.preferredTwoFactorMethod.getOrThrow())
     }
     @Test fun `changePreferred needs step up token of same user`() = runTest {
         val user = registerUser(email2faEnabled = true, totpEnabled = true)
@@ -908,7 +910,7 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
             .expectStatus().isUnauthorized
 
         val updatedUser = userService.findById(user.id).getOrThrow()
-        Assertions.assertEquals(TwoFactorMethod.EMAIL, updatedUser.preferredTwoFactorMethod)
+        Assertions.assertEquals(TwoFactorMethod.EMAIL, updatedUser.preferredTwoFactorMethod.getOrThrow())
     }
     @Test fun `changePreferred needs step up token of same session`() = runTest {
         val user = registerUser(email2faEnabled = true, totpEnabled = true)
@@ -924,6 +926,6 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
             .expectStatus().isUnauthorized
 
         val updatedUser = userService.findById(user.id).getOrThrow()
-        Assertions.assertEquals(TwoFactorMethod.EMAIL, updatedUser.preferredTwoFactorMethod)
+        Assertions.assertEquals(TwoFactorMethod.EMAIL, updatedUser.preferredTwoFactorMethod.getOrThrow())
     }
 }

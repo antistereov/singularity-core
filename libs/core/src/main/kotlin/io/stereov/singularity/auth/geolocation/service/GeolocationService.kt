@@ -31,7 +31,7 @@ class GeolocationService(
 
     private val logger = KotlinLogging.logger {}
 
-    private suspend fun doGetLocation(ipAddress: InetAddress): Result<CityResponse, GeolocationException> {
+    suspend fun getLocation(ipAddress: InetAddress): Result<CityResponse, GeolocationException> {
         logger.debug { "Retrieving geolocation for IP address $ipAddress" }
 
         return geolocationDatabaseService.getCity(ipAddress)
@@ -47,8 +47,8 @@ class GeolocationService(
      * @return A [Result] containing either a successful [GeolocationResponse] with geolocation details,
      *  or a [GeolocationException] in case of failure.
      */
-    suspend fun getLocation(ipAddress: InetAddress): Result<GeolocationResponse, GeolocationException> {
-        return doGetLocation(ipAddress)
+    suspend fun getLocationResponse(ipAddress: InetAddress): Result<GeolocationResponse, GeolocationException> {
+        return getLocation(ipAddress)
             .map { cityResponse -> geolocationMapper.createGeolocationResponse(cityResponse) }
     }
 
@@ -65,7 +65,7 @@ class GeolocationService(
         val ipAddress = runCatching { exchange.request.getClientIp(properties.realIpHeader)?.let { InetAddress.getByName(it) } }
 
         return ipAddress.getOrNull()?.let {
-            getLocation(it)
+            getLocationResponse(it)
                 .onFailure { ex -> logger.warn { "Failed to resolve geolocation for IP address $it: ${ex.message}"} }
                 .getOrNull()
         }

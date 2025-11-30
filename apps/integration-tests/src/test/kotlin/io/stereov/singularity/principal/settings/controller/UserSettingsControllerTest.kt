@@ -80,7 +80,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .expectStatus().isOk
 
         val foundUser = userService.findByEmail(newEmail).getOrThrow()
-        assertEquals(user.id, foundUser.id)
+        assertEquals(user.id, foundUser.id.getOrThrow())
     }
     @Test fun `changeEmail changes email when old is verified`() = runTest {
         val newEmail = "new@email.com"
@@ -107,7 +107,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .expectStatus().isOk
 
         val foundUser = userService.findByEmail(newEmail).getOrThrow()
-        assertEquals(user.id, foundUser.id)
+        assertEquals(user.id, foundUser.id.getOrThrow())
     }
     @Test fun `changeEmail requires authentication`() = runTest {
         val oldEmail = "old@email.com"
@@ -250,7 +250,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
         requireNotNull(res)
         assertTrue(res.verificationRequired)
         val foundUser = userService.findByEmail(user.email!!).getOrThrow()
-        assertEquals(user.id, foundUser.id)
+        assertEquals(user.id, foundUser.id.getOrThrow())
     }
     @Test fun `changeEmail requires valid email`() = runTest {
         val user = registerUser()
@@ -266,7 +266,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
 
         requireNotNull(res)
         val foundUser = userService.findByEmail(user.email!!).getOrThrow()
-        assertEquals(user.id, foundUser.id)
+        assertEquals(user.id, foundUser.id.getOrThrow())
     }
     @Test fun `changeEmail throws cooldown`() = runTest {
         val newEmail = "new@email.com"
