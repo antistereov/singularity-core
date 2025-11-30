@@ -115,7 +115,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.AUTHENTICATION_FAILED)
 
 
-        assertTrue(userService.findAll().getOrThrow().toList().isEmpty())
+        assertTrue(principalService.findAll().getOrThrow().toList().isEmpty())
     }
     @Test fun `register flow needs valid state token`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -142,7 +142,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .location
             .assertErrorCode(OAuth2ErrorCode.AUTHENTICATION_FAILED)
 
-        assertTrue(userService.findAll().getOrThrow().toList().isEmpty())
+        assertTrue(principalService.findAll().getOrThrow().toList().isEmpty())
     }
     @Test fun `register flow needs unexpired state token`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -204,7 +204,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         mockOAuth2Server.verifyRequests()
 
-        assertTrue(userService.findAll().getOrThrow().toList().isEmpty())
+        assertTrue(principalService.findAll().getOrThrow().toList().isEmpty())
     }
     @Test fun `register flow needs valid session token`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -233,7 +233,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         mockOAuth2Server.verifyRequests()
 
-        assertTrue(userService.findAll().getOrThrow().toList().isEmpty())
+        assertTrue(principalService.findAll().getOrThrow().toList().isEmpty())
     }
     @Test fun `register flow needs unexpired session token`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -326,7 +326,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         mockOAuth2Server.verifyRequests()
 
-        assertTrue(userService.findAll().getOrThrow().toList().isEmpty())
+        assertTrue(principalService.findAll().getOrThrow().toList().isEmpty())
     }
     @Test fun `register flow needs username`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -395,7 +395,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         val identities = user.sensitive.identities.providers
-        assertEquals(1, identities.size)
+        assertEquals(0, identities.size)
 
         assertNull(identities["github"])
         assertTrue(hashService.checkBcrypt(registeredUser.password!!, user.password.getOrThrow()).getOrThrow())
@@ -797,7 +797,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(info.email!!).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(info.email, user.sensitive.email)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -855,7 +855,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         val identities = user.sensitive.identities.providers
@@ -905,7 +905,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         val identities = user.sensitive.identities.providers
@@ -962,7 +962,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         val identities = user.sensitive.identities.providers
@@ -1014,7 +1014,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         assertTrue(user.sensitive.sessions.isEmpty())
@@ -1066,7 +1066,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         val identities = user.sensitive.identities.providers
@@ -1120,7 +1120,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         val identities = user.sensitive.identities.providers
@@ -1174,7 +1174,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         assertTrue(user.sensitive.sessions.isEmpty())
@@ -1227,7 +1227,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         assertTrue(user.sensitive.sessions.isEmpty())
@@ -1280,7 +1280,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         val identities = user.sensitive.identities.providers
@@ -1333,11 +1333,11 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         mockOAuth2Server.verifyRequests()
 
-        assertEquals(2, userService.findAll().getOrThrow().toList().size)
+        assertEquals(2, principalService.findAll().getOrThrow().toList().size)
 
         val user = userService.findByEmail(oauth.email).getOrThrow()
         assertEquals(oauth.id, user.id.getOrThrow())
-        assertEquals(2, userService.findAll().getOrThrow().toList().size)
+        assertEquals(2, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         assertTrue(user.sensitive.sessions.isEmpty())
@@ -1388,11 +1388,11 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         mockOAuth2Server.verifyRequests()
 
-        assertEquals(2, userService.findAll().getOrThrow().toList().size)
+        assertEquals(2, principalService.findAll().getOrThrow().toList().size)
 
         val user = userService.findByEmail(oauth.email).getOrThrow()
         assertEquals(oauth.id, user.id.getOrThrow())
-        assertEquals(2, userService.findAll().getOrThrow().toList().size)
+        assertEquals(2, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         assertTrue(user.sensitive.sessions.isEmpty())
@@ -1443,11 +1443,11 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         mockOAuth2Server.verifyRequests()
 
-        assertEquals(2, userService.findAll().getOrThrow().toList().size)
+        assertEquals(2, principalService.findAll().getOrThrow().toList().size)
 
         val user = userService.findByEmail(oauth.email).getOrThrow()
         assertEquals(oauth.id, user.id.getOrThrow())
-        assertEquals(2, userService.findAll().getOrThrow().toList().size)
+        assertEquals(2, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         assertTrue(user.sensitive.sessions.isEmpty())
@@ -1505,7 +1505,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(registeredUser.email, user.sensitive.email)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -1564,7 +1564,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         val identities = user.sensitive.identities.providers
@@ -1613,7 +1613,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         val identities = user.sensitive.identities.providers
@@ -1668,7 +1668,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         val identities = user.sensitive.identities.providers
@@ -1720,7 +1720,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         val identities = user.sensitive.identities.providers
@@ -1772,7 +1772,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         val identities = user.sensitive.identities.providers
@@ -1825,7 +1825,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         val identities = user.sensitive.identities.providers
@@ -1878,7 +1878,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         val identities = user.sensitive.identities.providers
@@ -1931,7 +1931,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         val identities = user.sensitive.identities.providers
@@ -1984,7 +1984,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         val identities = user.sensitive.identities.providers
@@ -2037,7 +2037,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         val identities = user.sensitive.identities.providers
@@ -2090,7 +2090,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         val identities = user.sensitive.identities.providers
@@ -2143,7 +2143,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         val identities = user.sensitive.identities.providers
@@ -2193,7 +2193,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         val identities = user.sensitive.identities.providers
@@ -2244,7 +2244,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         val identities = user.sensitive.identities.providers
@@ -2297,7 +2297,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         val identities = user.sensitive.identities.providers
@@ -2350,7 +2350,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         val identities = user.sensitive.identities.providers
@@ -2404,7 +2404,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         val identities = user.sensitive.identities.providers
@@ -2457,7 +2457,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         val identities = user.sensitive.identities.providers
@@ -2510,7 +2510,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         val identities = user.sensitive.identities.providers
@@ -2563,7 +2563,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(info.email!!).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(info.email, user.sensitive.email)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -2622,7 +2622,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         val identities = user.sensitive.identities.providers
@@ -2673,7 +2673,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         val identities = user.sensitive.identities.providers
@@ -2731,7 +2731,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         val identities = user.sensitive.identities.providers
@@ -2784,7 +2784,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         assertTrue(user.sensitive.sessions.isEmpty())
@@ -2837,7 +2837,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         val identities = user.sensitive.identities.providers
@@ -2892,7 +2892,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         val identities = user.sensitive.identities.providers
@@ -2946,7 +2946,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         assertEquals(1, user.sensitive.sessions.size)
@@ -3000,7 +3000,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         assertEquals(1, user.sensitive.sessions.size)
@@ -3054,7 +3054,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         assertEquals(1, user.sensitive.sessions.size)
@@ -3109,7 +3109,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         assertTrue(user.sensitive.sessions.isEmpty())
@@ -3163,7 +3163,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         assertTrue(user.sensitive.sessions.isEmpty())
@@ -3217,7 +3217,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         val identities = user.sensitive.identities.providers
@@ -3270,11 +3270,11 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         mockOAuth2Server.verifyRequests()
 
-        assertEquals(2, userService.findAll().getOrThrow().toList().size)
+        assertEquals(2, principalService.findAll().getOrThrow().toList().size)
 
         val user = userService.findByEmail(oauth.email).getOrThrow()
         assertEquals(oauth.id, user.id.getOrThrow())
-        assertEquals(2, userService.findAll().getOrThrow().toList().size)
+        assertEquals(2, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         assertEquals(1, user.sensitive.sessions.size)
@@ -3325,11 +3325,11 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         mockOAuth2Server.verifyRequests()
 
-        assertEquals(2, userService.findAll().getOrThrow().toList().size)
+        assertEquals(2, principalService.findAll().getOrThrow().toList().size)
 
         val user = userService.findByEmail(oauth.email).getOrThrow()
         assertEquals(oauth.id, user.id.getOrThrow())
-        assertEquals(2, userService.findAll().getOrThrow().toList().size)
+        assertEquals(2, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         assertEquals(1, user.sensitive.sessions.size)
@@ -3380,11 +3380,11 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         mockOAuth2Server.verifyRequests()
 
-        assertEquals(2, userService.findAll().getOrThrow().toList().size)
+        assertEquals(2, principalService.findAll().getOrThrow().toList().size)
 
         val user = userService.findByEmail(oauth.email).getOrThrow()
         assertEquals(oauth.id, user.id.getOrThrow())
-        assertEquals(2, userService.findAll().getOrThrow().toList().size)
+        assertEquals(2, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
         assertEquals(1, user.sensitive.sessions.size)
@@ -3441,7 +3441,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = userService.findById(registeredUser.id).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(info.email!!, user.sensitive.email)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -3499,7 +3499,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = principalService.findById(registeredUser.id).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.Guest.GUEST), user.roles)
         assertThat { user is Guest }
 
@@ -3543,7 +3543,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val user = principalService.findById(registeredUser.id).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
-        assertEquals(1, userService.findAll().getOrThrow().toList().size)
+        assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.Guest.GUEST), user.roles)
         assertThat { user is Guest }
 
