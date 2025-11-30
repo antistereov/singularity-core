@@ -608,7 +608,7 @@ class GroupControllerTest() : BaseIntegrationTest() {
         Assertions.assertFalse(groupService.existsByKey(group.key).getOrThrow())
         Assertions.assertFalse(groupService.existsById(group.id.getOrThrow()).getOrThrow())
 
-        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val updatedUser = userService.findById(user.id).getOrThrow()
 
         Assertions.assertTrue(updatedUser.groups.isEmpty())
     }
@@ -632,7 +632,7 @@ class GroupControllerTest() : BaseIntegrationTest() {
         Assertions.assertTrue(groupService.existsByKey(group.key).getOrThrow())
         Assertions.assertTrue(groupService.existsById(group.id.getOrThrow()).getOrThrow())
 
-        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val updatedUser = userService.findById(user.id).getOrThrow()
 
         Assertions.assertEquals(setOf(group.key),updatedUser.groups)
     }
@@ -657,7 +657,7 @@ class GroupControllerTest() : BaseIntegrationTest() {
         Assertions.assertTrue(groupService.existsByKey(group.key).getOrThrow())
         Assertions.assertTrue(groupService.existsById(group.id.getOrThrow()).getOrThrow())
 
-        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val updatedUser = userService.findById(user.id).getOrThrow()
 
         Assertions.assertEquals(setOf(group.key),updatedUser.groups)
     }
@@ -683,7 +683,7 @@ class GroupControllerTest() : BaseIntegrationTest() {
         Assertions.assertTrue(groupService.existsByKey(group.key).getOrThrow())
         Assertions.assertTrue(groupService.existsById(group.id.getOrThrow()).getOrThrow())
 
-        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val updatedUser = userService.findById(user.id).getOrThrow()
 
         Assertions.assertEquals(setOf(group.key),updatedUser.groups)
     }

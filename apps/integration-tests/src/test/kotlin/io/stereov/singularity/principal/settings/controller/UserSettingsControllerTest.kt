@@ -72,7 +72,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .returnResult()
             .responseBody
 
-        val token = emailVerificationTokenService.create(user.info.id.getOrThrow(), newEmail, user.info.sensitive.security.email.verificationSecret)
+        val token = emailVerificationTokenService.create(user.id, newEmail, user.info.sensitive.security.email.verificationSecret)
             .getOrThrow()
         webTestClient.post()
             .uri("/api/auth/email/verification?token=$token")
@@ -80,7 +80,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .expectStatus().isOk
 
         val foundUser = userService.findByEmail(newEmail).getOrThrow()
-        assertEquals(user.info.id, foundUser.id)
+        assertEquals(user.id, foundUser.id)
     }
     @Test fun `changeEmail changes email when old is verified`() = runTest {
         val newEmail = "new@email.com"
@@ -99,7 +99,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .returnResult()
             .responseBody
 
-        val token = emailVerificationTokenService.create(user.info.id.getOrThrow(), newEmail, user.info.sensitive.security.email.verificationSecret)
+        val token = emailVerificationTokenService.create(user.id, newEmail, user.info.sensitive.security.email.verificationSecret)
             .getOrThrow()
         webTestClient.post()
             .uri("/api/auth/email/verification?token=$token")
@@ -107,7 +107,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .expectStatus().isOk
 
         val foundUser = userService.findByEmail(newEmail).getOrThrow()
-        assertEquals(user.info.id, foundUser.id)
+        assertEquals(user.id, foundUser.id)
     }
     @Test fun `changeEmail requires authentication`() = runTest {
         val oldEmail = "old@email.com"
@@ -159,7 +159,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .accessTokenCookie(user.accessToken)
             .cookie(
                 SessionTokenType.StepUp.cookieName,
-                stepUpTokenService.create(anotherUser.info.id.getOrThrow(), user.sessionId).getOrThrow().value
+                stepUpTokenService.create(anotherUser.id, user.sessionId).getOrThrow().value
             )
             .bodyValue(ChangeEmailRequest(newEmail))
             .exchange()
@@ -176,7 +176,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .accessTokenCookie(user.accessToken)
             .cookie(
                 SessionTokenType.StepUp.cookieName,
-                stepUpTokenService.create(user.info.id.getOrThrow(), UUID.randomUUID()).getOrThrow().value
+                stepUpTokenService.create(user.id, UUID.randomUUID()).getOrThrow().value
             )
             .bodyValue(ChangeEmailRequest(newEmail))
             .exchange()
@@ -194,7 +194,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .cookie(
                 SessionTokenType.StepUp.cookieName,
                 stepUpTokenService.create(
-                    user.info.id.getOrThrow(),
+                    user.id,
                     user.sessionId,
                     Instant.ofEpochSecond(0)
                 ).getOrThrow().value
@@ -250,7 +250,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
         requireNotNull(res)
         assertTrue(res.verificationRequired)
         val foundUser = userService.findByEmail(user.email!!).getOrThrow()
-        assertEquals(user.info.id, foundUser.id)
+        assertEquals(user.id, foundUser.id)
     }
     @Test fun `changeEmail requires valid email`() = runTest {
         val user = registerUser()
@@ -266,7 +266,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
 
         requireNotNull(res)
         val foundUser = userService.findByEmail(user.email!!).getOrThrow()
-        assertEquals(user.info.id, foundUser.id)
+        assertEquals(user.id, foundUser.id)
     }
     @Test fun `changeEmail throws cooldown`() = runTest {
         val newEmail = "new@email.com"
@@ -300,7 +300,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .stepUpTokenCookie(user.stepUpToken)
             .cookie(
                 SessionTokenType.StepUp.cookieName,
-                stepUpTokenService.create(user.info.id.getOrThrow(), user.sessionId).getOrThrow().value
+                stepUpTokenService.create(user.id, user.sessionId).getOrThrow().value
             )
             .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
             .exchange()
@@ -330,7 +330,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isUnauthorized
 
-        val foundUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val foundUser = userService.findById(user.id).getOrThrow()
         assertTrue(hashService.checkBcrypt(oldPassword, foundUser.password.getOrThrow()).getOrThrow())
     }
     @Test fun `changePassword requires capital letter`() = runTest {
@@ -346,7 +346,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isBadRequest
 
-        val foundUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val foundUser = userService.findById(user.id).getOrThrow()
         assertTrue(hashService.checkBcrypt(oldPassword, foundUser.password.getOrThrow()).getOrThrow())
     }
     @Test fun `changePassword requires small letter`() = runTest {
@@ -362,7 +362,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isBadRequest
 
-        val foundUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val foundUser = userService.findById(user.id).getOrThrow()
         assertTrue(hashService.checkBcrypt(oldPassword, foundUser.password.getOrThrow()).getOrThrow())
     }
     @Test fun `changePassword requires at least 8 characters`() = runTest {
@@ -378,7 +378,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isBadRequest
 
-        val foundUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val foundUser = userService.findById(user.id).getOrThrow()
         assertTrue(hashService.checkBcrypt(oldPassword, foundUser.password.getOrThrow()).getOrThrow())
     }
     @Test fun `changePassword requires a number`() = runTest {
@@ -394,7 +394,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isBadRequest
 
-        val foundUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val foundUser = userService.findById(user.id).getOrThrow()
         assertTrue(hashService.checkBcrypt(oldPassword, foundUser.password.getOrThrow()).getOrThrow())
     }
     @Test fun `changePassword requires a special character`() = runTest {
@@ -410,7 +410,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isBadRequest
 
-        val foundUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val foundUser = userService.findById(user.id).getOrThrow()
         assertTrue(hashService.checkBcrypt(oldPassword, foundUser.password.getOrThrow()).getOrThrow())
     }
     @Test fun `changePassword requires body`() = runTest {
@@ -424,7 +424,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isBadRequest
 
-        val foundUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val foundUser = userService.findById(user.id).getOrThrow()
         assertTrue(hashService.checkBcrypt(oldPassword, foundUser.password.getOrThrow()).getOrThrow())
     }
     @Test fun `changePassword requires correct password`() = runTest {
@@ -441,7 +441,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isUnauthorized
 
-        val foundUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val foundUser = userService.findById(user.id).getOrThrow()
         assertTrue(hashService.checkBcrypt(oldPassword, foundUser.password.getOrThrow()).getOrThrow())
     }
     @Test fun `changePassword requires step up`() = runTest {
@@ -457,7 +457,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isUnauthorized
 
-        val foundUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val foundUser = userService.findById(user.id).getOrThrow()
         assertTrue(hashService.checkBcrypt(oldPassword, foundUser.password.getOrThrow()).getOrThrow())
     }
     @Test fun `changePassword requires step up token for same user`() = runTest {
@@ -472,13 +472,13 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .accessTokenCookie(user.accessToken)
             .cookie(
                 SessionTokenType.StepUp.cookieName,
-                stepUpTokenService.create(anotherUser.info.id.getOrThrow(), user.sessionId).getOrThrow().value
+                stepUpTokenService.create(anotherUser.id, user.sessionId).getOrThrow().value
             )
             .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
             .exchange()
             .expectStatus().isUnauthorized
 
-        val foundUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val foundUser = userService.findById(user.id).getOrThrow()
         assertTrue(hashService.checkBcrypt(oldPassword, foundUser.password.getOrThrow()).getOrThrow())
     }
     @Test fun `changePassword requires step up token for same session`() = runTest {
@@ -492,13 +492,13 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .accessTokenCookie(user.accessToken)
             .cookie(
                 SessionTokenType.StepUp.cookieName,
-                stepUpTokenService.create(user.info.id.getOrThrow(), UUID.randomUUID()).getOrThrow().value
+                stepUpTokenService.create(user.id, UUID.randomUUID()).getOrThrow().value
             )
             .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
             .exchange()
             .expectStatus().isUnauthorized
 
-        val foundUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val foundUser = userService.findById(user.id).getOrThrow()
         assertTrue(hashService.checkBcrypt(oldPassword, foundUser.password.getOrThrow()).getOrThrow())
     }
     @Test fun `changePassword requires unexpired step up token`() = runTest {
@@ -513,7 +513,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .cookie(
                 SessionTokenType.StepUp.cookieName,
                 stepUpTokenService.create(
-                    user.info.id.getOrThrow(),
+                    user.id,
                     user.sessionId,
                     Instant.ofEpochSecond(0)
                 ).getOrThrow().value
@@ -522,7 +522,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isUnauthorized
 
-        val foundUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val foundUser = userService.findById(user.id).getOrThrow()
         assertTrue(hashService.checkBcrypt(oldPassword, foundUser.password.getOrThrow()).getOrThrow())
     }
     @Test fun `changePassword requires valid step up token`() = runTest {
@@ -539,7 +539,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isUnauthorized
 
-        val foundUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val foundUser = userService.findById(user.id).getOrThrow()
         assertTrue(hashService.checkBcrypt(oldPassword, foundUser.password.getOrThrow()).getOrThrow())
     }
 
@@ -561,7 +561,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
         requireNotNull(res)
 
         assertEquals(newName, res.name)
-        assertEquals(newName, userService.findById(user.info.id.getOrThrow()).getOrThrow().sensitive.name)
+        assertEquals(newName, userService.findById(user.id).getOrThrow().sensitive.name)
     }
     @Test fun `changeUser requires authentication`() = runTest {
         val user = registerUser()
@@ -573,7 +573,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isUnauthorized
 
-        val foundUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val foundUser = userService.findById(user.id).getOrThrow()
         assertEquals(user.info.sensitive.name, foundUser.sensitive.name)
     }
     @Test fun `changeUser requires body`() = runTest {
@@ -586,7 +586,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isBadRequest
 
-        val foundUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val foundUser = userService.findById(user.id).getOrThrow()
         assertEquals(user.info.sensitive.name, foundUser.sensitive.name)
     }
 
@@ -810,7 +810,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isUnauthorized
 
-        val foundUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val foundUser = userService.findById(user.id).getOrThrow()
         assertNull(foundUser.sensitive.avatarFileKey)
     }
     @Test fun `setAvatar requires body`() = runTest {
@@ -821,7 +821,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isBadRequest
 
-        val foundUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val foundUser = userService.findById(user.id).getOrThrow()
         assertNull(foundUser.sensitive.avatarFileKey)
     }
 
@@ -872,7 +872,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
         val originalFile = File(localFileStorageProperties.fileDirectory, original.key)
         assertFalse(originalFile.exists())
 
-        val foundUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val foundUser = userService.findById(user.id).getOrThrow()
         assertNull(foundUser.sensitive.avatarFileKey)
     }
     @Test fun `deleteAvatar requires authentication`() = runTest {
@@ -886,7 +886,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isUnauthorized
 
-        val foundUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val foundUser = userService.findById(user.id).getOrThrow()
         assertEquals("avatar", foundUser.sensitive.avatarFileKey)
     }
 
@@ -964,8 +964,8 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .expectStatus().isUnauthorized
 
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
-        val foundUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
-        assertEquals(user.info.id, foundUser.id.getOrThrow())
+        val foundUser = userService.findById(user.id).getOrThrow()
+        assertEquals(user.id, foundUser.id.getOrThrow())
     }
     @Test fun `delete requires stepUp`() = runTest {
         val user = registerUser()
@@ -977,7 +977,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .expectStatus().isUnauthorized
 
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
-        val foundUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
-        assertEquals(user.info.id, foundUser.id.getOrThrow())
+        val foundUser = userService.findById(user.id).getOrThrow()
+        assertEquals(user.id, foundUser.id.getOrThrow())
     }
 }

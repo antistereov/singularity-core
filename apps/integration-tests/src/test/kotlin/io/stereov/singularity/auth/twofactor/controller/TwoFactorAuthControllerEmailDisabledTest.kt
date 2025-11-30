@@ -43,8 +43,8 @@ class TwoFactorAuthControllerEmailDisabledTest : BaseIntegrationTest() {
 
         assertThrows<TokenExtractionException> { res.extractTwoFactorAuthenticationToken() }
 
-        Assertions.assertEquals(user.info.id, accessToken.userId)
-        Assertions.assertEquals(user.info.id, refreshToken.userId)
+        Assertions.assertEquals(user.id, accessToken.userId)
+        Assertions.assertEquals(user.id, refreshToken.userId)
         Assertions.assertEquals(accessToken.sessionId, refreshToken.sessionId)
 
     }

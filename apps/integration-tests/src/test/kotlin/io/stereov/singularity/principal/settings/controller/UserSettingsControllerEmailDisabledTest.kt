@@ -28,7 +28,7 @@ class UserSettingsControllerEmailDisabledTest : BaseIntegrationTest() {
 
         assertFalse(res!!.verificationRequired)
         val foundUser = userService.findByEmail(newEmail).getOrThrow()
-        assertEquals(user.info.id, foundUser.id.getOrThrow())
+        assertEquals(user.id, foundUser.id.getOrThrow())
     }
 
 }

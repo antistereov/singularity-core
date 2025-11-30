@@ -61,7 +61,7 @@ class InvitationControllerTest() : BaseArticleTest() {
         val owner = registerUser()
         val invited = registerUser()
         val article = saveArticle()
-        article.access.users.maintainer.add(owner.info.id.toString())
+        article.access.users.maintainer.add(owner.id.toString())
         articleService.save(article)
 
         webTestClient.post()
@@ -85,7 +85,7 @@ class InvitationControllerTest() : BaseArticleTest() {
     @Test fun `invite to article works with unregistered`() = runTest {
         val owner = registerUser()
         val article = saveArticle()
-        article.access.users.maintainer.add(owner.info.id.toString())
+        article.access.users.maintainer.add(owner.id.toString())
         articleService.save(article)
 
         webTestClient.post()
@@ -110,7 +110,7 @@ class InvitationControllerTest() : BaseArticleTest() {
         val owner = registerUser()
         val invited = registerUser()
         val article = saveArticle()
-        article.access.users.editor.add(owner.info.id.toString())
+        article.access.users.editor.add(owner.id.toString())
         articleService.save(article)
 
         webTestClient.post()
@@ -130,7 +130,7 @@ class InvitationControllerTest() : BaseArticleTest() {
         val owner = registerUser()
         val invited = registerUser()
         val article = saveArticle()
-        article.access.users.editor.add(owner.info.id.getOrThrow().toString())
+        article.access.users.editor.add(owner.id.toString())
         articleService.save(article)
 
         webTestClient.post()
@@ -149,7 +149,7 @@ class InvitationControllerTest() : BaseArticleTest() {
         val owner = registerUser()
         val invited = registerUser()
         val article = saveArticle()
-        article.access.users.editor.add(owner.info.id.toString())
+        article.access.users.editor.add(owner.id.toString())
         articleService.save(article)
 
         webTestClient.post()
@@ -167,7 +167,7 @@ class InvitationControllerTest() : BaseArticleTest() {
     @Test fun `invite to article requires body`() = runTest {
         val owner = registerUser()
         val article = saveArticle()
-        article.access.users.editor.add(owner.info.id.toString())
+        article.access.users.editor.add(owner.id.toString())
         articleService.save(article)
 
         webTestClient.post()
@@ -232,7 +232,7 @@ class InvitationControllerTest() : BaseArticleTest() {
 
         val updated = articleService.findByKey(article.key).getOrThrow()
         assertFalse(updated.access.invitations.isEmpty())
-        assertFalse(updated.access.users.maintainer.contains(invited.info.id.toString()))
+        assertFalse(updated.access.users.maintainer.contains(invited.id.toString()))
     }
     @Test fun `accept invite to article works`() = runTest {
         val owner = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
@@ -265,7 +265,7 @@ class InvitationControllerTest() : BaseArticleTest() {
 
         assertEquals(article.key, res.key)
         assertTrue(updated.access.invitations.isEmpty())
-        assertTrue(updated.access.users.maintainer.contains(invited.info.id.toString()))
+        assertTrue(updated.access.users.maintainer.contains(invited.id.toString()))
     }
     @Test fun `accept invite to article needs valid token`() = runTest {
         val owner = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
@@ -292,7 +292,7 @@ class InvitationControllerTest() : BaseArticleTest() {
 
         val updated = articleService.findByKey(article.key).getOrThrow()
         assertFalse(updated.access.invitations.isEmpty())
-        assertFalse(updated.access.users.maintainer.contains(invited.info.id.toString()))
+        assertFalse(updated.access.users.maintainer.contains(invited.id.toString()))
     }
     @Test fun `accept invite to article needs unexpired token`() = runTest {
         val owner = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
@@ -320,7 +320,7 @@ class InvitationControllerTest() : BaseArticleTest() {
 
         val updated = articleService.findByKey(article.key).getOrThrow()
         assertFalse(updated.access.invitations.isEmpty())
-        assertFalse(updated.access.users.maintainer.contains(invited.info.id.toString()))
+        assertFalse(updated.access.users.maintainer.contains(invited.id.toString()))
     }
     @Test fun `accept invite to article needs article`() = runTest {
         val owner = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
@@ -347,7 +347,7 @@ class InvitationControllerTest() : BaseArticleTest() {
 
         val updated = articleService.findByKey(article.key).getOrThrow()
         assertFalse(updated.access.invitations.isEmpty())
-        assertFalse(updated.access.users.maintainer.contains(invited.info.id.toString()))
+        assertFalse(updated.access.users.maintainer.contains(invited.id.toString()))
     }
     @Test fun `accept invite to article needs user`() = runTest {
         val owner = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
@@ -374,7 +374,7 @@ class InvitationControllerTest() : BaseArticleTest() {
 
         val updated = articleService.findByKey(article.key).getOrThrow()
         assertFalse(updated.access.invitations.isEmpty())
-        assertFalse(updated.access.users.maintainer.contains(invited.info.id.toString()))
+        assertFalse(updated.access.users.maintainer.contains(invited.id.toString()))
     }
 
     @Test fun `delete works`() = runTest {
@@ -405,7 +405,7 @@ class InvitationControllerTest() : BaseArticleTest() {
         val updated = articleService.findByKey(article.key).getOrThrow()
         assertFalse(invitationService.existsById(invitationId).getOrThrow())
         assertTrue(updated.access.invitations.isEmpty())
-        assertFalse(updated.access.users.maintainer.contains(invited.info.id.toString()))
+        assertFalse(updated.access.users.maintainer.contains(invited.id.toString()))
     }
     @Test fun `delete requires authorization`() = runTest {
         val owner = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
@@ -434,14 +434,14 @@ class InvitationControllerTest() : BaseArticleTest() {
         val updated = articleService.findByKey(article.key).getOrThrow()
         assertTrue(invitationService.existsById(invitationId).getOrThrow())
         assertFalse(updated.access.invitations.isEmpty())
-        assertFalse(updated.access.users.maintainer.contains(invited.info.id.toString()))
+        assertFalse(updated.access.users.maintainer.contains(invited.id.toString()))
     }
     @Test fun `delete requires maintainer`() = runTest {
         val owner = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
         val invited = registerUser()
         val article = saveArticle(owner)
         val anotherUser = registerUser()
-        article.access.users.editor.add(anotherUser.info.id.toString())
+        article.access.users.editor.add(anotherUser.id.toString())
         articleService.save(article)
 
         webTestClient.post()
@@ -467,7 +467,7 @@ class InvitationControllerTest() : BaseArticleTest() {
         val updated = articleService.findByKey(article.key).getOrThrow()
         assertTrue(invitationService.existsById(invitationId).getOrThrow())
         assertFalse(updated.access.invitations.isEmpty())
-        assertFalse(updated.access.users.maintainer.contains(invited.info.id.toString()))
+        assertFalse(updated.access.users.maintainer.contains(invited.id.toString()))
     }
     @Test fun `delete requires article`() = runTest {
         val owner = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))

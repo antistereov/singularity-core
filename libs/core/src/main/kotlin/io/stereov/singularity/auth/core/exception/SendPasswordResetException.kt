@@ -1,5 +1,6 @@
 package io.stereov.singularity.auth.core.exception
 
+import io.stereov.singularity.auth.alert.exception.AlertException
 import io.stereov.singularity.database.core.exception.DatabaseFailure
 import io.stereov.singularity.email.core.exception.*
 import io.stereov.singularity.global.exception.SingularityException
@@ -196,10 +197,19 @@ sealed class SendPasswordResetException(
     companion object {
 
         fun from(ex: EmailException) = when (ex) {
-            is EmailException.Send -> Send(ex.message, ex.cause)
-            is EmailException.Disabled -> EmailDisabled(ex.message, ex.cause)
-            is EmailException.Template -> Template(ex.message, ex.cause)
-            is EmailException.Authentication -> EmailAuthentication(ex.message, ex.cause)
+            is EmailException.Send -> Send("Failed to send password reset request", ex.cause)
+            is EmailException.Disabled -> EmailDisabled("Failed to send password reset request: email is disabled", ex.cause)
+            is EmailException.Template -> Template("Failed to send password reset request: failed to build template", ex.cause)
+            is EmailException.Authentication -> EmailAuthentication("Failed to send password reset request: failure in email authentication", ex.cause)
+        }
+
+        fun from(ex: AlertException) = when (ex) {
+            is AlertException.Send -> Send("Failed to send password reset request", ex.cause)
+            is AlertException.EmailDisabled -> EmailDisabled("Failed to send password reset request: email is disabled", ex.cause)
+            is AlertException.Template -> Template("Failed to send password reset request: failed to build template", ex.cause)
+            is AlertException.CooldownCache -> CooldownCache(ex.message, ex.cause)
+            is AlertException.CooldownActive -> CooldownActive(ex.message, ex.cause)
+            is AlertException.EmailAuthentication -> EmailAuthentication("Failed to send password reset request: failure in email authentication", ex.cause)
         }
     }
 }

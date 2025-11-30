@@ -106,7 +106,7 @@ class AccessCriteriaTest : BaseArticleTest() {
     fun `getArticles works with user viewer`() = runTest {
         val user = registerUser(emailSuffix = "another@email.com")
         val article = saveArticle()
-        article.share(ContentAccessSubject.USER, user.info.id.getOrThrow().toHexString(), ContentAccessRole.VIEWER)
+        article.share(ContentAccessSubject.USER, user.id.toHexString(), ContentAccessRole.VIEWER)
         articleService.save(article)
 
         val res = webTestClient.get()
@@ -126,7 +126,7 @@ class AccessCriteriaTest : BaseArticleTest() {
     fun `getArticles works with user editor`() = runTest {
         val user = registerUser(emailSuffix = "another@email.com")
         val article = saveArticle()
-        article.share(ContentAccessSubject.USER, user.info.id.getOrThrow().toHexString(), ContentAccessRole.EDITOR)
+        article.share(ContentAccessSubject.USER, user.id.toHexString(), ContentAccessRole.EDITOR)
         articleService.save(article)
 
         val res = webTestClient.get()
@@ -146,7 +146,7 @@ class AccessCriteriaTest : BaseArticleTest() {
     fun `getArticles works with user admin`() = runTest {
         val user = registerUser(emailSuffix = "another@email.com")
         val article = saveArticle()
-        article.share(ContentAccessSubject.USER, user.info.id.getOrThrow().toHexString(), ContentAccessRole.MAINTAINER)
+        article.share(ContentAccessSubject.USER, user.id.toHexString(), ContentAccessRole.MAINTAINER)
         articleService.save(article)
 
         val res = webTestClient.get()
@@ -402,7 +402,7 @@ class AccessCriteriaTest : BaseArticleTest() {
     fun `getLatestArticles works with user viewer`() = runTest {
         val user = registerUser(emailSuffix = "another@email.com")
         val article = saveArticle()
-        article.share(ContentAccessSubject.USER, user.info.id.getOrThrow().toHexString(), ContentAccessRole.VIEWER)
+        article.share(ContentAccessSubject.USER, user.id.toHexString(), ContentAccessRole.VIEWER)
         article.state = ArticleState.PUBLISHED
         articleService.save(article)
 
@@ -424,7 +424,7 @@ class AccessCriteriaTest : BaseArticleTest() {
     fun `getLatestArticles works with user editor`() = runTest {
         val user = registerUser(emailSuffix = "another@email.com")
         val article = saveArticle()
-        article.share(ContentAccessSubject.USER, user.info.id.getOrThrow().toHexString(), ContentAccessRole.EDITOR)
+        article.share(ContentAccessSubject.USER, user.id.toHexString(), ContentAccessRole.EDITOR)
         article.state = ArticleState.PUBLISHED
         articleService.save(article)
 
@@ -446,7 +446,7 @@ class AccessCriteriaTest : BaseArticleTest() {
     fun `getLatestArticles works with user admin`() = runTest {
         val user = registerUser(emailSuffix = "another@email.com")
         val article = saveArticle()
-        article.share(ContentAccessSubject.USER, user.info.id.getOrThrow().toHexString(), ContentAccessRole.MAINTAINER)
+        article.share(ContentAccessSubject.USER, user.id.toHexString(), ContentAccessRole.MAINTAINER)
         article.state = ArticleState.PUBLISHED
         articleService.save(article)
 

@@ -1,11 +1,12 @@
 package io.stereov.singularity.auth.core.service
 
+import com.github.michaelbull.result.getOrThrow
 import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.slot
 import io.stereov.singularity.auth.core.dto.request.LoginRequest
-import io.stereov.singularity.test.BaseSecurityAlertTest
 import io.stereov.singularity.principal.core.model.User
+import io.stereov.singularity.test.BaseSecurityAlertTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -33,7 +34,7 @@ class IdentityProviderInfoServiceIntegrationTest : BaseSecurityAlertTest() {
 
         coVerify(exactly = 1) { identityProviderInfoService.send(any(), anyNullable()) }
         assert(userSlot.isCaptured)
-        Assertions.assertEquals(user.info.id, userSlot.captured.id)
+        Assertions.assertEquals(user.id, userSlot.captured.id.getOrThrow())
         assert(localeSlot.isNull)
     }
     @Test fun `login works with locale`() = runTest {
@@ -56,7 +57,7 @@ class IdentityProviderInfoServiceIntegrationTest : BaseSecurityAlertTest() {
 
         coVerify(exactly = 1) { identityProviderInfoService.send(any(), anyNullable()) }
         assert(userSlot.isCaptured)
-        Assertions.assertEquals(user.info.id, userSlot.captured.id)
+        Assertions.assertEquals(user.id, userSlot.captured.id.getOrThrow())
         assert(localeSlot.isCaptured)
         Assertions.assertEquals(Locale.ENGLISH, localeSlot.captured)
     }

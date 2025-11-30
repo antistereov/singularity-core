@@ -53,7 +53,7 @@ class SessionControllerTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isOk
 
-        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val updatedUser = userService.findById(user.id).getOrThrow()
         val sessions = updatedUser.sensitive.sessions
 
         Assertions.assertEquals(0, sessions.size)
@@ -74,7 +74,7 @@ class SessionControllerTest : BaseIntegrationTest() {
             .expectStatus()
             .isOk
 
-        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val updatedUser = userService.findById(user.id).getOrThrow()
         val sessions = updatedUser.sensitive.sessions
 
         Assertions.assertEquals(0, sessions.size)

@@ -2,6 +2,7 @@ package io.stereov.singularity.auth.core.controller
 
 import com.github.michaelbull.result.getOrThrow
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
 import io.stereov.singularity.auth.core.dto.response.GenerateSessionTokenResponse
 import io.stereov.singularity.auth.core.dto.response.SessionInfoResponse
@@ -15,6 +16,7 @@ import io.stereov.singularity.auth.token.exception.AccessTokenExtractionExceptio
 import io.stereov.singularity.auth.token.exception.CookieException
 import io.stereov.singularity.auth.token.model.SessionTokenType
 import io.stereov.singularity.auth.token.service.SessionTokenService
+import io.stereov.singularity.cache.exception.CacheException
 import io.stereov.singularity.database.encryption.exception.SaveEncryptedDocumentException
 import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.ErrorResponse
@@ -46,6 +48,7 @@ class SessionController(
     private val sessionMapper: SessionMapper,
     private val authorizationService: AuthorizationService,
     private val principalService: PrincipalService,
+    private val accessTokenCache: AccessTokenCache,
 ) {
 
     private val logger = KotlinLogging.logger {}
@@ -211,7 +214,8 @@ class SessionController(
         AuthenticationException.AuthenticationRequired::class,
         FindPrincipalByIdException::class,
         CookieException.Creation::class,
-        SaveEncryptedDocumentException::class
+        SaveEncryptedDocumentException::class,
+        CacheException::class,
     ])
     suspend fun deleteAllSessions(): ResponseEntity<SuccessResponse> {
         logger.debug { "Logging out user from all sessions" }
@@ -234,6 +238,9 @@ class SessionController(
 
         sessionService.deleteAllSessions(principal)
             .getOrThrow { when (it) { is SaveEncryptedDocumentException -> it } }
+
+        accessTokenCache.invalidateAllTokens(principalId)
+            .getOrThrow { when (it) { is CacheException -> it } }
 
         return ResponseEntity.ok()
             .header("Set-Cookie", clearAccessToken.toString())

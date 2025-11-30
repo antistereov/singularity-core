@@ -135,7 +135,8 @@ class AuthenticationConfiguration {
         sessionTokenService: SessionTokenService,
         sessionMapper: SessionMapper,
         authorizationService: AuthorizationService,
-        principalService: PrincipalService
+        principalService: PrincipalService,
+        accessTokenCache: AccessTokenCache
     ): SessionController {
         return SessionController(
             sessionService,
@@ -144,6 +145,7 @@ class AuthenticationConfiguration {
             sessionMapper,
             authorizationService,
             principalService,
+            accessTokenCache,
         )
     }
 

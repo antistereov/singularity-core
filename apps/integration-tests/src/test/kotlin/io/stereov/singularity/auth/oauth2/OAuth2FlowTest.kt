@@ -796,7 +796,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(successRedirectUri, res.responseHeaders.location?.toString())
 
         val user = userService.findByEmail(info.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(info.email, user.sensitive.email)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
@@ -854,7 +854,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.AUTHENTICATION_FAILED)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -870,7 +870,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     @Test fun `login flow needs valid state token`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -904,7 +904,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.AUTHENTICATION_FAILED)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -920,7 +920,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     @Test fun `login flow needs unexpired state token`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -961,7 +961,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.STATE_EXPIRED)
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -977,7 +977,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     // Session
     @Test fun `login flow needs session token`() = runTest {
@@ -1013,7 +1013,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.SESSION_TOKEN_MISSING)
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -1029,7 +1029,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     @Test fun `login flow needs valid session token`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -1065,7 +1065,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         mockOAuth2Server.verifyRequests()
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -1081,7 +1081,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     @Test fun `login flow needs unexpired session token`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -1119,7 +1119,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         mockOAuth2Server.verifyRequests()
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -1135,7 +1135,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     // Claims
     @Test fun `login flow needs sub`() = runTest {
@@ -1173,7 +1173,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         mockOAuth2Server.verifyRequests()
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -1189,7 +1189,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     @Test fun `login flow needs email`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -1226,7 +1226,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         mockOAuth2Server.verifyRequests()
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -1242,7 +1242,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     @Test fun `login flow needs username`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -1279,7 +1279,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         mockOAuth2Server.verifyRequests()
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -1295,7 +1295,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     // Login
     @Test fun `login flow throws when already authenticated with password`() = runTest {
@@ -1336,7 +1336,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(2, userService.findAll().getOrThrow().toList().size)
 
         val user = userService.findByEmail(oauth.email).getOrThrow()
-        assertEquals(oauth.info.id, user.id.getOrThrow())
+        assertEquals(oauth.id, user.id.getOrThrow())
         assertEquals(2, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -1352,7 +1352,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(oauth.info.id.getOrThrow(), oauth.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(oauth.id, oauth.sessionId) }
     }
     @Test fun `login flow throws when already authenticated with different oauth2`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -1391,7 +1391,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(2, userService.findAll().getOrThrow().toList().size)
 
         val user = userService.findByEmail(oauth.email).getOrThrow()
-        assertEquals(oauth.info.id, user.id.getOrThrow())
+        assertEquals(oauth.id, user.id.getOrThrow())
         assertEquals(2, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -1407,7 +1407,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(oauth.info.id.getOrThrow(), oauth.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(oauth.id, oauth.sessionId) }
     }
     @Test fun `login flow throws when already authenticated with different oauth2 provider`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -1446,7 +1446,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(2, userService.findAll().getOrThrow().toList().size)
 
         val user = userService.findByEmail(oauth.email).getOrThrow()
-        assertEquals(oauth.info.id, user.id.getOrThrow())
+        assertEquals(oauth.id, user.id.getOrThrow())
         assertEquals(2, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -1462,7 +1462,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(oauth.info.id.getOrThrow(), oauth.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(oauth.id, oauth.sessionId) }
     }
 
     // CONNECTION
@@ -1485,7 +1485,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os")).getOrThrow()
         val providerConnectionToken = oAuth2ProviderConnectionTokenService
-            .create(registeredUser.info.id.getOrThrow(), registeredUser.sessionId, "github").getOrThrow()
+            .create(registeredUser.id, registeredUser.sessionId, "github").getOrThrow()
 
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
         val res = webTestClient.get().uri(redirectUri)
@@ -1504,7 +1504,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(successRedirectUri, res.responseHeaders.location?.toString())
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(registeredUser.email, user.sensitive.email)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
@@ -1534,7 +1534,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         val principalId = "12345"
         val registeredUser = registerOAuth2(provider = "another", principalId = principalId)
         val providerConnectionToken = oAuth2ProviderConnectionTokenService
-            .create(registeredUser.info.id.getOrThrow(), registeredUser.sessionId, "github")
+            .create(registeredUser.id, registeredUser.sessionId, "github")
             .getOrThrow()
         val (_, sessionCookie) = webTestClient.get()
             .uri("$authorizationPath?redirect_uri=$successRedirectUri")
@@ -1563,7 +1563,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.AUTHENTICATION_FAILED)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -1575,7 +1575,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     @Test fun `connection flow needs valid state token`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -1583,7 +1583,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         val principalId = "12345"
         val registeredUser = registerOAuth2(provider = "another", principalId = principalId)
         val providerConnectionToken = oAuth2ProviderConnectionTokenService
-            .create(registeredUser.info.id.getOrThrow(), registeredUser.sessionId, "github")
+            .create(registeredUser.id, registeredUser.sessionId, "github")
             .getOrThrow()
         val (_, sessionCookie) = webTestClient.get()
             .uri("$authorizationPath?redirect_uri=$successRedirectUri")
@@ -1612,7 +1612,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.AUTHENTICATION_FAILED)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -1624,7 +1624,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     @Test fun `connection flow needs unexpired state token`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -1632,7 +1632,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         val principalId = "12345"
         val registeredUser = registerOAuth2(provider = "another", principalId = principalId)
         val providerConnectionToken = oAuth2ProviderConnectionTokenService
-            .create(registeredUser.info.id.getOrThrow(), registeredUser.sessionId, "github")
+            .create(registeredUser.id, registeredUser.sessionId, "github")
             .getOrThrow()
         val (state, sessionCookie) = webTestClient.get()
             .uri("$authorizationPath?redirect_uri=$successRedirectUri")
@@ -1667,7 +1667,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         mockOAuth2Server.verifyRequests()
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -1679,7 +1679,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     // SessionToken
     @Test fun `connection flow needs session token`() = runTest {
@@ -1699,7 +1699,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .extractStateAndSession()
 
         val providerConnectionToken = oAuth2ProviderConnectionTokenService
-            .create(registeredUser.info.id.getOrThrow(), registeredUser.sessionId, "github")
+            .create(registeredUser.id, registeredUser.sessionId, "github")
             .getOrThrow()
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
         val res = webTestClient.get().uri(redirectUri)
@@ -1719,7 +1719,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.SESSION_TOKEN_MISSING)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -1731,7 +1731,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     @Test fun `connection flow needs valid session token`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -1750,7 +1750,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .extractStateAndSession()
 
         val providerConnectionToken = oAuth2ProviderConnectionTokenService
-            .create(registeredUser.info.id.getOrThrow(), registeredUser.sessionId, "github")
+            .create(registeredUser.id, registeredUser.sessionId, "github")
             .getOrThrow()
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
         val res = webTestClient.get().uri(redirectUri)
@@ -1771,7 +1771,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.INVALID_SESSION_TOKEN)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -1783,7 +1783,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     @Test fun `connection flow needs unexpired session token`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -1803,7 +1803,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os"), Instant.ofEpochSecond(0)).getOrThrow()
         val providerConnectionToken = oAuth2ProviderConnectionTokenService
-            .create(registeredUser.info.id.getOrThrow(), registeredUser.sessionId, "github")
+            .create(registeredUser.id, registeredUser.sessionId, "github")
             .getOrThrow()
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
         val res = webTestClient.get().uri(redirectUri)
@@ -1824,7 +1824,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.SESSION_TOKEN_EXPIRED)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -1836,7 +1836,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     // AccessToken
     @Test fun `connection flow needs access token`() = runTest {
@@ -1857,7 +1857,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os")).getOrThrow()
         val providerConnectionToken = oAuth2ProviderConnectionTokenService
-            .create(registeredUser.info.id.getOrThrow(), registeredUser.sessionId, "github")
+            .create(registeredUser.id, registeredUser.sessionId, "github")
             .getOrThrow()
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
         val res = webTestClient.get().uri(redirectUri)
@@ -1877,7 +1877,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.ACCESS_TOKEN_MISSING)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -1889,7 +1889,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     @Test fun `connection flow needs valid access token`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -1909,7 +1909,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os")).getOrThrow()
         val providerConnectionToken = oAuth2ProviderConnectionTokenService
-            .create(registeredUser.info.id.getOrThrow(), registeredUser.sessionId, "github")
+            .create(registeredUser.id, registeredUser.sessionId, "github")
             .getOrThrow()
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
         val res = webTestClient.get().uri(redirectUri)
@@ -1930,7 +1930,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.INVALID_ACCESS_TOKEN)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -1942,7 +1942,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     @Test fun `connection flow needs unexpired access token`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -1962,7 +1962,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os")).getOrThrow()
         val providerConnectionToken = oAuth2ProviderConnectionTokenService
-            .create(registeredUser.info.id.getOrThrow(), registeredUser.sessionId, "github")
+            .create(registeredUser.id, registeredUser.sessionId, "github")
             .getOrThrow()
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
         val res = webTestClient.get().uri(redirectUri)
@@ -1983,7 +1983,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.ACCESS_TOKEN_EXPIRED)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -1995,7 +1995,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     // StepUpToken
     @Test fun `connection flow needs stepUp token`() = runTest {
@@ -2016,7 +2016,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os")).getOrThrow()
         val providerConnectionToken = oAuth2ProviderConnectionTokenService
-            .create(registeredUser.info.id.getOrThrow(), registeredUser.sessionId, "github")
+            .create(registeredUser.id, registeredUser.sessionId, "github")
             .getOrThrow()
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
         val res = webTestClient.get().uri(redirectUri)
@@ -2036,7 +2036,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.STEP_UP_MISSING)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -2048,7 +2048,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     @Test fun `connection flow needs valid stepUp token`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -2068,7 +2068,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os")).getOrThrow()
         val providerConnectionToken = oAuth2ProviderConnectionTokenService
-            .create(registeredUser.info.id.getOrThrow(), registeredUser.sessionId, "github")
+            .create(registeredUser.id, registeredUser.sessionId, "github")
             .getOrThrow()
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
         val res = webTestClient.get().uri(redirectUri)
@@ -2089,7 +2089,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.INVALID_STEP_UP_TOKEN)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -2101,7 +2101,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     @Test fun `connection flow needs unexpired stepUp token`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -2121,14 +2121,14 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os")).getOrThrow()
         val providerConnectionToken = oAuth2ProviderConnectionTokenService
-            .create(registeredUser.info.id.getOrThrow(), registeredUser.sessionId, "github")
+            .create(registeredUser.id, registeredUser.sessionId, "github")
             .getOrThrow()
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
         val res = webTestClient.get().uri(redirectUri)
             .cookie("SESSION", sessionCookie)
             .accessTokenCookie(registeredUser.accessToken)
             .oauth2ConnectionCookie(providerConnectionToken)
-            .stepUpTokenCookie(stepUpTokenService.create(registeredUser.info.id.getOrThrow(), registeredUser.sessionId, Instant.ofEpochSecond(0)).getOrThrow())
+            .stepUpTokenCookie(stepUpTokenService.create(registeredUser.id, registeredUser.sessionId, Instant.ofEpochSecond(0)).getOrThrow())
             .sessionTokenCookie(sessionToken)
             .exchange()
             .expectStatus().isFound
@@ -2142,7 +2142,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.STEP_UP_TOKEN_EXPIRED)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -2154,7 +2154,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     // OAuth2ProviderConnectionToken
     @Test fun `connection flow needs connection token`() = runTest {
@@ -2192,7 +2192,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.USER_ALREADY_AUTHENTICATED)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -2204,7 +2204,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     @Test fun `connection flow needs valid connection token`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -2243,7 +2243,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.INVALID_CONNECTION_TOKEN)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -2255,7 +2255,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     @Test fun `connection flow needs unexpired connection token`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -2275,7 +2275,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os")).getOrThrow()
         val providerConnectionToken = oAuth2ProviderConnectionTokenService
-            .create(registeredUser.info.id.getOrThrow(), registeredUser.sessionId, "github", Instant.ofEpochSecond(0))
+            .create(registeredUser.id, registeredUser.sessionId, "github", Instant.ofEpochSecond(0))
             .getOrThrow()
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
         val res = webTestClient.get().uri(redirectUri)
@@ -2296,7 +2296,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.CONNECTION_TOKEN_EXPIRED)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -2308,7 +2308,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     @Test fun `connection flow needs connection token for same provider`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -2328,7 +2328,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os")).getOrThrow()
         val providerConnectionToken = oAuth2ProviderConnectionTokenService
-            .create(registeredUser.info.id.getOrThrow(), registeredUser.sessionId, "not-github")
+            .create(registeredUser.id, registeredUser.sessionId, "not-github")
             .getOrThrow()
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
         val res = webTestClient.get().uri(redirectUri)
@@ -2349,7 +2349,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.CONNECTION_TOKEN_PROVIDER_MISMATCH)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -2361,7 +2361,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     // Claims
     @Test fun `connection flow needs sub`() = runTest {
@@ -2382,7 +2382,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os")).getOrThrow()
         val providerConnectionToken = oAuth2ProviderConnectionTokenService
-            .create(registeredUser.info.id.getOrThrow(), registeredUser.sessionId, "github")
+            .create(registeredUser.id, registeredUser.sessionId, "github")
             .getOrThrow()
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
         val res = webTestClient.get().uri(redirectUri)
@@ -2403,7 +2403,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.SUB_CLAIM_MISSING)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -2415,7 +2415,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     @Test fun `connection flow needs email`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -2435,7 +2435,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os")).getOrThrow()
         val providerConnectionToken = oAuth2ProviderConnectionTokenService
-            .create(registeredUser.info.id.getOrThrow(), registeredUser.sessionId, "github")
+            .create(registeredUser.id, registeredUser.sessionId, "github")
             .getOrThrow()
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
         val res = webTestClient.get().uri(redirectUri)
@@ -2456,7 +2456,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.EMAIL_CLAIM_MISSING)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -2468,7 +2468,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     @Test fun `connection flow needs username`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -2488,7 +2488,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os")).getOrThrow()
         val providerConnectionToken = oAuth2ProviderConnectionTokenService
-            .create(registeredUser.info.id.getOrThrow(), registeredUser.sessionId, "github")
+            .create(registeredUser.id, registeredUser.sessionId, "github")
             .getOrThrow()
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
         val res = webTestClient.get().uri(redirectUri)
@@ -2509,7 +2509,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.AUTHENTICATION_FAILED)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -2521,7 +2521,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
 
     // STEP-UP
@@ -2562,7 +2562,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(successRedirectUri, res.responseHeaders.location?.toString())
 
         val user = userService.findByEmail(info.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(info.email, user.sensitive.email)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
@@ -2621,7 +2621,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.AUTHENTICATION_FAILED)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -2637,7 +2637,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     @Test fun `stepUp flow needs valid state token`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -2672,7 +2672,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.AUTHENTICATION_FAILED)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -2688,7 +2688,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     @Test fun `stepUp flow needs unexpired state token`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -2730,7 +2730,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.STATE_EXPIRED)
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -2746,7 +2746,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     // Session
     @Test fun `stepUp flow needs session token`() = runTest {
@@ -2783,7 +2783,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.SESSION_TOKEN_MISSING)
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -2799,7 +2799,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     @Test fun `stepUp flow needs valid session token`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -2836,7 +2836,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         mockOAuth2Server.verifyRequests()
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -2852,7 +2852,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     @Test fun `stepUp flow needs unexpired session token`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -2891,7 +2891,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         mockOAuth2Server.verifyRequests()
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -2907,7 +2907,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     // AccessToken
     @Test fun `stepUp flow needs access token`() = runTest {
@@ -2945,7 +2945,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.ACCESS_TOKEN_MISSING)
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -2961,7 +2961,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     @Test fun `stepUp flow needs valid access token`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -2999,7 +2999,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.INVALID_ACCESS_TOKEN)
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -3015,7 +3015,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     @Test fun `stepUp flow needs unexpired access token`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -3053,7 +3053,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.ACCESS_TOKEN_EXPIRED)
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -3069,7 +3069,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     // Claims
     @Test fun `stepUp flow needs sub`() = runTest {
@@ -3108,7 +3108,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         mockOAuth2Server.verifyRequests()
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -3124,7 +3124,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     @Test fun `stepUp flow needs email`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -3162,7 +3162,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         mockOAuth2Server.verifyRequests()
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -3178,7 +3178,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     @Test fun `stepUp flow needs username`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -3216,7 +3216,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         mockOAuth2Server.verifyRequests()
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -3232,7 +3232,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     // Authentication
     @Test fun `stepUp flow throws when already authenticated with password`() = runTest {
@@ -3273,7 +3273,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(2, userService.findAll().getOrThrow().toList().size)
 
         val user = userService.findByEmail(oauth.email).getOrThrow()
-        assertEquals(oauth.info.id, user.id.getOrThrow())
+        assertEquals(oauth.id, user.id.getOrThrow())
         assertEquals(2, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -3289,7 +3289,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(oauth.info.id.getOrThrow(), oauth.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(oauth.id, oauth.sessionId) }
     }
     @Test fun `stepUp flow throws when already authenticated with different oauth2`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -3328,7 +3328,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(2, userService.findAll().getOrThrow().toList().size)
 
         val user = userService.findByEmail(oauth.email).getOrThrow()
-        assertEquals(oauth.info.id, user.id.getOrThrow())
+        assertEquals(oauth.id, user.id.getOrThrow())
         assertEquals(2, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -3344,7 +3344,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(oauth.info.id.getOrThrow(), oauth.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(oauth.id, oauth.sessionId) }
     }
     @Test fun `stepUp flow throws when already authenticated with different oauth2 provider`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -3383,7 +3383,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(2, userService.findAll().getOrThrow().toList().size)
 
         val user = userService.findByEmail(oauth.email).getOrThrow()
-        assertEquals(oauth.info.id, user.id.getOrThrow())
+        assertEquals(oauth.id, user.id.getOrThrow())
         assertEquals(2, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -3399,7 +3399,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(oauth.info.id.getOrThrow(), oauth.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(oauth.id, oauth.sessionId) }
     }
 
     // CONVERTING GUESTS TO USER ACCOUNTS
@@ -3421,7 +3421,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os")).getOrThrow()
         val providerConnectionToken = oAuth2ProviderConnectionTokenService
-            .create(registeredUser.info.id.getOrThrow(), registeredUser.sessionId, "github")
+            .create(registeredUser.id, registeredUser.sessionId, "github")
             .getOrThrow()
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
         val res = webTestClient.get().uri(redirectUri)
@@ -3439,8 +3439,8 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         assertEquals(successRedirectUri, res.responseHeaders.location?.toString())
 
-        val user = userService.findById(registeredUser.info.id.getOrThrow()).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        val user = userService.findById(registeredUser.id).getOrThrow()
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(info.email!!, user.sensitive.email)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
@@ -3469,7 +3469,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val registeredUser = createGuest()
         val providerConnectionToken = oAuth2ProviderConnectionTokenService
-            .create(registeredUser.info.id.getOrThrow(), registeredUser.sessionId, "github")
+            .create(registeredUser.id, registeredUser.sessionId, "github")
             .getOrThrow()
         val (_, sessionCookie) = webTestClient.get()
             .uri("$authorizationPath?redirect_uri=$successRedirectUri")
@@ -3497,8 +3497,8 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .location
             .assertErrorCode(OAuth2ErrorCode.AUTHENTICATION_FAILED)
 
-        val user = principalService.findById(registeredUser.info.id.getOrThrow()).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        val user = principalService.findById(registeredUser.id).getOrThrow()
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.Guest.GUEST), user.roles)
         assertThat { user is Guest }
@@ -3506,14 +3506,14 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     @Test fun `concerting guest to user flow needs valid state token`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
 
         val registeredUser = createGuest()
         val providerConnectionToken = oAuth2ProviderConnectionTokenService
-            .create(registeredUser.info.id.getOrThrow(), registeredUser.sessionId, "github")
+            .create(registeredUser.id, registeredUser.sessionId, "github")
             .getOrThrow()
         val (_, sessionCookie) = webTestClient.get()
             .uri("$authorizationPath?redirect_uri=$successRedirectUri")
@@ -3541,8 +3541,8 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .location
             .assertErrorCode(OAuth2ErrorCode.AUTHENTICATION_FAILED)
 
-        val user = principalService.findById(registeredUser.info.id.getOrThrow()).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        val user = principalService.findById(registeredUser.id).getOrThrow()
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.Guest.GUEST), user.roles)
         assertThat { user is Guest }
@@ -3550,14 +3550,14 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     @Test fun `concerting guest to user flow needs unexpired state token`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
 
         val registeredUser = createGuest()
         val providerConnectionToken = oAuth2ProviderConnectionTokenService
-            .create(registeredUser.info.id.getOrThrow(), registeredUser.sessionId, "github")
+            .create(registeredUser.id, registeredUser.sessionId, "github")
             .getOrThrow()
         val (state, sessionCookie) = webTestClient.get()
             .uri("$authorizationPath?redirect_uri=$successRedirectUri")
@@ -3591,8 +3591,8 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         mockOAuth2Server.verifyRequests()
 
-        val user = principalService.findById(registeredUser.info.id.getOrThrow()).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        val user = principalService.findById(registeredUser.id).getOrThrow()
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, principalService.findAll().getOrThrow().toList().size)
 
         assertEquals(mutableSetOf(Role.Guest.GUEST), user.roles)
@@ -3601,7 +3601,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     // SessionToken
     @Test fun `concerting guest to user flow needs session token`() = runTest {
@@ -3620,7 +3620,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .extractStateAndSession()
 
         val providerConnectionToken = oAuth2ProviderConnectionTokenService
-            .create(registeredUser.info.id.getOrThrow(), registeredUser.sessionId, "github")
+            .create(registeredUser.id, registeredUser.sessionId, "github")
             .getOrThrow()
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
         val res = webTestClient.get().uri(redirectUri)
@@ -3639,8 +3639,8 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .location
             .assertErrorCode(OAuth2ErrorCode.SESSION_TOKEN_MISSING)
 
-        val user = principalService.findById(registeredUser.info.id.getOrThrow()).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        val user = principalService.findById(registeredUser.id).getOrThrow()
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.Guest.GUEST), user.roles)
         assertThat { user is Guest }
@@ -3648,7 +3648,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     @Test fun `concerting guest to user flow needs valid session token`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -3666,7 +3666,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .extractStateAndSession()
 
         val providerConnectionToken = oAuth2ProviderConnectionTokenService
-            .create(registeredUser.info.id.getOrThrow(), registeredUser.sessionId, "github")
+            .create(registeredUser.id, registeredUser.sessionId, "github")
             .getOrThrow()
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
         val res = webTestClient.get().uri(redirectUri)
@@ -3686,8 +3686,8 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .location
             .assertErrorCode(OAuth2ErrorCode.INVALID_SESSION_TOKEN)
 
-        val user = principalService.findById(registeredUser.info.id.getOrThrow()).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        val user = principalService.findById(registeredUser.id).getOrThrow()
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.Guest.GUEST), user.roles)
         assertThat { user is Guest }
@@ -3695,7 +3695,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     @Test fun `concerting guest to user flow needs unexpired session token`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -3714,7 +3714,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os"), Instant.ofEpochSecond(0)).getOrThrow()
         val providerConnectionToken = oAuth2ProviderConnectionTokenService
-            .create(registeredUser.info.id.getOrThrow(), registeredUser.sessionId, "github")
+            .create(registeredUser.id, registeredUser.sessionId, "github")
             .getOrThrow()
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
         val res = webTestClient.get().uri(redirectUri)
@@ -3734,8 +3734,8 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .location
             .assertErrorCode(OAuth2ErrorCode.SESSION_TOKEN_EXPIRED)
 
-        val user = principalService.findById(registeredUser.info.id.getOrThrow()).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        val user = principalService.findById(registeredUser.id).getOrThrow()
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.Guest.GUEST), user.roles)
         assertThat { user is Guest }
@@ -3743,7 +3743,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     // AccessToken
     @Test fun `concerting guest to user flow needs access token`() = runTest {
@@ -3763,7 +3763,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os")).getOrThrow()
         val providerConnectionToken = oAuth2ProviderConnectionTokenService
-            .create(registeredUser.info.id.getOrThrow(), registeredUser.sessionId, "github")
+            .create(registeredUser.id, registeredUser.sessionId, "github")
             .getOrThrow()
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
         val res = webTestClient.get().uri(redirectUri)
@@ -3782,8 +3782,8 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .location
             .assertErrorCode(OAuth2ErrorCode.ACCESS_TOKEN_MISSING)
 
-        val user = principalService.findById(registeredUser.info.id.getOrThrow()).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        val user = principalService.findById(registeredUser.id).getOrThrow()
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.Guest.GUEST), user.roles)
         assertThat { user is Guest }
@@ -3791,7 +3791,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     @Test fun `concerting guest to user flow needs valid access token`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -3810,7 +3810,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os")).getOrThrow()
         val providerConnectionToken = oAuth2ProviderConnectionTokenService
-            .create(registeredUser.info.id.getOrThrow(), registeredUser.sessionId, "github")
+            .create(registeredUser.id, registeredUser.sessionId, "github")
             .getOrThrow()
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
         val res = webTestClient.get().uri(redirectUri)
@@ -3830,8 +3830,8 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .location
             .assertErrorCode(OAuth2ErrorCode.INVALID_ACCESS_TOKEN)
 
-        val user = principalService.findById(registeredUser.info.id.getOrThrow()).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        val user = principalService.findById(registeredUser.id).getOrThrow()
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.Guest.GUEST), user.roles)
         assertThat { user is Guest }
@@ -3839,7 +3839,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     @Test fun `concerting guest to user flow needs unexpired access token`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -3858,7 +3858,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os")).getOrThrow()
         val providerConnectionToken = oAuth2ProviderConnectionTokenService
-            .create(registeredUser.info.id.getOrThrow(), registeredUser.sessionId, "github")
+            .create(registeredUser.id, registeredUser.sessionId, "github")
             .getOrThrow()
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
         val res = webTestClient.get().uri(redirectUri)
@@ -3878,8 +3878,8 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .location
             .assertErrorCode(OAuth2ErrorCode.ACCESS_TOKEN_EXPIRED)
 
-        val user = principalService.findById(registeredUser.info.id.getOrThrow()).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        val user = principalService.findById(registeredUser.id).getOrThrow()
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.Guest.GUEST), user.roles)
         assertThat { user is Guest }
@@ -3887,7 +3887,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     // StepUpToken
     @Test fun `concerting guest to user flow needs stepUp token`() = runTest {
@@ -3907,7 +3907,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os")).getOrThrow()
         val providerConnectionToken = oAuth2ProviderConnectionTokenService
-            .create(registeredUser.info.id.getOrThrow(), registeredUser.sessionId, "github")
+            .create(registeredUser.id, registeredUser.sessionId, "github")
             .getOrThrow()
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
         val res = webTestClient.get().uri(redirectUri)
@@ -3926,8 +3926,8 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .location
             .assertErrorCode(OAuth2ErrorCode.STEP_UP_MISSING)
 
-        val user = principalService.findById(registeredUser.info.id.getOrThrow()).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        val user = principalService.findById(registeredUser.id).getOrThrow()
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.Guest.GUEST), user.roles)
         assertThat { user is Guest }
@@ -3935,7 +3935,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     @Test fun `concerting guest to user flow needs valid stepUp token`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -3954,7 +3954,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os")).getOrThrow()
         val providerConnectionToken = oAuth2ProviderConnectionTokenService
-            .create(registeredUser.info.id.getOrThrow(), registeredUser.sessionId, "github")
+            .create(registeredUser.id, registeredUser.sessionId, "github")
             .getOrThrow()
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
         val res = webTestClient.get().uri(redirectUri)
@@ -3974,8 +3974,8 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .location
             .assertErrorCode(OAuth2ErrorCode.INVALID_STEP_UP_TOKEN)
 
-        val user = principalService.findById(registeredUser.info.id.getOrThrow()).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        val user = principalService.findById(registeredUser.id).getOrThrow()
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.Guest.GUEST), user.roles)
         assertThat { user is Guest }
@@ -3983,7 +3983,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     @Test fun `concerting guest to user flow needs unexpired stepUp token`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -4002,14 +4002,14 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os")).getOrThrow()
         val providerConnectionToken = oAuth2ProviderConnectionTokenService
-            .create(registeredUser.info.id.getOrThrow(), registeredUser.sessionId, "github")
+            .create(registeredUser.id, registeredUser.sessionId, "github")
             .getOrThrow()
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
         val res = webTestClient.get().uri(redirectUri)
             .cookie("SESSION", sessionCookie)
             .accessTokenCookie(registeredUser.accessToken)
             .oauth2ConnectionCookie(providerConnectionToken)
-            .stepUpTokenCookie(stepUpTokenService.create(registeredUser.info.id.getOrThrow(), registeredUser.sessionId, Instant.ofEpochSecond(0)).getOrThrow())
+            .stepUpTokenCookie(stepUpTokenService.create(registeredUser.id, registeredUser.sessionId, Instant.ofEpochSecond(0)).getOrThrow())
             .sessionTokenCookie(sessionToken)
             .exchange()
             .expectStatus().isFound
@@ -4022,8 +4022,8 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .location
             .assertErrorCode(OAuth2ErrorCode.STEP_UP_TOKEN_EXPIRED)
 
-        val user = principalService.findById(registeredUser.info.id.getOrThrow()).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        val user = principalService.findById(registeredUser.id).getOrThrow()
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.Guest.GUEST), user.roles)
         assertThat { user is Guest }
@@ -4031,7 +4031,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     // OAuth2ProviderConnectionToken
     @Test fun `concerting guest to user flow needs connection token`() = runTest {
@@ -4068,8 +4068,8 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .location
             .assertErrorCode(OAuth2ErrorCode.USER_ALREADY_AUTHENTICATED)
 
-        val user = principalService.findById(registeredUser.info.id.getOrThrow()).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        val user = principalService.findById(registeredUser.id).getOrThrow()
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.Guest.GUEST), user.roles)
         assertThat { user is Guest }
@@ -4077,7 +4077,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     @Test fun `concerting guest to user flow needs valid connection token`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -4114,8 +4114,8 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .location
             .assertErrorCode(OAuth2ErrorCode.INVALID_CONNECTION_TOKEN)
 
-        val user = principalService.findById(registeredUser.info.id.getOrThrow()).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        val user = principalService.findById(registeredUser.id).getOrThrow()
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.Guest.GUEST), user.roles)
         assertThat { user is Guest }
@@ -4123,7 +4123,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     @Test fun `concerting guest to user flow needs unexpired connection token`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -4142,7 +4142,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os")).getOrThrow()
         val providerConnectionToken = oAuth2ProviderConnectionTokenService
-            .create(registeredUser.info.id.getOrThrow(), registeredUser.sessionId, "github", Instant.ofEpochSecond(0))
+            .create(registeredUser.id, registeredUser.sessionId, "github", Instant.ofEpochSecond(0))
             .getOrThrow()
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
         val res = webTestClient.get().uri(redirectUri)
@@ -4162,8 +4162,8 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .location
             .assertErrorCode(OAuth2ErrorCode.CONNECTION_TOKEN_EXPIRED)
 
-        val user = principalService.findById(registeredUser.info.id.getOrThrow()).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        val user = principalService.findById(registeredUser.id).getOrThrow()
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.Guest.GUEST), user.roles)
         assertThat { user is Guest }
@@ -4171,7 +4171,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     @Test fun `concerting guest to user flow needs connection token for same provider`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -4190,7 +4190,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os")).getOrThrow()
         val providerConnectionToken = oAuth2ProviderConnectionTokenService
-            .create(registeredUser.info.id.getOrThrow(), registeredUser.sessionId, "not-github")
+            .create(registeredUser.id, registeredUser.sessionId, "not-github")
             .getOrThrow()
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
         val res = webTestClient.get().uri(redirectUri)
@@ -4210,8 +4210,8 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .location
             .assertErrorCode(OAuth2ErrorCode.CONNECTION_TOKEN_PROVIDER_MISMATCH)
 
-        val user = principalService.findById(registeredUser.info.id.getOrThrow()).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        val user = principalService.findById(registeredUser.id).getOrThrow()
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.Guest.GUEST), user.roles)
         assertThat { user is Guest }
@@ -4219,7 +4219,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     // Claims
     @Test fun `concerting guest to user flow needs sub`() = runTest {
@@ -4239,7 +4239,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os")).getOrThrow()
         val providerConnectionToken = oAuth2ProviderConnectionTokenService
-            .create(registeredUser.info.id.getOrThrow(), registeredUser.sessionId, "github")
+            .create(registeredUser.id, registeredUser.sessionId, "github")
             .getOrThrow()
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
         val res = webTestClient.get().uri(redirectUri)
@@ -4259,8 +4259,8 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .location
             .assertErrorCode(OAuth2ErrorCode.SUB_CLAIM_MISSING)
 
-        val user = principalService.findById(registeredUser.info.id.getOrThrow()).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        val user = principalService.findById(registeredUser.id).getOrThrow()
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.Guest.GUEST), user.roles)
         assertThat { user is Guest }
@@ -4268,7 +4268,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     @Test fun `concerting guest to user flow needs email`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -4287,7 +4287,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os")).getOrThrow()
         val providerConnectionToken = oAuth2ProviderConnectionTokenService
-            .create(registeredUser.info.id.getOrThrow(), registeredUser.sessionId, "github")
+            .create(registeredUser.id, registeredUser.sessionId, "github")
             .getOrThrow()
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
         val res = webTestClient.get().uri(redirectUri)
@@ -4307,8 +4307,8 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .location
             .assertErrorCode(OAuth2ErrorCode.EMAIL_CLAIM_MISSING)
 
-        val user = principalService.findById(registeredUser.info.id.getOrThrow()).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        val user = principalService.findById(registeredUser.id).getOrThrow()
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.Guest.GUEST), user.roles)
         assertThat { user is Guest }
@@ -4316,7 +4316,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
     @Test fun `concerting guest to user flow needs username`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -4335,7 +4335,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os")).getOrThrow()
         val providerConnectionToken = oAuth2ProviderConnectionTokenService
-            .create(registeredUser.info.id.getOrThrow(), registeredUser.sessionId, "github")
+            .create(registeredUser.id, registeredUser.sessionId, "github")
             .getOrThrow()
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
         val res = webTestClient.get().uri(redirectUri)
@@ -4355,8 +4355,8 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .location
             .assertErrorCode(OAuth2ErrorCode.AUTHENTICATION_FAILED)
 
-        val user = principalService.findById(registeredUser.info.id.getOrThrow()).getOrThrow()
-        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
+        val user = principalService.findById(registeredUser.id).getOrThrow()
+        assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.Guest.GUEST), user.roles)
         assertThat { user is Guest }
@@ -4364,7 +4364,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         requireNotNull(res)
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
-        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.info.id.getOrThrow(), registeredUser.sessionId) }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
 
 }

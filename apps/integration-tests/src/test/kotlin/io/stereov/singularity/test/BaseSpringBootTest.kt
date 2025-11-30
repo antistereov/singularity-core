@@ -232,6 +232,9 @@ class BaseSpringBootTest() {
         private val accessTokenToken: AccessToken
     ) {
 
+        val id: ObjectId
+            get() = info.id.getOrThrow()
+
         val authentication: AuthenticationOutcome.Authenticated
             get() = AuthenticationOutcome.Authenticated(info.id.getOrThrow(),info.roles, info.groups, accessTokenToken)
     }
@@ -365,10 +368,8 @@ class BaseSpringBootTest() {
 
         user = userService.findById(user.id.getOrThrow()).getOrThrow()
         
-        if (roles != listOf(Role.User.USER)) {
-            if (roles.contains(Role.User.ADMIN)) {
-                user.addAdminRole()
-            }
+        if (roles.contains(Role.User.ADMIN)) {
+            user.addAdminRole()
         }
         user.groups.addAll(groups)
         user = userService.save(user).getOrThrow()

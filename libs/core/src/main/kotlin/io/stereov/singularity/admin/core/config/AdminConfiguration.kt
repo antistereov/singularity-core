@@ -11,6 +11,7 @@ import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.principal.core.mapper.PrincipalMapper
+import io.stereov.singularity.principal.core.service.PrincipalService
 import io.stereov.singularity.principal.core.service.UserService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
@@ -35,14 +36,16 @@ class AdminConfiguration {
         userService: UserService,
         authorizationService: AuthorizationService,
         principalMapper: PrincipalMapper,
-        accessTokenCache: AccessTokenCache
+        accessTokenCache: AccessTokenCache,
+        principalService: PrincipalService
     ): AdminController {
         return AdminController(
             adminService,
             accessTokenCache,
             authorizationService,
             userService,
-            principalMapper
+            principalMapper,
+            principalService
         )
     }
 

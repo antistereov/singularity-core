@@ -1,13 +1,14 @@
 package io.stereov.singularity.auth.core.service
 
+import com.github.michaelbull.result.getOrThrow
 import io.mockk.clearMocks
 import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.slot
 import io.stereov.singularity.auth.core.dto.request.RegisterUserRequest
+import io.stereov.singularity.principal.core.model.User
 import io.stereov.singularity.test.BaseSecurityAlertTest
 import io.stereov.singularity.test.config.MockEmailVerificationService
-import io.stereov.singularity.principal.core.model.User
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -51,7 +52,7 @@ class RegistrationAlertIntegrationTest : BaseSecurityAlertTest() {
         coVerify(exactly = 1) { registrationAlertService.send(any(), anyNullable()) }
         coVerify(exactly = 1) { emailVerificationService.startCooldown(any()) }
         assert(userSlot.isCaptured)
-        assertEquals(user.info.id, userSlot.captured.id)
+        assertEquals(user.id, userSlot.captured.id.getOrThrow())
         assert(localeSlot.isNull)
         assertEquals(user.email, emailSlot.captured)
     }

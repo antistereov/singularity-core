@@ -69,7 +69,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
 
         Assertions.assertTrue(body.identityProviders.contains(UserIdentity.PASSWORD_IDENTITY))
 
-        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val updatedUser = userService.findById(user.id).getOrThrow()
 
         Assertions.assertTrue(updatedUser.sensitive.identities.password != null)
         Assertions.assertTrue(hashService.checkBcrypt(req.password, updatedUser.password.getOrThrow()).getOrThrow())
@@ -92,7 +92,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isBadRequest
 
-        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val updatedUser = userService.findById(user.id).getOrThrow()
         Assertions.assertFalse(updatedUser.sensitive.identities.password != null)
         Assertions.assertNull(updatedUser.password.getOrThrow())
     }
@@ -108,7 +108,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isBadRequest
 
-        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val updatedUser = userService.findById(user.id).getOrThrow()
 
         Assertions.assertFalse(updatedUser.sensitive.identities.password != null)
         Assertions.assertNull(updatedUser.password)
@@ -125,7 +125,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isBadRequest
 
-        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val updatedUser = userService.findById(user.id).getOrThrow()
         Assertions.assertFalse(updatedUser.sensitive.identities.password != null)
         Assertions.assertNull(updatedUser.password)
     }
@@ -141,7 +141,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isBadRequest
 
-        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val updatedUser = userService.findById(user.id).getOrThrow()
         Assertions.assertFalse(updatedUser.sensitive.identities.password != null)
         Assertions.assertNull(updatedUser.password)
     }
@@ -157,7 +157,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isBadRequest
 
-        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val updatedUser = userService.findById(user.id).getOrThrow()
         Assertions.assertFalse(updatedUser.sensitive.identities.password != null)
         Assertions.assertNull(updatedUser.password)
     }
@@ -171,7 +171,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isBadRequest
 
-        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val updatedUser = userService.findById(user.id).getOrThrow()
         Assertions.assertFalse(updatedUser.sensitive.identities.password != null)
         Assertions.assertNull(updatedUser.password)
     }
@@ -199,7 +199,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isUnauthorized
 
-        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val updatedUser = userService.findById(user.id).getOrThrow()
 
         Assertions.assertFalse(updatedUser.sensitive.identities.password != null)
         Assertions.assertNull(updatedUser.password)
@@ -263,7 +263,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
 
         Assertions.assertEquals(listOf(UserIdentity.PASSWORD_IDENTITY), body.identityProviders)
 
-        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val updatedUser = userService.findById(user.id).getOrThrow()
         Assertions.assertTrue(updatedUser.sensitive.identities.password != null)
         Assertions.assertTrue(hashService.checkBcrypt(user.password!!, updatedUser.password.getOrThrow()).getOrThrow())
     }
@@ -279,7 +279,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isNotFound
 
-        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val updatedUser = userService.findById(user.id).getOrThrow()
         Assertions.assertEquals(2, updatedUser.sensitive.identities.providers.size)
         Assertions.assertTrue(updatedUser.sensitive.identities.password != null)
         Assertions.assertTrue(updatedUser.sensitive.identities.providers.contains("github"))
@@ -307,7 +307,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isUnauthorized
 
-        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val updatedUser = userService.findById(user.id).getOrThrow()
         Assertions.assertEquals(2, updatedUser.sensitive.identities.providers.size)
         Assertions.assertTrue(updatedUser.sensitive.identities.password != null)
         Assertions.assertTrue(updatedUser.sensitive.identities.providers.contains("github"))
@@ -325,7 +325,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isBadRequest
 
-        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val updatedUser = userService.findById(user.id).getOrThrow()
         Assertions.assertEquals(2, updatedUser.sensitive.identities.providers.size)
         Assertions.assertTrue(updatedUser.sensitive.identities.password != null)
         Assertions.assertTrue(updatedUser.sensitive.identities.providers.contains("github"))
@@ -341,7 +341,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isBadRequest
 
-        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val updatedUser = userService.findById(user.id).getOrThrow()
         Assertions.assertFalse(updatedUser.sensitive.identities.password != null)
         Assertions.assertNull(updatedUser.password)
     }

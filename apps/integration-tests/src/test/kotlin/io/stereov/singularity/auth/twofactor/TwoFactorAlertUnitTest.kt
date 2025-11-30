@@ -1,8 +1,10 @@
 package io.stereov.singularity.auth.twofactor
 
+import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.getOrThrow
-import io.mockk.coJustRun
+import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.mockk
 import io.mockk.slot
 import io.stereov.singularity.auth.core.model.SecurityAlertType
 import io.stereov.singularity.auth.twofactor.dto.request.EnableEmailTwoFactorMethodRequest
@@ -11,6 +13,7 @@ import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
 import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.principal.core.model.User
 import io.stereov.singularity.test.BaseSecurityAlertTest
+import jakarta.mail.internet.MimeMessage
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -29,13 +32,13 @@ class TwoFactorAlertUnitTest : BaseSecurityAlertTest() {
         val providerKeySlot = slot<String?>()
         val twoFactorMethodSlot = slot<TwoFactorMethod?>()
 
-        coJustRun { securityAlertService.send(
+        coEvery { securityAlertService.send(
             capture(userSlot),
             captureNullable(localeSlot),
             capture(alertTypeSlot),
             captureNullable(providerKeySlot),
             captureNullable(twoFactorMethodSlot),
-        ) }
+        ) } returns Ok(mockk<MimeMessage>())
 
         webTestClient.post()
             .uri("/api/auth/2fa/email/enable")
@@ -47,7 +50,7 @@ class TwoFactorAlertUnitTest : BaseSecurityAlertTest() {
 
         coVerify(exactly = 1) { securityAlertService.send(any(), anyNullable(), any(), anyNullable(), any()) }
         assert(userSlot.isCaptured)
-        assertEquals(user.info.id, userSlot.captured.id)
+        assertEquals(user.id, userSlot.captured.id.getOrThrow())
         assert(localeSlot.isNull)
         assertEquals(SecurityAlertType.TWO_FACTOR_ADDED, alertTypeSlot.captured)
         assertEquals(TwoFactorMethod.EMAIL, twoFactorMethodSlot.captured)
@@ -63,13 +66,13 @@ class TwoFactorAlertUnitTest : BaseSecurityAlertTest() {
         val providerKeySlot = slot<String?>()
         val twoFactorMethodSlot = slot<TwoFactorMethod?>()
 
-        coJustRun { securityAlertService.send(
+        coEvery { securityAlertService.send(
             capture(userSlot),
             captureNullable(localeSlot),
             capture(alertTypeSlot),
             captureNullable(providerKeySlot),
             captureNullable(twoFactorMethodSlot),
-        ) }
+        ) } returns Ok(mockk<MimeMessage>())
 
         webTestClient.post()
             .uri("/api/auth/2fa/email/enable?locale=en")
@@ -81,7 +84,7 @@ class TwoFactorAlertUnitTest : BaseSecurityAlertTest() {
 
         coVerify(exactly = 1) { securityAlertService.send(any(), anyNullable(), any(), anyNullable(), any()) }
         assert(userSlot.isCaptured)
-        assertEquals(user.info.id, userSlot.captured.id)
+        assertEquals(user.id, userSlot.captured.id.getOrThrow())
         assertEquals(Locale.ENGLISH, localeSlot.captured)
         assertEquals(SecurityAlertType.TWO_FACTOR_ADDED, alertTypeSlot.captured)
         assertEquals(TwoFactorMethod.EMAIL, twoFactorMethodSlot.captured)
@@ -99,13 +102,13 @@ class TwoFactorAlertUnitTest : BaseSecurityAlertTest() {
         val providerKeySlot = slot<String?>()
         val twoFactorMethodSlot = slot<TwoFactorMethod?>()
 
-        coJustRun { securityAlertService.send(
+        coEvery { securityAlertService.send(
             capture(userSlot),
             captureNullable(localeSlot),
             capture(alertTypeSlot),
             captureNullable(providerKeySlot),
             captureNullable(twoFactorMethodSlot),
-        ) }
+        ) } returns Ok(mockk<MimeMessage>())
 
         webTestClient.delete()
             .uri("/api/auth/2fa/email")
@@ -116,7 +119,7 @@ class TwoFactorAlertUnitTest : BaseSecurityAlertTest() {
 
         coVerify(exactly = 1) { securityAlertService.send(any(), anyNullable(), any(), anyNullable(), any()) }
         assert(userSlot.isCaptured)
-        assertEquals(user.info.id, userSlot.captured.id)
+        assertEquals(user.id, userSlot.captured.id.getOrThrow())
         assert(localeSlot.isNull)
         assertEquals(SecurityAlertType.TWO_FACTOR_REMOVED, alertTypeSlot.captured)
         assertEquals(TwoFactorMethod.EMAIL, twoFactorMethodSlot.captured)
@@ -133,13 +136,13 @@ class TwoFactorAlertUnitTest : BaseSecurityAlertTest() {
         val providerKeySlot = slot<String?>()
         val twoFactorMethodSlot = slot<TwoFactorMethod?>()
 
-        coJustRun { securityAlertService.send(
+        coEvery { securityAlertService.send(
             capture(userSlot),
             captureNullable(localeSlot),
             capture(alertTypeSlot),
             captureNullable(providerKeySlot),
             captureNullable(twoFactorMethodSlot),
-        ) }
+        ) } returns Ok(mockk<MimeMessage>())
 
         webTestClient.delete()
             .uri("/api/auth/2fa/email?locale=en")
@@ -150,7 +153,7 @@ class TwoFactorAlertUnitTest : BaseSecurityAlertTest() {
 
         coVerify(exactly = 1) { securityAlertService.send(any(), anyNullable(), any(), anyNullable(), any()) }
         assert(userSlot.isCaptured)
-        assertEquals(user.info.id, userSlot.captured.id)
+        assertEquals(user.id, userSlot.captured.id.getOrThrow())
         assertEquals(Locale.ENGLISH, localeSlot.captured)
         assertEquals(SecurityAlertType.TWO_FACTOR_REMOVED, alertTypeSlot.captured)
         assertEquals(TwoFactorMethod.EMAIL, twoFactorMethodSlot.captured)
@@ -167,17 +170,17 @@ class TwoFactorAlertUnitTest : BaseSecurityAlertTest() {
         val providerKeySlot = slot<String?>()
         val twoFactorMethodSlot = slot<TwoFactorMethod?>()
 
-        coJustRun { securityAlertService.send(
+        coEvery { securityAlertService.send(
             capture(userSlot),
             captureNullable(localeSlot),
             capture(alertTypeSlot),
             captureNullable(providerKeySlot),
             captureNullable(twoFactorMethodSlot),
-        ) }
+        ) } returns Ok(mockk<MimeMessage>())
 
         val secret = totpService.generateSecretKey().getOrThrow()
         val recoveryCode = Random.generateString(10).getOrThrow()
-        val token = setupTokenService.create(user.info.id.getOrThrow(), secret, listOf(recoveryCode)).getOrThrow()
+        val token = setupTokenService.create(user.id, secret, listOf(recoveryCode)).getOrThrow()
         val code = gAuth.getTotpPassword(secret)
 
         webTestClient.post()
@@ -190,7 +193,7 @@ class TwoFactorAlertUnitTest : BaseSecurityAlertTest() {
 
         coVerify(exactly = 1) { securityAlertService.send(any(), anyNullable(), any(), anyNullable(), any()) }
         assert(userSlot.isCaptured)
-        assertEquals(user.info.id, userSlot.captured.id)
+        assertEquals(user.id, userSlot.captured.id.getOrThrow())
         assert(localeSlot.isNull)
         assertEquals(SecurityAlertType.TWO_FACTOR_ADDED, alertTypeSlot.captured)
         assertEquals(TwoFactorMethod.TOTP, twoFactorMethodSlot.captured)
@@ -206,17 +209,17 @@ class TwoFactorAlertUnitTest : BaseSecurityAlertTest() {
         val providerKeySlot = slot<String?>()
         val twoFactorMethodSlot = slot<TwoFactorMethod?>()
 
-        coJustRun { securityAlertService.send(
+        coEvery { securityAlertService.send(
             capture(userSlot),
             captureNullable(localeSlot),
             capture(alertTypeSlot),
             captureNullable(providerKeySlot),
             captureNullable(twoFactorMethodSlot),
-        ) }
+        ) } returns Ok(mockk<MimeMessage>())
 
         val secret = totpService.generateSecretKey().getOrThrow()
         val recoveryCode = Random.generateString(10).getOrThrow()
-        val token = setupTokenService.create(user.info.id.getOrThrow(), secret, listOf(recoveryCode)).getOrThrow()
+        val token = setupTokenService.create(user.id, secret, listOf(recoveryCode)).getOrThrow()
         val code = gAuth.getTotpPassword(secret)
 
         webTestClient.post()
@@ -229,7 +232,7 @@ class TwoFactorAlertUnitTest : BaseSecurityAlertTest() {
 
         coVerify(exactly = 1) { securityAlertService.send(any(), anyNullable(), any(), anyNullable(), any()) }
         assert(userSlot.isCaptured)
-        assertEquals(user.info.id, userSlot.captured.id)
+        assertEquals(user.id, userSlot.captured.id.getOrThrow())
         assertEquals(Locale.ENGLISH, localeSlot.captured)
         assertEquals(SecurityAlertType.TWO_FACTOR_ADDED, alertTypeSlot.captured)
         assertEquals(TwoFactorMethod.TOTP, twoFactorMethodSlot.captured)
@@ -247,13 +250,13 @@ class TwoFactorAlertUnitTest : BaseSecurityAlertTest() {
         val providerKeySlot = slot<String?>()
         val twoFactorMethodSlot = slot<TwoFactorMethod?>()
 
-        coJustRun { securityAlertService.send(
+        coEvery { securityAlertService.send(
             capture(userSlot),
             captureNullable(localeSlot),
             capture(alertTypeSlot),
             captureNullable(providerKeySlot),
             captureNullable(twoFactorMethodSlot),
-        ) }
+        ) } returns Ok(mockk<MimeMessage>())
 
         webTestClient.delete()
             .uri("/api/auth/2fa/totp")
@@ -264,7 +267,7 @@ class TwoFactorAlertUnitTest : BaseSecurityAlertTest() {
 
         coVerify(exactly = 1) { securityAlertService.send(any(), anyNullable(), any(), anyNullable(), any()) }
         assert(userSlot.isCaptured)
-        assertEquals(user.info.id, userSlot.captured.id)
+        assertEquals(user.id, userSlot.captured.id.getOrThrow())
         assert(localeSlot.isNull)
         assertEquals(SecurityAlertType.TWO_FACTOR_REMOVED, alertTypeSlot.captured)
         assertEquals(TwoFactorMethod.TOTP, twoFactorMethodSlot.captured)
@@ -281,13 +284,13 @@ class TwoFactorAlertUnitTest : BaseSecurityAlertTest() {
         val providerKeySlot = slot<String?>()
         val twoFactorMethodSlot = slot<TwoFactorMethod?>()
 
-        coJustRun { securityAlertService.send(
+        coEvery { securityAlertService.send(
             capture(userSlot),
             captureNullable(localeSlot),
             capture(alertTypeSlot),
             captureNullable(providerKeySlot),
             captureNullable(twoFactorMethodSlot),
-        ) }
+        ) } returns Ok(mockk<MimeMessage>())
 
         webTestClient.delete()
             .uri("/api/auth/2fa/totp?locale=en")
@@ -298,7 +301,7 @@ class TwoFactorAlertUnitTest : BaseSecurityAlertTest() {
 
         coVerify(exactly = 1) { securityAlertService.send(any(), anyNullable(), any(), anyNullable(), any()) }
         assert(userSlot.isCaptured)
-        assertEquals(user.info.id, userSlot.captured.id)
+        assertEquals(user.id, userSlot.captured.id.getOrThrow())
         assertEquals(Locale.ENGLISH, localeSlot.captured)
         assertEquals(SecurityAlertType.TWO_FACTOR_REMOVED, alertTypeSlot.captured)
         assertEquals(TwoFactorMethod.TOTP, twoFactorMethodSlot.captured)

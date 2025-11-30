@@ -99,7 +99,7 @@ class GuestControllerTest : BaseIntegrationTest() {
         val accessToken = result.extractAccessToken()
         val refreshToken = result.extractRefreshToken()
 
-        val user = principalService.findById(guest.info.id.getOrThrow()).getOrThrow()
+        val user = principalService.findById(guest.id).getOrThrow()
 
         Assertions.assertEquals(user.id.getOrThrow(), accessToken.userId)
         Assertions.assertEquals(user.id.getOrThrow(), refreshToken.userId)
@@ -138,7 +138,7 @@ class GuestControllerTest : BaseIntegrationTest() {
             .returnResult()
 
         val accessToken = result.extractAccessToken()
-        val user = principalService.findById(guest.info.id.getOrThrow()).getOrThrow()
+        val user = principalService.findById(guest.id).getOrThrow()
 
         Assertions.assertEquals(1, user.sensitive.sessions.size)
         val session = user.sensitive.sessions[accessToken.sessionId]!!

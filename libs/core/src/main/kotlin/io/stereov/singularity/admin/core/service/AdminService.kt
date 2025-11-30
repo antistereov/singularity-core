@@ -104,7 +104,8 @@ class AdminService(
                 password = password,
                 name = "Root",
                 email2faEnabled = emailProperties.enable,
-                mailTwoFactorCodeExpiresIn = twoFactorEmailCodeProperties.expiresIn
+                mailTwoFactorCodeExpiresIn = twoFactorEmailCodeProperties.expiresIn,
+                isAdmin = true
             )
 
             userService.save(rootUser)

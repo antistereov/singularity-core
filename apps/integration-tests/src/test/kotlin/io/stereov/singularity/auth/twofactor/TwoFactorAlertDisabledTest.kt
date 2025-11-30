@@ -84,7 +84,7 @@ class TwoFactorAlertDisabledTest : BaseMailIntegrationTest() {
 
         val secret = totpService.generateSecretKey().getOrThrow()
         val recoveryCode = Random.generateString(10).getOrThrow()
-        val token = setupTokenService.create(user.info.id.getOrThrow(), secret, listOf(recoveryCode)).getOrThrow()
+        val token = setupTokenService.create(user.id, secret, listOf(recoveryCode)).getOrThrow()
         val code = gAuth.getTotpPassword(secret)
 
         webTestClient.post()
@@ -104,7 +104,7 @@ class TwoFactorAlertDisabledTest : BaseMailIntegrationTest() {
 
         val secret = totpService.generateSecretKey().getOrThrow()
         val recoveryCode = Random.generateString(10).getOrThrow()
-        val token = setupTokenService.create(user.info.id.getOrThrow(), secret, listOf(recoveryCode)).getOrThrow()
+        val token = setupTokenService.create(user.id, secret, listOf(recoveryCode)).getOrThrow()
         val code = gAuth.getTotpPassword(secret)
 
         webTestClient.post()

@@ -6,7 +6,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.secrets.core.exception.SecretStoreException
 import io.stereov.singularity.secrets.local.data.LocalSecretEntity
 import jakarta.annotation.PostConstruct
-import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
@@ -49,6 +49,7 @@ class LocalSecretRepository(
                 .one()
                 .awaitSingleOrNull()
         }
+            .mapError { ex -> SecretStoreException.Operation("Failed to fetch secret with key $key from local secret store: ${ex.message}", ex) }
             .flatMap { entity ->
                 if (entity != null) {
                     Ok(entity)
@@ -56,7 +57,6 @@ class LocalSecretRepository(
                     Err(SecretStoreException.NotFound("No secret with key $key found"))
                 }
             }
-            .mapError { ex -> SecretStoreException.Operation("Failed to fetch secret with key $key from local secret store: ${ex.message}", ex) }
     }
 
     suspend fun put(secret: LocalSecretEntity): Result<LocalSecretEntity, SecretStoreException> {
@@ -72,7 +72,7 @@ class LocalSecretRepository(
                 .bind("id", secret.id)
                 .bind("created_at", secret.createdAt)
                 .then()
-                .awaitFirst()
+                .awaitFirstOrNull()
         }
             .map { secret }
             .mapError { ex -> SecretStoreException.Operation("Failed to save secret ${secret.key} in local secret store: ${ex.message}", ex) }

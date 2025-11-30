@@ -21,7 +21,7 @@ class PasswordResetControllerTest : BaseMailIntegrationTest() {
 
     @Test fun `resetPassword works`() = runTest {
         val user = registerUser()
-        val token = passwordResetTokenService.create(user.info.id.getOrThrow(), user.passwordResetSecret!!).getOrThrow()
+        val token = passwordResetTokenService.create(user.id, user.passwordResetSecret!!).getOrThrow()
 
         Assertions.assertFalse(user.info.sensitive.security.email.verified)
 
@@ -34,7 +34,7 @@ class PasswordResetControllerTest : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isOk
 
-        val verifiedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val verifiedUser = userService.findById(user.id).getOrThrow()
 
         Assertions.assertNotEquals(
             user.info.sensitive.security.password.resetSecret,
@@ -70,7 +70,7 @@ class PasswordResetControllerTest : BaseMailIntegrationTest() {
     }
     @Test fun `resetPassword requires unexpired token`() = runTest {
         val user = registerUser()
-        val token = passwordResetTokenService.create(user.info.id.getOrThrow(), user.passwordResetSecret!!, Instant.ofEpochSecond(0)).getOrThrow()
+        val token = passwordResetTokenService.create(user.id, user.passwordResetSecret!!, Instant.ofEpochSecond(0)).getOrThrow()
 
         val req = ResetPasswordRequest("Password$2")
 
@@ -82,7 +82,7 @@ class PasswordResetControllerTest : BaseMailIntegrationTest() {
     }
     @Test fun `resetPassword requires capital letter`() = runTest {
         val user = registerUser()
-        val token = passwordResetTokenService.create(user.info.id.getOrThrow(), user.passwordResetSecret!!).getOrThrow()
+        val token = passwordResetTokenService.create(user.id, user.passwordResetSecret!!).getOrThrow()
 
         Assertions.assertFalse(user.info.sensitive.security.email.verified)
 
@@ -95,12 +95,12 @@ class PasswordResetControllerTest : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isBadRequest
 
-        val foundUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val foundUser = userService.findById(user.id).getOrThrow()
         assertTrue(hashService.checkBcrypt(user.password!!, foundUser.password.getOrThrow()).getOrThrow())
     }
     @Test fun `resetPassword requires small letter`() = runTest {
         val user = registerUser()
-        val token = passwordResetTokenService.create(user.info.id.getOrThrow(), user.passwordResetSecret!!).getOrThrow()
+        val token = passwordResetTokenService.create(user.id, user.passwordResetSecret!!).getOrThrow()
 
         Assertions.assertFalse(user.info.sensitive.security.email.verified)
 
@@ -113,12 +113,12 @@ class PasswordResetControllerTest : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isBadRequest
 
-        val foundUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val foundUser = userService.findById(user.id).getOrThrow()
         assertTrue(hashService.checkBcrypt(user.password!!, foundUser.password.getOrThrow()).getOrThrow())
     }
     @Test fun `resetPassword requires number`() = runTest {
         val user = registerUser()
-        val token = passwordResetTokenService.create(user.info.id.getOrThrow(), user.passwordResetSecret!!).getOrThrow()
+        val token = passwordResetTokenService.create(user.id, user.passwordResetSecret!!).getOrThrow()
 
         Assertions.assertFalse(user.info.sensitive.security.email.verified)
 
@@ -131,12 +131,12 @@ class PasswordResetControllerTest : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isBadRequest
 
-        val foundUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val foundUser = userService.findById(user.id).getOrThrow()
         assertTrue(hashService.checkBcrypt(user.password!!, foundUser.password.getOrThrow()).getOrThrow())
     }
     @Test fun `resetPassword requires special character`() = runTest {
         val user = registerUser()
-        val token = passwordResetTokenService.create(user.info.id.getOrThrow(), user.passwordResetSecret!!).getOrThrow()
+        val token = passwordResetTokenService.create(user.id, user.passwordResetSecret!!).getOrThrow()
 
         Assertions.assertFalse(user.info.sensitive.security.email.verified)
 
@@ -149,12 +149,12 @@ class PasswordResetControllerTest : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isBadRequest
 
-        val foundUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val foundUser = userService.findById(user.id).getOrThrow()
         assertTrue(hashService.checkBcrypt(user.password!!, foundUser.password.getOrThrow()).getOrThrow())
     }
     @Test fun `resetPassword requires 8 characters`() = runTest {
         val user = registerUser()
-        val token = passwordResetTokenService.create(user.info.id.getOrThrow(), user.passwordResetSecret!!).getOrThrow()
+        val token = passwordResetTokenService.create(user.id, user.passwordResetSecret!!).getOrThrow()
 
         Assertions.assertFalse(user.info.sensitive.security.email.verified)
 
@@ -167,12 +167,12 @@ class PasswordResetControllerTest : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isBadRequest
 
-        val foundUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val foundUser = userService.findById(user.id).getOrThrow()
         assertTrue(hashService.checkBcrypt(user.password!!, foundUser.password.getOrThrow()).getOrThrow())
     }
     @Test fun `resetPassword needs body`() = runTest {
         val user = registerUser()
-        val token = passwordResetTokenService.create(user.info.id.getOrThrow(), user.passwordResetSecret!!).getOrThrow()
+        val token = passwordResetTokenService.create(user.id, user.passwordResetSecret!!).getOrThrow()
 
 
         webTestClient.post()
@@ -182,7 +182,7 @@ class PasswordResetControllerTest : BaseMailIntegrationTest() {
     }
     @Test fun `resetPassword sets password for oauth2`() = runTest {
         val user = registerOAuth2()
-        val token = passwordResetTokenService.create(user.info.id.getOrThrow(), user.info.sensitive.security.password.resetSecret).getOrThrow()
+        val token = passwordResetTokenService.create(user.id, user.info.sensitive.security.password.resetSecret).getOrThrow()
 
         val newPassword = "NewPassword$2"
         val req = ResetPasswordRequest(newPassword)
@@ -193,7 +193,7 @@ class PasswordResetControllerTest : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isOk
 
-        val verifiedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val verifiedUser = userService.findById(user.id).getOrThrow()
 
         Assertions.assertNotEquals(
             user.info.sensitive.security.password.resetSecret,
@@ -211,7 +211,7 @@ class PasswordResetControllerTest : BaseMailIntegrationTest() {
     }
     @Test fun `resetPassword is bad for guest`() = runTest {
         val guest = createGuest()
-        val token = passwordResetTokenService.create(guest.info.id.getOrThrow(), Random.generateString().getOrThrow()).getOrThrow()
+        val token = passwordResetTokenService.create(guest.id, Random.generateString().getOrThrow()).getOrThrow()
 
         val newPassword = "NewPassword$2"
         val req = ResetPasswordRequest(newPassword)
@@ -220,7 +220,7 @@ class PasswordResetControllerTest : BaseMailIntegrationTest() {
             .uri("/api/auth/password/reset?token=$token")
             .bodyValue(req)
             .exchange()
-            .expectStatus().isBadRequest
+            .expectStatus().isNotFound
     }
 
     @Test fun `sendPasswordReset works`() = runTest {

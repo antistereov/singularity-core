@@ -77,7 +77,7 @@ class ArticleService : BaseArticleTest() {
         val owner = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
         val article = saveArticle(owner = owner)
         val anotherUser = registerUser()
-        article.access.users.viewer.add(anotherUser.info.id.toString())
+        article.access.users.viewer.add(anotherUser.id.toString())
         articleService.save(article)
 
         val res = webTestClient.get()
@@ -121,7 +121,7 @@ class ArticleService : BaseArticleTest() {
         val owner = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
         val article = saveArticle(owner = owner)
 
-        userService.deleteById(owner.info.id.getOrThrow()).getOrThrow()
+        userService.deleteById(owner.id).getOrThrow()
 
         val res = webTestClient.get()
             .uri("/api/content/articles/${article.key}")
@@ -433,7 +433,7 @@ class ArticleService : BaseArticleTest() {
         val owner = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
         val article = saveArticle(owner = owner)
 
-        userService.deleteById(owner.info.id.getOrThrow()).getOrThrow()
+        userService.deleteById(owner.id).getOrThrow()
 
         val res = webTestClient.get()
             .uri("/api/content/articles")
@@ -447,6 +447,6 @@ class ArticleService : BaseArticleTest() {
         assertEquals(1, res.content.size)
         assertEquals(1, res.totalElements)
         assertEquals(article.key, res.content[0].key)
-        assertEquals(owner.info.id, article.access.ownerId)
+        assertEquals(owner.id, article.access.ownerId)
     }
 }

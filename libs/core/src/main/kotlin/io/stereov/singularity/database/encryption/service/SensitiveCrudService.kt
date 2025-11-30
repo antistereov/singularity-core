@@ -121,7 +121,7 @@ abstract class SensitiveCrudService<SensitiveData, DecryptedDocument: SensitiveD
      * @return A [Result] containing the decrypted document on success, or an [FindEncryptedDocumentByIdException]
      * if an error occurs during the retrieval or decryption process.
      */
-    suspend fun findById(id: ObjectId): Result<DecryptedDocument, FindEncryptedDocumentByIdException> {
+    open suspend fun findById(id: ObjectId): Result<DecryptedDocument, FindEncryptedDocumentByIdException> {
         logger.debug { "Finding ${encryptedDocumentClazz.simpleName} by ID: $id" }
 
         return findEncryptedById(id)

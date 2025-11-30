@@ -18,7 +18,7 @@ class ChangeAlertDisabledTest : BaseMailIntegrationTest() {
         user.info.clearSessions()
         userService.save(user.info)
 
-        val token = passwordResetTokenService.create(user.info.id.getOrThrow(), user.passwordResetSecret!!).getOrThrow()
+        val token = passwordResetTokenService.create(user.id, user.passwordResetSecret!!).getOrThrow()
         val newPassword = "Password$2"
         val req = ResetPasswordRequest(newPassword)
 
@@ -35,7 +35,7 @@ class ChangeAlertDisabledTest : BaseMailIntegrationTest() {
         user.info.clearSessions()
         userService.save(user.info)
 
-        val token = passwordResetTokenService.create(user.info.id.getOrThrow(), user.passwordResetSecret!!).getOrThrow()
+        val token = passwordResetTokenService.create(user.id, user.passwordResetSecret!!).getOrThrow()
         val newPassword = "Password$2"
         val req = ResetPasswordRequest(newPassword)
 
@@ -54,7 +54,7 @@ class ChangeAlertDisabledTest : BaseMailIntegrationTest() {
         userService.save(user.info)
         val newEmail = "new@test.com"
 
-        val token = emailVerificationTokenService.create(user.info.id.getOrThrow(), newEmail,user.mailVerificationSecret!!).getOrThrow()
+        val token = emailVerificationTokenService.create(user.id, newEmail,user.mailVerificationSecret!!).getOrThrow()
         assertFalse(user.info.sensitive.security.email.verified)
 
         webTestClient.post()
@@ -70,7 +70,7 @@ class ChangeAlertDisabledTest : BaseMailIntegrationTest() {
         userService.save(user.info)
         val newEmail = "new@test.com"
 
-        val token = emailVerificationTokenService.create(user.info.id.getOrThrow(), newEmail ,user.mailVerificationSecret!!).getOrThrow()
+        val token = emailVerificationTokenService.create(user.id, newEmail ,user.mailVerificationSecret!!).getOrThrow()
         assertFalse(user.info.sensitive.security.email.verified)
 
         webTestClient.post()

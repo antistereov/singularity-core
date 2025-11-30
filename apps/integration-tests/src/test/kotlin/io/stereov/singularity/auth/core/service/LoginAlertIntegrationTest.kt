@@ -38,11 +38,11 @@ class LoginAlertIntegrationTest : BaseSecurityAlertTest() {
             .expectStatus()
             .isOk
 
-        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val updatedUser = userService.findById(user.id).getOrThrow()
 
         coVerify(exactly = 1) { loginAlertService.send(any(), anyNullable(), anyNullable()) }
         assert(loginUserSlot.isCaptured)
-        assertEquals(user.info.id, loginUserSlot.captured.id)
+        assertEquals(user.id, loginUserSlot.captured.id.getOrThrow())
         assert(loginLocaleSlot.isNull)
         assertEquals(updatedUser.sensitive.sessions.values.first(), loginSessionSlot.captured)
     }
@@ -68,11 +68,11 @@ class LoginAlertIntegrationTest : BaseSecurityAlertTest() {
             .expectStatus()
             .isOk
 
-        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val updatedUser = userService.findById(user.id).getOrThrow()
 
         coVerify(exactly = 1) { loginAlertService.send(any(), any(), any()) }
         assert(loginUserSlot.isCaptured)
-        assertEquals(user.info.id, loginUserSlot.captured.id)
+        assertEquals(user.id, loginUserSlot.captured.id.getOrThrow())
         assertEquals(Locale.ENGLISH, loginLocaleSlot.captured)
         assertEquals(updatedUser.sensitive.sessions.values.first(), loginSessionSlot.captured)
         assertEquals("browser", loginSessionSlot.captured.browser)

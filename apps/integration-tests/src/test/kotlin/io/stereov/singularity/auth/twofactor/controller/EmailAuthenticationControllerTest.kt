@@ -99,7 +99,7 @@ class EmailAuthenticationControllerTest : BaseMailIntegrationTest() {
             .returnResult()
             .responseBody
 
-        val userWith2fa = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val userWith2fa = userService.findById(user.id).getOrThrow()
 
         requireNotNull(setupRes)
         assertTrue(userWith2fa.sensitive.security.twoFactor.email.enabled)
@@ -118,7 +118,7 @@ class EmailAuthenticationControllerTest : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isUnauthorized
 
-        val userWith2fa = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val userWith2fa = userService.findById(user.id).getOrThrow()
 
         assertFalse(userWith2fa.sensitive.security.twoFactor.email.enabled)
         assertFalse(userWith2fa.twoFactorEnabled)
@@ -138,7 +138,7 @@ class EmailAuthenticationControllerTest : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isUnauthorized
 
-        val userWith2fa = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val userWith2fa = userService.findById(user.id).getOrThrow()
 
         assertFalse(userWith2fa.sensitive.security.twoFactor.email.enabled)
         assertFalse(userWith2fa.twoFactorEnabled)
@@ -155,7 +155,7 @@ class EmailAuthenticationControllerTest : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isUnauthorized
 
-        val userWith2fa = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val userWith2fa = userService.findById(user.id).getOrThrow()
 
         assertFalse(userWith2fa.sensitive.security.twoFactor.email.enabled)
         assertFalse(userWith2fa.twoFactorEnabled)
@@ -172,7 +172,7 @@ class EmailAuthenticationControllerTest : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isUnauthorized
 
-        val userWith2fa = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val userWith2fa = userService.findById(user.id).getOrThrow()
 
         assertFalse(userWith2fa.sensitive.security.twoFactor.email.enabled)
         assertFalse(userWith2fa.twoFactorEnabled)
@@ -190,7 +190,7 @@ class EmailAuthenticationControllerTest : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isBadRequest
 
-        val userWith2fa = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val userWith2fa = userService.findById(user.id).getOrThrow()
 
         assertFalse(userWith2fa.sensitive.security.twoFactor.email.enabled)
         assertFalse(userWith2fa.twoFactorEnabled)
@@ -208,7 +208,7 @@ class EmailAuthenticationControllerTest : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isNotModified
 
-        val userWith2fa = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val userWith2fa = userService.findById(user.id).getOrThrow()
 
         assertTrue(userWith2fa.sensitive.security.twoFactor.email.enabled)
         assertTrue(userWith2fa.twoFactorEnabled)
@@ -230,11 +230,11 @@ class EmailAuthenticationControllerTest : BaseMailIntegrationTest() {
         val body = res.responseBody
         requireNotNull(body)
 
-        assertEquals(user.info.id, body.id)
+        assertEquals(user.id, body.id)
         assertTrue(body.twoFactorAuthEnabled)
         assertEquals(listOf(TwoFactorMethod.TOTP), body.twoFactorMethods)
 
-        val userAfterDisable = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val userAfterDisable = userService.findById(user.id).getOrThrow()
         assertEquals(listOf(TwoFactorMethod.TOTP), userAfterDisable.twoFactorMethods)
         assertTrue(userAfterDisable.sensitive.security.twoFactor.totp.enabled)
         assertFalse(userAfterDisable.sensitive.security.twoFactor.email.enabled)
@@ -249,7 +249,7 @@ class EmailAuthenticationControllerTest : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isBadRequest
 
-        val userAfterDisable = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val userAfterDisable = userService.findById(user.id).getOrThrow()
         assertTrue(userAfterDisable.twoFactorEnabled)
         assertEquals(listOf(TwoFactorMethod.EMAIL), userAfterDisable.twoFactorMethods)
         assertTrue(userAfterDisable.sensitive.security.twoFactor.email.enabled)
@@ -263,7 +263,7 @@ class EmailAuthenticationControllerTest : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isUnauthorized
 
-        val userAfterDisable = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val userAfterDisable = userService.findById(user.id).getOrThrow()
         assertTrue(userAfterDisable.twoFactorEnabled)
         assertEquals(listOf(TwoFactorMethod.EMAIL), userAfterDisable.twoFactorMethods)
         assertTrue(userAfterDisable.sensitive.security.twoFactor.email.enabled)
@@ -277,7 +277,7 @@ class EmailAuthenticationControllerTest : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isUnauthorized
 
-        val userAfterDisable = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val userAfterDisable = userService.findById(user.id).getOrThrow()
         assertTrue(userAfterDisable.twoFactorEnabled)
         assertEquals(listOf(TwoFactorMethod.EMAIL), userAfterDisable.twoFactorMethods)
         assertTrue(userAfterDisable.sensitive.security.twoFactor.email.enabled)
@@ -292,7 +292,7 @@ class EmailAuthenticationControllerTest : BaseMailIntegrationTest() {
             .exchange()
             .expectStatus().isUnauthorized
 
-        val userAfterDisable = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val userAfterDisable = userService.findById(user.id).getOrThrow()
         assertTrue(userAfterDisable.twoFactorEnabled)
         assertEquals(listOf(TwoFactorMethod.EMAIL), userAfterDisable.twoFactorMethods)
         assertTrue(userAfterDisable.sensitive.security.twoFactor.email.enabled)
@@ -302,12 +302,12 @@ class EmailAuthenticationControllerTest : BaseMailIntegrationTest() {
 
         webTestClient.delete()
             .uri("/api/auth/2fa/email")
-            .stepUpTokenCookie(cookieCreator.createCookie(stepUpTokenService.create(user.info.id.getOrThrow(), user.sessionId, Instant.ofEpochSecond(0)).getOrThrow()).getOrThrow().value)
+            .stepUpTokenCookie(cookieCreator.createCookie(stepUpTokenService.create(user.id, user.sessionId, Instant.ofEpochSecond(0)).getOrThrow()).getOrThrow().value)
             .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isUnauthorized
 
-        val userAfterDisable = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val userAfterDisable = userService.findById(user.id).getOrThrow()
         assertTrue(userAfterDisable.twoFactorEnabled)
         assertEquals(listOf(TwoFactorMethod.EMAIL), userAfterDisable.twoFactorMethods)
         assertTrue(userAfterDisable.sensitive.security.twoFactor.email.enabled)
@@ -318,12 +318,12 @@ class EmailAuthenticationControllerTest : BaseMailIntegrationTest() {
 
         webTestClient.delete()
             .uri("/api/auth/2fa/email")
-            .stepUpTokenCookie(cookieCreator.createCookie(stepUpTokenService.create(anotherUser.info.id.getOrThrow(), user.sessionId).getOrThrow()).getOrThrow().value)
+            .stepUpTokenCookie(cookieCreator.createCookie(stepUpTokenService.create(anotherUser.id, user.sessionId).getOrThrow()).getOrThrow().value)
             .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isUnauthorized
 
-        val userAfterDisable = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val userAfterDisable = userService.findById(user.id).getOrThrow()
         assertTrue(userAfterDisable.twoFactorEnabled)
         assertEquals(listOf(TwoFactorMethod.EMAIL), userAfterDisable.twoFactorMethods)
         assertTrue(userAfterDisable.sensitive.security.twoFactor.email.enabled)
@@ -334,13 +334,13 @@ class EmailAuthenticationControllerTest : BaseMailIntegrationTest() {
         webTestClient.delete()
             .uri("/api/auth/2fa/email")
             .cookie(
-                SessionTokenType.StepUp.cookieName, cookieCreator.createCookie(stepUpTokenService.create(user.info.id.getOrThrow(),
+                SessionTokenType.StepUp.cookieName, cookieCreator.createCookie(stepUpTokenService.create(user.id,
                 UUID.randomUUID()).getOrThrow()).getOrThrow().value)
             .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isUnauthorized
 
-        val userAfterDisable = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val userAfterDisable = userService.findById(user.id).getOrThrow()
         assertTrue(userAfterDisable.twoFactorEnabled)
         assertEquals(listOf(TwoFactorMethod.EMAIL), userAfterDisable.twoFactorMethods)
         assertTrue(userAfterDisable.sensitive.security.twoFactor.email.enabled)

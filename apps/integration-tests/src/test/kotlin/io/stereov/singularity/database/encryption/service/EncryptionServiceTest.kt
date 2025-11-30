@@ -12,7 +12,7 @@ class EncryptionServiceTest : BaseIntegrationTest() {
     fun rotationWorks() = runTest {
         val user = registerUser()
 
-        val encryptedUser = userService.findEncryptedById(user.info.id.getOrThrow()).getOrThrow()
+        val encryptedUser = userService.findEncryptedById(user.id).getOrThrow()
         val oldSecret = encryptedUser.sensitive.secretKey
 
         val decryptedUser = userService.decrypt(encryptedUser)
@@ -20,7 +20,7 @@ class EncryptionServiceTest : BaseIntegrationTest() {
         encryptionSecretService.updateSecret()
         userService.rotateSecret()
 
-        val rotatedEncryptedUser = userService.findEncryptedById(user.info.id.getOrThrow()).getOrThrow()
+        val rotatedEncryptedUser = userService.findEncryptedById(user.id).getOrThrow()
         val newSecret = rotatedEncryptedUser.sensitive.secretKey
 
         Assertions.assertNotEquals(oldSecret, newSecret)

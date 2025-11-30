@@ -167,7 +167,7 @@ class HeaderAuthenticationTest : BaseSpringBootTest() {
     }
     @Test fun `refresh requires unexpired token`() = runTest {
         val user = registerUser()
-        val token = refreshTokenService.create(user.info.id.getOrThrow(), user.sessionId, user.info.sensitive.sessions.values.first().refreshTokenId!!,Instant.ofEpochSecond(0))
+        val token = refreshTokenService.create(user.id, user.sessionId, user.info.sensitive.sessions.values.first().refreshTokenId!!,Instant.ofEpochSecond(0))
             .getOrThrow()
 
         webTestClient.post()
@@ -257,7 +257,7 @@ class HeaderAuthenticationTest : BaseSpringBootTest() {
     }
     @Test fun `stepUp requires unexpired token`() = runTest {
         val user = registerUser()
-        val stepUpToken = stepUpTokenService.create(user.info.id.getOrThrow(), user.sessionId, Instant.ofEpochSecond(0)).getOrThrow()
+        val stepUpToken = stepUpTokenService.create(user.id, user.sessionId, Instant.ofEpochSecond(0)).getOrThrow()
 
         webTestClient.get()
             .uri("/api/auth/2fa/totp/setup")
@@ -309,7 +309,7 @@ class HeaderAuthenticationTest : BaseSpringBootTest() {
     }
     @Test fun `stepUp needs access token from matching session`() = runTest {
         val user = registerUser()
-        val stepUpToken = stepUpTokenService.create(user.info.id.getOrThrow(), UUID.randomUUID()).getOrThrow()
+        val stepUpToken = stepUpTokenService.create(user.id, UUID.randomUUID()).getOrThrow()
 
         webTestClient.get()
             .uri("/api/auth/2fa/totp/setup")

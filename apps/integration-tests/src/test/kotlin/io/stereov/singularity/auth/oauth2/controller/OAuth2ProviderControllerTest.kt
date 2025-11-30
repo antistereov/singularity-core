@@ -26,7 +26,7 @@ class OAuth2ProviderControllerTest : BaseIntegrationTest() {
 
         val token = res.extractOAuth2ProviderConnectionToken(user.info)
 
-        Assertions.assertEquals(user.info.id, token.userId)
+        Assertions.assertEquals(user.id, token.userId)
         Assertions.assertEquals(user.sessionId, token.sessionId)
         Assertions.assertEquals(req.provider, token.provider)
     }
@@ -46,7 +46,7 @@ class OAuth2ProviderControllerTest : BaseIntegrationTest() {
 
         val token = res.extractOAuth2ProviderConnectionToken(user.info)
 
-        Assertions.assertEquals(user.info.id, token.userId)
+        Assertions.assertEquals(user.id, token.userId)
         Assertions.assertEquals(user.sessionId, token.sessionId)
         Assertions.assertEquals(req.provider, token.provider)
     }
@@ -66,7 +66,7 @@ class OAuth2ProviderControllerTest : BaseIntegrationTest() {
 
         val token = res.extractOAuth2ProviderConnectionToken(user.info)
 
-        Assertions.assertEquals(user.info.id, token.userId)
+        Assertions.assertEquals(user.id, token.userId)
         Assertions.assertEquals(user.sessionId, token.sessionId)
         Assertions.assertEquals(req.provider, token.provider)
     }

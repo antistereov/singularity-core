@@ -28,7 +28,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
         ).getOrThrow()
 
         val res = webTestClient.post()
-            .uri("/api/groups/${group.key}/members/${user.info.id.getOrThrow()}")
+            .uri("/api/groups/${group.key}/members/${user.id}")
             .accessTokenCookie(admin.accessToken)
             .exchange()
             .expectStatus().isOk
@@ -40,7 +40,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
 
         Assertions.assertEquals(setOf(group.key), res.groups)
 
-        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val updatedUser = userService.findById(user.id).getOrThrow()
 
         Assertions.assertEquals(mutableSetOf(group.key), updatedUser.groups)
     }
@@ -49,12 +49,12 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
         val user = registerUser()
 
         webTestClient.post()
-            .uri("/api/groups/new-pilots/members/${user.info.id.getOrThrow()}")
+            .uri("/api/groups/new-pilots/members/${user.id}")
             .accessTokenCookie(admin.accessToken)
             .exchange()
             .expectStatus().isNotFound
 
-        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val updatedUser = userService.findById(user.id).getOrThrow()
 
         Assertions.assertEquals(mutableSetOf<String>(), updatedUser.groups)
     }
@@ -73,11 +73,11 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
         )
 
         webTestClient.post()
-            .uri("/api/groups/${group.key}/members/${user.info.id.getOrThrow()}")
+            .uri("/api/groups/${group.key}/members/${user.id}")
             .exchange()
             .expectStatus().isUnauthorized
 
-        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val updatedUser = userService.findById(user.id).getOrThrow()
 
         Assertions.assertEquals(mutableSetOf<String>(), updatedUser.groups)
     }
@@ -96,19 +96,19 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
         )
 
         webTestClient.post()
-            .uri("/api/groups/${group.key}/members/${user.info.id.getOrThrow()}")
+            .uri("/api/groups/${group.key}/members/${user.id}")
             .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isForbidden
 
-        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val updatedUser = userService.findById(user.id).getOrThrow()
 
         Assertions.assertEquals(mutableSetOf<String>(), updatedUser.groups)
     }
     @Test fun `addMember with non-existing user is not found`() = runTest {
         val admin = createAdmin()
         val user = registerUser()
-        userService.deleteById(user.info.id.getOrThrow()).getOrThrow()
+        userService.deleteById(user.id).getOrThrow()
 
         val group = groupRepository.save(
             Group(
@@ -122,7 +122,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
         )
 
         webTestClient.post()
-            .uri("/api/groups/${group.key}/members/${user.info.id.getOrThrow()}")
+            .uri("/api/groups/${group.key}/members/${user.id}")
             .accessTokenCookie(admin.accessToken)
             .exchange()
             .expectStatus().isNotFound
@@ -144,7 +144,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
         )
 
         val res = webTestClient.delete()
-            .uri("/api/groups/${group.key}/members/${user.info.id.getOrThrow()}")
+            .uri("/api/groups/${group.key}/members/${user.id}")
             .accessTokenCookie(admin.accessToken)
             .exchange()
             .expectStatus().isOk
@@ -156,7 +156,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
 
         Assertions.assertEquals(emptySet<String>(), res.groups)
 
-        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val updatedUser = userService.findById(user.id).getOrThrow()
         Assertions.assertEquals(emptySet<String>(), updatedUser.groups)
     }
     @Test fun `removeMember with non-existing group is not found`() = runTest {
@@ -164,12 +164,12 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
         val user = registerUser(groups = listOf("pilots"))
 
         webTestClient.delete()
-            .uri("/api/groups/new-pilots/members/${user.info.id.getOrThrow()}")
+            .uri("/api/groups/new-pilots/members/${user.id}")
             .accessTokenCookie(admin.accessToken)
             .exchange()
             .expectStatus().isNotFound
 
-        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val updatedUser = userService.findById(user.id).getOrThrow()
         Assertions.assertEquals(mutableSetOf("pilots"), updatedUser.groups)
     }
     @Test fun `removeMember requires authentication`() = runTest {
@@ -187,11 +187,11 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
         )
 
         webTestClient.delete()
-            .uri("/api/groups/${group.key}/members/${user.info.id.getOrThrow()}")
+            .uri("/api/groups/${group.key}/members/${user.id}")
             .exchange()
             .expectStatus().isUnauthorized
 
-        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val updatedUser = userService.findById(user.id).getOrThrow()
         Assertions.assertEquals(mutableSetOf(group.key), updatedUser.groups)
     }
     @Test fun `removeMember requires admin`() = runTest {
@@ -209,18 +209,18 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
         )
 
         webTestClient.delete()
-            .uri("/api/groups/${group.key}/members/${user.info.id.getOrThrow()}")
+            .uri("/api/groups/${group.key}/members/${user.id}")
             .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isForbidden
 
-        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val updatedUser = userService.findById(user.id).getOrThrow()
         Assertions.assertEquals(mutableSetOf(group.key), updatedUser.groups)
     }
     @Test fun `removeMember with non-existing user is not found`() = runTest {
         val admin = createAdmin()
         val user = registerUser(groups = listOf("pilots"))
-        userService.deleteById(user.info.id.getOrThrow()).getOrThrow()
+        userService.deleteById(user.id).getOrThrow()
 
         val group = groupRepository.save(
             Group(
@@ -234,7 +234,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
         )
 
         webTestClient.delete()
-            .uri("/api/groups/${group.key}/members/${user.info.id.getOrThrow()}")
+            .uri("/api/groups/${group.key}/members/${user.id}")
             .accessTokenCookie(admin.accessToken)
             .exchange()
             .expectStatus().isNotFound

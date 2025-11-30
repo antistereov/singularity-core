@@ -63,7 +63,7 @@ class OAuth2IdentityProviderInfoUnitTest : BaseOAuth2FlowTest() {
         mockOAuth2Server.verifyRequests()
 
         coVerify(exactly = 1) { identityProviderInfoService.send(any(), anyNullable()) }
-        assertEquals(registeredUser.info.id, userSlot.captured.id)
+        assertEquals(registeredUser.id, userSlot.captured.id.getOrThrow())
         assert(localeSlot.isNull)
     }
     @Test fun `register works with locale`() = runTest {
@@ -105,7 +105,7 @@ class OAuth2IdentityProviderInfoUnitTest : BaseOAuth2FlowTest() {
         mockOAuth2Server.verifyRequests()
 
         coVerify(exactly = 1) { identityProviderInfoService.send(any(), anyNullable()) }
-        assertEquals(registeredUser.info.id, userSlot.captured.id)
+        assertEquals(registeredUser.id, userSlot.captured.id.getOrThrow())
         assertEquals(Locale.ENGLISH, localeSlot.captured)
     }
     @Test fun `register works with another oauth2`() = runTest {
@@ -147,7 +147,7 @@ class OAuth2IdentityProviderInfoUnitTest : BaseOAuth2FlowTest() {
         mockOAuth2Server.verifyRequests()
 
         coVerify(exactly = 1) { identityProviderInfoService.send(any(), anyNullable()) }
-        assertEquals(registeredUser.info.id, userSlot.captured.id)
+        assertEquals(registeredUser.id, userSlot.captured.id.getOrThrow())
         assert(localeSlot.isNull)
     }
     @Test fun `register does not send when not registered`() = runTest {

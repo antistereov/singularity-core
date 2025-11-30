@@ -28,7 +28,8 @@ class LocalSecretStore(
     override val logger = KotlinLogging.logger {}
 
     override suspend fun doGet(key: String): Result<Secret, SecretStoreException> {
-        return repository.findByKey(key).map { it.toSecret() }
+        return repository.findByKey(key)
+            .map { it.toSecret() }
     }
 
     override suspend fun doPut(
@@ -48,7 +49,7 @@ class LocalSecretStore(
             )
             .andThen { entity ->
                 val newSecret = LocalSecretEntity(
-                    id = entity.toString(),
+                    id = entity.id,
                     key = key,
                     value = value,
                     createdAt = Instant.now()

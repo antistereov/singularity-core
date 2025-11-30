@@ -46,7 +46,7 @@ class TwoFactorAuthControllerEmailDefaultTest : BaseMailIntegrationTest() {
 
         val twoFactorAuthToken = res.extractTwoFactorAuthenticationToken()
 
-        Assertions.assertEquals(user.info.id, twoFactorAuthToken.userId)
+        Assertions.assertEquals(user.id, twoFactorAuthToken.userId)
     }
 
     @Test fun `login sends 2fa email automatically after login when preferred`() = runTest {

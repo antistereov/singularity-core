@@ -112,7 +112,7 @@ class OAuth2AlertDisabledTest : BaseOAuth2FlowTest() {
 
         val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os")).getOrThrow()
         val providerConnectionToken = oAuth2ProviderConnectionTokenService
-            .create(registeredUser.info.id.getOrThrow(), registeredUser.sessionId, "github").getOrThrow()
+            .create(registeredUser.id, registeredUser.sessionId, "github").getOrThrow()
 
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
         webTestClient.get().uri(redirectUri)
@@ -148,7 +148,7 @@ class OAuth2AlertDisabledTest : BaseOAuth2FlowTest() {
 
         val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os")).getOrThrow()
         val providerConnectionToken = oAuth2ProviderConnectionTokenService
-            .create(registeredUser.info.id.getOrThrow(), registeredUser.sessionId, "github").getOrThrow()
+            .create(registeredUser.id, registeredUser.sessionId, "github").getOrThrow()
 
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
         val res = webTestClient.get().uri(redirectUri)

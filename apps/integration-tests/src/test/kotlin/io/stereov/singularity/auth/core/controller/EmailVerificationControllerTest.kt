@@ -16,7 +16,7 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
 
     @Test fun `verifyEmail works`() = runTest {
         val user = registerUser()
-        val token = emailVerificationTokenService.create(user.info.id.getOrThrow(), user.info.sensitive.email ,user.mailVerificationSecret!!).getOrThrow()
+        val token = emailVerificationTokenService.create(user.id, user.info.sensitive.email ,user.mailVerificationSecret!!).getOrThrow()
 
         assertFalse(user.info.sensitive.security.email.verified)
 
@@ -43,7 +43,7 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
     }
     @Test fun `verifyEmail requires right token`() = runTest {
         val user = registerUser()
-        val token = emailVerificationTokenService.create(user.info.id.getOrThrow(), user.info.sensitive.email, encryptionSecretService.getCurrentSecret().getOrThrow().value).getOrThrow()
+        val token = emailVerificationTokenService.create(user.id, user.info.sensitive.email, encryptionSecretService.getCurrentSecret().getOrThrow().value).getOrThrow()
 
         webTestClient.post()
             .uri("/api/auth/email/verification?token=$token")
@@ -52,7 +52,7 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
     }
     @Test fun `verifyEmail requires unexpired token`() = runTest {
         val user = registerUser()
-        val token = emailVerificationTokenService.create(user.info.id.getOrThrow(), user.info.sensitive.email, user.mailVerificationSecret!!, Instant.ofEpochSecond(0)).getOrThrow()
+        val token = emailVerificationTokenService.create(user.id, user.info.sensitive.email, user.mailVerificationSecret!!, Instant.ofEpochSecond(0)).getOrThrow()
 
         webTestClient.post()
             .uri("/api/auth/email/verification?token=$token")
@@ -64,7 +64,7 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
         user.info.sensitive.security.email.verified = true
         userService.save(user.info)
 
-        val token = emailVerificationTokenService.create(user.info.id.getOrThrow(), user.info.sensitive.email,user.mailVerificationSecret!!).getOrThrow()
+        val token = emailVerificationTokenService.create(user.id, user.info.sensitive.email,user.mailVerificationSecret!!).getOrThrow()
 
         webTestClient.post()
             .uri("/api/auth/email/verification?token=$token")
@@ -74,12 +74,12 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
     @Test fun `verifyEmail is bad for guest`() = runTest {
         val guest = createGuest()
 
-        val token = emailVerificationTokenService.create(guest.info.id.getOrThrow(), "random-email" , Random.generateString().getOrThrow()).getOrThrow()
+        val token = emailVerificationTokenService.create(guest.id, "random-email" , Random.generateString().getOrThrow()).getOrThrow()
 
         webTestClient.post()
             .uri("/api/auth/email/verification?token=$token")
             .exchange()
-            .expectStatus().isBadRequest
+            .expectStatus().isNotFound
     }
 
     @Test fun `sendVerificationEmail works`() = runTest {

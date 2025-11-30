@@ -58,7 +58,7 @@ class GeolocationServiceTest : BaseIntegrationTest() {
             .expectStatus()
             .isOk
 
-        val updatedUser = userService.findById(user.info.id.getOrThrow()).getOrThrow()
+        val updatedUser = userService.findById(user.id).getOrThrow()
         val location = updatedUser.sensitive.sessions.values.first().location
 
         println(location)

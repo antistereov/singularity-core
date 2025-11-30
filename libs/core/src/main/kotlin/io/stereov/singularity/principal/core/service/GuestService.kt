@@ -1,9 +1,11 @@
 package io.stereov.singularity.principal.core.service
 
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.*
+import com.github.michaelbull.result.coroutines.coroutineBinding
+import com.github.michaelbull.result.coroutines.runSuspendCatching
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.database.encryption.exception.EncryptionException
+import io.stereov.singularity.database.encryption.exception.FindEncryptedDocumentByIdException
 import io.stereov.singularity.database.encryption.exception.SaveEncryptedDocumentException
 import io.stereov.singularity.database.encryption.model.Encrypted
 import io.stereov.singularity.database.encryption.service.EncryptionSecretService
@@ -13,9 +15,14 @@ import io.stereov.singularity.principal.core.dto.request.CreateGuestRequest
 import io.stereov.singularity.principal.core.mapper.GuestMapper
 import io.stereov.singularity.principal.core.model.Guest
 import io.stereov.singularity.principal.core.model.encrypted.EncryptedGuest
+import io.stereov.singularity.principal.core.model.encrypted.EncryptedPrincipal
+import io.stereov.singularity.principal.core.model.encrypted.EncryptedUser
 import io.stereov.singularity.principal.core.model.sensitve.SensitiveGuestData
 import io.stereov.singularity.principal.core.repository.GuestRepository
+import kotlinx.coroutines.reactor.awaitSingleOrNull
+import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
+import org.springframework.data.mongodb.core.findById
 import org.springframework.stereotype.Service
 
 /**
@@ -80,10 +87,28 @@ class GuestService (
     suspend fun createGuest(req: CreateGuestRequest): Result<Guest, SaveEncryptedDocumentException> {
         logger.debug { "Creating guest with name ${req.name}" }
 
-        val user = guestMapper.createGuest(
+        val guest = guestMapper.createGuest(
             name = req.name,
         )
 
-        return save(user)
+        return save(guest)
+    }
+
+    override suspend fun findById(id: ObjectId): Result<Guest, FindEncryptedDocumentByIdException> = coroutineBinding {
+        val encryptedPrincipal = runSuspendCatching {
+            reactiveMongoTemplate.findById<EncryptedPrincipal<*, *>>(id, "principals")
+                .awaitSingleOrNull()
+        }
+            .mapError { ex -> FindEncryptedDocumentByIdException.Database("Failed to retrieve guest with id $id from database", ex) }
+            .andThen { it.toResultOr { FindEncryptedDocumentByIdException.NotFound("No guest found with id $id") }}
+            .bind()
+
+        val decryptedPrincipal = when (encryptedPrincipal) {
+            is EncryptedGuest -> decrypt(encryptedPrincipal)
+            is EncryptedUser -> Err(FindEncryptedDocumentByIdException.NotFound("No guest found with id $id")).bind()
+        }
+
+        decryptedPrincipal.mapError { ex -> FindEncryptedDocumentByIdException.Encryption("Failed to decrypt guest with id $id: ${ex.message}", ex) }
+            .bind()
     }
 }

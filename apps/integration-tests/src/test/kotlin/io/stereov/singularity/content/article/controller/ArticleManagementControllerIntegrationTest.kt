@@ -70,7 +70,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
 
         val article = articleService.findByKey(res.key).getOrThrow()
         assertEquals(AccessType.PRIVATE, article.access.visibility)
-        assertEquals(owner.info.id, article.access.ownerId)
+        assertEquals(owner.id, article.access.ownerId)
         assertTrue(article.access.users.isEmpty())
         assertTrue(article.access.groups.isEmpty())
         val translation = requireNotNull(article.translations[Locale.ENGLISH])
@@ -104,7 +104,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
 
         val article = articleService.findByKey(res.key).getOrThrow()
         assertEquals(AccessType.PRIVATE, article.access.visibility)
-        assertEquals(owner.info.id, article.access.ownerId)
+        assertEquals(owner.id, article.access.ownerId)
         assertTrue(article.access.users.isEmpty())
         assertTrue(article.access.groups.isEmpty())
         val translation = requireNotNull(article.translations[Locale.GERMAN])
@@ -138,7 +138,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
 
         val article = articleService.findByKey(res.key).getOrThrow()
         assertEquals(AccessType.PRIVATE, article.access.visibility)
-        assertEquals(owner.info.id, article.access.ownerId)
+        assertEquals(owner.id, article.access.ownerId)
         assertTrue(article.access.users.isEmpty())
         assertTrue(article.access.groups.isEmpty())
         val translation = requireNotNull(article.translations[Locale.ENGLISH])
@@ -164,7 +164,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
 
         val article1 = articleService.findByKey(res.key).getOrThrow()
         assertEquals(AccessType.PRIVATE, article1.access.visibility)
-        assertEquals(owner.info.id, article1.access.ownerId)
+        assertEquals(owner.id, article1.access.ownerId)
         assertTrue(article1.access.users.isEmpty())
         assertTrue(article1.access.groups.isEmpty())
         val translation1 = requireNotNull(article.translations[Locale.ENGLISH])
@@ -752,7 +752,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         val owner = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
         val anotherUser = registerUser()
         val article = saveArticle(owner = owner)
-        article.access.users.viewer.add(anotherUser.info.id.toString())
+        article.access.users.viewer.add(anotherUser.id.toString())
         articleService.save(article)
 
         val req = UpdateArticleRequest(
@@ -858,7 +858,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         val owner = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
         val article = saveArticle(owner = owner)
         val anotherUser = registerUser()
-        article.access.users.viewer.add(anotherUser.info.id.toString())
+        article.access.users.viewer.add(anotherUser.id.toString())
         articleService.save(article)
 
         val req = ChangeArticleStateRequest(ArticleState.PUBLISHED)
@@ -1198,7 +1198,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         val article = saveArticle(owner = owner)
         val file = ClassPathResource("files/test-image.jpg")
         val anotherUser = registerUser()
-        article.access.users.viewer.add(anotherUser.info.id.toString())
+        article.access.users.viewer.add(anotherUser.id.toString())
         articleService.save(article)
 
         webTestClient.put()
@@ -1283,9 +1283,9 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         val req = UpdateContentAccessRequest(
             accessType = AccessType.PUBLIC,
             sharedUsers = mapOf(
-                maintainer.info.id.getOrThrow() to ContentAccessRole.MAINTAINER,
-                editor.info.id.getOrThrow() to ContentAccessRole.EDITOR,
-                viewer.info.id.getOrThrow() to ContentAccessRole.VIEWER
+                maintainer.id to ContentAccessRole.MAINTAINER,
+                editor.id to ContentAccessRole.EDITOR,
+                viewer.id to ContentAccessRole.VIEWER
             ),
             sharedGroups = mapOf(
                 maintainerGroup.key to ContentAccessRole.MAINTAINER,
@@ -1311,13 +1311,13 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
             .responseBody
             .awaitFirst()
 
-        assertEquals(owner.info.id, res1.ownerId)
+        assertEquals(owner.id, res1.ownerId)
         assertEquals(req.accessType, res1.visibility)
         assertEquals(3, res1.users.size)
         assertEquals(3, res1.groups.size)
-        assertTrue(res1.users.any { it.user.id == maintainer.info.id.getOrThrow() && it.role == ContentAccessRole.MAINTAINER })
-        assertTrue(res1.users.any { it.user.id == editor.info.id.getOrThrow() && it.role == ContentAccessRole.EDITOR })
-        assertTrue(res1.users.any { it.user.id == viewer.info.id.getOrThrow() && it.role == ContentAccessRole.VIEWER })
+        assertTrue(res1.users.any { it.user.id == maintainer.id && it.role == ContentAccessRole.MAINTAINER })
+        assertTrue(res1.users.any { it.user.id == editor.id && it.role == ContentAccessRole.EDITOR })
+        assertTrue(res1.users.any { it.user.id == viewer.id && it.role == ContentAccessRole.VIEWER })
         assertTrue(res1.groups[maintainerGroup.key] == ContentAccessRole.MAINTAINER)
         assertTrue(res1.groups[editorGroup.key] == ContentAccessRole.EDITOR)
         assertTrue(res1.groups[viewerGroup.key] == ContentAccessRole.VIEWER)
@@ -1343,7 +1343,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
             .responseBody
             .awaitFirst()
 
-        assertEquals(owner.info.id, res2.ownerId)
+        assertEquals(owner.id, res2.ownerId)
         assertEquals(req.accessType, res2.visibility)
         assertEquals(0, res2.users.size)
         assertEquals(0, res2.groups.size)
@@ -1352,7 +1352,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         val owner = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
         val article = saveArticle(owner = owner)
         val anotherUser = registerUser()
-        article.access.users.editor.add(anotherUser.info.id.toString())
+        article.access.users.editor.add(anotherUser.id.toString())
         articleService.save(article)
 
         webTestClient.get()
@@ -1403,9 +1403,9 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         val req = UpdateContentAccessRequest(
             accessType = AccessType.PUBLIC,
             sharedUsers = mapOf(
-                maintainer.info.id.getOrThrow() to ContentAccessRole.MAINTAINER,
-                editor.info.id.getOrThrow() to ContentAccessRole.EDITOR,
-                viewer.info.id.getOrThrow() to ContentAccessRole.VIEWER
+                maintainer.id to ContentAccessRole.MAINTAINER,
+                editor.id to ContentAccessRole.EDITOR,
+                viewer.id to ContentAccessRole.VIEWER
             ),
             sharedGroups = mapOf(
                 maintainerGroup.key to ContentAccessRole.MAINTAINER,
@@ -1453,9 +1453,9 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertNotEquals(article.access, updatedArticle.access)
         assertEquals(article.access.ownerId, updatedArticle.access.ownerId)
         assertEquals(req.accessType, updatedArticle.access.visibility)
-        assertTrue(updatedArticle.access.users.maintainer.contains(maintainer.info.id.toString()))
-        assertTrue(updatedArticle.access.users.editor.contains(editor.info.id.toString()))
-        assertTrue(updatedArticle.access.users.viewer.contains(viewer.info.id.toString()))
+        assertTrue(updatedArticle.access.users.maintainer.contains(maintainer.id.toString()))
+        assertTrue(updatedArticle.access.users.editor.contains(editor.id.toString()))
+        assertTrue(updatedArticle.access.users.viewer.contains(viewer.id.toString()))
         assertTrue(updatedArticle.access.groups.maintainer.contains(maintainerGroup.key))
         assertTrue(updatedArticle.access.groups.editor.contains(editorGroup.key))
         assertTrue(updatedArticle.access.groups.viewer.contains(viewerGroup.key))
@@ -1496,9 +1496,9 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         val req = UpdateContentAccessRequest(
             accessType = AccessType.PUBLIC,
             sharedUsers = mapOf(
-                maintainer.info.id.getOrThrow() to ContentAccessRole.MAINTAINER,
-                editor.info.id.getOrThrow() to ContentAccessRole.EDITOR,
-                viewer.info.id.getOrThrow() to ContentAccessRole.VIEWER
+                maintainer.id to ContentAccessRole.MAINTAINER,
+                editor.id to ContentAccessRole.EDITOR,
+                viewer.id to ContentAccessRole.VIEWER
             ),
             sharedGroups = mapOf(
                 maintainerGroup.key to ContentAccessRole.MAINTAINER,
@@ -1601,9 +1601,9 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         val req = UpdateContentAccessRequest(
             accessType = AccessType.PUBLIC,
             sharedUsers = mapOf(
-                maintainer.info.id.getOrThrow() to ContentAccessRole.MAINTAINER,
-                editor.info.id.getOrThrow() to ContentAccessRole.EDITOR,
-                viewer.info.id.getOrThrow() to ContentAccessRole.VIEWER
+                maintainer.id to ContentAccessRole.MAINTAINER,
+                editor.id to ContentAccessRole.EDITOR,
+                viewer.id to ContentAccessRole.VIEWER
             ),
             sharedGroups = mapOf(
                 maintainerGroup.key to ContentAccessRole.MAINTAINER,
@@ -1624,9 +1624,9 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         val req2 = UpdateContentAccessRequest(
             accessType = AccessType.PRIVATE,
             sharedUsers = mapOf(
-                maintainer.info.id.getOrThrow() to ContentAccessRole.MAINTAINER,
-                editor.info.id.getOrThrow() to ContentAccessRole.EDITOR,
-                viewer.info.id.getOrThrow() to ContentAccessRole.VIEWER
+                maintainer.id to ContentAccessRole.MAINTAINER,
+                editor.id to ContentAccessRole.EDITOR,
+                viewer.id to ContentAccessRole.VIEWER
             ),
             sharedGroups = mapOf(
                 maintainerGroup.key to ContentAccessRole.MAINTAINER,
@@ -1717,9 +1717,9 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         val req = UpdateContentAccessRequest(
             accessType = AccessType.PRIVATE,
             sharedUsers = mapOf(
-                maintainer.info.id.getOrThrow() to ContentAccessRole.MAINTAINER,
-                editor.info.id.getOrThrow() to ContentAccessRole.EDITOR,
-                viewer.info.id.getOrThrow() to ContentAccessRole.VIEWER
+                maintainer.id to ContentAccessRole.MAINTAINER,
+                editor.id to ContentAccessRole.EDITOR,
+                viewer.id to ContentAccessRole.VIEWER
             ),
             sharedGroups = mapOf(
                 maintainerGroup.key to ContentAccessRole.MAINTAINER,
@@ -1809,9 +1809,9 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         val req = UpdateContentAccessRequest(
             accessType = AccessType.PUBLIC,
             sharedUsers = mapOf(
-                maintainer.info.id.getOrThrow() to ContentAccessRole.MAINTAINER,
-                editor.info.id.getOrThrow() to ContentAccessRole.EDITOR,
-                viewer.info.id.getOrThrow() to ContentAccessRole.VIEWER
+                maintainer.id to ContentAccessRole.MAINTAINER,
+                editor.id to ContentAccessRole.EDITOR,
+                viewer.id to ContentAccessRole.VIEWER
             ),
             sharedGroups = mapOf(
                 maintainerGroup.key to ContentAccessRole.MAINTAINER,
@@ -1911,9 +1911,9 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         val req = UpdateContentAccessRequest(
             accessType = AccessType.PUBLIC,
             sharedUsers = mapOf(
-                maintainer.info.id.getOrThrow() to ContentAccessRole.MAINTAINER,
-                editor.info.id.getOrThrow() to ContentAccessRole.EDITOR,
-                viewer.info.id.getOrThrow() to ContentAccessRole.VIEWER
+                maintainer.id to ContentAccessRole.MAINTAINER,
+                editor.id to ContentAccessRole.EDITOR,
+                viewer.id to ContentAccessRole.VIEWER
             ),
             sharedGroups = mapOf(
                 "maintainer" to ContentAccessRole.MAINTAINER,
@@ -1935,7 +1935,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         val owner = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
         val article = saveArticle(owner = owner)
         val maintainer = registerUser()
-        userService.deleteById(maintainer.info.id.getOrThrow()).getOrThrow()
+        userService.deleteById(maintainer.id).getOrThrow()
         val editor = registerUser()
         val viewer = registerUser()
         val maintainerGroup = groupService.save(Group(
@@ -1954,9 +1954,9 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         val req = UpdateContentAccessRequest(
             accessType = AccessType.PUBLIC,
             sharedUsers = mapOf(
-                maintainer.info.id.getOrThrow() to ContentAccessRole.MAINTAINER,
-                editor.info.id.getOrThrow() to ContentAccessRole.EDITOR,
-                viewer.info.id.getOrThrow() to ContentAccessRole.VIEWER
+                maintainer.id to ContentAccessRole.MAINTAINER,
+                editor.id to ContentAccessRole.EDITOR,
+                viewer.id to ContentAccessRole.VIEWER
             ),
             sharedGroups = mapOf(
                 maintainerGroup.key to ContentAccessRole.MAINTAINER,
@@ -1978,7 +1978,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         val owner = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
         val article = saveArticle(owner = owner)
         val anotherUser = registerUser()
-        article.access.users.viewer.add(anotherUser.info.id.toString())
+        article.access.users.viewer.add(anotherUser.id.toString())
         articleService.save(article)
 
         val maintainer = registerUser()
@@ -2000,9 +2000,9 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         val req = UpdateContentAccessRequest(
             accessType = AccessType.PUBLIC,
             sharedUsers = mapOf(
-                maintainer.info.id.getOrThrow() to ContentAccessRole.MAINTAINER,
-                editor.info.id.getOrThrow() to ContentAccessRole.EDITOR,
-                viewer.info.id.getOrThrow() to ContentAccessRole.VIEWER
+                maintainer.id to ContentAccessRole.MAINTAINER,
+                editor.id to ContentAccessRole.EDITOR,
+                viewer.id to ContentAccessRole.VIEWER
             ),
             sharedGroups = mapOf(
                 maintainerGroup.key to ContentAccessRole.MAINTAINER,
@@ -2043,9 +2043,9 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         val req = UpdateContentAccessRequest(
             accessType = AccessType.PUBLIC,
             sharedUsers = mapOf(
-                maintainer.info.id.getOrThrow() to ContentAccessRole.MAINTAINER,
-                editor.info.id.getOrThrow() to ContentAccessRole.EDITOR,
-                viewer.info.id.getOrThrow() to ContentAccessRole.VIEWER
+                maintainer.id to ContentAccessRole.MAINTAINER,
+                editor.id to ContentAccessRole.EDITOR,
+                viewer.id to ContentAccessRole.VIEWER
             ),
             sharedGroups = mapOf(
                 maintainerGroup.key to ContentAccessRole.MAINTAINER,
@@ -2085,9 +2085,9 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         val req = UpdateContentAccessRequest(
             accessType = AccessType.PUBLIC,
             sharedUsers = mapOf(
-                maintainer.info.id.getOrThrow() to ContentAccessRole.MAINTAINER,
-                editor.info.id.getOrThrow() to ContentAccessRole.EDITOR,
-                viewer.info.id.getOrThrow() to ContentAccessRole.VIEWER
+                maintainer.id to ContentAccessRole.MAINTAINER,
+                editor.id to ContentAccessRole.EDITOR,
+                viewer.id to ContentAccessRole.VIEWER
             ),
             sharedGroups = mapOf(
                 maintainerGroup.key to ContentAccessRole.MAINTAINER,
@@ -2111,8 +2111,8 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         val article = saveArticle(owner = owner)
         val newOwner = registerUser()
 
-        val req = UpdateOwnerRequest(newOwner.info.id.toString())
-        assertTrue(userService.existsById(newOwner.info.id.getOrThrow()).getOrThrow())
+        val req = UpdateOwnerRequest(newOwner.id.toString())
+        assertTrue(userService.existsById(newOwner.id).getOrThrow())
 
         val res = webTestClient.put()
             .uri("/api/content/articles/${article.key}/owner")
@@ -2151,7 +2151,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         assertEquals(article.publishedAt?.truncatedTo(ChronoUnit.MILLIS), updatedArticle.publishedAt)
         assertTrue(article.updatedAt.isBefore(updatedArticle.updatedAt))
         assertEquals(req.newOwnerId, updatedArticle.access.ownerId.toString())
-        assertTrue(updatedArticle.access.users.maintainer.contains(owner.info.id.toString()))
+        assertTrue(updatedArticle.access.users.maintainer.contains(owner.id.toString()))
         assertEquals(contentProperties.contentUri.substringAfter(uiProperties.baseUri)
             .replace("{contentType}", Article.CONTENT_TYPE)
             .replace("{contentKey}", key),
@@ -2172,11 +2172,11 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         val owner = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
         val article = saveArticle(owner = owner)
         val anotherUser = registerUser()
-        article.access.users.maintainer.add(anotherUser.info.id.toString())
+        article.access.users.maintainer.add(anotherUser.id.toString())
         articleService.save(article)
         val newOwner = registerUser()
 
-        val req = UpdateOwnerRequest(newOwner.info.id.toString())
+        val req = UpdateOwnerRequest(newOwner.id.toString())
 
         webTestClient.put()
             .uri("/api/content/articles/${article.key}/owner")
@@ -2192,7 +2192,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         val article = saveArticle(owner = owner)
         val newOwner = registerUser()
 
-        val req = UpdateOwnerRequest(newOwner.info.id.toString())
+        val req = UpdateOwnerRequest(newOwner.id.toString())
 
         webTestClient.put()
             .uri("/api/content/articles/${article.key}/owner")
@@ -2207,7 +2207,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         val article = saveArticle(owner = owner)
         val newOwner = registerUser()
 
-        val req = UpdateOwnerRequest(newOwner.info.id.toString())
+        val req = UpdateOwnerRequest(newOwner.id.toString())
 
         webTestClient.put()
             .uri("/api/content/articles/not-there/owner")
@@ -2222,9 +2222,9 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         val owner = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
         val article = saveArticle(owner = owner)
         val newOwner = registerUser()
-        userService.deleteById(newOwner.info.id.getOrThrow()).getOrThrow()
+        userService.deleteById(newOwner.id).getOrThrow()
 
-        val req = UpdateOwnerRequest(newOwner.info.id.toString())
+        val req = UpdateOwnerRequest(newOwner.id.toString())
 
         webTestClient.put()
             .uri("/api/content/articles/${article.key}/owner")
@@ -2409,7 +2409,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
         val owner = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
         val article = saveArticle(owner = owner)
         val anotherUser = registerUser()
-        article.access.users.editor.add(anotherUser.info.id.toString())
+        article.access.users.editor.add(anotherUser.id.toString())
         articleService.save(article)
 
         webTestClient.delete()
