@@ -264,7 +264,10 @@ abstract class FileStorage {
         logger.debug { "Removing file with key \"$key\"" }
 
         val metadata = metadataService.findByKey(key)
-            .mapError { ex -> FileException.Metadata("No metadata found for file with key $key: ${ex.message}", ex) }
+            .mapError { ex -> when (ex) {
+                is FindDocumentByKeyException.NotFound -> FileException.NotFound("No metadata found for file with key $key: ${ex.message}", ex)
+                is FindDocumentByKeyException.Database -> FileException.Metadata("Failed to retrieve file metadata for file with $key: ${ex.message}", ex)
+            } }
             .bind()
 
         metadata.renditions.values.forEach { rendition ->

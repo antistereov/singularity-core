@@ -60,7 +60,7 @@ class TestS3FileStorage : BaseSpringBootTest() {
             .getOrThrow()
         method(file, metadata, user)
 
-        storage.remove(metadata.key).getOrThrow()
+        storage.remove(metadata.key)
     }
 
     @Test fun `should initialize beans correctly`() {

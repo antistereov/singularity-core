@@ -43,8 +43,6 @@ data class FileMetadataDocument(
     override var tags: MutableSet<String> = mutableSetOf()
 ) : ContentDocument<FileMetadataDocument> {
 
-
-
     constructor(
         id: ObjectId? = null,
         key: String,
