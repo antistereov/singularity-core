@@ -48,6 +48,8 @@ interface SecretStore {
      * or a [SecretStoreException] if there is a failure.
      */
     suspend fun put(key: String, value: String, note: String = ""): Result<Secret, SecretStoreException> {
+        logger.debug { "Writing key $key to secret store" }
+
         return doPut(key, value, note).onSuccess { secret ->
             secretCache.put(secret).recover { ex ->
                 logger.warn(ex) { "Failed to cache secret $key: ${ex.message}"}

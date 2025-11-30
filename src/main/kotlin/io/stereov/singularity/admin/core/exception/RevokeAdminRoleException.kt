@@ -17,7 +17,7 @@ sealed class RevokeAdminRoleException(
     class AtLeastOneAdminRequired(msg: String, cause: Throwable? = null) : RevokeAdminRoleException(
         msg,
         "AT_LEAST_ONE_ADMIN_REQUIRED",
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.CONFLICT,
         "At least one admin is required.",
         cause
     )

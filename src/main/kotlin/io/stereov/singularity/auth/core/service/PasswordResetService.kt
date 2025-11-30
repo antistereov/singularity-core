@@ -83,11 +83,12 @@ class PasswordResetService(
                     when (ex) {
                         is FindUserByEmailException.UserNotFound -> {
                             noAccountInfoService.send(req.email, NoAccountInfoAction.PASSWORD_RESET, locale)
-                                .onFailure { ex -> logger.error(ex) { "Failed to send no account info email"} }
+                                .mapError { SendPasswordResetException.from(it) }
+                                .bind()
                             startCooldown(req.email)
                                 .mapError { ex -> SendPasswordResetException.CooldownCache("Failed to start cooldown: ${ex.message}", ex) }
                         }
-                        else -> Err(SendPasswordResetException.Database("Failed to find user by email: ${ex.message}", ex))
+                        else -> Err(SendPasswordResetException.Database("Database failure: ${ex.message}", ex))
                     } }
             )
             .bind()

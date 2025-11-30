@@ -573,7 +573,8 @@ class AuthenticationController(
     )
     @ThrowsDomainError([
         AccessTokenExtractionException::class,
-        FindUserByIdException::class,
+        FindPrincipalByIdException::class,
+        PrincipalException.InvalidDocument::class,
     ])
     suspend fun getAuthenticationStatus(exchange: ServerWebExchange): ResponseEntity<AuthenticationStatusResponse> {
         val authenticationOutcome = authorizationService.getAuthenticationOutcome()
@@ -599,17 +600,24 @@ class AuthenticationController(
         } else null
         val stepUp = stepUpToken != null
 
-        val user = if (authorizedUserId != null || twoFactorToken != null) {
-            userService.findById(authorizedUserId ?: twoFactorToken!!.userId)
-                .getOrThrow { FindUserByIdException.from(it) }
+        val principal = if (authorizedUserId != null || twoFactorToken != null) {
+            principalService.findById(authorizedUserId ?: twoFactorToken!!.userId)
+                .getOrThrow { when (it) { is FindPrincipalByIdException -> it } }
         } else null
 
-        val (twoFactorMethods, preferredTwoFactorMethod) = if (twoFactorToken != null && twoFactorRequired) {
-
-            user!!.twoFactorMethods to user.preferredTwoFactorMethod.getOrNull()
+        val (twoFactorMethods, preferredTwoFactorMethod) = if (principal != null && principal is User) {
+            if (principal.twoFactorEnabled) {
+                principal.twoFactorMethods to principal.preferredTwoFactorMethod
+                    .getOrThrow { PrincipalException.InvalidDocument("2FA is enabled but no preferred method is set") }
+            } else {
+                null to null
+            }
         } else null to null
 
-        val emailVerified = user?.sensitive?.security?.email?.verified
+        val emailVerified = when (principal) {
+            is User -> principal.sensitive.security.email.verified
+            else -> null
+        }
 
         return ResponseEntity.ok(
             AuthenticationStatusResponse(

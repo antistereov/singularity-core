@@ -13,10 +13,15 @@ import io.stereov.singularity.database.encryption.exception.SaveEncryptedDocumen
 import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.principal.core.dto.response.UserResponse
+import io.stereov.singularity.principal.core.exception.FindPrincipalByIdException
 import io.stereov.singularity.principal.core.exception.FindUserByIdException
+import io.stereov.singularity.principal.core.exception.PrincipalException
 import io.stereov.singularity.principal.core.exception.PrincipalMapperException
 import io.stereov.singularity.principal.core.mapper.PrincipalMapper
+import io.stereov.singularity.principal.core.model.Guest
 import io.stereov.singularity.principal.core.model.Role
+import io.stereov.singularity.principal.core.model.User
+import io.stereov.singularity.principal.core.service.PrincipalService
 import io.stereov.singularity.principal.core.service.UserService
 import io.swagger.v3.oas.annotations.ExternalDocumentation
 import io.swagger.v3.oas.annotations.Operation
@@ -35,7 +40,8 @@ class AdminController(
     private val accessTokenCache: AccessTokenCache,
     private val authorizationService: AuthorizationService,
     private val userService: UserService,
-    private val principalMapper: PrincipalMapper
+    private val principalMapper: PrincipalMapper,
+    private val principalService: PrincipalService
 ) {
 
     private val logger = KotlinLogging.logger {}
@@ -69,7 +75,7 @@ class AdminController(
         AccessTokenExtractionException::class,
         AuthenticationException.AuthenticationRequired::class,
         AuthenticationException.RoleRequired::class,
-        FindUserByIdException::class,
+        FindPrincipalByIdException::class,
         SaveEncryptedDocumentException::class,
         PrincipalMapperException::class
     ])
@@ -86,15 +92,28 @@ class AdminController(
         accessTokenCache.invalidateAllTokens(userId)
             .onFailure { ex -> logger.error(ex) { "Failed to invalidate all tokens for user $userId" } }
 
-        var user = userService.findById(userId)
-            .getOrThrow { FindUserByIdException.from(it) }
-        user = adminService.addAdminRole(user)
-            .getOrThrow { when (it) { is SaveEncryptedDocumentException -> it } }
+        var principal = principalService.findById(userId)
+            .getOrThrow { when (it) { is FindPrincipalByIdException -> it } }
+        when (principal) {
+            is Guest -> throw PrincipalException.GuestCannotPerformThisAction("Only users can be admins")
+            is User -> {
+                principal = adminService.addAdminRole(principal)
+                    .getOrThrow {
+                        when (it) {
+                            is SaveEncryptedDocumentException -> it
+                        }
+                    }
 
-        val response = principalMapper.toResponse(user)
-            .getOrThrow { when (it) { is PrincipalMapperException -> it } }
+                val response = principalMapper.toResponse(principal)
+                    .getOrThrow {
+                        when (it) {
+                            is PrincipalMapperException -> it
+                        }
+                    }
 
-        return ResponseEntity.ok(response)
+                return ResponseEntity.ok(response)
+            }
+        }
     }
 
     @DeleteMapping("{userId}")

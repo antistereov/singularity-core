@@ -7,6 +7,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.database.core.util.CriteriaBuilder
 import io.stereov.singularity.database.encryption.exception.EncryptionException
 import io.stereov.singularity.database.encryption.exception.FindAllEncryptedDocumentsPaginatedException
+import io.stereov.singularity.database.encryption.exception.FindEncryptedDocumentByIdException
 import io.stereov.singularity.database.encryption.model.Encrypted
 import io.stereov.singularity.database.encryption.service.EncryptionSecretService
 import io.stereov.singularity.database.encryption.service.EncryptionService
@@ -18,6 +19,8 @@ import io.stereov.singularity.principal.core.exception.FindUserByProviderIdentit
 import io.stereov.singularity.principal.core.exception.GetUsersException
 import io.stereov.singularity.principal.core.model.Role
 import io.stereov.singularity.principal.core.model.User
+import io.stereov.singularity.principal.core.model.encrypted.EncryptedGuest
+import io.stereov.singularity.principal.core.model.encrypted.EncryptedPrincipal
 import io.stereov.singularity.principal.core.model.encrypted.EncryptedUser
 import io.stereov.singularity.principal.core.model.identity.HashedUserIdentities
 import io.stereov.singularity.principal.core.model.identity.HashedUserIdentity
@@ -25,9 +28,12 @@ import io.stereov.singularity.principal.core.model.sensitve.SensitiveUserData
 import io.stereov.singularity.principal.core.repository.UserRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.reactor.awaitSingleOrNull
+import org.bson.types.ObjectId
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
+import org.springframework.data.mongodb.core.findById
 import org.springframework.stereotype.Service
 import java.time.Instant
 
@@ -187,6 +193,24 @@ class UserService(
         logger.debug { "Finding all users with group membership $group" }
 
         return repository.findAllByGroupsContaining(group).map { decrypt(it) }
+    }
+
+    override suspend fun findById(id: ObjectId): Result<User, FindEncryptedDocumentByIdException> = coroutineBinding {
+        val encryptedPrincipal = runSuspendCatching {
+            reactiveMongoTemplate.findById<EncryptedPrincipal<*, *>>(id, "principals")
+                .awaitSingleOrNull()
+        }
+            .mapError { ex -> FindEncryptedDocumentByIdException.Database("Failed to retrieve user with id $id from database", ex) }
+            .andThen { it.toResultOr { FindEncryptedDocumentByIdException.NotFound("No user found with id $id") }}
+            .bind()
+
+        val decryptedPrincipal = when (encryptedPrincipal) {
+            is EncryptedUser -> decrypt(encryptedPrincipal)
+            is EncryptedGuest -> Err(FindEncryptedDocumentByIdException.NotFound("No user found with id $id")).bind()
+        }
+
+        decryptedPrincipal.mapError { ex -> FindEncryptedDocumentByIdException.Encryption("Failed to decrypt user with id $id: ${ex.message}", ex) }
+            .bind()
     }
 
     /**

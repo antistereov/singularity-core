@@ -58,8 +58,10 @@ class SecurityAlertService(
             user,
             locale,
             SecurityAlertType.EMAIL_CHANGED,
-            oldEmail = oldEmail,
-            newEmail = newEmail
+            null,
+            null,
+            oldEmail,
+            newEmail
         )
     }
 

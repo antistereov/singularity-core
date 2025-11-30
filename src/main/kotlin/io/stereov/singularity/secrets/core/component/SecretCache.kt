@@ -44,7 +44,7 @@ class SecretCache(
      *   or a [CacheException] if an error occurs during the caching process.
      */
     suspend fun put(secret: Secret): Result<Secret, CacheException> {
-        logger.trace { "Caching secret ${secret.key}" }
+        logger.debug { "Caching secret ${secret.key}" }
         return cacheService.put(getCacheKey(secret.key), secret, expirationDurationSeconds)
     }
 
@@ -60,7 +60,7 @@ class SecretCache(
      * an error occurs (e.g., key not found or deserialization failure).
      */
     suspend fun get(key: String): Result<Secret, CacheException> {
-        logger.trace { "Retrieving secret $key from cache" }
+        logger.debug { "Retrieving secret $key from cache" }
         return cacheService.get<Secret>(getCacheKey(key))
     }
 }

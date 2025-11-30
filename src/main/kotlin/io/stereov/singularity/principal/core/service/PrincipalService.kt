@@ -18,6 +18,7 @@ import io.stereov.singularity.principal.core.model.sensitve.SensitivePrincipalDa
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.reactive.asFlow
+import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
@@ -118,8 +119,8 @@ class PrincipalService(
      */
     suspend fun deleteById(id: ObjectId): Result<Unit, DeleteEncryptedDocumentByIdException> {
         return runSuspendCatching {
-            reactiveMongoTemplate.remove(Criteria.where("_id").`is`(id), "principals")
-                .awaitSingleOrNull()
+            reactiveMongoTemplate.remove(Query(Criteria.where(Principal<*,*>::_id.name).`is`(id)), Principal::class.java,"principals")
+                .awaitSingle()
         }
             .mapError { ex -> DeleteEncryptedDocumentByIdException.Database("Failed to delete principal with id ${id}: ${ex.message}", ex) }
             .map { }

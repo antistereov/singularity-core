@@ -54,7 +54,7 @@ interface CrudService<T: WithId> {
      *         is not found or an error occurs during the operation.
      */
     suspend fun findById(id: ObjectId): Result<T, FindDocumentByIdException> {
-        logger.debug { "Finding ${collectionClazz.name} by ID $id" }
+        logger.debug { "Finding ${collectionClazz.simpleName} by ID $id" }
 
         return runSuspendCatching { repository.findById(id) }
             .mapError { ex -> FindDocumentByIdException.Database("Failed to fetch ${collectionClazz.simpleName} with ID $id: ${ex.message}", ex) }
@@ -69,7 +69,7 @@ interface CrudService<T: WithId> {
      *   or a [ExistsDocumentByIdException] if an error occurs during the operation.
      */
     suspend fun existsById(id: ObjectId): Result<Boolean, ExistsDocumentByIdException> {
-        logger.debug { "Checking if ${collectionClazz.name} exists by ID $id" }
+        logger.debug { "Checking if ${collectionClazz.simpleName} exists by ID $id" }
 
         return runSuspendCatching { repository.existsById(id) }
             .mapError { ex -> ExistsDocumentByIdException.Database("Failed to check existence of ${collectionClazz.simpleName} with ID $id: ${ex.message}", ex) }
@@ -83,7 +83,7 @@ interface CrudService<T: WithId> {
      *         if an error occurs during the deletion process.
      */
     suspend fun deleteById(id: ObjectId): Result<Unit, DeleteDocumentByIdException> {
-        logger.debug { "Deleting ${collectionClazz.name} by ID $id" }
+        logger.debug { "Deleting ${collectionClazz.simpleName} by ID $id" }
 
         return runSuspendCatching { repository.deleteById(id) }
             .mapError { ex -> DeleteDocumentByIdException.Database("Failed to delete ${collectionClazz.simpleName} with ID $id: ${ex.message}", ex) }
@@ -96,7 +96,7 @@ interface CrudService<T: WithId> {
      *         if an error occurs during the deletion process.
      */
     suspend fun deleteAll(): Result<Unit, DeleteAllDocumentsException> {
-        logger.debug { "Deleting all ${collectionClazz.name}" }
+        logger.debug { "Deleting all ${collectionClazz.simpleName}" }
 
         return runSuspendCatching { repository.deleteAll() }
             .mapError { ex -> DeleteAllDocumentsException.Database("Failed to delete all ${collectionClazz.simpleName}s: ${ex.message}", ex) }
@@ -109,7 +109,7 @@ interface CrudService<T: WithId> {
      * @return A [Result] containing the saved document or a [SaveDocumentException] if an error occurs during the save operation.
      */
     suspend fun save(doc: T): Result<T, SaveDocumentException> {
-        logger.debug { "Saving ${collectionClazz.name}" }
+        logger.debug { "Saving ${collectionClazz.simpleName}" }
 
         return runSuspendCatching { repository.save(doc) }
             .mapError { ex -> SaveDocumentException.Database("Failed to save ${collectionClazz.name}: ${ex.message}", ex) }
@@ -123,7 +123,7 @@ interface CrudService<T: WithId> {
      */
     @Suppress("UNUSED")
     suspend fun saveAll(docs: Collection<T>): Result<List<T>, SaveAllDocumentsException> {
-        logger.debug { "Saving multiple ${collectionClazz.name}s" }
+        logger.debug { "Saving multiple ${collectionClazz.simpleName}s" }
 
         return runSuspendCatching { repository.saveAll(docs).toList() }
             .mapError { ex -> SaveAllDocumentsException.Database("Failed to save multiple ${collectionClazz.simpleName}s: ${ex.message}", ex) }

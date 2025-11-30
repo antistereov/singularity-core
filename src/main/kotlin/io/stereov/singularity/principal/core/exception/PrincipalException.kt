@@ -43,4 +43,12 @@ sealed class PrincipalException(
         InvalidPrincipalDocumentFailure.DESCRIPTION,
         cause
     )
+
+    class GuestCannotPerformThisAction(msg: String, cause: Throwable? = null) : PrincipalException(
+        msg,
+        "GUEST_CANNOT_PERFORM_THIS_ACTION",
+        HttpStatus.BAD_REQUEST,
+        "Failed to perform an action with a guest that is only meant for users.",
+        cause
+    )
 }

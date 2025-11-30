@@ -46,7 +46,7 @@ abstract class SecretService(
      * @return A [Result] containing the [Secret] if successful, or a [SecretStoreException] in case of failure.
      */
     suspend fun getCurrentSecret(): Result<Secret, SecretStoreException> {
-        this.logger.trace { "Getting current secret" }
+        this.logger.debug { "Getting current secret" }
 
         return this.currentSecret
             ?.let { Ok(it) }
@@ -63,7 +63,7 @@ abstract class SecretService(
      * @return A [Result] containing the [Secret] if successful, or a [SecretStoreException] in case of failure.
      */
     private suspend fun loadCurrentSecret(): Result<Secret, SecretStoreException> {
-        this.logger.trace { "Loading current secret from key manager" }
+        this.logger.debug { "Loading current secret from key manager" }
 
         return secretStore.get(actualKey)
             .andThenRecoverIf(
@@ -85,7 +85,7 @@ abstract class SecretService(
      * in case of failure during key generation, secret storage, or related operations.
      */
     suspend fun updateSecret(): Result<Secret, SecretStoreException> = coroutineBinding {
-        logger.trace { "Updating current secret" }
+        logger.debug { "Updating current secret" }
 
         val newKey = "$actualKey-${Instant.now()}"
         val newValue = generateKey(algorithm = algorithm).bind()
@@ -95,8 +95,6 @@ abstract class SecretService(
         currentSecret = newSecret
 
         secretStore.put(actualKey, newSecret.key, newNote).bind()
-
-        newSecret
     }
 
     /**

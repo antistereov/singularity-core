@@ -31,7 +31,7 @@ interface CooldownEmailService {
         logger.debug { "Getting remaining cooldown" }
 
         return cacheService.getRemainingCooldown(getCooldownCacheKey(email))
-            .map { it.seconds >= 0 }
+            .map { it.seconds > 0 }
     }
 
     suspend fun getRemainingCooldown(email: String): Result<Duration, CacheException.Operation> {
