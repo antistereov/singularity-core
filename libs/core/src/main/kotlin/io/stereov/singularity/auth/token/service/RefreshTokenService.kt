@@ -43,7 +43,6 @@ class RefreshTokenService(
     private val jwtProperties: JwtProperties,
     private val geolocationService: GeolocationService,
     private val geolocationProperties: GeolocationProperties,
-    private val userService: UserService,
     private val tokenValueExtractor: TokenValueExtractor,
     private val principalService: PrincipalService
 ) {
@@ -183,7 +182,7 @@ class RefreshTokenService(
                                 .mapError { ex -> RefreshTokenExtractionException.Invalid("Invalid ObjectId in sub: $sub", ex) }
                         }.bind()
     
-                    val user = userService.findById(userId)
+                    val user = principalService.findById(userId)
                         .mapError { ex ->
                             RefreshTokenExtractionException.Invalid(
                                 "Invalid refresh token: user with ID $userId does not exist",

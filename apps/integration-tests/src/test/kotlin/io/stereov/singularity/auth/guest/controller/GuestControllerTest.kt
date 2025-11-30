@@ -67,6 +67,9 @@ class GuestControllerTest : BaseIntegrationTest() {
     @Test fun `createGuest is not modified when already authenticated`() = runTest {
         val name = "Guest"
         val user = registerUser()
+
+        Assertions.assertEquals(1, principalService.findAll().getOrThrow().toList().size)
+
         webTestClient.post()
             .uri("/api/guests")
             .accessTokenCookie(user.accessToken)
@@ -98,8 +101,8 @@ class GuestControllerTest : BaseIntegrationTest() {
 
         val user = principalService.findById(guest.info.id.getOrThrow()).getOrThrow()
 
-        Assertions.assertEquals(user.id, accessToken.userId)
-        Assertions.assertEquals(user.id, refreshToken.userId)
+        Assertions.assertEquals(user.id.getOrThrow(), accessToken.userId)
+        Assertions.assertEquals(user.id.getOrThrow(), refreshToken.userId)
         Assertions.assertEquals(1, user.sensitive.sessions.size)
 
         val session = user.sensitive.sessions.keys.first()

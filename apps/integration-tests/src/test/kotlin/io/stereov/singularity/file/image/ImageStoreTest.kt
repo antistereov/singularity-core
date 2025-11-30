@@ -1,6 +1,7 @@
 package io.stereov.singularity.file.image
 
 import com.github.michaelbull.result.getOrThrow
+import io.stereov.singularity.file.core.exception.FileException
 import io.stereov.singularity.file.core.model.FileKey
 import io.stereov.singularity.file.core.model.FileMetadataDocument
 import io.stereov.singularity.file.download.model.StreamedFile
@@ -17,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ClassPathResource
 import org.springframework.core.io.buffer.DefaultDataBufferFactory
 import org.springframework.http.MediaType
-import org.springframework.web.reactive.function.UnsupportedMediaTypeException
 import reactor.core.publisher.Flux
 import java.io.File
 
@@ -78,7 +78,7 @@ class ImageStoreTest() : BaseIntegrationTest() {
         val filePart = MockFilePart(file, type = MediaType.APPLICATION_JSON)
         val key = FileKey("key")
 
-        assertThrows<UnsupportedMediaTypeException> { imageStore.upload(user.authentication, filePart, key.key, true).getOrThrow() }
+        assertThrows<FileException.UnsupportedMediaType> { imageStore.upload(user.authentication, filePart, key.key, true).getOrThrow() }
     }
     @Test fun `save image throws when wrong content type not set`() = runTest {
         val user = registerUser()
@@ -86,7 +86,7 @@ class ImageStoreTest() : BaseIntegrationTest() {
         val filePart = MockFilePart(file, setType = false)
         val key = FileKey("key")
 
-        assertThrows<UnsupportedMediaTypeException> { imageStore.upload(user.authentication, filePart, key.key, true).getOrThrow() }
+        assertThrows<FileException.UnsupportedMediaType> { imageStore.upload(user.authentication, filePart, key.key, true).getOrThrow() }
     }
 
     @Test fun `save image works with downloaded file`() = runTest {
@@ -112,6 +112,6 @@ class ImageStoreTest() : BaseIntegrationTest() {
         val downloadedFile = StreamedFile(content = Flux.just(DefaultDataBufferFactory().wrap(file.readBytes())), contentType = MediaType.APPLICATION_OCTET_STREAM, url = "")
         val key = FileKey("key")
 
-        assertThrows<UnsupportedMediaTypeException> { imageStore.upload(user.authentication, downloadedFile, key.key, true).getOrThrow() }
+        assertThrows<FileException.UnsupportedMediaType> { imageStore.upload(user.authentication, downloadedFile, key.key, true).getOrThrow() }
     }
 }

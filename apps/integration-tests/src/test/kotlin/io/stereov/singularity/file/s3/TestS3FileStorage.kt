@@ -31,7 +31,7 @@ import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.MinIOContainer
-import org.testcontainers.containers.MongoDBContainer
+import org.testcontainers.mongodb.MongoDBContainer
 import org.testcontainers.utility.DockerImageName
 import java.io.File
 import java.net.URI
@@ -51,7 +51,7 @@ class TestS3FileStorage : BaseSpringBootTest() {
         metadataService.deleteAll().getOrThrow()
     }
 
-    suspend fun runFileTest(public: Boolean = true, method: suspend (file: File, metadata: FileMetadataResponse, user: TestRegisterResponse) -> Unit) = runTest {
+    suspend fun runFileTest(public: Boolean = true, method: suspend (file: File, metadata: FileMetadataResponse, user: TestRegisterResponse<*>) -> Unit) = runTest {
         val user = registerUser()
         val file = ClassPathResource("files/test-image.jpg").file
         val filePart = MockFilePart(file)

@@ -3,6 +3,7 @@ package io.stereov.singularity.auth.core.controller
 import com.github.michaelbull.result.getOrThrow
 import io.mockk.verify
 import io.stereov.singularity.auth.core.dto.response.MailCooldownResponse
+import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.test.BaseMailIntegrationTest
 import jakarta.mail.internet.MimeMessage
 import kotlinx.coroutines.test.runTest
@@ -73,7 +74,7 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
     @Test fun `verifyEmail is bad for guest`() = runTest {
         val guest = createGuest()
 
-        val token = emailVerificationTokenService.create(guest.info.id.getOrThrow(), "random-email" ,guest.info.sensitive.security.email.verificationSecret).getOrThrow()
+        val token = emailVerificationTokenService.create(guest.info.id.getOrThrow(), "random-email" , Random.generateString().getOrThrow()).getOrThrow()
 
         webTestClient.post()
             .uri("/api/auth/email/verification?token=$token")

@@ -36,9 +36,13 @@ import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.principal.core.dto.request.CreateGuestRequest
 import io.stereov.singularity.principal.core.dto.response.CreateGuestResponse
+import io.stereov.singularity.principal.core.model.Guest
+import io.stereov.singularity.principal.core.model.Principal
 import io.stereov.singularity.principal.core.model.Role
 import io.stereov.singularity.principal.core.model.User
+import io.stereov.singularity.principal.core.model.sensitve.SensitivePrincipalData
 import io.stereov.singularity.principal.core.repository.UserRepository
+import io.stereov.singularity.principal.core.service.GuestService
 import io.stereov.singularity.principal.core.service.PrincipalService
 import io.stereov.singularity.principal.core.service.UserService
 import io.stereov.singularity.principal.group.model.Group
@@ -74,6 +78,9 @@ class BaseSpringBootTest() {
 
     @Autowired
     lateinit var principalService: PrincipalService
+
+    @Autowired
+    lateinit var guestService: GuestService
 
     @Autowired
     lateinit var downloadService: DownloadService
@@ -186,7 +193,7 @@ class BaseSpringBootTest() {
 
     @AfterEach
     fun clearDatabase() = runBlocking {
-        userService.deleteAll().getOrThrow()
+        principalService.deleteAll().getOrThrow()
         cacheService.deleteAll().getOrThrow()
         groupRepository.deleteAll()
         counter.set(0)
@@ -208,8 +215,8 @@ class BaseSpringBootTest() {
 
     private val counter = AtomicInteger(0)
 
-    data class TestRegisterResponse(
-        val info: User,
+    data class TestRegisterResponse<P : Principal<out Role, out SensitivePrincipalData>>(
+        val info: P,
         val email: String?,
         val password: String?,
         val accessToken: String,
@@ -242,7 +249,7 @@ class BaseSpringBootTest() {
         name: String = "Name",
         roles: List<Role> = listOf(Role.User.USER),
         groups: List<String> = listOf(),
-    ): TestRegisterResponse {
+    ): TestRegisterResponse<User> {
         val actualEmail = "${counter.getAndIncrement()}$emailSuffix"
 
         webTestClient.post()
@@ -387,11 +394,11 @@ class BaseSpringBootTest() {
         )
     }
 
-    suspend fun createAdmin(email: String = "admin@example.com"): TestRegisterResponse {
+    suspend fun createAdmin(email: String = "admin@example.com"): TestRegisterResponse<User> {
         return registerUser(emailSuffix = email, roles = listOf(Role.User.USER, Role.User.ADMIN))
     }
     
-    suspend fun createGuest(): TestRegisterResponse {
+    suspend fun createGuest(): TestRegisterResponse<Guest> {
         val req = CreateGuestRequest(name = "Guest", null)
 
         val result = webTestClient.post()
@@ -407,7 +414,7 @@ class BaseSpringBootTest() {
         val responseBody = result.responseBody
         requireNotNull(responseBody)
 
-        val guest = userService.findById(responseBody.user.id).getOrThrow()
+        val guest = guestService.findById(responseBody.user.id).getOrThrow()
 
         val stepUpTokenValue = webTestClient.post()
             .uri("/api/auth/step-up")
@@ -420,7 +427,7 @@ class BaseSpringBootTest() {
 
         requireNotNull(stepUpTokenValue)
 
-        return TestRegisterResponse(
+        return TestRegisterResponse<Guest>(
             info = guest,
             accessToken = accessToken.value,
             refreshToken = refreshToken.value,
@@ -433,7 +440,7 @@ class BaseSpringBootTest() {
             mailVerificationSecret = null,
             passwordResetSecret = null,
             sessionId = guest.sensitive.sessions.keys.first(),
-            email2faCode = guest.sensitive.security.twoFactor.email.code,
+            email2faCode = "123456",
             accessTokenToken = accessToken
         )
     }
@@ -442,7 +449,7 @@ class BaseSpringBootTest() {
         emailSuffix: String = "oauth2@email.com",
         provider: String = "github",
         principalId: String = "123456"
-    ): TestRegisterResponse {
+    ): TestRegisterResponse<User> {
         val actualEmail = "${counter.getAndIncrement()}$emailSuffix"
         val user = userService.save(User.ofProvider(
             email = actualEmail,
@@ -477,7 +484,7 @@ class BaseSpringBootTest() {
         )
     }
 
-    suspend fun deleteAccount(response: TestRegisterResponse) {
+    suspend fun deleteAccount(response: TestRegisterResponse<*>) {
         webTestClient.delete()
             .uri("/api/users/me")
             .accessTokenCookie(response.accessToken)
@@ -486,7 +493,7 @@ class BaseSpringBootTest() {
             .expectStatus().isOk
     }
 
-    suspend fun deleteAllSessions(response: TestRegisterResponse) {
+    suspend fun deleteAllSessions(response: TestRegisterResponse<*>) {
         webTestClient.delete()
             .uri("/api/auth/sessions")
             .accessTokenCookie(response.accessToken)
@@ -520,7 +527,7 @@ class BaseSpringBootTest() {
             ?: throw TokenExtractionException.Missing("No StepUpToken found in response")
     }
 
-    suspend fun EntityExchangeResult<*>.extractOAuth2ProviderConnectionToken(user: User): OAuth2ProviderConnectionToken {
+    suspend fun EntityExchangeResult<*>.extractOAuth2ProviderConnectionToken(user: Principal<*,*>): OAuth2ProviderConnectionToken {
         return this.responseCookies[OAuth2TokenType.ProviderConnection.cookieName]
             ?.firstOrNull()?.value
             ?.let { oAuth2ProviderConnectionTokenService.extract(it, user).getOrThrow() }

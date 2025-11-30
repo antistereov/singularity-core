@@ -8,6 +8,7 @@ import io.stereov.singularity.auth.core.dto.request.ResetPasswordRequest
 import io.stereov.singularity.auth.core.dto.request.SendPasswordResetRequest
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
 import io.stereov.singularity.auth.core.dto.response.MailCooldownResponse
+import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.test.BaseMailIntegrationTest
 import jakarta.mail.internet.MimeMessage
 import kotlinx.coroutines.test.runTest
@@ -210,7 +211,7 @@ class PasswordResetControllerTest : BaseMailIntegrationTest() {
     }
     @Test fun `resetPassword is bad for guest`() = runTest {
         val guest = createGuest()
-        val token = passwordResetTokenService.create(guest.info.id.getOrThrow(), guest.info.sensitive.security.password.resetSecret).getOrThrow()
+        val token = passwordResetTokenService.create(guest.info.id.getOrThrow(), Random.generateString().getOrThrow()).getOrThrow()
 
         val newPassword = "NewPassword$2"
         val req = ResetPasswordRequest(newPassword)

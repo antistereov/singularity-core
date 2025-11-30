@@ -1,6 +1,5 @@
 package io.stereov.singularity.test
 
-import io.stereov.singularity.principal.group.model.KnownGroups
 import io.stereov.singularity.content.article.dto.request.CreateArticleRequest
 import io.stereov.singularity.content.article.dto.response.FullArticleResponse
 import io.stereov.singularity.content.article.mapper.ArticleMapper
@@ -9,6 +8,7 @@ import io.stereov.singularity.content.article.service.ArticleManagementService
 import io.stereov.singularity.content.article.service.ArticleService
 import io.stereov.singularity.content.tag.dto.CreateTagMultiLangRequest
 import io.stereov.singularity.content.tag.model.TagTranslation
+import io.stereov.singularity.principal.group.model.KnownGroups
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -42,7 +42,7 @@ class BaseArticleTest : BaseMailIntegrationTest() {
         ) }
     }
 
-    suspend fun saveArticle(owner: TestRegisterResponse? = null, title: String? = null): Article {
+    suspend fun saveArticle(owner: TestRegisterResponse<*>? = null, title: String? = null): Article {
         val actualUser = owner ?: registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
         val req = CreateArticleRequest(Locale.ENGLISH, title ?: "test", "", "")
         val res = webTestClient.post()

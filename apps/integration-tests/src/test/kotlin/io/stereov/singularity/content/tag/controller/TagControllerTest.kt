@@ -45,7 +45,7 @@ class TagControllerTest() : BaseIntegrationTest() {
         assertTrue(foundTag.translations.keys.contains(Locale.ENGLISH))
         assertThat(foundTag.translations.keys.size).isEqualTo(1)
 
-        assertThat(tagMapper.createTagResponse(foundTag, null)).isEqualTo(res)
+        assertThat(tagMapper.createTagResponse(foundTag, null).getOrThrow()).isEqualTo(res)
     }
     @Test fun `create works with another locale`() = runTest {
         val user = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
@@ -66,7 +66,7 @@ class TagControllerTest() : BaseIntegrationTest() {
         assertTrue(foundTag.translations.keys.contains(Locale.GERMAN))
         assertThat(foundTag.translations.keys.size).isEqualTo(1)
 
-        assertThat(tagMapper.createTagResponse(foundTag, null)).isEqualTo(res)
+        assertThat(tagMapper.createTagResponse(foundTag, null).getOrThrow()).isEqualTo(res)
     }
     @Test fun `create requires new key`() = runTest {
         val user = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
@@ -144,7 +144,7 @@ class TagControllerTest() : BaseIntegrationTest() {
 
         requireNotNull(res)
 
-        assertEquals(tagMapper.createTagResponse(tag, null), res)
+        assertEquals(tagMapper.createTagResponse(tag, null).getOrThrow(), res)
         assertEquals("Test", res.name)
     }
     @Test fun `findByKey works with another locale`() = runTest {
@@ -166,7 +166,7 @@ class TagControllerTest() : BaseIntegrationTest() {
 
         requireNotNull(res)
 
-        assertEquals(tagMapper.createTagResponse(tag, Locale.GERMAN), res)
+        assertEquals(tagMapper.createTagResponse(tag, Locale.GERMAN).getOrThrow(), res)
         assertEquals("TestDeutsch", res.name)
     }
     @Test fun `findByKey needs tag`() = runTest {
@@ -367,7 +367,7 @@ class TagControllerTest() : BaseIntegrationTest() {
         requireNotNull(res)
 
         val updatedTag = tagService.findById(tag.id.getOrThrow()).getOrThrow()
-        assertEquals(tagMapper.createTagResponse(updatedTag, null), res)
+        assertEquals(tagMapper.createTagResponse(updatedTag, null).getOrThrow(), res)
         assertEquals("Test", res.name)
         assertEquals("Test", updatedTag.translations[Locale.ENGLISH]?.name)
         assertEquals("New", updatedTag.translations[Locale.ENGLISH]?.description)
@@ -435,7 +435,7 @@ class TagControllerTest() : BaseIntegrationTest() {
         requireNotNull(res)
 
         val updatedTag = tagService.findById(tag.id.getOrThrow()).getOrThrow()
-        assertEquals(tagMapper.createTagResponse(updatedTag, Locale.GERMAN), res)
+        assertEquals(tagMapper.createTagResponse(updatedTag, Locale.GERMAN).getOrThrow(), res)
         assertEquals("TestDeutsch", res.name)
         assertEquals("Test", updatedTag.translations[Locale.ENGLISH]?.name)
         assertEquals("", updatedTag.translations[Locale.ENGLISH]?.description)
@@ -621,7 +621,7 @@ class TagControllerTest() : BaseIntegrationTest() {
                 Locale.ENGLISH to TagTranslation("Test"),
                 Locale.GERMAN to TagTranslation("TestDeutsch")
             )
-        ))
+        )).getOrThrow()
 
         webTestClient.delete()
             .uri("/api/content/tags/tag")

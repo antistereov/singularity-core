@@ -80,7 +80,6 @@ class TokenConfiguration {
         jwtProperties: JwtProperties,
         geolocationService: GeolocationService,
         geolocationProperties: GeolocationProperties,
-        userService: UserService,
         tokenValueExtractor: TokenValueExtractor,
         principalService: PrincipalService
     ) = RefreshTokenService(
@@ -88,7 +87,6 @@ class TokenConfiguration {
         jwtProperties,
         geolocationService,
         geolocationProperties,
-        userService,
         tokenValueExtractor,
         principalService,
     )

@@ -44,7 +44,7 @@ class TestLocalFileStorage : BaseIntegrationTest() {
         metadataService.deleteAll().getOrThrow()
     }
 
-    suspend fun runFileTest(public: Boolean = true, key: String = "test-image.jpg", method: suspend (file: File, metadata: FileMetadataResponse, user: TestRegisterResponse) -> Unit) = runTest {
+    suspend fun runFileTest(public: Boolean = true, key: String = "test-image.jpg", method: suspend (file: File, metadata: FileMetadataResponse, user: TestRegisterResponse<*>) -> Unit) = runTest {
         val user = registerUser()
         val file = ClassPathResource("files/test-image.jpg").file
         val filePart = MockFilePart(file)

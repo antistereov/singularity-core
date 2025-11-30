@@ -28,7 +28,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
         )
 
         val res = webTestClient.post()
-            .uri("/api/groups/${group.key}/members/${user.info.id}")
+            .uri("/api/groups/${group.key}/members/${user.info.id.getOrThrow()}")
             .accessTokenCookie(admin.accessToken)
             .exchange()
             .expectStatus().isOk
@@ -49,7 +49,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
         val user = registerUser()
 
         webTestClient.post()
-            .uri("/api/groups/new-pilots/members/${user.info.id}")
+            .uri("/api/groups/new-pilots/members/${user.info.id.getOrThrow()}")
             .accessTokenCookie(admin.accessToken)
             .exchange()
             .expectStatus().isNotFound
@@ -73,7 +73,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
         )
 
         webTestClient.post()
-            .uri("/api/groups/${group.key}/members/${user.info.id}")
+            .uri("/api/groups/${group.key}/members/${user.info.id.getOrThrow()}")
             .exchange()
             .expectStatus().isUnauthorized
 
@@ -96,7 +96,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
         )
 
         webTestClient.post()
-            .uri("/api/groups/${group.key}/members/${user.info.id}")
+            .uri("/api/groups/${group.key}/members/${user.info.id.getOrThrow()}")
             .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isForbidden
@@ -122,7 +122,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
         )
 
         webTestClient.post()
-            .uri("/api/groups/${group.key}/members/${user.info.id}")
+            .uri("/api/groups/${group.key}/members/${user.info.id.getOrThrow()}")
             .accessTokenCookie(admin.accessToken)
             .exchange()
             .expectStatus().isNotFound
@@ -144,7 +144,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
         )
 
         val res = webTestClient.delete()
-            .uri("/api/groups/${group.key}/members/${user.info.id}")
+            .uri("/api/groups/${group.key}/members/${user.info.id.getOrThrow()}")
             .accessTokenCookie(admin.accessToken)
             .exchange()
             .expectStatus().isOk
@@ -164,7 +164,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
         val user = registerUser(groups = listOf("pilots"))
 
         webTestClient.delete()
-            .uri("/api/groups/new-pilots/members/${user.info.id}")
+            .uri("/api/groups/new-pilots/members/${user.info.id.getOrThrow()}")
             .accessTokenCookie(admin.accessToken)
             .exchange()
             .expectStatus().isNotFound
@@ -187,7 +187,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
         )
 
         webTestClient.delete()
-            .uri("/api/groups/${group.key}/members/${user.info.id}")
+            .uri("/api/groups/${group.key}/members/${user.info.id.getOrThrow()}")
             .exchange()
             .expectStatus().isUnauthorized
 
@@ -209,7 +209,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
         )
 
         webTestClient.delete()
-            .uri("/api/groups/${group.key}/members/${user.info.id}")
+            .uri("/api/groups/${group.key}/members/${user.info.id.getOrThrow()}")
             .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isForbidden
@@ -234,7 +234,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
         )
 
         webTestClient.delete()
-            .uri("/api/groups/${group.key}/members/${user.info.id}")
+            .uri("/api/groups/${group.key}/members/${user.info.id.getOrThrow()}")
             .accessTokenCookie(admin.accessToken)
             .exchange()
             .expectStatus().isNotFound

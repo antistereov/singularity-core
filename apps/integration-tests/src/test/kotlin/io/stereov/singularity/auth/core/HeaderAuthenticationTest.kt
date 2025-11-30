@@ -11,7 +11,7 @@ import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.web.reactive.server.expectBody
 import org.testcontainers.containers.GenericContainer
-import org.testcontainers.containers.MongoDBContainer
+import org.testcontainers.mongodb.MongoDBContainer
 import org.testcontainers.utility.DockerImageName
 import java.time.Instant
 import java.util.*

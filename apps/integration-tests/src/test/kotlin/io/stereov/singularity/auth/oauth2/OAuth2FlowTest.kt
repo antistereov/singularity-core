@@ -795,7 +795,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(successRedirectUri, res.responseHeaders.location?.toString())
 
         val user = userService.findByEmail(info.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(info.email, user.sensitive.email)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
@@ -853,7 +853,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.AUTHENTICATION_FAILED)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -903,7 +903,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.AUTHENTICATION_FAILED)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -960,7 +960,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.STATE_EXPIRED)
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -1012,7 +1012,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.SESSION_TOKEN_MISSING)
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -1064,7 +1064,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         mockOAuth2Server.verifyRequests()
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -1118,7 +1118,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         mockOAuth2Server.verifyRequests()
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -1172,7 +1172,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         mockOAuth2Server.verifyRequests()
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -1225,7 +1225,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         mockOAuth2Server.verifyRequests()
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -1278,7 +1278,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         mockOAuth2Server.verifyRequests()
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -1503,7 +1503,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(successRedirectUri, res.responseHeaders.location?.toString())
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(registeredUser.email, user.sensitive.email)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
@@ -1562,7 +1562,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.AUTHENTICATION_FAILED)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -1611,7 +1611,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.AUTHENTICATION_FAILED)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -1666,7 +1666,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         mockOAuth2Server.verifyRequests()
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -1718,7 +1718,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.SESSION_TOKEN_MISSING)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -1770,7 +1770,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.INVALID_SESSION_TOKEN)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -1823,7 +1823,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.SESSION_TOKEN_EXPIRED)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -1876,7 +1876,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.ACCESS_TOKEN_MISSING)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -1929,7 +1929,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.INVALID_ACCESS_TOKEN)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -1982,7 +1982,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.ACCESS_TOKEN_EXPIRED)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -2035,7 +2035,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.STEP_UP_MISSING)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -2088,7 +2088,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.INVALID_STEP_UP_TOKEN)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -2141,7 +2141,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.STEP_UP_TOKEN_EXPIRED)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -2191,7 +2191,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.USER_ALREADY_AUTHENTICATED)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -2242,7 +2242,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.INVALID_CONNECTION_TOKEN)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -2295,7 +2295,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.CONNECTION_TOKEN_EXPIRED)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -2348,7 +2348,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.CONNECTION_TOKEN_PROVIDER_MISMATCH)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -2402,7 +2402,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.SUB_CLAIM_MISSING)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -2455,7 +2455,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.EMAIL_CLAIM_MISSING)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -2508,7 +2508,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.AUTHENTICATION_FAILED)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -2561,7 +2561,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(successRedirectUri, res.responseHeaders.location?.toString())
 
         val user = userService.findByEmail(info.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(info.email, user.sensitive.email)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
@@ -2579,9 +2579,9 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         val refreshToken = res.extractRefreshToken()
         val stepUpToken = res.extractStepUpToken(accessToken.userId, accessToken.sessionId)
 
-        assertEquals(user.id, accessToken.userId)
-        assertEquals(user.id, refreshToken.userId)
-        assertEquals(user.id, stepUpToken.userId)
+        assertEquals(user.id.getOrThrow(), accessToken.userId)
+        assertEquals(user.id.getOrThrow(), refreshToken.userId)
+        assertEquals(user.id.getOrThrow(), stepUpToken.userId)
         assertEquals(refreshToken.sessionId, accessToken.sessionId)
         assertEquals(refreshToken.sessionId, stepUpToken.sessionId)
         assertEquals(setOf(refreshToken.sessionId), user.sensitive.sessions.keys)
@@ -2620,7 +2620,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.AUTHENTICATION_FAILED)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -2671,7 +2671,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.AUTHENTICATION_FAILED)
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -2729,7 +2729,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.STATE_EXPIRED)
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -2782,7 +2782,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.SESSION_TOKEN_MISSING)
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -2835,7 +2835,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         mockOAuth2Server.verifyRequests()
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -2890,7 +2890,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         mockOAuth2Server.verifyRequests()
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -2944,7 +2944,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.ACCESS_TOKEN_MISSING)
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -2998,7 +2998,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.INVALID_ACCESS_TOKEN)
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -3052,7 +3052,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.ACCESS_TOKEN_EXPIRED)
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -3107,7 +3107,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         mockOAuth2Server.verifyRequests()
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -3161,7 +3161,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         mockOAuth2Server.verifyRequests()
 
         val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -3215,7 +3215,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         mockOAuth2Server.verifyRequests()
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
@@ -3439,7 +3439,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(successRedirectUri, res.responseHeaders.location?.toString())
 
         val user = userService.findById(registeredUser.info.id.getOrThrow()).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(info.email!!, user.sensitive.email)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
@@ -3497,7 +3497,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.AUTHENTICATION_FAILED)
 
         val user = userService.findById(registeredUser.info.id.getOrThrow()).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.Guest.GUEST), user.roles)
         assertNull(user.sensitive.email)
@@ -3546,7 +3546,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.AUTHENTICATION_FAILED)
 
         val user = userService.findById(registeredUser.info.id.getOrThrow()).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.Guest.GUEST), user.roles)
         assertNull(user.sensitive.email)
@@ -3601,7 +3601,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         mockOAuth2Server.verifyRequests()
 
         val user = userService.findById(registeredUser.info.id.getOrThrow()).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.Guest.GUEST), user.roles)
         assertNull(user.sensitive.email)
@@ -3653,7 +3653,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.SESSION_TOKEN_MISSING)
 
         val user = userService.findById(registeredUser.info.id.getOrThrow()).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.Guest.GUEST), user.roles)
         assertNull(user.sensitive.email)
@@ -3705,7 +3705,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.INVALID_SESSION_TOKEN)
 
         val user = userService.findById(registeredUser.info.id.getOrThrow()).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.Guest.GUEST), user.roles)
         assertNull(user.sensitive.email)
@@ -3758,7 +3758,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.SESSION_TOKEN_EXPIRED)
 
         val user = userService.findById(registeredUser.info.id.getOrThrow()).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.Guest.GUEST), user.roles)
         assertNull(user.sensitive.email)
@@ -3811,7 +3811,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.ACCESS_TOKEN_MISSING)
 
         val user = userService.findById(registeredUser.info.id.getOrThrow()).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.Guest.GUEST), user.roles)
         assertNull(user.sensitive.email)
@@ -3864,7 +3864,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.INVALID_ACCESS_TOKEN)
 
         val user = userService.findById(registeredUser.info.id.getOrThrow()).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.Guest.GUEST), user.roles)
         assertNull(user.sensitive.email)
@@ -3917,7 +3917,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.ACCESS_TOKEN_EXPIRED)
 
         val user = userService.findById(registeredUser.info.id.getOrThrow()).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.Guest.GUEST), user.roles)
         assertNull(user.sensitive.email)
@@ -3970,7 +3970,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.STEP_UP_MISSING)
 
         val user = userService.findById(registeredUser.info.id.getOrThrow()).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.Guest.GUEST), user.roles)
         assertNull(user.sensitive.email)
@@ -4023,7 +4023,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.INVALID_STEP_UP_TOKEN)
 
         val user = userService.findById(registeredUser.info.id.getOrThrow()).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.Guest.GUEST), user.roles)
         assertNull(user.sensitive.email)
@@ -4076,7 +4076,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.STEP_UP_TOKEN_EXPIRED)
 
         val user = userService.findById(registeredUser.info.id.getOrThrow()).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.Guest.GUEST), user.roles)
         assertNull(user.sensitive.email)
@@ -4127,7 +4127,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.USER_ALREADY_AUTHENTICATED)
 
         val user = userService.findById(registeredUser.info.id.getOrThrow()).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.Guest.GUEST), user.roles)
         assertNull(user.sensitive.email)
@@ -4178,7 +4178,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.INVALID_CONNECTION_TOKEN)
 
         val user = userService.findById(registeredUser.info.id.getOrThrow()).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.Guest.GUEST), user.roles)
         assertNull(user.sensitive.email)
@@ -4231,7 +4231,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.CONNECTION_TOKEN_EXPIRED)
 
         val user = userService.findById(registeredUser.info.id.getOrThrow()).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.Guest.GUEST), user.roles)
         assertNull(user.sensitive.email)
@@ -4284,7 +4284,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.CONNECTION_TOKEN_PROVIDER_MISMATCH)
 
         val user = userService.findById(registeredUser.info.id.getOrThrow()).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.Guest.GUEST), user.roles)
         assertNull(user.sensitive.email)
@@ -4338,7 +4338,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.SUB_CLAIM_MISSING)
 
         val user = userService.findById(registeredUser.info.id.getOrThrow()).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.Guest.GUEST), user.roles)
         assertNull(user.sensitive.email)
@@ -4391,7 +4391,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.EMAIL_CLAIM_MISSING)
 
         val user = userService.findById(registeredUser.info.id.getOrThrow()).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.Guest.GUEST), user.roles)
         assertNull(user.sensitive.email)
@@ -4444,7 +4444,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .assertErrorCode(OAuth2ErrorCode.AUTHENTICATION_FAILED)
 
         val user = userService.findById(registeredUser.info.id.getOrThrow()).getOrThrow()
-        assertEquals(registeredUser.info.id, user.id.getOrThrow())
+        assertEquals(registeredUser.info.id.getOrThrow(), user.id.getOrThrow())
         assertEquals(1, userService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.Guest.GUEST), user.roles)
         assertNull(user.sensitive.email)

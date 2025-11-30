@@ -45,7 +45,7 @@ class AccessCriteriaTest : BaseArticleTest() {
         requireNotNull(res)
 
         Assertions.assertEquals(1, res.totalElements)
-        Assertions.assertEquals(article.id, res.content.first().id)
+        Assertions.assertEquals(article.id.getOrThrow(), res.content.first().id)
     }
     @Test
     fun `getArticles works with shared`() = runTest {
@@ -100,7 +100,7 @@ class AccessCriteriaTest : BaseArticleTest() {
         requireNotNull(res)
 
         Assertions.assertEquals(1, res.totalElements)
-        Assertions.assertEquals(article.id, res.content.first().id)
+        Assertions.assertEquals(article.id.getOrThrow(), res.content.first().id)
     }
     @Test
     fun `getArticles works with user viewer`() = runTest {
@@ -120,7 +120,7 @@ class AccessCriteriaTest : BaseArticleTest() {
         requireNotNull(res)
 
         Assertions.assertEquals(1, res.totalElements)
-        Assertions.assertEquals(article.id, res.content.first().id)
+        Assertions.assertEquals(article.id.getOrThrow(), res.content.first().id)
     }
     @Test
     fun `getArticles works with user editor`() = runTest {
@@ -140,7 +140,7 @@ class AccessCriteriaTest : BaseArticleTest() {
         requireNotNull(res)
 
         Assertions.assertEquals(1, res.totalElements)
-        Assertions.assertEquals(article.id, res.content.first().id)
+        Assertions.assertEquals(article.id.getOrThrow(), res.content.first().id)
     }
     @Test
     fun `getArticles works with user admin`() = runTest {
@@ -160,7 +160,7 @@ class AccessCriteriaTest : BaseArticleTest() {
         requireNotNull(res)
 
         Assertions.assertEquals(1, res.totalElements)
-        Assertions.assertEquals(article.id, res.content.first().id)
+        Assertions.assertEquals(article.id.getOrThrow(), res.content.first().id)
     }
     @Test
     fun `getArticles works with group viewer`() = runTest {
@@ -182,7 +182,7 @@ class AccessCriteriaTest : BaseArticleTest() {
         requireNotNull(res)
 
         Assertions.assertEquals(1, res.totalElements)
-        Assertions.assertEquals(article.id, res.content.first().id)
+        Assertions.assertEquals(article.id.getOrThrow(), res.content.first().id)
     }
     @Test
     fun `getArticles works with group editor`() = runTest {
@@ -203,7 +203,7 @@ class AccessCriteriaTest : BaseArticleTest() {
         requireNotNull(res)
 
         Assertions.assertEquals(1, res.totalElements)
-        Assertions.assertEquals(article.id, res.content.first().id)
+        Assertions.assertEquals(article.id.getOrThrow(), res.content.first().id)
     }
     @Test
     fun `getArticles works with group admin`() = runTest {
@@ -224,7 +224,7 @@ class AccessCriteriaTest : BaseArticleTest() {
         requireNotNull(res)
 
         Assertions.assertEquals(1, res.totalElements)
-        Assertions.assertEquals(article.id, res.content.first().id)
+        Assertions.assertEquals(article.id.getOrThrow(), res.content.first().id)
     }
     @Test
     fun `getArticles correctly filters tags`() = runTest {
@@ -248,7 +248,7 @@ class AccessCriteriaTest : BaseArticleTest() {
         requireNotNull(res)
 
         Assertions.assertEquals(1, res.totalElements)
-        Assertions.assertEquals(article.id, res.content.first().id)
+        Assertions.assertEquals(article.id.getOrThrow(), res.content.first().id)
     }
     @Test
     fun `getArticles correctly filters when multiple tags`() = runTest {
@@ -297,7 +297,7 @@ class AccessCriteriaTest : BaseArticleTest() {
 
         Assertions.assertEquals(1, res.totalElements)
         Assertions.assertEquals(1, res.content.size)
-        Assertions.assertEquals(article.id, res.content.first().id)
+        Assertions.assertEquals(article.id.getOrThrow(), res.content.first().id)
     }
     @Test
     fun `getLatestArticles works with draft`() = runTest {
@@ -396,7 +396,7 @@ class AccessCriteriaTest : BaseArticleTest() {
 
         Assertions.assertEquals(1, res.totalElements)
         Assertions.assertEquals(1, res.content.size)
-        Assertions.assertEquals(article.id, res.content.first().id)
+        Assertions.assertEquals(article.id.getOrThrow(), res.content.first().id)
     }
     @Test
     fun `getLatestArticles works with user viewer`() = runTest {
@@ -418,7 +418,7 @@ class AccessCriteriaTest : BaseArticleTest() {
 
         Assertions.assertEquals(1, res.totalElements)
         Assertions.assertEquals(1, res.content.size)
-        Assertions.assertEquals(article.id, res.content.first().id)
+        Assertions.assertEquals(article.id.getOrThrow(), res.content.first().id)
     }
     @Test
     fun `getLatestArticles works with user editor`() = runTest {
@@ -440,7 +440,7 @@ class AccessCriteriaTest : BaseArticleTest() {
 
         Assertions.assertEquals(1, res.totalElements)
         Assertions.assertEquals(1, res.content.size)
-        Assertions.assertEquals(article.id, res.content.first().id)
+        Assertions.assertEquals(article.id.getOrThrow(), res.content.first().id)
     }
     @Test
     fun `getLatestArticles works with user admin`() = runTest {
@@ -462,7 +462,7 @@ class AccessCriteriaTest : BaseArticleTest() {
 
         Assertions.assertEquals(1, res.totalElements)
         Assertions.assertEquals(1, res.content.size)
-        Assertions.assertEquals(article.id, res.content.first().id)
+        Assertions.assertEquals(article.id.getOrThrow(), res.content.first().id)
     }
     @Test
     fun `getLatestArticles works with group viewer`() = runTest {
@@ -485,7 +485,7 @@ class AccessCriteriaTest : BaseArticleTest() {
 
         Assertions.assertEquals(1, res.totalElements)
         Assertions.assertEquals(1, res.content.size)
-        Assertions.assertEquals(article.id, res.content.first().id)
+        Assertions.assertEquals(article.id.getOrThrow(), res.content.first().id)
     }
     @Test
     fun `getLatestArticles works with group editor`() = runTest {
@@ -508,7 +508,7 @@ class AccessCriteriaTest : BaseArticleTest() {
 
         Assertions.assertEquals(1, res.totalElements)
         Assertions.assertEquals(1, res.content.size)
-        Assertions.assertEquals(article.id, res.content.first().id)
+        Assertions.assertEquals(article.id.getOrThrow(), res.content.first().id)
     }
     @Test
     fun `getLatestArticles works with group admin`() = runTest {
@@ -531,6 +531,6 @@ class AccessCriteriaTest : BaseArticleTest() {
 
         Assertions.assertEquals(1, res.totalElements)
         Assertions.assertEquals(1, res.content.size)
-        Assertions.assertEquals(article.id, res.content.first().id)
+        Assertions.assertEquals(article.id.getOrThrow(), res.content.first().id)
     }
 }

@@ -17,7 +17,7 @@ class AdminControllerTest : BaseIntegrationTest() {
         val user = registerUser()
 
         val res = webTestClient.post()
-            .uri("/api/admins/${user.info.id}")
+            .uri("/api/admins/${user.info.id.getOrThrow()}")
             .accessTokenCookie(admin.accessToken)
             .exchange()
             .expectStatus().isOk
@@ -65,7 +65,7 @@ class AdminControllerTest : BaseIntegrationTest() {
         val user = registerUser()
 
         webTestClient.post()
-            .uri("/api/admins/${user.info.id}")
+            .uri("/api/admins/${user.info.id.getOrThrow()}")
             .exchange()
             .expectStatus().isUnauthorized
 
@@ -78,7 +78,7 @@ class AdminControllerTest : BaseIntegrationTest() {
         val user = registerUser()
 
         webTestClient.post()
-            .uri("/api/admins/${user.info.id}")
+            .uri("/api/admins/${user.info.id.getOrThrow()}")
             .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isForbidden

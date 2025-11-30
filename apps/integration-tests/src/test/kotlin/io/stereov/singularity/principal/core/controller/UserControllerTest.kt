@@ -60,7 +60,7 @@ class UserControllerTest() : BaseIntegrationTest() {
         userService.deleteById(user.info.id.getOrThrow())
 
         webTestClient.get()
-            .uri("/api/users/${user.info.id}")
+            .uri("/api/users/${user.info.id.getOrThrow()}")
             .exchange()
             .expectStatus().isNotFound
     }
@@ -69,7 +69,7 @@ class UserControllerTest() : BaseIntegrationTest() {
         val user = registerUser(roles = listOf(Role.User.USER, Role.User.ADMIN))
 
         webTestClient.delete()
-            .uri("/api/users/${user.info.id}")
+            .uri("/api/users/${user.info.id.getOrThrow()}")
             .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isOk
@@ -100,7 +100,7 @@ class UserControllerTest() : BaseIntegrationTest() {
             .responseBody
 
         webTestClient.delete()
-            .uri("/api/users/${user.info.id}")
+            .uri("/api/users/${user.info.id.getOrThrow()}")
             .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isOk
@@ -146,7 +146,7 @@ class UserControllerTest() : BaseIntegrationTest() {
         val user = registerUser()
 
         webTestClient.delete()
-            .uri("/api/users/${user.info.id}")
+            .uri("/api/users/${user.info.id.getOrThrow()}")
             .exchange()
             .expectStatus().isUnauthorized
 
@@ -156,7 +156,7 @@ class UserControllerTest() : BaseIntegrationTest() {
         val user = registerUser()
 
         webTestClient.delete()
-            .uri("/api/users/${user.info.id}")
+            .uri("/api/users/${user.info.id.getOrThrow()}")
             .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isForbidden
@@ -167,7 +167,7 @@ class UserControllerTest() : BaseIntegrationTest() {
         val user = registerUser(roles = listOf(Role.Guest.GUEST))
 
         webTestClient.delete()
-            .uri("/api/users/${user.info.id}")
+            .uri("/api/users/${user.info.id.getOrThrow()}")
             .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isForbidden
