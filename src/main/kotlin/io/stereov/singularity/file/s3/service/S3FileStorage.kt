@@ -171,7 +171,7 @@ class S3FileStorage(
 
     override suspend fun getRenditionUrl(key: String): Result<String, FileException> = coroutineBinding {
 
-        val fileExists = exists(key).bind()
+        val fileExists = renditionExists(key).bind()
         resolveMetadataSyncConflicts(fileExists, key).bind()
 
         runSuspendCatching {

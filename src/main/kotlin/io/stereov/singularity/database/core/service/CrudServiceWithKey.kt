@@ -23,7 +23,7 @@ interface CrudServiceWithKey<D: WithKey> : CrudService<D> {
      *  detailing the failure reason if the operation is unsuccessful.
      */
     suspend fun findByKey(key: String): Result<D, FindDocumentByKeyException> {
-        logger.debug { "Finding group by key \"$key\"" }
+        logger.debug { "Finding ${collectionClazz.simpleName} by key \"$key\"" }
 
         return runSuspendCatching { repository.findByKey(key) }
             .mapError { ex -> FindDocumentByKeyException.Database("Failed to check existence of ${collectionClazz.simpleName} with key $key: ${ex.message}", ex) }
