@@ -353,7 +353,7 @@ class EmailAuthenticationControllerTest : BaseMailIntegrationTest() {
             .stepUpTokenCookie(user.stepUpToken)
             .accessTokenCookie(user.accessToken)
             .exchange()
-            .expectStatus().isBadRequest
+            .expectStatus().isNotModified
     }
 
     @Test fun `cooldown works with access token`() = runTest {

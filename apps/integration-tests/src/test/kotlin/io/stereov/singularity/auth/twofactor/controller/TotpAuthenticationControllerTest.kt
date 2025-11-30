@@ -666,6 +666,6 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
             .stepUpTokenCookie(user.stepUpToken)
             .accessTokenCookie(user.accessToken)
             .exchange()
-            .expectStatus().isBadRequest
+            .expectStatus().isNotModified
     }
 }

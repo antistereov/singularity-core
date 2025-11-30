@@ -15,7 +15,7 @@ class EncryptionServiceTest : BaseIntegrationTest() {
         val encryptedUser = userService.findEncryptedById(user.id).getOrThrow()
         val oldSecret = encryptedUser.sensitive.secretKey
 
-        val decryptedUser = userService.decrypt(encryptedUser)
+        val decryptedUser = userService.decrypt(encryptedUser).getOrThrow()
 
         encryptionSecretService.updateSecret()
         userService.rotateSecret()
@@ -25,7 +25,7 @@ class EncryptionServiceTest : BaseIntegrationTest() {
 
         Assertions.assertNotEquals(oldSecret, newSecret)
 
-        val newDecryptedUser = userService.decrypt(rotatedEncryptedUser)
+        val newDecryptedUser = userService.decrypt(rotatedEncryptedUser).getOrThrow()
 
         Assertions.assertEquals(decryptedUser, newDecryptedUser)
     }
