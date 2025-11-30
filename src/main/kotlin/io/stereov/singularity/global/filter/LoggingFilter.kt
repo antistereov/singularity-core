@@ -55,7 +55,7 @@ class LoggingFilter(
 
         val ipAddress = exchange.request.getClientIp(geolocationProperties.realIpHeader)
             ?.let { runCatching { InetAddress.getByName(it) }.getOrElse { null } }
-        val location = ipAddress?.let { geoLocationService.getLocation(ipAddress) }?.getOrElse { null }
+        val location = ipAddress?.let { geoLocationService.getLocationResponse(ipAddress) }?.getOrElse { null }
         val locationString = location?.let { " (${location.city.names["en"]}, ${location.country.isoCode})" } ?: ""
 
         logger.debug { "Incoming request  - $method $path from $ipAddress$locationString$originString" }

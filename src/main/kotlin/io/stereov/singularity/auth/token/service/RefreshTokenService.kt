@@ -128,7 +128,7 @@ class RefreshTokenService(
 
         val location = ipAddress
             ?.let {
-                geolocationService.getLocation(ipAddress)
+                geolocationService.getLocationResponse(ipAddress)
                     .onFailure { ex -> logger.warn { "Failed to resolve geolocation from ip address $ipAddress: ${ex.message}" } }
                     .getOrElse { null }
             }
