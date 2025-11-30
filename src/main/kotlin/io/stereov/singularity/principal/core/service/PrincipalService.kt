@@ -5,10 +5,7 @@ import com.github.michaelbull.result.coroutines.coroutineBinding
 import com.github.michaelbull.result.coroutines.runSuspendCatching
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.database.core.exception.DatabaseException
-import io.stereov.singularity.database.encryption.exception.DeleteEncryptedDocumentByIdException
-import io.stereov.singularity.database.encryption.exception.EncryptionException
-import io.stereov.singularity.database.encryption.exception.ExistsEncryptedDocumentByIdException
-import io.stereov.singularity.database.encryption.exception.SaveEncryptedDocumentException
+import io.stereov.singularity.database.encryption.exception.*
 import io.stereov.singularity.principal.core.exception.FindPrincipalByIdException
 import io.stereov.singularity.principal.core.model.Guest
 import io.stereov.singularity.principal.core.model.Principal
@@ -19,11 +16,13 @@ import io.stereov.singularity.principal.core.model.encrypted.EncryptedPrincipal
 import io.stereov.singularity.principal.core.model.encrypted.EncryptedUser
 import io.stereov.singularity.principal.core.model.sensitve.SensitivePrincipalData
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.exists
+import org.springframework.data.mongodb.core.findAll
 import org.springframework.data.mongodb.core.findById
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
@@ -134,9 +133,22 @@ class PrincipalService(
      * [Principal] with decrypted data or an [EncryptionException] if decryption fails.
      * If an error occurs during the retrieval process from the database, a [DatabaseException.Database] is returned.
      */
-    suspend fun findAll(): Result<Flow<Result<Principal<out Role, out SensitivePrincipalData>, EncryptionException>>, DatabaseException.Database> = coroutineBinding {
-        val users = userService.findAll().bind()
-        val guests = guestService.findAll().bind()
-        merge(users, guests)
+    suspend fun findAll(): Result<Flow<Result<Principal<out Role, out SensitivePrincipalData>, EncryptionException>>, DatabaseException.Database> {
+
+        return runSuspendCatching {
+            reactiveMongoTemplate.findAll<EncryptedPrincipal<out Role, out SensitivePrincipalData>>("principals")
+        }
+            .mapError { ex -> DatabaseException.Database("Failed to get all principals: ${ex.message}", ex) }
+            .map { flux -> flux.asFlow().map { principal ->
+                when (principal) {
+                    is EncryptedGuest -> guestService.decrypt(principal)
+                    is EncryptedUser -> userService.decrypt(principal)
+                }
+            } }
+    }
+
+    suspend fun deleteAll(): Result<Unit, DeleteAllEncryptedDocumentsException> {
+        return userService.deleteAll()
+            .andThen({ guestService.deleteAll() })
     }
 }

@@ -1,10 +1,12 @@
 package io.stereov.singularity.principal.core.model
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.global.config.JsonConfiguration
 import io.stereov.singularity.principal.core.exception.RoleException
 
 /**
@@ -17,6 +19,7 @@ import io.stereov.singularity.principal.core.exception.RoleException
  * Roles define the level of access and permissions
  * a user or entity has in the system.
  */
+@JsonDeserialize(using = JsonConfiguration.RoleDeserializer::class)
 sealed interface Role {
 
     val logger: KLogger

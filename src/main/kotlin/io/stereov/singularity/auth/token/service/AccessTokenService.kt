@@ -64,7 +64,7 @@ class AccessTokenService(
         val id = principal.id
             .mapError { ex -> AccessTokenCreationException.InvalidPrincipal("Failed to generate access token because the associated principal document contains no ID: ${ex.message}", ex) }
             .bind()
-        logger.debug { "Creating access token for user ${principal.id} and session $sessionId" }
+        logger.debug { "Creating access token for user ${principal._id} and session $sessionId" }
 
         val tokenId = Random.generateString(20)
             .mapError { ex -> AccessTokenCreationException.Failed("Failed to generate token id: ${ex.message}", ex) }
