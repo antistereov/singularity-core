@@ -46,7 +46,7 @@ class GroupMemberService(
             .mapError { ex -> GroupMemberException.Database("Failed to check existence of group with key $groupKey: ${ex.message}", ex) }
             .bind()
 
-        if (groupExists) {
+        if (!groupExists) {
             Err(GroupMemberException.GroupNotFound("Group with key \"$groupKey\" does not exist"))
                 .bind()
         }
@@ -92,7 +92,7 @@ class GroupMemberService(
             .mapError { ex -> GroupMemberException.Database("Failed to check existence of group with key $groupKey: ${ex.message}", ex) }
             .bind()
 
-        if (groupExists) {
+        if (!groupExists) {
             Err(GroupMemberException.GroupNotFound("Group with key \"$groupKey\" does not exist"))
                 .bind()
         }

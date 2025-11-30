@@ -6,7 +6,6 @@ import io.stereov.singularity.auth.core.exception.AuthenticationException
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.token.exception.AccessTokenExtractionException
 import io.stereov.singularity.database.encryption.exception.DeleteEncryptedDocumentByIdException
-import io.stereov.singularity.database.encryption.exception.FindAllEncryptedDocumentsPaginatedException
 import io.stereov.singularity.file.core.exception.FileException
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.global.annotation.ThrowsDomainError
@@ -16,6 +15,7 @@ import io.stereov.singularity.global.model.SuccessResponse
 import io.stereov.singularity.global.util.mapContent
 import io.stereov.singularity.principal.core.dto.response.UserOverviewResponse
 import io.stereov.singularity.principal.core.exception.FindUserByIdException
+import io.stereov.singularity.principal.core.exception.GetUsersException
 import io.stereov.singularity.principal.core.exception.PrincipalMapperException
 import io.stereov.singularity.principal.core.mapper.PrincipalMapper
 import io.stereov.singularity.principal.core.model.Role
@@ -125,7 +125,7 @@ class UserController(
         AccessTokenExtractionException::class,
         AuthenticationException.AuthenticationRequired::class,
         AuthenticationException.RoleRequired::class,
-        FindAllEncryptedDocumentsPaginatedException::class,
+        GetUsersException::class,
         PrincipalMapperException::class
     ])
     suspend fun getUsers(
@@ -160,7 +160,7 @@ class UserController(
             createdAtBefore = createdAtBefore,
             lastActiveAfter = lastActiveAfter,
             lastActiveBefore = lastActiveBefore
-        ).getOrThrow { when (it) { is FindAllEncryptedDocumentsPaginatedException -> it } }
+        ).getOrThrow { when (it) { is GetUsersException -> it } }
 
         val mappedUsers = users.mapContent {
             principalMapper.toOverview(it, authenticationOutcome)

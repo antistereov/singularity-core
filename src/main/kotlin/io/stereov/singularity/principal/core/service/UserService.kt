@@ -15,6 +15,7 @@ import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.principal.core.exception.ExistsUserByEmailException
 import io.stereov.singularity.principal.core.exception.FindUserByEmailException
 import io.stereov.singularity.principal.core.exception.FindUserByProviderIdentityException
+import io.stereov.singularity.principal.core.exception.GetUsersException
 import io.stereov.singularity.principal.core.model.Role
 import io.stereov.singularity.principal.core.model.User
 import io.stereov.singularity.principal.core.model.encrypted.EncryptedUser
@@ -212,11 +213,17 @@ class UserService(
         lastActiveBefore: Instant?,
         lastActiveAfter: Instant?,
         identityKeys: Set<String>?
-    ): Result<Page<User>, FindAllEncryptedDocumentsPaginatedException> {
+    ): Result<Page<User>, GetUsersException> = coroutineBinding {
         logger.debug { "Finding ${encryptedDocumentClazz.simpleName}: page ${pageable.pageNumber}, size: ${pageable.pageSize}, sort: ${pageable.sort}" }
 
+        val hashedEmail = email?.let {
+            hashService.hashSearchableHmacSha256(it)
+                .mapError { ex -> GetUsersException.Hash("Failed to hash email $email from request: ${ex.message}", ex) }
+                .bind()
+        }
+
         val criteria = CriteriaBuilder()
-            .isEqualTo(EncryptedUser::email, email?.let { hashService.hashSearchableHmacSha256(it) })
+            .isEqualTo(EncryptedUser::email, hashedEmail )
             .isIn(EncryptedUser::roles, roles)
             .isIn(EncryptedUser::groups, groups)
             .compare(EncryptedUser::createdAt, createdAtBefore, createdAtAfter)
@@ -224,7 +231,9 @@ class UserService(
             .existsAny(identityKeys, EncryptedUser::identities)
             .build()
 
-        return findAllPaginated(pageable, criteria)
+        findAllPaginated(pageable, criteria)
+            .mapError { GetUsersException.from(it) }
+            .bind()
     }
 
 }
