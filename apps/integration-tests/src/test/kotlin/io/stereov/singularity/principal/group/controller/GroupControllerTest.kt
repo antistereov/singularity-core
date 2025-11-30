@@ -1,4 +1,4 @@
-package io.stereov.singularity.auth.group.controller
+package io.stereov.singularity.principal.group.controller
 
 import com.github.michaelbull.result.getOrThrow
 import io.stereov.singularity.principal.group.dto.request.CreateGroupRequest

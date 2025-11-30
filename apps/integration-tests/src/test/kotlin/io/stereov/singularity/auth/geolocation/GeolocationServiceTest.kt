@@ -38,7 +38,7 @@ class GeolocationServiceTest : BaseIntegrationTest() {
     }
 
     @Test fun `should resolve geolocation`() = runTest {
-        val city = geoLocationService.getLocation(InetAddress.getByName("8.8.8.8"))
+        val city = geoLocationService.getLocation(InetAddress.getByName("8.8.8.8")).getOrThrow()
         
         assertThat(city.toString()).isEqualTo("com.maxmind.geoip2.model.CityResponse [ {\"city\":{},\"continent\":{\"code\":\"NA\",\"geoname_id\":6255149,\"names\":{\"de\":\"Nordamerika\",\"ru\":\"Северная Америка\",\"pt-BR\":\"América do Norte\",\"ja\":\"北アメリカ\",\"en\":\"North America\",\"fr\":\"Amérique du Nord\",\"zh-CN\":\"北美洲\",\"es\":\"Norteamérica\"}},\"country\":{\"geoname_id\":6252001,\"is_in_european_union\":false,\"iso_code\":\"US\",\"names\":{\"de\":\"USA\",\"ru\":\"США\",\"pt-BR\":\"EUA\",\"ja\":\"アメリカ\",\"en\":\"United States\",\"fr\":\"États Unis\",\"zh-CN\":\"美国\",\"es\":\"Estados Unidos\"}},\"location\":{\"accuracy_radius\":1000,\"latitude\":37.751,\"longitude\":-97.822,\"time_zone\":\"America/Chicago\"},\"maxmind\":{},\"postal\":{},\"registered_country\":{\"geoname_id\":6252001,\"is_in_european_union\":false,\"iso_code\":\"US\",\"names\":{\"de\":\"USA\",\"ru\":\"США\",\"pt-BR\":\"EUA\",\"ja\":\"アメリカ\",\"en\":\"United States\",\"fr\":\"États Unis\",\"zh-CN\":\"美国\",\"es\":\"Estados Unidos\"}},\"represented_country\":{\"is_in_european_union\":false},\"traits\":{\"ip_address\":\"8.8.8.8\",\"is_anonymous\":false,\"is_anonymous_proxy\":false,\"is_anonymous_vpn\":false,\"is_anycast\":false,\"is_hosting_provider\":false,\"is_legitimate_proxy\":false,\"is_public_proxy\":false,\"is_residential_proxy\":false,\"is_satellite_provider\":false,\"is_tor_exit_node\":false,\"network\":\"8.8.8.0/23\"}} ]")
     }

@@ -16,7 +16,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
         val admin = createAdmin()
         val user = registerUser()
 
-        val group = groupRepository.save(
+        val group = groupService.save(
             Group(
                 null,
                 "pilots",
@@ -25,7 +25,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
                     Locale.GERMAN to GroupTranslation("Piloten", "Menschen, die fliegen")
                 ),
             )
-        )
+        ).getOrThrow()
 
         val res = webTestClient.post()
             .uri("/api/groups/${group.key}/members/${user.info.id.getOrThrow()}")

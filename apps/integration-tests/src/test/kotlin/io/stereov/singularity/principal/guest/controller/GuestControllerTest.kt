@@ -1,4 +1,4 @@
-package io.stereov.singularity.auth.guest.controller
+package io.stereov.singularity.principal.guest.controller
 
 import com.github.michaelbull.result.getOrThrow
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest

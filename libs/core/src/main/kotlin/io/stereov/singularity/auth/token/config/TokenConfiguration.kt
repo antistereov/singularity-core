@@ -13,7 +13,6 @@ import io.stereov.singularity.database.encryption.service.EncryptionService
 import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.principal.core.service.PrincipalService
-import io.stereov.singularity.principal.core.service.UserService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean

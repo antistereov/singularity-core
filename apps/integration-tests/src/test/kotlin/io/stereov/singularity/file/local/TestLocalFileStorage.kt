@@ -71,7 +71,7 @@ class TestLocalFileStorage : BaseIntegrationTest() {
             val file = File(properties.fileDirectory, metadata.key)
 
             assertTrue(file.exists())
-            val savedMetadata = fileStorage.metadataResponseByKey(metadata.key, user.authentication)
+            val savedMetadata = fileStorage.metadataResponseByKey(metadata.key, user.authentication).getOrThrow()
 
             val metadataWithMillis = metadata.copy(
                 createdAt = metadata.createdAt.truncatedTo(ChronoUnit.MILLIS),
@@ -187,7 +187,7 @@ class TestLocalFileStorage : BaseIntegrationTest() {
     }
     @Test fun `returns not found when no database entry is removed but file exists`() = runTest {
         runFileTest { file, metadata, _ ->
-            metadataService.deleteByKey(metadata.key)
+            metadataService.deleteByKey(metadata.key).getOrThrow()
 
             webTestClient.get()
                 .uri("/api/assets/${metadata.key}")

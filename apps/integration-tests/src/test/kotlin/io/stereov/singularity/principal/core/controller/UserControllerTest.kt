@@ -135,7 +135,7 @@ class UserControllerTest() : BaseIntegrationTest() {
         userService.deleteById(anotherUser.info.id.getOrThrow()).getOrThrow()
 
         webTestClient.delete()
-            .uri("/api/users/${anotherUser.info.id}")
+            .uri("/api/users/${anotherUser.info.id.getOrThrow()}")
             .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isNotFound
@@ -205,10 +205,10 @@ class UserControllerTest() : BaseIntegrationTest() {
 
         assertEquals(5, res1.totalElements)
         assertEquals(4, res1.content.size)
-        assertEquals(user1.info.id, res1.content.first().id)
-        assertEquals(user2.info.id, res1.content[1].id)
-        assertEquals(user3.info.id, res1.content[2].id)
-        assertEquals(user4.info.id, res1.content[3].id)
+        assertEquals(user1.info.id.getOrThrow(), res1.content.first().id)
+        assertEquals(user2.info.id.getOrThrow(), res1.content[1].id)
+        assertEquals(user3.info.id.getOrThrow(), res1.content[2].id)
+        assertEquals(user4.info.id.getOrThrow(), res1.content[3].id)
 
         val uri2 = UriComponentsBuilder.fromUriString("/api/users")
             .queryParam("sort", "createdAt,asc")
@@ -231,7 +231,7 @@ class UserControllerTest() : BaseIntegrationTest() {
 
         assertEquals(5, res2.totalElements)
         assertEquals(1, res2.content.size)
-        assertEquals(user5.info.id, res2.content.first().id)
+        assertEquals(user5.info.id.getOrThrow(), res2.content.first().id)
     }
     @Test fun `getUsers works with everything`() = runTest {
         val user1 = registerUser(roles = listOf(Role.User.ADMIN, Role.User.USER), groups = listOf("test"))
@@ -265,7 +265,7 @@ class UserControllerTest() : BaseIntegrationTest() {
 
         assertEquals(1, res.totalElements)
         assertEquals(1, res.content.size)
-        assertEquals(user1.info.id, res.content.first().id)
+        assertEquals(user1.info.id.getOrThrow(), res.content.first().id)
     }
     @Test fun `getUsers works with email`() = runTest {
         val user1 = registerUser(roles = listOf(Role.User.ADMIN, Role.User.USER))
@@ -292,7 +292,7 @@ class UserControllerTest() : BaseIntegrationTest() {
 
         assertEquals(1, res.totalElements)
         assertEquals(1, res.content.size)
-        assertEquals(user1.info.id, res.content.first().id)
+        assertEquals(user1.info.id.getOrThrow(), res.content.first().id)
     }
     @Test fun `getUsers works with email not existing`() = runTest {
         val user1 = registerUser(roles = listOf(Role.User.ADMIN, Role.User.USER))
@@ -345,7 +345,7 @@ class UserControllerTest() : BaseIntegrationTest() {
 
         assertEquals(1, res.totalElements)
         assertEquals(1, res.content.size)
-        assertEquals(user1.info.id, res.content.first().id)
+        assertEquals(user1.info.id.getOrThrow(), res.content.first().id)
     }
     @Test fun `getUsers works with multiple roles`() = runTest {
         val user1 = registerUser(roles = listOf(Role.User.ADMIN, Role.User.USER))
@@ -372,7 +372,7 @@ class UserControllerTest() : BaseIntegrationTest() {
 
         assertEquals(1, res.totalElements)
         assertEquals(1, res.content.size)
-        assertEquals(user1.info.id, res.content.first().id)
+        assertEquals(user1.info.id.getOrThrow(), res.content.first().id)
     }
     @Test fun `getUsers works with groups`() = runTest {
         val user1 = registerUser(roles = listOf(Role.User.ADMIN, Role.User.USER), groups = listOf("test"))
@@ -399,7 +399,7 @@ class UserControllerTest() : BaseIntegrationTest() {
 
         assertEquals(1, res.totalElements)
         assertEquals(1, res.content.size)
-        assertEquals(user1.info.id, res.content.first().id)
+        assertEquals(user1.info.id.getOrThrow(), res.content.first().id)
     }
     @Test fun `getUsers works with multiple groups`() = runTest {
         val user1 = registerUser(roles = listOf(Role.User.ADMIN, Role.User.USER), groups = listOf("test"))
@@ -426,7 +426,7 @@ class UserControllerTest() : BaseIntegrationTest() {
 
         assertEquals(1, res.totalElements)
         assertEquals(1, res.content.size)
-        assertEquals(user1.info.id, res.content.first().id)
+        assertEquals(user1.info.id.getOrThrow(), res.content.first().id)
     }
     @Test fun `getUsers works with identities`() = runTest {
         val user1 = registerUser(roles = listOf(Role.User.ADMIN, Role.User.USER), )
@@ -453,7 +453,7 @@ class UserControllerTest() : BaseIntegrationTest() {
 
         assertEquals(1, res.totalElements)
         assertEquals(1, res.content.size)
-        assertEquals(user1.info.id, res.content.first().id)
+        assertEquals(user1.info.id.getOrThrow(), res.content.first().id)
     }
     @Test fun `getUsers works with multiple identities`() = runTest {
         val user1 = registerUser(roles = listOf(Role.User.ADMIN, Role.User.USER), )
@@ -480,7 +480,7 @@ class UserControllerTest() : BaseIntegrationTest() {
 
         assertEquals(1, res.totalElements)
         assertEquals(1, res.content.size)
-        assertEquals(user1.info.id, res.content.first().id)
+        assertEquals(user1.info.id.getOrThrow(), res.content.first().id)
     }
     @Test fun `getUsers works with createdAtAfter`() = runTest {
         val user1 = registerUser(roles = listOf(Role.User.ADMIN, Role.User.USER), )
@@ -508,7 +508,7 @@ class UserControllerTest() : BaseIntegrationTest() {
 
         assertEquals(1, res.totalElements)
         assertEquals(1, res.content.size)
-        assertEquals(user1.info.id, res.content.first().id)
+        assertEquals(user1.info.id.getOrThrow(), res.content.first().id)
     }
     @Test fun `getUsers works with createdAtBefore`() = runTest {
         val user1 = registerUser(roles = listOf(Role.User.ADMIN, Role.User.USER), )
@@ -536,7 +536,7 @@ class UserControllerTest() : BaseIntegrationTest() {
 
         assertEquals(1, res.totalElements)
         assertEquals(1, res.content.size)
-        assertEquals(user1.info.id, res.content.first().id)
+        assertEquals(user1.info.id.getOrThrow(), res.content.first().id)
     }
     @Test fun `getUsers works with lastActiveAfter`() = runTest {
         val user1 = registerUser(roles = listOf(Role.User.ADMIN, Role.User.USER), )
@@ -564,7 +564,7 @@ class UserControllerTest() : BaseIntegrationTest() {
 
         assertEquals(1, res.totalElements)
         assertEquals(1, res.content.size)
-        assertEquals(user1.info.id, res.content.first().id)
+        assertEquals(user1.info.id.getOrThrow(), res.content.first().id)
     }
     @Test fun `getUsers works with lastActiveBefore`() = runTest {
         val user1 = registerUser(roles = listOf(Role.User.ADMIN, Role.User.USER), )
@@ -592,7 +592,7 @@ class UserControllerTest() : BaseIntegrationTest() {
 
         assertEquals(1, res.totalElements)
         assertEquals(1, res.content.size)
-        assertEquals(user1.info.id, res.content.first().id)
+        assertEquals(user1.info.id.getOrThrow(), res.content.first().id)
     }
     @Test fun `getUsers works needs authentication`() = runTest {
         registerUser()

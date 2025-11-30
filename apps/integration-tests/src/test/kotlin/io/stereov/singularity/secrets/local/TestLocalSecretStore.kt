@@ -1,7 +1,6 @@
 package io.stereov.singularity.secrets.local
 
 import com.github.michaelbull.result.getOrThrow
-import com.mongodb.assertions.Assertions.assertNull
 import io.stereov.singularity.secrets.core.component.SecretStore
 import io.stereov.singularity.secrets.core.exception.SecretStoreException
 import io.stereov.singularity.secrets.local.component.LocalSecretStore
@@ -42,8 +41,5 @@ class TestLocalSecretStore : BaseIntegrationTest() {
     }
     @Test fun `get throws exception when no secret exists`() = runTest {
         assertThrows<SecretStoreException.NotFound> { secretStore.get("random-key").getOrThrow() }
-    }
-    @Test fun `getOrNull return null when no secret exists`() = runTest {
-        assertNull(secretStore.get("random-key"))
     }
 }
