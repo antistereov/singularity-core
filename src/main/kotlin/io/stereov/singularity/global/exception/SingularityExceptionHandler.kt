@@ -14,6 +14,7 @@ class SingularityExceptionHandler {
     private val logger = KotlinLogging.logger {}
 
     @ExceptionHandler(SingularityException::class)
+    @Suppress("UNUSED")
     fun handleException(ex: SingularityException, exchange: ServerWebExchange): ResponseEntity<ErrorResponse> {
         logger.warn { "${ex.javaClass.simpleName} - ${ex.message}" }
 
