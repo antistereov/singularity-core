@@ -49,11 +49,18 @@ sealed class AuthenticationException(
      */
     class AuthenticationRequired(msg: String, cause: Throwable? = null) : AuthenticationException(
         msg,
-        "AUTHENTICATION_REQUIRED",
-        HttpStatus.UNAUTHORIZED,
-        "User is not authenticated.",
+        CODE,
+        STATUS,
+        DESCRIPTION,
         cause
-    )
+    ) {
+        companion object {
+            const val CODE = "AUTHENTICATION_REQUIRED"
+            const val DESCRIPTION = "User is not authenticated."
+            val STATUS = HttpStatus.UNAUTHORIZED
+        }
+
+    }
 
     /**
      * Represents a specific type of [AuthenticationException] indicating that the user does not

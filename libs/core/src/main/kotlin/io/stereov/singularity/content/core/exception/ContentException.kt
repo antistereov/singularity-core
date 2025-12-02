@@ -1,5 +1,6 @@
 package io.stereov.singularity.content.core.exception
 
+import io.stereov.singularity.auth.core.exception.AuthenticationException
 import io.stereov.singularity.global.exception.SingularityException
 import org.springframework.http.HttpStatus
 
@@ -25,6 +26,14 @@ sealed class ContentException(
         NotAuthorizedFailure.CODE,
         NotAuthorizedFailure.STATUS,
         NotAuthorizedFailure.DESCRIPTION,
+        cause
+    )
+
+    class NotAuthenticated(msg: String, cause: Throwable? = null) : ContentException(
+        msg,
+        AuthenticationException.AuthenticationRequired.CODE,
+        AuthenticationException.AuthenticationRequired.STATUS,
+        AuthenticationException.AuthenticationRequired.DESCRIPTION,
         cause
     )
 }

@@ -1,5 +1,6 @@
 package io.stereov.singularity.auth.twofactor.controller
 
+import com.github.michaelbull.result.getOrThrow
 import io.mockk.verify
 import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.auth.core.dto.request.StepUpRequest
@@ -22,7 +23,7 @@ class TwoFactorAuthControllerEmailDefaultTest : BaseMailIntegrationTest() {
 
         Assertions.assertTrue(user.info.twoFactorEnabled)
         Assertions.assertEquals(listOf(TwoFactorMethod.EMAIL), user.info.twoFactorMethods)
-        Assertions.assertEquals(TwoFactorMethod.EMAIL, user.info.preferredTwoFactorMethod)
+        Assertions.assertEquals(TwoFactorMethod.EMAIL, user.info.preferredTwoFactorMethod.getOrThrow())
         Assertions.assertTrue(user.info.sensitive.security.twoFactor.enabled)
         Assertions.assertTrue(user.info.sensitive.security.twoFactor.email.enabled)
         Assertions.assertFalse(user.info.sensitive.security.twoFactor.totp.enabled)

@@ -894,6 +894,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
 
         webTestClient.put()
             .uri("/api/content/articles/not-there/state")
+            .accessTokenCookie(owner.accessToken)
             .bodyValue(req)
             .exchange()
             .expectStatus().isNotFound
@@ -2437,6 +2438,7 @@ class ArticleManagementControllerIntegrationTest() : BaseArticleTest() {
 
         webTestClient.delete()
             .uri("/api/content/articles/oops")
+            .accessTokenCookie(owner.accessToken)
             .exchange()
             .expectStatus().isNotFound
 

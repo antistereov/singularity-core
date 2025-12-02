@@ -1,4 +1,4 @@
-package io.stereov.singularity.ratelimit
+package io.stereov.singularity.security.ratelimit
 
 import io.stereov.singularity.security.ratelimit.properties.RateLimitProperties
 import io.stereov.singularity.test.BaseSpringBootTest

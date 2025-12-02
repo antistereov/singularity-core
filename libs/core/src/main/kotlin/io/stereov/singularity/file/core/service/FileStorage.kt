@@ -335,34 +335,51 @@ abstract class FileStorage {
 
     protected suspend fun resolveMetadataSyncConflicts(
         fileExists: Boolean,
-        key: String
-    ): Result<FileMetadataDocument, FileException> = coroutineBinding {
+        renditionKey: String
+    ): Result<FileMetadataDocument, FileException> {
 
-        metadataService.findRenditionByKey(key)
+        return metadataService.findRenditionByKey(renditionKey)
             .flatMapEither(
-                success = { metadata -> Ok(metadata) },
+                success = { metadata ->
+                    if (fileExists) { Ok(metadata) } else {
+                        metadataService.deleteRenditionByKey(renditionKey)
+                            .mapError { ex ->
+                                FileException.MetadataOutOfSync(
+                                    "File with key $renditionKey does not exist but metadata was found; attempt to resolve conflict failed: ${ex.message}",
+                                    ex
+                                )
+                            }
+                            .andThen {
+                                Err(
+                                    FileException.NotFound(
+                                        "No metadata for file with key $renditionKey found; file was removed to resolve this conflict",
+                                    )
+                                )
+                            }
+                    }
+                    },
                 failure = { ex ->
                     when (ex) {
                         is FileMetadataException.NotFound -> {
                             if (fileExists) {
-                                logger.warn { "No metadata found for rendition with key $key but file exists, removing file..." }
-                                remove(key)
+                                logger.warn { "No metadata found for rendition with key $renditionKey but file exists, removing file..." }
+                                removeRendition(renditionKey)
                                     .mapError { ex ->
                                         FileException.MetadataOutOfSync(
-                                            "File with key $key found but no metadata was found; attempt to resolve conflict failed: ${ex.message}",
+                                            "File with key $renditionKey found but no metadata was found; attempt to resolve conflict failed: ${ex.message}",
                                             ex
                                         )
                                     }
                                     .andThen {
                                         Err(
-                                            FileException.Metadata(
-                                                "Failed to fetch metadata for file with key $key: ${ex.message}",
+                                            FileException.NotFound(
+                                                "No metadata for file with key $renditionKey found; file was removed to resolve this conflict",
                                                 ex
                                             )
                                         )
                                     }
                             } else {
-                                Err(FileException.NotFound("File with key $key not found: ${ex.message}", ex))
+                                Err(FileException.NotFound("File with key $renditionKey not found: ${ex.message}", ex))
                             }
                         }
 
@@ -370,17 +387,17 @@ abstract class FileStorage {
                             if (fileExists) {
                                 Err(
                                     FileException.Metadata(
-                                        "Failed to fetch metadata for file with key $key: ${ex.message}",
+                                        "Failed to fetch metadata for file with key $renditionKey: ${ex.message}",
                                         ex
                                     )
                                 )
                             } else {
-                                Err(FileException.NotFound("File with key $key not found"))
+                                Err(FileException.NotFound("File with key $renditionKey not found"))
                             }
                         }
                     }
                 }
-            ).bind()
+            )
     }
 
     protected abstract suspend fun uploadRendition(req: FileUploadRequest): Result<FileUploadResponse, FileException.Operation>

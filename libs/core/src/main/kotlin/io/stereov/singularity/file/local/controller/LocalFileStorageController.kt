@@ -1,8 +1,8 @@
 package io.stereov.singularity.file.local.controller
 
 import com.github.michaelbull.result.getOrThrow
-import io.stereov.singularity.auth.token.exception.AccessTokenExtractionException
 import io.stereov.singularity.auth.core.service.AuthorizationService
+import io.stereov.singularity.auth.token.exception.AccessTokenExtractionException
 import io.stereov.singularity.file.core.exception.FileException
 import io.stereov.singularity.file.local.service.LocalFileStorage
 import io.stereov.singularity.global.annotation.ThrowsDomainError

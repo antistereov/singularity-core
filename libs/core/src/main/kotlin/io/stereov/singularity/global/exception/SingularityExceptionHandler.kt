@@ -20,11 +20,8 @@ class SingularityExceptionHandler {
         val status = ex.status
 
         val errorResponse = ErrorResponse(
-            status = status.value(),
-            error = ex.javaClass.simpleName,
-            message = ex.message,
-            path = exchange.request.uri.path,
-            code = ex.code
+            exception =  ex,
+            exchange = exchange
         )
 
         return ResponseEntity(errorResponse, status)

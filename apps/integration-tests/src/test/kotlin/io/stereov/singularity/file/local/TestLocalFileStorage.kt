@@ -185,7 +185,7 @@ class TestLocalFileStorage : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isNotFound
     }
-    @Test fun `returns not found when no database entry is removed but file exists`() = runTest {
+    @Test fun `returns not found when database entry is removed but file exists`() = runTest {
         runFileTest { file, metadata, _ ->
             metadataService.deleteByKey(metadata.key).getOrThrow()
 

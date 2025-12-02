@@ -1,4 +1,4 @@
-package io.stereov.singularity.ratelimit
+package io.stereov.singularity.security.ratelimit
 
 import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest

@@ -5,11 +5,13 @@ import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.auth.core.dto.response.IdentityProviderResponse
 import io.stereov.singularity.auth.oauth2.dto.request.AddPasswordAuthenticationRequest
 import io.stereov.singularity.principal.core.dto.response.UserResponse
+import io.stereov.singularity.principal.core.exception.UserException
 import io.stereov.singularity.principal.core.model.identity.UserIdentity
 import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class IdentityProviderControllerTest : BaseIntegrationTest() {
 
@@ -27,23 +29,20 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
 
         val body = requireNotNull(res.responseBody)
 
-        Assertions.assertEquals(listOf(
-            IdentityProviderResponse(UserIdentity.PASSWORD_IDENTITY),
-            IdentityProviderResponse("github")), body.map { objectMapper.convertValue(it, IdentityProviderResponse::class.java) })
+        Assertions.assertTrue( body.map { objectMapper.convertValue(it, IdentityProviderResponse::class.java) }
+            .containsAll(
+                listOf(
+                    IdentityProviderResponse(UserIdentity.PASSWORD_IDENTITY),
+                    IdentityProviderResponse("github"))
+            ))
     }
-    @Test fun `get works with guest`() = runTest {
+    @Test fun `get does not works with guest`() = runTest {
         val user = createGuest()
 
-        val res = webTestClient.get()
+        webTestClient.get()
             .uri("/api/users/me/providers")
             .accessTokenCookie(user.accessToken)
-            .exchange().expectStatus().isOk
-            .expectBody(List::class.java)
-            .returnResult()
-
-        val body = requireNotNull(res.responseBody)
-
-        Assertions.assertTrue(body.isEmpty())
+            .exchange().expectStatus().isNotFound
     }
     @Test fun `get requires access token`() = runTest {
         webTestClient.get()
@@ -94,7 +93,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
 
         val updatedUser = userService.findById(user.id).getOrThrow()
         Assertions.assertFalse(updatedUser.sensitive.identities.password != null)
-        Assertions.assertNull(updatedUser.password.getOrThrow())
+        assertThrows<UserException.NoPassword> { updatedUser.password.getOrThrow() }
     }
     @Test fun `addPassword requires passwort with lower case letter`() = runTest {
         val user = registerOAuth2()
@@ -111,7 +110,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
         val updatedUser = userService.findById(user.id).getOrThrow()
 
         Assertions.assertFalse(updatedUser.sensitive.identities.password != null)
-        Assertions.assertNull(updatedUser.password)
+        assertThrows<UserException.NoPassword> { updatedUser.password.getOrThrow() }
     }
     @Test fun `addPassword requires password with upper-case letter`() = runTest {
         val user = registerOAuth2()
@@ -127,7 +126,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
 
         val updatedUser = userService.findById(user.id).getOrThrow()
         Assertions.assertFalse(updatedUser.sensitive.identities.password != null)
-        Assertions.assertNull(updatedUser.password)
+        assertThrows<UserException.NoPassword> { updatedUser.password.getOrThrow() }
     }
     @Test fun `addPassword requires password with number`() = runTest {
         val user = registerOAuth2()
@@ -143,7 +142,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
 
         val updatedUser = userService.findById(user.id).getOrThrow()
         Assertions.assertFalse(updatedUser.sensitive.identities.password != null)
-        Assertions.assertNull(updatedUser.password)
+        assertThrows<UserException.NoPassword> { updatedUser.password.getOrThrow() }
     }
     @Test fun `addPassword requires password with special character`() = runTest {
         val user = registerOAuth2()
@@ -159,7 +158,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
 
         val updatedUser = userService.findById(user.id).getOrThrow()
         Assertions.assertFalse(updatedUser.sensitive.identities.password != null)
-        Assertions.assertNull(updatedUser.password)
+        assertThrows<UserException.NoPassword> { updatedUser.password.getOrThrow() }
     }
     @Test fun `addPassword needs body`() = runTest {
         val user = registerOAuth2()
@@ -173,7 +172,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
 
         val updatedUser = userService.findById(user.id).getOrThrow()
         Assertions.assertFalse(updatedUser.sensitive.identities.password != null)
-        Assertions.assertNull(updatedUser.password)
+        assertThrows<UserException.NoPassword> { updatedUser.password.getOrThrow() }
     }
     @Test fun `addPassword needs access and step-up`() = runTest {
         val user = registerOAuth2()
@@ -202,7 +201,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
         val updatedUser = userService.findById(user.id).getOrThrow()
 
         Assertions.assertFalse(updatedUser.sensitive.identities.password != null)
-        Assertions.assertNull(updatedUser.password)
+        assertThrows<UserException.NoPassword> { updatedUser.password.getOrThrow() }
     }
     @Test fun `addPassword does not allow guests`() = runTest {
         val user = createGuest()
@@ -214,7 +213,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
             .stepUpTokenCookie(user.stepUpToken)
             .bodyValue(req)
             .exchange()
-            .expectStatus().isBadRequest
+            .expectStatus().isNotFound
     }
     @Test fun `addPassword returns not modified if already set up`() = runTest {
         val oauth2User = registerOAuth2()
@@ -280,7 +279,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
             .expectStatus().isNotFound
 
         val updatedUser = userService.findById(user.id).getOrThrow()
-        Assertions.assertEquals(2, updatedUser.sensitive.identities.providers.size)
+        Assertions.assertEquals(1, updatedUser.sensitive.identities.providers.size)
         Assertions.assertTrue(updatedUser.sensitive.identities.password != null)
         Assertions.assertTrue(updatedUser.sensitive.identities.providers.contains("github"))
         Assertions.assertTrue(hashService.checkBcrypt(user.password!!, updatedUser.password.getOrThrow()).getOrThrow())
@@ -308,7 +307,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
             .expectStatus().isUnauthorized
 
         val updatedUser = userService.findById(user.id).getOrThrow()
-        Assertions.assertEquals(2, updatedUser.sensitive.identities.providers.size)
+        Assertions.assertEquals(1, updatedUser.sensitive.identities.providers.size)
         Assertions.assertTrue(updatedUser.sensitive.identities.password != null)
         Assertions.assertTrue(updatedUser.sensitive.identities.providers.contains("github"))
         Assertions.assertTrue(hashService.checkBcrypt(user.password!!, updatedUser.password.getOrThrow()).getOrThrow())
@@ -326,7 +325,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
             .expectStatus().isBadRequest
 
         val updatedUser = userService.findById(user.id).getOrThrow()
-        Assertions.assertEquals(2, updatedUser.sensitive.identities.providers.size)
+        Assertions.assertEquals(1, updatedUser.sensitive.identities.providers.size)
         Assertions.assertTrue(updatedUser.sensitive.identities.password != null)
         Assertions.assertTrue(updatedUser.sensitive.identities.providers.contains("github"))
         Assertions.assertTrue(hashService.checkBcrypt(user.password!!, updatedUser.password.getOrThrow()).getOrThrow())
@@ -343,6 +342,6 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
 
         val updatedUser = userService.findById(user.id).getOrThrow()
         Assertions.assertFalse(updatedUser.sensitive.identities.password != null)
-        Assertions.assertNull(updatedUser.password)
+        assertThrows<UserException.NoPassword> { updatedUser.password.getOrThrow() }
     }
 }
