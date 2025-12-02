@@ -1,6 +1,8 @@
 package io.stereov.singularity.global.model
 
-import java.time.LocalDateTime
+import io.stereov.singularity.global.exception.SingularityException
+import org.springframework.web.server.ServerWebExchange
+import java.time.Instant
 
 /**
  * Represents a standardized error response returned by the application.
@@ -17,10 +19,28 @@ import java.time.LocalDateTime
  * @property path The path of the request that triggered the error, if available.
  */
 data class ErrorResponse(
-    val timestamp: LocalDateTime = LocalDateTime.now(),
+    val timestamp: String = Instant.now().toString(),
     val status: Int,
     val code: String,
     val error: String,
     val message: String?,
     val path: String?,
-)
+) {
+
+    /**
+     * Secondary constructor for creating an instance of [ErrorResponse] using a [SingularityException]
+     * and a [ServerWebExchange]. This constructor extracts details from the provided exception and
+     * exchange to populate the attributes of the error response.
+     *
+     * @param exception The [SingularityException] instance containing details such as the HTTP status,
+     * error code, and error message.
+     * @param exchange The [ServerWebExchange] instance from which the request path is obtained.
+     */
+    constructor(exception: SingularityException, exchange: ServerWebExchange): this(
+        status = exception.status.value(),
+        error = exception.javaClass.simpleName,
+        message = exception.message,
+        path = exchange.request.uri.path,
+        code = exception.code
+    )
+}

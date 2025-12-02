@@ -56,14 +56,19 @@ abstract class ContentService<T: ContentDocument<T>> : CrudServiceWithKey<T>  {
      * @param authenticationOutcome The authentication information of the user attempting to perform the action.
      * @param content The content on which the action is to be performed.
      * @param role The role required to perform the action, such as VIEWER, EDITOR, or ADMIN.
-     * @return A [Result] containing the content of type [T] if the user is authorized, or a [ContentException.NotAuthorized]
+     * @return A [Result] containing the content of type [T] if the user is authorized, or a [ContentException]
      * if the user does not have sufficient permissions.
      */
     fun requireAuthorization(
         authenticationOutcome: AuthenticationOutcome,
         content: T, role: ContentAccessRole
-    ): Result<T, ContentException.NotAuthorized> {
+    ): Result<T, ContentException> {
         logger.debug { "Validating that user has role \"$role\" in ${collectionClazz.simpleName} with key \"${content.key}\"" }
+
+
+        if (!content.isPublic && authenticationOutcome is AuthenticationOutcome.None) {
+            return Err(ContentException.NotAuthenticated("Authentication is required to access this content"))
+        }
 
         return if (content.hasAccess(authenticationOutcome, role)) {
             Ok(content)

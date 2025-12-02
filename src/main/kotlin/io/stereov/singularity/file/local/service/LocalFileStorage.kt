@@ -5,7 +5,6 @@ import com.github.michaelbull.result.coroutines.coroutineBinding
 import com.github.michaelbull.result.coroutines.runSuspendCatching
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.model.AuthenticationOutcome
-import io.stereov.singularity.content.core.exception.ContentException
 import io.stereov.singularity.content.core.model.ContentAccessRole
 import io.stereov.singularity.file.core.exception.FileException
 import io.stereov.singularity.file.core.mapper.FileMetadataMapper
@@ -58,18 +57,18 @@ class LocalFileStorage(
      * Serves a file based on the provided key and authentication outcome.
      *
      * @param authenticationOutcome The result of the authentication process, used to validate user permissions.
-     * @param key The file key to locate and serve the file.
+     * @param renditionKey The file key to locate and serve the file.
      * @return A [Result] containing the served file data encapsulated in [ServedFile] if successful,
      * or a [FileException] if an error occurs, such as file access issues, invalid requests, or authorization failures.
      */
     suspend fun serveFile(
         authenticationOutcome: AuthenticationOutcome,
-        key: String,
+        renditionKey: String,
     ): Result<ServedFile, FileException> = coroutineBinding {
 
-        logger.debug { "Accessing asset $key" }
+        logger.debug { "Accessing asset $renditionKey" }
 
-        if (key.isBlank()) {
+        if (renditionKey.isBlank()) {
             Err(FileException.BadRequest("Missing file key in request path")).bind()
         }
 
@@ -82,7 +81,7 @@ class LocalFileStorage(
             }
             .bind()
 
-        val filePath = runCatching { Paths.get(properties.fileDirectory).resolve(key).normalize().absolute() }
+        val filePath = runCatching { Paths.get(properties.fileDirectory).resolve(renditionKey).normalize().absolute() }
             .mapError { ex -> FileException.Operation("Failed to resolve file path: ${ex.message}") }
             .bind()
 
@@ -95,21 +94,14 @@ class LocalFileStorage(
             }
             .bind()
 
-        val metadata = resolveMetadataSyncConflicts(fileExists, key).bind()
+        val metadata = resolveMetadataSyncConflicts(fileExists, renditionKey).bind()
 
         metadataService.requireAuthorization(authenticationOutcome, metadata, ContentAccessRole.VIEWER)
-            .mapError { ex ->
-                when (ex) {
-                    is ContentException.NotAuthorized -> FileException.NotAuthorized(
-                        msg = "User is not authorized to view file with key $key: ${ex.message}",
-                        cause = ex
-                    )
-                }
-            }
+            .mapError { ex -> FileException.from(ex) }
             .bind()
 
-        val rendition = metadata.renditions.values.firstOrNull { it.key == key }
-            .toResultOr { FileException.Metadata("Metadata does not contain rendition with key $key although it was found by this key") }
+        val rendition = metadata.renditions.values.firstOrNull { it.key == renditionKey }
+            .toResultOr { FileException.Metadata("Metadata does not contain rendition with key $renditionKey although it was found by this key") }
             .bind()
 
         if (!filePath.startsWith(baseFileDir)) {
@@ -121,7 +113,7 @@ class LocalFileStorage(
         val size = runCatching { Files.size(filePath).toString() }
             .mapError { ex ->
                 FileException.Operation(
-                    "Failed to generate file size of file with key $key: ${ex.message}",
+                    "Failed to generate file size of file with key $renditionKey: ${ex.message}",
                     ex
                 )
             }
@@ -129,7 +121,7 @@ class LocalFileStorage(
         val mediaType = runCatching { MediaType.parseMediaType(rendition.contentType) }
             .mapError { ex ->
                 FileException.Metadata(
-                    "Invalid media type ${rendition.contentType} saved in metadata for file with key $key: ${ex.message}",
+                    "Invalid media type ${rendition.contentType} saved in metadata for file with key $renditionKey: ${ex.message}",
                     ex
                 )
             }

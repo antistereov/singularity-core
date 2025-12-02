@@ -1,5 +1,7 @@
 package io.stereov.singularity.file.core.exception
 
+import io.stereov.singularity.auth.core.exception.AuthenticationException
+import io.stereov.singularity.content.core.exception.ContentException
 import io.stereov.singularity.global.exception.SingularityException
 import org.springframework.http.HttpStatus
 
@@ -187,4 +189,21 @@ sealed class FileException(msg: String, code: String, status: HttpStatus, descri
         "Thrown when access to the requested file is not permitted.",
         cause
     )
+
+    class NotAuthenticated(msg: String, cause: Throwable? = null) : FileException(
+        msg,
+        AuthenticationException.AuthenticationRequired.CODE,
+        AuthenticationException.AuthenticationRequired.STATUS,
+        AuthenticationException.AuthenticationRequired.DESCRIPTION,
+        cause
+    )
+
+    companion object {
+        fun from(ex: ContentException) : FileException {
+            return when (ex) {
+                is ContentException.NotAuthorized -> NotAuthorized(ex.message, ex.cause)
+                is ContentException.NotAuthenticated -> NotAuthenticated(ex.message, ex.cause)
+            }
+        }
+    }
 }

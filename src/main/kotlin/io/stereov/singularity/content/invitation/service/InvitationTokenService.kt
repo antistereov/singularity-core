@@ -48,11 +48,15 @@ class InvitationTokenService(
     ): Result<InvitationToken, InvitationTokenCreationException> = coroutineBinding {
         logger.debug { "Creating invitation token" }
 
+        val id = invitation.id
+            .mapError { ex -> InvitationTokenCreationException.InvalidInvitation("Failed to extract ID from invitation: ${ex.message}", ex) }
+            .bind()
+
         val claims = runCatching {
             JwtClaimsSet.builder()
                 .issuedAt(invitation.issuedAt)
                 .expiresAt(invitation.expiresAt)
-                .subject(invitation.id.toString())
+                .subject(id.toHexString())
                 .build()
         }
             .mapError { ex -> InvitationTokenCreationException.Encoding("Failed to create JWT claims: ${ex.message}", ex) }
@@ -62,9 +66,7 @@ class InvitationTokenService(
             .mapError { ex -> InvitationTokenCreationException.from(ex) }
             .bind()
 
-        val id = invitation.id
-            .mapError { ex -> InvitationTokenCreationException.InvalidInvitation("Failed to extract ID from invitation: ${ex.message}", ex) }
-            .bind()
+
 
         InvitationToken(id, jwt)
     }
@@ -89,6 +91,9 @@ class InvitationTokenService(
             .mapError { InvitationTokenExtractionException.from(it) }
             .bind()
 
-        InvitationToken(ObjectId(jwt.subject), jwt)
+        val invitationId = runCatching { ObjectId(jwt.subject) }
+            .mapError { InvitationTokenExtractionException.Invalid("Invitation token does not contain valid ID") }
+            .bind()
+        InvitationToken(invitationId, jwt)
     }
 }

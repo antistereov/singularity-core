@@ -1,8 +1,12 @@
 package io.stereov.singularity.security.ratelimit.filter
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
+import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.util.getClientIp
+import io.stereov.singularity.ratelimit.excpetion.RateLimitException
 import io.stereov.singularity.security.ratelimit.service.RateLimitService
+import org.springframework.http.MediaType
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
@@ -46,6 +50,17 @@ class RateLimitFilter(
                 .then(rateLimitService.checkUserRateLimit())
                 .then(if (isLoginAttempt) rateLimitService.checkIpLoginLimit(clientIp) else Mono.empty())
                 .then(chain.filter(exchange) )
+                .onErrorResume(RateLimitException::class.java) { ex ->
+                    val status = ex.status
+                    exchange.response.statusCode = status
+                    exchange.response.headers.contentType = MediaType.APPLICATION_JSON
+
+                    val errorResponse = ErrorResponse(ex, exchange)
+
+                    exchange.response.writeWith(
+                        Mono.just(exchange.response.bufferFactory().wrap(ObjectMapper().writeValueAsBytes(errorResponse)))
+                    )
+                }
         }
     }
 }
