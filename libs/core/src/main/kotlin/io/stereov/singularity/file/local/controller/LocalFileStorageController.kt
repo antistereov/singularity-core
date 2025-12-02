@@ -41,6 +41,7 @@ class LocalFileStorageController(
         AccessTokenExtractionException::class,
         FileException::class,
     ])
+    @Suppress("UNUSED")
     suspend fun serveFile(
         exchange: ServerWebExchange
     ): ResponseEntity<Flux<DataBuffer>> {
