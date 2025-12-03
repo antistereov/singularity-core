@@ -232,11 +232,26 @@ abstract class SensitiveCrudService<SensitiveData, DecryptedDocument: SensitiveD
      * @param id The unique identifier of the document to delete.
      * @return A [Result] containing [Unit] on successful deletion, or an [DeleteEncryptedDocumentByIdException] if an error occurs.
      */
-    open suspend fun deleteById(id: ObjectId): Result<Unit, DeleteEncryptedDocumentByIdException> {
+    open suspend fun deleteById(id: ObjectId): Result<Unit, DeleteEncryptedDocumentByIdException> = coroutineBinding {
         logger.debug { "Deleting ${encryptedDocumentClazz.simpleName} by ID $id" }
 
-        return runSuspendCatching { repository.deleteById(id) }
-            .mapError { ex -> DeleteEncryptedDocumentByIdException.Database("Failed to delete ${encryptedDocumentClazz.simpleName} by ID: ${ex.message}", ex) }
+        val exists = existsById(id)
+            .mapError { ex -> DeleteEncryptedDocumentByIdException.Database("Failed to check existence of ${sensitiveClazz.simpleName} with ID $id: ${ex.message}", ex) }
+            .bind()
+
+        if (exists) {
+            runSuspendCatching { repository.deleteById(id) }
+                .mapError { ex ->
+                    DeleteEncryptedDocumentByIdException.Database(
+                        "Failed to delete ${encryptedDocumentClazz.simpleName} by ID: ${ex.message}",
+                        ex
+                    )
+                }
+                .bind()
+        } else {
+            Err(DeleteEncryptedDocumentByIdException.NotFound("No ${sensitiveClazz.simpleName} with ID $id found"))
+                .bind()
+        }
     }
 
     /**

@@ -1,7 +1,6 @@
 package io.stereov.singularity.secrets.vault
 
 import com.github.michaelbull.result.getOrThrow
-import com.mongodb.assertions.Assertions.assertNull
 import io.stereov.singularity.secrets.core.component.SecretStore
 import io.stereov.singularity.secrets.core.exception.SecretStoreException
 import io.stereov.singularity.secrets.core.properties.SecretStoreImplementation
@@ -51,7 +50,7 @@ class TestVaultSecretStore : BaseSpringBootTest() {
         assertThrows<SecretStoreException.NotFound> { secretStore.get("random-key").getOrThrow() }
     }
     @Test fun `getOrNull return null when no secret exists`() = runTest {
-        assertNull(secretStore.get("random-key").getOrThrow())
+        assertThrows<SecretStoreException.NotFound> { secretStore.get("random-key").getOrThrow() }
     }
 
     companion object {

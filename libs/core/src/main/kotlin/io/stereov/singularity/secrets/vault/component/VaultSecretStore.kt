@@ -9,6 +9,7 @@ import io.stereov.singularity.secrets.core.exception.SecretStoreException
 import io.stereov.singularity.secrets.core.model.Secret
 import io.stereov.singularity.secrets.vault.properties.VaultSecretStoreProperties
 import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 import org.springframework.vault.core.ReactiveVaultOperations
@@ -34,7 +35,7 @@ class VaultSecretStore(
         val secretPath = getSecretPath(key)
 
         return runCatching {
-            vaultOperations.read(secretPath).awaitSingle()?.data
+            vaultOperations.read(secretPath).awaitSingleOrNull()?.data
         }
             .mapError { ex -> SecretStoreException.Operation("Failed to generate secret with key $key from vault: ${ex.message}", ex) }
             .flatMap { data ->

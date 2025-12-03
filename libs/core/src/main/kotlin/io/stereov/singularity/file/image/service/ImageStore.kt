@@ -5,6 +5,7 @@ import com.github.michaelbull.result.coroutines.coroutineBinding
 import com.github.michaelbull.result.coroutines.runSuspendCatching
 import com.sksamuel.scrimage.ImmutableImage
 import com.sksamuel.scrimage.Position
+import com.sksamuel.scrimage.webp.WebpWriter
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.file.core.component.DataBufferPublisher
@@ -16,18 +17,11 @@ import io.stereov.singularity.file.core.model.FileUploadRequest
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.file.download.model.StreamedFile
 import io.stereov.singularity.file.image.properties.ImageProperties
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.springframework.core.io.buffer.DataBufferUtils
-import org.springframework.core.io.buffer.DefaultDataBufferFactory
 import org.springframework.http.MediaType
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
-import java.io.PipedInputStream
-import java.io.PipedOutputStream
-import javax.imageio.ImageIO
 
 /**
  * Service for handling image uploads and processing, including resizing, format conversion, and storage in a file system.
@@ -40,7 +34,8 @@ import javax.imageio.ImageIO
 class ImageStore(
     private val imageProperties: ImageProperties,
     private val fileStorage: FileStorage,
-    private val dataBufferPublisher: DataBufferPublisher
+    private val dataBufferPublisher: DataBufferPublisher,
+    private val webpWriter: WebpWriter
 ) {
 
     private val logger = KotlinLogging.logger {}
@@ -102,31 +97,17 @@ class ImageStore(
             logger.debug { "Creating upload request for $fileKey" }
             val resized = originalImage.resize(size)
 
-            val pipedInput = PipedInputStream()
-            val pipedOutput = PipedOutputStream(pipedInput)
+            val resizedBytes = resized.bytes(webpWriter)
 
-            CoroutineScope(Dispatchers.IO).launch {
-                try {
-                    val buffered = resized.awt()
-                    ImageIO.write(buffered, "webp", pipedOutput)
-                } catch (e: Exception) {
-                    pipedOutput.close()
-                    throw e
-                } finally {
-                    pipedOutput.close()
-                }
-
-            }
-
-            FileUploadRequest.DataBufferUpload(
+            FileUploadRequest.ByteArrayUpload(
                 key = fileKey,
                 contentType = mediaType,
-                data = DataBufferUtils.readInputStream({ pipedInput }, DefaultDataBufferFactory(), 8192),
+                data = resizedBytes,
                 width = resized.width,
                 height = resized.height,
             )
         }
-            .mapError { ex -> FileException.Stream("Failed to create upload request for \$key: \${ex.message}", ex) }
+            .mapError { ex -> FileException.Operation("Failed to create upload request for $key: ${ex.message}", ex) }
     }
 
     suspend fun ImmutableImage.resize(size: Int): ImmutableImage = withContext(Dispatchers.Default) {

@@ -37,12 +37,4 @@ sealed class CreateFullArticleResponseException(
         FileFailure.DESCRIPTION,
         cause
     )
-
-    class OwnerNotFound(msg: String, cause: Throwable? = null) : CreateFullArticleResponseException(
-        msg,
-        "OWNER_NOT_FOUND",
-        HttpStatus.NOT_FOUND,
-        "Owner not found.",
-        cause
-    )
 }

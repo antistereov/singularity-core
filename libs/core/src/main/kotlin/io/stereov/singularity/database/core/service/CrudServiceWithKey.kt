@@ -1,10 +1,8 @@
 package io.stereov.singularity.database.core.service
 
-import com.github.michaelbull.result.Result
-import com.github.michaelbull.result.andThen
+import com.github.michaelbull.result.*
+import com.github.michaelbull.result.coroutines.coroutineBinding
 import com.github.michaelbull.result.coroutines.runSuspendCatching
-import com.github.michaelbull.result.mapError
-import com.github.michaelbull.result.toResultOr
 import io.stereov.singularity.database.core.exception.DeleteDocumentByKeyException
 import io.stereov.singularity.database.core.exception.ExistsDocumentByKeyException
 import io.stereov.singularity.database.core.exception.FindDocumentByKeyException
@@ -55,11 +53,26 @@ interface CrudServiceWithKey<D: WithKey> : CrudService<D> {
      * @return A [Result] containing [Unit] if the deletion is successful, or
      * a [DeleteDocumentByKeyException] indicating the failure reason.
      */
-    suspend fun deleteByKey(key: String): Result<Unit, DeleteDocumentByKeyException> {
+    suspend fun deleteByKey(key: String): Result<Unit, DeleteDocumentByKeyException> = coroutineBinding {
         logger.debug { "Deleting ${collectionClazz.simpleName} with key \"$key\"" }
 
-        return runSuspendCatching { repository.deleteByKey(key) }
-            .mapError { ex -> DeleteDocumentByKeyException.Database("Failed to delete ${collectionClazz.simpleName} with key $key: ${ex.message}", ex) }
+        val exists = existsByKey(key)
+            .mapError { ex -> DeleteDocumentByKeyException.Database("Failed to check existence of ${collectionClazz.simpleName} with key $key: ${ex.message}", ex) }
+            .bind()
+
+        if (exists) {
+            runSuspendCatching { repository.deleteByKey(key) }
+                .mapError { ex ->
+                    DeleteDocumentByKeyException.Database(
+                        "Failed to delete ${collectionClazz.simpleName} with key $key: ${ex.message}",
+                        ex
+                    )
+                }
+                .bind()
+        } else {
+            Err(DeleteDocumentByKeyException.NotFound("No ${collectionClazz.simpleName} with key $key found"))
+                .bind()
+        }
     }
 
 }

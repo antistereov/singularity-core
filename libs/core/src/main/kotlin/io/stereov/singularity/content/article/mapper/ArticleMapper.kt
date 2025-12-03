@@ -88,10 +88,11 @@ class ArticleMapper(
     ): Result<FullArticleResponse, CreateFullArticleResponseException> = coroutineBinding {
         val actualOwnerId = ownerId ?: article.access.ownerId
         val actualOwner = userService.findById(actualOwnerId)
-            .mapError { when (it) {
-                is FindEncryptedDocumentByIdException.NotFound -> CreateFullArticleResponseException.OwnerNotFound("Owner of article with key ${article.key} does not exist")
-                else -> CreateFullArticleResponseException.Database("Failed to find owner of article with key ${article.key}: ${it.message}", it) }
-            }
+            .recoverIf(
+                { it is FindEncryptedDocumentByIdException.NotFound },
+                { null }
+            )
+            .mapError { CreateFullArticleResponseException.Database("Failed to find owner of article with key ${article.key}: ${it.message}", it) }
             .bind()
 
         val access = ContentAccessDetailsResponse.create(article.access, authenticationOutcome)
@@ -131,9 +132,11 @@ class ArticleMapper(
             .mapError { ex -> CreateFullArticleResponseException.Database("Failed to extract ID from article: ${ex.message}", ex) }
             .bind()
 
-        val ownerOverview = principalMapper.toOverview(actualOwner, authenticationOutcome)
-            .mapError { ex -> CreateFullArticleResponseException.Database("Failed to map owner to overview: ${ex.message}", ex) }
-            .bind()
+        val ownerOverview = actualOwner?.let {
+            principalMapper.toOverview(actualOwner, authenticationOutcome)
+                .mapError { ex -> CreateFullArticleResponseException.Database("Failed to map owner to overview: ${ex.message}", ex) }
+                .bind()
+        }
 
         FullArticleResponse(
             id = articleId,

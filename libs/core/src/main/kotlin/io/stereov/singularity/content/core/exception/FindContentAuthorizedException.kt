@@ -1,5 +1,6 @@
 package io.stereov.singularity.content.core.exception
 
+import io.stereov.singularity.auth.core.exception.AuthenticationException
 import io.stereov.singularity.database.core.exception.DatabaseFailure
 import io.stereov.singularity.database.core.exception.FindDocumentByKeyException
 import io.stereov.singularity.global.exception.SingularityException
@@ -69,12 +70,27 @@ sealed class FindContentAuthorizedException(
         cause
     )
 
+    class NotAuthenticated(msg: String, cause: Throwable? = null) : FindContentAuthorizedException(
+        msg,
+        AuthenticationException.AuthenticationRequired.CODE,
+        AuthenticationException.AuthenticationRequired.STATUS,
+        AuthenticationException.AuthenticationRequired.DESCRIPTION,
+        cause
+    )
+
     companion object {
 
         fun from(ex: FindDocumentByKeyException): FindContentAuthorizedException {
             return when (ex) {
                 is FindDocumentByKeyException.Database -> Database(ex.message, ex.cause)
                 is FindDocumentByKeyException.NotFound -> NotFound(ex.message, ex.cause)
+            }
+        }
+
+        fun from(ex: ContentException): FindContentAuthorizedException {
+            return when (ex) {
+                is ContentException.NotAuthorized -> NotAuthorized(ex.message, ex.cause)
+                is ContentException.NotAuthenticated -> NotAuthenticated(ex.message, ex.cause)
             }
         }
     }

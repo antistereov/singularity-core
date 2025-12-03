@@ -154,6 +154,7 @@ class InvitationControllerTest() : BaseArticleTest() {
 
         webTestClient.post()
             .uri("/api/content/articles/invitations/not-found")
+            .accessTokenCookie(owner.accessToken)
             .bodyValue(InviteUserToContentRequest(email = invited.email!!, role = ContentAccessRole.MAINTAINER))
             .exchange()
             .expectStatus().isNotFound
@@ -228,7 +229,7 @@ class InvitationControllerTest() : BaseArticleTest() {
             .uri("/api/content/articles/invitations/accept")
             .bodyValue(AcceptInvitationToContentRequest(token.value))
             .exchange()
-            .expectStatus().isUnauthorized
+            .expectStatus().isBadRequest
 
         val updated = articleService.findByKey(article.key).getOrThrow()
         assertFalse(updated.access.invitations.isEmpty())
@@ -487,7 +488,7 @@ class InvitationControllerTest() : BaseArticleTest() {
         val updatedArticle = articleService.findByKey(article.key).getOrThrow()
         assertEquals(1, updatedArticle.access.invitations.size)
         val invitationId = updatedArticle.access.invitations.first()
-        articleService.deleteByKey(article.key)
+        articleService.deleteByKey(article.key).getOrThrow()
 
         webTestClient.delete()
             .uri("/api/content/invitations/${invitationId}")

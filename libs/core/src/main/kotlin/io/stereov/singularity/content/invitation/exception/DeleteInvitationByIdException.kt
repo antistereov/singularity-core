@@ -1,5 +1,6 @@
 package io.stereov.singularity.content.invitation.exception
 
+import io.stereov.singularity.auth.core.exception.AuthenticationException
 import io.stereov.singularity.content.core.exception.DeleteContentInvitationException
 import io.stereov.singularity.content.core.exception.NotAuthorizedFailure
 import io.stereov.singularity.database.core.exception.DatabaseFailure
@@ -55,6 +56,14 @@ sealed class DeleteInvitationByIdException(
         cause
     )
 
+    class NotAuthenticated(msg: String, cause: Throwable? = null) : DeleteInvitationByIdException(
+        msg,
+        AuthenticationException.AuthenticationRequired.CODE,
+        AuthenticationException.AuthenticationRequired.STATUS,
+        AuthenticationException.AuthenticationRequired.DESCRIPTION,
+        cause
+    )
+
     class NotAuthorized(msg: String, cause: Throwable? = null) : DeleteInvitationByIdException(
         msg,
         NotAuthorizedFailure.CODE,
@@ -68,6 +77,7 @@ sealed class DeleteInvitationByIdException(
             is DeleteContentInvitationException.ContentNotFound -> ContentTypeNotFound(ex.message, ex.cause)
             is DeleteContentInvitationException.Database -> Database(ex.message, ex.cause)
             is DeleteContentInvitationException.NotAuthorized -> NotAuthorized(ex.message, ex.cause)
+            is DeleteContentInvitationException.NotAuthenticated -> NotAuthenticated(ex.message, ex.cause)
         }
     }
 }

@@ -61,19 +61,17 @@ class CacheServiceTest : BaseIntegrationTest() {
         assertEquals("value", cacheService.get<String>("key").getOrThrow())
 
         cacheService.delete("key").getOrThrow()
-        assertNull(cacheService.get<String>("key").getOrThrow())
+        assertThrows<CacheException.KeyNotFound> { cacheService.get<String>("key").getOrThrow() }
     }
     @Test fun `delete works if key does not exists`() = runTest {
         cacheService.delete("key")
     }
 
     @Test fun `getDataOrNul returns null if no key exists`() = runTest {
-        assertNull(cacheService.get<String>("key").getOrThrow())
+        assertThrows<CacheException.KeyNotFound> { cacheService.get<String>("key").getOrThrow() }
     }
     @Test fun `getData throws error if no key exists`() = runTest {
-        assertThrows<CacheException.KeyNotFound> {
-            runBlocking { cacheService.get<String>("key") }
-        }
+        assertThrows<CacheException.KeyNotFound> { cacheService.get<String>("key").getOrThrow() }
     }
 
     @Test fun `deleteAll deletesAll`() = runTest {
@@ -85,8 +83,8 @@ class CacheServiceTest : BaseIntegrationTest() {
 
         cacheService.deleteAll().getOrThrow()
 
-        assertNull(cacheService.get<String>("key1").getOrThrow())
-        assertNull(cacheService.get<String>("key2").getOrThrow())
+        assertThrows<CacheException.KeyNotFound> { cacheService.get<String>("key1").getOrThrow() }
+        assertThrows<CacheException.KeyNotFound> { cacheService.get<String>("key2").getOrThrow() }
     }
     @Test fun `deleteAll works if no data exist`() = runTest {
         cacheService.deleteAll().getOrThrow()

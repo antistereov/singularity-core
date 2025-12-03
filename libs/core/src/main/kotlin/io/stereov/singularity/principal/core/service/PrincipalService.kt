@@ -6,6 +6,7 @@ import com.github.michaelbull.result.coroutines.runSuspendCatching
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.database.core.exception.DatabaseException
 import io.stereov.singularity.database.encryption.exception.*
+import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.principal.core.exception.FindPrincipalByIdException
 import io.stereov.singularity.principal.core.model.Guest
 import io.stereov.singularity.principal.core.model.Principal
@@ -39,7 +40,8 @@ import org.springframework.stereotype.Service
 class PrincipalService(
     private val reactiveMongoTemplate: ReactiveMongoTemplate,
     private val userService: UserService,
-    private val guestService: GuestService
+    private val guestService: GuestService,
+    private val fileStorage: FileStorage
 ) {
 
     private val logger = KotlinLogging.logger {}
@@ -117,12 +119,26 @@ class PrincipalService(
      * @return A [Result] containing [Unit] on successful deletion, or a [DeleteEncryptedDocumentByIdException]
      * if an error occurs during the deletion process.
      */
-    suspend fun deleteById(id: ObjectId): Result<Unit, DeleteEncryptedDocumentByIdException> {
-        return runSuspendCatching {
+    suspend fun deleteById(id: ObjectId): Result<Unit, DeleteEncryptedDocumentByIdException> = coroutineBinding {
+        val principal = findById(id)
+            .mapError { ex -> when (ex) {
+                is FindPrincipalByIdException.NotFound -> DeleteEncryptedDocumentByIdException.NotFound("No principal with ID $id found: ${ex.message}", ex)
+                else -> DeleteEncryptedDocumentByIdException.Database("Failed to retrieve principal with ID $id: ${ex.message}", ex)
+            } }
+            .bind()
+
+        runSuspendCatching {
             reactiveMongoTemplate.remove(Query(Criteria.where(Principal<*,*>::_id.name).`is`(id)), Principal::class.java,"principals")
                 .awaitSingle()
         }
+            .onSuccess {
+                if (principal is User) {
+                    principal.sensitive.avatarFileKey?.let { fileStorage.remove(it)
+                        .onFailure { ex -> logger.error(ex) { "Failed to remove avatar of deleted user with ID $id: ${ex.message}" } }}
+                }
+            }
             .mapError { ex -> DeleteEncryptedDocumentByIdException.Database("Failed to delete principal with id ${id}: ${ex.message}", ex) }
+
             .map { }
     }
 

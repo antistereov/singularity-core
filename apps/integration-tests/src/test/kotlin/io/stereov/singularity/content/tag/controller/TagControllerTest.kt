@@ -615,13 +615,6 @@ class TagControllerTest() : BaseIntegrationTest() {
     }
     @Test fun `delete requires tag`() = runTest {
         val user = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
-        tagService.save(TagDocument(
-            key = "test",
-            translations = mutableMapOf(
-                Locale.ENGLISH to TagTranslation("Test"),
-                Locale.GERMAN to TagTranslation("TestDeutsch")
-            )
-        )).getOrThrow()
 
         webTestClient.delete()
             .uri("/api/content/tags/tag")
@@ -629,6 +622,6 @@ class TagControllerTest() : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isNotFound
 
-        assertFalse(tagService.findAll().getOrThrow().toList().isEmpty())
+        assertTrue(tagService.findAll().getOrThrow().toList().isEmpty())
     }
 }

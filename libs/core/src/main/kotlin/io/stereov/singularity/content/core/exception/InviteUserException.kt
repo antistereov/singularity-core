@@ -1,5 +1,6 @@
 package io.stereov.singularity.content.core.exception
 
+import io.stereov.singularity.auth.core.exception.AuthenticationException
 import io.stereov.singularity.content.invitation.exception.InviteException
 import io.stereov.singularity.database.core.exception.DatabaseFailure
 import io.stereov.singularity.database.core.exception.InvalidDocumentFailure
@@ -100,6 +101,15 @@ sealed class InviteUserException(
     )
 
 
+    class NotAuthenticated(msg: String, cause: Throwable? = null) : InviteUserException(
+        msg,
+        AuthenticationException.AuthenticationRequired.CODE,
+        AuthenticationException.AuthenticationRequired.STATUS,
+        AuthenticationException.AuthenticationRequired.DESCRIPTION,
+        cause
+    )
+
+
     companion object {
 
         fun from(ex: InviteException) = when (ex) {
@@ -117,6 +127,7 @@ sealed class InviteUserException(
                 is FindContentAuthorizedException.Database -> Database(ex.message, ex.cause)
                 is FindContentAuthorizedException.NotFound -> ContentNotFound(ex.message, ex.cause)
                 is FindContentAuthorizedException.NotAuthorized -> NotAuthorized(ex.message, ex.cause)
+                is FindContentAuthorizedException.NotAuthenticated -> NotAuthenticated(ex.message, ex.cause)
             }
         }
 
@@ -126,6 +137,7 @@ sealed class InviteUserException(
                 is GenerateExtendedContentAccessDetailsException.NotAuthorized -> NotAuthorized(ex.message, ex.cause)
                 is GenerateExtendedContentAccessDetailsException.ContentNotFound -> ContentNotFound(ex.message, ex.cause)
                 is GenerateExtendedContentAccessDetailsException.InvalidDocument -> InvalidDocument(ex.message, ex.cause)
+                is GenerateExtendedContentAccessDetailsException.NotAuthenticated -> NotAuthenticated(ex.message, ex.cause)
             }
         }
     }

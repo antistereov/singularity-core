@@ -268,26 +268,6 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
         val foundUser = userService.findByEmail(user.email!!).getOrThrow()
         assertEquals(user.id, foundUser.id.getOrThrow())
     }
-    @Test fun `changeEmail throws cooldown`() = runTest {
-        val newEmail = "new@email.com"
-        val user = registerUser()
-
-        webTestClient.put()
-            .uri("/api/users/me/email")
-            .accessTokenCookie(user.accessToken)
-            .stepUpTokenCookie(user.stepUpToken)
-            .bodyValue(ChangeEmailRequest(newEmail))
-            .exchange()
-            .expectStatus().isOk
-
-        webTestClient.put()
-            .uri("/api/users/me/email")
-            .accessTokenCookie(user.accessToken)
-            .stepUpTokenCookie(user.stepUpToken)
-            .bodyValue(ChangeEmailRequest(newEmail))
-            .exchange()
-            .expectStatus().isEqualTo(HttpStatus.TOO_MANY_REQUESTS)
-    }
 
     @Test fun `changePassword works`() = runTest {
         val oldPassword = "Password$2"

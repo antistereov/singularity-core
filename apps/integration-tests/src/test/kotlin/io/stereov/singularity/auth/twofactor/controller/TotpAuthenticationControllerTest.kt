@@ -4,7 +4,7 @@ import com.github.michaelbull.result.getOrThrow
 import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
 import io.stereov.singularity.auth.core.dto.response.LoginResponse
-import io.stereov.singularity.auth.jwt.exception.TokenExtractionException
+import io.stereov.singularity.auth.token.exception.TwoFactorAuthenticationTokenExtractionException
 import io.stereov.singularity.auth.token.model.SessionTokenType
 import io.stereov.singularity.auth.twofactor.dto.request.CompleteStepUpRequest
 import io.stereov.singularity.auth.twofactor.dto.request.TotpRecoveryRequest
@@ -408,7 +408,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
         requireNotNull(body)
 
         assertEquals(user.id, body.user.id)
-        assertThrows<TokenExtractionException> { res.extractTwoFactorAuthenticationToken() }
+        assertThrows<TwoFactorAuthenticationTokenExtractionException> { res.extractTwoFactorAuthenticationToken() }
 
         val accessToken = res.extractAccessToken()
         val refreshToken = res.extractRefreshToken()
@@ -446,7 +446,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
         val body = res.responseBody
         requireNotNull(body)
 
-        assertThrows<TokenExtractionException> { res.extractTwoFactorAuthenticationToken() }
+        assertThrows<TwoFactorAuthenticationTokenExtractionException> { res.extractTwoFactorAuthenticationToken() }
 
         val accessToken = res.extractAccessToken()
         val refreshToken = res.extractRefreshToken()

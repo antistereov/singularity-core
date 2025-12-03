@@ -114,7 +114,7 @@ abstract class ContentService<T: ContentDocument<T>> : CrudServiceWithKey<T>  {
             .bind()
 
         requireAuthorization(authenticationOutcome, content, role)
-            .mapError { ex -> FindContentAuthorizedException.NotAuthorized(ex.message, ex.cause) }
+            .mapError { ex -> FindContentAuthorizedException.from(ex) }
             .bind()
     }
 }

@@ -1,5 +1,6 @@
 package io.stereov.singularity.content.article.exception
 
+import io.stereov.singularity.auth.core.exception.AuthenticationException
 import io.stereov.singularity.content.core.exception.ContentNotFoundFailure
 import io.stereov.singularity.content.core.exception.FindContentAuthorizedException
 import io.stereov.singularity.content.core.exception.NotAuthorizedFailure
@@ -24,6 +25,14 @@ sealed class ChangeArticleStateException (
         DatabaseFailure.CODE,
         DatabaseFailure.STATUS,
         DatabaseFailure.DESCRIPTION,
+        cause
+    )
+
+    class NotAuthenticated(msg: String, cause: Throwable? = null) : ChangeArticleStateException(
+        msg,
+        AuthenticationException.AuthenticationRequired.CODE,
+        AuthenticationException.AuthenticationRequired.STATUS,
+        AuthenticationException.AuthenticationRequired.DESCRIPTION,
         cause
     )
 
@@ -75,6 +84,8 @@ sealed class ChangeArticleStateException (
         cause
     )
 
+
+
     companion object {
 
         fun from(ex: FindContentAuthorizedException): ChangeArticleStateException {
@@ -82,6 +93,7 @@ sealed class ChangeArticleStateException (
                 is FindContentAuthorizedException.Database -> Database(ex.message, ex.cause)
                 is FindContentAuthorizedException.NotFound -> ContentNotFound(ex.message, ex.cause)
                 is FindContentAuthorizedException.NotAuthorized -> NotAuthorized(ex.message, ex.cause)
+                is FindContentAuthorizedException.NotAuthenticated -> NotAuthenticated(ex.message, ex.cause)
             }
         }
 

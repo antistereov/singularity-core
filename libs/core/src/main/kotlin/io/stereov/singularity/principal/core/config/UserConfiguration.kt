@@ -142,11 +142,13 @@ class UserConfiguration {
     fun principalService(
         reactiveMongoTemplate: ReactiveMongoTemplate,
         userService: UserService,
-        guestService: GuestService
+        guestService: GuestService,
+        fileStorage: FileStorage
     ) = PrincipalService(
         reactiveMongoTemplate,
         userService,
-        guestService
+        guestService,
+        fileStorage
     )
 
     @Bean

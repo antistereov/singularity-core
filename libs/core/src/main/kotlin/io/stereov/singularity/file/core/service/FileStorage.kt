@@ -4,6 +4,7 @@ import com.github.michaelbull.result.*
 import com.github.michaelbull.result.coroutines.coroutineBinding
 import io.github.oshai.kotlinlogging.KLogger
 import io.stereov.singularity.auth.core.model.AuthenticationOutcome
+import io.stereov.singularity.database.core.exception.DeleteDocumentByKeyException
 import io.stereov.singularity.database.core.exception.FindDocumentByKeyException
 import io.stereov.singularity.file.core.dto.FileMetadataResponse
 import io.stereov.singularity.file.core.exception.FileException
@@ -277,6 +278,10 @@ abstract class FileStorage {
                 .bind()
         }
         metadataService.deleteByKey(key)
+            .recoverIf(
+                { it is DeleteDocumentByKeyException.NotFound },
+                {}
+            )
             .mapError { ex ->
                 FileException.Metadata("Failed to delete metadata for key $key: ${ex.message}", ex)
             }

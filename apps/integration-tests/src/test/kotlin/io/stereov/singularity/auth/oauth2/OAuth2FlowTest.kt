@@ -431,7 +431,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         mockOAuth2Server.verifyRequests()
 
-        assertThrows<FindUserByEmailException.UserNotFound> { userService.findByEmail(info.email!!) }
+        assertThrows<FindUserByEmailException.UserNotFound> { userService.findByEmail(info.email!!).getOrThrow() }
     }
     @Test fun `register flow throws when already authenticated with different oauth2`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -464,7 +464,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         mockOAuth2Server.verifyRequests()
 
-        assertThrows<FindUserByEmailException.UserNotFound> { userService.findByEmail(info.email!!) }
+        assertThrows<FindUserByEmailException.UserNotFound> { userService.findByEmail(info.email!!).getOrThrow() }
     }
     @Test fun `register flow throws when already authenticated with same oauth2`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -497,7 +497,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         mockOAuth2Server.verifyRequests()
 
-        assertThrows<FindUserByEmailException.UserNotFound> { userService.findByEmail(info.email!!) }
+        assertThrows<FindUserByEmailException.UserNotFound> { userService.findByEmail(info.email!!).getOrThrow() }
     }
     @Test fun `register flow throws when already authenticated with different oauth2 provider`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -530,7 +530,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         mockOAuth2Server.verifyRequests()
 
-        assertThrows<FindUserByEmailException.UserNotFound> { userService.findByEmail(info.email!!) }
+        assertThrows<FindUserByEmailException.UserNotFound> { userService.findByEmail(info.email!!).getOrThrow() }
     }
     @Test fun `register flow sets avatar when existing`() = runTest {
         val successRedirectUri = "http://localhost:8000/dashboard"

@@ -7,12 +7,10 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.content.core.model.ContentDocument
 import io.stereov.singularity.content.core.util.findContentManagementService
-import io.stereov.singularity.content.invitation.exception.AcceptInvitationException
 import io.stereov.singularity.content.invitation.exception.DeleteInvitationByIdException
 import io.stereov.singularity.content.invitation.exception.InviteException
 import io.stereov.singularity.content.invitation.model.EncryptedInvitation
 import io.stereov.singularity.content.invitation.model.Invitation
-import io.stereov.singularity.content.invitation.model.InvitationToken
 import io.stereov.singularity.content.invitation.model.SensitiveInvitationData
 import io.stereov.singularity.content.invitation.properties.InvitationProperties
 import io.stereov.singularity.content.invitation.repository.InvitationRepository
@@ -67,10 +65,10 @@ class InvitationService(
     override val logger = KotlinLogging.logger {}
 
     @Scheduled(cron = "0 */15 * * * *")
-    private fun scheduledCleanup()  {
+    private fun scheduledCleanup() {
         runBlocking {
             runSuspendCatching { removeExpired() }
-                .onFailure { ex -> logger.error(ex) { "Failed to remove expired invitations"} }
+                .onFailure { ex -> logger.error(ex) { "Failed to remove expired invitations" } }
         }
     }
 
@@ -78,24 +76,28 @@ class InvitationService(
         encrypted: EncryptedInvitation,
         decryptedSensitive: SensitiveInvitationData
     ): Result<Invitation, EncryptionException> {
-        return Ok(Invitation(
-            encrypted._id,
-            encrypted.issuedAt,
-            encrypted.expiresAt,
-            decryptedSensitive
-        ))
+        return Ok(
+            Invitation(
+                encrypted._id,
+                encrypted.issuedAt,
+                encrypted.expiresAt,
+                decryptedSensitive
+            )
+        )
     }
 
     override suspend fun doEncrypt(
         document: Invitation,
         encryptedSensitive: Encrypted<SensitiveInvitationData>
     ): Result<EncryptedInvitation, EncryptionException> {
-        return Ok(EncryptedInvitation(
-            document._id,
-            document.issuedAt,
-            document.expiresAt,
-            encryptedSensitive
-        ))
+        return Ok(
+            EncryptedInvitation(
+                document._id,
+                document.issuedAt,
+                document.expiresAt,
+                encryptedSensitive
+            )
+        )
     }
 
     /**
@@ -121,7 +123,7 @@ class InvitationService(
         claims: Map<String, Any>,
         issuedAt: Instant = Instant.now(),
         expiresInSeconds: Long = 60 * 60 * 24 * 7, // 1 week
-        locale : Locale?,
+        locale: Locale?,
     ): Result<Invitation, InviteException> = coroutineBinding {
         logger.debug { "Inviting \"$email\" with claims: $claims" }
 
@@ -138,10 +140,16 @@ class InvitationService(
             .mapError { ex -> InviteException.Database("Failed to save invitation: ${ex.message}", ex) }
             .bind()
         val token = invitationTokenService.create(invitation)
-            .mapError { ex -> InviteException.InvitationTokenCreation("Failed to create invitation token: ${ex.message}", ex) }
+            .mapError { ex ->
+                InviteException.InvitationTokenCreation(
+                    "Failed to create invitation token: ${ex.message}",
+                    ex
+                )
+            }
             .bind()
 
-        val subject = translateService.translateResourceKey(TranslateKey("invitation.subject"), "i18n/core/email", locale)
+        val subject =
+            translateService.translateResourceKey(TranslateKey("invitation.subject"), "i18n/core/email", locale)
 
         val placeholders = mapOf(
             "inviter_name" to inviterName,
@@ -155,11 +163,21 @@ class InvitationService(
             .translate("i18n/core/email", actualLocale)
             .replacePlaceholders(templateService.getPlaceholders(placeholders))
             .build()
-            .mapError { ex -> InviteException.Template("Failed to create invitation email template: ${ex.message}", ex) }
+            .mapError { ex ->
+                InviteException.Template(
+                    "Failed to create invitation email template: ${ex.message}",
+                    ex
+                )
+            }
             .bind()
 
         val userExistsByEmail = userService.existsByEmail(email)
-            .mapError { ex -> InviteException.Database("Failed to check existence of user with email $email: ${ex.message}", ex) }
+            .mapError { ex ->
+                InviteException.Database(
+                    "Failed to check existence of user with email $email: ${ex.message}",
+                    ex
+                )
+            }
             .bind()
 
         if (userExistsByEmail || invitationProperties.allowUnregisteredUsers) {
@@ -169,25 +187,6 @@ class InvitationService(
         }
 
         invitation
-    }
-
-    /**
-     * Processes the provided invitation token to retrieve and validate the corresponding invitation.
-     *
-     * @param token The invitation token used to locate and validate the associated invitation.
-     * @return A [Result] containing the validated [Invitation] if successful, or an [AcceptInvitationException] if an error occurs.
-     */
-    suspend fun accept(
-        token: InvitationToken,
-    ): Result<Invitation, AcceptInvitationException> {
-        logger.debug { "Validating invitation" }
-
-        return findById(token.invitationId)
-            .mapError { when (it) {
-                is FindEncryptedDocumentByIdException.NotFound ->
-                    AcceptInvitationException.InvitationNotFound("No invitation found for token.")
-                else -> AcceptInvitationException.Database("Failed to get invitation from database: ${it.message}")
-            } }
     }
 
     /**
@@ -226,15 +225,17 @@ class InvitationService(
      * @param id the ObjectId of the invitation to be deleted
      * @return A [Result] containing Unit if the operation is successful, or a [DeleteInvitationByIdException] if an error occurs
      */
-    suspend fun <T: ContentDocument<T>> deleteInvitationById(
+    suspend fun <T : ContentDocument<T>> deleteInvitationById(
         id: ObjectId,
         authenticationOutcome: AuthenticationOutcome,
     ): Result<Unit, DeleteInvitationByIdException> = coroutineBinding {
         val invitation = findById(id)
-            .mapError { when (it) {
-                is FindEncryptedDocumentByIdException.NotFound -> DeleteInvitationByIdException.InvitationNotFound("No invitation found for ID $id")
-                else -> DeleteInvitationByIdException.Database("Failed to get invitation from database: ${it.message}")
-            } }
+            .mapError {
+                when (it) {
+                    is FindEncryptedDocumentByIdException.NotFound -> DeleteInvitationByIdException.InvitationNotFound("No invitation found for ID $id")
+                    else -> DeleteInvitationByIdException.Database("Failed to get invitation from database: ${it.message}")
+                }
+            }
             .bind()
         val contentType = (invitation.sensitive.claims["contentType"] as? String)
             .toResultOr { DeleteInvitationByIdException.InvalidInvitation("No content type found in invitation") }
@@ -243,14 +244,24 @@ class InvitationService(
             .toResultOr { DeleteInvitationByIdException.InvalidInvitation("No key found in invitation") }
             .bind()
         applicationContext.findContentManagementService(contentType)
-            .mapError { ex -> DeleteInvitationByIdException.ContentTypeNotFound("Failed to find content management service for content type $contentType: ${ex.message}", ex)}
+            .mapError { ex ->
+                DeleteInvitationByIdException.ContentTypeNotFound(
+                    "Failed to find content management service for content type $contentType: ${ex.message}",
+                    ex
+                )
+            }
             .bind()
             .deleteInvitation(key, id, authenticationOutcome)
             .mapError { DeleteInvitationByIdException.from(it) }
             .bind()
 
         deleteById(id)
-            .mapError { ex -> DeleteInvitationByIdException.Database("Failed to delete invitation from database: ${ex.message}", ex) }
+            .mapError { ex ->
+                DeleteInvitationByIdException.Database(
+                    "Failed to delete invitation from database: ${ex.message}",
+                    ex
+                )
+            }
             .bind()
     }
 

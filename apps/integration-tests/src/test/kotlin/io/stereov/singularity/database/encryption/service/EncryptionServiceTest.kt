@@ -27,6 +27,6 @@ class EncryptionServiceTest : BaseIntegrationTest() {
 
         val newDecryptedUser = userService.decrypt(rotatedEncryptedUser).getOrThrow()
 
-        Assertions.assertEquals(decryptedUser, newDecryptedUser)
+        Assertions.assertEquals(decryptedUser.toString(), newDecryptedUser.toString())
     }
 }

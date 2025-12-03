@@ -21,7 +21,7 @@ import org.springframework.test.web.reactive.server.returnResult
 import java.time.Instant
 import java.util.*
 
-class ArticleService : BaseArticleTest() {
+class ArticleServiceTest : BaseArticleTest() {
 
     @Test fun `findByKey works`() = runTest {
         val owner = registerUser(groups = listOf(KnownGroups.CONTRIBUTOR))
