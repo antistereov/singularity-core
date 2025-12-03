@@ -113,9 +113,9 @@ The final permission is granted if **any** of the following conditions are met:
 
 | Required Role    | Access Granted if...                                                                                                                                                                          |
 |:-----------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **`MAINTAINER`** | 1. The user has the [**`ADMIN`**](../auth/roles#admins) global role. OR 2. The user/group is explicitly a **`MAINTAINER`**.                                                                   |
-| **`EDITOR`**     | 1. The user has the [**`ADMIN`**](../auth/roles#admins) global role. OR 2. The user/group is explicitly a **`MAINTAINER`**. OR 3. The user/group is explicitly an **`EDITOR`**.               |
-| **`VIEWER`**     | 1. The user has the [**`ADMIN`**](../auth/roles#admins) global role. OR 2. The content is **`PUBLIC`**. OR 3. The user/group is explicitly a **`MAINTAINER`**, **`EDITOR`**, or **`VIEWER`**. |
+| **`MAINTAINER`** | 1. The user has the [**`ADMIN`**](../auth/principals#admins) global role. OR 2. The user/group is explicitly a **`MAINTAINER`**.                                                                   |
+| **`EDITOR`**     | 1. The user has the [**`ADMIN`**](../auth/principals#admins) global role. OR 2. The user/group is explicitly a **`MAINTAINER`**. OR 3. The user/group is explicitly an **`EDITOR`**.               |
+| **`VIEWER`**     | 1. The user has the [**`ADMIN`**](../auth/principals#admins) global role. OR 2. The content is **`PUBLIC`**. OR 3. The user/group is explicitly a **`MAINTAINER`**, **`EDITOR`**, or **`VIEWER`**. |
 
 ### Group Access Checking
 

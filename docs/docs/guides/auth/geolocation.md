@@ -40,24 +40,16 @@ If you need to access the location of your users, you can use the [GeolocationSe
 
 @Service
 class CoolService(private val geolocationService: GeolocationService) {
-    
+
+    /**
+     * This method returns geolocation-specific responses if the current location can be identified. 
+     */
     suspend fun locationSpecific(exchange: ServerWebExchange): CoolStuff {
 
         /**
-         * This will throw a GeolocationException if the location cannot be resolved.
-         * This is the case if your IP address is a local address, for example.
+         * This will return the geolocation if it can be resolved.
          */
-        val location = geoLocationService.getLocation(exchange.request)
-        
-        return CoolStuff.byLocation(location)
-    }
-    
-    suspend fun locationSpecificDefault(exchange: ServerWebExchange): CoolStuff {
-
-        /**
-         * This will return null and log a warning instead of throwing an exception.
-         */
-        val location = geoLocationService.getLocationOrNull(exchange.request)
+        val location = geoLocationService.getLocationOrNull(exchange)
             ?: return CoolStuff.forEveryone()
 
         return CoolStuff.byLocation(location)

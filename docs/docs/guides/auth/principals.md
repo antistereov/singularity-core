@@ -1,14 +1,18 @@
 ---
-description: Learn more about roles.
+description: Learn more about principals.
 sidebar_position: 7
 ---
 
-# Roles
+# Principals
 
 :::note
 This guide assumes familiarity with the [Spring Framework](https://spring.io).  
 If you are new to Spring, we recommend starting with their [official guides](https://spring.io/quickstart) to get up to speed.
 :::
+
+*Singularity* has two different types of principals: **users** and **guests**.
+
+## Roles
 
 **Roles** in *Singularity* allow you to control access and management of your server.
 There are three roles:
@@ -16,6 +20,7 @@ There are three roles:
 - **`USER`:** A "normal" user of your application. 
     Can access most of the resources but is not allowed to manager your server.
 - **`ADMIN`:** An administrator. Has access to all resources and is allowed to manage your server.
+  Only `USER`s can be administrators.
 - **`GUEST`:** A user that has access to your application only in the current browser context and
     did not set up any authentication method.
 
@@ -25,27 +30,27 @@ If you want to have a more fine-grained control on which user can access what re
 check out [groups](./groups.md).
 :::
 
-## Users
+### Users
 
 Every registered account has the `USER` role.
 This is the standard role in *Singularity*.
 `USER`s can access resources that are not dealing with server administration or security.
 
-## Admins
+### Admins
 
-### Granting Admin Permissions
+#### Granting Admin Permissions
 
 You can grant admin permissions to a user through the endpoint [`POST /api/admins/{user-id}`](../../api/grant-admin-permissions.api.mdx).
 
 This action can only be performed by users who already have `ADMIN` privileges.
 
-### Revoking Admin Permissions
+#### Revoking Admin Permissions
 
 You can revoke admin permissions from a user through the endpoint [`DELETE /api/admins/{user-id}`](../../api/revoke-admin-permissions.api.mdx).
 
 This action can only be performed by users who already have `ADMIN` privileges.
 
-## Guests
+### Guests
 
 *Singularity* allows you to create `GUEST` accounts.
 These accounts live only in one browser session and will be invalid as soon as the browser cache is emptied.
