@@ -27,6 +27,7 @@ import io.stereov.singularity.content.invitation.mapper.InvitationMapper
 import io.stereov.singularity.content.invitation.model.InvitationToken
 import io.stereov.singularity.content.invitation.service.InvitationService
 import io.stereov.singularity.database.core.exception.FindDocumentByKeyException
+import io.stereov.singularity.file.core.exception.FileException
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.file.image.service.ImageStore
 import io.stereov.singularity.global.util.toSlug
@@ -186,6 +187,7 @@ class ArticleManagementService(
             .bind()
 
         article.updateTranslation(req)
+            .bind()
 
         val articleId = article.id
             .mapError { ex -> UpdateArticleException.InvalidDocument("Failed to extract ID from article: ${ex.message}", ex) }
@@ -277,7 +279,10 @@ class ArticleManagementService(
             .path.removePrefix("/") + "/" + article.key
 
         val image = imageStore.upload(authenticationOutcome, file, imageKey,  true)
-            .mapError { ex -> ChangeArticleImageException.File("Failed to upload image: ${ex.message}", ex) }
+            .mapError { ex -> when (ex) {
+                is FileException.UnsupportedMediaType -> ChangeArticleImageException.UnsupportedMediaType(ex.message)
+                else -> ChangeArticleImageException.File("Failed to upload image: ${ex.message}", ex)
+            } }
             .bind()
 
         article.imageKey = image.key

@@ -243,6 +243,7 @@ class TotpAuthenticationService(
 
         if (match.isEmpty()) {
             Err(TotpUserRecoveryException.WrongCode("Invalid two-factor recovery code."))
+                .bind()
         }
 
         userService.save(user)

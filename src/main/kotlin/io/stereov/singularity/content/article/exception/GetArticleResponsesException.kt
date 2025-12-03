@@ -32,14 +32,6 @@ sealed class GetArticleResponsesException(
         cause
     )
 
-    class OwnerNotFound(msg: String, cause: Throwable? = null) : GetArticleResponsesException(
-        msg,
-        "OWNER_NOT_FOUND",
-        HttpStatus.NOT_FOUND,
-        "Owner not found.",
-        cause
-    )
-
     class NotAuthorized(msg: String, cause: Throwable? = null) : GetArticleResponsesException(
         msg,
         NotAuthorizedFailure.CODE,
@@ -61,7 +53,6 @@ sealed class GetArticleResponsesException(
         fun from(ex: CreateFullArticleResponseException): GetArticleResponsesException = when (ex) {
             is CreateFullArticleResponseException.NoTranslations -> NoTranslations(ex.message, ex.cause)
             is CreateFullArticleResponseException.File -> File(ex.message, ex.cause)
-            is CreateFullArticleResponseException.OwnerNotFound -> OwnerNotFound(ex.message, ex.cause)
             is CreateFullArticleResponseException.Database -> Database(ex.message, ex.cause)
         }
 

@@ -1,5 +1,6 @@
 package io.stereov.singularity.content.core.exception
 
+import io.stereov.singularity.auth.core.exception.AuthenticationException
 import io.stereov.singularity.database.core.exception.DatabaseFailure
 import io.stereov.singularity.global.exception.ResponseMappingFailure
 import io.stereov.singularity.global.exception.SingularityException
@@ -62,6 +63,14 @@ sealed class UpdateContentAccessException(
         cause
     )
 
+    class NotAuthenticated(msg: String, cause: Throwable? = null) : UpdateContentAccessException(
+        msg,
+        AuthenticationException.AuthenticationRequired.CODE,
+        AuthenticationException.AuthenticationRequired.STATUS,
+        AuthenticationException.AuthenticationRequired.DESCRIPTION,
+        cause
+    )
+
     companion object {
 
         fun from(ex: FindContentAuthorizedException): UpdateContentAccessException {
@@ -69,6 +78,7 @@ sealed class UpdateContentAccessException(
                 is FindContentAuthorizedException.Database -> Database(ex.message, ex.cause)
                 is FindContentAuthorizedException.NotFound -> ContentNotFound(ex.message, ex.cause)
                 is FindContentAuthorizedException.NotAuthorized -> NotAuthorized(ex.message, ex.cause)
+                is FindContentAuthorizedException.NotAuthenticated -> NotAuthenticated(ex.message, ex.cause)
             }
         }
     }

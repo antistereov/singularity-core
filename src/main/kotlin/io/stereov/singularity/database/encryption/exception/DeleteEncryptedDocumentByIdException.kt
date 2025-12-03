@@ -1,5 +1,6 @@
 package io.stereov.singularity.database.encryption.exception
 
+import io.stereov.singularity.database.core.exception.DatabaseEntityNotFound
 import io.stereov.singularity.database.core.exception.DatabaseException
 import io.stereov.singularity.database.core.exception.DatabaseFailure
 import io.stereov.singularity.global.exception.SingularityException
@@ -44,6 +45,14 @@ sealed class DeleteEncryptedDocumentByIdException(
         DatabaseFailure.CODE,
         DatabaseFailure.STATUS,
         DatabaseFailure.DESCRIPTION,
+        cause
+    )
+
+    class NotFound(msg: String, cause: Throwable? = null) : DeleteEncryptedDocumentByIdException(
+        msg,
+        DatabaseEntityNotFound.CODE,
+        DatabaseEntityNotFound.STATUS,
+        DatabaseEntityNotFound.DESCRIPTION,
         cause
     )
 }

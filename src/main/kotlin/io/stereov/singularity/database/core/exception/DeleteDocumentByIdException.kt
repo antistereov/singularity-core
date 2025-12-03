@@ -43,4 +43,12 @@ sealed class DeleteDocumentByIdException(
         DatabaseFailure.DESCRIPTION,
         cause
     )
+
+    class NotFound(msg: String, cause: Throwable? = null) : DeleteDocumentByIdException(
+        msg,
+        DatabaseEntityNotFound.CODE,
+        DatabaseEntityNotFound.STATUS,
+        DatabaseEntityNotFound.DESCRIPTION,
+        cause
+    )
 }

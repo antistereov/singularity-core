@@ -1,5 +1,6 @@
 package io.stereov.singularity.content.core.exception
 
+import io.stereov.singularity.auth.core.exception.AuthenticationException
 import io.stereov.singularity.database.core.exception.DatabaseFailure
 import io.stereov.singularity.global.exception.SingularityException
 import org.springframework.http.HttpStatus
@@ -11,6 +12,14 @@ sealed class DeleteContentByKeyException(
     description: String,
     cause: Throwable?
 ) : SingularityException(msg, code, status, description, cause) {
+
+    class NotAuthenticated(msg: String, cause: Throwable? = null) : DeleteContentByKeyException(
+        msg,
+        AuthenticationException.AuthenticationRequired.CODE,
+        AuthenticationException.AuthenticationRequired.STATUS,
+        AuthenticationException.AuthenticationRequired.DESCRIPTION,
+        cause
+    )
 
     class NotAuthorized(msg: String, cause: Throwable? = null) : DeleteContentByKeyException(
         msg,
@@ -43,6 +52,7 @@ sealed class DeleteContentByKeyException(
                 is FindContentAuthorizedException.Database -> Database(ex.message, ex.cause)
                 is FindContentAuthorizedException.NotFound -> ContentNotFound(ex.message, ex.cause)
                 is FindContentAuthorizedException.NotAuthorized -> NotAuthorized(ex.message, ex.cause)
+                is FindContentAuthorizedException.NotAuthenticated -> NotAuthenticated(ex.message, ex.cause)
             }
         }
     }

@@ -199,4 +199,29 @@ sealed class DownloadException(
         description = "Thrown when an unknown error occurs while downloading from the given URL.",
         cause = cause
     )
+
+    /**
+     * Exception indicating that the provided URL contains no content.
+     *
+     * This exception is a subclass of [DownloadException] and is thrown when attempting
+     * to download content from a URL that results in an empty response. It provides
+     * additional context such as the error code, associated HTTP status, and a detailed
+     * description of the issue.
+     *
+     * @param url The URL that was determined to have no content.
+     * @param cause The underlying cause of this exception, if applicable.
+     *
+     * @property code `NO_DOWNLOADABLE_CONTENT`
+     * @property status [HttpStatus.NOT_FOUND]
+     */
+    class Empty(
+        url: String,
+        cause: Throwable? = null
+    ) : DownloadException(
+        msg = "URL $url does not contain any content",
+        code = "NO_DOWNLOADABLE_CONTENT",
+        status = HttpStatus.NOT_FOUND,
+        description = "Thrown when the URL does not contain any content.",
+        cause = cause
+    )
 }

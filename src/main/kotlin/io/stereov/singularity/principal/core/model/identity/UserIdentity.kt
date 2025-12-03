@@ -23,7 +23,11 @@ sealed interface UserIdentity {
      * @see Hash
      * @see UserIdentity
      */
-    class Password(var password: Hash) : UserIdentity
+    class Password(var password: Hash) : UserIdentity {
+        override fun toString(): String {
+            return "UserIdentities.Password(password=${password})"
+        }
+    }
 
     /**
      * Represents a provider-based user identity in the system.

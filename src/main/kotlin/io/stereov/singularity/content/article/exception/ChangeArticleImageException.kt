@@ -1,11 +1,13 @@
 package io.stereov.singularity.content.article.exception
 
+import io.stereov.singularity.auth.core.exception.AuthenticationException
 import io.stereov.singularity.content.core.exception.ContentNotFoundFailure
 import io.stereov.singularity.content.core.exception.FindContentAuthorizedException
 import io.stereov.singularity.content.core.exception.NotAuthorizedFailure
 import io.stereov.singularity.database.core.exception.DatabaseFailure
 import io.stereov.singularity.database.core.exception.InvalidDocumentFailure
 import io.stereov.singularity.file.core.exception.FileFailure
+import io.stereov.singularity.file.core.exception.UnsupportedMediaTypeFailure
 import io.stereov.singularity.global.exception.ResponseMappingFailure
 import io.stereov.singularity.global.exception.SingularityException
 import io.stereov.singularity.translate.exception.TranslateException
@@ -24,6 +26,14 @@ sealed class ChangeArticleImageException (
         DatabaseFailure.CODE,
         DatabaseFailure.STATUS,
         DatabaseFailure.DESCRIPTION,
+        cause
+    )
+
+    class NotAuthenticated(msg: String, cause: Throwable? = null) : ChangeArticleImageException(
+        msg,
+        AuthenticationException.AuthenticationRequired.CODE,
+        AuthenticationException.AuthenticationRequired.STATUS,
+        AuthenticationException.AuthenticationRequired.DESCRIPTION,
         cause
     )
 
@@ -75,6 +85,14 @@ sealed class ChangeArticleImageException (
         cause
     )
 
+    class UnsupportedMediaType(msg: String, cause: Throwable? = null) : ChangeArticleImageException(
+        msg,
+        UnsupportedMediaTypeFailure.CODE,
+        UnsupportedMediaTypeFailure.STATUS,
+        UnsupportedMediaTypeFailure.DESCRIPTION,
+        cause
+    )
+
     companion object {
 
         fun from(ex: FindContentAuthorizedException): ChangeArticleImageException {
@@ -82,6 +100,7 @@ sealed class ChangeArticleImageException (
                 is FindContentAuthorizedException.Database -> Database(ex.message, ex.cause)
                 is FindContentAuthorizedException.NotFound -> ContentNotFound(ex.message, ex.cause)
                 is FindContentAuthorizedException.NotAuthorized -> NotAuthorized(ex.message, ex.cause)
+                is FindContentAuthorizedException.NotAuthenticated -> NotAuthenticated(ex.message, ex.cause)
             }
         }
 

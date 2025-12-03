@@ -149,7 +149,7 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
     protected suspend fun doAcceptInvitation(token: InvitationToken): Result<T, AcceptContentInvitationException> = coroutineBinding {
         logger.debug { "Accepting invitation" }
 
-        val invitation = invitationService.accept(token)
+        val invitation = invitationService.findById(token.invitationId)
             .mapError { ex -> AcceptContentInvitationException.from(ex) }
             .bind()
 
@@ -187,7 +187,11 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
             }}
             .bind()
 
-        content.share(ContentAccessSubject.USER, user.id.toString(), role)
+        val userId = user.id
+            .mapError { ex -> AcceptContentInvitationException.InvalidInvitation("Database entity of invited user contains no ID: ${ex.message}", ex) }
+            .bind()
+
+        content.share(ContentAccessSubject.USER, userId.toString(), role)
         content.removeInvitation(token.invitationId)
 
         contentService.save(content)

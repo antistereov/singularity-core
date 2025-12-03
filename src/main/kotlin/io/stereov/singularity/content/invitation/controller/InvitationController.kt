@@ -13,19 +13,17 @@ import io.stereov.singularity.content.core.exception.InviteUserException
 import io.stereov.singularity.content.core.util.findContentManagementService
 import io.stereov.singularity.content.invitation.exception.AcceptInvitationException
 import io.stereov.singularity.content.invitation.exception.ContentManagementException
+import io.stereov.singularity.content.invitation.exception.DeleteInvitationByIdException
 import io.stereov.singularity.content.invitation.exception.InvitationTokenExtractionException
 import io.stereov.singularity.content.invitation.service.InvitationService
 import io.stereov.singularity.content.invitation.service.InvitationTokenService
 import io.stereov.singularity.global.annotation.ThrowsDomainError
-import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.global.model.SuccessResponse
 import io.stereov.singularity.principal.core.exception.FindUserByIdException
 import io.stereov.singularity.principal.core.service.UserService
 import io.swagger.v3.oas.annotations.ExternalDocumentation
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.media.Content
-import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -187,24 +185,14 @@ class InvitationController(
             ApiResponse(
                 responseCode = "200",
                 description = "Success.",
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "Invalid or expired `AccessToken`.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "403",
-                description = "AccessToken does permit [`MAINTAINER`](https://singularity.stereov.io/docs/guides/content/introduction#object-specific-roles-shared-state) access on this object.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "404",
-                description = "No invitation with given `id` found or no content document with `key` contained in invitation found.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
     )
+    @ThrowsDomainError([
+        AccessTokenExtractionException::class,
+        AuthenticationException.AuthenticationRequired::class,
+        DeleteInvitationByIdException::class
+    ])
     suspend fun deleteInvitationToContentObjectById(@PathVariable id: ObjectId): ResponseEntity<SuccessResponse> {
         val authenticationOutcome = authorizationService.getAuthenticationOutcome()
             .getOrThrow { when (it) { is AccessTokenExtractionException -> it} }
@@ -212,6 +200,7 @@ class InvitationController(
             .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it} }
 
         service.deleteInvitationById(id, authenticationOutcome)
+            .getOrThrow { when (it) { is DeleteInvitationByIdException -> it } }
         return ResponseEntity.ok(SuccessResponse(true))
     }
 

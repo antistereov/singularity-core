@@ -165,6 +165,7 @@ class EmailAuthenticationService(
 
         emailService.sendEmail(user.email, subject, content, actualLocale)
             .mapError { SendEmailAuthenticationException.from(it) }
+            .bind()
 
         startCooldown(user.email)
             .mapError { ex -> SendEmailAuthenticationException.PostCommitSideEffect("Failed to start cooldown: ${ex.message}", ex) }

@@ -1,8 +1,8 @@
 package io.stereov.singularity.content.core.exception
 
-import io.stereov.singularity.content.invitation.exception.AcceptInvitationException
 import io.stereov.singularity.database.core.exception.DatabaseFailure
 import io.stereov.singularity.database.core.exception.PostCommitSideEffectFailure
+import io.stereov.singularity.database.encryption.exception.FindEncryptedDocumentByIdException
 import io.stereov.singularity.global.exception.ResponseMappingFailure
 import io.stereov.singularity.global.exception.SingularityException
 import io.stereov.singularity.principal.core.exception.UserNotFoundFailure
@@ -73,13 +73,12 @@ sealed class AcceptContentInvitationException(
         cause
     )
 
-
     companion object {
 
-        fun from(ex: AcceptInvitationException) = when (ex) {
-            is AcceptInvitationException.Database -> Database(ex.message, ex.cause)
-            is AcceptInvitationException.InvitationNotFound -> InvitationNotFound(ex.message, ex.cause)
-            is AcceptInvitationException.PostCommitSideEffect -> PostCommitSideEffect(ex.message, ex.cause)
+        fun from(ex: FindEncryptedDocumentByIdException) = when (ex) {
+            is FindEncryptedDocumentByIdException.Database -> Database(ex.message, ex.cause)
+            is FindEncryptedDocumentByIdException.NotFound -> InvitationNotFound(ex.message, ex.cause)
+            is FindEncryptedDocumentByIdException.Encryption -> PostCommitSideEffect(ex.message, ex.cause)
         }
     }
 }

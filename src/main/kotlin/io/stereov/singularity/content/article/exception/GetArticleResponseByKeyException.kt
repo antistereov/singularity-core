@@ -1,5 +1,6 @@
 package io.stereov.singularity.content.article.exception
 
+import io.stereov.singularity.auth.core.exception.AuthenticationException
 import io.stereov.singularity.content.core.exception.ContentNotFoundFailure
 import io.stereov.singularity.content.core.exception.FindContentAuthorizedException
 import io.stereov.singularity.content.core.exception.NotAuthorizedFailure
@@ -33,11 +34,11 @@ sealed class GetArticleResponseByKeyException(
         cause
     )
 
-    class OwnerNotFound(msg: String, cause: Throwable? = null) : GetArticleResponseByKeyException(
+    class NotAuthenticated(msg: String, cause: Throwable? = null) : GetArticleResponseByKeyException(
         msg,
-        "OWNER_NOT_FOUND",
-        HttpStatus.NOT_FOUND,
-        "Owner not found.",
+        AuthenticationException.AuthenticationRequired.CODE,
+        AuthenticationException.AuthenticationRequired.STATUS,
+        AuthenticationException.AuthenticationRequired.DESCRIPTION,
         cause
     )
 
@@ -70,7 +71,6 @@ sealed class GetArticleResponseByKeyException(
         fun from(ex: CreateFullArticleResponseException): GetArticleResponseByKeyException = when (ex) {
             is CreateFullArticleResponseException.NoTranslations -> NoTranslations(ex.message, ex.cause)
             is CreateFullArticleResponseException.File -> File(ex.message, ex.cause)
-            is CreateFullArticleResponseException.OwnerNotFound -> OwnerNotFound(ex.message, ex.cause)
             is CreateFullArticleResponseException.Database -> Database(ex.message, ex.cause)
         }
 
@@ -79,6 +79,7 @@ sealed class GetArticleResponseByKeyException(
                 is FindContentAuthorizedException.Database -> Database(ex.message, ex.cause)
                 is FindContentAuthorizedException.NotFound -> ContentNotFound(ex.message, ex.cause)
                 is FindContentAuthorizedException.NotAuthorized -> NotAuthorized(ex.message, ex.cause)
+                is FindContentAuthorizedException.NotAuthenticated -> NotAuthenticated(ex.message, ex.cause)
             }
         }
     }

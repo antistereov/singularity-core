@@ -1,5 +1,6 @@
 package io.stereov.singularity.file.image.config
 
+import com.sksamuel.scrimage.webp.WebpWriter
 import io.stereov.singularity.file.core.component.DataBufferPublisher
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.file.image.properties.ImageProperties
@@ -20,6 +21,12 @@ import org.springframework.context.annotation.Configuration
 @EnableConfigurationProperties(ImageProperties::class)
 class ImageConfiguration {
 
+    @Bean
+    fun webpWriter() = WebpWriter(4, 85, 4, false)
+
+    @Bean
+    fun losslessWebpWriter() = WebpWriter(6, 100, 6, true)
+
     // Service
 
     @Bean
@@ -27,10 +34,12 @@ class ImageConfiguration {
     fun imageStore(
         imageProperties: ImageProperties,
         fileStorage: FileStorage,
-        dataBufferPublisher: DataBufferPublisher
+        dataBufferPublisher: DataBufferPublisher,
+        webpWriter: WebpWriter
     ) = ImageStore(
         imageProperties,
         fileStorage,
-        dataBufferPublisher
+        dataBufferPublisher,
+        webpWriter
     )
 }

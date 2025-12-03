@@ -12,12 +12,13 @@ import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.core.io.buffer.DataBufferLimitException
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
+import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientRequestException
 import org.springframework.web.reactive.function.client.WebClientResponseException
-import org.springframework.web.reactive.function.client.bodyToFlux
-import reactor.core.publisher.Mono
+import reactor.core.publisher.Flux
 
 /**
  * Service responsible for downloading files from remote URLs.
@@ -51,21 +52,29 @@ class DownloadService(
         return runSuspendCatching {
             webClient.get()
                 .uri(url)
-                .exchangeToMono { clientResponse ->
-                    val headers = clientResponse.headers().asHttpHeaders()
-                    val contentType = headers.contentType ?: MediaType.APPLICATION_OCTET_STREAM
+                .retrieve()
+                .toEntityFlux(BodyExtractors.toDataBuffers())
+                .handle { clientResponse: ResponseEntity<Flux<DataBuffer>>, sink ->
+                    val body = clientResponse.body
+                    if (body == null) {
+                        sink.error(DownloadException.Empty(url))
+                    } else {
+                        val headers = clientResponse.headers
+                        val contentType = headers.contentType ?: MediaType.APPLICATION_OCTET_STREAM
 
-                    Mono.just(
-                        StreamedFile(
-                            url = url,
-                            contentType = contentType,
-                            content = clientResponse.bodyToFlux<DataBuffer>()
+                        sink.next(
+                            StreamedFile(
+                                url = url,
+                                contentType = contentType,
+                                content = body
+                            )
                         )
-                    )
+                    }
                 }
                 .awaitSingle()
         }.mapError { ex ->
             when (ex) {
+                is DownloadException -> ex
                 is WebClientResponseException.NotFound -> DownloadException.FileNotFound(url, ex)
                 is WebClientResponseException.BadRequest -> DownloadException.BadRequest(url, ex)
                 is WebClientResponseException.Unauthorized -> DownloadException.Unauthorized(url, ex)

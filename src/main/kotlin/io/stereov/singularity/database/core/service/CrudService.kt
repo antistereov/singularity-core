@@ -82,11 +82,27 @@ interface CrudService<T: WithId> {
      * @return A [Result] that wraps [Unit] if the deletion is successful, or a [DeleteDocumentByIdException]
      *         if an error occurs during the deletion process.
      */
-    suspend fun deleteById(id: ObjectId): Result<Unit, DeleteDocumentByIdException> {
+    suspend fun deleteById(id: ObjectId): Result<Unit, DeleteDocumentByIdException> = coroutineBinding {
         logger.debug { "Deleting ${collectionClazz.simpleName} by ID $id" }
 
-        return runSuspendCatching { repository.deleteById(id) }
-            .mapError { ex -> DeleteDocumentByIdException.Database("Failed to delete ${collectionClazz.simpleName} with ID $id: ${ex.message}", ex) }
+        val exists = existsById(id)
+            .mapError { ex -> DeleteDocumentByIdException.Database("Failed to check existence of ${collectionClazz.simpleName} with ID $id: ${ex.message}", ex) }
+            .bind()
+
+        if (exists) {
+            runSuspendCatching { repository.deleteById(id) }
+                .mapError { ex ->
+                    DeleteDocumentByIdException.Database(
+                        "Failed to delete ${collectionClazz.simpleName} with ID $id: ${ex.message}",
+                        ex
+                    )
+                }
+                .bind()
+        } else {
+            Err(DeleteDocumentByIdException.NotFound("No ${collectionClazz.simpleName} with ID $id found"))
+                .bind()
+
+        }
     }
 
     /**
