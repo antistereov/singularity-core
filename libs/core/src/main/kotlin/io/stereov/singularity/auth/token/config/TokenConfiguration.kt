@@ -2,7 +2,6 @@ package io.stereov.singularity.auth.token.config
 
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.properties.AuthProperties
-import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
 import io.stereov.singularity.auth.jwt.properties.JwtProperties
 import io.stereov.singularity.auth.jwt.service.JwtService
@@ -78,14 +77,12 @@ class TokenConfiguration {
         jwtService: JwtService,
         jwtProperties: JwtProperties,
         geolocationService: GeolocationService,
-        geolocationProperties: GeolocationProperties,
         tokenValueExtractor: TokenValueExtractor,
         principalService: PrincipalService
     ) = RefreshTokenService(
         jwtService,
         jwtProperties,
         geolocationService,
-        geolocationProperties,
         tokenValueExtractor,
         principalService,
     )
