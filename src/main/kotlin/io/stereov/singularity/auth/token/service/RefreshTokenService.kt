@@ -5,7 +5,6 @@ import com.github.michaelbull.result.coroutines.coroutineBinding
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
 import io.stereov.singularity.auth.core.model.SessionInfo
-import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
 import io.stereov.singularity.auth.jwt.properties.JwtProperties
 import io.stereov.singularity.auth.jwt.service.JwtService
@@ -16,7 +15,6 @@ import io.stereov.singularity.auth.token.model.RefreshToken
 import io.stereov.singularity.auth.token.model.SessionTokenType
 import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.global.util.Random
-import io.stereov.singularity.global.util.getClientIp
 import io.stereov.singularity.principal.core.model.Principal
 import io.stereov.singularity.principal.core.model.Role
 import io.stereov.singularity.principal.core.model.sensitve.SensitivePrincipalData
@@ -26,7 +24,6 @@ import org.bson.types.ObjectId
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ServerWebExchange
-import java.net.InetAddress
 import java.time.Instant
 import java.util.*
 
@@ -42,7 +39,6 @@ class RefreshTokenService(
     private val jwtService: JwtService,
     private val jwtProperties: JwtProperties,
     private val geolocationService: GeolocationService,
-    private val geolocationProperties: GeolocationProperties,
     private val tokenValueExtractor: TokenValueExtractor,
     private val principalService: PrincipalService
 ) {
@@ -119,19 +115,8 @@ class RefreshTokenService(
         sessionInfo: SessionInfoRequest?,
         tokenId: String
     ): Result<Principal<out Role, out SensitivePrincipalData>, RefreshTokenCreationException.SessionUpdate> = coroutineBinding {
-        val ipAddress = exchange.request.getClientIp(geolocationProperties.realIpHeader)
-            ?.let { ip -> 
-                runCatching { InetAddress.getByName(ip) }
-                    .onFailure { ex -> logger.warn { "Failed to resolve ip address from X-Real-Ip header: ${ex.message}" } }
-                    .getOrElse { null } 
-            }
-
-        val location = ipAddress
-            ?.let {
-                geolocationService.getLocationResponse(ipAddress)
-                    .onFailure { ex -> logger.warn { "Failed to resolve geolocation from ip address $ipAddress: ${ex.message}" } }
-                    .getOrElse { null }
-            }
+        val location = geolocationService.getLocationOrNull(exchange)
+        val locationInfo = location
             ?.let { location -> 
                 SessionInfo.LocationInfo(
                     location.location.latitude,
@@ -146,8 +131,8 @@ class RefreshTokenService(
             browser = sessionInfo?.browser,
             os = sessionInfo?.os,
             issuedAt = Instant.now(),
-            ipAddress = ipAddress.toString(),
-            location = location
+            ipAddress = location?.ipAddress,
+            location = locationInfo
         )
 
         principal.updateLastActive()

@@ -31,7 +31,17 @@ class GeolocationService(
 
     private val logger = KotlinLogging.logger {}
 
-    suspend fun getLocation(ipAddress: InetAddress): Result<CityResponse, GeolocationException> {
+    /**
+     * Retrieves city-specific geolocation details for a given IP address.
+     *
+     * This method interacts with the geolocation database service to fetch geolocation
+     * information for the provided IP address.
+     *
+     * @param ipAddress The IP address for which geolocation city details need to be fetched.
+     * @return A [Result] containing either a successful [CityResponse] with city geolocation details,
+     * or a [GeolocationException] in case of failure.
+     */
+    suspend fun getCityResponse(ipAddress: InetAddress): Result<CityResponse, GeolocationException> {
         logger.debug { "Retrieving geolocation for IP address $ipAddress" }
 
         return geolocationDatabaseService.getCity(ipAddress)
@@ -47,8 +57,8 @@ class GeolocationService(
      * @return A [Result] containing either a successful [GeolocationResponse] with geolocation details,
      *  or a [GeolocationException] in case of failure.
      */
-    suspend fun getLocationResponse(ipAddress: InetAddress): Result<GeolocationResponse, GeolocationException> {
-        return getLocation(ipAddress)
+    private suspend fun getLocationResponse(ipAddress: InetAddress): Result<GeolocationResponse, GeolocationException> {
+        return getCityResponse(ipAddress)
             .map { cityResponse -> geolocationMapper.createGeolocationResponse(cityResponse) }
     }
 
