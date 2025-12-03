@@ -50,11 +50,9 @@ class GroupService(
         logger.info { "Creating initial groups" }
 
         appProperties.groups.forEach { groupRequest ->
-            runBlocking {
-                create(groupRequest)
-                    .onSuccess { logger.info { "Created group with key \"${groupRequest.key}\""} }
-                    .onFailure { ex -> logger.error(ex) { "Failed to create group with key \"${groupRequest.key}\""}}
-            }
+            create(groupRequest)
+                .onSuccess { logger.info { "Created group with key \"${groupRequest.key}\""} }
+                .onFailure { ex -> logger.error(ex) { "Failed to create group with key \"${groupRequest.key}\""}}
         }
     }
 
