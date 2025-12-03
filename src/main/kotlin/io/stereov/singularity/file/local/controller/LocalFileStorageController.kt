@@ -8,6 +8,7 @@ import io.stereov.singularity.file.local.service.LocalFileStorage
 import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.swagger.v3.oas.annotations.ExternalDocumentation
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.http.HttpHeaders
@@ -20,6 +21,7 @@ import reactor.core.publisher.Flux
 
 @Controller
 @RequestMapping("/api/assets")
+@Tag(name = "Local File Storage", description = "Access files served by the local file storage")
 @ConditionalOnProperty(prefix = "singularity.file.storage", value = ["type"], havingValue = "local", matchIfMissing = true)
 class LocalFileStorageController(
     private val localFileStorage: LocalFileStorage,
