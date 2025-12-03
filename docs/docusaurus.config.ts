@@ -25,7 +25,7 @@ const config: Config = {
 
     // GitHub pages deployment config.
     // If you aren't using GitHub pages, you don't need these.
-    organizationName: 'antistereov', // Usually your GitHub org/user name.
+    organizationName: 'antistereov', // Usually your GitHub org/username.
     projectName: 'singularity', // Usually your repo name.
 
     onBrokenLinks: 'throw',

@@ -64,10 +64,10 @@ class TestVaultSecretStore : BaseSpringBootTest() {
                 start()
             }
 
-        private const val vaultToken = "test-token"
+        private const val VAULT_TOKEN = "test-token"
 
         private val vaultContainer = VaultContainer("hashicorp/vault:latest")
-            .withVaultToken(vaultToken)
+            .withVaultToken(VAULT_TOKEN)
             .withExposedPorts(8200)
             .withInitCommand("secrets enable -path=apps -version=2 kv")
             .apply { start() }
@@ -84,7 +84,7 @@ class TestVaultSecretStore : BaseSpringBootTest() {
             registry.add("singularity.secrets.store") { SecretStoreImplementation.VAULT }
             registry.add("singularity.secrets.vault.host") { vaultContainer.host }
             registry.add("singularity.secrets.vault.port") { vaultContainer.getMappedPort(8200) }
-            registry.add("singularity.secrets.vault.token") { vaultToken }
+            registry.add("singularity.secrets.vault.token") { VAULT_TOKEN }
         }
     }
 }

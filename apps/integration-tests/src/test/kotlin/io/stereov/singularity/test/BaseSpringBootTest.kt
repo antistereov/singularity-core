@@ -428,7 +428,7 @@ class BaseSpringBootTest() {
 
         requireNotNull(stepUpTokenValue)
 
-        return TestRegisterResponse<Guest>(
+        return TestRegisterResponse(
             info = guest,
             accessToken = accessToken.value,
             refreshToken = refreshToken.value,

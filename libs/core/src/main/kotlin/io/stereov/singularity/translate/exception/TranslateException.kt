@@ -47,7 +47,7 @@ sealed class TranslateException(
         companion object {
             const val CODE = "NO_TRANSLATIONS"
             val STATUS = HttpStatus.INTERNAL_SERVER_ERROR
-            val DESCRIPTION = "Exception indicating that no translations are available for a given request."
+            const val DESCRIPTION = "Exception indicating that no translations are available for a given request."
         }
 
     }
