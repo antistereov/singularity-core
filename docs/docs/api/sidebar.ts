@@ -619,11 +619,11 @@ const sidebar: SidebarsConfig = {
     },
     {
       type: "category",
-      label: "local-file-storage-controller",
+      label: "Local File Storage",
       link: {
         type: "generated-index",
-        title: "local-file-storage-controller",
-        slug: "/category/api/local-file-storage-controller",
+        title: "Local File Storage",
+        slug: "/category/api/local-file-storage",
       },
       items: [
         {
