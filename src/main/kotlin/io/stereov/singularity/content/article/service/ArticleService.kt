@@ -21,7 +21,9 @@ import io.stereov.singularity.content.core.model.ContentAccessRole
 import io.stereov.singularity.content.core.properties.ContentProperties
 import io.stereov.singularity.content.core.service.ContentService
 import io.stereov.singularity.database.core.util.CriteriaBuilder
+import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.global.util.mapContent
+import io.stereov.singularity.translate.service.TranslatableCrudService
 import io.stereov.singularity.translate.service.TranslateService
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.data.domain.Page
@@ -40,8 +42,9 @@ class ArticleService(
     override val accessCriteria: AccessCriteria,
     override val translateService: TranslateService,
     private val articleMapper: ArticleMapper,
-    override val contentProperties: ContentProperties
-) : ContentService<Article>() {
+    override val contentProperties: ContentProperties,
+    override val appProperties: AppProperties
+) : ContentService<Article>(), TranslatableCrudService<ArticleTranslation, Article> {
 
     override val logger: KLogger = KotlinLogging.logger {}
     override val collectionClazz: Class<Article> = Article::class.java
@@ -88,7 +91,7 @@ class ArticleService(
             .isIn(Article::tags, tags)
             .build()
 
-        val articles = findAllPaginated(pageable, criteria)
+        val articles = findAllPaginated(pageable, criteria, actualLocale)
             .mapError { GetArticleResponsesException.from(it) }
             .bind()
 
