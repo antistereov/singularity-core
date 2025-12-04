@@ -347,7 +347,7 @@ class AuthenticationController(
 
     @PostMapping("/refresh")
     @Operation(
-        summary = "Refresh Access EmailVerificationTokenCreation",
+        summary = "Refresh Access Token",
         description = """
             Request a new [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token).
             
