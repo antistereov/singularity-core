@@ -128,15 +128,3 @@ You can learn more about OAuth2 in *Singularity* [here](https://www.google.com/s
 By connecting an OAuth2 provider to a `GUEST` account, this account automatically becomes a `USER` account. 
 The process of connecting an OAuth2 provider is the same as for users. 
 You can follow [this](../auth/oauth2.md#connecting-an-oauth2-provider-to-an-existing-account) guide.
-
-## Roles
-
-**Roles** in *Singularity* allow you to control access and management of your server. There are three primary roles:
-
-- **`USER`:** A "normal" user of your application. Can access most of the resources but is not allowed to manage your server.
-- **`ADMIN`:** An administrator. Has access to all resources and is allowed to manage your server. Only `USER`s can be administrators.
-- **`GUEST`:** A user that has access to your application only in the current browser context and did not set up any authentication method.
-
-:::info
-Roles are primarily used to control and limit resources related to server management. If you want to have a more fine-grained control on which user can access what resource, check out [groups](https://www.google.com/search?q=./groups.md).
-:::

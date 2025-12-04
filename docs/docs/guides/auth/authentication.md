@@ -258,7 +258,7 @@ This means, an [`AccessToken`](./tokens#access-token) is not enough to perform t
 You need to provide a [`StepUpToken`](./tokens#step-up-token) to authorize a step-up.
 
 :::note
-You can learn more on how to secure your endpoints by requiring a step-up [here](./securing-endpoints#requiring-step-up-authentication)
+You can learn more on how to secure your endpoints by requiring a step-up [here](./securing-endpoints#3-requiring-roles-and-group-membership)
 :::
 
 You can request a [`StepUpToken`](./tokens#step-up-token) using [`POST /api/auth/step-up`](../../api/step-up.api.mdx).

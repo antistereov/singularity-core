@@ -50,9 +50,9 @@ class UserController(
         description = """
             Get information about a specific user.
             
-            You can find more information about user management [here](https://singularity.stereov.io/docs/guides/users/managing-users).
+            You can find more information about user management [here](https://singularity.stereov.io/docs/guides/principals/managing-users).
         """,
-        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/users/managing-users"),
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/principals/managing-users"),
         responses = [
             ApiResponse(
                 responseCode = "200",
@@ -91,7 +91,7 @@ class UserController(
         description = """
             Find all users with the specified filters.
             
-            You can find more information about user management [here](https://singularity.stereov.io/docs/guides/users/managing-users).
+            You can find more information about user management [here](https://singularity.stereov.io/docs/guides/principals/managing-users).
             
             **Filter:**
             
@@ -108,7 +108,7 @@ class UserController(
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
               with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
         """,
-        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/users/managing-users"),
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/principals/managing-users"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER, scopes = [OpenApiConstants.ADMIN_SCOPE]),
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE, scopes = [OpenApiConstants.ADMIN_SCOPE]),
@@ -176,13 +176,13 @@ class UserController(
         description = """
             Delete a User with given ID.
             
-            You can find more information about user management [here](https://singularity.stereov.io/docs/guides/users/managing-users).
+            You can find more information about user management [here](https://singularity.stereov.io/docs/guides/principals/managing-users).
             
             ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
               with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
         """,
-        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/users/managing-users"),
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/principals/managing-users"),
         security = [
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_HEADER, scopes = [OpenApiConstants.ADMIN_SCOPE]),
             SecurityRequirement(OpenApiConstants.ACCESS_TOKEN_COOKIE, scopes = [OpenApiConstants.ADMIN_SCOPE]),

@@ -66,12 +66,12 @@ class PrincipalSettingsController(
         description = """
             Retrieves the principle profile information of the currently authenticated principle.
             
-            You can find more information about profile management [here](https://singularity.stereov.io/docs/guides/users/profile-management).
+            You can find more information about profile management [here](https://singularity.stereov.io/docs/guides/principals/profile-management).
             
             ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
         """,
-        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/users/profile-management"),
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/principals/profile-management"),
         security = [
             SecurityRequirement(name = OpenApiConstants.ACCESS_TOKEN_HEADER),
             SecurityRequirement(name = OpenApiConstants.ACCESS_TOKEN_COOKIE)
@@ -119,7 +119,7 @@ class PrincipalSettingsController(
             - The `email` should be a valid email address (e.g., "test@example.com")
               that is not associated to an existing account.
             
-            You can find more information about profile management [here](https://singularity.stereov.io/docs/guides/users/profile-management).
+            You can find more information about profile management [here](https://singularity.stereov.io/docs/guides/principals/profile-management).
             
             ### Locale
             
@@ -135,7 +135,7 @@ class PrincipalSettingsController(
             - A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
               is required. This token should match user and session contained in the `AccessToken`.
         """,
-        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/users/profile-management"),
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/principals/profile-management"),
         security = [
             SecurityRequirement(name = OpenApiConstants.ACCESS_TOKEN_HEADER),
             SecurityRequirement(name = OpenApiConstants.ACCESS_TOKEN_COOKIE),
@@ -182,7 +182,7 @@ class PrincipalSettingsController(
         description = """
             Change the password of the currently authenticated user.
             
-            You can find more information about profile management [here](https://singularity.stereov.io/docs/guides/users/profile-management).
+            You can find more information about profile management [here](https://singularity.stereov.io/docs/guides/principals/profile-management).
             
             ### Requirements
             - The `password` must be at least 8 characters long and include at least one uppercase letter, 
@@ -202,7 +202,7 @@ class PrincipalSettingsController(
             - A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
               is required. This token should match user and session contained in the `AccessToken`.
         """,
-        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/users/profile-management"),
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/principals/profile-management"),
         security = [
             SecurityRequirement(name = OpenApiConstants.ACCESS_TOKEN_HEADER),
             SecurityRequirement(name = OpenApiConstants.ACCESS_TOKEN_COOKIE),
@@ -256,12 +256,12 @@ class PrincipalSettingsController(
         description = """
             Update the principal information of the currently authenticated principal.
             
-            You can find more information about profile management [here](https://singularity.stereov.io/docs/guides/users/profile-management).
+            You can find more information about profile management [here](https://singularity.stereov.io/docs/guides/principals/profile-management).
             
             ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
         """,
-        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/users/profile-management"),
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/principals/profile-management"),
         security = [
             SecurityRequirement(name = OpenApiConstants.ACCESS_TOKEN_HEADER),
             SecurityRequirement(name = OpenApiConstants.ACCESS_TOKEN_COOKIE)
@@ -305,12 +305,12 @@ class PrincipalSettingsController(
         description = """
             Update the avatar of the currently authenticated user.
             
-            You can find more information about profile management [here](https://singularity.stereov.io/docs/guides/users/profile-management).
+            You can find more information about profile management [here](https://singularity.stereov.io/docs/guides/principals/profile-management).
             
             ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
         """,
-        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/users/profile-management"),
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/principals/profile-management"),
         security = [
             SecurityRequirement(name = OpenApiConstants.ACCESS_TOKEN_HEADER),
             SecurityRequirement(name = OpenApiConstants.ACCESS_TOKEN_COOKIE)
@@ -354,12 +354,12 @@ class PrincipalSettingsController(
         description = """
             Delete the avatar of the currently authenticated user.
             
-            You can find more information about profile management [here](https://singularity.stereov.io/docs/guides/users/profile-management).
+            You can find more information about profile management [here](https://singularity.stereov.io/docs/guides/principals/profile-management).
             
             ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
         """,
-        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/users/profile-management"),
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/principals/profile-management"),
         security = [
             SecurityRequirement(name = OpenApiConstants.ACCESS_TOKEN_HEADER),
             SecurityRequirement(name = OpenApiConstants.ACCESS_TOKEN_COOKIE)
@@ -402,14 +402,14 @@ class PrincipalSettingsController(
         description = """
             Delete the currently authenticated principal.
             
-            You can find more information about profile management [here](https://singularity.stereov.io/docs/guides/users/profile-management).
+            You can find more information about profile management [here](https://singularity.stereov.io/docs/guides/principals/profile-management).
             
             ### Tokens
             - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
             - A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
               is required. This token should match user and session contained in the `AccessToken`.
         """,
-        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/users/profile-management"),
+        externalDocs = ExternalDocumentation(url = "https://singularity.stereov.io/docs/guides/principals/profile-management"),
         security = [
             SecurityRequirement(name = OpenApiConstants.ACCESS_TOKEN_HEADER),
             SecurityRequirement(name = OpenApiConstants.ACCESS_TOKEN_COOKIE),

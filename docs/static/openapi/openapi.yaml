@@ -3318,9 +3318,9 @@ paths:
       description: |-
         Get information about a specific user.
 
-        You can find more information about user management [here](https://singularity.stereov.io/docs/guides/users/managing-users).
+        You can find more information about user management [here](https://singularity.stereov.io/docs/guides/principals/managing-users).
       externalDocs:
-        url: https://singularity.stereov.io/docs/guides/users/managing-users
+        url: https://singularity.stereov.io/docs/guides/principals/managing-users
       operationId: getUserById
       parameters:
       - name: id
@@ -3377,13 +3377,13 @@ paths:
       description: |-
         Delete a User with given ID.
 
-        You can find more information about user management [here](https://singularity.stereov.io/docs/guides/users/managing-users).
+        You can find more information about user management [here](https://singularity.stereov.io/docs/guides/principals/managing-users).
 
         ### Tokens
         - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
           with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
       externalDocs:
-        url: https://singularity.stereov.io/docs/guides/users/managing-users
+        url: https://singularity.stereov.io/docs/guides/principals/managing-users
       operationId: deleteUserById
       parameters:
       - name: id
@@ -3470,7 +3470,7 @@ paths:
       description: |-
         Find all users with the specified filters.
 
-        You can find more information about user management [here](https://singularity.stereov.io/docs/guides/users/managing-users).
+        You can find more information about user management [here](https://singularity.stereov.io/docs/guides/principals/managing-users).
 
         **Filter:**
 
@@ -3487,7 +3487,7 @@ paths:
         - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)
           with [`ADMIN`](https://singularity.stereov.io/docs/guides/auth/roles#admins) permissions is required.
       externalDocs:
-        url: https://singularity.stereov.io/docs/guides/users/managing-users
+        url: https://singularity.stereov.io/docs/guides/principals/managing-users
       operationId: getUsers
       parameters:
       - name: page
@@ -3608,12 +3608,12 @@ paths:
       description: |-
         Retrieves the principle profile information of the currently authenticated principle.
 
-        You can find more information about profile management [here](https://singularity.stereov.io/docs/guides/users/profile-management).
+        You can find more information about profile management [here](https://singularity.stereov.io/docs/guides/principals/profile-management).
 
         ### Tokens
         - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
       externalDocs:
-        url: https://singularity.stereov.io/docs/guides/users/profile-management
+        url: https://singularity.stereov.io/docs/guides/principals/profile-management
       operationId: getAuthorizedPrincipal
       responses:
         "200":
@@ -3664,12 +3664,12 @@ paths:
       description: |-
         Update the principal information of the currently authenticated principal.
 
-        You can find more information about profile management [here](https://singularity.stereov.io/docs/guides/users/profile-management).
+        You can find more information about profile management [here](https://singularity.stereov.io/docs/guides/principals/profile-management).
 
         ### Tokens
         - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
       externalDocs:
-        url: https://singularity.stereov.io/docs/guides/users/profile-management
+        url: https://singularity.stereov.io/docs/guides/principals/profile-management
       operationId: updateAuthorizedUser
       requestBody:
         content:
@@ -3727,14 +3727,14 @@ paths:
       description: |-
         Delete the currently authenticated principal.
 
-        You can find more information about profile management [here](https://singularity.stereov.io/docs/guides/users/profile-management).
+        You can find more information about profile management [here](https://singularity.stereov.io/docs/guides/principals/profile-management).
 
         ### Tokens
         - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
         - A valid [`StepUpToken`](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)
           is required. This token should match user and session contained in the `AccessToken`.
       externalDocs:
-        url: https://singularity.stereov.io/docs/guides/users/profile-management
+        url: https://singularity.stereov.io/docs/guides/principals/profile-management
       operationId: deleteAuthorizedPrincipal
       responses:
         "200":
@@ -3788,7 +3788,7 @@ paths:
         \ email is disabled, the email will be changed immediately.\n\n### Requirements\n\
         - The `email` should be a valid email address (e.g., \"test@example.com\"\
         )\n  that is not associated to an existing account.\n\nYou can find more information\
-        \ about profile management [here](https://singularity.stereov.io/docs/guides/users/profile-management).\n\
+        \ about profile management [here](https://singularity.stereov.io/docs/guides/principals/profile-management).\n\
         \n### Locale\n\nA locale can be specified for this request. \nThe email will\
         \ be sent in the specified locale.\nYou can learn more about locale in emails\
         \ [here](https://singularity.stereov.io/docs/guides/email/templates).\n\n\
@@ -3799,7 +3799,7 @@ paths:
         \  is required. This token should match user and session contained in the\
         \ `AccessToken`."
       externalDocs:
-        url: https://singularity.stereov.io/docs/guides/users/profile-management
+        url: https://singularity.stereov.io/docs/guides/principals/profile-management
       operationId: changeEmailOfAuthorizedUser
       parameters:
       - name: locale
@@ -3875,7 +3875,7 @@ paths:
       - Profile Management
       summary: Change Password
       description: "Change the password of the currently authenticated user.\n\nYou\
-        \ can find more information about profile management [here](https://singularity.stereov.io/docs/guides/users/profile-management).\n\
+        \ can find more information about profile management [here](https://singularity.stereov.io/docs/guides/principals/profile-management).\n\
         \n### Requirements\n- The `password` must be at least 8 characters long and\
         \ include at least one uppercase letter, \n  one lowercase letter, one number,\
         \ and one special character (!@#$%^&*()_+={}[]|\\:;'\"<>,.?/).\n  \n### Locale\n\
@@ -3888,7 +3888,7 @@ paths:
         \  is required. This token should match user and session contained in the\
         \ `AccessToken`."
       externalDocs:
-        url: https://singularity.stereov.io/docs/guides/users/profile-management
+        url: https://singularity.stereov.io/docs/guides/principals/profile-management
       operationId: changePasswordOfAuthorizedUser
       parameters:
       - name: locale
@@ -3966,12 +3966,12 @@ paths:
       description: |-
         Update the avatar of the currently authenticated user.
 
-        You can find more information about profile management [here](https://singularity.stereov.io/docs/guides/users/profile-management).
+        You can find more information about profile management [here](https://singularity.stereov.io/docs/guides/principals/profile-management).
 
         ### Tokens
         - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
       externalDocs:
-        url: https://singularity.stereov.io/docs/guides/users/profile-management
+        url: https://singularity.stereov.io/docs/guides/principals/profile-management
       operationId: setAvatarOfAuthorizedUser
       requestBody:
         content:
@@ -4042,12 +4042,12 @@ paths:
       description: |-
         Delete the avatar of the currently authenticated user.
 
-        You can find more information about profile management [here](https://singularity.stereov.io/docs/guides/users/profile-management).
+        You can find more information about profile management [here](https://singularity.stereov.io/docs/guides/principals/profile-management).
 
         ### Tokens
         - A valid [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token) is required.
       externalDocs:
-        url: https://singularity.stereov.io/docs/guides/users/profile-management
+        url: https://singularity.stereov.io/docs/guides/principals/profile-management
       operationId: deleteAvatarOfAuthorizedUser
       responses:
         "200":
@@ -5872,12 +5872,6 @@ components:
     KLogger:
       type: object
       properties:
-        isLoggingOff:
-          type: boolean
-          deprecated: true
-          description: Use isLoggingOff() instead
-        name:
-          type: string
         isInfoEnabled:
           type: boolean
           deprecated: true
@@ -5898,6 +5892,12 @@ components:
           type: boolean
           deprecated: true
           description: Use isWarnEnabled() instead
+        isLoggingOff:
+          type: boolean
+          deprecated: true
+          description: Use isLoggingOff() instead
+        name:
+          type: string
       required:
       - isDebugEnabled
       - isErrorEnabled
@@ -6826,12 +6826,15 @@ components:
         totalPages:
           type: integer
           format: int32
-        pageable:
-          $ref: "#/components/schemas/PageableObject"
         first:
           type: boolean
         last:
           type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
         size:
           type: integer
           format: int32
@@ -6844,9 +6847,6 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
-        numberOfElements:
-          type: integer
-          format: int32
         empty:
           type: boolean
     PageableObject:
@@ -7093,12 +7093,15 @@ components:
         totalPages:
           type: integer
           format: int32
-        pageable:
-          $ref: "#/components/schemas/PageableObject"
         first:
           type: boolean
         last:
           type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
         size:
           type: integer
           format: int32
@@ -7111,9 +7114,6 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
-        numberOfElements:
-          type: integer
-          format: int32
         empty:
           type: boolean
     PageTagResponse:
@@ -7125,12 +7125,15 @@ components:
         totalPages:
           type: integer
           format: int32
-        pageable:
-          $ref: "#/components/schemas/PageableObject"
         first:
           type: boolean
         last:
           type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
         size:
           type: integer
           format: int32
@@ -7143,9 +7146,6 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
-        numberOfElements:
-          type: integer
-          format: int32
         empty:
           type: boolean
     ArticleOverviewResponse:
@@ -7210,12 +7210,15 @@ components:
         totalPages:
           type: integer
           format: int32
-        pageable:
-          $ref: "#/components/schemas/PageableObject"
         first:
           type: boolean
         last:
           type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
         size:
           type: integer
           format: int32
@@ -7228,9 +7231,6 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
-        numberOfElements:
-          type: integer
-          format: int32
         empty:
           type: boolean
     AuthenticationStatusResponse:
