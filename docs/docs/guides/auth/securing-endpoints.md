@@ -175,8 +175,8 @@ suspend fun removeCoolStuff(
 
     // 2. Ensure the user performed a step-up (403)
     // The ServerWebExchange is required for token extraction
-    authorizationService.validateStepUp(authenticatedOutcome, exchange)
-        .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it } }
+    authorizationService.requireStepUp(authenticatedOutcome, exchange)
+        .getOrThrow { when (it) { is StepUpTokenExtractionException -> it } }
 
     // 3. Retrieve the Principal (User or Guest) using the ID from the outcome
     // (A common pattern to get the full principal object)

@@ -13,7 +13,7 @@ If you are new to Spring, we recommend starting with their [official guides](htt
 **Groups** allow fine-grained control on which information each user is allowed to see.
 
 :::note
-You can learn more on how to secure endpoints by requiring a group membership [here](./securing-endpoints.md#requiring-group-membership).
+You can learn more on how to secure endpoints by requiring a group membership [here](./securing-endpoints.md#3-requiring-roles-and-group-membership).
 :::
 
 A **Group** is uniquely identified by a `key`.
