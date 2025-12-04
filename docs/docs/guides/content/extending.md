@@ -2,6 +2,7 @@
 sidebar_position: 5
 ---
 
+
 # Extending Content
 
 :::note
@@ -59,7 +60,7 @@ It is good practice to create DTOs to send and receive information to your front
 This way you can hide some fields and add some aggregations to make it more readable.
 :::
 
-This DTO implements `ContentResponse<CoolStuffDocument>` and 
+This DTO implements `ContentResponse<CoolStuffDocument>` and
 contains the fields needed for the client, including the mapped ContentAccessDetailsResponse.
 
 ```kotlin
@@ -109,11 +110,19 @@ class CoolStuffMapper(
 }
 ```
 
-## 3. The CoolStuff Service
+## 5. The CoolStuff Service
 
-The **`CoolStuffService`** extends the abstract **`ContentService`**, 
-which provides the core authorization utility (`findAuthorizedByKey`). 
+The **`CoolStuffService`** extends the abstract **`ContentService`**,
+which provides the core authorization utility (`findAuthorizedByKey`).
 This means any content retrieval is automatically secured.
+
+:::info Result Usage
+Since the core `ContentService` methods now return a `Result<V, E>`, the service methods are updated to either 
+propagate the `Result` or wrap their logic in `coroutineBinding { ... }` and use `bind()` 
+to unwrap successful values and automatically propagate errors.
+
+You can find more information about this design decision [here](../design-decisions.md).
+:::
 
 ```kotlin
 
@@ -130,8 +139,9 @@ class CoolStuffService(
     
     /**
      * Finds a CoolStuffDocument by key and ensures the current user has VIEWER access.
+     * It now directly returns the Result from the core ContentService method.
      */
-    suspend fun findCoolStuffByKey(key: String): CoolStuffDocument {
+    suspend fun findCoolStuffByKey(key: String): Result<CoolStuffDocument, FindContentAuthorizedException> {
         // findAuthorizedByKey (from ContentService) handles the full authorization check:
         // 1. Checks if the object is PUBLIC.
         // 2. Checks if the user is the OWNER or explicitly has the VIEWER role (or higher).
@@ -140,10 +150,13 @@ class CoolStuffService(
 
     /**
      * Creates a new CoolStuffDocument. Requires the user to be a member of the CONTRIB group.
+     * It uses coroutineBinding to handle and propagate exceptions from required membership checks and saving.
      */
-    suspend fun createCoolStuff(key: String, ownerId: ObjectId): CoolStuffDocument {
-        // requireEditorGroupMembership (from ContentService) checks the global Contributor group.
-        requireEditorGroupMembership() 
+    suspend fun createCoolStuff(key: String, ownerId: ObjectId): Result<CoolStuffDocument, Exception> = coroutineBinding {
+        
+        // requireEditorGroupMembership is assumed to return Result<Unit, AuthorizationException>.
+        // bind() unwraps Unit on success or immediately returns the AuthorizationException on failure.
+        requireEditorGroupMembership().bind()
         
         val newCoolStuff = CoolStuffDocument(
             key = key,
@@ -152,14 +165,19 @@ class CoolStuffService(
             name = "A new cool thing",
             coolLevel = 10
         )
-        return repository.save(newCoolStuff)
+        
+        // repository.save is assumed to return Result<CoolStuffDocument, DatabaseException> or similar.
+        // bind() unwraps the saved document or propagates the error.
+        repository.save(newCoolStuff).bind()
     }
 }
 ```
 
-## 4. The CoolStuff Controller
+## 6. The CoolStuff Controller
 
-The **`CoolStuffController`** exposes the read operations. Complex access management tasks (like changing visibility or owner) are handled by calling the generic `ContentManagementController`'s service implementation by passing the correct content type (`cool-stuff`).
+The **`CoolStuffController`** exposes the read operations. We use `getOrThrow()` 
+here to simplify the controller logic by allowing Spring's exception handler to 
+process the errors propagated as `Result` failures from the service layer.
 
 ```kotlin
 
@@ -174,26 +192,28 @@ class CoolStuffController(
     // --- Public Retrieval Endpoint ---
     @GetMapping("/{key}")
     suspend fun getCoolStuffByKey(@PathVariable key: String): ResponseEntity<CoolStuffResponse> {
-        // Authorization is handled by the service layer (findCoolStuffByKey)
+        // Authorization is handled by the service layer (findCoolStuffByKey), which returns a Result.
+        // We use .getOrThrow() to unwrap the success value or let the exception bubble up.
+        val coolStuffDocument = coolStuffService.findCoolStuffByKey(key)
+            .getOrThrow()
+            
         return ResponseEntity.ok(
-            coolStuffMapper.toResponse(
-                coolStuffService.findCoolStuffByKey(key)
-            )
+            coolStuffMapper.toResponse(coolStuffDocument)
         )
     }
 }
 ```
 
-## 5. The CoolStuff Management Service
+## 7. The CoolStuff Management Service
 
-To gain all the default management endpoints (for changing visibility, updating the owner, 
-and setting the trusted state), we implement a **`CoolStuffManagementService`** that 
+To gain all the default management endpoints (for changing visibility, updating the owner,
+and setting the trusted state), we implement a **`CoolStuffManagementService`** that
 extends the generic `ContentManagementService`.
 
 By extending `ContentManagementService<CoolStuffDocument>`,
-all the complex business logic for content management (like inviting users, checking permissions, 
-and updating access control lists) is automatically handled. 
-You only need to provide the required core dependencies and implement a few methods.
+all the complex business logic for content management (like inviting users, checking permissions,
+and updating access control lists) is automatically handled.
+We update the abstract method implementations to use `coroutineBinding` and `bind()` to correctly handle the `Result` types now returned by the protected base methods (`do...`).
 
 ```kotlin
 
@@ -226,55 +246,56 @@ class CoolStuffManagementService(
 
     /**
      * Implementation for abstract suspend fun acceptInvitation.
-     * Delegates to core logic and maps the resulting document to CoolStuffResponse.
+     * Uses coroutineBinding to handle and propagate errors from core logic.
      */
     override suspend fun acceptInvitation(
         req: AcceptInvitationToContentRequest,
         locale: Locale?
-    ): CoolStuffResponse {
+    ): CoolStuffResponse = coroutineBinding {
         logger.debug { "Accepting invitation for CoolStuff with token ${req.token}" }
 
-        // 1. Call the protected core logic method (doAcceptInvitation)
-        val coolStuff = doAcceptInvitation(req)
+        // 1. Call the protected core logic method (doAcceptInvitation) which now returns a Result.
+        // We use bind() to unwrap the document or propagate the error.
+        val coolStuff = doAcceptInvitation(req).bind()
 
         // 2. Map the updated document to the CoolStuffResponse DTO
-        return coolStuffMapper.toResponse(coolStuff)
+        coolStuffMapper.toResponse(coolStuff)
     }
 
     /**
      * Implementation for abstract suspend fun inviteUser.
-     * Delegates to core logic and calls the base class's helper to create the complex access response.
+     * Uses coroutineBinding to handle and propagate errors from core logic.
      */
     override suspend fun inviteUser(
         key: String,
         req: InviteUserToContentRequest,
         locale: Locale?
-    ): ExtendedContentAccessDetailsResponse {
+    ): ExtendedContentAccessDetailsResponse = coroutineBinding {
         logger.debug { "Inviting user to CoolStuff with key \"$key\"" }
 
-        // 1. Call the protected core logic method (doInviteUser)
-        val coolStuff = doInviteUser(key, req)
+        // 1. Call the protected core logic method (doInviteUser) which now returns a Result.
+        val coolStuff = doInviteUser(key, req).bind()
 
         // 2. Call the base class's helper to create the final, non-generic ExtendedContentAccessDetailsResponse
-        return getExtendedAccessDetailsResponse(coolStuff)
+        getExtendedAccessDetailsResponse(coolStuff)
     }
 
     /**
-     * Implementation for abstract suspend fun changeVisibility.
-     * Delegates to core logic and maps the resulting document to CoolStuffResponse.
+     * Implementation for abstractly suspend fun changeVisibility.
+     * Uses coroutineBinding to handle and propagate errors from core logic.
      */
     override suspend fun changeVisibility(
         key: String,
         req: UpdateContentVisibilityRequest,
         locale: Locale?
-    ): CoolStuffResponse {
+    ): CoolStuffResponse = coroutineBinding {
         logger.debug { "Changing visibility of CoolStuff with key \"$key\"" }
 
-        // 1. Call the protected core logic method (doChangeVisibility)
-        val coolStuff = doChangeVisibility(key, req)
+        // 1. Call the protected core logic method (doChangeVisibility) which now returns a Result.
+        val coolStuff = doChangeVisibility(key, req).bind()
 
         // 2. Map the updated document to the CoolStuffResponse DTO
-        return coolStuffMapper.toResponse(coolStuff)
+        coolStuffMapper.toResponse(coolStuff)
     }
 }
 ```
@@ -304,8 +325,9 @@ The **access** can be updated through the endpoint:
 #### Trusted State
 
 The **trusted state** can be updated through the endpoint
+
 * **Endpoint:**  [`PUT /api/content/cool-stuff/{key}/trusted`](../../api/update-content-object-trusted-state.api.mdx)
-* **Requirements:** Only [`ADMIN`](../auth/principals.md#admins)s can perform this action.
+* **Requirements:** Only [`ADMIN`](../principals/introduction.md#admins)s can perform this action.
 
 ### Deleting
 

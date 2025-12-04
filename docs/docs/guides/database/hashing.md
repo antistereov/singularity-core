@@ -28,9 +28,54 @@ which makes it ideal for storing sensitive information like passwords and for ve
 If you need to restore the initial value, check out [encryption](./encryption.md).
 :::
 
-## Codes and Passwords
+## Core Components
 
-Here's how you can use `Hash` for fields like passwords:
+### `HashService`
+
+The `HashService` is the primary component for secure, one-way data transformation within *Singularity*.
+
+This service supports two main types of hashing:
+1.  **BCrypt** for **passwords and codes** (designed for verification, not searchability).
+2.  **HMAC-SHA256** for **searchable fields** (designed to be deterministic and searchable).
+
+#### **Explanation**
+
+The `HashService` class provides functions to:
+* **Generate `Hash` objects** (using BCrypt) for security-critical data like passwords, where the hash changes every time it is generated, making rainbow table attacks impossible.
+* **Generate `SearchableHash` objects** (using HMAC-SHA256) for data that needs to be securely stored but also queried (e.g., finding a user by a hashed email).
+* **Verify** an input string against an existing hash or searchable hash.
+
+It uses the `HashSecretService` to retrieve a secure, fixed secret for the HMAC-SHA256 operation, ensuring that the **`SearchableHash`** result is **deterministic** (the same input always produces the same hash).
+
+#### **Core Signatures**
+
+| Function                     | Description                                                                                                            | Signature                                                                                                     |
+|------------------------------|------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------|
+| `verifyBcrypt`               | Checks if the plain `input` string matches the stored **BCrypt** `hash`. Returns `true` on match.                      | `suspend fun verifyBcrypt(input: String, hash: Hash): Result<Boolean, HashException>`                         |
+| `hashBcrypt`                 | Generates a new, randomized **BCrypt hash** from the `input` string. The result is non-deterministic.                  | `suspend fun hashBcrypt(input: String): Result<Hash, HashException>`                                          |
+| `verifySearchableHmacSha256` | Checks if the plain `input` string matches the stored **SearchableHash**. Returns `true` on match.                     | `suspend fun verifySearchableHmacSha256(input: String, hash: SearchableHash): Result<Boolean, HashException>` |
+| `hashSearchableHmacSha256`   | Generates a **deterministic SearchableHash** using HMAC-SHA256 and a secret key. Used for fields that must be queried. | `suspend fun hashSearchableHmacSha256(input: String): Result<SearchableHash, HashException>`                  |
+
+
+### **Model Descriptions**
+
+The `HashService` operates on two data models:
+
+| Model                | Description                                                                                                                                           |
+|----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`Hash`**           | Used for passwords and codes. Contains only the `data: String` (the non-searchable, randomized hash).                                                 |
+| **`SearchableHash`** | Used for searchable fields (e.g., email). Contains the deterministic `data: String` and a `secretId: UUID` to track the secret used for its creation. |
+
+## Examples
+
+### Codes and Passwords
+
+Here's how you can use [`Hash`](https://github.com/antistereov/singularity-core/blob/main/src/main/kotlin/io/stereov/singularity/database/hash/model/Hash.kt) for fields like passwords. BCrypt is designed to be slow, so every time you call `hashService.hashBcrypt(code)`,
+a new hash will be generated that is different to the one before.
+
+:::caution Result Return Type
+`HashService` methods now return a `Result<V, E>`. In the service layer, we use `coroutineBinding` and `bind()` to unwrap the successful value or propagate the error, typically a `HashException`.
+:::
 
 ```kotlin
 /**
@@ -38,40 +83,58 @@ Here's how you can use `Hash` for fields like passwords:
  */
 @Document(collection = "cool-stuff")
 data class CoolStuff(
-    @Id val id: Object? = null,
+    @Id val id: ObjectId? = null,
+    // The field storing the BCrypt hash
     val code: Hash
 )
 
+/**
+ * The repository interface.
+ */
+interface CoolStuffRepository : CoroutineCrudRepository<CoolStuff, ObjectId> {
+    // ... custom methods
+}
+
 @Service
 class CoolStuffService(
-    // Autowire the HashService 
-    private val hashService: HashService
+    private val hashService: HashService,
+    private val repository: CoolStuffRepository
 ) {
     
-    suspend fun createCoolStuff(code: String): CoolStuff {
-        // You can hash the code using this method
-        val hashedCode = hashService.hashBcrypt(code)
-        return CoolStuff(code = hashedCode)
+    /**
+     * Creates a new CoolStuff document with a BCrypt hashed code.
+     * Uses coroutineBinding to handle and propagate HashExceptions or DatabaseExceptions.
+     */
+    suspend fun createCoolStuff(code: String): Result<CoolStuff, Exception> = coroutineBinding {
+        // Hashing the code using BCrypt, which returns Result<Hash, HashException>.
+        // bind() unwraps the Hash object or propagates HashException.
+        val hashedCode = hashService.hashBcrypt(code).bind()
+        
+        val newCoolStuff = CoolStuff(code = hashedCode)
+        
+        // Assuming repository.save returns Result<CoolStuff, DatabaseException>.
+        // bind() unwraps the saved document or propagates the database error.
+        repository.save(newCoolStuff).bind()
     }
-    
-    suspend fun codeIsValid(coolStuff: CoolStuff, code: String): Boolean {
-        // You can check if a given code is identical to the stored value
-        return hashService.checkBcrypt(coolStuff.code, code)
+
+    /**
+     * Checks if the input string matches the stored BCrypt hash.
+     * Returns the Result<Boolean, HashException> directly.
+     */
+    suspend fun checkPassword(input: String, document: CoolStuff): Result<Boolean, HashException> {
+        // checkBcrypt now returns Result<Boolean, HashException>, which we return directly.
+        return hashService.checkBcrypt(input, document.code)
     }
 }
 ```
 
-## Searchable Fields
+### Searchable Hashing
 
-In some cases, such as email addresses for example, you want to search for a given value.
-The example above does not allow this. Every time you run `hashService.hashBcrypt(code)`,
-a new hash will be generated that is different to the one before.
-
-If you want to find the cool stuff by an associated email address, you can use the `SearchableHash`.
+If you want to find the cool stuff by an associated email address, you can use the [`SearchableHash`](https://www.google.com/search?q=https://github.com/antistereov/singularity-core/blob/main/src/main/kotlin/io/stereov/singularity/database/hash/model/SearchableHash.kt).
 
 :::info
 The `SearchableHash` will be generated using a secret.
-This secret will make the result deterministic. 
+This secret will make the result deterministic.
 Every call with the same input and secret will return the same result.
 
 Since it is a hash, the initial value cannot be retrieved again.
@@ -84,13 +147,14 @@ Since it is a hash, the initial value cannot be retrieved again.
 @Document(collection = "cool-stuff")
 data class CoolStuff(
     @Id val id: ObjectId? = null,
+    // The field storing the SearchableHash
     val email: SearchableHash
 )
 
 /**
  * The repository interface.
  */
-interface CoolStuffRepository : CoroutineCrudRespository<CoolStuff, ObjectId> {
+interface CoolStuffRepository : CoroutineCrudRepository<CoolStuff, ObjectId> {
     
     suspend fun findByEmail(hashedEmail: SearchableHash): CoolStuff?
 }
@@ -103,17 +167,32 @@ class CoolStuffService(
     private val repository: CoolStuffRepository
 ) {
     
-    suspend fun createCoolStuff(email: String): CoolStuff {
-        // You can create a searchable hash of the email
-        val hashedEmail = hashService.hashSearchableHmacSha256(email)
-        return CoolStuff(email = hashedEmail)
+    /**
+     * Creates a new CoolStuff document with an HMAC-SHA256 searchable hash for the email.
+     * Uses coroutineBinding to handle and propagate HashExceptions or DatabaseExceptions.
+     */
+    suspend fun createCoolStuff(email: String): Result<CoolStuff, Exception> = coroutineBinding {
+        // hashSearchableHmacSha256 returns Result<SearchableHash, HashException>.
+        val hashedEmail = hashService.hashSearchableHmacSha256(email).bind()
+        
+        val newCoolStuff = CoolStuff(email = hashedEmail)
+        
+        // Assuming repository.save returns Result<CoolStuff, DatabaseException>.
+        repository.save(newCoolStuff).bind()
     }
     
-    suspend fun findByEmail(email: String): CoolStuff? {
-        // Create the same hash again
-        val hashedEmail = hashService.hashSearchableHmacSha256(email)
-        return repository.findByEmail(hashedEmail)
-    }
+    /**
+     * Finds a CoolStuff document by email address.
+     * The process hashes the input email and then queries the repository.
+     * Returns the nullable document wrapped in Result<CoolStuff?, HashException>
+     */
+    suspend fun findByEmail(email: String): Result<CoolStuff?, HashException> = coroutineBinding {
+        // Create the same hash again. bind() unwraps SearchableHash or propagates HashException.
+        val hashedEmail = hashService.hashSearchableHmacSha256(email).bind()
+        
+        // Since the repository call returns a nullable document (CoolStuff?),
+        // coroutineBinding automatically wraps this success in Ok(CoolStuff?).
+        repository.findByEmail(hashedEmail)
+    }.mapError { it as HashException } // Maps the generic error from coroutineBinding to the specific HashException.
 }
-
 ```

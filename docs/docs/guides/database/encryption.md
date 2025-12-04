@@ -9,253 +9,246 @@ This guide assumes familiarity with the [Spring Framework](https://spring.io).
 If you are new to Spring, we recommend starting with their [official guides](https://spring.io/quickstart) to get up to speed.
 :::
 
-Sensitive information like phone addresses or passwords should not be stored in the database as clear text.
-This would cause a major security risk.
-
-*Singularity* offers a way to encrypt these fields safely.
-The [`SensitiveCrudService`](https://github.com/antistereov/singularity-core/tree/main/src/main/kotlin/io/stereov/singularity/database/encryption/service/SensitiveCrudService.kt)
-provides methods encrypt and decrypt documents.
-
-:::info Encryption vs. Hashing
-Encryption is a **two-way process** that transforms data into an unreadable format (ciphertext). The original data can be recovered from the ciphertext using a secret key.
-
-* **Primary Use:** Protecting confidential data and ensuring only authorized parties can read it.
-* **Key Feature:** The original data **can be recovered** by using the correct key.
-* **Example:** You can encrypt a document and later decrypt it to read its contents.
-
-If you don't need to restore the initial value, check out [hashing](hashing.md).
-:::
+Sensitive information like phone addresses or passwords should not be stored in the database as clear text. This would cause a major security risk.
 
 :::warning 
 You cannot search encrypted data.
-If you need to search fields, then consider using [searchable hashes](./hashing.md#searchable-fields).
-
-You can use the searchable hashes for queries and store the sensitive data encrypted.
-This way you retrieve the initial value as well.
+If you need to search fields, then consider using [searchable hashes](./hashing.md#searchable-hashing).
 :::
 
-## Usage
+## `SensitiveCrudService<S, T, E>`
 
-### Encrypting Whole Documents
+The `SensitiveCrudService` is a specialized abstract service designed to handle documents where a portion of the data must be stored in an encrypted format in the database.
 
-We can also encrypt the whole document by encapsulating the sensitive information in a separate data class.
+It performs **automatic encryption** upon save and **automatic decryption** upon retrieval, ensuring developers work with clear-text documents (`T`) while the persistence layer handles the encrypted format (`E`).
 
-#### 1. Creating a Sensitive Information Class
+The service uses the following type parameters:
+* **`S`**: The Sensitive Data Transfer Object (DTO) containing the fields to be encrypted.
+* **`T`**: The clear-text, developer-facing document (`T: SensitiveDocument<S>`).
+* **`E`**: The encrypted document stored in the database (`E: EncryptedSensitiveDocument<S>`).
 
-The first step is creating a class that contains sensitive information.
-The provided fields will be encrypted before they get stored.
+This service extends `CrudService<E>`, which means it inherits all standard CRUD methods, but overrides the key retrieval and saving operations to handle the encryption/decryption process.
+
+### Core CRUD Methods (Overridden for Decryption)
+
+These methods operate on the **clear-text document (`T`)**, but internally handle the persistence of the encrypted document (`E`).
+
+| Function           | Description                                                                                                                                              | Signature                                                                                                                             |
+|--------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------|
+| `save`             | Encrypts the sensitive data in `T`, persists the encrypted document (`E`), decrypts the result, and returns the persisted **clear-text document (`T`)**. | `suspend fun save(entity: T): Result<T, SaveEncryptedDocumentException>`                                                              |
+| `findById`         | Retrieves the encrypted document (`E`) by ID, decrypts it, and returns the **clear-text document (`T`)**.                                                | `suspend fun findById(id: ObjectId): Result<T, FindEncryptedDocumentException>`                                                       |
+| `findAll`          | Retrieves and decrypts all documents, returning them as a coroutine `Flow` of **clear-text documents (`T`)**.                                            | `suspend fun findAll(): Flow<T>`                                                                                                      |
+| `findAllPaginated` | Retrieves a paginated list of encrypted documents (`E`), decrypts them, and returns a `Page` of **clear-text documents (`T`)**.                          | `suspend fun findAllPaginated(pageable: Pageable, criteria: Criteria?): Result<Page<T>, FindAllEncryptedDocumentsPaginatedException>` |
+
+
+### Encryption/Decryption Helpers
+
+These methods are used internally but can be called directly if needed for custom operations.
+
+| Function  | Description                                                                                  | Signature                                                                   |
+|-----------|----------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------|
+| `encrypt` | Converts a clear-text document (`T`) into its encrypted database representation (`E`).       | `suspend fun encrypt(document: T): Result<E, EncryptionException>`          |
+| `decrypt` | Converts an encrypted database document (`E`) back into its clear-text representation (`T`). | `suspend fun decrypt(encryptedDocument: E): Result<T, DecryptionException>` |
+
+
+### Abstract Mapping Methods
+
+These two abstract methods **must be implemented** by the concrete service class. They define the business logic for mapping data between the clear-text and encrypted document types.
+
+| Function    | Description                                                                                                                                                                                                                                                                   | Signature                                                                          |
+|-------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------|
+| `doEncrypt` | **Mandatory:** Defines how to take the clear-text document (`T`) and the framework-provided **encrypted sensitive data** (`Encrypted<S>`) and combine them to create the final encrypted document (`E`) for storage. This is where you would calculate **searchable hashes**. | `abstract suspend fun doEncrypt(document: T, encryptedSensitive: Encrypted<S>): E` |
+| `doDecrypt` | **Mandatory:** Defines how to take the encrypted database document (`E`) and the framework-provided **decrypted sensitive data** (`S`) and combine them to reconstruct the final clear-text document (`T`) for the application.                                               | `abstract suspend fun doDecrypt(encryptedDocument: E, decryptedSensitive: S): T`   |
+
+## Example
+
+### 1. Defining the Documents
+
+For encryption, you need three parts:
+
+1.  **Sensitive Data DTO (`SensitiveCoolStuffData`)**: The fields you want to encrypt.
+2.  **Developer-Facing Document (`CoolStuff`)**: The document you work with in your code, which contains the clear-text sensitive data.
+3.  **Encrypted Document (`EncryptedCoolStuff`)**: The actual MongoDB document that stores the encrypted sensitive data and any searchable fields.
 
 
 ```kotlin
+// 1. The data that will be encrypted (Only visible in code, never in DB)
 data class SensitiveCoolStuffData(
-    val phone: String
+    val secret: String, // e.g., an API key
+    val creditCard: String,
 )
-```
 
-#### 2. Creating a Decrypted Document Class
-
-This class is only needed in the code, no objects of this class will be stored.
-It needs to implement the [`SensitiveDocument`](https://github.com/antistereov/singularity-core/blob/main/src/main/kotlin/io/stereov/singularity/database/encryption/model/SensitiveDocument.kt) interface.
-
-Make sure to override the sensitive field and specify the type generic.
-
-```kotlin
+// 2. The developer-facing document that contains the clear-text sensitive data
+@Document(collection = "cool-stuff")
 data class CoolStuff(
-    val id: ObjectId? = null,
-    // override the sensitive field with the data class for the sensitive information
-    override val sensitive: SensitiveCoolStuffData
-    // add the type parameter for the data class
+    @Id val id: ObjectId? = null,
+    val name: String,
+    val phone: String, // This will be hashed for searching
+    // Embed the clear-text sensitive data DTO
+    override val sensitive: SensitiveCoolStuffData,
 ) : SensitiveDocument<SensitiveCoolStuffData>
-```
 
-#### 3. Creating an Encrypted Document Class
-
-This is the actual document class that will be stored to the database.
-It is the encrypted representation of the `CoolStuff` class.
-
-It needs to implement the [`EncryptedSensitiveDocument`](https://github.com/antistereov/singularity-core/blob/main/src/main/kotlin/io/stereov/singularity/database/encryption/model/EncryptedSensitiveDocument.kt) interface.
-Make sure to override the `id` and `sensitive` field and specify the type generic.
-
-```kotlin
-@Document(collection = "cool_stuff")
+// 3. The actual document stored in the database
+@Document(collection = "cool-stuff")
 data class EncryptedCoolStuff(
-    // Since this document is stored in the database, an ID is required.
     @Id override val _id: ObjectId? = null,
-    // Now the type is Encrypted<SensitiveCoolData> - the data is encrypted.
-    override val sensitive: Encrypted<SensitiveCoolStuffData>
+    // This is the encrypted ciphertext provided by the framework
+    override val sensitive: Encrypted<SensitiveCoolStuffData>,
+    // The searchable hash
+    val phone: SearchableHash,
 ) : EncryptedSensitiveDocument<SensitiveCoolStuffData>
 ```
 
-#### 4. Creating a Repository
+### 2. The Sensitive Repository
 
-Create an interface based on the [`SensitiveCrudRepository`](https://github.com/antistereov/singularity-core/blob/main/src/main/kotlin/io/stereov/singularity/database/encryption/repository/SensitiveCrudRepository.kt).
-It already includes the most relevant methods.
+The repository must be typed for the **encrypted** document, as this is what is persisted in the database.
 
 ```kotlin
-interface EncryptedCoolStuffRepository : SensitiveCrudRepository<EncryptedCoolStuffDocument>
+interface CoolStuffRepository : SensitiveCrudRepository<EncryptedCoolStuff> {
+    
+    // You can query on searchable fields like the phone hash
+    suspend fun findByPhone(hashedPhone: SearchableHash): EncryptedCoolStuff?
+}
 ```
 
-#### 5. Creating a Service
+### 3. The CoolStuff Sensitive Service
 
-Create a service class based on the [`SensitiveCrudService`](https://github.com/antistereov/singularity-core/blob/main/src/main/kotlin/io/stereov/singularity/database/encryption/service/SensitiveCrudService.kt).
-It already includes the base logic for storing and retrieving data.
-It will return the document in decrypted form.
+The service extends `SensitiveCrudService`. 
+This base class is **Result-aware**. Your service methods must use `coroutineBinding` and `bind()` to manage error propagation, 
+ensuring the returned `Result`'s success channel (`Ok(V)`) is non-nullable.
 
-There are two methods you need to implement: `doDecrypt` and `doEncrypt` that specify how to map an encrypted to a decrypted; and the other way round.
+:::warning Null Safety in Result
+If an operation is expected to return a value but returns `null` (e.g., finding a document), 
+this should be treated as a failure and mapped to an `Err(Exception)` rather than `Ok(null)`.
+:::
+
+
 
 ```kotlin
 @Service
 class CoolStuffService(
-    // Autowire the repository
-    override val repository: EncryptedCoolStuffRepository,
-    // Autowire EncryptionService, ReactiveMongoTemplate and EncryptionSecretService
-    // All are included in Singularity
-    override val encryptionService: EncryptionService,
+    override val repository: CoolStuffRepository,
     override val reactiveMongoTemplate: ReactiveMongoTemplate,
+    // The hash service is needed to create the searchable hash
+    private val hashService: HashService,
+    // All other necessary dependencies for the base service
+    override val encryptionService: EncryptionService,
     override val encryptionSecretService: EncryptionSecretService,
-) : SensitiveCrudService<
-        // The type of sensitive data
-        SensitiveCoolStuffData, 
-        // The decrypted document
-        CoolStuff,
-        // The encrypted document
-        EncryptedCoolStuff
->() {
-    // Create an instance of logger
+    override val objectMapper: ObjectMapper,
+) : SensitiveCrudService<SensitiveCoolStuffData, CoolStuff, EncryptedCoolStuff>() {
+
     override val logger = KotlinLogging.logger {}
-    
-    // This field will hold the class of SensitiveUserData in memory - must be the same as in the type generic
     override val sensitiveClazz = SensitiveCoolStuffData::class.java
-    
-    // This field will hold the class of EncryptedCoolStuff in memory - must be the same as in the type generic
+    override val documentClazz = CoolStuff::class.java
     override val encryptedDocumentClazz = EncryptedCoolStuff::class.java
 
-    // Implement the doEncrypt method that specifies how to create an encrypted version of the document.
-    override suspend fun doDecrypt(
-        // This is the encrypted document
-        encrypted: EncryptedCoolStuff,
-        // This is the already decrypted sensitive data
-        decryptedSensitive: SensitiveCoolStuffData
-    ) = CoolStuff(
-        id = encrypted._id, 
-        sensitive = decryptedSensitive
-    )
 
-    override suspend fun doEncrypt(
-        // This is the decrypted document
-        document: CoolStuff,
-        // This is the already encrypted sensitive data
-        encryptedSensitive: Encrypted<SensitiveCoolStuffData>
-    ) = EncryptedCoolStuff(
-        _id = document.id,
-        sensitive = encryptedSensitive
-    )
-}
-```
+    /**
+     * Creates a new CoolStuff document, encrypting sensitive data before saving.
+     * Propagates any [EncryptionException], [HashException], or [DatabaseException].
+     */
+    suspend fun createCoolStuff(
+        name: String, 
+        phone: String, 
+        secret: String
+    ): Result<CoolStuff, Exception> = coroutineBinding {
+        
+        // 1. Create the document to be encrypted.
+        val newCoolStuff = CoolStuff(
+            name = name,
+            phone = phone,
+            sensitive = SensitiveCoolStuffData(secret = secret, creditCard = "4444..."),
+        )
 
-#### Usage
+        // 2. Encrypt the sensitive data. encrypt() returns Result<EncryptedCoolStuff, EncryptionException>.
+        val encrypted = encrypt(newCoolStuff).bind()
 
-We will now create a controller that lets us query the `CoolStuff`.
-The `SensitiveCrudService` takes all the decryption logic away from you and
-lets you focus on what matters.
+        // 3. Save the encrypted document. repository.save is assumed to return Result<EncryptedCoolStuff, DatabaseException>.
+        val saved = repository.save(encrypted).bind()
 
-All the methods like `findById` return decrypted versions of the document by default.
-
-```kotlin
-@RestController
-@RequestMapping("/api/cool-stuff")
-class CoolStuffController(
-    private val coolStuffService: CoolStuffService
-) {
-    
-    @GetMapping("{id}")
-    suspend fun getCoolStuffById(@PathVariable id: ObjectId): ResponseEntity<CoolStuffDocument> {
-        // This will return the decrypted CoolStuff decrypted
-        return ResponseEntity.ok(coolStuffService.findById(id))
+        // 4. Decrypt the document before returning it. decrypt() returns Result<CoolStuff, DecryptionException>.
+        decrypt(saved).bind()
     }
-    
-    @GetMapping
-    suspend fun getCoolStuffPaginated(
-        // Add the pageable parameter so you can customize page, size and sort
-        pageable: Pageable
-    ): ResponseEntity<Page<CoolStuff>> {
-        // This will return the decrypted CoolStuff decrypted
-        return ResponseEntity.ok(coolStuffService.findAllPaginated(pageable))
-    }
-}
-```
-### Encrypting Whole Documents With Searchability
 
-As stated earlier, it is not possible to search values of the `SenstiveCoolData`.
-If you want to search the `phone` field, you can create an extra `SearchableHash` field.
-You can learn more about hashes [here](./hashing.md).
 
-For this, you only need to add the extra field to the [`EncryptedCoolStuff`](#2-creating-a-decrypted-document-class):
-
-```kotlin
-@Document(collection = "cool_stuff")
-data class EncryptedCoolStuff(
-    @Id override val _id: ObjectId? = null,
-    override val sensitive: Encrypted<SensitiveCoolStuffData>,
-    
-    // The new field:
-    val phone: SearchableHash
-) : EncryptedSensitiveDocument<SensitiveCoolStuffData>
-```
-
-And update the [`CoolStuffRepository`](#4-creating-a-repository) and [`CoolStuffService`](#5-creating-a-service):
-
-```kotlin
-interface EncryptedCoolStuffRepository : SensitiveCrudRepository<EncryptedCoolStuffDocument> {
-    
-    // Add a method to search by phone
-    suspend fun findByPhone(phone: SearchableHash)
-}
-
-@Service
-class CoolStuffService(
-    override val repository: EncryptedCoolStuffRepository,
-    override val encryptionService: EncryptionService,
-    override val reactiveMongoTemplate: ReactiveMongoTemplate,
-    override val encryptionSecretService: EncryptionSecretService,
-    // Add the HashService
-    private val hashService: HashService
-) : SensitiveCrudService<SensitiveCoolStuffData, CoolStuff, EncryptedCoolStuff>() {
-    // ... (rest of the service, including doEncrypt and doDecrypt) ...
-    
-    // Implement the doEncrypt method that specifies how to create an encrypted version of the document.
+    /**
+     * Implementation for the abstract method: Specifies how to create the database document
+     * from the encrypted sensitive data and clear-text fields.
+     *
+     * It must handle any HashService errors and forward them as [EncryptionException].
+     */
     override suspend fun doEncrypt(
-        // This is the developer-facing object
         document: CoolStuff,
-        // This is the already encrypted sensitive data, provided by the framework
         encryptedSensitive: Encrypted<SensitiveCoolStuffData>
-    ): EncryptedCoolStuff {
-        // 1. Create the searchable hash from the original string.
+    ): Result<EncryptedCoolStuff, EncryptionException> = coroutineBinding {
+        
+        // 1. Create the searchable hash from the clear-text phone number.
+        // hashSearchableHmacSha256 returns Result<SearchableHash, HashException>.
         val hashedPhone = hashService.hashSearchableHmacSha256(document.phone)
+            // Map the specific HashException to a generic EncryptionException sub-type for domain consistency.
+            .mapError { ex -> 
+                EncryptionException.Hashing(
+                    "Failed to create searchable hash for phone: ${ex.message}", 
+                    ex
+                ) 
+            }
+            .bind() // Propagates the mapped error via coroutineBinding.
 
         // 2. Map all fields to the EncryptedCoolStuff object.
-        return EncryptedCoolStuff(
-            // Map the ID from the developer-facing object
+        EncryptedCoolStuff(
             _id = document.id,
-            // The framework has already encrypted this data for you
             sensitive = encryptedSensitive,
-            // Map the newly created searchable hash
             phone = hashedPhone
         )
     }
-        
 
-    // A new method to find a document by its searchable hash
-    suspend fun findByPhone(phone: String): CoolStuff? {
+
+    /**
+     * Implementation for the abstract method: Specifies how to create the clear-text document
+     * from the decrypted sensitive data and other fields in the database document.
+     */
+    override suspend fun doDecrypt(
+        encryptedDocument: EncryptedCoolStuff,
+        decryptedSensitive: SensitiveCoolStuffData
+    ): Result<CoolStuff, EncryptionException> {
+        return Ok(
+            CoolStuff(
+                id = encryptedDocument._id, 
+                name = "name from a non-encrypted field, if it existed",
+                sensitive = decryptedSensitive,
+                // Cannot retrieve clear-text phone from hash, so we leave it empty or map from another field
+                phone = "Decrypted document (phone unavailable)", 
+            )
+        )
+    }
+
+    /**
+     * Finds a CoolStuff document by email address.
+     * Returns [Result<CoolStuff, Exception>] - no nullable success type.
+     */
+    suspend fun findByPhone(phone: String): Result<CoolStuff, Exception> = coroutineBinding {
+        // 1. Hash the search input
         val hashedPhone = hashService.hashSearchableHmacSha256(phone)
+            .mapError { ex -> 
+                EncryptionException.Hashing(
+                    "Failed to hash search term: ${ex.message}", 
+                    ex
+                ) 
+            }
+            .bind() // Propagates HashException.
 
-        // This query is performed on the database level
+        // 2. Query the repository for the encrypted document
         val encryptedCoolStuff = repository.findByPhone(hashedPhone)
+            // If the repository returns null, we throw an exception to exit the coroutineBinding block
+            // and return an Err result, satisfying the non-nullable Ok requirement.
+            ?: throw FindDocumentException.NotFound("CoolStuff document not found by phone hash")
 
-        // Return the decrypted document
-        return encryptedCoolStuff?.let { decrypt(it) }
+        // 3. Decrypt it. decrypt() returns Result<CoolStuff, DecryptionException>.
+        decrypt(encryptedCoolStuff).bind() // Propagates DecryptionException.
+    }.mapError {
+        // This ensures the exception thrown (e.g., FindDocumentException.NotFound)
+        // or the one propagated via bind() (e.g., EncryptionException) is returned.
+        it as Exception 
     }
 }
 ```
-
-

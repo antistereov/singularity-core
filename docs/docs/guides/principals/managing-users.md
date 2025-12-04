@@ -1,13 +1,17 @@
 ---
-sidebar_position: 1
+sidebar_position: 2
 description: Learn how to manage users.
 ---
 
 # Managing Users
 
+:::note
+These endpoints only work with registered [users](introduction.md#users).
+:::
+
 The User Management system provides administrative tools to manage user accounts within the application. 
 
-These capabilities are restricted to users with [`ADMIN`](../auth/principals.md#admins) permissions, 
+These capabilities are restricted to users with [`ADMIN`](introduction.md#admins) permissions, 
 ensuring that sensitive user data and account actions are handled securely.
 
 ## Core Functions
@@ -23,13 +27,13 @@ This is useful for viewing a complete profile and verifying account details.
 
 ### User Search and Discovery
 
-This action is only accessible for users with [`ADMIN`](../auth/principals.md#admins) permissions.
+This action is only accessible for users with [`ADMIN`](introduction.md#admins) permissions.
 It can be requested through [`GET /api/users`](../../api/get-users.api.mdx).
 
 * Administrators can search for users using a variety of filters.
 * Filtering can be performed by a user's exact email address for precise lookups.
-* You can also filter users by their assigned **roles** (e.g., [`ADMIN`](../auth/principals.md#admins), 
-  [`USER`](../auth/principals.md#users)) or by the **groups** they belong to.
+* You can also filter users by their assigned **roles** (e.g., [`ADMIN`](introduction.md#admins), 
+  [`USER`](introduction.md#users)) or by the **groups** they belong to.
 * The system allows searching for users who are connected to specific **identity providers** 
   (e.g., `google`, `github`), making it easy to manage accounts authenticated through external services.
 * Time-based filtering is available to find users based on when their accounts were **created** 
@@ -42,5 +46,5 @@ It can be requested through [`GET /api/users`](../../api/get-users.api.mdx).
 The system provides a function to permanently delete a user account. 
 This action is irreversible and should be performed with caution.
 
-Deleting a user is only permitted for users with [`ADMIN`](../auth/principals.md#admins) privileges.
+Deleting a user is only permitted for users with [`ADMIN`](introduction.md#admins) privileges.
 It can be requested through [`DELETE /api/users/{id}`](../../api/delete-user-by-id.api.mdx).

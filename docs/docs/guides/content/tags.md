@@ -1,5 +1,5 @@
 ---
-sidebar_position: 3
+sidebar_position: 2
 description: Learn more about tags.
 ---
 
@@ -28,7 +28,7 @@ New tags can be created through the endpoint:
 
 #### On Startup
 
-It is possible to create tags on startup.
+It is possible to create tags during the application startup.
 You can use your `application.yaml` to specify tags with descriptions.
 
 ```yaml

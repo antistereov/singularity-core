@@ -1,3 +1,7 @@
+---
+sidebar_position: 6
+---
+
 # Security
 
 *Singularity* provides built-in security features to protect your application, 

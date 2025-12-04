@@ -1,5 +1,5 @@
 ---
-sidebar_position: 5
+sidebar_position: 6
 description: Learn how to authenticate users using OAuth2 clients.
 ---
 
@@ -296,8 +296,8 @@ these codes can occur when trying to perform [step-up authentication](./authenti
 
 | Code                                 | Description                                                                                                                                                   |
 |--------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `user_already_authenticated`         | Conversion of [`GUEST`](principals.md#guests) to user account failed. The user already authenticated.                                                            |
-| `email_already_registered`           | Conversion of [`GUEST`](principals.md#guests) to user account failed. The email attribute of the OAuth2 provider matches an email of an already registered user. |
+| `user_already_authenticated`         | Conversion of [`GUEST`](../principals/introduction.md#guests) to user account failed. The user already authenticated.                                                            |
+| `email_already_registered`           | Conversion of [`GUEST`](../principals/introduction.md#guests) to user account failed. The email attribute of the OAuth2 provider matches an email of an already registered user. |
 | `provider_already_connected`         | The user already connected the provider.                                                                                                                      |
 | `connection_token_expired`           | The provided [`OAuth2ProviderConnectionToken`](./tokens.md#oauth2-provider-connection-token) is expired.                                                      |
 | `invalid_connection_token`           | The provided [`OAuth2ProviderConnectionToken`](./tokens.md#oauth2-provider-connection-token) cannot be decoded.                                               |

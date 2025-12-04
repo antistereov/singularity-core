@@ -1,5 +1,5 @@
 ---
-sidebar_position: 5
+sidebar_position: 3
 description: Learn more about articles.
 ---
 # Articles
@@ -202,7 +202,7 @@ The **access** can be updated through the endpoint:
 
 The **trusted state** can be updated through the endpoint
 * **Endpoint:**  [`PUT /api/content/articles/{key}/trusted`](../../api/update-content-object-trusted-state.api.mdx)
-* **Requirements:** Only [`ADMIN`](../auth/principals.md#admins)s can perform this action.
+* **Requirements:** Only [`ADMIN`](../principals/introduction.md#admins)s can perform this action.
 
 ### Deleting Articles
 

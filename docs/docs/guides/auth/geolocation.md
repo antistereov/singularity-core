@@ -1,88 +1,115 @@
 ---
-sidebar_position: 6
+sidebar_position: 7
 description: Use geolocation data to secure access.
 ---
 
 # Geolocation
 
 :::note
-This guide assumes familiarity with the [Spring Framework](https://spring.io).  
+This guide assumes familiarity with the [Spring Framework](https://spring.io).
 If you are new to Spring, we recommend starting with their [official guides](https://spring.io/quickstart) to get up to speed.
 :::
 
-*Singularity* integrates automated geolocation resolving for requests.
-When enabled and configured correctly, it downloads the latest version of the [MaxMind GeoLite2-City](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data/) database.
+*Singularity* integrates automated geolocation resolving for incoming requests. When enabled and configured correctly, 
+it uses the **MaxMind GeoLite2-City** database to look up the geographical location associated with a client's IP address.
 
 This database is completely free to use and does not have any usage limits.
 The only thing you need to do is to create a free [MaxMind account](https://support.maxmind.com/hc/en-us/articles/4407099783707-Create-an-Account#h_01G4G4NV169TJWFCJ1KGFAM1CD) 
 and provide your [account ID and license key](https://support.maxmind.com/hc/en-us/articles/4407111582235-Generate-a-License-Key).
 
-When enabled, the geolocation of every session that is used for login or registration will be stored.
-This can enhance security since users can revoke access to sessions that they do not know.
+When enabled, the geolocation of every session used for login or registration will be stored. 
+This enhances security by allowing users to review and revoke access to sessions originating from unknown locations.
 
 ## Highlights
 
-* No usage limits when using MaxMind GeoLite2-City
-* Automatic database download and updates
-* Built-in integration with login/registration flows
-* Useful for detecting unusual login locations and improving account security
+* No usage limits when using MaxMind GeoLite2-City.
+* Automatic database download and updates.
+* Built-in integration with login/registration flows.
+* Useful for detecting unusual login locations and improving account security.
 
-## Usage
+## Usage with `GeolocationService`
 
-:::info
-Geolocation data is included in **login** and **registration** responses,  
-as well as in your **access logs**.
-:::
+The **`GeolocationService`** is the entry point for retrieving geolocation data within your application logic. It handles the entire process: extracting the client's IP address from the request, querying the local MaxMind database, and mapping the result into a clean response object.
 
-If you need to access the location of your users, you can use the [GeolocationService](https://github.com/antistereov/singularity-core/blob/669bd23c2648ab5ed4b9bceb641d5374dd69bfef/src/main/kotlin/io/stereov/singularity/auth/geolocation/service/GeolocationService.kt).
+### Core Method
+
+The primary method you will use in your controllers or services is `getLocationOrNull`.
+
+| Method                  | Description                                                          | Kotlin Signature                                                                   |
+|:------------------------|:---------------------------------------------------------------------|:-----------------------------------------------------------------------------------|
+| **`getLocationOrNull`** | Retrieves the geolocation details for the client making the request. | `suspend fun getLocationOrNull(exchange: ServerWebExchange): GeolocationResponse?` |
+
+### Example
+
+This is a typical pattern for using the service in a controller:
 
 ```kotlin
-
-@Service
-class CoolService(private val geolocationService: GeolocationService) {
-
-    /**
-     * This method returns geolocation-specific responses if the current location can be identified. 
-     */
-    suspend fun locationSpecific(exchange: ServerWebExchange): CoolStuff {
-
-        /**
-         * This will return the geolocation if it can be resolved.
-         */
-        val location = geoLocationService.getLocationOrNull(exchange)
-            ?: return CoolStuff.forEveryone()
-
-        return CoolStuff.byLocation(location)
-    }
-}
-
 @RestController
-@RequestMapping("/api/cool-stuff")
-class CoolController(private val service: CoolService) {
+class SessionController(
+    private val geolocationService: GeolocationService
+) {
+    @GetMapping("/api/my-session-location")
+    suspend fun getSessionLocation(exchange: ServerWebExchange): GeolocationResponse? {
 
-    /**
-     * Spring will automatically fill the exchange parameter when the request is executed.
-     */
-    @GetMapping("/location-specific")
-    suspend fun locationSpecific(exchange: ServerWebExchange): ResponseEntity<CoolStuff> {
-        return ResponseEntity.ok(service.locationSpecific(exchange))
-    }
+        // Get the geolocation data based on the client's IP in the request
+        val geolocation = geolocationService.getLocationOrNull(exchange)
 
-    @GetMapping("/location-specific-default")
-    suspend fun locationSpecificWithDefault(exchange: ServerWebExchange): ResponseEntity<CoolStuff> {
-        return ResponseEntity.ok(service.locationSpecificWithDefault(exchange))
+        // GeolocationResponse? can be null if:
+        // 1. The client's IP address could not be reliably determined.
+        // 2. The geolocation database lookup failed.
+
+        return geolocation
     }
 }
 ```
+
+## Geolocation Data Structure
+
+The **`GeolocationResponse`** data transfer object (DTO) is what the `GeolocationService` returns. It encapsulates all the relevant geographical information provided by the MaxMind database.
+
+```kotlin
+data class GeolocationResponse(
+    val ipAddress: String,
+    val city: City,
+    val country: Country,
+    val continent: Continent,
+    val location: Location
+)
+```
+
+| Field           | Type                                  | Description                                                  |
+|:----------------|:--------------------------------------|:-------------------------------------------------------------|
+| **`ipAddress`** | `String`                              | The IP address that was resolved.                            |
+| **`city`**      | `com.maxmind.geoip2.record.City`      | Detailed city information (e.g., city name, postal code).    |
+| **`country`**   | `com.maxmind.geoip2.record.Country`   | Detailed country information (e.g., country name, ISO code). |
+| **`continent`** | `com.maxmind.geoip2.record.Continent` | Detailed continent information.                              |
+| **`location`**  | `com.maxmind.geoip2.record.Location`  | Geographical coordinates (latitude, longitude) and timezone. |
+
+The fields within `GeolocationResponse` (`City`, `Country`, `Continent`, `Location`) are the standard record types from the **MaxMind GeoIP2 library**. 
+You can consult the MaxMind documentation for a full list of available properties on these objects.
+
 ## Configuration
 
-| Property                                        | Type      | Description                                                                                                                                                          | Default value         |
-|-------------------------------------------------|-----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------|
-| singularity.auth.geolocation.enabled            | `Boolean` | Enable resolving IP addresses to geolocations. This will download the GeoLite2-City database from maxmind. Account ID and license key are required for the download. | `false`               |
-| singularity.auth.geolocation.real-ip-header     | `String`  | The preferred header used for identification of the real IP address of the client.                                                                                   | `X-Real-IP`           |
-| singularity.auth.geolocation.database-directory | `String`  | The directory where the GeoLite2-City database will be saved to.                                                                                                     | `./.data/geolocation` |
-| singularity.auth.geolocation.database-filename  | `String`  | The filename of the GeoLite2-City database. Defaults to GeoLite2-City.mmdb.                                                                                          | `GeoLite2-City.mmdb`  |
-| singularity.auth.geolocation.download           | `Boolean` | Enable automated downloads and updates of the database. You can also provide this file yourself.                                                                     | `true`                |
-| singularity.auth.geolocation.account-id         | `String`  | The account ID of your maxmind account. Required to download the GeoLite2-City database to resolve your geolocation.                                                 |                       |
-| singularity.auth.geolocation.license-key        | `String`  | The license key of your maxmind account. Required to download the GeoLite2-City database to resolve your geolocation.                                                |                       |
+Geolocation resolving is controlled by the following configuration properties.
 
+| Property                                          | Type      | Description                                                                                                                                          | Default value         |
+|:--------------------------------------------------|:----------|:-----------------------------------------------------------------------------------------------------------------------------------------------------|:----------------------|
+| `singularity.auth.geolocation.enabled`            | `Boolean` | Enable the geolocation service.                                                                                                                      | `false`               |
+| `singularity.auth.geolocation.real-ip-header`     | `String`  | The preferred HTTP header used for identifying the real IP address of the client (e.g., when behind a proxy/load balancer).                          | `X-Real-IP`           |
+| `singularity.auth.geolocation.database-directory` | `String`  | The local directory where the GeoLite2-City database will be saved to.                                                                               | `./.data/geolocation` |
+| `singularity.auth.geolocation.database-filename`  | `String`  | The filename of the GeoLite2-City database.                                                                                                          | `GeoLite2-City.mmdb`  |
+| `singularity.auth.geolocation.download`           | `Boolean` | **Enable automated downloads and updates** of the database. Requires `account-id` and `license-key`. If `false`, you must provide the file manually. | `true`                |
+| `singularity.auth.geolocation.account-id`         | `String`  | The **Account ID** of your MaxMind account. Required for automated database download.                                                                |                       |
+| `singularity.auth.geolocation.license-key`        | `String`  | The **License Key** of your MaxMind account. Required for automated database download.                                                               |                       |
+
+### Example Configuration
+
+```yaml
+singularity:
+  auth:
+    geolocation:
+      enabled: true
+      download: true
+      account-id: "YOUR_MAXMIND_ACCOUNT_ID" # <-- Required for download: true
+      license-key: "YOUR_MAXMIND_LICENSE_KEY" # <-- Required for download: true
+```

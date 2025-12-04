@@ -59,9 +59,11 @@ You can learn more about **invitations** [here](./invitations.md).
 
 ### `ContentAccessPermissions`
 
-This object is utilized by both the `users` and `groups` fields to manage explicit, non-owner permissions.
+This object is used by both the `users` and `groups` fields to manage explicit, non-owner permissions.
 
-The roles are implemented as separate sets of Subject IDs (User IDs or Group IDs), which ensures that roles are **additive** (a maintainer is also an editor and viewer) and **mutually exclusive** (a subject can only be in one set at a time):
+The roles are implemented as separate sets of Subject IDs (User IDs or Group IDs), 
+which ensures that roles are **additive** (a maintainer is also an editor and viewer) 
+and **mutually exclusive** (a subject can only be in one set at a time):
 
 ```kotlin
 data class ContentAccessPermissions(
@@ -111,11 +113,11 @@ The primary access function (`hasAccess(authentication, role)`) determines
 if an authenticated user meets the required role for a given action. 
 The final permission is granted if **any** of the following conditions are met:
 
-| Required Role    | Access Granted if...                                                                                                                                                                          |
-|:-----------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **`MAINTAINER`** | 1. The user has the [**`ADMIN`**](../auth/principals#admins) global role. OR 2. The user/group is explicitly a **`MAINTAINER`**.                                                                   |
-| **`EDITOR`**     | 1. The user has the [**`ADMIN`**](../auth/principals#admins) global role. OR 2. The user/group is explicitly a **`MAINTAINER`**. OR 3. The user/group is explicitly an **`EDITOR`**.               |
-| **`VIEWER`**     | 1. The user has the [**`ADMIN`**](../auth/principals#admins) global role. OR 2. The content is **`PUBLIC`**. OR 3. The user/group is explicitly a **`MAINTAINER`**, **`EDITOR`**, or **`VIEWER`**. |
+| Required Role    | Access Granted if...                                                                                                                                                                                          |
+|:-----------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`MAINTAINER`** | 1. The user has the [**`ADMIN`**](../principals/introduction.md#admins) global role. OR 2. The user/group is explicitly a **`MAINTAINER`**.                                                                   |
+| **`EDITOR`**     | 1. The user has the [**`ADMIN`**](../principals/introduction.md#admins) global role. OR 2. The user/group is explicitly a **`MAINTAINER`**. OR 3. The user/group is explicitly an **`EDITOR`**.               |
+| **`VIEWER`**     | 1. The user has the [**`ADMIN`**](../principals/introduction.md#admins) global role. OR 2. The content is **`PUBLIC`**. OR 3. The user/group is explicitly a **`MAINTAINER`**, **`EDITOR`**, or **`VIEWER`**. |
 
 ### Group Access Checking
 
