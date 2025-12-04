@@ -1,7 +1,6 @@
 package io.stereov.singularity.content.article.config
 
 import io.stereov.singularity.auth.core.service.AuthorizationService
-import io.stereov.singularity.auth.group.service.GroupService
 import io.stereov.singularity.content.article.controller.ArticleController
 import io.stereov.singularity.content.article.controller.ArticleManagementController
 import io.stereov.singularity.content.article.mapper.ArticleMapper
@@ -12,15 +11,17 @@ import io.stereov.singularity.content.article.service.ArticleService
 import io.stereov.singularity.content.core.component.AccessCriteria
 import io.stereov.singularity.content.core.config.ContentConfiguration
 import io.stereov.singularity.content.core.properties.ContentProperties
+import io.stereov.singularity.content.invitation.mapper.InvitationMapper
 import io.stereov.singularity.content.invitation.service.InvitationService
 import io.stereov.singularity.content.tag.mapper.TagMapper
 import io.stereov.singularity.content.tag.service.TagService
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.file.image.service.ImageStore
 import io.stereov.singularity.global.properties.AppProperties
+import io.stereov.singularity.principal.core.mapper.PrincipalMapper
+import io.stereov.singularity.principal.core.service.UserService
+import io.stereov.singularity.principal.group.service.GroupService
 import io.stereov.singularity.translate.service.TranslateService
-import io.stereov.singularity.user.core.mapper.UserMapper
-import io.stereov.singularity.user.core.service.UserService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -45,17 +46,24 @@ class ArticleConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun articleController(articleService: ArticleService): ArticleController {
-        return ArticleController(articleService)
-    }
+    fun articleController(
+        articleService: ArticleService,
+        authorizationService: AuthorizationService,
+    ) = ArticleController(
+        articleService,
+        authorizationService
+    )
+
 
     @Bean
     @ConditionalOnMissingBean
     fun articleManagementController(
         articleManagementService: ArticleManagementService,
+        authorizationService: AuthorizationService,
     ): ArticleManagementController {
         return ArticleManagementController(
             articleManagementService,
+            authorizationService,
         )
     }
 
@@ -65,22 +73,20 @@ class ArticleConfiguration {
     @ConditionalOnMissingBean
     fun articleMapper(
         appProperties: AppProperties,
-        authorizationService: AuthorizationService,
         userService: UserService,
         translateService: TranslateService,
         tagMapper: TagMapper,
         tagService: TagService,
         fileStorage: FileStorage,
-        userMapper: UserMapper,
+        principalMapper: PrincipalMapper,
     ) = ArticleMapper(
         appProperties,
-        authorizationService,
         userService,
         translateService,
         tagMapper,
         tagService,
         fileStorage,
-        userMapper,
+        principalMapper,
     )
 
     // Service
@@ -94,7 +100,8 @@ class ArticleConfiguration {
         accessCriteria: AccessCriteria,
         articleMapper: ArticleMapper,
         translateService: TranslateService,
-        contentProperties: ContentProperties
+        contentProperties: ContentProperties,
+        appProperties: AppProperties
     ): ArticleService {
         return ArticleService(
             articleRepository,
@@ -103,7 +110,8 @@ class ArticleConfiguration {
             accessCriteria,
             translateService,
             articleMapper,
-            contentProperties
+            contentProperties,
+            appProperties
         )
     }
 
@@ -116,10 +124,11 @@ class ArticleConfiguration {
         fileStorage: FileStorage,
         translateService: TranslateService,
         userService: UserService,
-        userMapper: UserMapper,
+        principalMapper: PrincipalMapper,
         articleMapper: ArticleMapper,
         imageStore: ImageStore,
-        groupService: GroupService
+        groupService: GroupService,
+        invitationMapper: InvitationMapper
     ): ArticleManagementService {
         return ArticleManagementService(
             articleService,
@@ -127,11 +136,12 @@ class ArticleConfiguration {
             invitationService,
             translateService,
             userService,
-            userMapper,
+            principalMapper,
             fileStorage,
             articleMapper,
             imageStore,
-            groupService
+            groupService,
+            invitationMapper,
         )
     }
 }

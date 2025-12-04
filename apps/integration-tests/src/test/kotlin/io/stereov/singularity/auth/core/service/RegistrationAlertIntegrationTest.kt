@@ -1,13 +1,14 @@
 package io.stereov.singularity.auth.core.service
 
+import com.github.michaelbull.result.getOrThrow
 import io.mockk.clearMocks
 import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.slot
 import io.stereov.singularity.auth.core.dto.request.RegisterUserRequest
+import io.stereov.singularity.principal.core.model.User
 import io.stereov.singularity.test.BaseSecurityAlertTest
 import io.stereov.singularity.test.config.MockEmailVerificationService
-import io.stereov.singularity.user.core.model.UserDocument
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -30,7 +31,7 @@ class RegistrationAlertIntegrationTest : BaseSecurityAlertTest() {
     @Test fun `works without session and locale`() = runTest {
         val user = registerUser()
 
-        val userSlot = slot<UserDocument>()
+        val userSlot = slot<User>()
         val localeSlot = slot<Locale?>()
         val emailSlot = slot<String>()
 
@@ -51,13 +52,13 @@ class RegistrationAlertIntegrationTest : BaseSecurityAlertTest() {
         coVerify(exactly = 1) { registrationAlertService.send(any(), anyNullable()) }
         coVerify(exactly = 1) { emailVerificationService.startCooldown(any()) }
         assert(userSlot.isCaptured)
-        assertEquals(user.info.id, userSlot.captured.id)
+        assertEquals(user.id, userSlot.captured.id.getOrThrow())
         assert(localeSlot.isNull)
         assertEquals(user.email, emailSlot.captured)
     }
     @Test fun `does not send when user does not exist`() = runTest {
-        val emailSlot = slot<UserDocument>()
-        val userSlot = slot<UserDocument>()
+        val emailSlot = slot<User>()
+        val userSlot = slot<User>()
         val registrationLocaleSlot = slot<Locale?>()
         val verificationLocaleSlot = slot<Locale?>()
         val req = RegisterUserRequest("examil@example.com", "Password$1", "Name")
@@ -87,7 +88,7 @@ class RegistrationAlertIntegrationTest : BaseSecurityAlertTest() {
     @Test fun `works with locale`() = runTest {
         val user = registerUser()
 
-        val userSlot = slot<UserDocument>()
+        val userSlot = slot<User>()
         val localeSlot = slot<Locale?>()
 
         coJustRun { registrationAlertService.send(

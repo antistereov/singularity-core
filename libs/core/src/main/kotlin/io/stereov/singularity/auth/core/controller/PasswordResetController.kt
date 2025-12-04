@@ -1,16 +1,20 @@
 package io.stereov.singularity.auth.core.controller
 
+import com.github.michaelbull.result.getOrThrow
 import io.stereov.singularity.auth.core.dto.request.ResetPasswordRequest
 import io.stereov.singularity.auth.core.dto.request.SendPasswordResetRequest
 import io.stereov.singularity.auth.core.dto.response.MailCooldownResponse
+import io.stereov.singularity.auth.core.exception.ResetPasswordException
+import io.stereov.singularity.auth.core.exception.SendPasswordResetException
 import io.stereov.singularity.auth.core.service.PasswordResetService
-import io.stereov.singularity.global.model.ErrorResponse
+import io.stereov.singularity.auth.token.exception.PasswordResetTokenExtractionException
+import io.stereov.singularity.auth.token.service.PasswordResetTokenService
+import io.stereov.singularity.cache.exception.CacheException
+import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.SendEmailResponse
 import io.stereov.singularity.global.model.SuccessResponse
 import io.swagger.v3.oas.annotations.ExternalDocumentation
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.media.Content
-import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
@@ -24,8 +28,10 @@ import java.util.*
     name = "Authentication"
 )
 class PasswordResetController(
-    private val passwordResetService: PasswordResetService
+    private val passwordResetService: PasswordResetService,
+    private val passwordResetTokenService: PasswordResetTokenService,
 ) {
+
 
 
     @PostMapping("/reset")
@@ -67,25 +73,23 @@ class PasswordResetController(
             ApiResponse(
                 responseCode = "200",
                 description = "Success.",
-            ),
-            ApiResponse(
-                responseCode = "400",
-                description = "`newPassword` is invalid.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "Invalid or expired password reset token.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
     )
+    @ThrowsDomainError([
+        PasswordResetTokenExtractionException::class,
+        ResetPasswordException::class,
+    ])
     suspend fun resetPassword(
         @RequestParam token: String,
         @RequestBody @Valid req: ResetPasswordRequest,
         @RequestParam locale: Locale?
     ): ResponseEntity<SuccessResponse> {
+        val token = passwordResetTokenService.extract(token)
+            .getOrThrow { when (it) { is PasswordResetTokenExtractionException -> it } }
+
         passwordResetService.resetPassword(token, req, locale)
+            .getOrThrow { when (it) { is ResetPasswordException -> it } }
 
         return ResponseEntity.ok()
             .body(SuccessResponse())
@@ -93,7 +97,7 @@ class PasswordResetController(
 
     @GetMapping("/reset/cooldown")
     @Operation(
-        summary = "Get Remaining Password Reset Cooldown",
+        summary = "Get Remaining Password Reset CooldownActive",
         description = """
             Get the remaining time in seconds until you can send another password reset request.
             
@@ -107,10 +111,15 @@ class PasswordResetController(
             ),
         ]
     )
+    @ThrowsDomainError([
+        CacheException.Operation::class
+    ])
     suspend fun getRemainingPasswordResetCooldown(
         @RequestParam email: String
     ): ResponseEntity<MailCooldownResponse> {
         val remainingCooldown = passwordResetService.getRemainingCooldown(email)
+            .getOrThrow { when (it) { is CacheException.Operation -> it } }
+            .seconds
 
         return ResponseEntity.ok().body(MailCooldownResponse(remainingCooldown))
     }
@@ -135,7 +144,7 @@ class PasswordResetController(
             >**Note:** If email is disabled, there is no way to reset the password.
             
             If there is no account associated with the given email address, 
-            a [No Account Information](https://singularity.stereov.io/docs/guides/auth/security-alerts#no-account-information)
+            a [No Principal Information](https://singularity.stereov.io/docs/guides/auth/security-alerts#no-account-information)
             email will be sent to the given email address.
             
             ### Locale
@@ -157,27 +166,21 @@ class PasswordResetController(
             ApiResponse(
                 responseCode = "200",
                 description = "The number of seconds the user needs to wait to send a new email.",
-            ),
-            ApiResponse(
-                responseCode = "429",
-                description = "Cooldown is active. You have to wait until you can send another email.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "503",
-                description = "Email is disabled in your application.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
+            )
         ]
     )
+    @ThrowsDomainError([
+        SendPasswordResetException::class,
+    ])
     suspend fun sendPasswordResetEmail(
         @RequestBody @Valid req: SendPasswordResetRequest,
         @RequestParam locale: Locale?
     ): ResponseEntity<SendEmailResponse> {
-        passwordResetService.sendPasswordReset(req, locale)
+        val remaining = passwordResetService.sendPasswordReset(req, locale)
+            .getOrThrow { when (it) { is SendPasswordResetException -> it } }
 
         return ResponseEntity.ok().body(
-            SendEmailResponse(passwordResetService.getRemainingCooldown(req).remaining)
+            SendEmailResponse(remaining)
         )
     }
 }

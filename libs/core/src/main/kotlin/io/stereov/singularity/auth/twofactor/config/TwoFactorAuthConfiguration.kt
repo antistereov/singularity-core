@@ -1,24 +1,20 @@
 package io.stereov.singularity.auth.twofactor.config
 
 import com.warrenstrange.googleauth.GoogleAuthenticator
+import io.stereov.singularity.auth.alert.properties.SecurityAlertProperties
+import io.stereov.singularity.auth.alert.service.SecurityAlertService
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
-import io.stereov.singularity.auth.core.component.CookieCreator
-import io.stereov.singularity.auth.core.component.TokenValueExtractor
 import io.stereov.singularity.auth.core.properties.AuthProperties
-import io.stereov.singularity.auth.core.properties.SecurityAlertProperties
 import io.stereov.singularity.auth.core.service.AuthorizationService
-import io.stereov.singularity.auth.core.service.SecurityAlertService
-import io.stereov.singularity.auth.core.service.token.AccessTokenService
-import io.stereov.singularity.auth.core.service.token.RefreshTokenService
-import io.stereov.singularity.auth.core.service.token.SessionTokenService
-import io.stereov.singularity.auth.core.service.token.StepUpTokenService
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
 import io.stereov.singularity.auth.jwt.properties.JwtProperties
 import io.stereov.singularity.auth.jwt.service.JwtService
+import io.stereov.singularity.auth.token.component.CookieCreator
+import io.stereov.singularity.auth.token.component.TokenValueExtractor
+import io.stereov.singularity.auth.token.service.*
 import io.stereov.singularity.auth.twofactor.controller.EmailAuthenticationController
 import io.stereov.singularity.auth.twofactor.controller.TotpAuthenticationController
 import io.stereov.singularity.auth.twofactor.controller.TwoFactorAuthenticationController
-import io.stereov.singularity.auth.twofactor.exception.handler.TwoFactorAuthExceptionHandler
 import io.stereov.singularity.auth.twofactor.properties.TotpRecoveryCodeProperties
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailProperties
@@ -26,22 +22,20 @@ import io.stereov.singularity.auth.twofactor.service.EmailAuthenticationService
 import io.stereov.singularity.auth.twofactor.service.TotpAuthenticationService
 import io.stereov.singularity.auth.twofactor.service.TotpService
 import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthenticationService
-import io.stereov.singularity.auth.twofactor.service.token.TotpSetupTokenService
-import io.stereov.singularity.auth.twofactor.service.token.TwoFactorAuthenticationTokenService
+import io.stereov.singularity.cache.service.CacheService
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.email.core.service.EmailService
 import io.stereov.singularity.email.template.service.TemplateService
 import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.global.properties.AppProperties
+import io.stereov.singularity.principal.core.mapper.PrincipalMapper
+import io.stereov.singularity.principal.core.service.UserService
 import io.stereov.singularity.translate.service.TranslateService
-import io.stereov.singularity.user.core.mapper.UserMapper
-import io.stereov.singularity.user.core.service.UserService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
-import org.springframework.data.redis.core.ReactiveRedisTemplate
 
 @AutoConfiguration(
     after = [
@@ -62,13 +56,13 @@ class TwoFactorAuthConfiguration {
     fun mailAuthenticationController(
         emailAuthenticationService: EmailAuthenticationService,
         authorizationService: AuthorizationService,
-        userMapper: UserMapper,
+        principalMapper: PrincipalMapper,
         twoFactorAuthTokenService: TwoFactorAuthenticationTokenService,
         userService: UserService
     ) = EmailAuthenticationController(
         emailAuthenticationService,
         authorizationService,
-        userMapper,
+        principalMapper,
         twoFactorAuthTokenService,
         userService
     )
@@ -81,18 +75,24 @@ class TwoFactorAuthConfiguration {
         accessTokenService: AccessTokenService,
         refreshTokenService: RefreshTokenService,
         stepUpTokenService: StepUpTokenService,
-        userMapper: UserMapper,
+        principalMapper: PrincipalMapper,
         authProperties: AuthProperties,
-        sessionTokenService: SessionTokenService,
+        authorizationService: AuthorizationService,
+        userService: UserService,
+        totpSetupTokenService: TotpSetupTokenService,
+        twoFactorAuthTokenService: TwoFactorAuthenticationTokenService
     ) = TotpAuthenticationController(
         totpAuthenticationService,
         cookieCreator,
         accessTokenService,
         refreshTokenService,
         stepUpTokenService,
-        userMapper,
+        principalMapper,
         authProperties,
-        sessionTokenService,
+        authorizationService,
+        userService,
+        totpSetupTokenService,
+        twoFactorAuthTokenService,
     )
 
     @Bean
@@ -101,41 +101,40 @@ class TwoFactorAuthConfiguration {
         twoFactorAuthenticationService: TwoFactorAuthenticationService,
         authProperties: AuthProperties,
         geolocationService: GeolocationService,
-        userMapper: UserMapper,
+        principalMapper: PrincipalMapper,
         accessTokenService: AccessTokenService,
         refreshTokenService: RefreshTokenService,
         stepUpTokenService: StepUpTokenService,
         cookieCreator: CookieCreator,
         authorizationService: AuthorizationService,
+        twoFactorAuthenticationTokenService: TwoFactorAuthenticationTokenService,
+        userService: UserService
     ): TwoFactorAuthenticationController {
         return TwoFactorAuthenticationController(
             twoFactorAuthenticationService,
             authProperties,
             geolocationService,
-            userMapper,
+            principalMapper,
             accessTokenService,
             refreshTokenService,
             stepUpTokenService,
             cookieCreator,
             authorizationService,
+            twoFactorAuthenticationTokenService,
+            userService
         )
     }
-
-    // Exception Handler
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun twoFactorAuthExceptionHandler() = TwoFactorAuthExceptionHandler()
 
     // Service
 
     @Bean
     @ConditionalOnMissingBean
     fun totpSetupTokenService(
-        authorizationService: AuthorizationService,
         jwtService: JwtService,
         jwtProperties: JwtProperties,
-    ) = TotpSetupTokenService(authorizationService, jwtService, jwtProperties)
+    ) = TotpSetupTokenService(
+        jwtService,
+        jwtProperties)
     
     @Bean
     @ConditionalOnMissingBean
@@ -159,10 +158,9 @@ class TwoFactorAuthConfiguration {
         userService: UserService,
         translateService: TranslateService,
         templateService: TemplateService,
-        redisTemplate: ReactiveRedisTemplate<String, String>,
+        cacheService: CacheService,
         emailService: EmailService,
         emailProperties: EmailProperties,
-        authorizationService: AuthorizationService,
         accessTokenCache: AccessTokenCache,
         appProperties: AppProperties, securityAlertProperties: SecurityAlertProperties,
         securityAlertService: SecurityAlertService
@@ -171,10 +169,9 @@ class TwoFactorAuthConfiguration {
         userService,
         translateService,
         templateService,
-        redisTemplate,
+        cacheService,
         emailService,
         emailProperties,
-        authorizationService,
         accessTokenCache,
         appProperties,
         securityAlertProperties,
@@ -185,27 +182,21 @@ class TwoFactorAuthConfiguration {
     @ConditionalOnMissingBean
     fun totpAuthenticationService(
         totpService: TotpService,
-        authorizationService: AuthorizationService,
         totpRecoveryCodeProperties: TotpRecoveryCodeProperties,
         setupTokenService: TotpSetupTokenService,
         hashService: HashService,
         userService: UserService,
         accessTokenCache: AccessTokenCache,
-        userMapper: UserMapper,
-        twoFactorAuthTokenService: TwoFactorAuthenticationTokenService,
         securityAlertProperties: SecurityAlertProperties,
         securityAlertService: SecurityAlertService,
         emailProperties: EmailProperties
     ) = TotpAuthenticationService(
         totpService,
-        authorizationService,
         totpRecoveryCodeProperties,
         setupTokenService,
         hashService,
         userService,
         accessTokenCache,
-        userMapper,
-        twoFactorAuthTokenService,
         securityAlertProperties,
         securityAlertService,
         emailProperties
@@ -223,15 +214,11 @@ class TwoFactorAuthConfiguration {
         userService: UserService,
         totpService: TotpAuthenticationService,
         emailAuthenticationService: EmailAuthenticationService,
-        twoFactorAuthTokenService: TwoFactorAuthenticationTokenService,
-        authorizationService: AuthorizationService,
     ): TwoFactorAuthenticationService {
         return TwoFactorAuthenticationService(
             userService,
             totpService,
-            twoFactorAuthTokenService,
             emailAuthenticationService,
-            authorizationService,
         )
     }
 }

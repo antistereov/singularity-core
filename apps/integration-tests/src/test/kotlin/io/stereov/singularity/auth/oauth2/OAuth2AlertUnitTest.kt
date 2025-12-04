@@ -1,19 +1,19 @@
 package io.stereov.singularity.auth.oauth2
 
-import io.mockk.clearMocks
-import io.mockk.coJustRun
-import io.mockk.coVerify
-import io.mockk.slot
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.getOrThrow
+import io.mockk.*
+import io.stereov.singularity.auth.alert.service.LoginAlertService
+import io.stereov.singularity.auth.alert.service.SecurityAlertService
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
 import io.stereov.singularity.auth.core.model.SecurityAlertType
 import io.stereov.singularity.auth.core.model.SessionInfo
-import io.stereov.singularity.auth.core.service.LoginAlertService
-import io.stereov.singularity.auth.core.service.SecurityAlertService
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
+import io.stereov.singularity.principal.core.model.User
+import io.stereov.singularity.principal.core.model.identity.UserIdentity
 import io.stereov.singularity.test.BaseOAuth2FlowTest
 import io.stereov.singularity.test.config.MockSecurityAlertConfig
-import io.stereov.singularity.user.core.model.UserDocument
-import io.stereov.singularity.user.core.model.identity.UserIdentity
+import jakarta.mail.internet.MimeMessage
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -28,7 +28,7 @@ import java.util.*
 class OAuth2AlertUnitTest : BaseOAuth2FlowTest() {
 
     @Test fun `login works with locale and session`() = runTest {
-        val loginUserSlot = slot<UserDocument>()
+        val loginUserSlot = slot<User>()
         val loginLocaleSlot = slot<Locale?>()
         val loginSessionSlot = slot<SessionInfo>()
 
@@ -37,7 +37,7 @@ class OAuth2AlertUnitTest : BaseOAuth2FlowTest() {
             captureNullable(loginLocaleSlot),
             capture(loginSessionSlot)
         ) }
-        coJustRun { securityAlertService.send(any(), anyNullable(), any(), anyNullable(), anyNullable()) }
+        coEvery { securityAlertService.send(any(), anyNullable(), any(), anyNullable(), anyNullable()) } returns Ok(mockk<MimeMessage>())
 
         val successRedirectUri = "http://localhost:8000/dashboard"
 
@@ -56,7 +56,7 @@ class OAuth2AlertUnitTest : BaseOAuth2FlowTest() {
             .returnResult()
             .extractStateAndSession()
 
-        val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os"), locale = Locale.ENGLISH)
+        val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os"), locale = Locale.ENGLISH).getOrThrow()
 
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
         val res = webTestClient.get().uri(redirectUri)
@@ -71,12 +71,12 @@ class OAuth2AlertUnitTest : BaseOAuth2FlowTest() {
 
         assertEquals(successRedirectUri, res.responseHeaders.location?.toString())
 
-        val updatedUser = userService.findById(registeredUser.info.id)
+        val updatedUser = userService.findById(registeredUser.id).getOrThrow()
 
         coVerify(exactly = 0) { securityAlertService.send(any(), anyNullable(), any(), anyNullable(), anyNullable())}
         coVerify(exactly = 1) { loginAlertService.send(any(), any(), any()) }
         assert(loginUserSlot.isCaptured)
-        assertEquals(registeredUser.info.id, loginUserSlot.captured.id)
+        assertEquals(registeredUser.id, loginUserSlot.captured.id.getOrThrow())
         assertEquals(Locale.ENGLISH, loginLocaleSlot.captured)
         assertEquals(updatedUser.sensitive.sessions.values.first(), loginSessionSlot.captured)
         assertEquals("browser", loginSessionSlot.captured.browser)
@@ -100,9 +100,9 @@ class OAuth2AlertUnitTest : BaseOAuth2FlowTest() {
             .returnResult()
             .extractStateAndSession()
 
-        val sessionToken = sessionTokenService.create(SessionInfoRequest())
+        val sessionToken = sessionTokenService.create(SessionInfoRequest()).getOrThrow()
 
-        val loginUserSlot = slot<UserDocument>()
+        val loginUserSlot = slot<User>()
         val loginLocaleSlot = slot<Locale?>()
         val loginSessionSlot = slot<SessionInfo>()
 
@@ -111,7 +111,7 @@ class OAuth2AlertUnitTest : BaseOAuth2FlowTest() {
             captureNullable(loginLocaleSlot),
             capture(loginSessionSlot)
         ) }
-        coJustRun { securityAlertService.send(any(), anyNullable(), any(), anyNullable(), anyNullable()) }
+        coEvery { securityAlertService.send(any(), anyNullable(), any(), anyNullable(), anyNullable()) } returns Ok(mockk<MimeMessage>())
 
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
         val res = webTestClient.get().uri(redirectUri)
@@ -129,24 +129,24 @@ class OAuth2AlertUnitTest : BaseOAuth2FlowTest() {
         coVerify(exactly = 0) { securityAlertService.send(any(), anyNullable(), any(), anyNullable(), anyNullable())}
         coVerify(exactly = 1) { loginAlertService.send(any(), anyNullable(), anyNullable()) }
         assert(loginUserSlot.isCaptured)
-        assertEquals(registeredUser.info.id, loginUserSlot.captured.id)
+        assertEquals(registeredUser.id, loginUserSlot.captured.id.getOrThrow())
         assert(loginLocaleSlot.isNull)
     }
 
     @Test fun `connect works without locale`() = runTest {
-        val userSlot = slot<UserDocument>()
+        val userSlot = slot<User>()
         val localeSlot = slot<Locale?>()
         val alertTypeSlot = slot<SecurityAlertType>()
         val providerKeySlot = slot<String?>()
         val twoFactorMethodSlot = slot<TwoFactorMethod?>()
 
-        coJustRun { securityAlertService.send(
+        coEvery { securityAlertService.send(
             capture(userSlot),
             captureNullable(localeSlot),
             capture(alertTypeSlot),
             captureNullable(providerKeySlot),
             captureNullable(twoFactorMethodSlot),
-        ) }
+        ) } returns Ok(mockk<MimeMessage>())
         coJustRun { loginAlertService.send(any(), anyNullable(), any()) }
 
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -164,10 +164,10 @@ class OAuth2AlertUnitTest : BaseOAuth2FlowTest() {
             .returnResult()
             .extractStateAndSession()
 
-        val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os"))
+        val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os")).getOrThrow()
         val providerConnectionToken = oAuth2ProviderConnectionTokenService
-            .create(registeredUser.info.id, registeredUser.sessionId, "github")
-
+            .create(registeredUser.id, registeredUser.sessionId, "github")
+            .getOrThrow()
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
         val res = webTestClient.get().uri(redirectUri)
             .cookie("SESSION", sessionCookie)
@@ -187,25 +187,25 @@ class OAuth2AlertUnitTest : BaseOAuth2FlowTest() {
         coVerify(exactly = 0) { loginAlertService.send(any(), anyNullable(), any()) }
         coVerify(exactly = 1) { securityAlertService.send(any(), anyNullable(), any(), anyNullable(), any()) }
         assert(userSlot.isCaptured)
-        assertEquals(registeredUser.info.id, userSlot.captured.id)
+        assertEquals(registeredUser.id, userSlot.captured.id.getOrThrow())
         assert(localeSlot.isNull)
         assertEquals(SecurityAlertType.OAUTH_CONNECTED, alertTypeSlot.captured)
         assertEquals("github", providerKeySlot.captured)
     }
     @Test fun `connect works with locale`() = runTest {
-        val userSlot = slot<UserDocument>()
+        val userSlot = slot<User>()
         val localeSlot = slot<Locale?>()
         val alertTypeSlot = slot<SecurityAlertType>()
         val providerKeySlot = slot<String?>()
         val twoFactorMethodSlot = slot<TwoFactorMethod?>()
 
-        coJustRun { securityAlertService.send(
+        coEvery { securityAlertService.send(
             capture(userSlot),
             captureNullable(localeSlot),
             capture(alertTypeSlot),
             captureNullable(providerKeySlot),
             captureNullable(twoFactorMethodSlot),
-        ) }
+        ) } returns Ok(mockk<MimeMessage>())
         coJustRun { loginAlertService.send(any(), anyNullable(), any()) }
 
         val successRedirectUri = "http://localhost:8000/dashboard"
@@ -223,9 +223,9 @@ class OAuth2AlertUnitTest : BaseOAuth2FlowTest() {
             .returnResult()
             .extractStateAndSession()
 
-        val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os"))
+        val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os")).getOrThrow()
         val providerConnectionToken = oAuth2ProviderConnectionTokenService
-            .create(registeredUser.info.id, registeredUser.sessionId, "github")
+            .create(registeredUser.id, registeredUser.sessionId, "github").getOrThrow()
 
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
         val res = webTestClient.get().uri(redirectUri)
@@ -246,13 +246,13 @@ class OAuth2AlertUnitTest : BaseOAuth2FlowTest() {
         coVerify(exactly = 0) { loginAlertService.send(any(), anyNullable(), any()) }
         coVerify(exactly = 1) { securityAlertService.send(any(), anyNullable(), any(), anyNullable(), any()) }
         assert(userSlot.isCaptured)
-        assertEquals(registeredUser.info.id, userSlot.captured.id)
+        assertEquals(registeredUser.id, userSlot.captured.id.getOrThrow())
         assert(localeSlot.isNull)
     }
 
     @Test fun `register does not send`() = runTest {
         coJustRun { loginAlertService.send(any(), anyNullable(), any()) }
-        coJustRun { securityAlertService.send(any(), anyNullable(), any(), anyNullable(), anyNullable()) }
+        coEvery { securityAlertService.send(any(), anyNullable(), any(), anyNullable(), anyNullable()) } returns Ok(mockk<MimeMessage>())
 
         val successRedirectUri = "http://localhost:8000/dashboard"
 
@@ -264,7 +264,7 @@ class OAuth2AlertUnitTest : BaseOAuth2FlowTest() {
             .returnResult()
             .extractStateAndSession()
 
-        val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os"))
+        val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os")).getOrThrow()
 
         mockOAuth2Server.enqueueResponses()
 
@@ -286,7 +286,7 @@ class OAuth2AlertUnitTest : BaseOAuth2FlowTest() {
     }
     @Test fun `guest conversion does not send`() = runTest {
         coJustRun { loginAlertService.send(any(), anyNullable(), any()) }
-        coJustRun { securityAlertService.send(any(), anyNullable(), any(), anyNullable(), anyNullable()) }
+        coEvery { securityAlertService.send(any(), anyNullable(), any(), anyNullable(), anyNullable()) } returns Ok(mockk<MimeMessage>())
 
         val successRedirectUri = "http://localhost:8000/dashboard"
 
@@ -302,9 +302,9 @@ class OAuth2AlertUnitTest : BaseOAuth2FlowTest() {
             .returnResult()
             .extractStateAndSession()
 
-        val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os"))
+        val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os")).getOrThrow()
         val providerConnectionToken = oAuth2ProviderConnectionTokenService
-            .create(registeredUser.info.id, registeredUser.sessionId, "github")
+            .create(registeredUser.id, registeredUser.sessionId, "github").getOrThrow()
 
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
         val res = webTestClient.get().uri(redirectUri)
@@ -327,7 +327,7 @@ class OAuth2AlertUnitTest : BaseOAuth2FlowTest() {
     }
     @Test fun `stepUp does not send`() = runTest {
         coJustRun { loginAlertService.send(any(), anyNullable(), any()) }
-        coJustRun { securityAlertService.send(any(), anyNullable(), any(), anyNullable(), anyNullable()) }
+        coEvery { securityAlertService.send(any(), anyNullable(), any(), anyNullable(), anyNullable()) } returns Ok(mockk<MimeMessage>())
 
         val successRedirectUri = "http://localhost:8000/dashboard"
 
@@ -346,7 +346,7 @@ class OAuth2AlertUnitTest : BaseOAuth2FlowTest() {
             .returnResult()
             .extractStateAndSession()
 
-        val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os"))
+        val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os")).getOrThrow()
 
 
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
@@ -369,22 +369,22 @@ class OAuth2AlertUnitTest : BaseOAuth2FlowTest() {
 
     @Test fun `disconnect works without locale`() = runTest {
         val user = registerUser()
-        user.info.sensitive.identities["github"] = UserIdentity(principalId = "1234", password = null)
+        user.info.sensitive.identities.providers["github"] = UserIdentity.ofProvider(principalId = "1234")
         userService.save(user.info)
 
-        val userSlot = slot<UserDocument>()
+        val userSlot = slot<User>()
         val localeSlot = slot<Locale?>()
         val alertTypeSlot = slot<SecurityAlertType>()
         val providerKeySlot = slot<String?>()
         val twoFactorMethodSlot = slot<TwoFactorMethod?>()
 
-        coJustRun { securityAlertService.send(
+        coEvery { securityAlertService.send(
             capture(userSlot),
             captureNullable(localeSlot),
             capture(alertTypeSlot),
             captureNullable(providerKeySlot),
             captureNullable(twoFactorMethodSlot),
-        ) }
+        ) } returns Ok(mockk<MimeMessage>())
 
         webTestClient.delete()
             .uri("/api/users/me/providers/github")
@@ -395,29 +395,29 @@ class OAuth2AlertUnitTest : BaseOAuth2FlowTest() {
 
         coVerify(exactly = 1) { securityAlertService.send(any(), anyNullable(), any(), anyNullable(), any()) }
         assert(userSlot.isCaptured)
-        assertEquals(user.info.id, userSlot.captured.id)
+        assertEquals(user.id, userSlot.captured.id.getOrThrow())
         assert(localeSlot.isNull)
         assertEquals(SecurityAlertType.OAUTH_DISCONNECTED, alertTypeSlot.captured)
         assertEquals("github", providerKeySlot.captured)
     }
     @Test fun `disconnect totp works with locale`() = runTest {
         val user = registerUser()
-        user.info.sensitive.identities["github"] = UserIdentity(principalId = "1234", password = null)
+        user.info.sensitive.identities.providers["github"] = UserIdentity.ofProvider(principalId = "1234")
         userService.save(user.info)
 
-        val userSlot = slot<UserDocument>()
+        val userSlot = slot<User>()
         val localeSlot = slot<Locale?>()
         val alertTypeSlot = slot<SecurityAlertType>()
         val providerKeySlot = slot<String?>()
         val twoFactorMethodSlot = slot<TwoFactorMethod?>()
 
-        coJustRun { securityAlertService.send(
+        coEvery { securityAlertService.send(
             capture(userSlot),
             captureNullable(localeSlot),
             capture(alertTypeSlot),
             captureNullable(providerKeySlot),
             captureNullable(twoFactorMethodSlot),
-        ) }
+        ) } returns Ok(mockk<MimeMessage>())
 
         webTestClient.delete()
             .uri("/api/users/me/providers/github?locale=en")
@@ -428,7 +428,7 @@ class OAuth2AlertUnitTest : BaseOAuth2FlowTest() {
 
         coVerify(exactly = 1) { securityAlertService.send(any(), anyNullable(), any(), anyNullable(), any()) }
         assert(userSlot.isCaptured)
-        assertEquals(user.info.id, userSlot.captured.id)
+        assertEquals(user.id, userSlot.captured.id.getOrThrow())
         assertEquals(Locale.ENGLISH, localeSlot.captured)
         assertEquals(SecurityAlertType.OAUTH_DISCONNECTED, alertTypeSlot.captured)
         assertEquals("github", providerKeySlot.captured)

@@ -4,6 +4,17 @@ import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.global.properties.UiProperties
 import org.springframework.stereotype.Service
 
+/**
+ * Service responsible for managing and providing template placeholders.
+ *
+ * This service initializes a predefined set of placeholders using application and UI properties.
+ * Placeholders may include URIs, application-specific details, and styling information.
+ * Additional placeholders can be dynamically merged with the predefined ones through `getPlaceholders`.
+ *
+ * @constructor Creates a TemplateService instance populated with default placeholders.
+ * @param appProperties Application-specific properties, such as the app name and support email.
+ * @param uiProperties UI-specific properties, such as base URIs and style configurations.
+ */
 @Service
 class TemplateService(
     appProperties: AppProperties,
@@ -28,6 +39,12 @@ class TemplateService(
         "secondary_text_color" to uiProperties.secondaryTextColor.trim(),
     )
 
+    /**
+     * Combines predefined placeholders with additional ones passed as a parameter.
+     *
+     * @param additional a map containing additional placeholders to be included.
+     * @return a map containing the merged set of placeholders.
+     */
     fun getPlaceholders(additional: Map<String, Any>): Map<String, Any> {
         val customPlaceholders = mutableMapOf<String, Any>()
         customPlaceholders.putAll(placeholders)

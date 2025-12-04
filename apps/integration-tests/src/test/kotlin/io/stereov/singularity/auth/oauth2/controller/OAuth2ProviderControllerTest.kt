@@ -2,6 +2,7 @@ package io.stereov.singularity.auth.oauth2.controller
 
 import io.stereov.singularity.auth.oauth2.dto.request.OAuth2ProviderConnectionRequest
 import io.stereov.singularity.auth.oauth2.dto.response.OAuth2ProviderConnectionTokenResponse
+import io.stereov.singularity.principal.core.model.User
 import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions
@@ -25,7 +26,7 @@ class OAuth2ProviderControllerTest : BaseIntegrationTest() {
 
         val token = res.extractOAuth2ProviderConnectionToken(user.info)
 
-        Assertions.assertEquals(user.info.id, token.userId)
+        Assertions.assertEquals(user.id, token.userId)
         Assertions.assertEquals(user.sessionId, token.sessionId)
         Assertions.assertEquals(req.provider, token.provider)
     }
@@ -45,7 +46,7 @@ class OAuth2ProviderControllerTest : BaseIntegrationTest() {
 
         val token = res.extractOAuth2ProviderConnectionToken(user.info)
 
-        Assertions.assertEquals(user.info.id, token.userId)
+        Assertions.assertEquals(user.id, token.userId)
         Assertions.assertEquals(user.sessionId, token.sessionId)
         Assertions.assertEquals(req.provider, token.provider)
     }
@@ -65,7 +66,7 @@ class OAuth2ProviderControllerTest : BaseIntegrationTest() {
 
         val token = res.extractOAuth2ProviderConnectionToken(user.info)
 
-        Assertions.assertEquals(user.info.id, token.userId)
+        Assertions.assertEquals(user.id, token.userId)
         Assertions.assertEquals(user.sessionId, token.sessionId)
         Assertions.assertEquals(req.provider, token.provider)
     }
@@ -95,7 +96,7 @@ class OAuth2ProviderControllerTest : BaseIntegrationTest() {
         val user = registerOAuth2()
         val req = OAuth2ProviderConnectionRequest("github")
 
-        userService.save(user.info.clearSessions())
+        userService.save(user.info.clearSessions() as User)
 
         webTestClient.post()
             .uri("/api/users/me/providers/oauth2/token")

@@ -12,7 +12,6 @@ import org.springframework.context.annotation.Bean
 ])
 class TranslateConfiguration {
 
-
     @Bean
     @ConditionalOnMissingBean
     fun translateService(appProperties: AppProperties) = TranslateService(appProperties)

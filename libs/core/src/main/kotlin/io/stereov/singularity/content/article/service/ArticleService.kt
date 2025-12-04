@@ -1,10 +1,16 @@
 package io.stereov.singularity.content.article.service
 
+import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.coroutines.coroutineBinding
+import com.github.michaelbull.result.mapError
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.content.article.dto.response.ArticleOverviewResponse
 import io.stereov.singularity.content.article.dto.response.FullArticleResponse
+import io.stereov.singularity.content.article.exception.GetArticleResponseByKeyException
+import io.stereov.singularity.content.article.exception.GetArticleResponsesException
 import io.stereov.singularity.content.article.mapper.ArticleMapper
 import io.stereov.singularity.content.article.model.Article
 import io.stereov.singularity.content.article.model.ArticleState
@@ -14,9 +20,10 @@ import io.stereov.singularity.content.core.component.AccessCriteria
 import io.stereov.singularity.content.core.model.ContentAccessRole
 import io.stereov.singularity.content.core.properties.ContentProperties
 import io.stereov.singularity.content.core.service.ContentService
-import io.stereov.singularity.global.util.CriteriaBuilder
+import io.stereov.singularity.database.core.util.CriteriaBuilder
+import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.global.util.mapContent
-import io.stereov.singularity.global.util.withLocalizedSort
+import io.stereov.singularity.translate.service.TranslatableCrudService
 import io.stereov.singularity.translate.service.TranslateService
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.data.domain.Page
@@ -35,19 +42,30 @@ class ArticleService(
     override val accessCriteria: AccessCriteria,
     override val translateService: TranslateService,
     private val articleMapper: ArticleMapper,
-    override val contentProperties: ContentProperties
-) : ContentService<Article>() {
+    override val contentProperties: ContentProperties,
+    override val appProperties: AppProperties
+) : ContentService<Article>(), TranslatableCrudService<ArticleTranslation, Article> {
 
     override val logger: KLogger = KotlinLogging.logger {}
     override val collectionClazz: Class<Article> = Article::class.java
     override val contentType = Article.CONTENT_TYPE
 
-    suspend fun getResponseByKey(key: String, locale: Locale?): FullArticleResponse {
-        return articleMapper.createFullResponse(findAuthorizedByKey(key, ContentAccessRole.VIEWER), locale)
+    suspend fun getResponseByKey(
+        key: String,
+        authenticationOutcome: AuthenticationOutcome,
+        locale: Locale?
+    ): Result<FullArticleResponse, GetArticleResponseByKeyException> = coroutineBinding {
+        val article = findAuthorizedByKey(key, authenticationOutcome,ContentAccessRole.VIEWER)
+            .mapError { GetArticleResponseByKeyException.from(it) }
+            .bind()
+        articleMapper.createFullResponse(article, authenticationOutcome, locale)
+            .mapError { GetArticleResponseByKeyException.from(it) }
+            .bind()
     }
 
     suspend fun getArticles(
         pageable: Pageable,
+        authenticationOutcome: AuthenticationOutcome,
         title: String?,
         content: String?,
         state: String?,
@@ -60,16 +78,10 @@ class ArticleService(
         publishedAtBefore: Instant?,
         publishedAtAfter: Instant?,
         locale: Locale?
-    ): Page<ArticleOverviewResponse> {
+    ): Result<Page<ArticleOverviewResponse>, GetArticleResponsesException> = coroutineBinding {
         val actualLocale = locale ?: translateService.defaultLocale
 
-        val localizedPageable = pageable.withLocalizedSort(actualLocale, listOf(
-            ArticleTranslation::title,
-            ArticleTranslation::content,
-            ArticleTranslation::summary,
-        ))
-
-        val criteria = CriteriaBuilder(accessCriteria.getAccessCriteria(roles))
+        val criteria = CriteriaBuilder(accessCriteria.generate(roles))
             .compare(Article::createdAt, createdAtBefore, createdAtAfter)
             .compare(Article::updatedAt, updatedAtBefore, updatedAtAfter)
             .compare(Article::publishedAt, publishedAtBefore, publishedAtAfter)
@@ -79,6 +91,14 @@ class ArticleService(
             .isIn(Article::tags, tags)
             .build()
 
-        return findAllPaginated(localizedPageable, criteria).mapContent { articleMapper.createOverview(it, actualLocale) }
+        val articles = findAllPaginated(pageable, criteria, actualLocale)
+            .mapError { GetArticleResponsesException.from(it) }
+            .bind()
+
+        articles.mapContent {
+            articleMapper.createOverview(it, authenticationOutcome, actualLocale)
+                .mapError { GetArticleResponsesException.from(it) }
+                .bind()
+        }
     }
 }

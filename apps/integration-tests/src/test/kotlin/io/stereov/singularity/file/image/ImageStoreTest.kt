@@ -1,9 +1,10 @@
 package io.stereov.singularity.file.image
 
-import io.stereov.singularity.file.core.exception.model.UnsupportedMediaTypeException
-import io.stereov.singularity.file.core.model.DownloadedFile
+import com.github.michaelbull.result.getOrThrow
+import io.stereov.singularity.file.core.exception.FileException
 import io.stereov.singularity.file.core.model.FileKey
 import io.stereov.singularity.file.core.model.FileMetadataDocument
+import io.stereov.singularity.file.download.model.StreamedFile
 import io.stereov.singularity.file.image.properties.ImageProperties
 import io.stereov.singularity.file.image.service.ImageStore
 import io.stereov.singularity.file.local.properties.LocalFileStorageProperties
@@ -15,7 +16,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ClassPathResource
+import org.springframework.core.io.buffer.DefaultDataBufferFactory
 import org.springframework.http.MediaType
+import reactor.core.publisher.Flux
 import java.io.File
 
 class ImageStoreTest() : BaseIntegrationTest() {
@@ -36,7 +39,7 @@ class ImageStoreTest() : BaseIntegrationTest() {
         val filePart = MockFilePart(file)
         val key = FileKey("key")
 
-        val metadata = imageStore.upload(user.info.id, filePart, key.key, true)
+        val metadata = imageStore.upload(user.authentication, filePart, key.key, true).getOrThrow()
 
         assertTrue { metadata.renditions.keys.contains(ImageProperties::small.name) }
         assertTrue { metadata.renditions.keys.contains(ImageProperties::medium.name) }
@@ -55,7 +58,7 @@ class ImageStoreTest() : BaseIntegrationTest() {
         val filePart = MockFilePart(file)
         val key = FileKey("key")
 
-        val metadata = imageStore.upload(user.info.id, filePart, key.key, true)
+        val metadata = imageStore.upload(user.authentication, filePart, key.key, true).getOrThrow()
 
         assertTrue { metadata.renditions.keys.contains(ImageProperties::small.name) }
         assertTrue { metadata.renditions.keys.contains(ImageProperties::medium.name) }
@@ -75,7 +78,7 @@ class ImageStoreTest() : BaseIntegrationTest() {
         val filePart = MockFilePart(file, type = MediaType.APPLICATION_JSON)
         val key = FileKey("key")
 
-        assertThrows<UnsupportedMediaTypeException> { imageStore.upload(user.info.id, filePart, key.key, true) }
+        assertThrows<FileException.UnsupportedMediaType> { imageStore.upload(user.authentication, filePart, key.key, true).getOrThrow() }
     }
     @Test fun `save image throws when wrong content type not set`() = runTest {
         val user = registerUser()
@@ -83,16 +86,16 @@ class ImageStoreTest() : BaseIntegrationTest() {
         val filePart = MockFilePart(file, setType = false)
         val key = FileKey("key")
 
-        assertThrows<UnsupportedMediaTypeException> { imageStore.upload(user.info.id, filePart, key.key, true) }
+        assertThrows<FileException.UnsupportedMediaType> { imageStore.upload(user.authentication, filePart, key.key, true).getOrThrow() }
     }
 
     @Test fun `save image works with downloaded file`() = runTest {
         val user = registerUser()
         val file = ClassPathResource("files/test-image.jpg").file
         val key = FileKey("key")
-        val downloadedFile = DownloadedFile(bytes = file.readBytes(), contentType = MediaType.IMAGE_JPEG, url = "")
+        val downloadedFile = StreamedFile(content = Flux.just(DefaultDataBufferFactory().wrap(file.readBytes())), contentType = MediaType.IMAGE_JPEG, url = "")
 
-        val metadata = imageStore.upload(user.info.id, downloadedFile, key.key, true)
+        val metadata = imageStore.upload(user.authentication, downloadedFile, key.key, true).getOrThrow()
 
         assertTrue { metadata.renditions.keys.contains(ImageProperties::small.name) }
         assertTrue { metadata.renditions.keys.contains(ImageProperties::medium.name) }
@@ -106,9 +109,9 @@ class ImageStoreTest() : BaseIntegrationTest() {
     @Test fun `save image throws when wrong content type with downloaded file`() = runTest {
         val user = registerUser()
         val file = ClassPathResource("files/test-image.jpg").file
-        val downloadedFile = DownloadedFile(bytes = file.readBytes(), contentType = MediaType.APPLICATION_OCTET_STREAM, url = "")
+        val downloadedFile = StreamedFile(content = Flux.just(DefaultDataBufferFactory().wrap(file.readBytes())), contentType = MediaType.APPLICATION_OCTET_STREAM, url = "")
         val key = FileKey("key")
 
-        assertThrows<UnsupportedMediaTypeException> { imageStore.upload(user.info.id, downloadedFile, key.key, true) }
+        assertThrows<FileException.UnsupportedMediaType> { imageStore.upload(user.authentication, downloadedFile, key.key, true).getOrThrow() }
     }
 }

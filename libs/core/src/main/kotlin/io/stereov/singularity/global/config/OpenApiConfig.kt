@@ -5,35 +5,44 @@ import io.stereov.singularity.auth.core.controller.AuthenticationController
 import io.stereov.singularity.auth.core.controller.EmailVerificationController
 import io.stereov.singularity.auth.core.controller.PasswordResetController
 import io.stereov.singularity.auth.core.controller.SessionController
-import io.stereov.singularity.auth.core.model.token.SessionTokenType
-import io.stereov.singularity.auth.group.controller.GroupController
-import io.stereov.singularity.auth.group.controller.GroupMemberController
-import io.stereov.singularity.auth.guest.controller.GuestController
 import io.stereov.singularity.auth.oauth2.controller.IdentityProviderController
 import io.stereov.singularity.auth.oauth2.controller.OAuth2ProviderController
+import io.stereov.singularity.auth.token.model.SessionTokenType
+import io.stereov.singularity.auth.token.model.TwoFactorTokenType
 import io.stereov.singularity.auth.twofactor.controller.EmailAuthenticationController
 import io.stereov.singularity.auth.twofactor.controller.TotpAuthenticationController
 import io.stereov.singularity.auth.twofactor.controller.TwoFactorAuthenticationController
-import io.stereov.singularity.auth.twofactor.model.token.TwoFactorTokenType
 import io.stereov.singularity.content.article.controller.ArticleController
 import io.stereov.singularity.content.article.controller.ArticleManagementController
 import io.stereov.singularity.content.core.controller.ContentManagementController
 import io.stereov.singularity.content.invitation.controller.InvitationController
 import io.stereov.singularity.content.tag.controller.TagController
+import io.stereov.singularity.global.annotation.ThrowsDomainError
+import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.model.OpenApiConstants
-import io.stereov.singularity.user.core.controller.UserController
-import io.stereov.singularity.user.settings.controller.UserSettingsController
+import io.stereov.singularity.principal.core.controller.GuestController
+import io.stereov.singularity.principal.core.controller.UserController
+import io.stereov.singularity.principal.group.controller.GroupController
+import io.stereov.singularity.principal.group.controller.GroupMemberController
+import io.stereov.singularity.principal.settings.controller.PrincipalSettingsController
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType
 import io.swagger.v3.oas.annotations.security.SecurityScheme
 import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.Operation
 import io.swagger.v3.oas.models.PathItem
+import io.swagger.v3.oas.models.media.Content
+import io.swagger.v3.oas.models.media.Schema
+import io.swagger.v3.oas.models.responses.ApiResponse
 import io.swagger.v3.oas.models.security.SecurityRequirement
 import io.swagger.v3.oas.models.tags.Tag
 import org.springdoc.core.customizers.OpenApiCustomizer
+import org.springdoc.core.customizers.OperationCustomizer
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.context.annotation.Bean
+import org.springframework.stereotype.Component
+import org.springframework.web.method.HandlerMethod
+import kotlin.reflect.full.primaryConstructor
 
 @AutoConfiguration
 @SecurityScheme(
@@ -75,7 +84,7 @@ import org.springframework.context.annotation.Bean
     type = SecuritySchemeType.APIKEY,
     `in` = SecuritySchemeIn.HEADER,
     paramName = SessionTokenType.StepUp.HEADER,
-    description = "Token for step up authentication allowing access of secure resources." +
+    description = "EmailVerificationTokenCreation for step up authentication allowing access of secure resources." +
             "You can learn more [here](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)."
 )
 @SecurityScheme(
@@ -83,7 +92,7 @@ import org.springframework.context.annotation.Bean
     type = SecuritySchemeType.APIKEY,
     `in` = SecuritySchemeIn.COOKIE,
     paramName = SessionTokenType.StepUp.COOKIE_NAME,
-    description = "Token for step up authentication allowing access of secure resources." +
+    description = "EmailVerificationTokenCreation for step up authentication allowing access of secure resources." +
             "You can learn more [here](https://singularity.stereov.io/docs/guides/auth/tokens#step-up-token)."
 )
 
@@ -92,7 +101,7 @@ import org.springframework.context.annotation.Bean
     type = SecuritySchemeType.APIKEY,
     `in` = SecuritySchemeIn.HEADER,
     paramName = TwoFactorTokenType.Authentication.HEADER,
-    description = "Token for successful authentication with email and password, indicating 2FA is required." +
+    description = "EmailVerificationTokenCreation for successful authentication with email and password, indicating 2FA is required." +
             "You can learn more [here](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token)."
 )
 @SecurityScheme(
@@ -100,11 +109,65 @@ import org.springframework.context.annotation.Bean
     type = SecuritySchemeType.APIKEY,
     `in` = SecuritySchemeIn.COOKIE,
     paramName = TwoFactorTokenType.Authentication.COOKIE_NAME,
-    description = "Token for successful authentication with email and password, indicating 2FA is required." +
+    description = "EmailVerificationTokenCreation for successful authentication with email and password, indicating 2FA is required." +
             "You can learn more [here](https://singularity.stereov.io/docs/guides/auth/tokens#two-factor-authentication-token)."
 )
 
 class OpenApiConfig() {
+
+    @Bean
+    fun domainErrorOperationCustomizer(): OperationCustomizer = DomainErrorOperationCustomizer()
+
+    @Component
+    class DomainErrorOperationCustomizer : OperationCustomizer {
+
+        override fun customize(operation: Operation, handlerMethod: HandlerMethod): Operation {
+            val domainErrorAnnotation = handlerMethod.getMethodAnnotation(ThrowsDomainError::class.java)
+                ?: return operation
+
+            domainErrorAnnotation.errorClasses.forEach { errorKClass ->
+
+                errorKClass.sealedSubclasses.forEach { concreteErrorClass ->
+
+                    val apiError = concreteErrorClass.objectInstance
+                        ?: concreteErrorClass.primaryConstructor?.call("", null)
+                        ?: return@forEach
+
+                    val responseCode = apiError.status.value().toString()
+                    val descriptionEntry = "\n* **`${apiError.code}`:** ${apiError.description}"
+
+                    val existingResponse = operation.responses[responseCode]
+                    if (existingResponse == null) {
+                        val initialDescription = "The following error codes correspond to this status:$descriptionEntry"
+
+                        operation.responses.addApiResponse(
+                            responseCode,
+                            ApiResponse()
+                                .description(initialDescription)
+                                .content(createErrorContent())
+                        )
+                    } else {
+                        val currentDescription = existingResponse.description ?: "A specific domain error occurred (see list below):"
+                        existingResponse.description = if (currentDescription.contains("`${apiError.code}`:")) {
+                            currentDescription
+                        } else {
+                            currentDescription + descriptionEntry
+                        }
+                    }
+                }
+            }
+
+            return operation
+        }
+
+        private fun createErrorContent(): Content {
+            return Content().addMediaType(
+                org.springframework.http.MediaType.APPLICATION_JSON_VALUE,
+                io.swagger.v3.oas.models.media.MediaType()
+                    .schema(Schema<ErrorResponse>())
+            )
+        }
+    }
 
 
     @Bean
@@ -257,13 +320,13 @@ class OpenApiConfig() {
         // Profile Management
 
         sortedOperationIds.addAll(listOf(
-            UserSettingsController::getAuthorizedUser.name,
-            UserSettingsController::updateAuthorizedUser.name,
-            UserSettingsController::changeEmailOfAuthorizedUser.name,
-            UserSettingsController::changePasswordOfAuthorizedUser.name,
-            UserSettingsController::setAvatarOfAuthorizedUser.name,
-            UserSettingsController::deleteAvatarOfAuthorizedUser.name,
-            UserSettingsController::deleteAuthorizedUser.name
+            PrincipalSettingsController::getAuthorizedPrincipal.name,
+            PrincipalSettingsController::updateAuthorizedUser.name,
+            PrincipalSettingsController::changeEmailOfAuthorizedUser.name,
+            PrincipalSettingsController::changePasswordOfAuthorizedUser.name,
+            PrincipalSettingsController::setAvatarOfAuthorizedUser.name,
+            PrincipalSettingsController::deleteAvatarOfAuthorizedUser.name,
+            PrincipalSettingsController::deleteAuthorizedPrincipal.name
         ))
 
         // Articles

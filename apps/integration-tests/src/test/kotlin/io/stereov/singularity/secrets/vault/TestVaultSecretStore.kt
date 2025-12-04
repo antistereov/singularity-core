@@ -1,8 +1,8 @@
 package io.stereov.singularity.secrets.vault
 
-import com.mongodb.assertions.Assertions.assertNull
+import com.github.michaelbull.result.getOrThrow
 import io.stereov.singularity.secrets.core.component.SecretStore
-import io.stereov.singularity.secrets.core.exception.model.SecretKeyNotFoundException
+import io.stereov.singularity.secrets.core.exception.SecretStoreException
 import io.stereov.singularity.secrets.core.properties.SecretStoreImplementation
 import io.stereov.singularity.secrets.vault.component.VaultSecretStore
 import io.stereov.singularity.secrets.vault.properties.VaultSecretStoreProperties
@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.containers.GenericContainer
-import org.testcontainers.containers.MongoDBContainer
+import org.testcontainers.mongodb.MongoDBContainer
 import org.testcontainers.utility.DockerImageName
 import org.testcontainers.vault.VaultContainer
 import java.time.temporal.ChronoUnit
@@ -37,20 +37,20 @@ class TestVaultSecretStore : BaseSpringBootTest() {
         val key = UUID.randomUUID().toString()
         val value = "value"
 
-        val secret = secretStore.put(key, value)
+        val secret = secretStore.put(key, value).getOrThrow()
 
         assertThat(secret.key).isEqualTo(key)
         assertThat(secret.value).isEqualTo(value)
 
-        val savedSecret = secretStore.get(key)
+        val savedSecret = secretStore.get(key).getOrThrow()
 
         assertThat(savedSecret.copy(createdAt = savedSecret.createdAt.truncatedTo(ChronoUnit.MILLIS))).isEqualTo(secret.copy(createdAt = savedSecret.createdAt.truncatedTo(ChronoUnit.MILLIS)))
     }
     @Test fun `get throws exception when no secret exists`() = runTest {
-        assertThrows<SecretKeyNotFoundException> { secretStore.get("random-key") }
+        assertThrows<SecretStoreException.NotFound> { secretStore.get("random-key").getOrThrow() }
     }
     @Test fun `getOrNull return null when no secret exists`() = runTest {
-        assertNull(secretStore.getOrNull("random-key"))
+        assertThrows<SecretStoreException.NotFound> { secretStore.get("random-key").getOrThrow() }
     }
 
     companion object {
@@ -64,10 +64,10 @@ class TestVaultSecretStore : BaseSpringBootTest() {
                 start()
             }
 
-        private const val vaultToken = "test-token"
+        private const val VAULT_TOKEN = "test-token"
 
         private val vaultContainer = VaultContainer("hashicorp/vault:latest")
-            .withVaultToken(vaultToken)
+            .withVaultToken(VAULT_TOKEN)
             .withExposedPorts(8200)
             .withInitCommand("secrets enable -path=apps -version=2 kv")
             .apply { start() }
@@ -84,7 +84,7 @@ class TestVaultSecretStore : BaseSpringBootTest() {
             registry.add("singularity.secrets.store") { SecretStoreImplementation.VAULT }
             registry.add("singularity.secrets.vault.host") { vaultContainer.host }
             registry.add("singularity.secrets.vault.port") { vaultContainer.getMappedPort(8200) }
-            registry.add("singularity.secrets.vault.token") { vaultToken }
+            registry.add("singularity.secrets.vault.token") { VAULT_TOKEN }
         }
     }
 }

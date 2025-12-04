@@ -1,5 +1,7 @@
 package io.stereov.singularity.global.filter
 
+import com.github.michaelbull.result.getOrElse
+import com.github.michaelbull.result.runCatching
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
@@ -12,14 +14,26 @@ import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Mono
+import java.net.InetAddress
 
 /**
- * # Filter for logging incoming requests and outgoing responses.
+ * LoggingFilter is an implementation of [WebFilter] responsible for logging incoming HTTP requests
+ * and outgoing HTTP responses within a reactive application. It provides detailed information
+ * about the request/response process, including the HTTP method, URI, client IP address, and
+ * geolocation details if available.
  *
- * This ratelimit logs the details of incoming requests and outgoing responses,
- * including the HTTP method, path, and status code.
+ * The filter uses the `geolocationProperties` and `geoLocationService` to optionally retrieve
+ * geolocation data associated with the client IP address. This data can help provide more
+ * contextual logging based on the location of the request origin.
  *
- * @author <a href="https://github.com/antistereov">antistereov</a>
+ * Error handling is integrated to log exceptions or failed responses appropriately, aiding in
+ * debugging and tracing issues in the request-response lifecycle.
+ *
+ * @constructor
+ * Initializes the LoggingFilter with required dependencies for geolocation and logging.
+ *
+ * @param geolocationProperties The configuration properties for geolocation functionality.
+ * @param geoLocationService The service used to retrieve geolocation data.
  */
 class LoggingFilter(
     private val geolocationProperties: GeolocationProperties,
@@ -40,7 +54,8 @@ class LoggingFilter(
         val originString = origin?.let { " with origin $origin" } ?: ""
 
         val ipAddress = exchange.request.getClientIp(geolocationProperties.realIpHeader)
-        val location = geoLocationService.getLocationOrNull(request)
+            ?.let { runCatching { InetAddress.getByName(it) }.getOrElse { null } }
+        val location = geoLocationService.getLocationOrNull(exchange)
         val locationString = location?.let { " (${location.city.names["en"]}, ${location.country.isoCode})" } ?: ""
 
         logger.debug { "Incoming request  - $method $path from $ipAddress$locationString$originString" }

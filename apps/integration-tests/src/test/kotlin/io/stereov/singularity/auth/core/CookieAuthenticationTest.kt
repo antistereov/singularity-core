@@ -1,8 +1,9 @@
 package io.stereov.singularity.auth.core
 
+import com.github.michaelbull.result.getOrThrow
 import io.stereov.singularity.auth.core.dto.response.RefreshTokenResponse
-import io.stereov.singularity.auth.core.model.token.SessionTokenType
 import io.stereov.singularity.auth.jwt.service.JwtSecretService
+import io.stereov.singularity.auth.token.model.SessionTokenType
 import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.test.runTest
@@ -50,7 +51,7 @@ class CookieAuthenticationTest() : BaseIntegrationTest() {
     }
     @Test fun `access unexpired token required`() = runTest {
         val user = registerUser()
-        val token = accessTokenService.create(user.info, user.sessionId, Instant.ofEpochSecond(0))
+        val token = accessTokenService.create(user.info, user.sessionId, Instant.ofEpochSecond(0)).getOrThrow()
 
         webTestClient.get()
             .uri("/api/users/me")
@@ -162,10 +163,10 @@ class CookieAuthenticationTest() : BaseIntegrationTest() {
     @Test fun `refresh requires unexpired token`() = runTest {
         val user = registerUser()
         val token = refreshTokenService.create(
-            user.info.id,
+            user.id,
             user.sessionId,
             user.info.sensitive.sessions.values.first().refreshTokenId!!,
-            Instant.ofEpochSecond(0))
+            Instant.ofEpochSecond(0)).getOrThrow()
 
         webTestClient.post()
             .uri("/api/auth/refresh")
@@ -215,11 +216,11 @@ class CookieAuthenticationTest() : BaseIntegrationTest() {
     }
     @Test fun `refresh invalid session will not be authorized`() = runTest {
         val user = registerUser()
-        val accessToken = accessTokenService.create(user.info, user.sessionId)
+        val accessToken = accessTokenService.create(user.info, user.sessionId).getOrThrow()
 
         webTestClient.get()
             .uri("/api/users/me")
-            .accessTokenCookie(cookieCreator.createCookie(accessToken).value)
+            .accessTokenCookie(cookieCreator.createCookie(accessToken).getOrThrow().value)
             .exchange()
             .expectStatus().isOk
 
@@ -254,7 +255,7 @@ class CookieAuthenticationTest() : BaseIntegrationTest() {
     }
     @Test fun `stepUp requires unexpired token`() = runTest {
         val user = registerUser()
-        val stepUpToken = stepUpTokenService.create(user.info.id, user.sessionId, Instant.ofEpochSecond(0))
+        val stepUpToken = stepUpTokenService.create(user.id, user.sessionId, Instant.ofEpochSecond(0)).getOrThrow()
 
         webTestClient.get()
             .uri("/api/auth/2fa/totp/setup")
@@ -284,7 +285,7 @@ class CookieAuthenticationTest() : BaseIntegrationTest() {
     }
     @Test fun `stepUp needs valid unexpired access token`() = runTest {
         val user = registerUser()
-        val accessToken = accessTokenService.create(user.info, user.sessionId, Instant.ofEpochSecond(0))
+        val accessToken = accessTokenService.create(user.info, user.sessionId, Instant.ofEpochSecond(0)).getOrThrow()
 
         webTestClient.get()
             .uri("/api/auth/2fa/totp/setup")
@@ -306,7 +307,7 @@ class CookieAuthenticationTest() : BaseIntegrationTest() {
     }
     @Test fun `stepUp needs access token from matching session`() = runTest {
         val user = registerUser()
-        val stepUpToken = stepUpTokenService.create(user.info.id, UUID.randomUUID())
+        val stepUpToken = stepUpTokenService.create(user.id, UUID.randomUUID()).getOrThrow()
 
         webTestClient.get()
             .uri("/api/auth/2fa/totp/setup")
@@ -319,13 +320,12 @@ class CookieAuthenticationTest() : BaseIntegrationTest() {
     @Test fun `key rotation works`() = runTest {
         val user = registerUser()
 
-        jwtSecretService.updateSecret()
+        jwtSecretService.updateSecret().getOrThrow()
 
         val newUser = registerUser("another@email.com")
 
         val newJwt = jwtDecoder.decode(newUser.accessToken).awaitFirst()
         val newKeyId = newJwt.headers["kid"]
-
 
         val jwt = jwtDecoder.decode(user.accessToken).awaitFirst()
         val oldKeyId = jwt.headers["kid"]

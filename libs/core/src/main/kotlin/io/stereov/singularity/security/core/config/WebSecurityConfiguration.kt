@@ -1,14 +1,9 @@
 package io.stereov.singularity.security.core.config
 
-import io.stereov.singularity.auth.core.component.CookieCreator
+import io.stereov.singularity.auth.alert.properties.SecurityAlertProperties
+import io.stereov.singularity.auth.alert.service.LoginAlertService
 import io.stereov.singularity.auth.core.filter.AuthenticationFilter
 import io.stereov.singularity.auth.core.properties.AuthProperties
-import io.stereov.singularity.auth.core.properties.SecurityAlertProperties
-import io.stereov.singularity.auth.core.service.LoginAlertService
-import io.stereov.singularity.auth.core.service.token.AccessTokenService
-import io.stereov.singularity.auth.core.service.token.RefreshTokenService
-import io.stereov.singularity.auth.core.service.token.SessionTokenService
-import io.stereov.singularity.auth.core.service.token.StepUpTokenService
 import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
 import io.stereov.singularity.auth.oauth2.component.CustomOAuth2AuthenticationFailureHandler
@@ -16,14 +11,19 @@ import io.stereov.singularity.auth.oauth2.component.CustomOAuth2AuthenticationSu
 import io.stereov.singularity.auth.oauth2.component.CustomOAuth2AuthorizationRequestResolver
 import io.stereov.singularity.auth.oauth2.properties.OAuth2Properties
 import io.stereov.singularity.auth.oauth2.service.OAuth2AuthenticationService
-import io.stereov.singularity.auth.oauth2.service.token.OAuth2StateTokenService
+import io.stereov.singularity.auth.token.service.OAuth2StateTokenService
+import io.stereov.singularity.auth.token.component.CookieCreator
+import io.stereov.singularity.auth.token.service.AccessTokenService
+import io.stereov.singularity.auth.token.service.RefreshTokenService
+import io.stereov.singularity.auth.token.service.SessionTokenService
+import io.stereov.singularity.auth.token.service.StepUpTokenService
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.global.filter.LoggingFilter
 import io.stereov.singularity.global.properties.UiProperties
-import io.stereov.singularity.ratelimit.filter.RateLimitFilter
-import io.stereov.singularity.ratelimit.service.RateLimitService
+import io.stereov.singularity.principal.core.model.Role
 import io.stereov.singularity.security.core.properties.SecurityProperties
-import io.stereov.singularity.user.core.model.Role
+import io.stereov.singularity.security.ratelimit.filter.RateLimitFilter
+import io.stereov.singularity.security.ratelimit.service.RateLimitService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -58,7 +58,7 @@ import reactor.core.publisher.Mono
  *
  * It enables the following services:
  * - [AccessTokenService]
- * - [io.stereov.singularity.user.core.service.UserService]
+ * - [io.stereov.singularity.principal.core.service.UserService]
  *
  * It enables the following beans:
  * - [org.springframework.security.crypto.password.PasswordEncoder]
@@ -121,7 +121,7 @@ class WebSecurityConfiguration {
                 authProperties.adminPaths.forEach { path ->
                     it.pathMatchers(path).hasRole("ADMIN")
                 }
-                it.pathMatchers("/admin/**").hasRole(Role.ADMIN.name)
+                it.pathMatchers("/admin/**").hasRole(Role.User.ADMIN.value)
                 it.anyExchange().permitAll()
             }
             .oauth2Login { oauth2 ->

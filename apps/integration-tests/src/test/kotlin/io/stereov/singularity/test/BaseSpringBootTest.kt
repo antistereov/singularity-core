@@ -1,37 +1,26 @@
 package io.stereov.singularity.test
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.github.michaelbull.result.getOrThrow
 import com.warrenstrange.googleauth.GoogleAuthenticator
 import io.mockk.every
 import io.stereov.singularity.WebSpringBootStarterApplication
-import io.stereov.singularity.auth.core.component.CookieCreator
 import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.auth.core.dto.request.RegisterUserRequest
 import io.stereov.singularity.auth.core.dto.response.StepUpResponse
+import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.auth.core.model.SessionInfo
-import io.stereov.singularity.auth.core.model.token.*
-import io.stereov.singularity.auth.core.service.token.*
-import io.stereov.singularity.auth.group.model.GroupDocument
-import io.stereov.singularity.auth.group.model.GroupTranslation
-import io.stereov.singularity.auth.group.repository.GroupRepository
-import io.stereov.singularity.auth.group.service.GroupService
-import io.stereov.singularity.auth.guest.dto.request.CreateGuestRequest
-import io.stereov.singularity.auth.guest.dto.response.CreateGuestResponse
-import io.stereov.singularity.auth.jwt.exception.TokenException
-import io.stereov.singularity.auth.oauth2.model.token.OAuth2ProviderConnectionToken
-import io.stereov.singularity.auth.oauth2.model.token.OAuth2TokenType
+import io.stereov.singularity.auth.jwt.exception.TokenExtractionException
 import io.stereov.singularity.auth.oauth2.properties.OAuth2Properties
-import io.stereov.singularity.auth.oauth2.service.token.OAuth2ProviderConnectionTokenService
+import io.stereov.singularity.auth.token.component.CookieCreator
+import io.stereov.singularity.auth.token.model.*
+import io.stereov.singularity.auth.token.service.*
 import io.stereov.singularity.auth.twofactor.dto.request.CompleteStepUpRequest
 import io.stereov.singularity.auth.twofactor.dto.request.EnableEmailTwoFactorMethodRequest
 import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorVerifySetupRequest
 import io.stereov.singularity.auth.twofactor.dto.response.TwoFactorSetupResponse
-import io.stereov.singularity.auth.twofactor.model.token.TwoFactorAuthenticationToken
-import io.stereov.singularity.auth.twofactor.model.token.TwoFactorTokenType
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailProperties
 import io.stereov.singularity.auth.twofactor.service.TotpService
-import io.stereov.singularity.auth.twofactor.service.token.TotpSetupTokenService
-import io.stereov.singularity.auth.twofactor.service.token.TwoFactorAuthenticationTokenService
 import io.stereov.singularity.cache.service.CacheService
 import io.stereov.singularity.content.core.properties.ContentProperties
 import io.stereov.singularity.content.invitation.service.InvitationService
@@ -39,16 +28,28 @@ import io.stereov.singularity.content.invitation.service.InvitationTokenService
 import io.stereov.singularity.content.tag.service.TagService
 import io.stereov.singularity.database.encryption.service.EncryptionSecretService
 import io.stereov.singularity.database.hash.service.HashService
-import io.stereov.singularity.file.core.service.DownloadService
+import io.stereov.singularity.file.core.component.DataBufferPublisher
 import io.stereov.singularity.file.core.service.FileStorage
+import io.stereov.singularity.file.download.service.DownloadService
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.global.properties.UiProperties
 import io.stereov.singularity.global.util.Random
+import io.stereov.singularity.principal.core.dto.request.CreateGuestRequest
+import io.stereov.singularity.principal.core.dto.response.CreateGuestResponse
+import io.stereov.singularity.principal.core.model.Guest
+import io.stereov.singularity.principal.core.model.Principal
+import io.stereov.singularity.principal.core.model.Role
+import io.stereov.singularity.principal.core.model.User
+import io.stereov.singularity.principal.core.model.sensitve.SensitivePrincipalData
+import io.stereov.singularity.principal.core.repository.UserRepository
+import io.stereov.singularity.principal.core.service.GuestService
+import io.stereov.singularity.principal.core.service.PrincipalService
+import io.stereov.singularity.principal.core.service.UserService
+import io.stereov.singularity.principal.group.model.Group
+import io.stereov.singularity.principal.group.model.GroupTranslation
+import io.stereov.singularity.principal.group.repository.GroupRepository
+import io.stereov.singularity.principal.group.service.GroupService
 import io.stereov.singularity.test.config.MockConfig
-import io.stereov.singularity.user.core.model.Role
-import io.stereov.singularity.user.core.model.UserDocument
-import io.stereov.singularity.user.core.repository.UserRepository
-import io.stereov.singularity.user.core.service.UserService
 import kotlinx.coroutines.runBlocking
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.AfterEach
@@ -71,6 +72,15 @@ import java.util.concurrent.atomic.AtomicInteger
 )
 @Import(MockConfig::class)
 class BaseSpringBootTest() {
+
+    @Autowired
+    lateinit var dataBufferPublisher: DataBufferPublisher
+
+    @Autowired
+    lateinit var principalService: PrincipalService
+
+    @Autowired
+    lateinit var guestService: GuestService
 
     @Autowired
     lateinit var downloadService: DownloadService
@@ -128,7 +138,7 @@ class BaseSpringBootTest() {
     lateinit var cookieCreator: CookieCreator
 
     @Autowired
-    lateinit var stepUpTokenService: StepUpTokenService 
+    lateinit var stepUpTokenService: StepUpTokenService
 
     @Autowired
     lateinit var applicationContext: ApplicationContext
@@ -183,12 +193,12 @@ class BaseSpringBootTest() {
 
     @AfterEach
     fun clearDatabase() = runBlocking {
-        userService.deleteAll()
-        cacheService.deleteAll()
+        principalService.deleteAll().getOrThrow()
+        cacheService.deleteAll().getOrThrow()
         groupRepository.deleteAll()
         counter.set(0)
-        tagService.deleteAll()
-        invitationService.deleteAll()
+        tagService.deleteAll().getOrThrow()
+        invitationService.deleteAll().getOrThrow()
     }
 
     @BeforeEach
@@ -205,8 +215,8 @@ class BaseSpringBootTest() {
 
     private val counter = AtomicInteger(0)
 
-    data class TestRegisterResponse(
-        val info: UserDocument,
+    data class TestRegisterResponse<P : Principal<out Role, out SensitivePrincipalData>>(
+        val info: P,
         val email: String?,
         val password: String?,
         val accessToken: String,
@@ -219,11 +229,19 @@ class BaseSpringBootTest() {
         val passwordResetSecret: String?,
         val sessionId: UUID,
         val email2faCode: String,
-    )
+        private val accessTokenToken: AccessToken
+    ) {
 
-    suspend fun createGroup(key: String = "test-group"): GroupDocument {
-        val group = GroupDocument(key = key, translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Test")))
-        return groupService.save(group)
+        val id: ObjectId
+            get() = info.id.getOrThrow()
+
+        val authentication: AuthenticationOutcome.Authenticated
+            get() = AuthenticationOutcome.Authenticated(info.id.getOrThrow(),info.roles, info.groups, accessTokenToken)
+    }
+
+    suspend fun createGroup(key: String = "test-group"): Group {
+        val group = Group(key = key, translations = mutableMapOf(Locale.ENGLISH to GroupTranslation("Test")))
+        return groupService.save(group).getOrThrow()
     }
 
     suspend fun registerUser(
@@ -232,9 +250,9 @@ class BaseSpringBootTest() {
         totpEnabled: Boolean = false,
         email2faEnabled: Boolean = false,
         name: String = "Name",
-        roles: List<Role> = listOf(Role.USER),
+        roles: List<Role> = listOf(Role.User.USER),
         groups: List<String> = listOf(),
-    ): TestRegisterResponse {
+    ): TestRegisterResponse<User> {
         val actualEmail = "${counter.getAndIncrement()}$emailSuffix"
 
         webTestClient.post()
@@ -247,18 +265,18 @@ class BaseSpringBootTest() {
         var twoFactorRecovery: String? = null
         var twoFactorSecret: String? = null
 
-        var user = userService.findByEmail(actualEmail)
+        var user = userService.findByEmail(actualEmail).getOrThrow()
 
         var sessionId = UUID.randomUUID()
-        var accessToken: String? = accessTokenService.create(user, sessionId).value
-        val refreshTokenId = Random.generateString(20)
-        var refreshToken: String? = refreshTokenService.create(user.id, sessionId, refreshTokenId).value
-        var stepUpToken = stepUpTokenService.create(user.id, sessionId)
+        var accessToken: String? = accessTokenService.create(user, sessionId).getOrThrow().value
+        val refreshTokenId = Random.generateString(20).getOrThrow()
+        var refreshToken: String? = refreshTokenService.create(user.id.getOrThrow(), sessionId,refreshTokenId).getOrThrow().value
+        var stepUpToken = stepUpTokenService.create(user.id.getOrThrow(), sessionId).getOrThrow()
 
         user.updateLastActive()
-        user.addOrUpdatesession(sessionId, SessionInfo(refreshTokenId = refreshTokenId))
+        user.addOrUpdateSession(sessionId, SessionInfo(refreshTokenId = refreshTokenId))
 
-        userService.save(user)
+        userService.save(user).getOrThrow()
 
         if (totpEnabled) {
 
@@ -316,16 +334,16 @@ class BaseSpringBootTest() {
             requireNotNull(accessToken) { "No access token contained in response" }
             requireNotNull(refreshToken) { "No refresh token contained in response" }
 
-            sessionId =  accessTokenService.extract(accessToken).sessionId
-            stepUpToken = stepUpTokenService.create(user.id, sessionId)
+            sessionId = accessTokenService.extract(accessToken).getOrThrow().requireAuthentication().getOrThrow().sessionId
+            stepUpToken = stepUpTokenService.create(user.id.getOrThrow(), sessionId).getOrThrow()
         }
 
         if (email2faEnabled) {
             if (twoFactorEmailProperties.enableByDefault) {
-                twoFactorToken = twoFactorAuthenticationTokenService.create(user.id).value
+                twoFactorToken = twoFactorAuthenticationTokenService.create(user.id.getOrThrow()).getOrThrow().value
             } else {
 
-                user = userService.findById(user.id)
+                user = userService.findById(user.id.getOrThrow()).getOrThrow()
                 val code = user.sensitive.security.twoFactor.email.code
 
                 webTestClient.post()
@@ -336,27 +354,25 @@ class BaseSpringBootTest() {
                     .exchange()
                     .expectStatus().isOk
 
-                user = userService.findById(user.id)
+                user = userService.findById(user.id.getOrThrow()).getOrThrow()
 
-                refreshToken = refreshTokenService.create(user.id, sessionId, refreshTokenId).value
-                stepUpToken = stepUpTokenService.create(user.id, sessionId)
+                refreshToken = refreshTokenService.create(user.id.getOrThrow(), sessionId, refreshTokenId).getOrThrow().value
+                stepUpToken = stepUpTokenService.create(user.id.getOrThrow(), sessionId).getOrThrow()
 
                 user.updateLastActive()
-                user.addOrUpdatesession(sessionId, SessionInfo(refreshTokenId = refreshTokenId))
+                user.addOrUpdateSession(sessionId, SessionInfo(refreshTokenId = refreshTokenId))
 
-                twoFactorToken = twoFactorAuthenticationTokenService.create(user.id).value
+                twoFactorToken = twoFactorAuthenticationTokenService.create(user.id.getOrThrow()).getOrThrow().value
             }
         }
 
-        user = userService.findById(user.id)
+        user = userService.findById(user.id.getOrThrow()).getOrThrow()
         
-        if (roles != listOf(Role.USER)) {
-            roles.forEach { role ->
-                user.addRole(role)
-            }
+        if (roles.contains(Role.User.ADMIN)) {
+            user.addAdminRole()
         }
         user.groups.addAll(groups)
-        user = userService.save(user)
+        user = userService.save(user).getOrThrow()
 
         val mailVerificationToken = user.sensitive.security.email.verificationSecret
         val passwordResetToken = user.sensitive.security.password.resetSecret
@@ -365,7 +381,7 @@ class BaseSpringBootTest() {
             user,
             actualEmail,
             password,
-            accessTokenService.create(user, sessionId).value,
+            accessTokenService.create(user, sessionId).getOrThrow().value,
             refreshToken!!,
             twoFactorToken,
             stepUpToken.value,
@@ -374,15 +390,16 @@ class BaseSpringBootTest() {
             mailVerificationToken,
             passwordResetToken,
             sessionId,
-            user.sensitive.security.twoFactor.email.code
+            user.sensitive.security.twoFactor.email.code,
+            accessTokenService.create(user, sessionId).getOrThrow()
         )
     }
 
-    suspend fun createAdmin(email: String = "admin@example.com"): TestRegisterResponse {
-        return registerUser(emailSuffix = email, roles = listOf(Role.USER, Role.ADMIN))
+    suspend fun createAdmin(email: String = "admin@example.com"): TestRegisterResponse<User> {
+        return registerUser(emailSuffix = email, roles = listOf(Role.User.USER, Role.User.ADMIN))
     }
     
-    suspend fun createGuest(): TestRegisterResponse {
+    suspend fun createGuest(): TestRegisterResponse<Guest> {
         val req = CreateGuestRequest(name = "Guest", null)
 
         val result = webTestClient.post()
@@ -398,7 +415,7 @@ class BaseSpringBootTest() {
         val responseBody = result.responseBody
         requireNotNull(responseBody)
 
-        val guest = userService.findById(responseBody.user.id)
+        val guest = guestService.findById(responseBody.user.id).getOrThrow()
 
         val stepUpTokenValue = webTestClient.post()
             .uri("/api/auth/step-up")
@@ -424,7 +441,8 @@ class BaseSpringBootTest() {
             mailVerificationSecret = null,
             passwordResetSecret = null,
             sessionId = guest.sensitive.sessions.keys.first(),
-            email2faCode = guest.sensitive.security.twoFactor.email.code,
+            email2faCode = "123456",
+            accessTokenToken = accessToken
         )
     }
 
@@ -432,26 +450,26 @@ class BaseSpringBootTest() {
         emailSuffix: String = "oauth2@email.com",
         provider: String = "github",
         principalId: String = "123456"
-    ): TestRegisterResponse {
+    ): TestRegisterResponse<User> {
         val actualEmail = "${counter.getAndIncrement()}$emailSuffix"
-        val user = userService.save(UserDocument.ofIdentityProvider(
+        val user = userService.save(User.ofProvider(
             email = actualEmail,
             provider = provider,
             principalId = principalId,
             mailTwoFactorCodeExpiresIn = 10,
             name = "Name"
-        ))
+        )).getOrThrow()
 
         val sessionId = UUID.randomUUID()
 
-        val accessToken = accessTokenService.create(user, sessionId).value
-        val refreshToken = refreshTokenService.create(user.id, sessionId, "tokenId").value
-        val stepUpToken = stepUpTokenService.create(user.id, sessionId).value
+        val accessToken = accessTokenService.create(user, sessionId).getOrThrow()
+        val refreshToken = refreshTokenService.create(user.id.getOrThrow(), sessionId, "tokenId").getOrThrow().value
+        val stepUpToken = stepUpTokenService.create(user.id.getOrThrow(), sessionId).getOrThrow().value
 
         return TestRegisterResponse(
             info = userService.save(user.copy(sensitive = user.sensitive.copy(sessions = user.sensitive.sessions.apply { put(sessionId,
-                SessionInfo()) } ))),
-            accessToken = accessToken,
+                SessionInfo()) } ))).getOrThrow(),
+            accessToken = accessToken.value,
             refreshToken = refreshToken,
             stepUpToken = stepUpToken,
             email = actualEmail,
@@ -462,11 +480,12 @@ class BaseSpringBootTest() {
             mailVerificationSecret = null,
             passwordResetSecret = null,
             sessionId = sessionId,
-            email2faCode = user.sensitive.security.twoFactor.email.code
+            email2faCode = user.sensitive.security.twoFactor.email.code,
+            accessTokenToken = accessToken
         )
     }
 
-    suspend fun deleteAccount(response: TestRegisterResponse) {
+    suspend fun deleteAccount(response: TestRegisterResponse<*>) {
         webTestClient.delete()
             .uri("/api/users/me")
             .accessTokenCookie(response.accessToken)
@@ -475,7 +494,7 @@ class BaseSpringBootTest() {
             .expectStatus().isOk
     }
 
-    suspend fun deleteAllSessions(response: TestRegisterResponse) {
+    suspend fun deleteAllSessions(response: TestRegisterResponse<*>) {
         webTestClient.delete()
             .uri("/api/auth/sessions")
             .accessTokenCookie(response.accessToken)
@@ -485,35 +504,35 @@ class BaseSpringBootTest() {
 
     suspend fun EntityExchangeResult<*>.extractAccessToken(): AccessToken {
         return this.responseCookies[SessionTokenType.Access.cookieName]?.firstOrNull()?.value
-            ?.let { accessTokenService.extract(it) }
-            ?: throw TokenException("No AccessToken found in response")
+            ?.let { accessTokenService.extract(it).getOrThrow().requireAuthentication().getOrThrow().accessToken }
+            ?: throw TokenExtractionException.Missing("No AccessToken found in response")
     }
 
     suspend fun EntityExchangeResult<*>.extractRefreshToken(): RefreshToken {
         return this.responseCookies[SessionTokenType.Refresh.cookieName]?.firstOrNull()?.value
-            ?.let { refreshTokenService.extract(it) }
-            ?: throw TokenException("No RefreshToken found in response")
+            ?.let { refreshTokenService.extract(it).getOrThrow() }
+            ?: throw TokenExtractionException.Missing("No RefreshToken found in response")
     }
 
     suspend fun EntityExchangeResult<*>.extractTwoFactorAuthenticationToken(): TwoFactorAuthenticationToken {
         return this.responseCookies[TwoFactorTokenType.Authentication.cookieName]
             ?.firstOrNull()?.value
-            ?.let { twoFactorAuthenticationTokenService.extract(it) }
-            ?: throw TokenException("No TwoFactorAuthenticationToken found in response")
+            ?.let { twoFactorAuthenticationTokenService.extract(it).getOrThrow() }
+            ?: throw TokenExtractionException.Missing("No TwoFactorAuthenticationToken found in response")
     }
 
     suspend fun EntityExchangeResult<*>.extractStepUpToken(userId: ObjectId, sessionId: UUID): StepUpToken {
         return this.responseCookies[SessionTokenType.StepUp.cookieName]
             ?.firstOrNull()?.value
-            ?.let { stepUpTokenService.extract(it, userId, sessionId) }
-            ?: throw TokenException("No StepUpToken found in response")
+            ?.let { stepUpTokenService.extract(it, userId, sessionId).getOrThrow() }
+            ?: throw TokenExtractionException.Missing("No StepUpToken found in response")
     }
 
-    suspend fun EntityExchangeResult<*>.extractOAuth2ProviderConnectionToken(user: UserDocument): OAuth2ProviderConnectionToken {
+    suspend fun EntityExchangeResult<*>.extractOAuth2ProviderConnectionToken(user: Principal<*,*>): OAuth2ProviderConnectionToken {
         return this.responseCookies[OAuth2TokenType.ProviderConnection.cookieName]
             ?.firstOrNull()?.value
-            ?.let { oAuth2ProviderConnectionTokenService.extract(it, user) }
-            ?: throw TokenException("No OAuth2ProviderConnectionToken found in response")
+            ?.let { oAuth2ProviderConnectionTokenService.extract(it, user).getOrThrow() }
+            ?: throw TokenExtractionException.Missing("No OAuth2ProviderConnectionToken found in response")
     }
 
     fun <S: WebTestClient.RequestHeadersSpec<S>> WebTestClient.RequestHeadersSpec<S>.accessTokenCookie(tokenValue: String): WebTestClient.RequestBodySpec {

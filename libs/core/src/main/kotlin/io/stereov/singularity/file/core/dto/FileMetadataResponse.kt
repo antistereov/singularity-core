@@ -16,5 +16,5 @@ data class FileMetadataResponse(
 ) : ContentResponse<FileMetadataDocument> {
 
     val originalUrl: String?
-        get() = renditions[FileMetadataDocument.ORIGINAL_RENDITION]?.url
+        get() = renditions["original"]?.url
 }

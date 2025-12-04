@@ -1,8 +1,11 @@
 package io.stereov.singularity.auth.core.controller
 
+import com.github.michaelbull.result.getOrThrow
+import com.github.michaelbull.result.onFailure
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.auth.core.component.CookieCreator
+import io.stereov.singularity.auth.alert.properties.SecurityAlertProperties
+import io.stereov.singularity.auth.alert.service.LoginAlertService
 import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.auth.core.dto.request.RegisterUserRequest
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
@@ -11,33 +14,38 @@ import io.stereov.singularity.auth.core.dto.response.AuthenticationStatusRespons
 import io.stereov.singularity.auth.core.dto.response.LoginResponse
 import io.stereov.singularity.auth.core.dto.response.RefreshTokenResponse
 import io.stereov.singularity.auth.core.dto.response.StepUpResponse
-import io.stereov.singularity.auth.core.model.token.SessionTokenType
+import io.stereov.singularity.auth.core.exception.*
+import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.auth.core.properties.AuthProperties
-import io.stereov.singularity.auth.core.properties.SecurityAlertProperties
 import io.stereov.singularity.auth.core.service.AuthenticationService
 import io.stereov.singularity.auth.core.service.AuthorizationService
-import io.stereov.singularity.auth.core.service.LoginAlertService
-import io.stereov.singularity.auth.core.service.token.AccessTokenService
-import io.stereov.singularity.auth.core.service.token.RefreshTokenService
-import io.stereov.singularity.auth.core.service.token.StepUpTokenService
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
-import io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException
-import io.stereov.singularity.auth.oauth2.model.token.OAuth2TokenType
-import io.stereov.singularity.auth.twofactor.model.token.TwoFactorTokenType
+import io.stereov.singularity.auth.token.component.CookieCreator
+import io.stereov.singularity.auth.token.exception.*
+import io.stereov.singularity.auth.token.model.OAuth2TokenType
+import io.stereov.singularity.auth.token.model.SessionTokenType
+import io.stereov.singularity.auth.token.model.TwoFactorTokenType
+import io.stereov.singularity.auth.token.service.AccessTokenService
+import io.stereov.singularity.auth.token.service.RefreshTokenService
+import io.stereov.singularity.auth.token.service.StepUpTokenService
+import io.stereov.singularity.auth.token.service.TwoFactorAuthenticationTokenService
 import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthenticationService
-import io.stereov.singularity.auth.twofactor.service.token.TwoFactorAuthenticationTokenService
-import io.stereov.singularity.email.core.exception.model.EmailCooldownException
+import io.stereov.singularity.database.core.exception.DocumentException
 import io.stereov.singularity.email.core.properties.EmailProperties
-import io.stereov.singularity.global.exception.model.InvalidDocumentException
-import io.stereov.singularity.global.model.ErrorResponse
+import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.global.model.SuccessResponse
-import io.stereov.singularity.user.core.mapper.UserMapper
-import io.stereov.singularity.user.core.service.UserService
+import io.stereov.singularity.global.util.getOrNull
+import io.stereov.singularity.principal.core.exception.FindPrincipalByIdException
+import io.stereov.singularity.principal.core.exception.FindUserByIdException
+import io.stereov.singularity.principal.core.exception.PrincipalException
+import io.stereov.singularity.principal.core.exception.PrincipalMapperException
+import io.stereov.singularity.principal.core.mapper.PrincipalMapper
+import io.stereov.singularity.principal.core.model.User
+import io.stereov.singularity.principal.core.service.PrincipalService
+import io.stereov.singularity.principal.core.service.UserService
 import io.swagger.v3.oas.annotations.ExternalDocumentation
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.media.Content
-import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -55,7 +63,7 @@ import java.util.*
 )
 class AuthenticationController(
     private val authenticationService: AuthenticationService,
-    private val userMapper: UserMapper,
+    private val principalMapper: PrincipalMapper,
     private val authProperties: AuthProperties,
     private val geoLocationService: GeolocationService,
     private val twoFactorAuthenticationTokenService: TwoFactorAuthenticationTokenService,
@@ -69,6 +77,7 @@ class AuthenticationController(
     private val loginAlertService: LoginAlertService,
     private val securityAlertProperties: SecurityAlertProperties,
     private val emailProperties: EmailProperties,
+    private val principalService: PrincipalService,
 ) {
 
     private val logger: KLogger
@@ -88,7 +97,7 @@ class AuthenticationController(
             - The `password` must be at least 8 characters long and include at least one uppercase letter, 
               one lowercase letter, one number, and one special character (!@#$%^&*()_+={}[]|\:;'"<>,.?/).
 
-            ### Behavior for Registering Account with Existing Email
+            ### Behavior for Registering Principal with Existing Email
             
             If the email is already connected to an existing account, a [warning](https://singularity.stereov.io/docs/guides/auth/security-alerts#core-identity-alerts)
             will be sent to the corresponding email address informing the user
@@ -108,19 +117,10 @@ class AuthenticationController(
             ApiResponse(
                 responseCode = "200",
                 description = "Request was successful. An email was sent to the given email address. If this email exists, a notification will be send. If the email doesn't exist, an account will be created.",
-            ),
-            ApiResponse(
-                responseCode = "304",
-                description = "User is already authenticated. Authenticated session state has not changed since last request.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "400",
-                description = "`email` or `password` are invalid.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
     )
+    @ThrowsDomainError([RegisterException::class])
     suspend fun register(
         @RequestBody @Valid payload: RegisterUserRequest,
         @RequestParam("send-email") sendEmail: Boolean = true,
@@ -129,6 +129,7 @@ class AuthenticationController(
         logger.info { "Executing register" }
 
         authenticationService.register(payload, sendEmail, locale)
+            .getOrThrow { when (it) { is RegisterException -> it } }
 
         return ResponseEntity.ok(SuccessResponse())
     }
@@ -193,19 +194,18 @@ class AuthenticationController(
             ApiResponse(
                 responseCode = "200",
                 description = "Authentication successful. Returns tokens and user details.",
-            ),
-            ApiResponse(
-                responseCode = "304",
-                description = "User is already authenticated. Authenticated session state has not changed since last request.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "Invalid credentials or trying to log in user that did not set up authentication using password.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
     )
+    @ThrowsDomainError([
+        LoginException::class,
+        DocumentException.Invalid::class,
+        TwoFactorAuthenticationTokenCreationException::class,
+        PrincipalMapperException::class,
+        CookieException.Creation::class,
+        AccessTokenCreationException::class,
+        RefreshTokenCreationException::class,
+    ])
     suspend fun login(
         exchange: ServerWebExchange,
         @RequestBody payload: LoginRequest,
@@ -214,52 +214,75 @@ class AuthenticationController(
         logger.info { "Executing login" }
 
         val user = authenticationService.login(payload, locale)
+            .getOrThrow { when (it) { is LoginException -> it } }
 
         if (user.twoFactorEnabled) {
-            runCatching { twoFactorAuthenticationService.handleTwoFactor(user, locale) }
-            val twoFactorAuthenticationToken = twoFactorAuthenticationTokenService.create(user.id)
+            twoFactorAuthenticationService.handleTwoFactor(user, locale)
+                .onFailure { ex -> logger.error(ex) { "Failed to handle two factor authentication" } }
+
+            val userId = user.id.getOrThrow { when (it) { is DocumentException.Invalid -> it }}
+
+            val twoFactorAuthenticationToken = twoFactorAuthenticationTokenService.create(userId)
+                .getOrThrow { when (it) { is TwoFactorAuthenticationTokenCreationException -> it } }
+
+            val response = principalMapper.toResponse(user)
+                .getOrThrow { when (it) { is PrincipalMapperException -> it} }
+
+            val twoFactorAuthenticationCookie = cookieCreator.createCookie(twoFactorAuthenticationToken)
+                .getOrThrow { when (it) { is CookieException.Creation -> it} }
 
             return ResponseEntity.ok()
-                .header("Set-Cookie", cookieCreator.createCookie(twoFactorAuthenticationToken).toString())
+                .header("Set-Cookie", twoFactorAuthenticationCookie.toString())
                 .body(
                     LoginResponse(
-                        user = userMapper.toResponse(user),
+                        user = response,
                         twoFactorRequired = true,
                         twoFactorMethods = user.twoFactorMethods,
                         twoFactorAuthenticationToken = if (authProperties.allowHeaderAuthentication) twoFactorAuthenticationToken.value else null,
-                        preferredTwoFactorMethod = user.preferredTwoFactorMethod,
+                        preferredTwoFactorMethod = user.preferredTwoFactorMethod.getOrNull(),
                         accessToken = null,
                         refreshToken = null,
-                        location = geoLocationService.getLocationOrNull(exchange.request)
+                        location = geoLocationService.getLocationOrNull(exchange)
                     )
                 )
         }
 
         val sessionId = UUID.randomUUID()
         val accessToken = accessTokenService.create(user, sessionId)
+            .getOrThrow { when (it) { is AccessTokenCreationException -> it} }
         val refreshToken = refreshTokenService.create(user, sessionId, payload.session, exchange)
+            .getOrThrow { when (it) { is RefreshTokenCreationException -> it} }
+
+        val response = principalMapper.toResponse(user)
+            .getOrThrow { when (it) { is PrincipalMapperException -> it} }
 
         val res = LoginResponse(
-            user = userMapper.toResponse(user),
+            user = response,
             accessToken = if (authProperties.allowHeaderAuthentication) accessToken.value else null,
             refreshToken = if (authProperties.allowHeaderAuthentication) refreshToken.value else null,
             twoFactorRequired = false,
             twoFactorMethods = null,
             twoFactorAuthenticationToken = null,
             preferredTwoFactorMethod = null,
-            location = geoLocationService.getLocationOrNull(exchange.request)
+            location = geoLocationService.getLocationOrNull(exchange)
         )
 
         val session = user.sensitive.sessions[sessionId]
-            ?: throw InvalidDocumentException("New session was not stored in document")
+            ?: throw PrincipalException.InvalidDocument("New session was not stored in document")
+
         if (securityAlertProperties.login && emailProperties.enable) {
             loginAlertService.send(user, locale, session)
-
+                .onFailure { ex -> logger.error(ex) { "Failed to send login alert" } }
         }
 
+        val accessTokenCookie = cookieCreator.createCookie(accessToken)
+            .getOrThrow { when (it) { is CookieException.Creation -> it} }
+        val refreshTokenCookie = cookieCreator.createCookie(refreshToken)
+            .getOrThrow { when (it) { is CookieException.Creation -> it} }
+
         return ResponseEntity.ok()
-            .header("Set-Cookie", cookieCreator.createCookie(accessToken).toString())
-            .header("Set-Cookie", cookieCreator.createCookie(refreshToken).toString())
+            .header("Set-Cookie", accessTokenCookie.toString())
+            .header("Set-Cookie", refreshTokenCookie.toString())
             .body(res)
     }
 
@@ -283,25 +306,34 @@ class AuthenticationController(
             ApiResponse(
                 responseCode = "200",
                 description = "Logout successful.",
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "Invalid AccessToken.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
     )
+    @ThrowsDomainError([
+        AccessTokenExtractionException::class,
+        CookieException.Creation::class,
+        LogoutException::class
+    ])
     suspend fun logout(): ResponseEntity<SuccessResponse> {
         logger.info { "Executing logout" }
 
+        val authenticationOutcome = authorizationService.getAuthenticationOutcome()
+            .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
+
         val clearAccessToken = cookieCreator.clearCookie(SessionTokenType.Access)
+            .getOrThrow { when (it) { is CookieException.Creation -> it } }
         val clearRefreshToken = cookieCreator.clearCookie(SessionTokenType.Refresh)
+            .getOrThrow { when (it) { is CookieException.Creation -> it } }
         val clearStepUpToken = cookieCreator.clearCookie(SessionTokenType.StepUp)
+            .getOrThrow { when (it) { is CookieException.Creation -> it } }
         val clearSessionToken = cookieCreator.clearCookie(SessionTokenType.Session)
+            .getOrThrow { when (it) { is CookieException.Creation -> it } }
         val clearTwoFactorAuthenticationToken = cookieCreator.clearCookie(TwoFactorTokenType.Authentication)
+            .getOrThrow { when (it) { is CookieException.Creation -> it } }
         val clearOAuth2ProviderConnectionToken = cookieCreator.clearCookie(OAuth2TokenType.ProviderConnection)
 
-        authenticationService.logout()
+        authenticationService.logout(authenticationOutcome)
+            .getOrThrow { when (it) { is LogoutException -> it } }
 
         return ResponseEntity.ok()
             .header("Set-Cookie", clearAccessToken.toString())
@@ -315,7 +347,7 @@ class AuthenticationController(
 
     @PostMapping("/refresh")
     @Operation(
-        summary = "Refresh Access Token",
+        summary = "Refresh Access EmailVerificationTokenCreation",
         description = """
             Request a new [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token).
             
@@ -339,14 +371,17 @@ class AuthenticationController(
             ApiResponse(
                 responseCode = "200",
                 description = "Authentication successful. Returns tokens and user details.",
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "Invalid RefreshToken.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
     )
+    @ThrowsDomainError([
+        RefreshTokenExtractionException::class,
+        FindUserByIdException::class,
+        AccessTokenCreationException::class,
+        RefreshTokenCreationException::class,
+        PrincipalMapperException::class,
+        CookieException.Creation::class
+    ])
     suspend fun refreshAccessToken(
         exchange: ServerWebExchange,
         @RequestBody(required = false) sessionInfo: SessionInfoRequest?
@@ -354,21 +389,33 @@ class AuthenticationController(
         logger.debug { "Refreshing token" }
 
         val refreshToken = refreshTokenService.extract(exchange)
-        val user = userService.findByIdOrNull(refreshToken.userId)
-            ?: throw InvalidTokenException("The corresponds to a non-existing user")
+            .getOrThrow { when (it) { is RefreshTokenExtractionException -> it } }
+
+        val user = userService.findById(refreshToken.userId)
+            .getOrThrow { FindUserByIdException.from(it) }
 
         val newAccessToken = accessTokenService.create(user, refreshToken.sessionId)
+            .getOrThrow { when (it) { is AccessTokenCreationException -> it } }
         val newRefreshToken = refreshTokenService.create(user, refreshToken.sessionId, sessionInfo, exchange)
+            .getOrThrow { when (it) { is RefreshTokenCreationException -> it } }
+
+        val response = principalMapper.toResponse(user)
+            .getOrThrow { when (it) { is PrincipalMapperException -> it } }
 
         val res = RefreshTokenResponse(
-            userMapper.toResponse(user),
+            response,
             if (authProperties.allowHeaderAuthentication) newAccessToken.value else null,
             if (authProperties.allowHeaderAuthentication) newRefreshToken.value else null,
         )
 
+        val accessTokenCookie = cookieCreator.createCookie(newAccessToken)
+            .getOrThrow { when (it) { is CookieException.Creation -> it } }
+        val refreshTokenCookie = cookieCreator.createCookie(newRefreshToken)
+            .getOrThrow { when (it) { is CookieException.Creation -> it } }
+
         return ResponseEntity.ok()
-            .header("Set-Cookie", cookieCreator.createCookie(newAccessToken).toString())
-            .header("Set-Cookie", cookieCreator.createCookie(newRefreshToken).toString())
+            .header("Set-Cookie", accessTokenCookie.toString())
+            .header("Set-Cookie", refreshTokenCookie.toString())
             .body(res)
     }
 
@@ -423,48 +470,63 @@ class AuthenticationController(
             ApiResponse(
                 responseCode = "200",
                 description = "Authentication successful.",
-            ),
-            ApiResponse(
-                responseCode = "400",
-                description = "Trying to request step-up for user that authenticated only via OAuth2 providers or " +
-                        "missing request body for authenticated users.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "Invalid credentials.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
     )
+    @ThrowsDomainError([
+        AccessTokenExtractionException::class,
+        AuthenticationException.AuthenticationRequired::class,
+        FindPrincipalByIdException::class,
+        DocumentException.Invalid::class,
+        TwoFactorAuthenticationTokenCreationException::class,
+        StepUpException::class,
+        StepUpTokenCreationException::class,
+        CookieException.Creation::class,
+    ])
     suspend fun stepUp(
         @RequestBody(required = false) req: StepUpRequest?,
         @RequestParam locale: Locale?
     ): ResponseEntity<StepUpResponse> {
         logger.info { "Executing step up request" }
 
-        val user = authenticationService.stepUp(req)
+        val authenticationOutcome = authorizationService.getAuthenticationOutcome()
+            .getOrThrow { when (it) { is AccessTokenExtractionException -> it }}
+            .requireAuthentication()
+            .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it } }
 
-        if (user.twoFactorEnabled) {
-            runCatching { twoFactorAuthenticationService.handleTwoFactor(user, locale) }
+        var principal = principalService.findById(authenticationOutcome.principalId)
+            .getOrThrow { when (it) { is FindPrincipalByIdException -> it } }
+        val sessionId = authenticationOutcome.sessionId
 
-            val twoFactorToken = twoFactorAuthenticationTokenService.create(user.id)
+        principal = authenticationService.stepUp(principal, sessionId, req)
+            .getOrThrow { when (it) { is StepUpException -> it } }
+        val principalId = principal.id.getOrThrow { when (it) { is DocumentException.Invalid -> it } }
+
+        if (principal is User && principal.twoFactorEnabled) {
+            twoFactorAuthenticationService.handleTwoFactor(principal, locale)
+                .onFailure { ex -> logger.error(ex) { "Failed to handle two factor authentication" } }
+
+            val twoFactorToken = twoFactorAuthenticationTokenService.create(principalId)
+                .getOrThrow { when (it) { is TwoFactorAuthenticationTokenCreationException -> it } }
+
+            val twoFactorCookie = cookieCreator.createCookie(twoFactorToken)
+                .getOrThrow { when (it) { is CookieException.Creation -> it } }
 
             return ResponseEntity.ok()
-                .header("Set-Cookie", cookieCreator.createCookie(twoFactorToken).toString())
+                .header("Set-Cookie", twoFactorCookie.toString())
                 .body(
                     StepUpResponse(
                         twoFactorRequired = true,
-                        twoFactorMethods = user.twoFactorMethods,
+                        twoFactorMethods = principal.twoFactorMethods,
                         twoFactorAuthenticationToken = if (authProperties.allowHeaderAuthentication) twoFactorToken.value else null,
                         stepUpToken = null,
-                        preferredTwoFactorMethod = user.preferredTwoFactorMethod
+                        preferredTwoFactorMethod = principal.preferredTwoFactorMethod.getOrNull()
                     )
                 )
         }
 
-        val sessionId = authorizationService.getSessionId()
-        val stepUpToken = stepUpTokenService.create(user.id, sessionId)
+        val stepUpToken = stepUpTokenService.create(principalId, sessionId)
+            .getOrThrow { when (it) { is StepUpTokenCreationException -> it } }
 
         val res = StepUpResponse(
             twoFactorRequired = false,
@@ -474,8 +536,11 @@ class AuthenticationController(
             preferredTwoFactorMethod = null,
         )
 
+        val stepUpCookie = cookieCreator.createCookie(stepUpToken)
+            .getOrThrow { when (it) { is CookieException.Creation -> it } }
+
         return ResponseEntity.ok()
-            .header("Set-Cookie", cookieCreator.createCookie(stepUpToken).toString())
+            .header("Set-Cookie", stepUpCookie.toString())
             .body(res)
     }
 
@@ -503,37 +568,56 @@ class AuthenticationController(
             ApiResponse(
                 responseCode = "200",
                 description = "The current user's authentication status.",
-            ),
-            ApiResponse(
-                responseCode = "404",
-                description = "The user contained in the TwoFactorAuthenticationToken does not exist.",
-                content = [Content(schema = Schema(ErrorResponse::class))]
             )
         ]
     )
+    @ThrowsDomainError([
+        AccessTokenExtractionException::class,
+        FindPrincipalByIdException::class,
+        PrincipalException.InvalidDocument::class,
+    ])
     suspend fun getAuthenticationStatus(exchange: ServerWebExchange): ResponseEntity<AuthenticationStatusResponse> {
-        val authorizedUserId = authorizationService.getUserIdOrNull()
-        val currentSessionId = authorizationService.getSessionIdOrNull()
-        val twoFactorToken = runCatching { twoFactorAuthenticationTokenService.extract(exchange) }.getOrNull()
+        val authenticationOutcome = authorizationService.getAuthenticationOutcome()
+            .getOrThrow { when (it) { is AccessTokenExtractionException -> it }}
+
+        val authorizedUserId = when (authenticationOutcome) {
+            is AuthenticationOutcome.Authenticated -> authenticationOutcome.principalId
+            is AuthenticationOutcome.None -> null
+        }
+        val currentSessionId = when (authenticationOutcome) {
+            is AuthenticationOutcome.Authenticated -> authenticationOutcome.sessionId
+            is AuthenticationOutcome.None -> null
+        }
+        val twoFactorToken = twoFactorAuthenticationTokenService.extract(exchange)
+            .getOrNull()
 
         val authorized = authorizedUserId != null
         val twoFactorRequired = if (authorized) false else (twoFactorToken != null)
 
         val stepUpToken = if (authorized && currentSessionId != null) {
-            runCatching { stepUpTokenService.extract(exchange, authorizedUserId, currentSessionId) }
+            stepUpTokenService.extract(exchange, authorizedUserId, currentSessionId)
                 .getOrNull()
         } else null
         val stepUp = stepUpToken != null
 
-        val (twoFactorMethods, preferredTwoFactorMethod) = if (twoFactorRequired && twoFactorToken != null) {
-            val user = userService.findById(twoFactorToken.userId)
+        val principal = if (authorizedUserId != null || twoFactorToken != null) {
+            principalService.findById(authorizedUserId ?: twoFactorToken!!.userId)
+                .getOrThrow { when (it) { is FindPrincipalByIdException -> it } }
+        } else null
 
-            user.twoFactorMethods to user.preferredTwoFactorMethod
+        val (twoFactorMethods, preferredTwoFactorMethod) = if (principal != null && principal is User) {
+            if (principal.twoFactorEnabled) {
+                principal.twoFactorMethods to principal.preferredTwoFactorMethod
+                    .getOrThrow { PrincipalException.InvalidDocument("2FA is enabled but no preferred method is set") }
+            } else {
+                null to null
+            }
         } else null to null
 
-        val emailVerified = authorizedUserId
-            ?.let { userService.findByIdOrNull(it) }
-            ?.sensitive?.security?.email?.verified
+        val emailVerified = when (principal) {
+            is User -> principal.sensitive.security.email.verified
+            else -> null
+        }
 
         return ResponseEntity.ok(
             AuthenticationStatusResponse(

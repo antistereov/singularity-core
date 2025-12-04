@@ -1,8 +1,9 @@
 package io.stereov.singularity.content.invitation.config
 
+import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.jwt.service.JwtService
 import io.stereov.singularity.content.invitation.controller.InvitationController
-import io.stereov.singularity.content.invitation.exception.handler.InvitationExceptionHandler
+import io.stereov.singularity.content.invitation.mapper.InvitationMapper
 import io.stereov.singularity.content.invitation.properties.InvitationProperties
 import io.stereov.singularity.content.invitation.repository.InvitationRepository
 import io.stereov.singularity.content.invitation.service.InvitationService
@@ -14,8 +15,8 @@ import io.stereov.singularity.email.core.service.EmailService
 import io.stereov.singularity.email.template.service.TemplateService
 import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.global.properties.AppProperties
+import io.stereov.singularity.principal.core.service.UserService
 import io.stereov.singularity.translate.service.TranslateService
-import io.stereov.singularity.user.core.service.UserService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -33,6 +34,30 @@ import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRep
 @EnableReactiveMongoRepositories(basePackageClasses = [InvitationRepository::class])
 @EnableConfigurationProperties(InvitationProperties::class)
 class InvitationConfiguration {
+
+    // Controller
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun invitationController(
+        invitationService: InvitationService,
+        context: ApplicationContext,
+        authorizationService: AuthorizationService,
+        invitationTokenService: InvitationTokenService,
+        userService: UserService,
+    ) = InvitationController(
+        invitationService,
+        context,
+        authorizationService,
+        invitationTokenService,
+        userService
+    )
+
+    // Mapper
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun invitationMapper() = InvitationMapper()
 
     // Service
 
@@ -72,18 +97,4 @@ class InvitationConfiguration {
     @ConditionalOnMissingBean
     fun invitationTokenService(jwtService: JwtService) = InvitationTokenService(jwtService)
 
-    // Controller
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun invitationController(
-        invitationService: InvitationService,
-        context: ApplicationContext
-    ) = InvitationController(invitationService, context)
-
-    // Exception Handler
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun invitationExceptionHandler() = InvitationExceptionHandler()
 }

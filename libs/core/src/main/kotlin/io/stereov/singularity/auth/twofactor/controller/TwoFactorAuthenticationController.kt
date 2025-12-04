@@ -1,29 +1,35 @@
 package io.stereov.singularity.auth.twofactor.controller
 
-import io.stereov.singularity.auth.core.component.CookieCreator
+import com.github.michaelbull.result.getOrThrow
 import io.stereov.singularity.auth.core.dto.response.LoginResponse
 import io.stereov.singularity.auth.core.dto.response.StepUpResponse
-import io.stereov.singularity.auth.core.exception.model.UserAlreadyAuthenticatedException
+import io.stereov.singularity.auth.core.exception.AuthenticationException
 import io.stereov.singularity.auth.core.properties.AuthProperties
 import io.stereov.singularity.auth.core.service.AuthorizationService
-import io.stereov.singularity.auth.core.service.token.AccessTokenService
-import io.stereov.singularity.auth.core.service.token.RefreshTokenService
-import io.stereov.singularity.auth.core.service.token.StepUpTokenService
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
-import io.stereov.singularity.auth.jwt.exception.model.InvalidTokenException
+import io.stereov.singularity.auth.token.component.CookieCreator
+import io.stereov.singularity.auth.token.exception.*
+import io.stereov.singularity.auth.token.model.TwoFactorTokenType
+import io.stereov.singularity.auth.token.service.AccessTokenService
+import io.stereov.singularity.auth.token.service.RefreshTokenService
+import io.stereov.singularity.auth.token.service.StepUpTokenService
+import io.stereov.singularity.auth.token.service.TwoFactorAuthenticationTokenService
 import io.stereov.singularity.auth.twofactor.dto.request.ChangePreferredTwoFactorMethodRequest
 import io.stereov.singularity.auth.twofactor.dto.request.CompleteLoginRequest
 import io.stereov.singularity.auth.twofactor.dto.request.CompleteStepUpRequest
-import io.stereov.singularity.auth.twofactor.model.token.TwoFactorTokenType
+import io.stereov.singularity.auth.twofactor.exception.ChangePreferredTwoFactorMethodException
+import io.stereov.singularity.auth.twofactor.exception.ValidateTwoFactorException
 import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthenticationService
-import io.stereov.singularity.global.model.ErrorResponse
+import io.stereov.singularity.database.core.exception.DocumentException
+import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.OpenApiConstants
-import io.stereov.singularity.user.core.dto.response.UserResponse
-import io.stereov.singularity.user.core.mapper.UserMapper
+import io.stereov.singularity.principal.core.dto.response.UserResponse
+import io.stereov.singularity.principal.core.exception.FindUserByIdException
+import io.stereov.singularity.principal.core.exception.PrincipalMapperException
+import io.stereov.singularity.principal.core.mapper.PrincipalMapper
+import io.stereov.singularity.principal.core.service.UserService
 import io.swagger.v3.oas.annotations.ExternalDocumentation
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.media.Content
-import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -45,12 +51,14 @@ class TwoFactorAuthenticationController(
     private val twoFactorAuthService: TwoFactorAuthenticationService,
     private val authProperties: AuthProperties,
     private val geolocationService: GeolocationService,
-    private val userMapper: UserMapper,
+    private val principalMapper: PrincipalMapper,
     private val accessTokenService: AccessTokenService,
     private val refreshTokenService: RefreshTokenService,
     private val stepUpTokenService: StepUpTokenService,
     private val cookieCreator: CookieCreator,
     private val authorizationService: AuthorizationService,
+    private val twoFactorAuthenticationTokenService: TwoFactorAuthenticationTokenService,
+    private val userService: UserService
 ) {
 
     @PostMapping("/login")
@@ -100,53 +108,63 @@ class TwoFactorAuthenticationController(
                 responseCode = "200",
                 description = "Information about the user and the tokens if header authentication is enabled.",
             ),
-            ApiResponse(
-                responseCode = "304",
-                description = "User is already authenticated.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "400",
-                description = "No 2FA code for an enabled 2FA method was provided or 2FA is disabled.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "Invalid or expired `TwoFactorAuthenticationToken`.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            )
         ]
     )
+    @ThrowsDomainError([
+        AuthenticationException.AlreadyAuthenticated::class,
+        TwoFactorAuthenticationTokenExtractionException::class,
+        ValidateTwoFactorException::class,
+        AccessTokenCreationException::class,
+        RefreshTokenCreationException::class,
+        CookieException.Creation::class,
+        PrincipalMapperException::class
+    ])
     suspend fun completeLogin(
         exchange: ServerWebExchange,
         @RequestBody req: CompleteLoginRequest
     ): ResponseEntity<LoginResponse> {
-        if (authorizationService.isAuthenticated())
-            throw UserAlreadyAuthenticatedException("Login not required: user is already authenticated.")
+        if (authorizationService.isAuthenticated()) {
+            throw AuthenticationException.AlreadyAuthenticated("Login not required: user is already authenticated.")
+        }
 
-        val user = twoFactorAuthService.validateTwoFactor(exchange, req)
+        val token = twoFactorAuthenticationTokenService.extract(exchange)
+            .getOrThrow { when (it) { is TwoFactorAuthenticationTokenExtractionException -> it } }
+
+        val user = twoFactorAuthService.validateTwoFactor(token, req)
+            .getOrThrow { when (it) { is ValidateTwoFactorException -> it } }
+
         val sessionId = UUID.randomUUID()
 
         val accessToken = accessTokenService.create(user, sessionId)
+            .getOrThrow { when (it) { is AccessTokenCreationException -> it } }
         val refreshToken = refreshTokenService.create(user, sessionId, req.session, exchange)
+            .getOrThrow { when (it) { is RefreshTokenCreationException -> it } }
 
+        val accessTokenCookie = cookieCreator.createCookie(accessToken)
+            .getOrThrow { when (it) { is CookieException.Creation -> it } }
+        val refreshTokenCookie = cookieCreator.createCookie(refreshToken)
+            .getOrThrow { when (it) { is CookieException.Creation -> it } }
         val clearTwoFactorCookie = cookieCreator.clearCookie(TwoFactorTokenType.Authentication)
+            .getOrThrow { when (it) { is CookieException.Creation -> it } }
+
+        val response = principalMapper.toResponse(user)
+            .getOrThrow { when (it) { is PrincipalMapperException -> it } }
 
         val res = LoginResponse(
             twoFactorRequired = false,
-            user = userMapper.toResponse(user),
+            user = response,
             accessToken = if (authProperties.allowHeaderAuthentication) accessToken.value else null,
             refreshToken = if (authProperties.allowHeaderAuthentication) refreshToken.value else null,
             twoFactorMethods = null,
             twoFactorAuthenticationToken = null,
             preferredTwoFactorMethod = null,
-            location = geolocationService.getLocationOrNull(exchange.request)
+            location = geolocationService.getLocationOrNull(exchange)
         )
 
         return ResponseEntity.ok()
             .header("Set-Cookie", clearTwoFactorCookie.toString())
-            .header("Set-Cookie", cookieCreator.createCookie(accessToken).toString())
-            .header("Set-Cookie", cookieCreator.createCookie(refreshToken).toString())
+            .header("Set-Cookie", accessTokenCookie.toString())
+            .header("Set-Cookie", refreshTokenCookie.toString())
             .body(res)
     }
 
@@ -188,30 +206,45 @@ class TwoFactorAuthenticationController(
             ApiResponse(
                 responseCode = "200",
                 description = "The token if header authentication is enabled.",
-            ),
-            ApiResponse(
-                responseCode = "400",
-                description = "No 2FA code for an enabled 2FA method was provided or 2FA is disabled.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "Invalid or expired `TwoFactorAuthenticationToken` or invalid or expired 2FA code.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
     )
+    @ThrowsDomainError([
+        TwoFactorAuthenticationTokenExtractionException::class,
+        ValidateTwoFactorException::class,
+        AccessTokenExtractionException::class,
+        AuthenticationException.AuthenticationRequired::class,
+        DocumentException.Invalid::class,
+        StepUpTokenCreationException::class,
+        CookieException.Creation::class
+    ])
     suspend fun completeStepUp(
         @RequestBody req: CompleteStepUpRequest,
         exchange: ServerWebExchange
     ): ResponseEntity<StepUpResponse> {
-        val user = twoFactorAuthService.validateTwoFactor(exchange, req)
-        val sessionId = authorizationService.getSessionId()
+        val token = twoFactorAuthenticationTokenService.extract(exchange)
+            .getOrThrow { when (it) { is TwoFactorAuthenticationTokenExtractionException -> it } }
 
-        if (user.id != authorizationService.getUserId())
-            throw InvalidTokenException("TwoFactorAuthenticationToken does not match AccessToken")
+        val user = twoFactorAuthService.validateTwoFactor(token, req)
+            .getOrThrow { when (it) { is ValidateTwoFactorException -> it } }
 
-        val stepUpToken = stepUpTokenService.create(user.id, sessionId)
+        val authentication = authorizationService.getAuthenticationOutcome()
+            .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
+            .requireAuthentication()
+            .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it } }
+
+        val sessionId = authentication.sessionId
+
+        val userId = user.id
+            .getOrThrow { when (it) { is DocumentException.Invalid -> it } }
+
+        if (userId != authentication.principalId) {
+            throw TwoFactorAuthenticationTokenExtractionException.Invalid(": TwoFactorAuthenticationToken does not match AccessToken")
+        }
+
+        val stepUpToken = stepUpTokenService.create(userId, sessionId)
+            .getOrThrow { when (it) { is StepUpTokenCreationException -> it } }
+
         val res = StepUpResponse(
             stepUpToken = if (authProperties.allowHeaderAuthentication) stepUpToken.value else null,
             twoFactorRequired = false,
@@ -220,8 +253,11 @@ class TwoFactorAuthenticationController(
             twoFactorAuthenticationToken = null
         )
 
+        val stepUpCookie = cookieCreator.createCookie(stepUpToken)
+            .getOrThrow { when (it) { is CookieException.Creation -> it } }
+
         return ResponseEntity.ok()
-            .header("Set-Cookie", cookieCreator.createCookie(stepUpToken).toString())
+            .header("Set-Cookie", stepUpCookie.toString())
             .body(res)
     }
 
@@ -254,24 +290,38 @@ class TwoFactorAuthenticationController(
             ApiResponse(
                 responseCode = "200",
                 description = "Updated user information.",
-            ),
-            ApiResponse(
-                responseCode = "400",
-                description = "This 2FA method is disabled or the user did not set up authentication via password.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "`AccessToken` or `StepUpToken` are invalid or expired or invalid or expired 2FA code.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
     )
+    @ThrowsDomainError([
+        AccessTokenExtractionException::class,
+        AuthenticationException.AuthenticationRequired::class,
+        StepUpTokenExtractionException::class,
+        FindUserByIdException::class,
+        ChangePreferredTwoFactorMethodException::class,
+        PrincipalMapperException::class
+    ])
     suspend fun changePreferredTwoFactorMethod(
-        @RequestBody req: ChangePreferredTwoFactorMethodRequest
+        @RequestBody req: ChangePreferredTwoFactorMethodRequest,
+        exchange: ServerWebExchange,
     ): ResponseEntity<UserResponse> {
-        return ResponseEntity.ok(
-            userMapper.toResponse(twoFactorAuthService.updatePreferredMethod(req))
-        )
+        val authentication = authorizationService.getAuthenticationOutcome()
+            .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
+            .requireAuthentication()
+            .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it } }
+
+        authorizationService.requireStepUp(authentication, exchange)
+            .getOrThrow { when (it) { is StepUpTokenExtractionException -> it } }
+
+        var user = userService.findById(authentication.principalId)
+            .getOrThrow { FindUserByIdException.from(it) }
+
+        user = twoFactorAuthService.changePreferredMethod(req, user)
+            .getOrThrow { when (it) { is ChangePreferredTwoFactorMethodException -> it } }
+
+        val response = principalMapper.toResponse(user)
+            .getOrThrow { when (it) { is PrincipalMapperException -> it }}
+
+        return ResponseEntity.ok(response)
     }
 }

@@ -40,15 +40,20 @@ You can only upload files smaller than the [configured maximum size](introductio
 class MyImageService(
     private val imageStore: ImageStore // Inject the FileStorage interface
 ) {
-    suspend fun uploadImage(userId: ObjectId, file: FilePart, key: String) {
+    suspend fun uploadImage(
+        authentication: AuthenticationOutcome.Authenticated,
+        file: StreamedFile,
+        key: String,
+        isPublic: Boolean
+    ): Result<FileMetadataDocument, FileException> {
         // Upload the file and get its metadata
-        val metadata: FileMetadataDocument = imageStore.upload(
+        imageStore.upload(
             // the metadata key
             key = key,
             // the file part containing the original image
             file = file,
-            // the owner
-            ownerId = userId,
+            // the authentication outcome for an authenticated principal
+            authentication = authentication,
             isPublic = true
         )
     }

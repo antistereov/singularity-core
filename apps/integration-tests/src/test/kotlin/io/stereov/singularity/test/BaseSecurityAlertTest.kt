@@ -1,7 +1,7 @@
 package io.stereov.singularity.test
 
 import io.mockk.clearMocks
-import io.stereov.singularity.auth.core.service.*
+import io.stereov.singularity.auth.alert.service.*
 import io.stereov.singularity.test.config.MockSecurityAlertConfig
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired

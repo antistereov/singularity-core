@@ -1,22 +1,23 @@
 package io.stereov.singularity.admin.core.controller
 
+import com.github.michaelbull.result.getOrThrow
+import io.stereov.singularity.principal.core.model.Role
 import io.stereov.singularity.test.BaseSpringBootTest
-import io.stereov.singularity.user.core.model.Role
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.containers.GenericContainer
-import org.testcontainers.containers.MongoDBContainer
+import org.testcontainers.mongodb.MongoDBContainer
 import org.testcontainers.utility.DockerImageName
 
 class AdminControllerStartupTest : BaseSpringBootTest() {
 
     @Test fun `root account will be created at start`() = runTest {
-        val root = userService.findByEmail("root@email.com")
+        val root = userService.findByEmail("root@email.com").getOrThrow()
 
-        Assertions.assertTrue(root.roles.contains(Role.ADMIN))
+        Assertions.assertTrue(root.roles.contains(Role.User.ADMIN))
     }
 
     companion object {

@@ -5,59 +5,48 @@ sidebar_position: 3
 
 # Download
 
-The `DownloadService` component in *Singularity* provides a robust, 
-non-blocking mechanism for fetching external files into the 
-application memory. 
+The `DownloadService` component in *Singularity* provides a robust,
+non-blocking mechanism for fetching external files using **reactive streams**.
 
-It leverages **Spring WebClient** and **Kotlin Coroutines** to handle 
+It leverages **Spring WebClient** and **Kotlin Coroutines** to handle
 downloads reactively and efficiently.
 
-:::note Reactive Download
-This service performs a full, in-memory download. The entire file content is loaded as a `ByteArray` before the function returns. 
-For very large files, consider using reactive streams directly (e.g., `Flux<DataBuffer>`) in other parts of the application to avoid potential out-of-memory issues.
+:::info Reactive Streaming
+This service performs a file download by **streaming** the content as a `Flux<DataBuffer>`.
+The entire file content is **not** loaded into a single `ByteArray` in memory,
+making this approach efficient for handling large files. The caller is responsible for
+consuming the reactive stream.
 :::
 
-## Core Component
+## Core Components
 
 ### `DownloadService`
 
 This is a **Spring `@Service`** that encapsulates the logic for an HTTP GET request to download a file. It is injected with a pre-configured `WebClient` instance.
 
-| Function   | Signature                                           | Description                                                                                                                   |
-|------------|-----------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------|
-| `download` | `suspend fun download(url: String): DownloadedFile` | Performs an asynchronous, non-blocking download of a file from the specified URL. It throws a `DownloadException` on failure. |
+| Function   | Signature                                                                    | Description                                                                                                                                                                                     |
+|------------|------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `download` | `suspend fun download(url: String): Result<StreamedFile, DownloadException>` | Performs an asynchronous, non-blocking download, returning the file content as a reactive stream. Returns a **`Result`** containing **`StreamedFile`** or a **`DownloadException`** on failure. |
 
 #### Error Handling
 
 The service provides unified error handling:
 
-* Any network or HTTP error that occurs during the download is caught.
-* The exception is wrapped and re-thrown as a **`DownloadException`**, providing context about the failed URL.
-* If the remote server returns a successful response but with an empty body (`null` bytes), a `DownloadException` is thrown indicating that the file body was empty.
+* An exception of type **`DownloadException`** is returned via the `Result`'s `Err` channel. This exception is a sealed class with specific subtypes (e.g., `FileNotFound`, `NetworkError`, `Timeout`, `FileTooLarge`) that provide context about the failure.
 
-## Data Model
+### `StreamedFile`
 
-### `DownloadedFile`
+The `StreamedFile` data class encapsulates the downloaded file's metadata and its content stream.
 
-The `DownloadedFile` is the value object returned by the `DownloadService`. It contains the file's raw content and essential metadata derived from the HTTP response headers.
+| Field         | Type               | Description                                                        |
+|---------------|--------------------|--------------------------------------------------------------------|
+| `content`     | `Flux<DataBuffer>` | The reactive stream of data buffers containing the file's content. |
+| `contentType` | `MediaType`        | The file's media type (e.g., `application/pdf`).                   |
+| `url`         | `String`           | The source URL of the file.                                        |
 
-| Property      | Type        | Description                                                                                                                                                                                      |
-|:--------------|:------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `bytes`       | `ByteArray` | The raw content of the file loaded into memory.                                                                                                                                                  |
-| `contentType` | `MediaType` | The file's media type (e.g., `application/pdf`, `image/jpeg`), usually extracted from the `Content-Type` HTTP header. Defaults to `MediaType.APPLICATION_OCTET_STREAM` if the header is missing. |
-| `url`         | `String`    | The original URL from which the file was downloaded.                                                                                                                                             |
-| `size`        | `Int`       | A derived property (getter) that returns the size of the file in bytes.                                                                                                                          |
+## Example
 
-#### Value Equality
-
-The `DownloadedFile` data class implements custom `equals` and `hashCode` methods. This is crucial because it contains a `ByteArray` (which uses reference equality by default).
-
-* **Equality is determined by:** The content of the `bytes` array (`contentEquals`) and the `contentType`.
-* **Excluded from equality:** The `url` is **not** included in the `equals` or `hashCode` calculation, meaning two `DownloadedFile` instances with the same content and media type are considered equal, regardless of the source URL.
-
-## Usage Example
-
-The `download` function must be called from within a **coroutine scope** or another `suspend` function.
+The `download` function returns a `Result`, so we use **`.bind()`** or **`.getOrThrow()`** (in a Controller/top-level function) to unwrap the `StreamedFile` and access the reactive content stream.
 
 ```kotlin
 // Example of injecting and using the service
@@ -65,22 +54,26 @@ The `download` function must be called from within a **coroutine scope** or anot
 class FileProcessor(
     private val downloadService: DownloadService
 ) {
-    suspend fun processExternalFile(link: String) {
-        try {
-            val file: DownloadedFile = downloadService.download(link)
+    /**
+     * Downloads an external file and initiates consumption of the content stream.
+     * Note: Reactive streams must be actively consumed (e.g., saved to disk) to prevent resource leaks.
+     */
+    suspend fun processExternalFile(link: String): Result<Unit, DownloadException> = coroutineBinding {
+        // download() returns Result<StreamedFile, DownloadException>.
+        // bind() unwraps the StreamedFile or propagates the DownloadException.
+        val streamedFile: StreamedFile = downloadService.download(link).bind()
 
-            // Log file details
-            logger.info { "Successfully downloaded file from ${file.url}" }
-            logger.info { "Content Type: ${file.contentType}" }
-            logger.info { "Size: ${file.size} bytes" }
+        // Log file details
+        logger.info { "Successfully initiated download stream from ${streamedFile.url}" }
+        logger.info { "Content Type: ${streamedFile.contentType}" }
 
-            // Access the raw bytes for further processing (e.g., saving to storage)
-            val rawData: ByteArray = file.bytes
+        // Access the reactive content stream (Flux<DataBuffer>)
+        val fileContentStream: Flux<DataBuffer> = streamedFile.content
 
-        } catch (ex: DownloadException) {
-            logger.error(ex) { "A file download failed." }
-            // Handle the download failure (e.g., notify user)
-        }
+        // IMPORTANT: The file content must be actively consumed here,
+        // e.g., by piping the Flux<DataBuffer> to a file sink or processing it reactively.
+        // Failing to consume the Flux can lead to resource leaks (e.g., open connections).
+        // Example: fileContentStream.doOnNext { dataBuffer -> /* process data */ }.awaitLast()
     }
 }
 ```

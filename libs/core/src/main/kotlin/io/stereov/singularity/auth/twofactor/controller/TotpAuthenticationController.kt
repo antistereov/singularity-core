@@ -1,21 +1,29 @@
 package io.stereov.singularity.auth.twofactor.controller
 
-import io.stereov.singularity.auth.core.component.CookieCreator
+import com.github.michaelbull.result.getOrThrow
+import io.stereov.singularity.auth.core.exception.AuthenticationException
 import io.stereov.singularity.auth.core.properties.AuthProperties
-import io.stereov.singularity.auth.core.service.token.AccessTokenService
-import io.stereov.singularity.auth.core.service.token.RefreshTokenService
-import io.stereov.singularity.auth.core.service.token.SessionTokenService
-import io.stereov.singularity.auth.core.service.token.StepUpTokenService
+import io.stereov.singularity.auth.core.service.AuthorizationService
+import io.stereov.singularity.auth.token.component.CookieCreator
+import io.stereov.singularity.auth.token.exception.*
+import io.stereov.singularity.auth.token.model.TwoFactorTokenType
+import io.stereov.singularity.auth.token.service.*
 import io.stereov.singularity.auth.twofactor.dto.request.TotpRecoveryRequest
 import io.stereov.singularity.auth.twofactor.dto.request.TwoFactorVerifySetupRequest
 import io.stereov.singularity.auth.twofactor.dto.response.TwoFactorRecoveryResponse
 import io.stereov.singularity.auth.twofactor.dto.response.TwoFactorSetupResponse
-import io.stereov.singularity.auth.twofactor.model.token.TwoFactorTokenType
+import io.stereov.singularity.auth.twofactor.exception.DisableTotpException
+import io.stereov.singularity.auth.twofactor.exception.GenerateTotpDetailsException
+import io.stereov.singularity.auth.twofactor.exception.TotpUserRecoveryException
+import io.stereov.singularity.auth.twofactor.exception.ValidateTotpSetupException
 import io.stereov.singularity.auth.twofactor.service.TotpAuthenticationService
-import io.stereov.singularity.global.model.ErrorResponse
+import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.OpenApiConstants
-import io.stereov.singularity.user.core.dto.response.UserResponse
-import io.stereov.singularity.user.core.mapper.UserMapper
+import io.stereov.singularity.principal.core.dto.response.UserResponse
+import io.stereov.singularity.principal.core.exception.FindUserByIdException
+import io.stereov.singularity.principal.core.exception.PrincipalMapperException
+import io.stereov.singularity.principal.core.mapper.PrincipalMapper
+import io.stereov.singularity.principal.core.service.UserService
 import io.swagger.v3.oas.annotations.ExternalDocumentation
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -39,9 +47,12 @@ class TotpAuthenticationController(
     private val accessTokenService: AccessTokenService,
     private val refreshTokenService: RefreshTokenService,
     private val stepUpTokenService: StepUpTokenService,
-    private val userMapper: UserMapper,
+    private val principalMapper: PrincipalMapper,
     private val authProperties: AuthProperties,
-    private val sessionTokenService: SessionTokenService,
+    private val authorizationService: AuthorizationService,
+    private val userService: UserService,
+    private val totpSetupTokenService: TotpSetupTokenService,
+    private val twoFactorAuthenticationTokenService: TwoFactorAuthenticationTokenService,
 ) {
 
     @GetMapping("/setup")
@@ -85,26 +96,32 @@ class TotpAuthenticationController(
                 responseCode = "200",
                 description = "The TOTP secret, recovery codes, TOTP URL and setup token.",
                 content = [Content(schema = Schema(implementation = TwoFactorSetupResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "304",
-                description = "User already enabled TOTP.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "400",
-                description = "2FA cannot be enabled for users who didn't configure authentication using a password.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "`AccessToken` or `StepUpToken` is invalid.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
+            )
         ]
     )
-    suspend fun getTotpSetupDetails(): ResponseEntity<TwoFactorSetupResponse> {
-        val res = totpAuthenticationService.getTotpDetails()
+    @ThrowsDomainError([
+        AccessTokenExtractionException::class,
+        AuthenticationException.AuthenticationRequired::class,
+        StepUpTokenExtractionException::class,
+        FindUserByIdException::class,
+        GenerateTotpDetailsException::class
+    ])
+    suspend fun getTotpSetupDetails(
+        exchange: ServerWebExchange,
+    ): ResponseEntity<TwoFactorSetupResponse> {
+        val authentication = authorizationService.getAuthenticationOutcome()
+            .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
+            .requireAuthentication()
+            .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it } }
+
+        authorizationService.requireStepUp(authentication, exchange)
+            .getOrThrow { when (it) { is StepUpTokenExtractionException -> it } }
+
+        val user = userService.findById(authentication.principalId)
+            .getOrThrow { FindUserByIdException.from(it) }
+
+        val res = totpAuthenticationService.getTotpDetails(user)
+            .getOrThrow { when (it) { is GenerateTotpDetailsException -> it } }
 
         return ResponseEntity.ok().body(res)
     }
@@ -152,31 +169,44 @@ class TotpAuthenticationController(
                 responseCode = "200",
                 description = "Success.",
                 content = [Content(schema = Schema(implementation = TwoFactorSetupResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "304",
-                description = "The user already enabled TOTP.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "400",
-                description = "2FA cannot be enabled for users who didn't configure authentication using a password.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "`AccessToken` or `StepUpToken` is invalid.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
     )
+    @ThrowsDomainError([
+        AccessTokenExtractionException::class,
+        AuthenticationException.AuthenticationRequired::class,
+        StepUpTokenExtractionException::class,
+        FindUserByIdException::class,
+        TotpSetupTokenExtractionException::class,
+        ValidateTotpSetupException::class,
+        PrincipalMapperException::class
+    ])
     suspend fun enableTotpAsTwoFactorMethod(
         @RequestBody setupRequest: TwoFactorVerifySetupRequest,
-        @RequestParam locale: Locale?
+        @RequestParam locale: Locale?,
+        exchange: ServerWebExchange,
     ): ResponseEntity<UserResponse> {
-        return ResponseEntity.ok(
-            totpAuthenticationService.validateSetup(setupRequest.token, setupRequest.code, locale)
-        )
+        val authentication = authorizationService.getAuthenticationOutcome()
+            .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
+            .requireAuthentication()
+            .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it } }
+
+        authorizationService.requireStepUp(authentication, exchange)
+            .getOrThrow { when (it) { is StepUpTokenExtractionException -> it } }
+
+        var user = userService.findById(authentication.principalId)
+            .getOrThrow { FindUserByIdException.from(it) }
+
+        val token = totpSetupTokenService.validate(setupRequest.token, authentication.principalId)
+            .getOrThrow { when (it) { is TotpSetupTokenExtractionException -> it } }
+
+        user = totpAuthenticationService.validateSetup(token, setupRequest.code, user, locale)
+            .getOrThrow { when (it) { is ValidateTotpSetupException -> it } }
+
+        val response = principalMapper.toResponse(user)
+            .getOrThrow { when (it) { is PrincipalMapperException -> it } }
+
+        return ResponseEntity.ok(response)
     }
 
     @DeleteMapping
@@ -217,23 +247,39 @@ class TotpAuthenticationController(
                 responseCode = "200",
                 description = "Success.",
                 content = [Content(schema = Schema(implementation = UserResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "400",
-                description = "This method is already disabled for the user.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "Invalid or expired `AccessToken` or `StepUpToken`.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
     )
+    @ThrowsDomainError([
+        AccessTokenExtractionException::class,
+        AuthenticationException.AuthenticationRequired::class,
+        StepUpTokenExtractionException::class,
+        FindUserByIdException::class,
+        DisableTotpException::class,
+        PrincipalMapperException::class
+    ])
     suspend fun disableTotpAsTwoFactorMethod(
-        @RequestParam locale: Locale?
+        @RequestParam locale: Locale?,
+        exchange: ServerWebExchange,
     ): ResponseEntity<UserResponse> {
-        return ResponseEntity.ok(totpAuthenticationService.disable(locale))
+        val authentication = authorizationService.getAuthenticationOutcome()
+            .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
+            .requireAuthentication()
+            .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it } }
+
+        authorizationService.requireStepUp(authentication, exchange)
+            .getOrThrow { when (it) { is StepUpTokenExtractionException -> it } }
+
+        var user = userService.findById(authentication.principalId)
+            .getOrThrow { FindUserByIdException.from(it) }
+
+        user = totpAuthenticationService.disable(user, locale)
+            .getOrThrow { when (it) { is DisableTotpException -> it } }
+
+        val response = principalMapper.toResponse(user)
+            .getOrThrow { when (it) { is PrincipalMapperException -> it } }
+
+        return ResponseEntity.ok(response)
     }
 
     @PostMapping("/recover")
@@ -285,46 +331,61 @@ class TotpAuthenticationController(
                         "the response will contain all tokens.",
                 content = [Content(schema = Schema(implementation = TwoFactorRecoveryResponse::class))]
             ),
-            ApiResponse(
-                responseCode = "400",
-                description = "TOTP is disabled.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "Wrong code or invalid or expired `TwoFactorAuthenticationToken`.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
         ]
     )
+    @ThrowsDomainError([
+        TwoFactorAuthenticationTokenExtractionException::class,
+        TotpUserRecoveryException::class,
+        CookieException.Creation::class,
+        AccessTokenCreationException::class,
+        RefreshTokenCreationException::class,
+        StepUpTokenCreationException::class,
+        PrincipalMapperException::class,
+    ])
     suspend fun recoverFromTotp(
         exchange: ServerWebExchange,
         @RequestBody req: TotpRecoveryRequest
     ): ResponseEntity<TwoFactorRecoveryResponse> {
 
-        val user = totpAuthenticationService.recoverUser(exchange, req.code)
+        val token = twoFactorAuthenticationTokenService.extract(exchange)
+            .getOrThrow { when (it) { is TwoFactorAuthenticationTokenExtractionException -> it } }
+
+        val user = totpAuthenticationService.recoverUser(token, req.code)
+            .getOrThrow { when (it) { is TotpUserRecoveryException -> it } }
+
         val sessionId = UUID.randomUUID()
 
         val clearTwoFactorCookie = cookieCreator.clearCookie(TwoFactorTokenType.Authentication)
-        val sessionToken = sessionTokenService.create(sessionInfo = req.session)
+            .getOrThrow { when (it) { is CookieException.Creation -> it } }
+
         val accessToken = accessTokenService.create(user, sessionId)
+            .getOrThrow { when (it) { is AccessTokenCreationException -> it } }
         val refreshToken = refreshTokenService.create(user, sessionId,req.session, exchange)
-        val stepUpToken = stepUpTokenService.createForRecovery(user.id, sessionId, exchange)
+            .getOrThrow { when (it) { is RefreshTokenCreationException -> it } }
+        val stepUpToken = stepUpTokenService.createForRecovery(token.userId, sessionId, exchange)
+            .getOrThrow { when (it) { is StepUpTokenCreationException -> it } }
+        val response = principalMapper.toResponse(user)
+            .getOrThrow { when (it) { is PrincipalMapperException -> it} }
 
         val res = TwoFactorRecoveryResponse(
-            userMapper.toResponse(user),
+            response,
             if (authProperties.allowHeaderAuthentication) accessToken.value else null,
             if (authProperties.allowHeaderAuthentication) refreshToken.value else null,
             if (authProperties.allowHeaderAuthentication) stepUpToken.value else null,
-            if (authProperties.allowHeaderAuthentication) sessionToken.value else null,
         )
+
+        val accessTokenCookie = cookieCreator.createCookie(accessToken)
+            .getOrThrow { when (it) { is CookieException.Creation -> it } }
+        val refreshTokenCookie = cookieCreator.createCookie(refreshToken)
+            .getOrThrow { when (it) { is CookieException.Creation -> it } }
+        val stepUpTokenCookie = cookieCreator.createCookie(stepUpToken)
+            .getOrThrow { when (it) { is CookieException.Creation -> it } }
 
         return ResponseEntity.ok()
             .header("Set-Cookie", clearTwoFactorCookie.toString())
-            .header("Set-Cookie", cookieCreator.createCookie(accessToken).toString())
-            .header("Set-Cookie", cookieCreator.createCookie(refreshToken).toString())
-            .header("Set-Cookie", cookieCreator.createCookie(stepUpToken).toString())
-            .header("Set-Cookie", cookieCreator.createCookie(sessionToken).toString())
+            .header("Set-Cookie", accessTokenCookie.toString())
+            .header("Set-Cookie", refreshTokenCookie.toString())
+            .header("Set-Cookie", stepUpTokenCookie.toString())
             .body(res)
     }
 }

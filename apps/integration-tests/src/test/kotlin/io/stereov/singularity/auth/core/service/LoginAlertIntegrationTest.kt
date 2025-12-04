@@ -1,13 +1,14 @@
 package io.stereov.singularity.auth.core.service
 
+import com.github.michaelbull.result.getOrThrow
 import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.slot
 import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
 import io.stereov.singularity.auth.core.model.SessionInfo
+import io.stereov.singularity.principal.core.model.User
 import io.stereov.singularity.test.BaseSecurityAlertTest
-import io.stereov.singularity.user.core.model.UserDocument
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -20,7 +21,7 @@ class LoginAlertIntegrationTest : BaseSecurityAlertTest() {
         user.info.clearSessions()
         userService.save(user.info)
 
-        val loginUserSlot = slot<UserDocument>()
+        val loginUserSlot = slot<User>()
         val loginLocaleSlot = slot<Locale?>()
         val loginSessionSlot = slot<SessionInfo>()
 
@@ -37,11 +38,11 @@ class LoginAlertIntegrationTest : BaseSecurityAlertTest() {
             .expectStatus()
             .isOk
 
-        val updatedUser = userService.findById(user.info.id)
+        val updatedUser = userService.findById(user.id).getOrThrow()
 
         coVerify(exactly = 1) { loginAlertService.send(any(), anyNullable(), anyNullable()) }
         assert(loginUserSlot.isCaptured)
-        assertEquals(user.info.id, loginUserSlot.captured.id)
+        assertEquals(user.id, loginUserSlot.captured.id.getOrThrow())
         assert(loginLocaleSlot.isNull)
         assertEquals(updatedUser.sensitive.sessions.values.first(), loginSessionSlot.captured)
     }
@@ -50,7 +51,7 @@ class LoginAlertIntegrationTest : BaseSecurityAlertTest() {
         user.info.clearSessions()
         userService.save(user.info)
 
-        val loginUserSlot = slot<UserDocument>()
+        val loginUserSlot = slot<User>()
         val loginLocaleSlot = slot<Locale>()
         val loginSessionSlot = slot<SessionInfo>()
 
@@ -67,11 +68,11 @@ class LoginAlertIntegrationTest : BaseSecurityAlertTest() {
             .expectStatus()
             .isOk
 
-        val updatedUser = userService.findById(user.info.id)
+        val updatedUser = userService.findById(user.id).getOrThrow()
 
         coVerify(exactly = 1) { loginAlertService.send(any(), any(), any()) }
         assert(loginUserSlot.isCaptured)
-        assertEquals(user.info.id, loginUserSlot.captured.id)
+        assertEquals(user.id, loginUserSlot.captured.id.getOrThrow())
         assertEquals(Locale.ENGLISH, loginLocaleSlot.captured)
         assertEquals(updatedUser.sensitive.sessions.values.first(), loginSessionSlot.captured)
         assertEquals("browser", loginSessionSlot.captured.browser)

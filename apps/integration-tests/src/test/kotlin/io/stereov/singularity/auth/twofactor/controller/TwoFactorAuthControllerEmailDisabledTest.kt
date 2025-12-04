@@ -1,9 +1,11 @@
 package io.stereov.singularity.auth.twofactor.controller
 
+import com.github.michaelbull.result.getOrThrow
 import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.auth.core.dto.response.LoginResponse
-import io.stereov.singularity.auth.jwt.exception.TokenException
+import io.stereov.singularity.auth.jwt.exception.TokenExtractionException
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
+import io.stereov.singularity.principal.core.exception.UserException
 import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions
@@ -19,7 +21,7 @@ class TwoFactorAuthControllerEmailDisabledTest : BaseIntegrationTest() {
 
         Assertions.assertFalse(user.info.twoFactorEnabled)
         Assertions.assertEquals(listOf<TwoFactorMethod>(), user.info.twoFactorMethods)
-        Assertions.assertNull(user.info.preferredTwoFactorMethod)
+        assertThrows<UserException.TwoFactorDisabled> { user.info.preferredTwoFactorMethod.getOrThrow() }
         Assertions.assertFalse(user.info.sensitive.security.twoFactor.enabled)
         Assertions.assertFalse(user.info.sensitive.security.twoFactor.email.enabled)
         Assertions.assertFalse(user.info.sensitive.security.twoFactor.totp.enabled)
@@ -41,10 +43,10 @@ class TwoFactorAuthControllerEmailDisabledTest : BaseIntegrationTest() {
         val accessToken = res.extractAccessToken()
         val refreshToken = res.extractRefreshToken()
 
-        assertThrows<TokenException> { res.extractTwoFactorAuthenticationToken() }
+        assertThrows<TokenExtractionException> { res.extractTwoFactorAuthenticationToken() }
 
-        Assertions.assertEquals(user.info.id, accessToken.userId)
-        Assertions.assertEquals(user.info.id, refreshToken.userId)
+        Assertions.assertEquals(user.id, accessToken.userId)
+        Assertions.assertEquals(user.id, refreshToken.userId)
         Assertions.assertEquals(accessToken.sessionId, refreshToken.sessionId)
 
     }

@@ -1,5 +1,8 @@
 package io.stereov.singularity.auth.geolocation.service
 
+import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.map
+import com.github.michaelbull.result.onFailure
 import com.maxmind.geoip2.model.CityResponse
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.geolocation.dto.GeolocationResponse
@@ -7,21 +10,21 @@ import io.stereov.singularity.auth.geolocation.exception.GeolocationException
 import io.stereov.singularity.auth.geolocation.mapper.GeolocationMapper
 import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
 import io.stereov.singularity.global.util.getClientIp
-import org.springframework.http.server.reactive.ServerHttpRequest
+import io.stereov.singularity.global.util.getOrNull
 import org.springframework.stereotype.Service
+import org.springframework.web.server.ServerWebExchange
 import java.net.InetAddress
 
 /**
- * # GeolocationService
+ * Service that provides functionalities for resolving geolocation details based on IP addresses.
  *
- * This service is responsible for retrieving geolocation information based on an IP address.
- * It uses the `WebClient` to make HTTP requests to a geolocation API.
- *
- * @author <a href="https://github.com/antistereov">antistereov</a>
+ * This service integrates with an underlying GeoIP database to retrieve geolocation
+ * information such as city details. The service encapsulates business logic related to
+ * geolocation and maps the retrieved data into desired response objects using a mapper.
  */
 @Service
 class GeolocationService(
-    private val geoIpDatabaseService: GeoIpDatabaseService,
+    private val geolocationDatabaseService: GeolocationDatabaseService,
     private val properties: GeolocationProperties,
     private val geolocationMapper: GeolocationMapper,
 ) {
@@ -29,34 +32,52 @@ class GeolocationService(
     private val logger = KotlinLogging.logger {}
 
     /**
-     * Retrieves the geolocation information for a given IP address.
+     * Retrieves city-specific geolocation details for a given IP address.
      *
-     * @param ipAddress The IP address to retrieve geolocation information for.
-     * @return A [GeoLocationResponse] containing the geolocation information.
-     * @throws GeolocationException If there is an error retrieving the geolocation information.
+     * This method interacts with the geolocation database service to fetch geolocation
+     * information for the provided IP address.
+     *
+     * @param ipAddress The IP address for which geolocation city details need to be fetched.
+     * @return A [Result] containing either a successful [CityResponse] with city geolocation details,
+     * or a [GeolocationException] in case of failure.
      */
-    suspend fun getLocation(ipAddress: InetAddress): CityResponse {
+    suspend fun getCityResponse(ipAddress: InetAddress): Result<CityResponse, GeolocationException> {
+        logger.debug { "Retrieving geolocation for IP address $ipAddress" }
 
-        return try {
-            geoIpDatabaseService.getCity(ipAddress)
-        } catch (e: Exception) {
-            throw GeolocationException("Unable to retrieve current geolocation for IP address $ipAddress", e)
+        return geolocationDatabaseService.getCity(ipAddress)
+    }
+
+    /**
+     * Retrieves the geolocation details for a given IP address.
+     *
+     * This method uses underlying services to fetch geolocation data and maps it
+     * into a response object containing details such as city, country, continent, and location.
+     *
+     * @param ipAddress The IP address for which geolocation details need to be fetched.
+     * @return A [Result] containing either a successful [GeolocationResponse] with geolocation details,
+     *  or a [GeolocationException] in case of failure.
+     */
+    private suspend fun getLocationResponse(ipAddress: InetAddress): Result<GeolocationResponse, GeolocationException> {
+        return getCityResponse(ipAddress)
+            .map { cityResponse -> geolocationMapper.createGeolocationResponse(cityResponse) }
+    }
+
+    /**
+     * Retrieves the geolocation details for a client based on their IP address extracted from the given server web exchange.
+     *
+     * This method attempts to resolve the client's IP address from the request, and if successful,
+     * fetches the geolocation details. Returns null if the IP address cannot be determined or if the geolocation lookup fails.
+     *
+     * @param exchange The [ServerWebExchange] representing the client's incoming request.
+     * @return A [GeolocationResponse] containing geolocation details if successful, or `null` if the IP address could not be resolved or geolocation lookup failed.
+     */
+    suspend fun getLocationOrNull(exchange: ServerWebExchange): GeolocationResponse? {
+        val ipAddress = runCatching { exchange.request.getClientIp(properties.realIpHeader)?.let { InetAddress.getByName(it) } }
+
+        return ipAddress.getOrNull()?.let {
+            getLocationResponse(it)
+                .onFailure { ex -> logger.warn { "Failed to resolve geolocation for IP address $it: ${ex.message}"} }
+                .getOrNull()
         }
-    }
-
-    suspend fun getLocation(request: ServerHttpRequest): GeolocationResponse {
-        val ipAddress = request.getClientIp(properties.realIpHeader)
-
-        val cityResponse = getLocation(InetAddress.getByName(ipAddress))
-
-        return geolocationMapper.createGeolocationResponse(cityResponse)
-    }
-
-    suspend fun getLocationOrNull(request: ServerHttpRequest): GeolocationResponse? {
-        return runCatching { getLocation(request) }
-            .getOrElse { error ->
-                logger.warn { error.message }
-                null
-            }
     }
 }

@@ -1,7 +1,6 @@
 package io.stereov.singularity.admin.core.config
 
 import io.stereov.singularity.admin.core.controller.AdminController
-import io.stereov.singularity.admin.core.exception.handler.AdminExceptionHandler
 import io.stereov.singularity.admin.core.service.AdminService
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
 import io.stereov.singularity.auth.core.service.AuthorizationService
@@ -11,8 +10,9 @@ import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.global.properties.AppProperties
-import io.stereov.singularity.user.core.mapper.UserMapper
-import io.stereov.singularity.user.core.service.UserService
+import io.stereov.singularity.principal.core.mapper.PrincipalMapper
+import io.stereov.singularity.principal.core.service.PrincipalService
+import io.stereov.singularity.principal.core.service.UserService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean
@@ -33,15 +33,21 @@ class AdminConfiguration {
     @ConditionalOnMissingBean
     fun adminController(
         adminService: AdminService,
+        userService: UserService,
+        authorizationService: AuthorizationService,
+        principalMapper: PrincipalMapper,
+        accessTokenCache: AccessTokenCache,
+        principalService: PrincipalService
     ): AdminController {
-        return AdminController(adminService)
+        return AdminController(
+            adminService,
+            accessTokenCache,
+            authorizationService,
+            userService,
+            principalMapper,
+            principalService
+        )
     }
-
-    // ExceptionHandler
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun adminExceptionHandler() = AdminExceptionHandler()
 
     // Services
 
@@ -53,9 +59,6 @@ class AdminConfiguration {
         appProperties: AppProperties,
         twoFactorEmailCodeProperties: TwoFactorEmailCodeProperties,
         emailProperties: EmailProperties,
-        authorizationService: AuthorizationService,
-        userMapper: UserMapper,
-        accessTokenCache: AccessTokenCache
     ): AdminService {
         return AdminService(
             userService,
@@ -63,9 +66,6 @@ class AdminConfiguration {
             hashService,
             twoFactorEmailCodeProperties,
             emailProperties,
-            authorizationService,
-            userMapper,
-            accessTokenCache
         )
     }
 }

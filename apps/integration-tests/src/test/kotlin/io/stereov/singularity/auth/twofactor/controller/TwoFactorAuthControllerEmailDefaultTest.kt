@@ -1,10 +1,11 @@
 package io.stereov.singularity.auth.twofactor.controller
 
+import com.github.michaelbull.result.getOrThrow
 import io.mockk.verify
 import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.auth.core.dto.request.StepUpRequest
 import io.stereov.singularity.auth.core.dto.response.LoginResponse
-import io.stereov.singularity.auth.jwt.exception.TokenException
+import io.stereov.singularity.auth.jwt.exception.TokenExtractionException
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
 import io.stereov.singularity.test.BaseMailIntegrationTest
 import jakarta.mail.internet.MimeMessage
@@ -22,7 +23,7 @@ class TwoFactorAuthControllerEmailDefaultTest : BaseMailIntegrationTest() {
 
         Assertions.assertTrue(user.info.twoFactorEnabled)
         Assertions.assertEquals(listOf(TwoFactorMethod.EMAIL), user.info.twoFactorMethods)
-        Assertions.assertEquals(TwoFactorMethod.EMAIL, user.info.preferredTwoFactorMethod)
+        Assertions.assertEquals(TwoFactorMethod.EMAIL, user.info.preferredTwoFactorMethod.getOrThrow())
         Assertions.assertTrue(user.info.sensitive.security.twoFactor.enabled)
         Assertions.assertTrue(user.info.sensitive.security.twoFactor.email.enabled)
         Assertions.assertFalse(user.info.sensitive.security.twoFactor.totp.enabled)
@@ -41,12 +42,12 @@ class TwoFactorAuthControllerEmailDefaultTest : BaseMailIntegrationTest() {
         Assertions.assertEquals(listOf(TwoFactorMethod.EMAIL), body.twoFactorMethods)
         Assertions.assertEquals(TwoFactorMethod.EMAIL, body.preferredTwoFactorMethod)
 
-        assertThrows<TokenException> { res.extractAccessToken() }
-        assertThrows<TokenException> { res.extractRefreshToken() }
+        assertThrows<TokenExtractionException> { res.extractAccessToken() }
+        assertThrows<TokenExtractionException> { res.extractRefreshToken() }
 
         val twoFactorAuthToken = res.extractTwoFactorAuthenticationToken()
 
-        Assertions.assertEquals(user.info.id, twoFactorAuthToken.userId)
+        Assertions.assertEquals(user.id, twoFactorAuthToken.userId)
     }
 
     @Test fun `login sends 2fa email automatically after login when preferred`() = runTest {

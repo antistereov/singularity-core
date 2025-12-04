@@ -1,40 +1,44 @@
 package io.stereov.singularity.auth.core.service
 
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.coroutines.coroutineBinding
+import com.github.michaelbull.result.mapError
+import com.github.michaelbull.result.onFailure
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.auth.core.exception.AuthException
-import io.stereov.singularity.auth.core.exception.model.EmailAlreadyVerifiedException
-import io.stereov.singularity.auth.core.model.SecurityAlertType
-import io.stereov.singularity.auth.core.properties.SecurityAlertProperties
-import io.stereov.singularity.auth.core.service.token.EmailVerificationTokenService
-import io.stereov.singularity.auth.guest.exception.model.GuestCannotPerformThisActionException
-import io.stereov.singularity.email.core.exception.model.EmailCooldownException
+import io.stereov.singularity.auth.alert.properties.SecurityAlertProperties
+import io.stereov.singularity.auth.alert.service.SecurityAlertService
+import io.stereov.singularity.auth.core.exception.SendVerificationEmailException
+import io.stereov.singularity.auth.core.exception.VerifyEmailException
+import io.stereov.singularity.auth.token.model.EmailVerificationToken
+import io.stereov.singularity.auth.token.service.EmailVerificationTokenService
+import io.stereov.singularity.cache.service.CacheService
+import io.stereov.singularity.database.encryption.exception.FindEncryptedDocumentByIdException
+import io.stereov.singularity.database.encryption.exception.SaveEncryptedDocumentException
 import io.stereov.singularity.email.core.properties.EmailProperties
+import io.stereov.singularity.email.core.service.CooldownEmailService
 import io.stereov.singularity.email.core.service.EmailService
 import io.stereov.singularity.email.core.util.EmailConstants
 import io.stereov.singularity.email.template.service.TemplateService
 import io.stereov.singularity.email.template.util.TemplateBuilder
-import io.stereov.singularity.global.exception.model.InvalidDocumentException
+import io.stereov.singularity.email.template.util.build
+import io.stereov.singularity.email.template.util.replacePlaceholders
+import io.stereov.singularity.email.template.util.translate
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.global.properties.UiProperties
+import io.stereov.singularity.principal.core.model.User
+import io.stereov.singularity.principal.core.service.UserService
 import io.stereov.singularity.translate.model.TranslateKey
 import io.stereov.singularity.translate.service.TranslateService
-import io.stereov.singularity.user.core.dto.response.UserResponse
-import io.stereov.singularity.user.core.mapper.UserMapper
-import io.stereov.singularity.user.core.model.UserDocument
-import io.stereov.singularity.user.core.service.UserService
-import kotlinx.coroutines.reactor.awaitSingleOrNull
-import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.stereotype.Service
-import java.time.Duration
 import java.util.*
 
 @Service
 class EmailVerificationService(
     private val userService: UserService,
     private val emailVerificationTokenService: EmailVerificationTokenService,
-    private val userMapper: UserMapper,
-    private val redisTemplate: ReactiveRedisTemplate<String, String>,
-    private val emailProperties: EmailProperties,
+    override val cacheService: CacheService,
+    override val emailProperties: EmailProperties,
     private val uiProperties: UiProperties,
     private val translateService: TranslateService,
     private val emailService: EmailService,
@@ -42,75 +46,63 @@ class EmailVerificationService(
     private val appProperties: AppProperties,
     private val securityAlertService: SecurityAlertService,
     private val securityAlertProperties: SecurityAlertProperties,
-) {
+) : CooldownEmailService {
 
-    private val logger = KotlinLogging.logger {}
+    override val logger = KotlinLogging.logger {}
+    override val slug = "email_verification"
 
     /**
-     * Verifies the email address of the user.
+     * Verifies a user's email using the provided token and updates the user's email or verification status as necessary.
      *
-     * This method checks the verification token and updates the user's email verification status.
-     *
-     * @param token The verification token sent to the user's email.
-     *
-     * @return The updated user information.
+     * @param token The email verification token containing user details and a secret for validation.
+     * @param locale The locale used for any locale-specific operations, such as localization of notifications, or null if not specified.
+     * @return A [Result] containing the verified [User] on success or a [VerifyEmailException] on failure.
      */
-    suspend fun verifyEmail(token: String, locale: Locale?): UserResponse {
+    suspend fun verifyEmail(
+        token: EmailVerificationToken,
+        locale: Locale?
+    ): Result<User, VerifyEmailException> = coroutineBinding {
         logger.debug { "Verifying email" }
 
-        val verificationToken = emailVerificationTokenService.extract(token)
-        val user = userService.findByIdOrNull(verificationToken.userId)
-            ?: throw AuthException("User does not exist")
-
-        if (user.isGuest)
-            throw GuestCannotPerformThisActionException("Guests cannot verify their email since no email is specified")
-
-        if (user.sensitive.email == null)
-            throw InvalidDocumentException("No email specified")
+        val user = userService.findById(token.userId)
+            .mapError { when (it) {
+                is FindEncryptedDocumentByIdException.NotFound -> VerifyEmailException.UserNotFound("User not found")
+                else -> VerifyEmailException.Database("Database failure", it)
+            } }
+            .bind()
 
         val savedSecret = user.sensitive.security.email.verificationSecret
 
-        if (verificationToken.secret != savedSecret) throw AuthException("Authentication token does not match")
+        if (token.secret != savedSecret) {
+            Err(VerifyEmailException.InvalidToken("The provided token does not match the user's verification secret"))
+                .bind()
+        }
 
         val oldEmail = user.sensitive.email
-        val newEmail = verificationToken.email
+        val newEmail = token.email
         val isEmailUpdate = oldEmail != newEmail
 
         if (isEmailUpdate) {
             user.sensitive.email = newEmail
         } else if (user.sensitive.security.email.verified) {
-            throw EmailAlreadyVerifiedException("Email is already verified")
+            Err(VerifyEmailException.AlreadyVerified("The user's email is already verified"))
+                .bind()
         }
 
         user.sensitive.security.email.verified = true
         val savedUser = userService.save(user)
+            .mapError { ex -> when (ex) {
+                is SaveEncryptedDocumentException.PostCommitSideEffect -> VerifyEmailException.PostCommitSideEffect("Failed to decrypt user after successful commit: ${ex.message}", ex)
+                else -> VerifyEmailException.Database("Database failure", ex)
+            } }
+            .bind()
 
         if (isEmailUpdate && emailProperties.enable && securityAlertProperties.emailChanged) {
-            securityAlertService.send(savedUser, locale, SecurityAlertType.EMAIL_CHANGED, oldEmail = oldEmail, newEmail = newEmail)
+            securityAlertService.sendEmailChanged( oldEmail = oldEmail, newEmail = newEmail, user = savedUser, locale = locale)
+                .onFailure { ex -> logger.error(ex) { "Failed to send email changed alert"} }
         }
 
-        return userMapper.toResponse(savedUser)
-    }
-
-suspend fun getRemainingCooldown(email: String): Long {
-        logger.debug { "Getting remaining cooldown for email verification" }
-
-        val key = "email-verification-cooldown:$email"
-        val remainingTtl = redisTemplate.getExpire(key).awaitSingleOrNull() ?: Duration.ofSeconds(-1)
-
-        return if (remainingTtl.seconds > 0) remainingTtl.seconds else 0
-    }
-
-    suspend fun startCooldown(email: String): Boolean {
-        logger.debug { "Starting cooldown for email verification" }
-
-        val key = "email-verification-cooldown:$email"
-        val isNewKey = redisTemplate.opsForValue()
-            .setIfAbsent(key, "1", Duration.ofSeconds(emailProperties.sendCooldown))
-            .awaitSingleOrNull()
-            ?: false
-
-        return isNewKey
+        user
     }
 
     /**
@@ -124,36 +116,51 @@ suspend fun getRemainingCooldown(email: String): Long {
     }
 
     /**
-     * Sends a verification email to the user.
+     * Sends a verification email to the specified user or a new email address if provided.
      *
-     * @param user The user to send the verification email to.
+     * @param user The user to whom the verification email should be sent.
+     * @param locale The locale to use for translating email content. If null, defaults to the application's locale.
+     * @param newEmail An optional new email address to send the verification email to. If null, defaults to the user's existing email.
+     * @return A [Result] containing the remaining cooldown time in seconds if successful,
+     * or a [SendVerificationEmailException] if an error occurs.
      */
-    suspend fun sendVerificationEmail(user: UserDocument, locale: Locale?, newEmail: String? = null): Long {
+    suspend fun sendVerificationEmail(
+        user: User,
+        locale: Locale?,
+        newEmail: String? = null
+    ): Result<Long, SendVerificationEmailException> = coroutineBinding {
         logger.debug { "Sending verification email for user ${user.id}" }
 
-        if (user.isGuest) {
-            throw GuestCannotPerformThisActionException("Failed to send verification email: a guest cannot verify an email address")
-        }
-
-        val email = newEmail
-            ?: user.sensitive.email
-            ?: throw InvalidDocumentException("No email address saved in user document")
-
+        val email = newEmail ?: user.sensitive.email
         val actualLocale = locale ?: appProperties.locale
 
-        val remainingCooldown = getRemainingCooldown(email)
-        if (remainingCooldown > 0) {
-            throw EmailCooldownException(remainingCooldown)
+        val cooldownActive = isCooldownActive(email)
+            .mapError { ex -> SendVerificationEmailException.CooldownCache("Failed to retrieve cooldown: ${ex.message}", ex) }
+            .bind()
+
+        if (cooldownActive) {
+            Err(SendVerificationEmailException.CooldownActive("Cooldown is still active for email verification"))
+                .bind()
         }
 
-        startCooldown(email)
+        val remainingCooldown = startCooldown(email)
+            .mapError { ex -> SendVerificationEmailException.CooldownCache("Failed to start cooldown: ${ex.message}", ex) }
+            .bind()
 
         val secret = user.sensitive.security.email.verificationSecret
 
-        if (newEmail == null && user.sensitive.security.email.verified)
-            throw EmailAlreadyVerifiedException("Email is already verified")
+        if (newEmail == null && user.sensitive.security.email.verified) {
+            Err(SendVerificationEmailException.AlreadyVerified("The user's email is already verified"))
+                .bind()
+        }
 
-        val token = emailVerificationTokenService.create(user.id, email, secret)
+        val userId = user.id.mapError { ex -> SendVerificationEmailException.Database("Failed to retrieve user ID: ${ex.message}", ex) }
+            .bind()
+
+        val token = emailVerificationTokenService.create(userId, email, secret)
+            .mapError { ex -> SendVerificationEmailException.EmailVerificationTokenCreation("Failed to create verification token: ${ex.message}", ex) }
+            .bind()
+
         val verificationUrl = generateVerificationUri(token)
 
         val slug = "email_verification"
@@ -167,10 +174,14 @@ suspend fun getRemainingCooldown(email: String): Long {
                 "verification_uri" to verificationUrl
             )))
             .build()
+            .mapError { ex -> SendVerificationEmailException.Template("Failed to create template for verification email: ${ex.message}", ex) }
+            .bind()
 
         emailService.sendEmail(email, subject, content, actualLocale)
+            .mapError { SendVerificationEmailException.from(it) }
+            .bind()
 
-        return remainingCooldown
+        remainingCooldown
     }
 
 }

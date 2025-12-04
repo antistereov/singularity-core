@@ -12,8 +12,8 @@
     },
     {
       "name": "singularity.auth.security-alert",
-      "type": "io.stereov.singularity.auth.core.properties.SecurityAlertProperties",
-      "sourceType": "io.stereov.singularity.auth.core.properties.SecurityAlertProperties"
+      "type": "io.stereov.singularity.auth.alert.properties.SecurityAlertProperties",
+      "sourceType": "io.stereov.singularity.auth.alert.properties.SecurityAlertProperties"
     },
     {
       "name": "singularity.auth.geolocation",
@@ -82,13 +82,13 @@
     },
     {
       "name": "singularity.security.login-attempt-limit",
-      "type": "io.stereov.singularity.ratelimit.properties.LoginAttemptLimitProperties",
-      "sourceType": "io.stereov.singularity.ratelimit.properties.LoginAttemptLimitProperties"
+      "type": "io.stereov.singularity.security.ratelimit.properties.LoginAttemptLimitProperties",
+      "sourceType": "io.stereov.singularity.security.ratelimit.properties.LoginAttemptLimitProperties"
     },
     {
       "name": "singularity.security.rate-limit",
-      "type": "io.stereov.singularity.ratelimit.properties.RateLimitProperties",
-      "sourceType": "io.stereov.singularity.ratelimit.properties.RateLimitProperties"
+      "type": "io.stereov.singularity.security.ratelimit.properties.RateLimitProperties",
+      "sourceType": "io.stereov.singularity.security.ratelimit.properties.RateLimitProperties"
     },
     {
       "name": "singularity.security.two-factor.totp.recovery-code",
@@ -206,56 +206,56 @@
     {
       "name": "singularity.auth.security-alert.login",
       "type": "java.lang.Boolean",
-      "sourceType": "io.stereov.singularity.auth.core.properties.SecurityAlertProperties",
+      "sourceType": "io.stereov.singularity.auth.alert.properties.SecurityAlertProperties",
       "defaultValue": true,
       "description": "Enable automated email alerts for new logins. Email needs to be enabled and configured in the application."
     },
     {
       "name": "singularity.auth.security-alert.registration-with-existing-email",
       "type": "java.lang.Boolean",
-      "sourceType": "io.stereov.singularity.auth.core.properties.SecurityAlertProperties",
+      "sourceType": "io.stereov.singularity.auth.alert.properties.SecurityAlertProperties",
       "defaultValue": true,
       "description": "Enable automated email alerts for tries to register a new account with an email address that is already linked to an existing account. "
     },
     {
       "name": "singularity.auth.security-alert.email-changed",
       "type": "java.lang.Boolean",
-      "sourceType": "io.stereov.singularity.auth.core.properties.SecurityAlertProperties",
+      "sourceType": "io.stereov.singularity.auth.alert.properties.SecurityAlertProperties",
       "defaultValue": true,
       "description": "Enable automated email alerts for an email change. Email needs to be enabled and configured in the application."
     },
     {
       "name": "singularity.auth.security-alert.password-changed",
       "type": "java.lang.Boolean",
-      "sourceType": "io.stereov.singularity.auth.core.properties.SecurityAlertProperties",
+      "sourceType": "io.stereov.singularity.auth.alert.properties.SecurityAlertProperties",
       "defaultValue": true,
       "description": "Enable automated email alerts for a password change. Email needs to be enabled and configured in the application."
     },
     {
       "name": "singularity.auth.security-alert.two-factor-added",
       "type": "java.lang.Boolean",
-      "sourceType": "io.stereov.singularity.auth.core.properties.SecurityAlertProperties",
+      "sourceType": "io.stereov.singularity.auth.alert.properties.SecurityAlertProperties",
       "defaultValue": true,
       "description": "Enable automated email alerts for the addition of a new 2FA method. Email needs to be enabled and configured in the application."
     },
     {
       "name": "singularity.auth.security-alert.two-factor-removed",
       "type": "java.lang.Boolean",
-      "sourceType": "io.stereov.singularity.auth.core.properties.SecurityAlertProperties",
+      "sourceType": "io.stereov.singularity.auth.alert.properties.SecurityAlertProperties",
       "defaultValue": true,
       "description": "Enable automated email alerts for the removal of an existing 2FA method. Email needs to be enabled and configured in the application."
     },
     {
       "name": "singularity.auth.security-alert.oauth2-provider-connected",
       "type": "java.lang.Boolean",
-      "sourceType": "io.stereov.singularity.auth.core.properties.SecurityAlertProperties",
+      "sourceType": "io.stereov.singularity.auth.alert.properties.SecurityAlertProperties",
       "defaultValue": true,
       "description": "Enable automated email alerts for the connection of a new OAuth2 provider. Email needs to be enabled and configured in the application."
     },
     {
       "name": "singularity.auth.security-alert.oauth2-provider-disconnected",
       "type": "java.lang.Boolean",
-      "sourceType": "io.stereov.singularity.auth.core.properties.SecurityAlertProperties",
+      "sourceType": "io.stereov.singularity.auth.alert.properties.SecurityAlertProperties",
       "defaultValue": true,
       "description": "Enable automated email alerts for the disconnection of an existing OAuth2 provider. Email needs to be enabled and configured in the application."
     },
@@ -616,42 +616,42 @@
     {
       "name": "singularity.security.rate-limit.ip-limit",
       "type": "java.lang.Long",
-      "sourceType": "io.stereov.singularity.ratelimit.properties.RateLimitProperties",
+      "sourceType": "io.stereov.singularity.security.ratelimit.properties.RateLimitProperties",
       "defaultValue": 200,
       "description": "Maximum number of requests from a single IP address in the time window."
     },
     {
       "name": "singularity.security.rate-limit.ip-time-window",
       "type": "java.lang.Long",
-      "sourceType": "io.stereov.singularity.ratelimit.properties.RateLimitProperties",
+      "sourceType": "io.stereov.singularity.security.ratelimit.properties.RateLimitProperties",
       "defaultValue": 1,
       "description": "Time window in minutes for the IP limit."
     },
     {
       "name": "singularity.security.rate-limit.user-limit",
       "type": "java.lang.Long",
-      "sourceType": "io.stereov.singularity.ratelimit.properties.RateLimitProperties",
+      "sourceType": "io.stereov.singularity.security.ratelimit.properties.RateLimitProperties",
       "defaultValue": 200,
       "description": "Maximum number of requests per user in the time window."
     },
     {
       "name": "singularity.security.rate-limit.user-time-window",
       "type": "java.lang.Long",
-      "sourceType": "io.stereov.singularity.ratelimit.properties.RateLimitProperties",
+      "sourceType": "io.stereov.singularity.security.ratelimit.properties.RateLimitProperties",
       "defaultValue": 1,
       "description": "Time window in minutes for the user limit."
     },
     {
       "name": "singularity.security.login-attempt-limit.ip-limit",
       "type": "java.lang.Long",
-      "sourceType": "io.stereov.singularity.ratelimit.properties.LoginAttemptLimitProperties",
+      "sourceType": "io.stereov.singularity.security.ratelimit.properties.LoginAttemptLimitProperties",
       "defaultValue": 10,
       "description": "Maximum number of login attempts from a single IP address before being blocked."
     },
     {
       "name": "singularity.security.login-attempt-limit.ip-time-window",
       "type": "java.lang.Long",
-      "sourceType": "io.stereov.singularity.ratelimit.properties.LoginAttemptLimitProperties",
+      "sourceType": "io.stereov.singularity.security.ratelimit.properties.LoginAttemptLimitProperties",
       "defaultValue": 5,
       "description": "Time window in minutes for the IP limit."
     },

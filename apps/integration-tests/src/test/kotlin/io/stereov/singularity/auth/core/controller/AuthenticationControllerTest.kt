@@ -1,5 +1,6 @@
 package io.stereov.singularity.auth.core.controller
 
+import com.github.michaelbull.result.getOrThrow
 import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.auth.core.dto.request.RegisterUserRequest
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
@@ -8,12 +9,12 @@ import io.stereov.singularity.auth.core.dto.response.AuthenticationStatusRespons
 import io.stereov.singularity.auth.core.dto.response.LoginResponse
 import io.stereov.singularity.auth.core.dto.response.RefreshTokenResponse
 import io.stereov.singularity.auth.core.dto.response.StepUpResponse
-import io.stereov.singularity.auth.core.model.token.SessionTokenType
-import io.stereov.singularity.auth.oauth2.model.token.OAuth2TokenType
-import io.stereov.singularity.auth.twofactor.model.token.TwoFactorTokenType
+import io.stereov.singularity.auth.token.model.OAuth2TokenType
+import io.stereov.singularity.auth.token.model.SessionTokenType
+import io.stereov.singularity.auth.token.model.TwoFactorTokenType
 import io.stereov.singularity.global.util.Random
+import io.stereov.singularity.principal.core.dto.response.UserResponse
 import io.stereov.singularity.test.BaseIntegrationTest
-import io.stereov.singularity.user.core.dto.response.UserResponse
 import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions
@@ -33,11 +34,11 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isOk
 
-        val userDetails = userService.findByEmail(email)
+        val userDetails = userService.findByEmail(email).getOrThrow()
         Assertions.assertEquals(userDetails.sensitive.name, req.name)
-        Assertions.assertTrue(hashService.checkBcrypt(password, userDetails.password!!))
+        Assertions.assertTrue(hashService.checkBcrypt(password, userDetails.password.getOrThrow()).getOrThrow())
         Assertions.assertFalse(userDetails.sensitive.security.email.verified)
-        Assertions.assertEquals(1, userService.findAll().count())
+        Assertions.assertEquals(1, userService.findAll().getOrThrow().count())
     }
     @Test fun `register requires valid email`() = runTest {
         webTestClient.post()
@@ -65,8 +66,8 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
             .exchange()
             .expectStatus().isOk()
 
-        val userAfterReq = userService.findById(user.info.id)
-        Assertions.assertFalse(hashService.checkBcrypt( req.password, userAfterReq.password!!))
+        val userAfterReq = userService.findById(user.id).getOrThrow()
+        Assertions.assertFalse(hashService.checkBcrypt( req.password, userAfterReq.password.getOrThrow()).getOrThrow())
         Assertions.assertNotEquals(userAfterReq.sensitive.name, req.name)
     }
     @Test fun `register requires password of min 8 characters`() = runTest {
@@ -168,7 +169,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
 
         Assertions.assertTrue(accessToken.isNotBlank())
         Assertions.assertTrue(refreshToken.isNotBlank())
-        Assertions.assertEquals(user.info.id, account.id)
+        Assertions.assertEquals(user.id, account.id)
 
         val userResponse = webTestClient.get()
             .uri("/api/users/me")
@@ -181,13 +182,13 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
 
         requireNotNull(userResponse)
 
-        Assertions.assertEquals(user.info.id, userResponse.id)
+        Assertions.assertEquals(user.id, userResponse.id)
         Assertions.assertEquals(user.info.sensitive.email, userResponse.email)
 
         Assertions.assertEquals(user.sessionId, user.info.sensitive.sessions.keys.first())
         Assertions.assertEquals(1, user.info.sensitive.sessions.size)
 
-        Assertions.assertEquals(1, userService.findAll().count())
+        Assertions.assertEquals(1, userService.findAll().getOrThrow().count())
     }
     @Test fun `login should save session correctly`() = runTest {
         val user = registerUser()
@@ -208,7 +209,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
 
         val accessToken = result.extractAccessToken()
 
-        val savedUser = userService.findById(user.info.id)
+        val savedUser = userService.findById(user.id).getOrThrow()
 
         Assertions.assertEquals(2, savedUser.sensitive.sessions.size)
         val session = savedUser.sensitive.sessions[accessToken.sessionId]!!
@@ -235,7 +236,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
         webTestClient.post()
             .uri("/api/auth/login")
             .bodyValue(LoginRequest(
-                user.info.sensitive.email!!,
+                user.info.sensitive.email,
                 "wrong password"
             ))
             .exchange()
@@ -273,7 +274,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
 
         requireNotNull(userInfo) { "No UserDetails provided in response" }
 
-        val sessions = userService.findById(user.info.id).sensitive.sessions
+        val sessions = userService.findById(user.id).getOrThrow().sensitive.sessions
 
         Assertions.assertEquals(2, sessions.size)
         Assertions.assertTrue(sessions.keys.any { it == user.sessionId })
@@ -297,7 +298,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
         val body = response.responseBody
         requireNotNull(body)
 
-        Assertions.assertEquals(twoFactorToken.userId, user.info.id)
+        Assertions.assertEquals(twoFactorToken.userId, user.id)
         Assertions.assertTrue(body.twoFactorRequired)
         Assertions.assertNotNull(body.user)
     }
@@ -317,7 +318,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
         webTestClient.post()
             .uri("/api/auth/login")
             .bodyValue(LoginRequest(
-                user.info.sensitive.email!!,
+                user.info.sensitive.email,
                 "any password"
             ))
             .exchange()
@@ -355,14 +356,14 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
 
         requireNotNull(account) { "No account provided in response" }
 
-        Assertions.assertTrue(userService.findById(user.info.id).sensitive.sessions.isEmpty())
+        Assertions.assertTrue(userService.findById(user.id).getOrThrow().sensitive.sessions.isEmpty())
     }
     @Test fun `logout requires authentication`() = runTest {
         webTestClient.post()
             .uri("/api/auth/logout")
             .bodyValue(SessionInfoRequest("session"))
             .exchange()
-            .expectStatus().isUnauthorized
+            .expectStatus().isNotModified
     }
 
     @Test fun `refresh returns valid tokens`() = runTest {
@@ -388,7 +389,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
         Assertions.assertTrue(accessToken.isNotBlank())
         Assertions.assertTrue(refreshToken.isNotBlank())
 
-        Assertions.assertEquals(user.info.id, res.user.id)
+        Assertions.assertEquals(user.id, res.user.id)
 
         webTestClient.post()
             .uri("/api/auth/refresh")
@@ -423,10 +424,10 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
         val user = registerUser()
         val anotherUser = registerUser(emailSuffix = "another@email.com")
         val refreshToken = refreshTokenService.create(
-            anotherUser.info.id,
+            anotherUser.id,
             user.sessionId,
-            Random.generateString(20)
-        )
+            Random.generateString(20).getOrThrow()
+        ).getOrThrow()
 
         webTestClient.post()
             .uri("/api/auth/refresh")
@@ -479,9 +480,9 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
 
         requireNotNull(stepUpTokenValue) { "No step up token info provided in response" }
 
-        val stepUpToken = stepUpTokenService.extract(stepUpTokenValue, user.info.id, user.sessionId)
+        val stepUpToken = stepUpTokenService.extract(stepUpTokenValue, user.id, user.sessionId).getOrThrow()
 
-        Assertions.assertEquals(user.info.id, stepUpToken.userId)
+        Assertions.assertEquals(user.id, stepUpToken.userId)
     }
     @Test fun `stepUp for user needs body`() = runTest {
         val user = registerUser()
@@ -551,7 +552,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
         val body = response.responseBody
         requireNotNull(body)
 
-        Assertions.assertEquals(twoFactorToken.userId, user.info.id)
+        Assertions.assertEquals(twoFactorToken.userId, user.id)
         Assertions.assertTrue(body.twoFactorRequired)
     }
     @Test fun `stepUp for guest works`() = runTest {
@@ -570,9 +571,9 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
 
         requireNotNull(stepUpTokenValue) { "No step up token info provided in response" }
 
-        val stepUpToken = stepUpTokenService.extract(stepUpTokenValue, guest.info.id, guest.sessionId)
+        val stepUpToken = stepUpTokenService.extract(stepUpTokenValue, guest.id, guest.sessionId).getOrThrow()
 
-        Assertions.assertEquals(guest.info.id, stepUpToken.userId)
+        Assertions.assertEquals(guest.id, stepUpToken.userId)
     }
 
     @Test fun `status works with nothing`() = runTest {
@@ -683,7 +684,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
     @Test fun `status works with two-factor`() = runTest {
         val user = registerUser(totpEnabled = true)
 
-        val twoFactorToken = twoFactorAuthenticationTokenService.create(user.info.id)
+        val twoFactorToken = twoFactorAuthenticationTokenService.create(user.id).getOrThrow()
 
         val res = webTestClient.get()
             .uri("/api/auth/status")
@@ -698,15 +699,15 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
 
         Assertions.assertFalse(res.authenticated)
         Assertions.assertFalse(res.stepUp)
-        Assertions.assertNull(res.emailVerified)
+        Assertions.assertFalse(res.emailVerified!!)
         Assertions.assertTrue(res.twoFactorRequired)
         Assertions.assertEquals(res.twoFactorMethods , user.info.twoFactorMethods)
-        Assertions.assertEquals(res.preferredTwoFactorMethod, user.info.preferredTwoFactorMethod)
+        Assertions.assertEquals(res.preferredTwoFactorMethod, user.info.preferredTwoFactorMethod.getOrThrow())
     }
     @Test fun `status works with two-factor and authenticated`() = runTest {
         val user = registerUser(totpEnabled = true)
 
-        val twoFactorToken = twoFactorAuthenticationTokenService.create(user.info.id)
+        val twoFactorToken = twoFactorAuthenticationTokenService.create(user.id).getOrThrow()
 
         val res = webTestClient.get()
             .uri("/api/auth/status")
@@ -724,7 +725,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
         Assertions.assertFalse(res.stepUp)
         Assertions.assertFalse(res.emailVerified!!)
         Assertions.assertFalse(res.twoFactorRequired)
-        Assertions.assertNull(res.twoFactorMethods)
-        Assertions.assertNull(res.preferredTwoFactorMethod)
+        Assertions.assertEquals(res.twoFactorMethods , user.info.twoFactorMethods)
+        Assertions.assertEquals(res.preferredTwoFactorMethod, user.info.preferredTwoFactorMethod.getOrThrow())
     }
 }

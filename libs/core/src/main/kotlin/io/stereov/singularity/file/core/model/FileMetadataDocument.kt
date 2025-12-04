@@ -1,19 +1,37 @@
 package io.stereov.singularity.file.core.model
 
-import io.stereov.singularity.auth.core.model.token.AccessType
+import io.stereov.singularity.auth.token.model.AccessType
 import io.stereov.singularity.content.core.model.ContentAccessDetails
 import io.stereov.singularity.content.core.model.ContentDocument
-import io.stereov.singularity.global.exception.model.InvalidDocumentException
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
-import org.springframework.data.annotation.Transient
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
 
+/**
+ * A document representation for storing metadata related to files.
+ *
+ * This class is used to model metadata information and properties of files stored in the system.
+ * It includes details such as renditions, associated content types, access settings, and additional
+ * metadata tags for the file.
+ *
+ * @property key The unique key identifying the file.
+ * @property createdAt The timestamp indicating when the file metadata was created.
+ * @property updatedAt The timestamp indicating the last update time of the file metadata.
+ * @property access Details regarding access permissions and visibility of the file.
+ * @property renditions A map of file renditions, where each rendition provides detail about a specific
+ *     version or format of the file.
+ * @property renditionKeys A set of all keys associated with the available renditions.
+ * @property contentTypes A set of MIME content types represented across the renditions of the file.
+ * @property trusted Indicates whether the file is trusted.
+ * @property tags A mutable set of user-defined tags associated with the file for categorization or
+ *     metadata purposes.
+ * @property id The unique identifier (ObjectId) for the file metadata document.
+ */
 @Document(collection = "files")
 data class FileMetadataDocument(
-    @Id private val _id: ObjectId? = null,
+    @Id override val _id: ObjectId? = null,
     @Indexed(unique = true) override val key: String,
     override val createdAt: Instant = Instant.now(),
     override var updatedAt: Instant = Instant.now(),
@@ -24,10 +42,6 @@ data class FileMetadataDocument(
     override var trusted: Boolean = false,
     override var tags: MutableSet<String> = mutableSetOf()
 ) : ContentDocument<FileMetadataDocument> {
-
-    @get:Transient
-    override val id: ObjectId
-        get() = _id ?: throw InvalidDocumentException("No ID found")
 
     constructor(
         id: ObjectId? = null,

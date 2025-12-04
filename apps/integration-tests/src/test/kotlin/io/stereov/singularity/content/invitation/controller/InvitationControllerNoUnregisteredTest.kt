@@ -1,10 +1,11 @@
 package io.stereov.singularity.content.invitation.controller
 
+import com.github.michaelbull.result.getOrThrow
 import io.mockk.verify
-import io.stereov.singularity.auth.group.model.KnownGroups
 import io.stereov.singularity.content.core.dto.request.InviteUserToContentRequest
 import io.stereov.singularity.content.core.dto.response.ExtendedContentAccessDetailsResponse
 import io.stereov.singularity.content.core.model.ContentAccessRole
+import io.stereov.singularity.principal.group.model.KnownGroups
 import io.stereov.singularity.test.BaseArticleTest
 import jakarta.mail.internet.MimeMessage
 import kotlinx.coroutines.flow.count
@@ -33,11 +34,11 @@ class InvitationControllerNoUnregisteredTest : BaseArticleTest() {
             .responseBody
             .awaitFirstOrNull()
 
-        val updatedArticle = articleService.findByKey(article.key)
+        val updatedArticle = articleService.findByKey(article.key).getOrThrow()
         assertEquals(1, updatedArticle.access.invitations.size)
         val invitationId = updatedArticle.access.invitations.first()
         assertNotNull(invitationService.findById(invitationId))
-        assertEquals(1, invitationService.findAll().count())
+        assertEquals(1, invitationService.findAll().getOrThrow().count())
 
 
         verify(exactly = 0) { mailSender.send(any<MimeMessage>()) }

@@ -1,12 +1,18 @@
 package io.stereov.singularity.auth.oauth2.controller
 
-import io.stereov.singularity.auth.core.component.CookieCreator
+import com.github.michaelbull.result.getOrThrow
+import io.stereov.singularity.auth.core.exception.AuthenticationException
 import io.stereov.singularity.auth.core.properties.AuthProperties
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.oauth2.dto.request.OAuth2ProviderConnectionRequest
 import io.stereov.singularity.auth.oauth2.dto.response.OAuth2ProviderConnectionTokenResponse
-import io.stereov.singularity.auth.oauth2.service.token.OAuth2ProviderConnectionTokenService
-import io.stereov.singularity.global.model.ErrorResponse
+import io.stereov.singularity.auth.token.component.CookieCreator
+import io.stereov.singularity.auth.token.exception.AccessTokenExtractionException
+import io.stereov.singularity.auth.token.exception.CookieException
+import io.stereov.singularity.auth.token.exception.OAuth2ProviderConnectionTokenCreationException
+import io.stereov.singularity.auth.token.exception.StepUpTokenExtractionException
+import io.stereov.singularity.auth.token.service.OAuth2ProviderConnectionTokenService
+import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.swagger.v3.oas.annotations.ExternalDocumentation
 import io.swagger.v3.oas.annotations.Operation
@@ -21,6 +27,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.server.ServerWebExchange
 
 @RestController
 @RequestMapping("/api/users/me/providers/oauth2")
@@ -59,27 +66,43 @@ class OAuth2ProviderController(
                 responseCode = "200",
                 description = "Returns the token if header authentication is enabled.",
                 content = [Content(schema = Schema(implementation = OAuth2ProviderConnectionTokenResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "Invalid or expired `AccessToken` or `StepUpToken`.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
     )
-    suspend fun generateOAuth2ProviderConnectionToken(@RequestBody req: OAuth2ProviderConnectionRequest): ResponseEntity<OAuth2ProviderConnectionTokenResponse> {
-        val userId = authorizationService.getUserId()
-        val sessionId = authorizationService.getSessionId()
+    @ThrowsDomainError([
+        AccessTokenExtractionException::class,
+        AuthenticationException.AuthenticationRequired::class,
+        StepUpTokenExtractionException::class,
+        OAuth2ProviderConnectionTokenCreationException::class,
+        CookieException.Creation::class
+    ])
+    suspend fun generateOAuth2ProviderConnectionToken(
+        @RequestBody req: OAuth2ProviderConnectionRequest,
+        exchange: ServerWebExchange
+    ): ResponseEntity<OAuth2ProviderConnectionTokenResponse> {
+        val authentication = authorizationService.getAuthenticationOutcome()
+            .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
+            .requireAuthentication()
+            .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it } }
 
-        authorizationService.requireStepUp()
-        val token = oAuth2ProviderConnectionTokenService.create(userId, sessionId, req.provider)
+        authorizationService.requireStepUp(authentication, exchange)
+            .getOrThrow { when (it) { is StepUpTokenExtractionException -> it } }
+
+        val principalId = authentication.principalId
+        val sessionId = authentication.sessionId
+
+        val token = oAuth2ProviderConnectionTokenService.create(principalId, sessionId, req.provider)
+            .getOrThrow { when (it) { is OAuth2ProviderConnectionTokenCreationException -> it } }
 
         val res = OAuth2ProviderConnectionTokenResponse(
             token = if (authProperties.allowHeaderAuthentication) token.value else null
         )
 
+        val connectionTokenCookie = cookieCreator.createCookie(token)
+            .getOrThrow { when (it) { is CookieException.Creation -> it } }
+
         return ResponseEntity.ok()
-            .header("Set-Cookie", cookieCreator.createCookie(token).toString())
+            .header("Set-Cookie", connectionTokenCookie.toString())
             .body(res)
     }
 }

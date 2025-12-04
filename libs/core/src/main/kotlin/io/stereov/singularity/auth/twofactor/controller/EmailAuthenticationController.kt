@@ -1,17 +1,29 @@
 package io.stereov.singularity.auth.twofactor.controller
 
+import com.github.michaelbull.result.getOrThrow
 import io.stereov.singularity.auth.core.dto.response.MailCooldownResponse
+import io.stereov.singularity.auth.core.exception.AuthenticationException
 import io.stereov.singularity.auth.core.service.AuthorizationService
+import io.stereov.singularity.auth.token.exception.AccessTokenExtractionException
+import io.stereov.singularity.auth.token.exception.StepUpTokenExtractionException
+import io.stereov.singularity.auth.token.exception.TwoFactorAuthenticationTokenExtractionException
+import io.stereov.singularity.auth.token.service.TwoFactorAuthenticationTokenService
 import io.stereov.singularity.auth.twofactor.dto.request.EnableEmailTwoFactorMethodRequest
+import io.stereov.singularity.auth.twofactor.exception.DisableEmailAuthenticationException
+import io.stereov.singularity.auth.twofactor.exception.EnableEmailAuthenticationException
+import io.stereov.singularity.auth.twofactor.exception.SendEmailAuthenticationException
 import io.stereov.singularity.auth.twofactor.service.EmailAuthenticationService
-import io.stereov.singularity.auth.twofactor.service.token.TwoFactorAuthenticationTokenService
-import io.stereov.singularity.global.model.ErrorResponse
-import io.stereov.singularity.global.model.SendEmailResponse
+import io.stereov.singularity.cache.exception.CacheException
+import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.OpenApiConstants
+import io.stereov.singularity.global.model.SendEmailResponse
 import io.stereov.singularity.global.model.SuccessResponse
-import io.stereov.singularity.user.core.dto.response.UserResponse
-import io.stereov.singularity.user.core.mapper.UserMapper
-import io.stereov.singularity.user.core.service.UserService
+import io.stereov.singularity.global.util.getOrNull
+import io.stereov.singularity.principal.core.dto.response.UserResponse
+import io.stereov.singularity.principal.core.exception.FindUserByIdException
+import io.stereov.singularity.principal.core.exception.PrincipalMapperException
+import io.stereov.singularity.principal.core.mapper.PrincipalMapper
+import io.stereov.singularity.principal.core.service.UserService
 import io.swagger.v3.oas.annotations.ExternalDocumentation
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -32,7 +44,7 @@ import java.util.*
 class EmailAuthenticationController(
     private val emailAuthenticationService: EmailAuthenticationService,
     private val authorizationService: AuthorizationService,
-    private val userMapper: UserMapper,
+    private val principalMapper: PrincipalMapper,
     private val twoFactorAuthenticationTokenService: TwoFactorAuthenticationTokenService,
     private val userService: UserService
 ) {
@@ -95,41 +107,34 @@ class EmailAuthenticationController(
                 description = "Success.",
                 content = [Content(schema = Schema(implementation = SuccessResponse::class))]
             ),
-            ApiResponse(
-                responseCode = "400",
-                description = "2FA cannot be sent for users who didn't configure authentication using a password.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "Invalid or expired `AccessToken` or `TwoFactorAuthenticationToken`.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "429",
-                description = "Cannot send email while cooldown is active.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "503",
-                description = "Email is disabled in your application.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
         ]
     )
+    @ThrowsDomainError([
+        AccessTokenExtractionException::class,
+        TwoFactorAuthenticationTokenExtractionException::class,
+        FindUserByIdException::class,
+        SendEmailAuthenticationException::class,
+    ])
     suspend fun sendEmailTwoFactorCode(
         @RequestParam locale: Locale?,
         exchange: ServerWebExchange,
     ): ResponseEntity<SendEmailResponse> {
-        val userId = authorizationService.getUserIdOrNull()
-            ?: twoFactorAuthenticationTokenService.extract(exchange).userId
+        val userId = authorizationService.getAuthenticationOutcome()
+            .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
+            .requireAuthentication()
+            .getOrNull()
+            ?.principalId
+            ?: twoFactorAuthenticationTokenService.extract(exchange)
+                .getOrThrow { when (it) { is TwoFactorAuthenticationTokenExtractionException -> it } }
+                .userId
 
-        emailAuthenticationService.sendMail(
-            userService.findById(userId),
-            locale
-        )
+        val user = userService.findById(userId)
+            .getOrThrow { FindUserByIdException.from(it) }
 
-        return ResponseEntity.ok(SendEmailResponse(emailAuthenticationService.getRemainingCooldown(userId)))
+        val remainingCooldown = emailAuthenticationService.sendMail(user, locale)
+            .getOrThrow { when (it) { is SendEmailAuthenticationException -> it } }
+
+        return ResponseEntity.ok(SendEmailResponse(remainingCooldown))
     }
 
     @PostMapping("/enable")
@@ -177,31 +182,40 @@ class EmailAuthenticationController(
                 responseCode = "200",
                 description = "Updated user information.",
                 content = [Content(schema = Schema(implementation = UserResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "304",
-                description = "This method is already enabled for the user.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "400",
-                description = "2FA cannot be enabled for users who didn't configure authentication using a password.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "Invalid `AccessToken` or `StepUpToken`.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
+            )
         ]
     )
+    @ThrowsDomainError([
+        AccessTokenExtractionException::class,
+        AuthenticationException.AuthenticationRequired::class,
+        StepUpTokenExtractionException::class,
+        FindUserByIdException::class,
+        EnableEmailAuthenticationException::class,
+        PrincipalMapperException::class,
+    ])
     suspend fun enableEmailAsTwoFactorMethod(
         @RequestBody payload: EnableEmailTwoFactorMethodRequest,
-        @RequestParam locale: Locale?
+        @RequestParam locale: Locale?,
+        exchange: ServerWebExchange,
     ): ResponseEntity<UserResponse> {
-        return ResponseEntity.ok(
-            userMapper.toResponse(emailAuthenticationService.enable(payload, locale))
-        )
+        val authentication = authorizationService.getAuthenticationOutcome()
+            .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
+            .requireAuthentication()
+            .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it } }
+
+        authorizationService.requireStepUp(authentication, exchange)
+            .getOrThrow { when (it) { is StepUpTokenExtractionException -> it } }
+
+        var user = userService.findById(authentication.principalId)
+            .getOrThrow { FindUserByIdException.from(it) }
+
+        user = emailAuthenticationService.enable(payload, user, locale)
+            .getOrThrow { when (it) { is EnableEmailAuthenticationException -> it } }
+
+        val response = principalMapper.toResponse(user)
+            .getOrThrow { when (it) { is PrincipalMapperException -> it } }
+
+        return ResponseEntity.ok(response)
     }
 
     @DeleteMapping
@@ -242,30 +256,45 @@ class EmailAuthenticationController(
                 responseCode = "200",
                 description = "Updated user information.",
                 content = [Content(schema = Schema(implementation = UserResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "400",
-                description = "This method is already disabled for the user.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "Invalid `AccessToken` or `RefreshToken`.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
+            )
         ]
     )
+    @ThrowsDomainError([
+        AccessTokenExtractionException::class,
+        AuthenticationException.AuthenticationRequired::class,
+        StepUpTokenExtractionException::class,
+        FindUserByIdException::class,
+        DisableEmailAuthenticationException::class,
+        PrincipalMapperException::class,
+    ])
     suspend fun disableEmailAsTwoFactorMethod(
-        @RequestParam locale: Locale?
+        @RequestParam locale: Locale?,
+        exchange: ServerWebExchange,
     ): ResponseEntity<UserResponse> {
-        return ResponseEntity.ok(
-            userMapper.toResponse(emailAuthenticationService.disable(locale))
-        )
+
+        val authentication = authorizationService.getAuthenticationOutcome()
+            .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
+            .requireAuthentication()
+            .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it } }
+
+        authorizationService.requireStepUp(authentication, exchange)
+            .getOrThrow { when (it) { is StepUpTokenExtractionException -> it } }
+
+        var user = userService.findById(authentication.principalId)
+            .getOrThrow { FindUserByIdException.from(it) }
+
+        user = emailAuthenticationService.disable(user, locale)
+            .getOrThrow { when (it) { is DisableEmailAuthenticationException -> it } }
+
+        val response = principalMapper.toResponse(user)
+            .getOrThrow { when (it) { is PrincipalMapperException -> it } }
+
+        return ResponseEntity.ok(response)
     }
 
     @GetMapping("/cooldown")
     @Operation(
-        summary = "Get Remaining Email 2FA Code Cooldown",
+        summary = "Get Remaining Email 2FA Code CooldownActive",
         description = """
             Get the remaining time in seconds until you can send another email containing a 2FA code.
             
@@ -288,20 +317,32 @@ class EmailAuthenticationController(
                 description = "The remaining cooldown.",
                 content = [Content(schema = Schema(implementation = MailCooldownResponse::class))]
             ),
-            ApiResponse(
-                responseCode = "401",
-                description = "Invalid or expired `AccessToken` or `TwoFactorAuthenticationToken`.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
         ]
     )
+    @ThrowsDomainError([
+        AccessTokenExtractionException::class,
+        TwoFactorAuthenticationTokenExtractionException::class,
+        FindUserByIdException::class,
+        CacheException.Operation::class,
+    ])
     suspend fun getRemainingEmailTwoFactorCooldown(
         exchange: ServerWebExchange
     ): ResponseEntity<MailCooldownResponse> {
-        val userId = authorizationService.getUserIdOrNull()
-            ?: twoFactorAuthenticationTokenService.extract(exchange).userId
+        val userId = authorizationService.getAuthenticationOutcome()
+            .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
+            .requireAuthentication()
+            .getOrNull()
+            ?.principalId
+            ?: twoFactorAuthenticationTokenService.extract(exchange)
+                .getOrThrow { when (it) { is TwoFactorAuthenticationTokenExtractionException -> it } }
+                .userId
 
-        val remainingCooldown = emailAuthenticationService.getRemainingCooldown(userId)
+        val user = userService.findById(userId)
+            .getOrThrow { FindUserByIdException.from(it) }
+
+        val remainingCooldown = emailAuthenticationService.getRemainingCooldown(user.email)
+            .getOrThrow { when (it) { is CacheException.Operation -> it } }
+            .seconds
 
         return ResponseEntity.ok().body(MailCooldownResponse(remainingCooldown))
     }

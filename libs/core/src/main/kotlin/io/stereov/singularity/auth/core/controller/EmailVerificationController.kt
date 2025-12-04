@@ -1,16 +1,26 @@
 package io.stereov.singularity.auth.core.controller
 
+import com.github.michaelbull.result.getOrThrow
 import io.stereov.singularity.auth.core.dto.response.MailCooldownResponse
+import io.stereov.singularity.auth.core.exception.AuthenticationException
+import io.stereov.singularity.auth.core.exception.SendVerificationEmailException
+import io.stereov.singularity.auth.core.exception.VerifyEmailException
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.core.service.EmailVerificationService
-import io.stereov.singularity.global.model.ErrorResponse
+import io.stereov.singularity.auth.token.exception.AccessTokenExtractionException
+import io.stereov.singularity.auth.token.exception.EmailVerificationTokenExtractionException
+import io.stereov.singularity.auth.token.service.EmailVerificationTokenService
+import io.stereov.singularity.cache.exception.CacheException
+import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.global.model.SendEmailResponse
-import io.stereov.singularity.user.core.dto.response.UserResponse
+import io.stereov.singularity.principal.core.dto.response.UserResponse
+import io.stereov.singularity.principal.core.exception.FindUserByIdException
+import io.stereov.singularity.principal.core.exception.PrincipalMapperException
+import io.stereov.singularity.principal.core.mapper.PrincipalMapper
+import io.stereov.singularity.principal.core.service.UserService
 import io.swagger.v3.oas.annotations.ExternalDocumentation
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.media.Content
-import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -26,6 +36,9 @@ import java.util.*
 class EmailVerificationController(
     private val emailVerificationService: EmailVerificationService,
     private val authorizationService: AuthorizationService,
+    private val emailVerificationTokenService: EmailVerificationTokenService,
+    private val userService: UserService,
+    private val principalMapper: PrincipalMapper,
 ) {
 
     @PostMapping
@@ -60,37 +73,38 @@ class EmailVerificationController(
             ApiResponse(
                 responseCode = "200",
                 description = "Updated user information.",
-            ),
-            ApiResponse(
-                responseCode = "304",
-                description = "Trying to verify an email for verified account.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "400",
-                description = "Trying to verify an email for [`GUEST`](https://singularity.stereov.io/docs/guides/auth/roles#guests).",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "Invalid or expired verification token.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
             )
         ]
     )
+    @ThrowsDomainError([
+        AccessTokenExtractionException::class,
+        EmailVerificationTokenExtractionException::class,
+        VerifyEmailException::class,
+        PrincipalMapperException::class
+    ])
     suspend fun verifyEmail(
         @RequestParam token: String,
         @RequestParam locale: Locale?
     ): ResponseEntity<UserResponse> {
-        val authInfo = emailVerificationService.verifyEmail(token, locale)
+        val authenticationOutcome = authorizationService.getAuthenticationOutcome()
+            .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
+
+        val token = emailVerificationTokenService.extract(token)
+            .getOrThrow { when (it) { is EmailVerificationTokenExtractionException -> it } }
+
+        val user = emailVerificationService.verifyEmail(token, locale)
+            .getOrThrow { when (it) { is VerifyEmailException -> it } }
+
+        val response = principalMapper.toResponse(user, authenticationOutcome)
+            .getOrThrow { when (it) { is PrincipalMapperException -> it } }
 
         return ResponseEntity.ok()
-            .body(authInfo)
+            .body(response)
     }
 
     @GetMapping("/cooldown")
     @Operation(
-        summary = "Get Remaining Email Verification Cooldown",
+        summary = "Get Remaining Email Verification CooldownActive",
         description = """
             Get the remaining time in seconds until you can send another email verification email.
             
@@ -108,19 +122,29 @@ class EmailVerificationController(
             ApiResponse(
                 responseCode = "200",
                 description = "The remaining cooldown.",
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "AccessToken is invalid or expired.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
+            )
         ]
     )
+    @ThrowsDomainError([
+        AccessTokenExtractionException::class,
+        AuthenticationException.AuthenticationRequired::class,
+        FindUserByIdException::class,
+        CacheException.Operation::class
+    ])
     suspend fun getRemainingEmailVerificationCooldown(): ResponseEntity<MailCooldownResponse> {
-        val email = authorizationService.getUser().sensitive.email
-        val remainingCooldown = if (email != null) {
-            emailVerificationService.getRemainingCooldown(email)
-        } else 0
+        val principalId = authorizationService.getAuthenticationOutcome()
+            .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
+            .requireAuthentication()
+            .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it } }
+            .principalId
+
+        val email = userService.findById(principalId)
+            .getOrThrow { FindUserByIdException.from(it) }
+            .email
+
+        val remainingCooldown = emailVerificationService.getRemainingCooldown(email)
+            .getOrThrow { when (it) { is CacheException.Operation -> it } }
+            .seconds
 
         return ResponseEntity.ok().body(MailCooldownResponse(remainingCooldown))
     }
@@ -144,7 +168,7 @@ class EmailVerificationController(
             >**Note:** If email is disabled, there is no way to verify a user's email address.
             
             If there is no account associated with the given email address, 
-            a [No Account Information](https://singularity.stereov.io/docs/guides/auth/security-alerts#no-account-information)
+            a [No Principal Information](https://singularity.stereov.io/docs/guides/auth/security-alerts#no-account-information)
             email will be sent to the given email address.
             
             ### Locale
@@ -173,39 +197,29 @@ class EmailVerificationController(
             ApiResponse(
                 responseCode = "200",
                 description = "The number of seconds the user needs to wait before sending a new email.",
-            ),
-            ApiResponse(
-                responseCode = "304",
-                description = "Trying to send a verification email for verified account.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "400",
-                description = "Trying to send a verification email for [`GUEST`](https://singularity.stereov.io/docs/guides/auth/roles#guests).",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "AccessToken is invalid or expired.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "429",
-                description = "Cooldown is active. You have to wait until you can send another email.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "503",
-                description = "Email is disabled in your application.",
-                content = [Content(schema = Schema(implementation = ErrorResponse::class))]
-            ),
+            )
         ]
     )
+    @ThrowsDomainError([
+        AccessTokenExtractionException::class,
+        AuthenticationException.AuthenticationRequired::class,
+        FindUserByIdException::class,
+        SendVerificationEmailException::class
+    ])
     suspend fun sendEmailVerificationEmail(
         @RequestParam locale: Locale?,
     ): ResponseEntity<SendEmailResponse> {
-        val user = authorizationService.getUser()
+        val principalId = authorizationService.getAuthenticationOutcome()
+            .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
+            .requireAuthentication()
+            .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it } }
+            .principalId
+
+        val user = userService.findById(principalId)
+            .getOrThrow { FindUserByIdException.from(it) }
+
         val cooldown = emailVerificationService.sendVerificationEmail(user, locale)
+            .getOrThrow { when (it) { is SendVerificationEmailException -> it } }
 
         return ResponseEntity.ok().body(
             SendEmailResponse(cooldown)

@@ -1,10 +1,9 @@
 package io.stereov.singularity.content.core.dto.response
 
-import io.stereov.singularity.auth.core.model.token.AccessType
+import io.stereov.singularity.auth.token.model.AccessType
 import io.stereov.singularity.content.core.model.ContentAccessDetails
 import io.stereov.singularity.content.core.model.ContentAccessRole
 import io.stereov.singularity.content.invitation.dto.InvitationResponse
-import io.stereov.singularity.content.invitation.model.InvitationDocument
 import org.bson.types.ObjectId
 
 data class ExtendedContentAccessDetailsResponse(
@@ -16,7 +15,7 @@ data class ExtendedContentAccessDetailsResponse(
 ) {
 
     companion object {
-        fun create(contentAccessDetails: ContentAccessDetails, invitations: List<InvitationDocument>, users: List<UserContentAccessDetails>): ExtendedContentAccessDetailsResponse {
+        fun create(contentAccessDetails: ContentAccessDetails, invitations: List<InvitationResponse>, users: List<UserContentAccessDetails>): ExtendedContentAccessDetailsResponse {
             val groups = mutableMapOf<String, ContentAccessRole>()
             contentAccessDetails.groups.viewer.forEach { group -> groups[group] = ContentAccessRole.VIEWER }
             contentAccessDetails.groups.editor.forEach { group -> groups[group] = ContentAccessRole.EDITOR }
@@ -27,7 +26,7 @@ data class ExtendedContentAccessDetailsResponse(
                 visibility = contentAccessDetails.visibility,
                 users = users,
                 groups = groups,
-                invitations = invitations.map { it.toInvitationResponse() }
+                invitations = invitations
             )
         }
     }

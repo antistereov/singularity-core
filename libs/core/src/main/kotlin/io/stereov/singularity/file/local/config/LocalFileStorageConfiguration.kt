@@ -1,5 +1,6 @@
 package io.stereov.singularity.file.local.config
 
+import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.file.core.config.StorageConfiguration
 import io.stereov.singularity.file.core.mapper.FileMetadataMapper
 import io.stereov.singularity.file.core.properties.StorageProperties
@@ -23,7 +24,7 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 @ConditionalOnProperty(prefix = "singularity.file.storage", value = ["type"], havingValue = "local", matchIfMissing = true)
 @EnableConfigurationProperties(LocalFileStorageProperties::class)
-class LocalFileStorageConfiguration {
+internal class LocalFileStorageConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
@@ -45,7 +46,7 @@ class LocalFileStorageConfiguration {
 
     @Bean
     fun localFileStorageController(
-        metadataService: FileMetadataService,
-        properties: LocalFileStorageProperties
-    ) = LocalFileStorageController(metadataService, properties)
+        localFileStorage: LocalFileStorage,
+        authorizationService: AuthorizationService,
+    ) = LocalFileStorageController(localFileStorage, authorizationService)
 }

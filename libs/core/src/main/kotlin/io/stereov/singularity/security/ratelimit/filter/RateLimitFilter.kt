@@ -1,17 +1,19 @@
-package io.stereov.singularity.ratelimit.filter
+package io.stereov.singularity.security.ratelimit.filter
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
+import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.util.getClientIp
-import io.stereov.singularity.ratelimit.excpetion.model.TooManyRequestsException
-import io.stereov.singularity.ratelimit.service.RateLimitService
-import org.springframework.http.HttpStatus
+import io.stereov.singularity.ratelimit.excpetion.RateLimitException
+import io.stereov.singularity.security.ratelimit.service.RateLimitService
+import org.springframework.http.MediaType
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Mono
 
 /**
- * # Filter for rate limiting incoming requests.
+ * Filter for rate limiting incoming requests.
  *
  * This ratelimit limits the number of requests from a single IP address and user account
  * within a specified time period.
@@ -38,7 +40,7 @@ class RateLimitFilter(
             val clientIp = exchange.request.getClientIp(geolocationProperties.realIpHeader) ?: "unknown"
             val path = exchange.request.path.toString()
             val isLoginAttempt = path.contains("/api/auth/login") ||
-                    path.contains("/api/auth/ste-up")
+                    path.contains("/api/auth/step-up") ||
                     path.contains("/api/auth/2fa/totp/recover") ||
                     path.contains("/api/auth/password/reset") ||
                     path.contains("/api/auth/2fa/step-up") ||
@@ -47,12 +49,17 @@ class RateLimitFilter(
             rateLimitService.checkIpRateLimit(clientIp)
                 .then(rateLimitService.checkUserRateLimit())
                 .then(if (isLoginAttempt) rateLimitService.checkIpLoginLimit(clientIp) else Mono.empty())
-                .then(chain.filter(exchange))
-                .onErrorResume { e ->
-                    if (e is TooManyRequestsException) {
-                        exchange.response.statusCode = HttpStatus.TOO_MANY_REQUESTS
-                        exchange.response.setComplete()
-                    } else { Mono.error(e) }
+                .then(chain.filter(exchange) )
+                .onErrorResume(RateLimitException::class.java) { ex ->
+                    val status = ex.status
+                    exchange.response.statusCode = status
+                    exchange.response.headers.contentType = MediaType.APPLICATION_JSON
+
+                    val errorResponse = ErrorResponse(ex, exchange)
+
+                    exchange.response.writeWith(
+                        Mono.just(exchange.response.bufferFactory().wrap(ObjectMapper().writeValueAsBytes(errorResponse)))
+                    )
                 }
         }
     }

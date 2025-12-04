@@ -1,30 +1,24 @@
 package io.stereov.singularity.auth.core.config
 
 import io.lettuce.core.ExperimentalLettuceCoroutinesApi
+import io.stereov.singularity.auth.alert.properties.SecurityAlertProperties
+import io.stereov.singularity.auth.alert.service.*
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
-import io.stereov.singularity.auth.core.component.CookieCreator
-import io.stereov.singularity.auth.core.component.ProviderStringCreator
-import io.stereov.singularity.auth.core.component.TokenValueExtractor
 import io.stereov.singularity.auth.core.controller.AuthenticationController
 import io.stereov.singularity.auth.core.controller.EmailVerificationController
 import io.stereov.singularity.auth.core.controller.PasswordResetController
 import io.stereov.singularity.auth.core.controller.SessionController
-import io.stereov.singularity.auth.core.exception.handler.AuthExceptionHandler
 import io.stereov.singularity.auth.core.mapper.SessionMapper
 import io.stereov.singularity.auth.core.properties.AuthProperties
-import io.stereov.singularity.auth.core.properties.SecurityAlertProperties
 import io.stereov.singularity.auth.core.service.*
-import io.stereov.singularity.auth.core.service.token.*
-import io.stereov.singularity.auth.geolocation.properties.GeolocationProperties
 import io.stereov.singularity.auth.geolocation.service.GeolocationService
 import io.stereov.singularity.auth.jwt.properties.JwtProperties
-import io.stereov.singularity.auth.jwt.service.JwtService
+import io.stereov.singularity.auth.token.component.CookieCreator
+import io.stereov.singularity.auth.token.service.*
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailCodeProperties
 import io.stereov.singularity.auth.twofactor.properties.TwoFactorEmailProperties
 import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthenticationService
-import io.stereov.singularity.auth.twofactor.service.token.TwoFactorAuthenticationTokenService
 import io.stereov.singularity.cache.service.CacheService
-import io.stereov.singularity.database.encryption.service.EncryptionService
 import io.stereov.singularity.database.hash.service.HashService
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.email.core.service.EmailService
@@ -33,15 +27,15 @@ import io.stereov.singularity.file.s3.config.S3Configuration
 import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.global.properties.UiProperties
+import io.stereov.singularity.principal.core.mapper.PrincipalMapper
+import io.stereov.singularity.principal.core.service.PrincipalService
+import io.stereov.singularity.principal.core.service.UserService
 import io.stereov.singularity.translate.service.TranslateService
-import io.stereov.singularity.user.core.mapper.UserMapper
-import io.stereov.singularity.user.core.service.UserService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.data.redis.core.ReactiveRedisTemplate
 
 @Configuration
 @AutoConfiguration(
@@ -52,11 +46,10 @@ import org.springframework.data.redis.core.ReactiveRedisTemplate
 )
 @EnableConfigurationProperties(
     AuthProperties::class,
-    SecurityAlertProperties::class
 )
 class AuthenticationConfiguration {
 
-    // Cache
+    // WriteAllowlist
 
     @OptIn(ExperimentalLettuceCoroutinesApi::class)
     @Bean
@@ -66,29 +59,13 @@ class AuthenticationConfiguration {
         jwtProperties: JwtProperties
     ) = AccessTokenCache(cacheService, jwtProperties)
 
-
-    // Component
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun cookieCreator(appProperties: AppProperties) = CookieCreator(appProperties)
-    
-    @Bean
-    @ConditionalOnMissingBean
-    fun providerStringCreator(translateService: TranslateService) = ProviderStringCreator(translateService)
-
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun tokenValueExtractor(authProperties: AuthProperties) = TokenValueExtractor(authProperties)
-
     // Controller
 
     @Bean
     @ConditionalOnMissingBean
     fun authenticationController(
         authenticationService: AuthenticationService,
-        userMapper: UserMapper,
+        principalMapper: PrincipalMapper,
         authProperties: AuthProperties,
         geoLocationService: GeolocationService,
         twoFactorAuthenticationTokenService: TwoFactorAuthenticationTokenService,
@@ -102,11 +79,11 @@ class AuthenticationConfiguration {
         loginAlertService: LoginAlertService,
         securityAlertProperties: SecurityAlertProperties,
         emailProperties: EmailProperties,
-
+        principalService: PrincipalService
         ): AuthenticationController {
         return AuthenticationController(
             authenticationService,
-            userMapper,
+            principalMapper,
             authProperties,
             geoLocationService,
             twoFactorAuthenticationTokenService,
@@ -119,7 +96,8 @@ class AuthenticationConfiguration {
             authorizationService,
             loginAlertService,
             securityAlertProperties,
-            emailProperties
+            emailProperties,
+            principalService
         )
     }
     
@@ -127,14 +105,27 @@ class AuthenticationConfiguration {
     @ConditionalOnMissingBean
     fun emailVerificationController(
         emailVerificationService: EmailVerificationService,
-        authorizationService: AuthorizationService
-    ) = EmailVerificationController(emailVerificationService, authorizationService)
+        authorizationService: AuthorizationService,
+        emailVerificationTokenService: EmailVerificationTokenService,
+        userService: UserService,
+        principalMapper: PrincipalMapper
+    ) = EmailVerificationController(
+        emailVerificationService,
+        authorizationService,
+        emailVerificationTokenService,
+        userService,
+        principalMapper
+    )
     
     @Bean
     @ConditionalOnMissingBean
     fun passwordResetController(
-        passwordResetService: PasswordResetService
-    ) = PasswordResetController(passwordResetService)
+        passwordResetService: PasswordResetService,
+        passwordResetTokenService: PasswordResetTokenService,
+    ) = PasswordResetController(
+        passwordResetService,
+        passwordResetTokenService,
+    )
 
     @Bean
     @ConditionalOnMissingBean
@@ -142,22 +133,20 @@ class AuthenticationConfiguration {
         sessionService: SessionService,
         cookieCreator: CookieCreator,
         sessionTokenService: SessionTokenService,
-        sessionMapper: SessionMapper
+        sessionMapper: SessionMapper,
+        authorizationService: AuthorizationService,
+        principalService: PrincipalService,
+        accessTokenCache: AccessTokenCache
     ): SessionController {
         return SessionController(
             sessionService,
             cookieCreator,
             sessionTokenService,
             sessionMapper,
+            authorizationService,
+            principalService,
+            accessTokenCache,
         )
-    }
-
-    // Exception Handler
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun authExceptionHandler(): AuthExceptionHandler {
-        return AuthExceptionHandler()
     }
 
     // Mapper
@@ -167,84 +156,6 @@ class AuthenticationConfiguration {
     fun sessionMapper() = SessionMapper()
 
     // Services
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun accessTokenService(
-        jwtService: JwtService,
-        accessTokenCache: AccessTokenCache,
-        jwtProperties: JwtProperties,
-        tokenValueExtractor: TokenValueExtractor,
-    ) = AccessTokenService(
-        jwtService,
-        accessTokenCache,
-        jwtProperties,
-        tokenValueExtractor,
-    )
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun emailVerificationTokenService(
-        jwtProperties: JwtProperties,
-        jwtService: JwtService
-    ) = EmailVerificationTokenService(
-        jwtProperties,
-        jwtService
-    )
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun passwordResetTokenService(
-        jwtProperties: JwtProperties,
-        jwtService: JwtService,
-        encryptionService: EncryptionService,
-    ) = PasswordResetTokenService(
-        jwtProperties, jwtService, encryptionService
-    )
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun refreshTokenService(
-        jwtService: JwtService,
-        jwtProperties: JwtProperties,
-        geolocationService: GeolocationService,
-        geolocationProperties: GeolocationProperties,
-        userService: UserService,
-        tokenValueExtractor: TokenValueExtractor,
-    ) = RefreshTokenService(
-        jwtService,
-        jwtProperties,
-        geolocationService,
-        geolocationProperties,
-        userService,
-        tokenValueExtractor,
-    )
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun sessionTokenService(
-        jwtService: JwtService,
-        jwtProperties: JwtProperties,
-        tokenValueExtractor: TokenValueExtractor
-    ) = SessionTokenService(
-        jwtService,
-        jwtProperties,
-        tokenValueExtractor
-    )
-    
-    @Bean
-    @ConditionalOnMissingBean
-    fun stepUpTokenService(
-        jwtService: JwtService,
-        jwtProperties: JwtProperties,
-        tokenValueExtractor: TokenValueExtractor,
-    ): StepUpTokenService {
-        return StepUpTokenService(
-            jwtService,
-            jwtProperties,
-            tokenValueExtractor
-        )
-    }
 
     @Bean
     @ConditionalOnMissingBean
@@ -260,7 +171,8 @@ class AuthenticationConfiguration {
         twoFactorEmailProperties: TwoFactorEmailProperties,
         registrationAlertService: RegistrationAlertService,
         securityAlertProperties: SecurityAlertProperties,
-        identityProviderInfoService: IdentityProviderInfoService
+        identityProviderInfoService: IdentityProviderInfoService,
+        principalService: PrincipalService
     ): AuthenticationService {
         return AuthenticationService(
             userService,
@@ -275,6 +187,7 @@ class AuthenticationConfiguration {
             registrationAlertService,
             securityAlertProperties,
             identityProviderInfoService,
+            principalService,
         )
     }
 
@@ -282,9 +195,8 @@ class AuthenticationConfiguration {
     @ConditionalOnMissingBean
     fun authorizationService(
         stepUpTokenService: StepUpTokenService,
-        userService: UserService
     ): AuthorizationService {
-        return AuthorizationService(stepUpTokenService, userService)
+        return AuthorizationService(stepUpTokenService)
     }
     
     @Bean
@@ -292,8 +204,7 @@ class AuthenticationConfiguration {
     fun emailVerificationService(
         userService: UserService,
         emailVerificationTokenService: EmailVerificationTokenService,
-        userMapper: UserMapper,
-        redisTemplate: ReactiveRedisTemplate<String, String>,
+        cacheService: CacheService,
         emailProperties: EmailProperties,
         uiProperties: UiProperties,
         translateService: TranslateService,
@@ -305,8 +216,7 @@ class AuthenticationConfiguration {
     ) = EmailVerificationService(
         userService,
         emailVerificationTokenService,
-        userMapper,
-        redisTemplate,
+        cacheService,
         emailProperties,
         uiProperties,
         translateService,
@@ -319,65 +229,11 @@ class AuthenticationConfiguration {
     
     @Bean
     @ConditionalOnMissingBean
-    fun identityProviderInfoService(
-        appProperties: AppProperties,
-        translateService: TranslateService,
-        emailService: EmailService,
-        templateService: TemplateService,
-        providerStringCreator: ProviderStringCreator,
-        redisTemplate: ReactiveRedisTemplate<String, String>,
-        emailProperties: EmailProperties,
-        passwordResetService: PasswordResetService
-    ) = IdentityProviderInfoService(
-        appProperties,
-        translateService,
-        emailService,
-        templateService,
-        providerStringCreator,
-        redisTemplate,
-        emailProperties,
-        passwordResetService
-    )
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun loginAlertService(
-        appProperties: AppProperties,
-        translateService: TranslateService,
-        emailService: EmailService,
-        templateService: TemplateService
-    ) = LoginAlertService(
-        appProperties,
-        translateService,
-        emailService,
-        templateService
-    )
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun noAccountInfoService(
-        appProperties: AppProperties,
-        translateService: TranslateService,
-        emailService: EmailService,
-        templateService: TemplateService,
-        redisTemplate: ReactiveRedisTemplate<String, String>,
-        emailProperties: EmailProperties
-    ) = NoAccountInfoService(
-        appProperties,
-        translateService,
-        emailService,
-        templateService,
-        redisTemplate,
-        emailProperties
-    )
-    
-    @Bean
-    @ConditionalOnMissingBean
     fun passwordResetService(
         userService: UserService,
         passwordResetTokenService: PasswordResetTokenService,
         hashService: HashService,
-        redisTemplate: ReactiveRedisTemplate<String, String>,
+        cacheService: CacheService,
         emailProperties: EmailProperties,
         uiProperties: UiProperties,
         translateService: TranslateService,
@@ -392,55 +248,25 @@ class AuthenticationConfiguration {
         userService,
         passwordResetTokenService,
         hashService,
-        redisTemplate,
+        cacheService,
         emailProperties,
         uiProperties,
         translateService,
         emailService,
         templateService,
-        accessTokenCache,
         appProperties,
         securityAlertService,
         securityAlertProperties,
-        noAccountInfoService
-    )
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun registrationAlertService(
-        translateService: TranslateService,
-        templateService: TemplateService,
-        appProperties: AppProperties,
-        emailService: EmailService,
-        providerStringCreator: ProviderStringCreator
-    ) = RegistrationAlertService(
-        translateService,
-        templateService,
-        appProperties,
-        emailService,
-        providerStringCreator
-    )
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun securityAlertService(
-        appProperties: AppProperties,
-        translateService: TranslateService,
-        emailService: EmailService,
-        templateService: TemplateService
-    ) = SecurityAlertService(
-        appProperties,
-        translateService,
-        emailService,
-        templateService
+        noAccountInfoService,
+        accessTokenCache,
     )
 
     @Bean
     @ConditionalOnMissingBean
     fun sessionService(
-        userService: UserService,
-        authorizationService: AuthorizationService,
-        accessTokenCache: AccessTokenCache,
-    ) = SessionService(userService, authorizationService, accessTokenCache)
+        principalService: PrincipalService
+    ) = SessionService(
+        principalService,
+    )
 
 }

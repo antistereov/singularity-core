@@ -1,5 +1,5 @@
 ---
-sidebar_position: 4
+sidebar_position: 5
 description: Learn how to enable and configure two-factor authentication.
 ---
 
@@ -16,8 +16,8 @@ There are two methods to authenticate your users using a second factor: [TOTP](#
 Two-factor authentication can only be used for accounts 
 that configured authentication using a password.
 
-When using an [OAuth2 provider](./oauth2), authentication and authorization
-is controlled by the provider.
+When using an [OAuth2 provider](./oauth2), the provider
+controls authentication and authorization.
 :::
 
 ## TOTP
@@ -25,7 +25,7 @@ is controlled by the provider.
 TOTP (Time-based One-time Password) is a two-factor authentication method 
 that generates a **temporary, unique, and time-sensitive** password. 
 The code is created using a shared secret key and the current time, 
-making it valid for only a short period (typically 30-60 seconds). 
+making it valid for only a short period (typically 30–60 seconds). 
 It's a common method for securing online accounts. 
 
 It is also commonly known as **Authenticator App** or **Authentication App**, 
@@ -67,7 +67,7 @@ email is [enabled and configured correctly](../email/configuration.md).
 
 :::note
 When the setup was successful,
-TOTP will be configured as preferred 2FA method.
+TOTP will be configured as the preferred 2FA method.
 :::
 
 ### Login

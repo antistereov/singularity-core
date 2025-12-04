@@ -1,13 +1,17 @@
 package io.stereov.singularity.auth.core.service
 
-import io.mockk.coJustRun
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.getOrThrow
+import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.mockk
 import io.mockk.slot
 import io.stereov.singularity.auth.core.dto.request.ResetPasswordRequest
 import io.stereov.singularity.auth.core.model.SecurityAlertType
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
+import io.stereov.singularity.principal.core.model.User
 import io.stereov.singularity.test.BaseSecurityAlertTest
-import io.stereov.singularity.user.core.model.UserDocument
+import jakarta.mail.internet.MimeMessage
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -21,21 +25,21 @@ class ChangeAlertIntegrationTest : BaseSecurityAlertTest() {
         user.info.clearSessions()
         userService.save(user.info)
 
-        val userSlot = slot<UserDocument>()
+        val userSlot = slot<User>()
         val localeSlot = slot<Locale?>()
         val alertTypeSlot = slot<SecurityAlertType>()
         val providerKeySlot = slot<String?>()
         val twoFactorMethodSlot = slot<TwoFactorMethod?>()
 
-        coJustRun { securityAlertService.send(
+        coEvery { securityAlertService.send(
             capture(userSlot),
             captureNullable(localeSlot),
             capture(alertTypeSlot),
             captureNullable(providerKeySlot),
-            captureNullable(twoFactorMethodSlot),
-        ) }
+            captureNullable(twoFactorMethodSlot)
+        ) } returns Ok(mockk<MimeMessage>())
 
-        val token = passwordResetTokenService.create(user.info.id, user.passwordResetSecret!!)
+        val token = passwordResetTokenService.create(user.id, user.passwordResetSecret!!).getOrThrow()
         val newPassword = "Password$2"
         val req = ResetPasswordRequest(newPassword)
 
@@ -47,7 +51,7 @@ class ChangeAlertIntegrationTest : BaseSecurityAlertTest() {
 
         coVerify(exactly = 1) { securityAlertService.send(any(), anyNullable(), any(), anyNullable(), any()) }
         assert(userSlot.isCaptured)
-        assertEquals(user.info.id, userSlot.captured.id)
+        assertEquals(user.id, userSlot.captured.id.getOrThrow())
         assert(localeSlot.isNull)
         assertEquals(SecurityAlertType.PASSWORD_CHANGED, alertTypeSlot.captured)
     }
@@ -56,21 +60,21 @@ class ChangeAlertIntegrationTest : BaseSecurityAlertTest() {
         user.info.clearSessions()
         userService.save(user.info)
 
-        val userSlot = slot<UserDocument>()
+        val userSlot = slot<User>()
         val localeSlot = slot<Locale?>()
         val alertTypeSlot = slot<SecurityAlertType>()
         val providerKeySlot = slot<String?>()
         val twoFactorMethodSlot = slot<TwoFactorMethod?>()
 
-        coJustRun { securityAlertService.send(
+        coEvery { securityAlertService.send(
             capture(userSlot),
             captureNullable(localeSlot),
             capture(alertTypeSlot),
             captureNullable(providerKeySlot),
             captureNullable(twoFactorMethodSlot),
-        ) }
+        ) } returns Ok(mockk<MimeMessage>())
 
-        val token = passwordResetTokenService.create(user.info.id, user.passwordResetSecret!!)
+        val token = passwordResetTokenService.create(user.id, user.passwordResetSecret!!).getOrThrow()
         val newPassword = "Password$2"
         val req = ResetPasswordRequest(newPassword)
 
@@ -80,10 +84,16 @@ class ChangeAlertIntegrationTest : BaseSecurityAlertTest() {
             .exchange()
             .expectStatus().isOk
 
-        coVerify(exactly = 1) { securityAlertService.send(any(), anyNullable(), any(), anyNullable(), any()) }
+        coVerify(exactly = 1) { securityAlertService.send(
+            any(),
+            anyNullable(),
+            any(),
+            anyNullable(),
+            any(),
+        ) }
         assertEquals(Locale.ENGLISH, localeSlot.captured)
         assert(userSlot.isCaptured)
-        assertEquals(user.info.id, userSlot.captured.id)
+        assertEquals(user.id, userSlot.captured.id.getOrThrow())
         assertEquals(SecurityAlertType.PASSWORD_CHANGED, alertTypeSlot.captured)
     }
 
@@ -92,7 +102,7 @@ class ChangeAlertIntegrationTest : BaseSecurityAlertTest() {
         user.info.clearSessions()
         userService.save(user.info)
 
-        val userSlot = slot<UserDocument>()
+        val userSlot = slot<User>()
         val localeSlot = slot<Locale?>()
         val alertTypeSlot = slot<SecurityAlertType>()
         val providerKeySlot = slot<String?>()
@@ -100,7 +110,7 @@ class ChangeAlertIntegrationTest : BaseSecurityAlertTest() {
         val oldEmailSlot = slot<String?>()
         val newEmailSlot = slot<String?>()
 
-        coJustRun { securityAlertService.send(
+        coEvery { securityAlertService.send(
             capture(userSlot),
             captureNullable(localeSlot),
             capture(alertTypeSlot),
@@ -108,10 +118,10 @@ class ChangeAlertIntegrationTest : BaseSecurityAlertTest() {
             captureNullable(twoFactorMethodSlot),
             captureNullable(oldEmailSlot),
             captureNullable(newEmailSlot)
-        ) }
+        ) } returns Ok(mockk<MimeMessage>())
         val newEmail = "new@test.com"
 
-        val token = emailVerificationTokenService.create(user.info.id, newEmail,user.mailVerificationSecret!!)
+        val token = emailVerificationTokenService.create(user.id, newEmail,user.mailVerificationSecret!!).getOrThrow()
         assertFalse(user.info.sensitive.security.email.verified)
 
         webTestClient.post()
@@ -121,18 +131,18 @@ class ChangeAlertIntegrationTest : BaseSecurityAlertTest() {
 
         coVerify(exactly = 1) { securityAlertService.send(any(), anyNullable(), any(), anyNullable(), anyNullable(), anyNullable(), anyNullable()) }
         assert(userSlot.isCaptured)
-        assertEquals(user.info.id, userSlot.captured.id)
+        assertEquals(user.id, userSlot.captured.id.getOrThrow())
         assert(localeSlot.isNull)
         assertEquals(SecurityAlertType.EMAIL_CHANGED, alertTypeSlot.captured)
         assertEquals(newEmail, newEmailSlot.captured)
-        assertEquals(user.info.sensitive.email!!, oldEmailSlot.captured)
+        assertEquals(user.info.sensitive.email, oldEmailSlot.captured)
     }
     @Test fun `email verification with locale`() = runTest {
         val user = registerUser()
         user.info.clearSessions()
         userService.save(user.info)
 
-        val userSlot = slot<UserDocument>()
+        val userSlot = slot<User>()
         val localeSlot = slot<Locale?>()
         val alertTypeSlot = slot<SecurityAlertType>()
         val providerKeySlot = slot<String?>()
@@ -140,7 +150,7 @@ class ChangeAlertIntegrationTest : BaseSecurityAlertTest() {
         val oldEmailSlot = slot<String?>()
         val newEmailSlot = slot<String?>()
 
-        coJustRun { securityAlertService.send(
+        coEvery { securityAlertService.send(
             capture(userSlot),
             captureNullable(localeSlot),
             capture(alertTypeSlot),
@@ -148,10 +158,10 @@ class ChangeAlertIntegrationTest : BaseSecurityAlertTest() {
             captureNullable(twoFactorMethodSlot),
             captureNullable(oldEmailSlot),
             captureNullable(newEmailSlot)
-        ) }
+        ) } returns Ok(mockk<MimeMessage>())
         val newEmail = "new@test.com"
 
-        val token = emailVerificationTokenService.create(user.info.id, newEmail ,user.mailVerificationSecret!!)
+        val token = emailVerificationTokenService.create(user.id, newEmail ,user.mailVerificationSecret!!).getOrThrow()
         assertFalse(user.info.sensitive.security.email.verified)
 
         webTestClient.post()
@@ -162,9 +172,9 @@ class ChangeAlertIntegrationTest : BaseSecurityAlertTest() {
         coVerify(exactly = 1) { securityAlertService.send(any(), anyNullable(), any(), anyNullable(), anyNullable(), anyNullable(), anyNullable()) }
         assertEquals(Locale.ENGLISH, localeSlot.captured)
         assert(userSlot.isCaptured)
-        assertEquals(user.info.id, userSlot.captured.id)
+        assertEquals(user.id, userSlot.captured.id.getOrThrow())
         assertEquals(SecurityAlertType.EMAIL_CHANGED, alertTypeSlot.captured)
         assertEquals(newEmail, newEmailSlot.captured)
-        assertEquals(user.info.sensitive.email!!, oldEmailSlot.captured)
+        assertEquals(user.info.sensitive.email, oldEmailSlot.captured)
     }
 }

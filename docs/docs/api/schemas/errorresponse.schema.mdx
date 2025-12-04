@@ -6,7 +6,7 @@ sidebar_label: "ErrorResponse"
 hide_title: true
 hide_table_of_contents: true
 schema: true
-sample: {"timestamp":"2024-07-29T15:51:28.071Z","status":0,"error":"string","message":"string","path":"string"}
+sample: {"timestamp":"string","status":0,"code":"string","error":"string","message":"string","path":"string"}
 custom_edit_url: null
 ---
 
@@ -25,7 +25,7 @@ import Heading from "@theme/Heading";
 
 
 <Schema
-  schema={{"type":"object","properties":{"timestamp":{"type":"string","format":"date-time"},"status":{"type":"integer","format":"int32"},"error":{"type":"string"},"message":{"type":"string"},"path":{"type":"string"}},"required":["error","status","timestamp"],"title":"ErrorResponse"}}
+  schema={{"type":"object","properties":{"timestamp":{"type":"string"},"status":{"type":"integer","format":"int32"},"code":{"type":"string"},"error":{"type":"string"},"message":{"type":"string"},"path":{"type":"string"}},"required":["code","error","status","timestamp"],"title":"ErrorResponse"}}
   schemaType={"response"}
 >
   

@@ -33,13 +33,13 @@ class ImageConfiguration {
     @ConditionalOnMissingBean
     fun imageStore(
         imageProperties: ImageProperties,
-        webpWriter: WebpWriter,
         fileStorage: FileStorage,
-        dataBufferPublisher: DataBufferPublisher
+        dataBufferPublisher: DataBufferPublisher,
+        webpWriter: WebpWriter
     ) = ImageStore(
         imageProperties,
-        webpWriter,
         fileStorage,
-        dataBufferPublisher
+        dataBufferPublisher,
+        webpWriter
     )
 }

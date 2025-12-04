@@ -25,7 +25,7 @@ const config: Config = {
 
     // GitHub pages deployment config.
     // If you aren't using GitHub pages, you don't need these.
-    organizationName: 'antistereov', // Usually your GitHub org/user name.
+    organizationName: 'antistereov', // Usually your GitHub org/username.
     projectName: 'singularity', // Usually your repo name.
 
     onBrokenLinks: 'throw',
@@ -121,7 +121,7 @@ const config: Config = {
                     title: 'Docs',
                     items: [
                         {
-                            label: 'Singlarity',
+                            label: 'Singularity',
                             to: '/docs/intro',
                         },
                         {
@@ -161,7 +161,7 @@ const config: Config = {
                     ],
                 },
             ],
-            copyright: `Copyright © ${new Date().getFullYear()} Stereov Built with Docusaurus.`,
+            copyright: `Copyright © ${new Date().getFullYear()} Stereov`,
         },
         prism: {
             theme: prismThemes.github,

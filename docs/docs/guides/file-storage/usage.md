@@ -40,12 +40,18 @@ You can then use its methods to manage your files.
 class MyFileService(
     private val fileStorage: FileStorage // Inject the FileStorage interface
 ) {
-    suspend fun uploadFile(userId: ObjectId, file: FilePart, key: String) {
+    suspend fun uploadFile(
+        // The authentication outcome of an authenticated principal
+        authentication: AuthenticationOutcome.Authenticated,
+        file: StreamedFile,
+        key: String,
+        isPublic: Boolean
+    ): Result<FileMetadataDocument, FileException> {
         // Upload the file and get its metadata
-        val metadata: FileMetadataDocument = fileStorage.upload(
+        return fileStorage.upload(
             key = key,
             file = file,
-            ownerId = userId,
+            authentication = authentication,
             isPublic = true
         )
     }
@@ -126,8 +132,8 @@ fileStorage.uploadMultipleRenditions(
     key = "users/123456/favorite-song",
     // Add the upload requests
     files = filesToUpload,
-    // Specify the owner with the owners userId
-    ownerId = userId,
+    // The authentication outcome of an authenticated principal
+    authentication = authentication,
     // Specify if the file should be publicly visible
     isPublic = true
 )

@@ -1,12 +1,12 @@
 ---
-sidebar_position: 2
+sidebar_position: 3
 description: Learn how to secure an endpoint.
 ---
 
 # Securing Endpoints
 
 :::note
-This guide assumes familiarity with the [Spring Framework](https://spring.io).  
+This guide assumes familiarity with the [Spring Framework](https://spring.io).
 If you are new to Spring, we recommend starting with their [official guides](https://spring.io/quickstart) to get up to speed.
 :::
 
@@ -15,276 +15,190 @@ All paths are public by default.
 :::
 
 There are two ways to secure your endpoints:
-* Using the [`AuthorizationService`](https://github.com/antistereov/singularity-core/blob/main/src/main/kotlin/io/stereov/singularity/auth/core/service/AuthorizationService.kt) for authorization on the [service level](#authorization-at-service-level).
-* Defining required roles [by path](#authorization-by-path) as an easy option to secure endpoints.
+
+* Using the `AuthorizationService` for fine-grained authorization *(more info [here](#authorization-through-authorizationservice))*.
+* Defining required roles through the configuration *(more info [here](#authorization-through-configuration))*.
 
 :::warning
-The preferred way is by specifying the requirements on the service level.
-Therefore, every endpoint that uses a service method that requires authorization will be secured by default.
-It also allows setting more specific requirements such as group memberships.
+The preferred way is by specifying the requirements using the `AuthorizationService`. This way the requirements are readable in code and simplify code maintenance. It also allows setting more specific requirements such as group memberships and step-up authentication.
 :::
 
-## Authorization at Service Level
+## Authorization through `AuthorizationService`
 
-The [`AuthorizationService`](https://github.com/antistereov/singularity-core/blob/main/src/main/kotlin/io/stereov/singularity/auth/core/service/AuthorizationService.kt) provides an easy way to sure endpoints at the lowest level.
-This philosophy ensures that if a specific method `doAdminThings()` requires authorization, 
-all methods that call `doAdminThings()` also require the same authorization.
+The `AuthorizationService` provides an easy way to secure endpoints at the controller level.
 
-Therefore,
-you don't need to think about each method that is called at one endpoint to secure this endpoint from the top.
-You can rely on your methods at the service level to do this for you.
+### The `AuthenticationOutcome` Model
 
-### Requiring a Role
+The **`AuthenticationOutcome`** sealed class represents the final result of the authentication process for any request. It is the core object you will use to make authorization decisions in your controllers.
 
-Let's say you have two endpoints: 
-* `/api/cool-stuff` that should return cool stuff everybody should see.
-* `/api/cool-stuff/for-admins` that only admins can see.
+| Outcome Class       | Description                                                                                                                                                                                        | Authentication Status |
+|:--------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:----------------------|
+| **`Authenticated`** | The request was successfully authenticated. The outcome contains the **`principalId`** (the `ObjectId` of the `User` or `Guest`), **`sessionId`**, **`roles`**, and **`groups`** of the principal. | ✅ Authenticated       |
+| **`None`**          | The request has no valid authentication token or credentials. The principal is anonymous.                                                                                                          | ❌ Unauthenticated     |
 
-You fetch the cool stuff using `CoolStuff.forEveryone()` and `CoolStuff.forAdmins()`.
-Therefore, you already know that the service method that provides the cool stuff for admins 
-should already only be accessible for admins. 
+### 1. How to Get the `AuthenticationOutcome`
 
-You can implement it this way:
+You retrieve the outcome using the **`AuthorizationService`** in your controller methods:
 
 ```kotlin
-/**
- * This is a simple controller that returns cool stuff.
- */
 @RestController
-@RequestMapping("/api/cool-stuff")
-class CoolStuffController(
-    private val service: CoolStuffService
+class MyController(
+    private val authorizationService: AuthorizationService,
 ) {
-
-    /**
-     * This endpoint is public and provides everybody with cool stuff.
-     */
-    @GetMapping
-    suspend fun getCoolStuff(): ResponseEntity<CoolStuff> {
-        return ResponseEntity.ok(service.getCoolStuff())
-    }
-
-    /**
-     * This endpoint is only accessible for users with the role `ADMIN`.
-     * As you can see, no verification is required in the controller.
-     */
-    @GetMapping("for-admins")
-    suspend fun getCoolStuffForAdmins(): ResponseEntity<CoolStuff> {
-        return ResponseEntity.ok(service.getCoolStuffForAdmins)
+    @GetMapping("/api/my-resource")
+    suspend fun getMyResource(): ResponseEntity<String> {
+        val outcome = authorizationService.getAuthenticationOutcome()
+            // We use getOrThrow with an explicit type cast here for better maintainability
+            .getOrThrow { when (it) { is AccessTokenExtractionException -> it } } // Handles token extraction errors
+        
+        // The 'outcome' is now either AuthenticationOutcome.Authenticated or AuthenticationOutcome.None
+        
+        // ... proceed with authorization logic
     }
 }
-
-@Service
-class CoolStuffService(
-    private val authService: AuthorizationService
-) {
-    
-    suspend fun getCoolStuff(): CoolStuff {
-        return CoolStuff.forEveryone()
-    }
-    
-    suspend fun getCoolStuffForAdmins(): CoolStuff {
-        /**
-         * Here's the catch!
-         * You can use the `requireRole` method to specify which role a user should have to access this information.
-         * It is already clear at this level that only admins should be able to see it.
-         * Therefore, we specify it here already.
-         */
-        authService.requireRole(Roles.ADMIN)
-
-        return CoolStuff.forAdmins()
-    }
-}
-
 ```
 
-If you call `/api/cool-stuff/for-admins` now, you get:
-* `200` if you are provided a valid token for a user with `ADMIN` role.
-* `401` if you didn't provide a valid token.
-* `403` if you provided a valid token but the user doesn't have the `ADMIN` role.
+The method signature in `AuthorizationService` is:
 
-### Requiring Group Membership
+```kotlin
+// In AuthorizationService.kt
+suspend fun getAuthenticationOutcome(): Result<AuthenticationOutcome, AccessTokenExtractionException>
+```
 
-You can be more fine-grained in your requirements.
-Define and use custom groups and limit access to members of this group only.
+This method checks the Reactive Security Context for the authentication token and wraps it into the appropriate `AuthenticationOutcome` class.
+
+### 2. Requiring Authentication
+
+To ensure only logged-in users or guests can access an endpoint, you call **`requireAuthentication()`** on the `AuthenticationOutcome`.
+
+| Method                        | Description                                                                                |
+|:------------------------------|:-------------------------------------------------------------------------------------------|
+| **`requireAuthentication()`** | Fails with `401 Unauthorized` if the outcome is `None`. Returns `Authenticated` otherwise. |
+
+#### Example: Requiring Any Principal
+
+```kotlin
+@GetMapping("/api/secured/info")
+suspend fun getPrincipalInfo(): ResponseEntity<String> {
+    val outcome = authorizationService.getAuthenticationOutcome()
+        .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
+
+    // This ensures the outcome is 'Authenticated'. If not, an AuthenticationException.AuthenticationRequired is thrown
+    // which translates to an HTTP 401 Unauthorized response.
+    val authenticatedOutcome = outcome.requireAuthentication()
+        .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it } }
+
+    val principalId = authenticatedOutcome.principalId
+    return ResponseEntity.ok("Welcome Principal $principalId!")
+}
+```
+
+### 3. Requiring Roles and Group Membership
+
+Once you have an `Authenticated` outcome, you can enforce more granular access control using its specialized methods. If the check fails, an exception is thrown which translates to an HTTP `403 Forbidden` response.
+
+| Method                                         | Description                                                                                                           | Error Thrown                                      | Status          | Error Code                  |
+|:-----------------------------------------------|:----------------------------------------------------------------------------------------------------------------------|:--------------------------------------------------|-----------------|-----------------------------|
+| **`requireRole(role: Role)`**                  | Checks if the principal has the specified `Role`. **`ADMIN`**s automatically satisfy any role requirement.            | `AuthenticationException.RoleRequired`            | `403 Forbidden` | `ROLE_REQUIRED`             |
+| **`requireGroupMembership(groupKey: String)`** | Checks if the principal is a member of the specified group. **`ADMIN`**s automatically satisfy any group requirement. | `AuthenticationException.GroupMembershipRequired` | `403 Forbidden` | `GROUP_MEMBERSHIP_REQUIRED` |
+
+#### Example: Requiring `ADMIN` Role
+
+```kotlin
+@DeleteMapping("/api/users/{userId}")
+suspend fun deleteUser(@PathVariable userId: String): ResponseEntity<Unit> {
+    val outcome = authorizationService.getAuthenticationOutcome()
+        .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
+
+    // 1. Ensure the user is authenticated (401)
+    val authenticatedOutcome = outcome.requireAuthentication()
+        .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it } }
+
+    // 2. Ensure the authenticated principal has the ADMIN role (403)
+    authenticatedOutcome.requireRole(Role.User.ADMIN)
+        .getOrThrow { when (it) { is AuthenticationException.RoleRequired -> it } }
+
+    // userService.deleteById(ObjectId(userId))
+    return ResponseEntity.noContent().build()
+}
+```
+
+#### Example: Requiring Group Membership
+
+```kotlin
+@PostMapping("/api/projects/{projectId}/settings")
+suspend fun updateProjectSettings(@PathVariable projectId: String): ResponseEntity<Unit> {
+    val outcome = authorizationService.getAuthenticationOutcome()
+        .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
+
+    val authenticatedOutcome = outcome.requireAuthentication()
+        .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it } }
+
+    // The principal (or an ADMIN) must be in the 'project:$projectId' group to manage settings
+    authenticatedOutcome.requireGroupMembership("project:$projectId")
+        .getOrThrow { when (it) { is AuthenticationException.GroupMembershipRequired -> it } }
+    
+    // projectService.updateSettings(...)
+    return ResponseEntity.ok().build()
+}
+```
+
+### 4. Requiring Step-Up Authentication
 
 :::note
-Everything about creating and using groups is covered here: [Groups](./groups).
+You can learn more about step-up authentication [here](./authentication.md#step-up).
 :::
 
+**Step-Up Authentication** (or re-authentication) is a security feature that requires a user to re-verify their identity 
+(e.g., by entering their password or a 2FA code) before performing a highly sensitive action.
+
+The `AuthorizationService` provides the **`validateStepUp()`** method to enforce this check. It looks for a valid Step-Up Token (a short-lived token generated after a successful re-authentication) in the request headers or cookies.
+
+| Method                                                                          | Description                                                                         | Error Thrown (403)               |
+|:--------------------------------------------------------------------------------|:------------------------------------------------------------------------------------|:---------------------------------|
+| **`requireStepUp(authentication: Authenticated, exchange: ServerWebExchange)`** | Checks for a valid Step-Up Token associated with the current session and principal. | `StepUpTokenExtractionException` |
+
+#### Example: Requiring Step-Up
+
 ```kotlin
-/**
- * An interface with your group keys to reuse the names across the code.
- */
-interface GroupKeys {
-    const val COOL_GROUP = "cool-group"
-}
+@PostMapping("/api/cool-stuff")
+suspend fun removeCoolStuff(
+    // The ServerWebExchange will be injected by Spring automatically
+    exchange: ServerWebExchange
+): ResponseEntity<String> {
+    val outcome = authorizationService.getAuthenticationOutcome()
+        .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
 
-@RestController
-@RequestMapping("/api/cool-stuff")
-class CoolStuffController(
-    private val service: CoolStuffService
-) {
+    // 1. Ensure the user is authenticated (401)
+    val authenticatedOutcome = outcome.requireAuthentication()
+        .getOrThrow { AuthorizationException.from(it) }
 
-    /**
-     * This endpoint is only accessible for users who are members of the group `cool-group`.
-     * As you can see, no verification is required in the controller.
-     */
-    @GetMapping("for-cool-group")
-    suspend fun getCoolStuffForCoolGroup(): ResponseEntity<CoolStuff> {
-        return ResponseEntity.ok(service.getCoolStuffForCoolGroup)
-    }
-}
+    // 2. Ensure the user performed a step-up (403)
+    // The ServerWebExchange is required for token extraction
+    authorizationService.requireStepUp(authenticatedOutcome, exchange)
+        .getOrThrow { when (it) { is StepUpTokenExtractionException -> it } }
 
-@Service
-class CoolStuffService(
-    private val authService: AuthorizationService
-) {
+    // 3. Retrieve the Principal (User or Guest) using the ID from the outcome
+    // (A common pattern to get the full principal object)
+    val principal = principalService.findById(authenticatedOutcome.principalId)
+        .getOrThrow { when (it) { is FindPrincipalByIdException -> it } }
 
-    suspend fun getCoolStuffForCoolGroup(): CoolStuff {
-        /**
-         * Require the user to be a member of the group `cool-group`.
-         */
-        authService.requireGroupMemebership(GroupKeys.COOL_GROUP)
-
-        return CoolStuff.forAdmins()
-    }
+    // Now we can call the method, and we are sure that the principal is authenticated and performed a step-up
+    return ResponseEntity.ok(service.removeCoolStuff(principal))
 }
 ```
 
-If you call `/api/cool-stuff/for-cool-group` now, you get:
-* `200` if you are provided a valid token for a user who is a member of `cool-group`.
-* `401` if you didn't provide a valid token.
-* `403` if you provided a valid token but the user is not a member of `cool-group`.
+## Authorization Through Configuration
 
-### Getting User Information
-
-Let's say you have specific cool stuff prepared for each user using `CoolStuff.forUserWithId(..)`.
-
-```kotlin
-@RestController
-@RequestMapping("/api/cool-stuff")
-class CoolStuffController(
-    private val service: CoolStuffService
-) {
-
-    /**
-     * This endpoint provides specific information base on the user that is calling it.
-     */
-    @GetMapping
-    suspend fun getCoolStuffForUserWithId(
-        @PathVariable val id: ObjectId
-    ): ResponseEntity<CoolStuff> {
-        return ResponseEntity.ok(service.getCoolStuffForUserWithId(id))
-    }
-}
-
-@Service
-class CoolStuffService(
-    private val authService: AuthorizationService
-) {
-
-    suspend fun getCoolStuffForUserWithId(): CoolStuff {
-        /**
-         * Get the user who called the endpoint from the security context.
-         */
-        val user = authService.getCurrentUser()
-
-        return CoolStuff.forUserWithId(user.id)
-    }
-}
-```
-
-If you call `/api/cool-stuff` now, you get:
-* `200` if you are provided a valid token for a user.
-* `401` if you didn't provide a valid token.
-
-#### Generic wildcard if no user token is provided
-
-But what if you want to provide generic cool stuff if no user information is provided?
-
-You can change the method slightly to do this:
-
-```kotlin
-@Service
-class CoolStuffService(
-    private val authService: AuthorizationService
-) {
-
-    suspend fun getCoolStuffForUserWithId(): CoolStuff {
-        /**
-         * Get the user who called the endpoint from the security context.
-         */
-        val user = authService.getCurrentUserOrNull()
-        
-        return if (user == null) {
-            CoolStuff.forEveryone()
-        } else {
-            CoolStuff.forUserWithId(user.id)
-        }
-    }
-}
-```
-
-### Requiring Step-Up Authentication
-
-You can secure critical endpoints by requiring the user to reauthenticate.
-
-:::note
-You can learn more about the step-up authentication flow [here](./authentication.md#step-up).
-:::
-
-```kotlin
-@RestController
-@RequestMapping("/api/cool-stuff")
-class CoolStuffController(
-    private val service: CoolStuffService
-) {
-
-    /**
-     * This endpoint removes cool stuff from the user.
-     * This is a security critical action.
-     */
-    @DeleteMapping
-    suspend fun removeCoolStuffFromUser(
-        @PathVariable val id: ObjectId
-    ): ResponseEntity<CoolStuff> {
-        return ResponseEntity.ok(service.getCoolStuffForUserWithId(id))
-    }
-}
-
-@Service
-class CoolStuffService(
-    private val authService: AuthorizationService
-) {
-
-    suspend fun removeCoolStuffFromUser() {
-        val user = authService.getCurrentUser()
-        
-        /**
-         * Require step-up authentication.
-         */
-        authService.requireStepUp()
-
-        user.removeCoolStuff()
-    }
-}
-```
-
-If you call `/api/cool-stuff` now, you get:
-* `200` whether you provide a token or not.
-
-## Authorization By Path
-
-If you decide to secure endpoints by path, you can define them using the following properties.
+If you decide to secure endpoints through configuration, you can define them using the following properties.
 
 ### Properties
 
-| Property                      | Type           | Description                                                                | Default value |
-|-------------------------------|----------------|----------------------------------------------------------------------------|---------------|
-| singularity.auth.public-paths | `List<String>` | Paths that do not require authentication.                                  |               |
-| singularity.auth.user-paths   | `List<String>` | Paths that require users to be authenticated and to have the `USER` role.  |               |
-| singularity.auth.admin-paths  | `List<String>` | Paths that require users to be authenticated and to have the `ADMIN` role. |               |
+| Property                        | Type           | Description                                                                    | Default value |
+|:--------------------------------|:---------------|:-------------------------------------------------------------------------------|:--------------|
+| `singularity.auth.public-paths` | `List<String>` | Paths that do not require authentication.                                      |               |
+| `singularity.auth.user-paths`   | `List<String>` | Paths that require users to be authenticated and to have the **`USER`** role.  |               |
+| `singularity.auth.admin-paths`  | `List<String>` | Paths that require users to be authenticated and to have the **`ADMIN`** role. |               |
 
 #### Example
 

@@ -1,8 +1,10 @@
 package io.stereov.singularity.file.s3
 
+import com.github.michaelbull.result.getOrThrow
 import io.minio.MakeBucketArgs
 import io.minio.MinioClient
 import io.stereov.singularity.file.core.dto.FileMetadataResponse
+import io.stereov.singularity.file.core.exception.FileException
 import io.stereov.singularity.file.core.model.FileKey
 import io.stereov.singularity.file.core.model.FileMetadataDocument
 import io.stereov.singularity.file.core.model.FileUploadRequest
@@ -12,7 +14,6 @@ import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.file.s3.properties.S3Properties
 import io.stereov.singularity.file.s3.service.S3FileStorage
 import io.stereov.singularity.file.util.MockFilePart
-import io.stereov.singularity.global.exception.model.DocumentNotFoundException
 import io.stereov.singularity.test.BaseSpringBootTest
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
@@ -30,7 +31,7 @@ import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.MinIOContainer
-import org.testcontainers.containers.MongoDBContainer
+import org.testcontainers.mongodb.MongoDBContainer
 import org.testcontainers.utility.DockerImageName
 import java.io.File
 import java.net.URI
@@ -46,20 +47,20 @@ class TestS3FileStorage : BaseSpringBootTest() {
 
     @BeforeEach
     fun delete() = runBlocking {
-        userService.deleteAll()
-        metadataService.deleteAll()
+        userService.deleteAll().getOrThrow()
+        metadataService.deleteAll().getOrThrow()
     }
 
-    suspend fun runFileTest(public: Boolean = true, method: suspend (file: File, metadata: FileMetadataResponse, user: TestRegisterResponse) -> Unit) = runTest {
+    suspend fun runFileTest(public: Boolean = true, method: suspend (file: File, metadata: FileMetadataResponse, user: TestRegisterResponse<*>) -> Unit) = runTest {
         val user = registerUser()
         val file = ClassPathResource("files/test-image.jpg").file
         val filePart = MockFilePart(file)
         val key = FileKey(file.name)
-        val metadata = storage.upload(ownerId = user.info.id, key = key, isPublic = public, file = filePart)
-
+        val metadata = storage.upload(authentication = user.authentication, key = key, isPublic = public, file = filePart)
+            .getOrThrow()
         method(file, metadata, user)
 
-        runCatching { storage.remove(metadata.key) }.getOrNull()
+        storage.remove(metadata.key)
     }
 
     @Test fun `should initialize beans correctly`() {
@@ -71,8 +72,8 @@ class TestS3FileStorage : BaseSpringBootTest() {
     }
 
     @Test fun `should upload public file`() = runTest {
-        runFileTest { _, metadata, _ ->
-            val savedMetadata = fileStorage.metadataResponseByKey(metadata.key)
+        runFileTest { _, metadata, user  ->
+            val savedMetadata = fileStorage.metadataResponseByKey(metadata.key, user.authentication).getOrThrow()
 
             val metadataWithMillis = metadata.copy(
                 createdAt = metadata.createdAt.truncatedTo(ChronoUnit.MILLIS),
@@ -80,11 +81,11 @@ class TestS3FileStorage : BaseSpringBootTest() {
             )
             assertEquals(metadataWithMillis, savedMetadata)
 
-            val all = metadataService.findAllPaginated(0, 10, emptyList(), null)
+            val all = metadataService.findAllPaginated(0, 10, emptyList(), null).getOrThrow()
             println(all)
 
-            assertTrue(metadataService.existsByKey(metadata.key))
-            assertTrue(metadataService.existsRenditionByKey(metadata.key))
+            assertTrue(metadataService.existsByKey(metadata.key).getOrThrow())
+            assertTrue(metadataService.existsRenditionByKey(metadata.key).getOrThrow())
         }
     }
     @Test fun `creates response with correct url`() = runTest {
@@ -119,8 +120,8 @@ class TestS3FileStorage : BaseSpringBootTest() {
             data = filePart,
         )
 
-        val upload = storage.uploadMultipleRenditions(key, mapOf("1" to req1, "2" to req2), user.info.id, true)
-
+        val upload = storage.uploadMultipleRenditions(user.authentication, key, mapOf("1" to req1, "2" to req2), true)
+            .getOrThrow()
         webTestClient.get()
             .uri(upload.renditions["1"]!!.url)
             .exchange()
@@ -142,27 +143,27 @@ class TestS3FileStorage : BaseSpringBootTest() {
                 assertThat(it.responseBody).isEqualTo(file.readBytes())
             }
 
-        assertTrue(metadataService.existsByKey(key))
-        assertTrue(metadataService.existsRenditionByKey(req1.key.key))
-        assertTrue(metadataService.existsRenditionByKey(req2.key.key))
+        assertTrue(metadataService.existsByKey(key).getOrThrow())
+        assertTrue(metadataService.existsRenditionByKey(req1.key.key).getOrThrow())
+        assertTrue(metadataService.existsRenditionByKey(req2.key.key).getOrThrow())
     }
 
     @Test fun `remove works`() = runTest {
         runFileTest { _, metadata, _ ->
-            storage.remove(metadata.key)
+            storage.remove(metadata.key).getOrThrow()
 
             webTestClient.get()
                 .uri(metadata.renditions[FileMetadataDocument.ORIGINAL_RENDITION]!!.url)
                 .exchange()
                 .expectStatus().isNotFound
 
-            assertFalse(metadataService.existsByKey(metadata.key))
-            assertFalse(metadataService.existsRenditionByKey(metadata.key))
-            assertFalse(storage.exists(metadata.key))
+            assertFalse(metadataService.existsByKey(metadata.key).getOrThrow())
+            assertFalse(metadataService.existsRenditionByKey(metadata.key).getOrThrow())
+            assertFalse(storage.exists(metadata.key).getOrThrow())
         }
     }
     @Test fun `remove does nothing when key not existing`() = runTest {
-        assertThrows<DocumentNotFoundException> { fileStorage.remove("just-a-key") }
+        assertThrows<FileException.NotFound> { fileStorage.remove("just-a-key").getOrThrow() }
     }
     @Test fun `should removes multiple renditions`() = runTest {
         val user = registerUser()
@@ -181,8 +182,8 @@ class TestS3FileStorage : BaseSpringBootTest() {
             data = filePart,
         )
 
-        val upload = storage.uploadMultipleRenditions(key.key, mapOf("1" to req1, "2" to req2), user.info.id, true)
-
+        val upload = storage.uploadMultipleRenditions(user.authentication, key.key, mapOf("1" to req1, "2" to req2), true)
+            .getOrThrow()
         webTestClient.get()
             .uri(upload.renditions["1"]!!.url)
             .exchange()
@@ -204,9 +205,9 @@ class TestS3FileStorage : BaseSpringBootTest() {
                 assertThat(it.responseBody).isEqualTo(file.readBytes())
             }
 
-        assertTrue(metadataService.existsByKey(key.key))
-        assertTrue(metadataService.existsRenditionByKey(req1.key.key))
-        assertTrue(metadataService.existsRenditionByKey(req2.key.key))
+        assertTrue(metadataService.existsByKey(key.key).getOrThrow())
+        assertTrue(metadataService.existsRenditionByKey(req1.key.key).getOrThrow())
+        assertTrue(metadataService.existsRenditionByKey(req2.key.key).getOrThrow())
 
         fileStorage.remove(key)
 
@@ -220,16 +221,16 @@ class TestS3FileStorage : BaseSpringBootTest() {
             .exchange()
             .expectStatus().isNotFound
 
-        assertFalse(metadataService.existsByKey(key.key))
-        assertFalse(metadataService.existsRenditionByKey(req1.key.key))
-        assertFalse(metadataService.existsRenditionByKey(req2.key.key))
+        assertFalse(metadataService.existsByKey(key.key).getOrThrow())
+        assertFalse(metadataService.existsRenditionByKey(req1.key.key).getOrThrow())
+        assertFalse(metadataService.existsRenditionByKey(req2.key.key).getOrThrow())
     }
 
     @Test fun `exists works`() = runTest {
-        assertFalse(storage.exists("just-a-key"))
+        assertFalse(storage.exists("just-a-key").getOrThrow())
 
         runFileTest { _, metadata, _ ->
-            assertTrue(storage.exists(metadata.key))
+            assertTrue(storage.exists(metadata.key).getOrThrow())
         }
     }
 

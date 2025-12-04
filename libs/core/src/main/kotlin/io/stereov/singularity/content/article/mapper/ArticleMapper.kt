@@ -1,20 +1,28 @@
 package io.stereov.singularity.content.article.mapper
 
-import io.stereov.singularity.auth.core.service.AuthorizationService
+import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.coroutines.coroutineBinding
+import com.github.michaelbull.result.map
+import com.github.michaelbull.result.mapError
+import com.github.michaelbull.result.recoverIf
+import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.content.article.dto.response.ArticleOverviewResponse
 import io.stereov.singularity.content.article.dto.response.FullArticleResponse
+import io.stereov.singularity.content.article.exception.CreateFullArticleResponseException
 import io.stereov.singularity.content.article.model.Article
 import io.stereov.singularity.content.article.model.ArticleTranslation
 import io.stereov.singularity.content.core.dto.response.ContentAccessDetailsResponse
 import io.stereov.singularity.content.core.model.ContentAccessDetails
 import io.stereov.singularity.content.tag.mapper.TagMapper
 import io.stereov.singularity.content.tag.service.TagService
+import io.stereov.singularity.database.core.exception.FindDocumentByKeyException
+import io.stereov.singularity.database.encryption.exception.FindEncryptedDocumentByIdException
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.global.properties.AppProperties
+import io.stereov.singularity.principal.core.mapper.PrincipalMapper
+import io.stereov.singularity.principal.core.service.UserService
 import io.stereov.singularity.translate.service.TranslateService
-import io.stereov.singularity.user.core.mapper.UserMapper
-import io.stereov.singularity.user.core.model.UserDocument
-import io.stereov.singularity.user.core.service.UserService
+import org.bson.types.ObjectId
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 import java.util.*
@@ -23,13 +31,12 @@ import java.util.*
 @ConditionalOnProperty(prefix = "singularity.content.articles", value = ["enable"], havingValue = "true", matchIfMissing = true)
 class ArticleMapper(
     private val appProperties: AppProperties,
-    private val authorizationService: AuthorizationService,
     private val userService: UserService,
     private val translateService: TranslateService,
     private val tagMapper: TagMapper,
     private val tagService: TagService,
     private val fileStorage: FileStorage,
-    private val userMapper: UserMapper,
+    private val principalMapper: PrincipalMapper,
 ) {
 
     fun createOverview(article: FullArticleResponse): ArticleOverviewResponse {
@@ -73,24 +80,71 @@ class ArticleMapper(
         )
     }
 
-    suspend fun createFullResponse(article: Article, locale: Locale?, owner: UserDocument? = null): FullArticleResponse {
-        val currentUser = authorizationService.getAuthenticationOrNull()
+    suspend fun createFullResponse(
+        article: Article,
+        authenticationOutcome: AuthenticationOutcome,
+        locale: Locale?,
+        ownerId: ObjectId? = null
+    ): Result<FullArticleResponse, CreateFullArticleResponseException> = coroutineBinding {
+        val actualOwnerId = ownerId ?: article.access.ownerId
+        val actualOwner = userService.findById(actualOwnerId)
+            .recoverIf(
+                { it is FindEncryptedDocumentByIdException.NotFound },
+                { null }
+            )
+            .mapError { CreateFullArticleResponseException.Database("Failed to find owner of article with key ${article.key}: ${it.message}", it) }
+            .bind()
 
-        val actualOwner = owner ?: userService.findByIdOrNull(article.access.ownerId)
-        val access = ContentAccessDetailsResponse.create(article.access, currentUser)
+        val access = ContentAccessDetailsResponse.create(article.access, authenticationOutcome)
         val (articleLang, translation) = translateService.translate(article, locale)
+            .mapError { ex -> CreateFullArticleResponseException.NoTranslations("Article contains no translations: ${ex.message}", ex) }
+            .bind()
 
-        val tags = article.tags.map { key -> tagMapper.createTagResponse(tagService.findByKey(key), articleLang) }
+        val tags = article.tags.mapNotNull { key ->
+            tagService.findByKey(key)
+                .recoverIf(
+                    { it is FindDocumentByKeyException.NotFound },
+                    {
+                        article.tags.remove(key)
+                        null
+                    }
+                )
+                .mapError {
+                    CreateFullArticleResponseException.Database(
+                        "Failed to find tag with key $key: ${it.message}",
+                        it
+                    )
+                }
+                .bind()
+        }
+            .map { tag ->
+                tagMapper.createTagResponse(tag, articleLang)
+                    .mapError { ex -> CreateFullArticleResponseException.Database("Failed to map tag to response: ${ex.message}", ex) }
+                    .bind()
+            }
 
-        val image = article.imageKey?.let { fileStorage.metadataResponseByKeyOrNull(it) }
 
-        return FullArticleResponse(
-            id = article.id,
+        val image = article.imageKey?.let { fileStorage.metadataResponseByKey(it, authenticationOutcome) }
+            ?.mapError { ex -> CreateFullArticleResponseException.File("Failed to fetch image metadata: ${ex.message}", ex) }
+            ?.bind()
+
+        val articleId = article.id
+            .mapError { ex -> CreateFullArticleResponseException.Database("Failed to extract ID from article: ${ex.message}", ex) }
+            .bind()
+
+        val ownerOverview = actualOwner?.let {
+            principalMapper.toOverview(actualOwner, authenticationOutcome)
+                .mapError { ex -> CreateFullArticleResponseException.Database("Failed to map owner to overview: ${ex.message}", ex) }
+                .bind()
+        }
+
+        FullArticleResponse(
+            id = articleId,
             key = article.key,
             createdAt = article.createdAt,
             publishedAt = article.publishedAt,
             updatedAt = article.updatedAt,
-            owner = actualOwner?.let { userMapper.toOverview(it) },
+            owner = ownerOverview,
             path = article.path,
             state = article.state,
             colors = article.colors,
@@ -105,7 +159,7 @@ class ArticleMapper(
         )
     }
 
-    suspend fun createOverview(article: Article, locale: Locale?): ArticleOverviewResponse {
-        return createOverview(createFullResponse(article, locale))
+    suspend fun createOverview(article: Article, authenticationOutcome: AuthenticationOutcome, locale: Locale?): Result<ArticleOverviewResponse, CreateFullArticleResponseException> {
+        return createFullResponse(article, authenticationOutcome, locale).map(::createOverview)
     }
 }

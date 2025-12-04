@@ -71,10 +71,11 @@ Once defined, you can inject your custom `SecretService` into any other service 
 class MyOtherService(
     private val mySecretService: MySecretService
 ) {
-    suspend fun doSomethingSecure() {
-        val currentSecret: Secret = mySecretService.getCurrentSecret()
+    suspend fun doSomethingSecure(): Result<SomethingSecret, SecretStoreException> = coroutineBinding {
+        val secret = mySecretService.getCurrentSecret().bind().value
+        
         // Use the secret value for your secure operation
-        val secretValue = currentSecret.value
+        SomethingSecret.fromSecret(secret)
     }
 }
 ```

@@ -1,6 +1,6 @@
 plugins {
-    kotlin("jvm") version "2.0.21"
-    kotlin("plugin.spring") version "2.0.21"
+    kotlin("jvm") version "2.2.21"
+    kotlin("plugin.spring") version "2.2.21"
     id("org.springframework.boot") version "3.4.1"
     id("io.spring.dependency-management") version "1.1.4"
 }
@@ -17,7 +17,7 @@ kotlin {
 }
 
 val kotlinxVersion = "1.10.1"
-val testContainersVersion = "1.21.3"
+val testContainersVersion = "2.0.2"
 
 dependencies {
     // Web Starter
@@ -33,15 +33,15 @@ dependencies {
     }
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
-    testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
     testImplementation("io.mockk:mockk:1.13.13")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinxVersion")
     testImplementation("org.testcontainers:testcontainers:$testContainersVersion")
-    testImplementation("org.testcontainers:junit-jupiter:$testContainersVersion")
-    testImplementation("org.testcontainers:mongodb:$testContainersVersion")
-    testImplementation("org.testcontainers:vault:${testContainersVersion}")
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter:$testContainersVersion")
+    testImplementation("org.testcontainers:testcontainers-mongodb:$testContainersVersion")
+    testImplementation("org.testcontainers:testcontainers-vault:${testContainersVersion}")
 
-    testImplementation("org.testcontainers:minio:${testContainersVersion}")
+    testImplementation("org.testcontainers:testcontainers-minio:${testContainersVersion}")
     testImplementation("io.minio:minio:8.5.17")
 }
 

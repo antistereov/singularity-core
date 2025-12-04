@@ -1,5 +1,6 @@
 package io.stereov.singularity.file.image
 
+import com.github.michaelbull.result.getOrThrow
 import io.stereov.singularity.file.core.model.FileKey
 import io.stereov.singularity.file.core.model.FileMetadataDocument
 import io.stereov.singularity.file.image.properties.ImageProperties
@@ -32,7 +33,7 @@ class ImageStoreNoOriginalTest : BaseIntegrationTest() {
         val filePart = MockFilePart(file)
         val key = FileKey("key")
 
-        val metadata = imageStore.upload(user.info.id, filePart, key.key, true)
+        val metadata = imageStore.upload(user.authentication, filePart, key.key, true).getOrThrow()
 
         assertTrue { metadata.renditions.keys.contains(ImageProperties::small.name) }
         assertTrue { metadata.renditions.keys.contains(ImageProperties::medium.name) }

@@ -134,7 +134,7 @@ welcome.get_started=Get started
 ```
 
 This example assumes a `welcome.html` content template and 
-utilizes the `EmailTemplateService` and other components to generate and send the email to a new user.
+uses the `EmailTemplateService` and other components to generate and send the email to a new user.
 
 ```kotlin
 // In your WelcomeService.kt
@@ -156,7 +156,7 @@ class WelcomeService(
     // If you want to use the base template provided by Singularity, just use templates/mail/base.html.
     val baseTemplatePath = "templates/mail/base.html"
 
-    suspend fun sendWelcomeEmail(to: String, name: String, locale: Locale?) {
+    suspend fun sendWelcomeEmail(to: String, name: String, locale: Locale?): Result<MimeMessage, Exception> = coroutineBinding {
         logger.debug { "Sending welcome email to $to" }
 
         // If no locale is specified, the application's default locale will be used.
@@ -180,6 +180,7 @@ class WelcomeService(
             .translate(resourceBundle, actualLocale)
             .replacePlaceholders(templateService.getPlaceholders(placeholders))
             .build()
+            .bind()
 
         // Get the translated subject
         val subject = translateService.translateResourceKey(
@@ -190,9 +191,11 @@ class WelcomeService(
 
         // Create the final, complete email template
         val finalTemplate = emailTemplateService.createTemplate(subject, content, actualLocale)
+            .bind()
 
         // Send the email
         emailService.sendEmail(to, subject, finalTemplate, actualLocale)
+            .bind()
     }
 }
 ```

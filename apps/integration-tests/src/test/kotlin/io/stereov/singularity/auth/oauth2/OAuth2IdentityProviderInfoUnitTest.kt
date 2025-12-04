@@ -1,15 +1,16 @@
 package io.stereov.singularity.auth.oauth2
 
+import com.github.michaelbull.result.getOrThrow
 import io.mockk.clearMocks
 import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.slot
+import io.stereov.singularity.auth.alert.service.IdentityProviderInfoService
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
-import io.stereov.singularity.auth.core.service.IdentityProviderInfoService
 import io.stereov.singularity.auth.oauth2.model.OAuth2ErrorCode
+import io.stereov.singularity.principal.core.model.User
 import io.stereov.singularity.test.BaseOAuth2FlowTest
 import io.stereov.singularity.test.config.MockSecurityAlertConfig
-import io.stereov.singularity.user.core.model.UserDocument
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -24,7 +25,7 @@ import java.util.*
 class OAuth2IdentityProviderInfoUnitTest : BaseOAuth2FlowTest() {
 
     @Test fun `register works without locale`() = runTest {
-        val userSlot = slot<UserDocument>()
+        val userSlot = slot<User>()
         val localeSlot = slot<Locale?>()
 
         coJustRun { identityProviderInfoService.send(
@@ -42,7 +43,7 @@ class OAuth2IdentityProviderInfoUnitTest : BaseOAuth2FlowTest() {
             .returnResult()
             .extractStateAndSession()
 
-        val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os"))
+        val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os")).getOrThrow()
 
         val registeredUser = registerUser()
         mockOAuth2Server.enqueueResponses(email = registeredUser.email)
@@ -62,11 +63,11 @@ class OAuth2IdentityProviderInfoUnitTest : BaseOAuth2FlowTest() {
         mockOAuth2Server.verifyRequests()
 
         coVerify(exactly = 1) { identityProviderInfoService.send(any(), anyNullable()) }
-        assertEquals(registeredUser.info.id, userSlot.captured.id)
+        assertEquals(registeredUser.id, userSlot.captured.id.getOrThrow())
         assert(localeSlot.isNull)
     }
     @Test fun `register works with locale`() = runTest {
-        val userSlot = slot<UserDocument>()
+        val userSlot = slot<User>()
         val localeSlot = slot<Locale?>()
 
         coJustRun { identityProviderInfoService.send(
@@ -84,7 +85,7 @@ class OAuth2IdentityProviderInfoUnitTest : BaseOAuth2FlowTest() {
             .returnResult()
             .extractStateAndSession()
 
-        val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os"), locale = Locale.ENGLISH)
+        val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os"), locale = Locale.ENGLISH).getOrThrow()
 
         val registeredUser = registerUser()
         mockOAuth2Server.enqueueResponses(email = registeredUser.email)
@@ -104,11 +105,11 @@ class OAuth2IdentityProviderInfoUnitTest : BaseOAuth2FlowTest() {
         mockOAuth2Server.verifyRequests()
 
         coVerify(exactly = 1) { identityProviderInfoService.send(any(), anyNullable()) }
-        assertEquals(registeredUser.info.id, userSlot.captured.id)
+        assertEquals(registeredUser.id, userSlot.captured.id.getOrThrow())
         assertEquals(Locale.ENGLISH, localeSlot.captured)
     }
     @Test fun `register works with another oauth2`() = runTest {
-        val userSlot = slot<UserDocument>()
+        val userSlot = slot<User>()
         val localeSlot = slot<Locale?>()
 
         coJustRun { identityProviderInfoService.send(
@@ -126,7 +127,7 @@ class OAuth2IdentityProviderInfoUnitTest : BaseOAuth2FlowTest() {
             .returnResult()
             .extractStateAndSession()
 
-        val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os"))
+        val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os")).getOrThrow()
 
         val registeredUser = registerOAuth2()
         mockOAuth2Server.enqueueResponses(email = registeredUser.email)
@@ -146,11 +147,11 @@ class OAuth2IdentityProviderInfoUnitTest : BaseOAuth2FlowTest() {
         mockOAuth2Server.verifyRequests()
 
         coVerify(exactly = 1) { identityProviderInfoService.send(any(), anyNullable()) }
-        assertEquals(registeredUser.info.id, userSlot.captured.id)
+        assertEquals(registeredUser.id, userSlot.captured.id.getOrThrow())
         assert(localeSlot.isNull)
     }
     @Test fun `register does not send when not registered`() = runTest {
-        val userSlot = slot<UserDocument>()
+        val userSlot = slot<User>()
         val localeSlot = slot<Locale?>()
 
         coJustRun { identityProviderInfoService.send(
@@ -168,7 +169,7 @@ class OAuth2IdentityProviderInfoUnitTest : BaseOAuth2FlowTest() {
             .returnResult()
             .extractStateAndSession()
 
-        val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os"))
+        val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os")).getOrThrow()
 
         mockOAuth2Server.enqueueResponses()
 

@@ -3,8 +3,8 @@ import org.jreleaser.model.Signing
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
-    kotlin("jvm") version "2.0.21"
-    kotlin("plugin.spring") version "2.0.21"
+    kotlin("jvm") version "2.2.21"
+    kotlin("plugin.spring") version "2.2.21"
     id("org.springframework.boot") version "3.4.1"
     id("io.spring.dependency-management") version "1.1.4"
     id("maven-publish")
@@ -36,7 +36,7 @@ repositories {
     mavenCentral()
 }
 
-val kotlinVersion = "2.0.21"
+val kotlinVersion = "2.2.21"
 val kotlinxVersion = "1.10.1"
 val springBootVersion = "3.5.6"
 val bucket4jVersion = "8.14.0"
@@ -118,6 +118,10 @@ dependencies {
 
     // Documentation
     api("org.springdoc:springdoc-openapi-starter-webflux-api:2.8.13")
+
+    // Result
+    api("com.michael-bull.kotlin-result:kotlin-result:2.1.0")
+    api("com.michael-bull.kotlin-result:kotlin-result-coroutines:2.1.0")
 }
 
 configurations.all {

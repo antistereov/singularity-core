@@ -1,6 +1,7 @@
 package io.stereov.singularity.auth.oauth2.component
 
-import io.stereov.singularity.auth.oauth2.service.token.OAuth2StateTokenService
+import com.github.michaelbull.result.getOrThrow
+import io.stereov.singularity.auth.token.service.OAuth2StateTokenService
 import io.stereov.singularity.global.util.Constants
 import kotlinx.coroutines.reactor.mono
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository
@@ -42,7 +43,7 @@ class CustomOAuth2AuthorizationRequestResolver(
             request.state,
             redirectUri,
             stepUp,
-        )
+        ).getOrThrow()
 
         val req = OAuth2AuthorizationRequest.from(request)
             .state(oAuth2StateToken.value)
