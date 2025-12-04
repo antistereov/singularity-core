@@ -37,7 +37,7 @@ class SecretRotationController(
 
     @PostMapping("/rotate-keys")
     @Operation(
-        summary = "Trigger HashSecret Rotation",
+        summary = "Trigger Secret Rotation",
         description = """
             Triggers an immediate secret key rotation. This is an asynchronous operation.
             
@@ -85,7 +85,7 @@ class SecretRotationController(
 
     @GetMapping("/rotate-keys/status")
     @Operation(
-        summary = "Get HashSecret Rotation Status",
+        summary = "Get Secret Rotation Status",
         description = """
             Returns the status of the current or most recent secret rotation process.
             

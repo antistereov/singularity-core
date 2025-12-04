@@ -291,7 +291,7 @@ paths:
     post:
       tags:
       - Authentication
-      summary: Refresh Access EmailVerificationTokenCreation
+      summary: Refresh Access Token
       description: "Request a new [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token).\n\
         \n### Tokens\n- Requires a valid [`RefreshToken`](https://singularity.stereov.io/docs/guides/auth/tokens#refresh-token).\n\
         - If successful, [`AccessToken`](https://singularity.stereov.io/docs/guides/auth/tokens#access-token)\
@@ -1926,7 +1926,7 @@ paths:
     get:
       tags:
       - Two-Factor Authentication
-      summary: Get Remaining Email 2FA Code CooldownActive
+      summary: Get Remaining Email 2FA Cooldown
       description: |-
         Get the remaining time in seconds until you can send another email containing a 2FA code.
 
@@ -5624,7 +5624,7 @@ paths:
     post:
       tags:
       - Security
-      summary: Trigger HashSecret Rotation
+      summary: Trigger Secret Rotation
       description: |-
         Triggers an immediate secret key rotation. This is an asynchronous operation.
 
@@ -5667,7 +5667,7 @@ paths:
     get:
       tags:
       - Security
-      summary: Get HashSecret Rotation Status
+      summary: Get Secret Rotation Status
       description: |-
         Returns the status of the current or most recent secret rotation process.
 

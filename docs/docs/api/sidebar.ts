@@ -36,7 +36,7 @@ const sidebar: SidebarsConfig = {
         {
           type: "doc",
           id: "api/refresh-access-token",
-          label: "Refresh Access EmailVerificationTokenCreation",
+          label: "Refresh Access Token",
           className: "api-method post",
         },
         {
@@ -161,7 +161,7 @@ const sidebar: SidebarsConfig = {
         {
           type: "doc",
           id: "api/get-remaining-email-two-factor-cooldown",
-          label: "Get Remaining Email 2FA Code CooldownActive",
+          label: "Get Remaining Email 2FA Cooldown",
           className: "api-method get",
         },
       ],
@@ -418,13 +418,13 @@ const sidebar: SidebarsConfig = {
         {
           type: "doc",
           id: "api/rotate-secret-keys",
-          label: "Trigger HashSecret Rotation",
+          label: "Trigger Secret Rotation",
           className: "api-method post",
         },
         {
           type: "doc",
           id: "api/get-secret-key-rotation-status",
-          label: "Get HashSecret Rotation Status",
+          label: "Get Secret Rotation Status",
           className: "api-method get",
         },
       ],

@@ -294,7 +294,7 @@ class EmailAuthenticationController(
 
     @GetMapping("/cooldown")
     @Operation(
-        summary = "Get Remaining Email 2FA Code CooldownActive",
+        summary = "Get Remaining Email 2FA Cooldown",
         description = """
             Get the remaining time in seconds until you can send another email containing a 2FA code.
             
