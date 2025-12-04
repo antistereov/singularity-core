@@ -1,3 +1,15 @@
+## [v1.10.0]
+
+## Changelog
+
+## 📝 Documentation
+- [23aa410](https://github.com/antistereov/singularity/commits/23aa410) **core**: fix broken operation names
+
+
+## Contributors
+We'd like to thank the following people for their contributions:
+antistereov
+
 ## [v1.9.6]
 
 ## Changelog
