@@ -43,7 +43,6 @@ class GroupService(
 
     override val logger = logger {}
     override val collectionClazz = Group::class.java
-    override val collectionClazz = GroupTranslation::class.java
 
     @PostConstruct
     fun initializeGroups() = runBlocking {

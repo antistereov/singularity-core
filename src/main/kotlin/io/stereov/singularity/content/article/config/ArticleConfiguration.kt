@@ -1,7 +1,6 @@
 package io.stereov.singularity.content.article.config
 
 import io.stereov.singularity.auth.core.service.AuthorizationService
-import io.stereov.singularity.principal.group.service.GroupService
 import io.stereov.singularity.content.article.controller.ArticleController
 import io.stereov.singularity.content.article.controller.ArticleManagementController
 import io.stereov.singularity.content.article.mapper.ArticleMapper
@@ -19,9 +18,10 @@ import io.stereov.singularity.content.tag.service.TagService
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.file.image.service.ImageStore
 import io.stereov.singularity.global.properties.AppProperties
-import io.stereov.singularity.translate.service.TranslateService
 import io.stereov.singularity.principal.core.mapper.PrincipalMapper
 import io.stereov.singularity.principal.core.service.UserService
+import io.stereov.singularity.principal.group.service.GroupService
+import io.stereov.singularity.translate.service.TranslateService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -100,7 +100,8 @@ class ArticleConfiguration {
         accessCriteria: AccessCriteria,
         articleMapper: ArticleMapper,
         translateService: TranslateService,
-        contentProperties: ContentProperties
+        contentProperties: ContentProperties,
+        appProperties: AppProperties
     ): ArticleService {
         return ArticleService(
             articleRepository,
@@ -109,7 +110,8 @@ class ArticleConfiguration {
             accessCriteria,
             translateService,
             articleMapper,
-            contentProperties
+            contentProperties,
+            appProperties
         )
     }
 
