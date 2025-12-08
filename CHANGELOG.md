@@ -1,3 +1,15 @@
+## [v1.10.1]
+
+## Changelog
+
+## 📝 Documentation
+- [821db44](https://github.com/antistereov/singularity/commits/821db44) **openapi**: add error response
+
+
+## Contributors
+We'd like to thank the following people for their contributions:
+antistereov
+
 ## [v1.10.0]
 
 ## Changelog
