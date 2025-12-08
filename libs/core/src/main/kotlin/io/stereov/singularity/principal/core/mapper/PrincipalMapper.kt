@@ -126,7 +126,10 @@ class PrincipalMapper(
 
         val avatarMetadata = avatarKey
             ?.let { fileStorage.metadataResponseByKey(it, authenticationOutcome) }
-            ?.recover { null }
+            ?.recover { ex ->
+                logger.error(ex) { "Failed to get avatar key" }
+                null
+            }
             ?.bind()
         
         val id = principal.id
