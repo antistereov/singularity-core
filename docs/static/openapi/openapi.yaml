@@ -1024,7 +1024,6 @@ paths:
             * **`TWO_FACTOR_AUTHENTICATION_TOKEN_INVALID`:** Indicates that the two-factor authentication token cannot be decoded.
             * **`TWO_FACTOR_AUTHENTICATION_TOKEN_MISSING`:** Thrown when the two-factor authentication token is missing.
             * **`TWO_FACTOR_CODE_EXPIRED`:** Two-factor code has expired.
-            * **`TOTP_CODE_VALIDATION_FAILURE`:** Failed to validate TOTP code.
             * **`WRONG_TWO_FACTOR_CODE`:** Wrong two-factor code.
           content:
             application/json:
@@ -1036,6 +1035,7 @@ paths:
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
             * **`INVALID_USER_DOCUMENT`:** A requested user document was stored in an invalid format.
             * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
+            * **`TOTP_CODE_VALIDATION_FAILURE`:** Failed to validate TOTP code.
             * **`ACCESS_TOKEN_CACHE_FAILURE`:** Thrown when an access token could not be created due to an exception in the access token whitelist.
             * **`ACCESS_TOKEN_ENCODING_FAILURE`:** Represents an exception that occurs during the encoding process of an access token.
             * **`ACCESS_TOKEN_CREATION_FAILURE`:** Thrown when a generic exception occurred during the creation of an access token.
@@ -1122,7 +1122,6 @@ paths:
             * **`TWO_FACTOR_AUTHENTICATION_TOKEN_INVALID`:** Indicates that the two-factor authentication token cannot be decoded.
             * **`TWO_FACTOR_AUTHENTICATION_TOKEN_MISSING`:** Thrown when the two-factor authentication token is missing.
             * **`TWO_FACTOR_CODE_EXPIRED`:** Two-factor code has expired.
-            * **`TOTP_CODE_VALIDATION_FAILURE`:** Failed to validate TOTP code.
             * **`WRONG_TWO_FACTOR_CODE`:** Wrong two-factor code.
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
@@ -1137,6 +1136,7 @@ paths:
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
             * **`INVALID_USER_DOCUMENT`:** A requested user document was stored in an invalid format.
             * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
+            * **`TOTP_CODE_VALIDATION_FAILURE`:** Failed to validate TOTP code.
             * **`ACCESS_TOKEN_ALLOWLIST_READING_FAILURE`:** Represents an exception indicating a failure when reading the allowlist for an access token cache.
             * **`INVALID_DATABASE_OBJECT`:** Indicates an invalid document stored in the database.
             * **`STEP_UP_TOKEN_ENCODING_FAILURE`:** Represents an exception that occurs during the encoding process of a step-up token.

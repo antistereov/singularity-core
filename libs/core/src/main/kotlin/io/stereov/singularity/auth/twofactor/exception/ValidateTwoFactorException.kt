@@ -92,7 +92,7 @@ sealed class ValidateTwoFactorException (
     class Totp(msg: String, cause: Throwable? = null) : ValidateTwoFactorException(
         msg,
         "TOTP_CODE_VALIDATION_FAILURE",
-        HttpStatus.UNAUTHORIZED,
+        HttpStatus.INTERNAL_SERVER_ERROR,
         "Failed to validate TOTP code.",
         cause
     )
