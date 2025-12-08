@@ -28,26 +28,6 @@ sealed class PrincipalMapperException(
 ) : SingularityException(msg, code, status, description, cause) {
 
     /**
-     * Exception representing a failure to map avatar metadata for a user.
-     *
-     * This exception is a specific subtype of [PrincipalMapperException] and is thrown when
-     * the system encounters an error during the process of mapping or handling user avatar metadata.
-     *
-     * @param msg A message providing details about the avatar mapping error.
-     * @param cause The underlying cause of the exception, if available.
-     *
-     * @property code `USER_AVATAR_MAPPING_FAILURE`
-     * @property status [HttpStatus.MULTI_STATUS]
-     */
-    class Avatar(msg: String, cause: Throwable? = null) : PrincipalMapperException(
-        msg,
-        "USER_AVATAR_MAPPING_FAILURE",
-        HttpStatus.MULTI_STATUS,
-        "Failed to map avatar metadata.",
-        cause
-    )
-
-    /**
      * Exception representing an invalid user document error.
      *
      * This exception is thrown when the system encounters an invalid user document
