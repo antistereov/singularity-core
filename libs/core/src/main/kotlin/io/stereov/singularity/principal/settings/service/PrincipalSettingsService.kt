@@ -185,8 +185,12 @@ class PrincipalSettingsService(
                 .bind()
         }
 
+        val fileStoragePath = user.fileStoragePath
+            .mapError { ex -> SetUserAvatarException.Database("Failed to get file storage path for user: ${ex.message}", ex) }
+            .bind()
+
         val avatarKey = imageStore
-            .upload(authentication, file, "${user.fileStoragePath}/avatar", true)
+            .upload(authentication, file, "$fileStoragePath/avatar", true)
             .mapError { ex -> SetUserAvatarException.File("Failed to upload new avatar: ${ex.message}") }
             .bind()
             .key
@@ -234,8 +238,12 @@ class PrincipalSettingsService(
                 .getOrElse { ex -> logger.debug(ex) { "Failed to remove old image" } }
         }
 
+        val fileStoragePath = user.fileStoragePath
+            .mapError { ex -> SetUserAvatarException.Database("Failed to get file storage path for user: ${ex.message}", ex) }
+            .bind()
+
         val avatarKey = imageStore
-            .upload(authentication, file, "${user.fileStoragePath}/avatar", true)
+            .upload(authentication, file, "$fileStoragePath/avatar", true)
             .mapError { ex -> SetUserAvatarException.File("Failed to upload new avatar: ${ex.message}") }
             .bind()
             .key
