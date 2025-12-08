@@ -40,6 +40,7 @@ import org.springdoc.core.customizers.OpenApiCustomizer
 import org.springdoc.core.customizers.OperationCustomizer
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.context.annotation.Bean
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.method.HandlerMethod
 import kotlin.reflect.full.primaryConstructor
@@ -162,9 +163,9 @@ class OpenApiConfig() {
 
         private fun createErrorContent(): Content {
             return Content().addMediaType(
-                org.springframework.http.MediaType.APPLICATION_JSON_VALUE,
+                MediaType.APPLICATION_JSON_VALUE,
                 io.swagger.v3.oas.models.media.MediaType()
-                    .schema(Schema<ErrorResponse>())
+                    .schema(Schema<ErrorResponse>().`$ref`("#/components/schemas/ErrorResponse"))
             )
         }
     }
