@@ -1,10 +1,8 @@
 package io.stereov.singularity.content.article.mapper
 
-import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.*
 import com.github.michaelbull.result.coroutines.coroutineBinding
-import com.github.michaelbull.result.map
-import com.github.michaelbull.result.mapError
-import com.github.michaelbull.result.recoverIf
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.content.article.dto.response.ArticleOverviewResponse
 import io.stereov.singularity.content.article.dto.response.FullArticleResponse
@@ -38,6 +36,8 @@ class ArticleMapper(
     private val fileStorage: FileStorage,
     private val principalMapper: PrincipalMapper,
 ) {
+
+    private val logger = KotlinLogging.logger {}
 
     fun createOverview(article: FullArticleResponse): ArticleOverviewResponse {
         return ArticleOverviewResponse(
@@ -125,7 +125,10 @@ class ArticleMapper(
 
 
         val image = article.imageKey?.let { fileStorage.metadataResponseByKey(it, authenticationOutcome) }
-            ?.mapError { ex -> CreateFullArticleResponseException.File("Failed to fetch image metadata: ${ex.message}", ex) }
+            ?.recover { ex ->
+                logger.error(ex) { "Failed to fetch image metadata" }
+                null
+            }
             ?.bind()
 
         val articleId = article.id

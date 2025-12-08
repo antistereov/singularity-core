@@ -52,7 +52,6 @@ sealed class GetArticleResponsesException(
 
         fun from(ex: CreateFullArticleResponseException): GetArticleResponsesException = when (ex) {
             is CreateFullArticleResponseException.NoTranslations -> NoTranslations(ex.message, ex.cause)
-            is CreateFullArticleResponseException.File -> File(ex.message, ex.cause)
             is CreateFullArticleResponseException.Database -> Database(ex.message, ex.cause)
         }
 
