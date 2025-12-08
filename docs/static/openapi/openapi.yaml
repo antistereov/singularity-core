@@ -115,7 +115,8 @@ paths:
             * **`ALREADY_AUTHENTICATED`:** Principal is already authenticated.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "500":
           description: |-
             The following error codes correspond to this status:
@@ -123,14 +124,16 @@ paths:
             * **`HASH_FAILURE`:** Exception representing a general failure related to hashing operations.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "207":
           description: |-
             The following error codes correspond to this status:
             * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - {}
       - {}
@@ -196,7 +199,8 @@ paths:
             * **`ALREADY_AUTHENTICATED`:** Principal is already authenticated.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "500":
           description: |-
             The following error codes correspond to this status:
@@ -216,21 +220,16 @@ paths:
             * **`REFRESH_TOKEN_SESSION_UPDATE_FAILURE`:** Thrown when an exception occurs when updating the user sessions after creating a new refresh token.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
             * **`INVALID_CREDENTIALS`:** Invalid credentials.
           content:
             application/json:
-              schema: {}
-        "207":
-          description: |-
-            The following error codes correspond to this status:
-            * **`USER_AVATAR_MAPPING_FAILURE`:** Failed to map avatar metadata.
-          content:
-            application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader: []
       - accessTokenCookie: []
@@ -261,7 +260,8 @@ paths:
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -269,21 +269,24 @@ paths:
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "304":
           description: |-
             The following error codes correspond to this status:
             * **`ALREADY_LOGGED_OUT`:** User is already logged out.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`USER_NOT_FOUND`:** User not found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader: []
       - accessTokenCookie: []
@@ -324,7 +327,8 @@ paths:
             * **`REFRESH_TOKEN_MISSING`:** Thrown when the refresh token is missing.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "500":
           description: |-
             The following error codes correspond to this status:
@@ -343,21 +347,16 @@ paths:
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`USER_NOT_FOUND`:** User not found.
           content:
             application/json:
-              schema: {}
-        "207":
-          description: |-
-            The following error codes correspond to this status:
-            * **`USER_AVATAR_MAPPING_FAILURE`:** Failed to map avatar metadata.
-          content:
-            application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - refreshTokenHeader: []
       - refreshTokenCookie: []
@@ -423,7 +422,8 @@ paths:
             * **`STEP_UP_TOKEN_SECRET_FAILURE`:** Represents an exception that occurs when there is a failure related to the secret required for creating a refresh token.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -433,14 +433,16 @@ paths:
             * **`SESSION_EXPIRED`:** Indicates that the user's session has expired.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`PRINCIPAL_NOT_FOUND`:** No principal with specified ID found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "400":
           description: |-
             The following error codes correspond to this status:
@@ -448,14 +450,16 @@ paths:
             * **`NO_PASSWORD`:** Indicates that the user does not have a password set.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "403":
           description: |-
             The following error codes correspond to this status:
             * **`STEP_UP_TOKEN_CREATION_FORBIDDEN`:** Thrown when a step-up token is requested from an illegal context.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader: []
       - accessTokenCookie: []
@@ -488,7 +492,8 @@ paths:
             * **`DATABASE_ENCRYPTION_FAILURE`:** Exception representing a general failure related to database encryption operations.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -496,14 +501,16 @@ paths:
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`PRINCIPAL_NOT_FOUND`:** No principal with specified ID found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader: []
         stepUpTokenHeader: []
@@ -566,7 +573,8 @@ paths:
             * **`EMAIL_COOLDOWN_ACTIVE`:** Failed to send email because cooldown is active.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "500":
           description: |-
             The following error codes correspond to this status:
@@ -578,14 +586,16 @@ paths:
             * **`PASSWORD_RESET_TOKEN_CREATION_FAILURE`:** Exception thrown when an error occurs during token generation.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "503":
           description: |-
             The following error codes correspond to this status:
             * **`EMAIL_DISABLED`:** Thrown when email functionality is disabled in the application.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - {}
       - {}
@@ -648,7 +658,8 @@ paths:
             * **`PASSWORD_RESET_TOKEN_MISSING`:** Thrown when the password reset token is missing.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "500":
           description: |-
             The following error codes correspond to this status:
@@ -657,21 +668,24 @@ paths:
             * **`HASH_FAILURE`:** Exception representing a general failure related to hashing operations.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "207":
           description: |-
             The following error codes correspond to this status:
             * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`USER_NOT_FOUND`:** User not found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - {}
       - {}
@@ -760,7 +774,8 @@ paths:
             * **`EMAIL_TEMPLATE_FAILURE`:** Thrown when there is a failure related to email template creation.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -768,35 +783,40 @@ paths:
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`USER_NOT_FOUND`:** User not found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "304":
           description: |-
             The following error codes correspond to this status:
             * **`EMAIL_ALREADY_VERIFIED`:** User's email is already verified.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "429":
           description: |-
             The following error codes correspond to this status:
             * **`EMAIL_COOLDOWN_ACTIVE`:** Failed to send email because cooldown is active.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "503":
           description: |-
             The following error codes correspond to this status:
             * **`EMAIL_DISABLED`:** Thrown when email functionality is disabled in the application.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader: []
       - accessTokenCookie: []
@@ -849,7 +869,8 @@ paths:
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -860,29 +881,32 @@ paths:
             * **`EMAIL_VERIFICATION_TOKEN_MISSING`:** Thrown when the email verification token is missing.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "304":
           description: |-
             The following error codes correspond to this status:
             * **`EMAIL_ALREADY_VERIFIED`:** User's email is already verified.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "207":
           description: |-
             The following error codes correspond to this status:
             * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
-            * **`USER_AVATAR_MAPPING_FAILURE`:** Failed to map avatar metadata.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`USER_NOT_FOUND`:** User not found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - {}
       - {}
@@ -916,7 +940,8 @@ paths:
             * **`DATABASE_ENCRYPTION_FAILURE`:** Exception representing a general failure related to database encryption operations.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -924,14 +949,16 @@ paths:
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`USER_NOT_FOUND`:** User not found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader: []
       - accessTokenCookie: []
@@ -995,7 +1022,8 @@ paths:
             * **`WRONG_TWO_FACTOR_CODE`:** Wrong two-factor code.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "500":
           description: |-
             The following error codes correspond to this status:
@@ -1014,7 +1042,8 @@ paths:
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "400":
           description: |-
             The following error codes correspond to this status:
@@ -1023,22 +1052,24 @@ paths:
             * **`2FA_DISABLED`:** User needs to set up two-factor authentication to complete this action.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "207":
           description: |-
             The following error codes correspond to this status:
             * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
-            * **`USER_AVATAR_MAPPING_FAILURE`:** Failed to map avatar metadata.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`USER_NOT_FOUND`:** User not found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - twoFactorAuthenticationTokenHeader: []
       - twoFactorAuthenticationTokenCookie: []
@@ -1097,7 +1128,8 @@ paths:
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "500":
           description: |-
             The following error codes correspond to this status:
@@ -1108,7 +1140,8 @@ paths:
             * **`STEP_UP_TOKEN_SECRET_FAILURE`:** Represents an exception that occurs when there is a failure related to the secret required for creating a refresh token.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "400":
           description: |-
             The following error codes correspond to this status:
@@ -1117,28 +1150,32 @@ paths:
             * **`2FA_DISABLED`:** User needs to set up two-factor authentication to complete this action.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "207":
           description: |-
             The following error codes correspond to this status:
             * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`USER_NOT_FOUND`:** User not found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "403":
           description: |-
             The following error codes correspond to this status:
             * **`STEP_UP_TOKEN_CREATION_FORBIDDEN`:** Thrown when a step-up token is requested from an illegal context.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader: []
         twoFactorAuthenticationTokenHeader: []
@@ -1185,7 +1222,8 @@ paths:
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -1196,14 +1234,16 @@ paths:
             * **`STEP_UP_TOKEN_MISSING`:** Thrown when the step-up token is missing.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`USER_NOT_FOUND`:** User not found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "400":
           description: |-
             The following error codes correspond to this status:
@@ -1211,15 +1251,16 @@ paths:
             * **`2FA_DISABLED`:** User needs to set up two-factor authentication to complete this action.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "207":
           description: |-
             The following error codes correspond to this status:
             * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
-            * **`USER_AVATAR_MAPPING_FAILURE`:** Failed to map avatar metadata.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader: []
         stepUpTokenHeader: []
@@ -1269,7 +1310,8 @@ paths:
             * **`TOTP_FAILURE`:** TOTP code validation failed.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -1280,28 +1322,32 @@ paths:
             * **`STEP_UP_TOKEN_MISSING`:** Thrown when the step-up token is missing.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`USER_NOT_FOUND`:** User not found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "304":
           description: |-
             The following error codes correspond to this status:
             * **`TWO_FACTOR_METHOD_ALREADY_ENABLED`:** Two-factor authentication method is already enabled.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "400":
           description: |-
             The following error codes correspond to this status:
             * **`NO_PASSWORD_PROVIDER`:** The user needs to set a password in to perform this action.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader: []
         stepUpTokenHeader: []
@@ -1362,7 +1408,8 @@ paths:
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -1377,36 +1424,40 @@ paths:
             * **`WRONG_TWO_FACTOR_CODE`:** Wrong two-factor code.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`USER_NOT_FOUND`:** User not found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "304":
           description: |-
             The following error codes correspond to this status:
             * **`TWO_FACTOR_METHOD_ALREADY_ENABLED`:** Two-factor authentication method is already enabled.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "400":
           description: |-
             The following error codes correspond to this status:
             * **`NO_PASSWORD_PROVIDER`:** The user needs to set a password in to perform this action.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "207":
           description: |-
             The following error codes correspond to this status:
             * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
-            * **`USER_AVATAR_MAPPING_FAILURE`:** Failed to map avatar metadata.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader: []
         stepUpTokenHeader: []
@@ -1457,7 +1508,8 @@ paths:
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -1468,21 +1520,24 @@ paths:
             * **`STEP_UP_TOKEN_MISSING`:** Thrown when the step-up token is missing.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`USER_NOT_FOUND`:** User not found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "304":
           description: |-
             The following error codes correspond to this status:
             * **`TWO_FACTOR_METHOD_ALREADY_DISABLED`:** Two factor method is already disabled.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "400":
           description: |-
             The following error codes correspond to this status:
@@ -1490,15 +1545,16 @@ paths:
             * **`NO_PASSWORD_PROVIDER`:** The user needs to set a password in to perform this action.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "207":
           description: |-
             The following error codes correspond to this status:
             * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
-            * **`USER_AVATAR_MAPPING_FAILURE`:** Failed to map avatar metadata.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader: []
         stepUpTokenHeader: []
@@ -1559,7 +1615,8 @@ paths:
             * **`WRONG_TWO_FACTOR_CODE`:** Wrong two-factor code.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "500":
           description: |-
             The following error codes correspond to this status:
@@ -1581,7 +1638,8 @@ paths:
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "400":
           description: |-
             The following error codes correspond to this status:
@@ -1589,29 +1647,32 @@ paths:
             * **`NO_PASSWORD_PROVIDER`:** The user needs to set a password in to perform this action.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "207":
           description: |-
             The following error codes correspond to this status:
             * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
-            * **`USER_AVATAR_MAPPING_FAILURE`:** Failed to map avatar metadata.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`USER_NOT_FOUND`:** User not found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "403":
           description: |-
             The following error codes correspond to this status:
             * **`STEP_UP_TOKEN_CREATION_FORBIDDEN`:** Thrown when a step-up token is requested from an illegal context.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - twoFactorAuthenticationTokenHeader: []
       - twoFactorAuthenticationTokenCookie: []
@@ -1674,7 +1735,8 @@ paths:
             * **`EMAIL_TEMPLATE_FAILURE`:** Thrown when there is a failure related to email template creation.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -1685,42 +1747,48 @@ paths:
             * **`TWO_FACTOR_AUTHENTICATION_TOKEN_MISSING`:** Thrown when the two-factor authentication token is missing.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`USER_NOT_FOUND`:** User not found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "429":
           description: |-
             The following error codes correspond to this status:
             * **`EMAIL_COOLDOWN_ACTIVE`:** Failed to send email because cooldown is active.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "503":
           description: |-
             The following error codes correspond to this status:
             * **`EMAIL_DISABLED`:** Thrown when email functionality is disabled in the application.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "400":
           description: |-
             The following error codes correspond to this status:
             * **`NO_PASSWORD_PROVIDER`:** The user needs to set a password in to perform this action.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "207":
           description: |-
             The following error codes correspond to this status:
             * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader: []
       - accessTokenCookie: []
@@ -1781,7 +1849,8 @@ paths:
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -1794,36 +1863,40 @@ paths:
             * **`WRONG_TWO_FACTOR_CODE`:** Wrong two-factor code.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`USER_NOT_FOUND`:** User not found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "304":
           description: |-
             The following error codes correspond to this status:
             * **`TWO_FACTOR_METHOD_ALREADY_ENABLED`:** Two-factor authentication method is already enabled.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "400":
           description: |-
             The following error codes correspond to this status:
             * **`NO_PASSWORD_PROVIDER`:** The user needs to set a password in to perform this action.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "207":
           description: |-
             The following error codes correspond to this status:
             * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
-            * **`USER_AVATAR_MAPPING_FAILURE`:** Failed to map avatar metadata.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader: []
         stepUpTokenHeader: []
@@ -1874,7 +1947,8 @@ paths:
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -1886,21 +1960,24 @@ paths:
             * **`TWO_FACTOR_CODE_EXPIRED`:** Two-factor code has expired.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`USER_NOT_FOUND`:** User not found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "304":
           description: |-
             The following error codes correspond to this status:
             * **`TWO_FACTOR_METHOD_ALREADY_DISABLED`:** Two factor method is already disabled.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "400":
           description: |-
             The following error codes correspond to this status:
@@ -1908,15 +1985,16 @@ paths:
             * **`NO_PASSWORD_PROVIDER`:** The user needs to set a password in to perform this action.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "207":
           description: |-
             The following error codes correspond to this status:
             * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
-            * **`USER_AVATAR_MAPPING_FAILURE`:** Failed to map avatar metadata.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader: []
         stepUpTokenHeader: []
@@ -1953,7 +2031,8 @@ paths:
             * **`DATABASE_ENCRYPTION_FAILURE`:** Exception representing a general failure related to database encryption operations.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -1964,14 +2043,16 @@ paths:
             * **`TWO_FACTOR_AUTHENTICATION_TOKEN_MISSING`:** Thrown when the two-factor authentication token is missing.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`USER_NOT_FOUND`:** User not found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader: []
       - accessTokenCookie: []
@@ -2010,7 +2091,8 @@ paths:
             * **`DATABASE_ENCRYPTION_FAILURE`:** Exception representing a general failure related to database encryption operations.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -2018,14 +2100,16 @@ paths:
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`USER_NOT_FOUND`:** User not found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader: []
       - accessTokenCookie: []
@@ -2078,7 +2162,8 @@ paths:
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -2089,7 +2174,8 @@ paths:
             * **`STEP_UP_TOKEN_MISSING`:** Thrown when the step-up token is missing.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
@@ -2097,7 +2183,8 @@ paths:
             * **`PROVIDER_NOT_FOUND`:** Provider not found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "400":
           description: |-
             The following error codes correspond to this status:
@@ -2105,15 +2192,16 @@ paths:
             * **`CANNOT_DISCONNECT_PASSWORD`:** Cannot disconnect password provider.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "207":
           description: |-
             The following error codes correspond to this status:
             * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
-            * **`USER_AVATAR_MAPPING_FAILURE`:** Failed to map avatar metadata.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader: []
         stepUpTokenHeader: []
@@ -2162,7 +2250,8 @@ paths:
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -2173,29 +2262,32 @@ paths:
             * **`STEP_UP_TOKEN_MISSING`:** Thrown when the step-up token is missing.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`USER_NOT_FOUND`:** User not found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "304":
           description: |-
             The following error codes correspond to this status:
             * **`PASSWORD_ALREADY_SET`:** Password is already set.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "207":
           description: |-
             The following error codes correspond to this status:
             * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
-            * **`USER_AVATAR_MAPPING_FAILURE`:** Failed to map avatar metadata.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader: []
         stepUpTokenHeader: []
@@ -2237,7 +2329,8 @@ paths:
             * **`OAUTH2_PROVIDER_CONNECTION_TOKEN_SECRET_FAILURE`:** Represents an exception that occurs when there is a failure related to the secret required for creating an OAuth2 provider connection token.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -2248,7 +2341,8 @@ paths:
             * **`STEP_UP_TOKEN_MISSING`:** Thrown when the step-up token is missing.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader: []
         stepUpTokenHeader: []
@@ -2286,7 +2380,8 @@ paths:
             * **`DATABASE_ENCRYPTION_FAILURE`:** Exception representing a general failure related to database encryption operations.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -2294,14 +2389,16 @@ paths:
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`PRINCIPAL_NOT_FOUND`:** No principal with specified ID found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader: []
       - accessTokenCookie: []
@@ -2346,21 +2443,24 @@ paths:
             * **`CACHE_OPERATION_FAILURE`:** Represents an exception that occurs during cache operation failures.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`PRINCIPAL_NOT_FOUND`:** No principal with specified ID found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "207":
           description: |-
             The following error codes correspond to this status:
             * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader: []
       - accessTokenCookie: []
@@ -2401,7 +2501,8 @@ paths:
             * **`DATABASE_ENCRYPTION_FAILURE`:** Exception representing a general failure related to database encryption operations.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -2409,21 +2510,24 @@ paths:
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`PRINCIPAL_NOT_FOUND`:** No principal with specified ID found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "207":
           description: |-
             The following error codes correspond to this status:
             * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader: []
       - accessTokenCookie: []
@@ -2465,7 +2569,8 @@ paths:
             * **`TOKEN_SECRET_FAILURE`:** Represents an exception that occurs when there is a failure related to the secret required for creating a JSON Web EmailVerificationTokenCreation (JWT).
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - {}
       - {}
@@ -2524,15 +2629,16 @@ paths:
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "207":
           description: |-
             The following error codes correspond to this status:
             * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
-            * **`USER_AVATAR_MAPPING_FAILURE`:** Failed to map avatar metadata.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - {}
       - {}
@@ -2610,7 +2716,8 @@ paths:
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -2618,36 +2725,40 @@ paths:
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "409":
           description: |-
             The following error codes correspond to this status:
             * **`GUEST_EMAIL_TAKEN`:** Cannot convert guest to user because the email address is already taken.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "304":
           description: |-
             The following error codes correspond to this status:
             * **`GUEST_IS_ALREADY_USER`:** Cannot convert guest to user because it is already a user.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`GUEST_NOT_FOUND`:** Cannot convert guest to user because it does not exist.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "207":
           description: |-
             The following error codes correspond to this status:
             * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
-            * **`USER_AVATAR_MAPPING_FAILURE`:** Failed to map avatar metadata.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader: []
       - accessTokenCookie: []
@@ -2689,7 +2800,8 @@ paths:
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -2697,22 +2809,24 @@ paths:
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`PRINCIPAL_NOT_FOUND`:** No principal with specified ID found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "207":
           description: |-
             The following error codes correspond to this status:
             * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
-            * **`USER_AVATAR_MAPPING_FAILURE`:** Failed to map avatar metadata.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader:
         - adminScope
@@ -2755,7 +2869,8 @@ paths:
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -2763,29 +2878,32 @@ paths:
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`USER_NOT_FOUND`:** User not found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "409":
           description: |-
             The following error codes correspond to this status:
             * **`AT_LEAST_ONE_ADMIN_REQUIRED`:** At least one admin is required.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "207":
           description: |-
             The following error codes correspond to this status:
             * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
-            * **`USER_AVATAR_MAPPING_FAILURE`:** Failed to map avatar metadata.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader:
         - adminScope
@@ -2855,7 +2973,8 @@ paths:
             * **`ACCESS_TOKEN_ALLOWLIST_READING_FAILURE`:** Represents an exception indicating a failure when reading the allowlist for an access token cache.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -2863,7 +2982,8 @@ paths:
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader:
         - adminScope
@@ -2922,7 +3042,8 @@ paths:
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -2930,21 +3051,24 @@ paths:
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "400":
           description: |-
             The following error codes correspond to this status:
             * **`INVALID_GROUP_TRANSLATION`:** Invalid group translation.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "409":
           description: |-
             The following error codes correspond to this status:
             * **`GROUP_KEY_EXISTS`:** Group key already exists.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader:
         - adminScope
@@ -3001,7 +3125,8 @@ paths:
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -3009,14 +3134,16 @@ paths:
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`DATABASE_ENTITY_NOT_FOUND`:** Exception representing a failure to find a database entity.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader:
         - adminScope
@@ -3080,7 +3207,8 @@ paths:
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -3088,21 +3216,24 @@ paths:
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "400":
           description: |-
             The following error codes correspond to this status:
             * **`INVALID_GROUP_TRANSLATION`:** Invalid group translation.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`GROUP_NOT_FOUND`:** No group with specified key found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader:
         - adminScope
@@ -3144,7 +3275,8 @@ paths:
             * **`MEMBER_UPDATE_FAILURE`:** Failed to update member after group deletion.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -3152,14 +3284,16 @@ paths:
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`GROUP_NOT_FOUND`:** No group with specified key found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader:
         - adminScope
@@ -3206,7 +3340,8 @@ paths:
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -3214,7 +3349,8 @@ paths:
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
@@ -3222,15 +3358,16 @@ paths:
             * **`USER_NOT_FOUND`:** User not found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "207":
           description: |-
             The following error codes correspond to this status:
             * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
-            * **`USER_AVATAR_MAPPING_FAILURE`:** Failed to map avatar metadata.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader:
         - adminScope
@@ -3280,7 +3417,8 @@ paths:
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -3288,7 +3426,8 @@ paths:
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
@@ -3296,15 +3435,16 @@ paths:
             * **`USER_NOT_FOUND`:** User not found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "207":
           description: |-
             The following error codes correspond to this status:
             * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
-            * **`USER_AVATAR_MAPPING_FAILURE`:** Failed to map avatar metadata.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader:
         - adminScope
@@ -3344,14 +3484,16 @@ paths:
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`USER_NOT_FOUND`:** User not found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -3359,14 +3501,8 @@ paths:
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
           content:
             application/json:
-              schema: {}
-        "207":
-          description: |-
-            The following error codes correspond to this status:
-            * **`USER_AVATAR_MAPPING_FAILURE`:** Failed to map avatar metadata.
-          content:
-            application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - {}
       - {}
@@ -3410,7 +3546,8 @@ paths:
             * **`FILE_STREAM_FAILURE`:** Thrown when an error occurred during a file stream.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -3419,7 +3556,8 @@ paths:
             * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
@@ -3428,35 +3566,40 @@ paths:
             * **`DATABASE_ENTITY_NOT_FOUND`:** Exception representing a failure to find a database entity.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "400":
           description: |-
             The following error codes correspond to this status:
             * **`BAD_FILE_REQUEST`:** Thrown when the file request is malformed or invalid.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "409":
           description: |-
             The following error codes correspond to this status:
             * **`FILE_KEY_TAKEN`:** This exception is thrown when attempting to store a file with a file key that is already taken or in use.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "403":
           description: |-
             The following error codes correspond to this status:
             * **`FILE_ACCESS_NOT_AUTHORIZED`:** Thrown when access to the requested file is not permitted.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "415":
           description: |-
             The following error codes correspond to this status:
             * **`UNSUPPORTED_MEDIA_TYPE`:** Thrown when a request is made with an unsupported media type.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader:
         - adminScope
@@ -3579,7 +3722,8 @@ paths:
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -3587,14 +3731,8 @@ paths:
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
           content:
             application/json:
-              schema: {}
-        "207":
-          description: |-
-            The following error codes correspond to this status:
-            * **`USER_AVATAR_MAPPING_FAILURE`:** Failed to map avatar metadata.
-          content:
-            application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader:
         - adminScope
@@ -3631,7 +3769,8 @@ paths:
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -3639,21 +3778,16 @@ paths:
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`PRINCIPAL_NOT_FOUND`:** No principal with specified ID found.
           content:
             application/json:
-              schema: {}
-        "207":
-          description: |-
-            The following error codes correspond to this status:
-            * **`USER_AVATAR_MAPPING_FAILURE`:** Failed to map avatar metadata.
-          content:
-            application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader: []
       - accessTokenCookie: []
@@ -3693,7 +3827,8 @@ paths:
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -3701,22 +3836,24 @@ paths:
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`PRINCIPAL_NOT_FOUND`:** No principal with specified ID found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "207":
           description: |-
             The following error codes correspond to this status:
             * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
-            * **`USER_AVATAR_MAPPING_FAILURE`:** Failed to map avatar metadata.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader: []
       - accessTokenCookie: []
@@ -3751,7 +3888,8 @@ paths:
             * **`DATABASE_ENCRYPTION_FAILURE`:** Exception representing a general failure related to database encryption operations.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -3762,7 +3900,8 @@ paths:
             * **`STEP_UP_TOKEN_MISSING`:** Thrown when the step-up token is missing.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
@@ -3770,7 +3909,8 @@ paths:
             * **`DATABASE_ENTITY_NOT_FOUND`:** Exception representing a failure to find a database entity.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader: []
         stepUpTokenHeader: []
@@ -3831,7 +3971,8 @@ paths:
             * **`DATABASE_ENCRYPTION_FAILURE`:** Exception representing a general failure related to database encryption operations.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -3842,28 +3983,32 @@ paths:
             * **`STEP_UP_TOKEN_MISSING`:** Thrown when the step-up token is missing.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`USER_NOT_FOUND`:** User not found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "409":
           description: |-
             The following error codes correspond to this status:
             * **`EMAIL_TAKEN`:** Email address is already taken.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "207":
           description: |-
             The following error codes correspond to this status:
             * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader: []
         stepUpTokenHeader: []
@@ -3919,7 +4064,8 @@ paths:
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -3930,29 +4076,32 @@ paths:
             * **`STEP_UP_TOKEN_MISSING`:** Thrown when the step-up token is missing.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`USER_NOT_FOUND`:** User not found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "400":
           description: |-
             The following error codes correspond to this status:
             * **`NO_PASSWORD_PROVIDER`:** The user needs to set a password in to perform this action.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "207":
           description: |-
             The following error codes correspond to this status:
             * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
-            * **`USER_AVATAR_MAPPING_FAILURE`:** Failed to map avatar metadata.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader: []
         stepUpTokenHeader: []
@@ -4001,7 +4150,8 @@ paths:
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -4009,29 +4159,32 @@ paths:
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`USER_NOT_FOUND`:** User not found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "207":
           description: |-
             The following error codes correspond to this status:
             * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
-            * **`USER_AVATAR_MAPPING_FAILURE`:** Failed to map avatar metadata.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "415":
           description: |-
             The following error codes correspond to this status:
             * **`UNSUPPORTED_MEDIA_TYPE`:** Thrown when a request is made with an unsupported media type.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader: []
       - accessTokenCookie: []
@@ -4066,7 +4219,8 @@ paths:
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -4074,22 +4228,24 @@ paths:
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`USER_NOT_FOUND`:** User not found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "207":
           description: |-
             The following error codes correspond to this status:
             * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
-            * **`USER_AVATAR_MAPPING_FAILURE`:** Failed to map avatar metadata.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader: []
       - accessTokenCookie: []
@@ -4216,7 +4372,8 @@ paths:
             * **`NO_TRANSLATIONS`:** Exception indicating that no translations are available for a given request.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -4224,14 +4381,16 @@ paths:
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "403":
           description: |-
             The following error codes correspond to this status:
             * **`NOT_AUTHORIZED`:** Action not authorized.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - {}
       - {}
@@ -4284,7 +4443,8 @@ paths:
             * **`INVALID_DOCUMENT`:** Invalid document.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -4292,21 +4452,24 @@ paths:
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "400":
           description: |-
             The following error codes correspond to this status:
             * **`INVALID_REQUEST`:** Invalid request.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "207":
           description: |-
             The following error codes correspond to this status:
             * **`RESPONSE_MAPPING_FAILURE`:** Response mapping failure.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader:
         - contributorScope
@@ -4355,7 +4518,8 @@ paths:
             * **`NO_TRANSLATIONS`:** Exception indicating that no translations are available for a given request.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -4364,21 +4528,24 @@ paths:
             * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`CONTENT_NOT_FOUND`:** Content not found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "403":
           description: |-
             The following error codes correspond to this status:
             * **`NOT_AUTHORIZED`:** Action not authorized.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - {}
       - {}
@@ -4437,7 +4604,8 @@ paths:
             * **`NO_TRANSLATIONS`:** Exception indicating that no translations are available for a given request.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -4446,35 +4614,40 @@ paths:
             * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`CONTENT_NOT_FOUND`:** Content not found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "400":
           description: |-
             The following error codes correspond to this status:
             * **`INVALID_REQUEST`:** Invalid request.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "403":
           description: |-
             The following error codes correspond to this status:
             * **`NOT_AUTHORIZED`:** Action not authorized.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "207":
           description: |-
             The following error codes correspond to this status:
             * **`RESPONSE_MAPPING_FAILURE`:** Response mapping failure.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader:
         - editorScope
@@ -4637,7 +4810,8 @@ paths:
             * **`INVALID_DOCUMENT`:** Invalid document.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -4646,7 +4820,8 @@ paths:
             * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
@@ -4654,14 +4829,16 @@ paths:
             * **`CONTENT_NOT_FOUND`:** Content not found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "403":
           description: |-
             The following error codes correspond to this status:
             * **`NOT_AUTHORIZED`:** Action not authorized.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader:
         - maintainerScope
@@ -4724,7 +4901,8 @@ paths:
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -4733,7 +4911,8 @@ paths:
             * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
@@ -4743,21 +4922,24 @@ paths:
             * **`USER_NOT_FOUND`:** User not found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "403":
           description: |-
             The following error codes correspond to this status:
             * **`NOT_AUTHORIZED`:** Action not authorized.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "207":
           description: |-
             The following error codes correspond to this status:
             * **`RESPONSE_MAPPING_FAILURE`:** Response mapping failure.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader:
         - maintainerScope
@@ -4823,7 +5005,8 @@ paths:
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -4832,7 +5015,8 @@ paths:
             * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
@@ -4841,21 +5025,24 @@ paths:
             * **`USER_NOT_FOUND`:** User not found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "403":
           description: |-
             The following error codes correspond to this status:
             * **`NOT_AUTHORIZED`:** Action not authorized.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "207":
           description: |-
             The following error codes correspond to this status:
             * **`RESPONSE_MAPPING_FAILURE`:** Response mapping failure.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader:
         - maintainerScope
@@ -4921,7 +5108,8 @@ paths:
             * **`RESPONSE_MAPPING_ERROR`:** Failed to map response.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -4929,7 +5117,8 @@ paths:
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
@@ -4937,7 +5126,8 @@ paths:
             * **`CONTENT_NOT_FOUND`:** Content not found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader:
         - adminScope
@@ -4988,7 +5178,8 @@ paths:
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -4997,7 +5188,8 @@ paths:
             * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
@@ -5005,14 +5197,16 @@ paths:
             * **`CONTENT_NOT_FOUND`:** Content not found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "403":
           description: |-
             The following error codes correspond to this status:
             * **`NOT_AUTHORIZED`:** Action not authorized.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader:
         - maintainerScope
@@ -5090,7 +5284,8 @@ paths:
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - {}
       - {}
@@ -5136,7 +5331,8 @@ paths:
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -5144,14 +5340,16 @@ paths:
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "409":
           description: |-
             The following error codes correspond to this status:
             * **`TAG_EXISTS`:** A tag with the specified key already exists.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader:
         - contributorScope
@@ -5200,14 +5398,16 @@ paths:
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`DATABASE_ENTITY_NOT_FOUND`:** Exception representing a failure to find a database entity.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - {}
       - {}
@@ -5253,7 +5453,8 @@ paths:
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -5261,14 +5462,16 @@ paths:
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`DATABASE_ENTITY_NOT_FOUND`:** Exception representing a failure to find a database entity.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader:
         - contributorScope
@@ -5328,7 +5531,8 @@ paths:
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -5336,21 +5540,24 @@ paths:
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "400":
           description: |-
             The following error codes correspond to this status:
             * **`INVALID_TAG_REQUEST`:** The request is invalid.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`TAG_NOT_FOUND`:** The tag does not exist.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader:
         - contributorScope
@@ -5420,7 +5627,8 @@ paths:
             * **`EMAIL_TEMPLATE_FAILURE`:** Thrown when there is a failure related to email template creation.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -5429,7 +5637,8 @@ paths:
             * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
@@ -5438,28 +5647,32 @@ paths:
             * **`CONTENT_NOT_FOUND`:** Content not found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "503":
           description: |-
             The following error codes correspond to this status:
             * **`EMAIL_DISABLED`:** Thrown when email functionality is disabled in the application.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "403":
           description: |-
             The following error codes correspond to this status:
             * **`NOT_AUTHORIZED`:** Action not authorized.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "207":
           description: |-
             The following error codes correspond to this status:
             * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader:
         - maintainerScope
@@ -5514,7 +5727,8 @@ paths:
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -5525,7 +5739,8 @@ paths:
             * **`INVITATION_TOKEN_MISSING`:** Thrown when the invitation token is missing.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
@@ -5533,14 +5748,16 @@ paths:
             * **`INVITATION_NOT_FOUND`:** Invitation not found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "207":
           description: |-
             The following error codes correspond to this status:
             * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - {}
       - {}
@@ -5583,7 +5800,8 @@ paths:
             * **`INVALID_INVITATION_DOCUMENT`:** Indicates that the principal document associated with the invitation token is invalid.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -5592,7 +5810,8 @@ paths:
             * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
@@ -5600,21 +5819,24 @@ paths:
             * **`INVITATION_NOT_FOUND`:** Invitation not found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "403":
           description: |-
             The following error codes correspond to this status:
             * **`NOT_AUTHORIZED`:** Action not authorized.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "207":
           description: |-
             The following error codes correspond to this status:
             * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader:
         - maintainerScope
@@ -5649,7 +5871,8 @@ paths:
             * **`ACCESS_TOKEN_ALLOWLIST_READING_FAILURE`:** Represents an exception indicating a failure when reading the allowlist for an access token cache.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -5657,7 +5880,8 @@ paths:
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader:
         - adminScope
@@ -5692,7 +5916,8 @@ paths:
             * **`ACCESS_TOKEN_ALLOWLIST_READING_FAILURE`:** Represents an exception indicating a failure when reading the allowlist for an access token cache.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -5700,7 +5925,8 @@ paths:
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader:
         - adminScope
@@ -5738,7 +5964,8 @@ paths:
             * **`FILE_STREAM_FAILURE`:** Thrown when an error occurred during a file stream.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -5747,42 +5974,48 @@ paths:
             * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "400":
           description: |-
             The following error codes correspond to this status:
             * **`BAD_FILE_REQUEST`:** Thrown when the file request is malformed or invalid.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "409":
           description: |-
             The following error codes correspond to this status:
             * **`FILE_KEY_TAKEN`:** This exception is thrown when attempting to store a file with a file key that is already taken or in use.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "403":
           description: |-
             The following error codes correspond to this status:
             * **`FILE_ACCESS_NOT_AUTHORIZED`:** Thrown when access to the requested file is not permitted.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
             * **`FILE_NOT_FOUND`:** Thrown when the requested file is not found.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "415":
           description: |-
             The following error codes correspond to this status:
             * **`UNSUPPORTED_MEDIA_TYPE`:** Thrown when a request is made with an unsupported media type.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - {}
       - {}
@@ -5872,6 +6105,12 @@ components:
     KLogger:
       type: object
       properties:
+        isLoggingOff:
+          type: boolean
+          deprecated: true
+          description: Use isLoggingOff() instead
+        name:
+          type: string
         isInfoEnabled:
           type: boolean
           deprecated: true
@@ -5892,12 +6131,6 @@ components:
           type: boolean
           deprecated: true
           description: Use isWarnEnabled() instead
-        isLoggingOff:
-          type: boolean
-          deprecated: true
-          description: Use isLoggingOff() instead
-        name:
-          type: string
       required:
       - isDebugEnabled
       - isErrorEnabled
@@ -6826,15 +7059,12 @@ components:
         totalPages:
           type: integer
           format: int32
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
         first:
           type: boolean
         last:
           type: boolean
-        numberOfElements:
-          type: integer
-          format: int32
-        pageable:
-          $ref: "#/components/schemas/PageableObject"
         size:
           type: integer
           format: int32
@@ -6847,6 +7077,9 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
+        numberOfElements:
+          type: integer
+          format: int32
         empty:
           type: boolean
     PageableObject:
@@ -7093,15 +7326,12 @@ components:
         totalPages:
           type: integer
           format: int32
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
         first:
           type: boolean
         last:
           type: boolean
-        numberOfElements:
-          type: integer
-          format: int32
-        pageable:
-          $ref: "#/components/schemas/PageableObject"
         size:
           type: integer
           format: int32
@@ -7114,6 +7344,9 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
+        numberOfElements:
+          type: integer
+          format: int32
         empty:
           type: boolean
     PageTagResponse:
@@ -7125,15 +7358,12 @@ components:
         totalPages:
           type: integer
           format: int32
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
         first:
           type: boolean
         last:
           type: boolean
-        numberOfElements:
-          type: integer
-          format: int32
-        pageable:
-          $ref: "#/components/schemas/PageableObject"
         size:
           type: integer
           format: int32
@@ -7146,6 +7376,9 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
+        numberOfElements:
+          type: integer
+          format: int32
         empty:
           type: boolean
     ArticleOverviewResponse:
@@ -7210,15 +7443,12 @@ components:
         totalPages:
           type: integer
           format: int32
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
         first:
           type: boolean
         last:
           type: boolean
-        numberOfElements:
-          type: integer
-          format: int32
-        pageable:
-          $ref: "#/components/schemas/PageableObject"
         size:
           type: integer
           format: int32
@@ -7231,6 +7461,9 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
+        numberOfElements:
+          type: integer
+          format: int32
         empty:
           type: boolean
     AuthenticationStatusResponse:

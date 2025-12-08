@@ -1,6 +1,7 @@
 package io.stereov.singularity.global.model
 
 import io.stereov.singularity.global.exception.SingularityException
+import io.swagger.v3.oas.annotations.media.Schema
 import org.springframework.web.server.ServerWebExchange
 import java.time.Instant
 
@@ -18,6 +19,7 @@ import java.time.Instant
  * @property message An optional detailed message providing more context about the error.
  * @property path The path of the request that triggered the error, if available.
  */
+@Schema
 data class ErrorResponse(
     val timestamp: String = Instant.now().toString(),
     val status: Int,
