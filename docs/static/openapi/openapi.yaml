@@ -1591,7 +1591,7 @@ paths:
             * **`TWO_FACTOR_AUTHENTICATION_TOKEN_EXPIRED`:** Indicates that the two-factor authentication token is expired.
             * **`TWO_FACTOR_AUTHENTICATION_TOKEN_INVALID`:** Indicates that the two-factor authentication token cannot be decoded.
             * **`TWO_FACTOR_AUTHENTICATION_TOKEN_MISSING`:** Thrown when the two-factor authentication token is missing.
-            * **`WRONG_TWO_FACTOR_CODE`:** Wrong two-factor code.
+            * **`WRONG_TOTP_RECOVERY_CODE`:** The given recovery code is not correct.
           content:
             application/json:
               schema:
@@ -7087,6 +7087,8 @@ components:
     PageableObject:
       type: object
       properties:
+        unpaged:
+          type: boolean
         paged:
           type: boolean
         pageNumber:
@@ -7095,8 +7097,6 @@ components:
         pageSize:
           type: integer
           format: int32
-        unpaged:
-          type: boolean
         offset:
           type: integer
           format: int64
@@ -7105,9 +7105,9 @@ components:
     SortObject:
       type: object
       properties:
-        sorted:
-          type: boolean
         unsorted:
+          type: boolean
+        sorted:
           type: boolean
         empty:
           type: boolean

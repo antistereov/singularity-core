@@ -51,9 +51,9 @@ sealed class TotpUserRecoveryException (
 
     class WrongCode(msg: String, cause: Throwable? = null) : TotpUserRecoveryException(
         msg,
-        WrongTwoFactorCodeFailure.CODE,
-        WrongTwoFactorCodeFailure.STATUS,
-        WrongTwoFactorCodeFailure.DESCRIPTION,
+        "WRONG_TOTP_RECOVERY_CODE",
+        HttpStatus.UNAUTHORIZED,
+        "The given recovery code is not correct.",
         cause
     )
 
