@@ -122,13 +122,6 @@ paths:
             The following error codes correspond to this status:
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
             * **`HASH_FAILURE`:** Exception representing a general failure related to hashing operations.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "207":
-          description: |-
-            The following error codes correspond to this status:
             * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
@@ -674,13 +667,6 @@ paths:
             * **`PASSWORD_RESET_TOKEN_SECRET_FAILURE`:** Thrown when an exception occurs when trying to decrypt the secret stored inside the password reset token.
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
             * **`HASH_FAILURE`:** Exception representing a general failure related to hashing operations.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "207":
-          description: |-
-            The following error codes correspond to this status:
             * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
@@ -883,6 +869,7 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_ALLOWLIST_READING_FAILURE`:** Represents an exception indicating a failure when reading the allowlist for an access token cache.
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
+            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
             application/json:
@@ -904,14 +891,6 @@ paths:
           description: |-
             The following error codes correspond to this status:
             * **`EMAIL_ALREADY_VERIFIED`:** User's email is already verified.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "207":
-          description: |-
-            The following error codes correspond to this status:
-            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
               schema:
@@ -1056,6 +1035,7 @@ paths:
             The following error codes correspond to this status:
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
             * **`INVALID_USER_DOCUMENT`:** A requested user document was stored in an invalid format.
+            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
             * **`ACCESS_TOKEN_CACHE_FAILURE`:** Thrown when an access token could not be created due to an exception in the access token whitelist.
             * **`ACCESS_TOKEN_ENCODING_FAILURE`:** Represents an exception that occurs during the encoding process of an access token.
             * **`ACCESS_TOKEN_CREATION_FAILURE`:** Thrown when a generic exception occurred during the creation of an access token.
@@ -1078,14 +1058,6 @@ paths:
             * **`NO_2FA_CODE_PROVIDED`:** Invalid request: at least one of email or totp must be provided.
             * **`NO_PASSWORD_PROVIDER`:** The user needs to set a password in to perform this action.
             * **`2FA_DISABLED`:** User needs to set up two-factor authentication to complete this action.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "207":
-          description: |-
-            The following error codes correspond to this status:
-            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
               schema:
@@ -1164,6 +1136,7 @@ paths:
             The following error codes correspond to this status:
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
             * **`INVALID_USER_DOCUMENT`:** A requested user document was stored in an invalid format.
+            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
             * **`ACCESS_TOKEN_ALLOWLIST_READING_FAILURE`:** Represents an exception indicating a failure when reading the allowlist for an access token cache.
             * **`INVALID_DATABASE_OBJECT`:** Indicates an invalid document stored in the database.
             * **`STEP_UP_TOKEN_ENCODING_FAILURE`:** Represents an exception that occurs during the encoding process of a step-up token.
@@ -1179,14 +1152,6 @@ paths:
             * **`NO_2FA_CODE_PROVIDED`:** Invalid request: at least one of email or totp must be provided.
             * **`NO_PASSWORD_PROVIDER`:** The user needs to set a password in to perform this action.
             * **`2FA_DISABLED`:** User needs to set up two-factor authentication to complete this action.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "207":
-          description: |-
-            The following error codes correspond to this status:
-            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
               schema:
@@ -1250,6 +1215,7 @@ paths:
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
             * **`DATABASE_ENCRYPTION_FAILURE`:** Exception representing a general failure related to database encryption operations.
             * **`INVALID_USER_DOCUMENT`:** A requested user document was stored in an invalid format.
+            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
             application/json:
@@ -1281,14 +1247,6 @@ paths:
             The following error codes correspond to this status:
             * **`NO_PASSWORD_PROVIDER`:** The user needs to set a password in to perform this action.
             * **`2FA_DISABLED`:** User needs to set up two-factor authentication to complete this action.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "207":
-          description: |-
-            The following error codes correspond to this status:
-            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
               schema:
@@ -1437,6 +1395,7 @@ paths:
             * **`DATABASE_ENCRYPTION_FAILURE`:** Exception representing a general failure related to database encryption operations.
             * **`HASH_FAILURE`:** Exception representing a general failure related to hashing operations.
             * **`INVALID_USER_DOCUMENT`:** A requested user document was stored in an invalid format.
+            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
             * **`TOTP_FAILURE`:** TOTP code validation failed.
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
@@ -1480,14 +1439,6 @@ paths:
           description: |-
             The following error codes correspond to this status:
             * **`NO_PASSWORD_PROVIDER`:** The user needs to set a password in to perform this action.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "207":
-          description: |-
-            The following error codes correspond to this status:
-            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
               schema:
@@ -1539,6 +1490,7 @@ paths:
             * **`DATABASE_ENCRYPTION_FAILURE`:** Exception representing a general failure related to database encryption operations.
             * **`HASH_FAILURE`:** Exception representing a general failure related to hashing operations.
             * **`INVALID_USER_DOCUMENT`:** A requested user document was stored in an invalid format.
+            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
             application/json:
@@ -1578,14 +1530,6 @@ paths:
             The following error codes correspond to this status:
             * **`CANNOT_DISABLE_ONLY_TWO_FACTOR_METHOD`:** Cannot disable only two-factor authentication method.
             * **`NO_PASSWORD_PROVIDER`:** The user needs to set a password in to perform this action.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "207":
-          description: |-
-            The following error codes correspond to this status:
-            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
               schema:
@@ -1658,6 +1602,7 @@ paths:
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
             * **`HASH_FAILURE`:** Exception representing a general failure related to hashing operations.
             * **`INVALID_USER_DOCUMENT`:** A requested user document was stored in an invalid format.
+            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
             * **`COOKIE_CREATION_FAILURE`:** Thrown when an exception occurred during the creation of a cookie.
             * **`ACCESS_TOKEN_CACHE_FAILURE`:** Thrown when an access token could not be created due to an exception in the access token whitelist.
             * **`ACCESS_TOKEN_ENCODING_FAILURE`:** Represents an exception that occurs during the encoding process of an access token.
@@ -1681,14 +1626,6 @@ paths:
             The following error codes correspond to this status:
             * **`TWO_FACTOR_METHOD_DISABLED`:** Two-factor authentication method is disabled.
             * **`NO_PASSWORD_PROVIDER`:** The user needs to set a password in to perform this action.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "207":
-          description: |-
-            The following error codes correspond to this status:
-            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
               schema:
@@ -1767,6 +1704,7 @@ paths:
             * **`EMAIL_COOLDOWN_CACHE_FAILURE`:** Thrown when an exception occurs when setting or getting cooldown.
             * **`EMAIL_AUTHENTICATION_FAILURE`:** Thrown when there is a failure related to email authentication.
             * **`INVALID_USER_DOCUMENT`:** A requested user document was stored in an invalid format.
+            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
             * **`EMAIL_SEND_FAILURE`:** Represents an exception that occurs when an email cannot be sent.
             * **`EMAIL_TEMPLATE_FAILURE`:** Thrown when there is a failure related to email template creation.
           content:
@@ -1813,14 +1751,6 @@ paths:
           description: |-
             The following error codes correspond to this status:
             * **`NO_PASSWORD_PROVIDER`:** The user needs to set a password in to perform this action.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "207":
-          description: |-
-            The following error codes correspond to this status:
-            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
               schema:
@@ -1882,6 +1812,7 @@ paths:
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
             * **`DATABASE_ENCRYPTION_FAILURE`:** Exception representing a general failure related to database encryption operations.
             * **`INVALID_USER_DOCUMENT`:** A requested user document was stored in an invalid format.
+            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
             application/json:
@@ -1922,14 +1853,6 @@ paths:
           description: |-
             The following error codes correspond to this status:
             * **`NO_PASSWORD_PROVIDER`:** The user needs to set a password in to perform this action.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "207":
-          description: |-
-            The following error codes correspond to this status:
-            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
               schema:
@@ -1981,6 +1904,7 @@ paths:
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
             * **`DATABASE_ENCRYPTION_FAILURE`:** Exception representing a general failure related to database encryption operations.
             * **`INVALID_USER_DOCUMENT`:** A requested user document was stored in an invalid format.
+            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
             application/json:
@@ -2021,14 +1945,6 @@ paths:
             The following error codes correspond to this status:
             * **`CANNOT_DISABLE_ONLY_TWO_FACTOR_METHOD`:** Cannot disable only two-factor authentication method.
             * **`NO_PASSWORD_PROVIDER`:** The user needs to set a password in to perform this action.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "207":
-          description: |-
-            The following error codes correspond to this status:
-            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
               schema:
@@ -2199,6 +2115,7 @@ paths:
             * **`ACCESS_TOKEN_ALLOWLIST_READING_FAILURE`:** Represents an exception indicating a failure when reading the allowlist for an access token cache.
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
             * **`DATABASE_ENCRYPTION_FAILURE`:** Exception representing a general failure related to database encryption operations.
+            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
             application/json:
@@ -2231,14 +2148,6 @@ paths:
             The following error codes correspond to this status:
             * **`CANNOT_DISCONNECT_LAST_PROVIDER`:** Cannot disconnect last provider.
             * **`CANNOT_DISCONNECT_PASSWORD`:** Cannot disconnect password provider.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "207":
-          description: |-
-            The following error codes correspond to this status:
-            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
               schema:
@@ -2288,6 +2197,7 @@ paths:
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
             * **`DATABASE_ENCRYPTION_FAILURE`:** Exception representing a general failure related to database encryption operations.
             * **`HASH_FAILURE`:** Exception representing a general failure related to hashing operations.
+            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
             application/json:
@@ -2318,14 +2228,6 @@ paths:
           description: |-
             The following error codes correspond to this status:
             * **`PASSWORD_ALREADY_SET`:** Password is already set.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "207":
-          description: |-
-            The following error codes correspond to this status:
-            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
               schema:
@@ -2485,6 +2387,7 @@ paths:
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
             * **`DATABASE_ENCRYPTION_FAILURE`:** Exception representing a general failure related to database encryption operations.
             * **`COOKIE_CREATION_FAILURE`:** Thrown when an exception occurred during the creation of a cookie.
+            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
             * **`CACHE_KEY_NOT_FOUND`:** Represents an exception that occurs when a requested key is not found in the cache.
             * **`CACHE_OBJECT_MAPPING_FAILURE`:** Represents an exception that occurs during object mapping operations within a cache.
             * **`CACHE_OPERATION_FAILURE`:** Represents an exception that occurs during cache operation failures.
@@ -2496,14 +2399,6 @@ paths:
           description: |-
             The following error codes correspond to this status:
             * **`PRINCIPAL_NOT_FOUND`:** No principal with specified ID found.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "207":
-          description: |-
-            The following error codes correspond to this status:
-            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
               schema:
@@ -2546,6 +2441,7 @@ paths:
             * **`ACCESS_TOKEN_ALLOWLIST_READING_FAILURE`:** Represents an exception indicating a failure when reading the allowlist for an access token cache.
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
             * **`DATABASE_ENCRYPTION_FAILURE`:** Exception representing a general failure related to database encryption operations.
+            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
               schema:
@@ -2564,14 +2460,6 @@ paths:
           description: |-
             The following error codes correspond to this status:
             * **`PRINCIPAL_NOT_FOUND`:** No principal with specified ID found.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "207":
-          description: |-
-            The following error codes correspond to this status:
-            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
               schema:
@@ -2673,6 +2561,7 @@ paths:
             The following error codes correspond to this status:
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
             * **`DATABASE_ENCRYPTION_FAILURE`:** Exception representing a general failure related to database encryption operations.
+            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
             * **`ACCESS_TOKEN_CACHE_FAILURE`:** Thrown when an access token could not be created due to an exception in the access token whitelist.
             * **`ACCESS_TOKEN_ENCODING_FAILURE`:** Represents an exception that occurs during the encoding process of an access token.
             * **`ACCESS_TOKEN_CREATION_FAILURE`:** Thrown when a generic exception occurred during the creation of an access token.
@@ -2685,14 +2574,6 @@ paths:
             * **`REFRESH_TOKEN_SESSION_UPDATE_FAILURE`:** Thrown when an exception occurs when updating the user sessions after creating a new refresh token.
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
             * **`COOKIE_CREATION_FAILURE`:** Thrown when an exception occurred during the creation of a cookie.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "207":
-          description: |-
-            The following error codes correspond to this status:
-            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
               schema:
@@ -2761,6 +2642,7 @@ paths:
             * **`ACCESS_TOKEN_ALLOWLIST_READING_FAILURE`:** Represents an exception indicating a failure when reading the allowlist for an access token cache.
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
             * **`HASH_FAILURE`:** Exception representing a general failure related to hashing operations.
+            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
             * **`ACCESS_TOKEN_CACHE_FAILURE`:** Thrown when an access token could not be created due to an exception in the access token whitelist.
             * **`ACCESS_TOKEN_ENCODING_FAILURE`:** Represents an exception that occurs during the encoding process of an access token.
             * **`ACCESS_TOKEN_CREATION_FAILURE`:** Thrown when a generic exception occurred during the creation of an access token.
@@ -2811,14 +2693,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-        "207":
-          description: |-
-            The following error codes correspond to this status:
-            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
       security:
       - accessTokenHeader: []
       - accessTokenCookie: []
@@ -2857,6 +2731,7 @@ paths:
             * **`ACCESS_TOKEN_ALLOWLIST_READING_FAILURE`:** Represents an exception indicating a failure when reading the allowlist for an access token cache.
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
             * **`DATABASE_ENCRYPTION_FAILURE`:** Exception representing a general failure related to database encryption operations.
+            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
             application/json:
@@ -2884,14 +2759,6 @@ paths:
           description: |-
             The following error codes correspond to this status:
             * **`PRINCIPAL_NOT_FOUND`:** No principal with specified ID found.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "207":
-          description: |-
-            The following error codes correspond to this status:
-            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
               schema:
@@ -2935,6 +2802,7 @@ paths:
             * **`ACCESS_TOKEN_ALLOWLIST_READING_FAILURE`:** Represents an exception indicating a failure when reading the allowlist for an access token cache.
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
             * **`DATABASE_ENCRYPTION_FAILURE`:** Exception representing a general failure related to database encryption operations.
+            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
             application/json:
@@ -2970,14 +2838,6 @@ paths:
           description: |-
             The following error codes correspond to this status:
             * **`AT_LEAST_ONE_ADMIN_REQUIRED`:** At least one admin is required.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "207":
-          description: |-
-            The following error codes correspond to this status:
-            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
               schema:
@@ -3465,6 +3325,7 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_ALLOWLIST_READING_FAILURE`:** Represents an exception indicating a failure when reading the allowlist for an access token cache.
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
+            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
             application/json:
@@ -3493,14 +3354,6 @@ paths:
             The following error codes correspond to this status:
             * **`GROUP_NOT_FOUND`:** No group with specified key found.
             * **`USER_NOT_FOUND`:** User not found.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "207":
-          description: |-
-            The following error codes correspond to this status:
-            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
               schema:
@@ -3551,6 +3404,7 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_ALLOWLIST_READING_FAILURE`:** Represents an exception indicating a failure when reading the allowlist for an access token cache.
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
+            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
             application/json:
@@ -3579,14 +3433,6 @@ paths:
             The following error codes correspond to this status:
             * **`GROUP_NOT_FOUND`:** No group with specified key found.
             * **`USER_NOT_FOUND`:** User not found.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "207":
-          description: |-
-            The following error codes correspond to this status:
-            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
               schema:
@@ -3981,6 +3827,7 @@ paths:
             * **`ACCESS_TOKEN_ALLOWLIST_READING_FAILURE`:** Represents an exception indicating a failure when reading the allowlist for an access token cache.
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
             * **`DATABASE_ENCRYPTION_FAILURE`:** Exception representing a general failure related to database encryption operations.
+            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
             application/json:
@@ -4000,14 +3847,6 @@ paths:
           description: |-
             The following error codes correspond to this status:
             * **`PRINCIPAL_NOT_FOUND`:** No principal with specified ID found.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "207":
-          description: |-
-            The following error codes correspond to this status:
-            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
               schema:
@@ -4044,6 +3883,7 @@ paths:
             * **`ACCESS_TOKEN_ALLOWLIST_READING_FAILURE`:** Represents an exception indicating a failure when reading the allowlist for an access token cache.
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
             * **`DATABASE_ENCRYPTION_FAILURE`:** Exception representing a general failure related to database encryption operations.
+            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
             * **`COOKIE_CREATION_FAILURE`:** Thrown when an exception occurred during the creation of a cookie.
           content:
             application/json:
@@ -4067,14 +3907,6 @@ paths:
             The following error codes correspond to this status:
             * **`PRINCIPAL_NOT_FOUND`:** No principal with specified ID found.
             * **`DATABASE_ENTITY_NOT_FOUND`:** Exception representing a failure to find a database entity.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "207":
-          description: |-
-            The following error codes correspond to this status:
-            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
               schema:
@@ -4137,6 +3969,7 @@ paths:
             * **`ACCESS_TOKEN_ALLOWLIST_READING_FAILURE`:** Represents an exception indicating a failure when reading the allowlist for an access token cache.
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
             * **`DATABASE_ENCRYPTION_FAILURE`:** Exception representing a general failure related to database encryption operations.
+            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
               schema:
@@ -4166,14 +3999,6 @@ paths:
           description: |-
             The following error codes correspond to this status:
             * **`EMAIL_TAKEN`:** Email address is already taken.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "207":
-          description: |-
-            The following error codes correspond to this status:
-            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
               schema:
@@ -4230,6 +4055,7 @@ paths:
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
             * **`DATABASE_ENCRYPTION_FAILURE`:** Exception representing a general failure related to database encryption operations.
             * **`HASH_FAILURE`:** Exception representing a general failure related to hashing operations.
+            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
             application/json:
@@ -4260,14 +4086,6 @@ paths:
           description: |-
             The following error codes correspond to this status:
             * **`NO_PASSWORD_PROVIDER`:** The user needs to set a password in to perform this action.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "207":
-          description: |-
-            The following error codes correspond to this status:
-            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
               schema:
@@ -4317,6 +4135,7 @@ paths:
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
             * **`DATABASE_ENCRYPTION_FAILURE`:** Exception representing a general failure related to database encryption operations.
             * **`FILE_FAILURE`:** Exception representing a general failure related to file operations.
+            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
             application/json:
@@ -4336,14 +4155,6 @@ paths:
           description: |-
             The following error codes correspond to this status:
             * **`USER_NOT_FOUND`:** User not found.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "207":
-          description: |-
-            The following error codes correspond to this status:
-            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
               schema:
@@ -4387,6 +4198,7 @@ paths:
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
             * **`DATABASE_ENCRYPTION_FAILURE`:** Exception representing a general failure related to database encryption operations.
             * **`FILE_FAILURE`:** Exception representing a general failure related to file operations.
+            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
             application/json:
@@ -4406,14 +4218,6 @@ paths:
           description: |-
             The following error codes correspond to this status:
             * **`USER_NOT_FOUND`:** User not found.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "207":
-          description: |-
-            The following error codes correspond to this status:
-            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
               schema:
@@ -4613,6 +4417,7 @@ paths:
             * **`ACCESS_TOKEN_ALLOWLIST_READING_FAILURE`:** Represents an exception indicating a failure when reading the allowlist for an access token cache.
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
             * **`INVALID_DOCUMENT`:** Invalid document.
+            * **`RESPONSE_MAPPING_FAILURE`:** Response mapping failure.
           content:
             application/json:
               schema:
@@ -4639,14 +4444,6 @@ paths:
           description: |-
             The following error codes correspond to this status:
             * **`INVALID_REQUEST`:** Invalid request.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "207":
-          description: |-
-            The following error codes correspond to this status:
-            * **`RESPONSE_MAPPING_FAILURE`:** Response mapping failure.
           content:
             application/json:
               schema:
@@ -4783,6 +4580,7 @@ paths:
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
             * **`INVALID_DOCUMENT`:** Invalid document.
             * **`NO_TRANSLATIONS`:** Exception indicating that no translations are available for a given request.
+            * **`RESPONSE_MAPPING_FAILURE`:** Response mapping failure.
           content:
             application/json:
               schema:
@@ -4817,14 +4615,6 @@ paths:
           description: |-
             The following error codes correspond to this status:
             * **`NOT_AUTHORIZED`:** Action not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "207":
-          description: |-
-            The following error codes correspond to this status:
-            * **`RESPONSE_MAPPING_FAILURE`:** Response mapping failure.
           content:
             application/json:
               schema:
@@ -5080,6 +4870,7 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_ALLOWLIST_READING_FAILURE`:** Represents an exception indicating a failure when reading the allowlist for an access token cache.
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
+            * **`RESPONSE_MAPPING_FAILURE`:** Response mapping failure.
           content:
             application/json:
               schema:
@@ -5109,14 +4900,6 @@ paths:
           description: |-
             The following error codes correspond to this status:
             * **`NOT_AUTHORIZED`:** Action not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "207":
-          description: |-
-            The following error codes correspond to this status:
-            * **`RESPONSE_MAPPING_FAILURE`:** Response mapping failure.
           content:
             application/json:
               schema:
@@ -5184,6 +4967,7 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_ALLOWLIST_READING_FAILURE`:** Represents an exception indicating a failure when reading the allowlist for an access token cache.
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
+            * **`RESPONSE_MAPPING_FAILURE`:** Response mapping failure.
           content:
             application/json:
               schema:
@@ -5212,14 +4996,6 @@ paths:
           description: |-
             The following error codes correspond to this status:
             * **`NOT_AUTHORIZED`:** Action not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "207":
-          description: |-
-            The following error codes correspond to this status:
-            * **`RESPONSE_MAPPING_FAILURE`:** Response mapping failure.
           content:
             application/json:
               schema:
@@ -5844,6 +5620,7 @@ paths:
             * **`EMAIL_AUTHENTICATION_FAILURE`:** Thrown when there is a failure related to email authentication.
             * **`INVALID_DOCUMENT`:** Invalid document.
             * **`INVITATION_TOKEN_CREATION_FAILURE`:** Represents an exception that occurs during the creation of an invitation token.
+            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
             * **`EMAIL_SEND_FAILURE`:** Represents an exception that occurs when an email cannot be sent.
             * **`EMAIL_TEMPLATE_FAILURE`:** Thrown when there is a failure related to email template creation.
           content:
@@ -5882,14 +5659,6 @@ paths:
           description: |-
             The following error codes correspond to this status:
             * **`NOT_AUTHORIZED`:** Action not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "207":
-          description: |-
-            The following error codes correspond to this status:
-            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
               schema:
@@ -5946,6 +5715,7 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_ALLOWLIST_READING_FAILURE`:** Represents an exception indicating a failure when reading the allowlist for an access token cache.
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
+            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
               schema:
@@ -5967,14 +5737,6 @@ paths:
             The following error codes correspond to this status:
             * **`CONTENT_TYPE_NOT_FOUND`:** Content type not found.
             * **`INVITATION_NOT_FOUND`:** Invitation not found.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "207":
-          description: |-
-            The following error codes correspond to this status:
-            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
               schema:
@@ -6019,6 +5781,7 @@ paths:
             * **`ACCESS_TOKEN_ALLOWLIST_READING_FAILURE`:** Represents an exception indicating a failure when reading the allowlist for an access token cache.
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
             * **`INVALID_INVITATION_DOCUMENT`:** Indicates that the principal document associated with the invitation token is invalid.
+            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
               schema:
@@ -6046,14 +5809,6 @@ paths:
           description: |-
             The following error codes correspond to this status:
             * **`NOT_AUTHORIZED`:** Action not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "207":
-          description: |-
-            The following error codes correspond to this status:
-            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
               schema:
@@ -7332,8 +7087,6 @@ components:
     PageableObject:
       type: object
       properties:
-        unpaged:
-          type: boolean
         paged:
           type: boolean
         pageNumber:
@@ -7342,6 +7095,8 @@ components:
         pageSize:
           type: integer
           format: int32
+        unpaged:
+          type: boolean
         offset:
           type: integer
           format: int64
@@ -7350,9 +7105,9 @@ components:
     SortObject:
       type: object
       properties:
-        unsorted:
-          type: boolean
         sorted:
+          type: boolean
+        unsorted:
           type: boolean
         empty:
           type: boolean

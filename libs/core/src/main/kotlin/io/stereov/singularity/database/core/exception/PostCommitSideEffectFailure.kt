@@ -12,10 +12,10 @@ import org.springframework.http.HttpStatus
  * side effect failures.
  *
  * @property CODE `POST_COMMIT_SIDE_EFFECT_FAILURE`
- * @property STATUS [HttpStatus.MULTI_STATUS]
+ * @property STATUS [HttpStatus.INTERNAL_SERVER_ERROR]
  */
 object PostCommitSideEffectFailure {
     const val CODE = "POST_COMMIT_SIDE_EFFECT_FAILURE"
     const val DESCRIPTION = "Exception representing a failure to perform a side effect after a successful database operation."
-    val STATUS = HttpStatus.MULTI_STATUS
+    val STATUS = HttpStatus.INTERNAL_SERVER_ERROR
 }
