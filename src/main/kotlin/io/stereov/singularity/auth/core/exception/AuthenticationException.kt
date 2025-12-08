@@ -79,7 +79,7 @@ sealed class AuthenticationException(
         msg,
         "ROLE_REQUIRED",
         HttpStatus.FORBIDDEN,
-        "User does not have required role.",
+        "Principal does not have required role.",
         cause
     )
 
