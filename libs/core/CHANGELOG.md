@@ -1,3 +1,15 @@
+## [v1.10.2]
+
+## Changelog
+
+## 🐛 Fixes
+- [b015917](https://github.com/antistereov/singularity/commits/b015917) **auth**: change error code for wrong totp recovery code to WRONG_TOTP_RECOVERY_CODE
+
+
+## Contributors
+We'd like to thank the following people for their contributions:
+antistereov
+
 ## [v1.10.1]
 
 ## Changelog
