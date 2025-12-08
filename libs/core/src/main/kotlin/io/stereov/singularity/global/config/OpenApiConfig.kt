@@ -18,6 +18,7 @@ import io.stereov.singularity.content.core.controller.ContentManagementControlle
 import io.stereov.singularity.content.invitation.controller.InvitationController
 import io.stereov.singularity.content.tag.controller.TagController
 import io.stereov.singularity.global.annotation.ThrowsDomainError
+import io.stereov.singularity.global.exception.SingularityException
 import io.stereov.singularity.global.model.ErrorResponse
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.principal.core.controller.GuestController
@@ -36,6 +37,7 @@ import io.swagger.v3.oas.models.media.Schema
 import io.swagger.v3.oas.models.responses.ApiResponse
 import io.swagger.v3.oas.models.security.SecurityRequirement
 import io.swagger.v3.oas.models.tags.Tag
+import org.springdoc.api.OpenApiResourceNotFoundException
 import org.springdoc.core.customizers.OpenApiCustomizer
 import org.springdoc.core.customizers.OperationCustomizer
 import org.springframework.boot.autoconfigure.AutoConfiguration
@@ -43,6 +45,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.method.HandlerMethod
+import kotlin.reflect.KClass
 import kotlin.reflect.full.primaryConstructor
 
 @AutoConfiguration
@@ -128,37 +131,44 @@ class OpenApiConfig() {
 
             domainErrorAnnotation.errorClasses.forEach { errorKClass ->
 
-                errorKClass.sealedSubclasses.forEach { concreteErrorClass ->
-
-                    val apiError = concreteErrorClass.objectInstance
-                        ?: concreteErrorClass.primaryConstructor?.call("", null)
-                        ?: return@forEach
-
-                    val responseCode = apiError.status.value().toString()
-                    val descriptionEntry = "\n* **`${apiError.code}`:** ${apiError.description}"
-
-                    val existingResponse = operation.responses[responseCode]
-                    if (existingResponse == null) {
-                        val initialDescription = "The following error codes correspond to this status:$descriptionEntry"
-
-                        operation.responses.addApiResponse(
-                            responseCode,
-                            ApiResponse()
-                                .description(initialDescription)
-                                .content(createErrorContent())
-                        )
-                    } else {
-                        val currentDescription = existingResponse.description ?: "A specific domain error occurred (see list below):"
-                        existingResponse.description = if (currentDescription.contains("`${apiError.code}`:")) {
-                            currentDescription
-                        } else {
-                            currentDescription + descriptionEntry
-                        }
+                if (errorKClass.isSealed) {
+                    errorKClass.sealedSubclasses.forEach { concreteErrorClass ->
+                        addDomainErrors(concreteErrorClass, operation)
                     }
+                } else {
+                    addDomainErrors(errorKClass, operation)
                 }
             }
 
             return operation
+        }
+
+        private fun addDomainErrors(clazz: KClass<out SingularityException>, operation: Operation) {
+            val apiError = clazz.objectInstance
+                ?: clazz.primaryConstructor?.call("", null)
+                ?: throw OpenApiResourceNotFoundException("Missing constructor for class ${clazz.simpleName}")
+
+            val responseCode = apiError.status.value().toString()
+            val descriptionEntry = "\n* **`${apiError.code}`:** ${apiError.description}"
+
+            val existingResponse = operation.responses[responseCode]
+            if (existingResponse == null) {
+                val initialDescription = "The following error codes correspond to this status:$descriptionEntry"
+
+                operation.responses.addApiResponse(
+                    responseCode,
+                    ApiResponse()
+                        .description(initialDescription)
+                        .content(createErrorContent())
+                )
+            } else {
+                val currentDescription = existingResponse.description ?: "A specific domain error occurred (see list below):"
+                existingResponse.description = if (currentDescription.contains("`${apiError.code}`:")) {
+                    currentDescription
+                } else {
+                    currentDescription + descriptionEntry
+                }
+            }
         }
 
         private fun createErrorContent(): Content {

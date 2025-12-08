@@ -205,9 +205,11 @@ paths:
           description: |-
             The following error codes correspond to this status:
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
+            * **`INVALID_DATABASE_OBJECT`:** Indicates an invalid document stored in the database.
             * **`TWO_FACTOR_AUTHENTICATION_TOKEN_ENCODING_FAILURE`:** Represents an exception that occurs during the encoding process of an two-factor authentication token.
             * **`TWO_FACTOR_AUTHENTICATION_TOKEN_SECRET_FAILURE`:** Represents an exception that occurs when there is a failure related to the secret required for creating an  two-factor authentication token.
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
+            * **`COOKIE_CREATION_FAILURE`:** Thrown when an exception occurred during the creation of a cookie.
             * **`ACCESS_TOKEN_CACHE_FAILURE`:** Thrown when an access token could not be created due to an exception in the access token whitelist.
             * **`ACCESS_TOKEN_ENCODING_FAILURE`:** Represents an exception that occurs during the encoding process of an access token.
             * **`ACCESS_TOKEN_CREATION_FAILURE`:** Thrown when a generic exception occurred during the creation of an access token.
@@ -257,6 +259,7 @@ paths:
           description: |-
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_ALLOWLIST_READING_FAILURE`:** Represents an exception indicating a failure when reading the allowlist for an access token cache.
+            * **`COOKIE_CREATION_FAILURE`:** Thrown when an exception occurred during the creation of a cookie.
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
           content:
             application/json:
@@ -345,6 +348,7 @@ paths:
             * **`REFRESH_TOKEN_SECRET_FAILURE`:** Represents an exception that occurs when there is a failure related to the secret required for creating a refresh token.
             * **`REFRESH_TOKEN_SESSION_UPDATE_FAILURE`:** Thrown when an exception occurs when updating the user sessions after creating a new refresh token.
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
+            * **`COOKIE_CREATION_FAILURE`:** Thrown when an exception occurred during the creation of a cookie.
           content:
             application/json:
               schema:
@@ -415,11 +419,13 @@ paths:
             * **`ACCESS_TOKEN_ALLOWLIST_READING_FAILURE`:** Represents an exception indicating a failure when reading the allowlist for an access token cache.
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
             * **`DATABASE_ENCRYPTION_FAILURE`:** Exception representing a general failure related to database encryption operations.
+            * **`INVALID_DATABASE_OBJECT`:** Indicates an invalid document stored in the database.
             * **`TWO_FACTOR_AUTHENTICATION_TOKEN_ENCODING_FAILURE`:** Represents an exception that occurs during the encoding process of an two-factor authentication token.
             * **`TWO_FACTOR_AUTHENTICATION_TOKEN_SECRET_FAILURE`:** Represents an exception that occurs when there is a failure related to the secret required for creating an  two-factor authentication token.
             * **`HASH_FAILURE`:** Exception representing a general failure related to hashing operations.
             * **`STEP_UP_TOKEN_ENCODING_FAILURE`:** Represents an exception that occurs during the encoding process of a step-up token.
             * **`STEP_UP_TOKEN_SECRET_FAILURE`:** Represents an exception that occurs when there is a failure related to the secret required for creating a refresh token.
+            * **`COOKIE_CREATION_FAILURE`:** Thrown when an exception occurred during the creation of a cookie.
           content:
             application/json:
               schema:
@@ -429,6 +435,7 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
             * **`INVALID_CREDENTIALS`:** Invalid credentials.
             * **`SESSION_EXPIRED`:** Indicates that the user's session has expired.
           content:
@@ -490,6 +497,7 @@ paths:
             * **`ACCESS_TOKEN_ALLOWLIST_READING_FAILURE`:** Represents an exception indicating a failure when reading the allowlist for an access token cache.
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
             * **`DATABASE_ENCRYPTION_FAILURE`:** Exception representing a general failure related to database encryption operations.
+            * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
             application/json:
               schema:
@@ -714,6 +722,14 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/MailCooldownResponse"
+        "500":
+          description: |-
+            The following error codes correspond to this status:
+            * **`CACHE_OPERATION_FAILURE`:** Represents an exception that occurs during cache operation failures.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
       security:
       - {}
       - {}
@@ -781,6 +797,7 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
           content:
             application/json:
               schema:
@@ -938,6 +955,7 @@ paths:
             * **`ACCESS_TOKEN_ALLOWLIST_READING_FAILURE`:** Represents an exception indicating a failure when reading the allowlist for an access token cache.
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
             * **`DATABASE_ENCRYPTION_FAILURE`:** Exception representing a general failure related to database encryption operations.
+            * **`CACHE_OPERATION_FAILURE`:** Represents an exception that occurs during cache operation failures.
           content:
             application/json:
               schema:
@@ -947,6 +965,7 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
           content:
             application/json:
               schema:
@@ -1011,6 +1030,14 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/LoginResponse"
+        "304":
+          description: |-
+            The following error codes correspond to this status:
+            * **`ALREADY_AUTHENTICATED`:** Principal is already authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: |-
             The following error codes correspond to this status:
@@ -1039,6 +1066,7 @@ paths:
             * **`REFRESH_TOKEN_INVALID_PRINCIPAL_DOCUMENT_FAILURE`:** Indicates that the principal document associated with the access token is invalid.
             * **`REFRESH_TOKEN_SECRET_FAILURE`:** Represents an exception that occurs when there is a failure related to the secret required for creating a refresh token.
             * **`REFRESH_TOKEN_SESSION_UPDATE_FAILURE`:** Thrown when an exception occurs when updating the user sessions after creating a new refresh token.
+            * **`COOKIE_CREATION_FAILURE`:** Thrown when an exception occurred during the creation of a cookie.
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
           content:
             application/json:
@@ -1126,6 +1154,7 @@ paths:
             * **`WRONG_TWO_FACTOR_CODE`:** Wrong two-factor code.
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
           content:
             application/json:
               schema:
@@ -1136,8 +1165,10 @@ paths:
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
             * **`INVALID_USER_DOCUMENT`:** A requested user document was stored in an invalid format.
             * **`ACCESS_TOKEN_ALLOWLIST_READING_FAILURE`:** Represents an exception indicating a failure when reading the allowlist for an access token cache.
+            * **`INVALID_DATABASE_OBJECT`:** Indicates an invalid document stored in the database.
             * **`STEP_UP_TOKEN_ENCODING_FAILURE`:** Represents an exception that occurs during the encoding process of a step-up token.
             * **`STEP_UP_TOKEN_SECRET_FAILURE`:** Represents an exception that occurs when there is a failure related to the secret required for creating a refresh token.
+            * **`COOKIE_CREATION_FAILURE`:** Thrown when an exception occurred during the creation of a cookie.
           content:
             application/json:
               schema:
@@ -1229,6 +1260,7 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
             * **`STEP_UP_TOKEN_EXPIRED`:** Indicates that the step-up token is expired.
             * **`STEP_UP_TOKEN_INVALID`:** Indicates that the step-up token cannot be decoded.
             * **`STEP_UP_TOKEN_MISSING`:** Thrown when the step-up token is missing.
@@ -1317,6 +1349,7 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
             * **`STEP_UP_TOKEN_EXPIRED`:** Indicates that the step-up token is expired.
             * **`STEP_UP_TOKEN_INVALID`:** Indicates that the step-up token cannot be decoded.
             * **`STEP_UP_TOKEN_MISSING`:** Thrown when the step-up token is missing.
@@ -1415,6 +1448,7 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
             * **`STEP_UP_TOKEN_EXPIRED`:** Indicates that the step-up token is expired.
             * **`STEP_UP_TOKEN_INVALID`:** Indicates that the step-up token cannot be decoded.
             * **`STEP_UP_TOKEN_MISSING`:** Thrown when the step-up token is missing.
@@ -1515,6 +1549,7 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
             * **`STEP_UP_TOKEN_EXPIRED`:** Indicates that the step-up token is expired.
             * **`STEP_UP_TOKEN_INVALID`:** Indicates that the step-up token cannot be decoded.
             * **`STEP_UP_TOKEN_MISSING`:** Thrown when the step-up token is missing.
@@ -1623,6 +1658,7 @@ paths:
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
             * **`HASH_FAILURE`:** Exception representing a general failure related to hashing operations.
             * **`INVALID_USER_DOCUMENT`:** A requested user document was stored in an invalid format.
+            * **`COOKIE_CREATION_FAILURE`:** Thrown when an exception occurred during the creation of a cookie.
             * **`ACCESS_TOKEN_CACHE_FAILURE`:** Thrown when an access token could not be created due to an exception in the access token whitelist.
             * **`ACCESS_TOKEN_ENCODING_FAILURE`:** Represents an exception that occurs during the encoding process of an access token.
             * **`ACCESS_TOKEN_CREATION_FAILURE`:** Thrown when a generic exception occurred during the creation of an access token.
@@ -1856,6 +1892,7 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
             * **`STEP_UP_TOKEN_EXPIRED`:** Indicates that the step-up token is expired.
             * **`STEP_UP_TOKEN_INVALID`:** Indicates that the step-up token cannot be decoded.
             * **`STEP_UP_TOKEN_MISSING`:** Thrown when the step-up token is missing.
@@ -1954,6 +1991,7 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
             * **`STEP_UP_TOKEN_EXPIRED`:** Indicates that the step-up token is expired.
             * **`STEP_UP_TOKEN_INVALID`:** Indicates that the step-up token cannot be decoded.
             * **`STEP_UP_TOKEN_MISSING`:** Thrown when the step-up token is missing.
@@ -2029,6 +2067,7 @@ paths:
             * **`ACCESS_TOKEN_ALLOWLIST_READING_FAILURE`:** Represents an exception indicating a failure when reading the allowlist for an access token cache.
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
             * **`DATABASE_ENCRYPTION_FAILURE`:** Exception representing a general failure related to database encryption operations.
+            * **`CACHE_OPERATION_FAILURE`:** Represents an exception that occurs during cache operation failures.
           content:
             application/json:
               schema:
@@ -2098,6 +2137,7 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
           content:
             application/json:
               schema:
@@ -2169,6 +2209,7 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
             * **`STEP_UP_TOKEN_EXPIRED`:** Indicates that the step-up token is expired.
             * **`STEP_UP_TOKEN_INVALID`:** Indicates that the step-up token cannot be decoded.
             * **`STEP_UP_TOKEN_MISSING`:** Thrown when the step-up token is missing.
@@ -2257,6 +2298,7 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
             * **`STEP_UP_TOKEN_EXPIRED`:** Indicates that the step-up token is expired.
             * **`STEP_UP_TOKEN_INVALID`:** Indicates that the step-up token cannot be decoded.
             * **`STEP_UP_TOKEN_MISSING`:** Thrown when the step-up token is missing.
@@ -2327,6 +2369,7 @@ paths:
             * **`ACCESS_TOKEN_ALLOWLIST_READING_FAILURE`:** Represents an exception indicating a failure when reading the allowlist for an access token cache.
             * **`OAUTH2_PROVIDER_CONNECTION_TOKEN_ENCODING_FAILURE`:** Represents an exception that occurs during the encoding process of an OAuth2 provider connection token.
             * **`OAUTH2_PROVIDER_CONNECTION_TOKEN_SECRET_FAILURE`:** Represents an exception that occurs when there is a failure related to the secret required for creating an OAuth2 provider connection token.
+            * **`COOKIE_CREATION_FAILURE`:** Thrown when an exception occurred during the creation of a cookie.
           content:
             application/json:
               schema:
@@ -2336,6 +2379,7 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
             * **`STEP_UP_TOKEN_EXPIRED`:** Indicates that the step-up token is expired.
             * **`STEP_UP_TOKEN_INVALID`:** Indicates that the step-up token cannot be decoded.
             * **`STEP_UP_TOKEN_MISSING`:** Thrown when the step-up token is missing.
@@ -2387,6 +2431,7 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
           content:
             application/json:
               schema:
@@ -2428,6 +2473,7 @@ paths:
             Invalid or expired AccessToken.
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
           content:
             '*/*':
               schema:
@@ -2438,6 +2484,7 @@ paths:
             * **`ACCESS_TOKEN_ALLOWLIST_READING_FAILURE`:** Represents an exception indicating a failure when reading the allowlist for an access token cache.
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
             * **`DATABASE_ENCRYPTION_FAILURE`:** Exception representing a general failure related to database encryption operations.
+            * **`COOKIE_CREATION_FAILURE`:** Thrown when an exception occurred during the creation of a cookie.
             * **`CACHE_KEY_NOT_FOUND`:** Represents an exception that occurs when a requested key is not found in the cache.
             * **`CACHE_OBJECT_MAPPING_FAILURE`:** Represents an exception that occurs during object mapping operations within a cache.
             * **`CACHE_OPERATION_FAILURE`:** Represents an exception that occurs during cache operation failures.
@@ -2508,6 +2555,7 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
           content:
             application/json:
               schema:
@@ -2567,6 +2615,7 @@ paths:
             The following error codes correspond to this status:
             * **`TOKEN_ENCODING_FAILURE`:** Represents an exception that occurs during the encoding process of a JSON Web EmailVerificationTokenCreation (JWT).
             * **`TOKEN_SECRET_FAILURE`:** Represents an exception that occurs when there is a failure related to the secret required for creating a JSON Web EmailVerificationTokenCreation (JWT).
+            * **`COOKIE_CREATION_FAILURE`:** Thrown when an exception occurred during the creation of a cookie.
           content:
             application/json:
               schema:
@@ -2611,6 +2660,14 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/CreateGuestResponse"
+        "304":
+          description: |-
+            The following error codes correspond to this status:
+            * **`ALREADY_AUTHENTICATED`:** Principal is already authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "500":
           description: |-
             The following error codes correspond to this status:
@@ -2627,6 +2684,7 @@ paths:
             * **`REFRESH_TOKEN_SECRET_FAILURE`:** Represents an exception that occurs when there is a failure related to the secret required for creating a refresh token.
             * **`REFRESH_TOKEN_SESSION_UPDATE_FAILURE`:** Thrown when an exception occurs when updating the user sessions after creating a new refresh token.
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
+            * **`COOKIE_CREATION_FAILURE`:** Thrown when an exception occurred during the creation of a cookie.
           content:
             application/json:
               schema:
@@ -2714,6 +2772,7 @@ paths:
             * **`REFRESH_TOKEN_SECRET_FAILURE`:** Represents an exception that occurs when there is a failure related to the secret required for creating a refresh token.
             * **`REFRESH_TOKEN_SESSION_UPDATE_FAILURE`:** Thrown when an exception occurs when updating the user sessions after creating a new refresh token.
             * **`INVALID_PRINCIPAL_DOCUMENT`:** A requested principal document was stored in an invalid format.
+            * **`COOKIE_CREATION_FAILURE`:** Thrown when an exception occurred during the creation of a cookie.
           content:
             application/json:
               schema:
@@ -2723,6 +2782,7 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
           content:
             application/json:
               schema:
@@ -2807,6 +2867,15 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: |-
+            The following error codes correspond to this status:
+            * **`ROLE_REQUIRED`:** Principal does not have required role.
           content:
             application/json:
               schema:
@@ -2876,6 +2945,15 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: |-
+            The following error codes correspond to this status:
+            * **`ROLE_REQUIRED`:** Principal does not have required role.
           content:
             application/json:
               schema:
@@ -2971,6 +3049,8 @@ paths:
           description: |-
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_ALLOWLIST_READING_FAILURE`:** Represents an exception indicating a failure when reading the allowlist for an access token cache.
+            * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
+            * **`NO_TRANSLATIONS`:** Exception indicating that no translations are available for a given request.
           content:
             application/json:
               schema:
@@ -2980,6 +3060,15 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: |-
+            The following error codes correspond to this status:
+            * **`ROLE_REQUIRED`:** Principal does not have required role.
           content:
             application/json:
               schema:
@@ -3040,6 +3129,7 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_ALLOWLIST_READING_FAILURE`:** Represents an exception indicating a failure when reading the allowlist for an access token cache.
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
+            * **`NO_TRANSLATIONS`:** Exception indicating that no translations are available for a given request.
           content:
             application/json:
               schema:
@@ -3049,6 +3139,15 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: |-
+            The following error codes correspond to this status:
+            * **`ROLE_REQUIRED`:** Principal does not have required role.
           content:
             application/json:
               schema:
@@ -3123,6 +3222,7 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_ALLOWLIST_READING_FAILURE`:** Represents an exception indicating a failure when reading the allowlist for an access token cache.
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
+            * **`NO_TRANSLATIONS`:** Exception indicating that no translations are available for a given request.
           content:
             application/json:
               schema:
@@ -3132,6 +3232,15 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: |-
+            The following error codes correspond to this status:
+            * **`ROLE_REQUIRED`:** Principal does not have required role.
           content:
             application/json:
               schema:
@@ -3205,6 +3314,7 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_ALLOWLIST_READING_FAILURE`:** Represents an exception indicating a failure when reading the allowlist for an access token cache.
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
+            * **`NO_TRANSLATIONS`:** Exception indicating that no translations are available for a given request.
           content:
             application/json:
               schema:
@@ -3214,6 +3324,15 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: |-
+            The following error codes correspond to this status:
+            * **`ROLE_REQUIRED`:** Principal does not have required role.
           content:
             application/json:
               schema:
@@ -3282,6 +3401,15 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: |-
+            The following error codes correspond to this status:
+            * **`ROLE_REQUIRED`:** Principal does not have required role.
           content:
             application/json:
               schema:
@@ -3347,6 +3475,15 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: |-
+            The following error codes correspond to this status:
+            * **`ROLE_REQUIRED`:** Principal does not have required role.
           content:
             application/json:
               schema:
@@ -3424,6 +3561,15 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: |-
+            The following error codes correspond to this status:
+            * **`ROLE_REQUIRED`:** Principal does not have required role.
           content:
             application/json:
               schema:
@@ -3558,6 +3704,15 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: |-
+            The following error codes correspond to this status:
+            * **`ROLE_REQUIRED`:** Principal does not have required role.
+            * **`FILE_ACCESS_NOT_AUTHORIZED`:** Thrown when access to the requested file is not permitted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: |-
             The following error codes correspond to this status:
@@ -3580,14 +3735,6 @@ paths:
           description: |-
             The following error codes correspond to this status:
             * **`FILE_KEY_TAKEN`:** This exception is thrown when attempting to store a file with a file key that is already taken or in use.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "403":
-          description: |-
-            The following error codes correspond to this status:
-            * **`FILE_ACCESS_NOT_AUTHORIZED`:** Thrown when access to the requested file is not permitted.
           content:
             application/json:
               schema:
@@ -3729,6 +3876,15 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: |-
+            The following error codes correspond to this status:
+            * **`ROLE_REQUIRED`:** Principal does not have required role.
           content:
             application/json:
               schema:
@@ -3776,6 +3932,7 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
           content:
             application/json:
               schema:
@@ -3834,6 +3991,7 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
           content:
             application/json:
               schema:
@@ -3886,6 +4044,7 @@ paths:
             * **`ACCESS_TOKEN_ALLOWLIST_READING_FAILURE`:** Represents an exception indicating a failure when reading the allowlist for an access token cache.
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
             * **`DATABASE_ENCRYPTION_FAILURE`:** Exception representing a general failure related to database encryption operations.
+            * **`COOKIE_CREATION_FAILURE`:** Thrown when an exception occurred during the creation of a cookie.
           content:
             application/json:
               schema:
@@ -3895,6 +4054,7 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
             * **`STEP_UP_TOKEN_EXPIRED`:** Indicates that the step-up token is expired.
             * **`STEP_UP_TOKEN_INVALID`:** Indicates that the step-up token cannot be decoded.
             * **`STEP_UP_TOKEN_MISSING`:** Thrown when the step-up token is missing.
@@ -3907,6 +4067,14 @@ paths:
             The following error codes correspond to this status:
             * **`PRINCIPAL_NOT_FOUND`:** No principal with specified ID found.
             * **`DATABASE_ENTITY_NOT_FOUND`:** Exception representing a failure to find a database entity.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "207":
+          description: |-
+            The following error codes correspond to this status:
+            * **`POST_COMMIT_SIDE_EFFECT_FAILURE`:** Exception representing a failure to perform a side effect after a successful database operation.
           content:
             application/json:
               schema:
@@ -3978,6 +4146,7 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
             * **`STEP_UP_TOKEN_EXPIRED`:** Indicates that the step-up token is expired.
             * **`STEP_UP_TOKEN_INVALID`:** Indicates that the step-up token cannot be decoded.
             * **`STEP_UP_TOKEN_MISSING`:** Thrown when the step-up token is missing.
@@ -4071,6 +4240,7 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
             * **`STEP_UP_TOKEN_EXPIRED`:** Indicates that the step-up token is expired.
             * **`STEP_UP_TOKEN_INVALID`:** Indicates that the step-up token cannot be decoded.
             * **`STEP_UP_TOKEN_MISSING`:** Thrown when the step-up token is missing.
@@ -4157,6 +4327,7 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
           content:
             application/json:
               schema:
@@ -4226,6 +4397,7 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
           content:
             application/json:
               schema:
@@ -4450,6 +4622,15 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: |-
+            The following error codes correspond to this status:
+            * **`GROUP_MEMBERSHIP_REQUIRED`:** User is not a member of required group.
           content:
             application/json:
               schema:
@@ -5115,6 +5296,15 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: |-
+            The following error codes correspond to this status:
+            * **`ROLE_REQUIRED`:** Principal does not have required role.
           content:
             application/json:
               schema:
@@ -5282,6 +5472,7 @@ paths:
           description: |-
             The following error codes correspond to this status:
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
+            * **`NO_TRANSLATIONS`:** Exception indicating that no translations are available for a given request.
           content:
             application/json:
               schema:
@@ -5329,6 +5520,7 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_ALLOWLIST_READING_FAILURE`:** Represents an exception indicating a failure when reading the allowlist for an access token cache.
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
+            * **`NO_TRANSLATIONS`:** Exception indicating that no translations are available for a given request.
           content:
             application/json:
               schema:
@@ -5338,6 +5530,15 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: |-
+            The following error codes correspond to this status:
+            * **`GROUP_MEMBERSHIP_REQUIRED`:** User is not a member of required group.
           content:
             application/json:
               schema:
@@ -5396,6 +5597,7 @@ paths:
           description: |-
             The following error codes correspond to this status:
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
+            * **`NO_TRANSLATIONS`:** Exception indicating that no translations are available for a given request.
           content:
             application/json:
               schema:
@@ -5460,6 +5662,15 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: |-
+            The following error codes correspond to this status:
+            * **`GROUP_MEMBERSHIP_REQUIRED`:** User is not a member of required group.
           content:
             application/json:
               schema:
@@ -5529,6 +5740,7 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_ALLOWLIST_READING_FAILURE`:** Represents an exception indicating a failure when reading the allowlist for an access token cache.
             * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
+            * **`NO_TRANSLATIONS`:** Exception indicating that no translations are available for a given request.
           content:
             application/json:
               schema:
@@ -5538,6 +5750,15 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: |-
+            The following error codes correspond to this status:
+            * **`GROUP_MEMBERSHIP_REQUIRED`:** User is not a member of required group.
           content:
             application/json:
               schema:
@@ -5878,6 +6099,23 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: |-
+            The following error codes correspond to this status:
+            * **`ROLE_REQUIRED`:** Principal does not have required role.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "400":
+          description: |-
+            The following error codes correspond to this status:
+            * **`SECRET_ROTATION_ONGOING`:** Represents an exception indicating that a secret rotation process is ongoing.
           content:
             application/json:
               schema:
@@ -5923,6 +6161,15 @@ paths:
             The following error codes correspond to this status:
             * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
             * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
+            * **`AUTHENTICATION_REQUIRED`:** User is not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: |-
+            The following error codes correspond to this status:
+            * **`ROLE_REQUIRED`:** Principal does not have required role.
           content:
             application/json:
               schema:
@@ -7085,6 +7332,8 @@ components:
     PageableObject:
       type: object
       properties:
+        unpaged:
+          type: boolean
         paged:
           type: boolean
         pageNumber:
@@ -7093,8 +7342,6 @@ components:
         pageSize:
           type: integer
           format: int32
-        unpaged:
-          type: boolean
         offset:
           type: integer
           format: int64
@@ -7103,9 +7350,9 @@ components:
     SortObject:
       type: object
       properties:
-        sorted:
-          type: boolean
         unsorted:
+          type: boolean
+        sorted:
           type: boolean
         empty:
           type: boolean
