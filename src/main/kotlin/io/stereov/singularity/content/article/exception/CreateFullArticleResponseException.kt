@@ -1,7 +1,6 @@
 package io.stereov.singularity.content.article.exception
 
 import io.stereov.singularity.database.core.exception.DatabaseFailure
-import io.stereov.singularity.file.core.exception.FileFailure
 import io.stereov.singularity.global.exception.SingularityException
 import io.stereov.singularity.translate.exception.TranslateException
 import org.springframework.http.HttpStatus
@@ -27,14 +26,6 @@ sealed class CreateFullArticleResponseException(
         TranslateException.NoTranslations.CODE,
         TranslateException.NoTranslations.STATUS,
         TranslateException.NoTranslations.DESCRIPTION,
-        cause
-    )
-
-    class File(msg: String, cause: Throwable? = null) : CreateFullArticleResponseException(
-        msg,
-        FileFailure.CODE,
-        FileFailure.STATUS,
-        FileFailure.DESCRIPTION,
         cause
     )
 }
