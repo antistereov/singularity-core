@@ -3,6 +3,7 @@ package io.stereov.singularity.principal.core.mapper
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.coroutines.coroutineBinding
 import com.github.michaelbull.result.mapError
+import com.github.michaelbull.result.recover
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.file.core.service.FileStorage
@@ -46,7 +47,7 @@ class PrincipalMapper(
 
         val avatarMetadata = avatarKey
             ?.let { fileStorage.metadataResponseByKey(it, authenticationOutcome) }
-            ?.mapError { ex -> PrincipalMapperException.Avatar("Failed to create file metadata response from avatar with key $avatarKey: ${ex.message}", ex) }
+            ?.recover { null }
             ?.bind()
         
         val id = principal.id.mapError { ex -> PrincipalMapperException.InvalidDocument("Failed to create user response because the user document does not contain an id: ${ex.message}", ex) }
@@ -125,7 +126,7 @@ class PrincipalMapper(
 
         val avatarMetadata = avatarKey
             ?.let { fileStorage.metadataResponseByKey(it, authenticationOutcome) }
-            ?.mapError { ex -> PrincipalMapperException.Avatar("Failed to create file metadata response from avatar with key $avatarKey: ${ex.message}", ex) }
+            ?.recover { null }
             ?.bind()
         
         val id = principal.id
