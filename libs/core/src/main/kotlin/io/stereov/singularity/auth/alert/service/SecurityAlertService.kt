@@ -153,12 +153,32 @@ class SecurityAlertService(
         } } ?: "Unknown"
 
 
-        val subject = translateService.translateResourceKey(TranslateKey("$slug.subject.${alertType.value}"),
-            EmailConstants.RESOURCE_BUNDLE, actualLocale)
         val alert = translateService.translateResourceKey(TranslateKey("$slug.message.${alertType.value}"),
             EmailConstants.RESOURCE_BUNDLE, actualLocale)
+        val subject = TemplateBuilder
+            .fromString(
+                translateService.translateResourceKey(TranslateKey("$slug.subject.${alertType.value}"),
+                    EmailConstants.RESOURCE_BUNDLE, actualLocale)
+            )
+            .replacePlaceholders(templateService.getPlaceholders(mapOf(
+                "name" to user.sensitive.name,
+                "security_alert" to alert,
+                "provider_name" to providerName,
+                "2fa_method" to twoFactorMethodName,
+                "old_email" to (oldEmail ?: "unknown"),
+                "new_email" to (newEmail ?: "unknown")
+            )))
+            .build()
         val content = TemplateBuilder.fromResource(templatePath)
             .translate(EmailConstants.RESOURCE_BUNDLE, actualLocale)
+            .replacePlaceholders(templateService.getPlaceholders(mapOf(
+                "name" to user.sensitive.name,
+                "security_alert" to alert,
+                "provider_name" to providerName,
+                "2fa_method" to twoFactorMethodName,
+                "old_email" to (oldEmail ?: "unknown"),
+                "new_email" to (newEmail ?: "unknown"),
+            )))
             .replacePlaceholders(templateService.getPlaceholders(mapOf(
                 "name" to user.sensitive.name,
                 "security_alert" to alert,
