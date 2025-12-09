@@ -784,6 +784,18 @@ const sidebar: SidebarsConfig = {
         },
         {
           type: "doc",
+          id: "api/schemas/sessioninforequest",
+          label: "SessionInfoRequest",
+          className: "schema",
+        },
+        {
+          type: "doc",
+          id: "api/schemas/generatesessiontokenresponse",
+          label: "GenerateSessionTokenResponse",
+          className: "schema",
+        },
+        {
+          type: "doc",
           id: "api/schemas/addpasswordauthenticationrequest",
           label: "AddPasswordAuthenticationRequest",
           className: "schema",
@@ -810,12 +822,6 @@ const sidebar: SidebarsConfig = {
           type: "doc",
           id: "api/schemas/createguestrequest",
           label: "CreateGuestRequest",
-          className: "schema",
-        },
-        {
-          type: "doc",
-          id: "api/schemas/sessioninforequest",
-          label: "SessionInfoRequest",
           className: "schema",
         },
         {
@@ -924,12 +930,6 @@ const sidebar: SidebarsConfig = {
           type: "doc",
           id: "api/schemas/stepupresponse",
           label: "StepUpResponse",
-          className: "schema",
-        },
-        {
-          type: "doc",
-          id: "api/schemas/generatesessiontokenresponse",
-          label: "GenerateSessionTokenResponse",
           className: "schema",
         },
         {
@@ -1054,6 +1054,18 @@ const sidebar: SidebarsConfig = {
         },
         {
           type: "doc",
+          id: "api/schemas/locationinfo",
+          label: "LocationInfo",
+          className: "schema",
+        },
+        {
+          type: "doc",
+          id: "api/schemas/sessioninforesponse",
+          label: "SessionInfoResponse",
+          className: "schema",
+        },
+        {
+          type: "doc",
           id: "api/schemas/identityproviderresponse",
           label: "IdentityProviderResponse",
           className: "schema",
@@ -1104,18 +1116,6 @@ const sidebar: SidebarsConfig = {
           type: "doc",
           id: "api/schemas/authenticationstatusresponse",
           label: "AuthenticationStatusResponse",
-          className: "schema",
-        },
-        {
-          type: "doc",
-          id: "api/schemas/locationinfo",
-          label: "LocationInfo",
-          className: "schema",
-        },
-        {
-          type: "doc",
-          id: "api/schemas/sessioninforesponse",
-          label: "SessionInfoResponse",
           className: "schema",
         },
         {

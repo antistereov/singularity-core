@@ -2294,7 +2294,7 @@ paths:
         stepUpTokenHeader: []
       - accessTokenCookie: []
         stepUpTokenCookie: []
-  /api/auth/sessions:
+  /api/users/me/sessions:
     get:
       tags:
       - Sessions
@@ -2406,7 +2406,7 @@ paths:
       security:
       - accessTokenHeader: []
       - accessTokenCookie: []
-  /api/auth/sessions/{sessionId}:
+  /api/users/me/sessions/{sessionId}:
     delete:
       tags:
       - Sessions
@@ -2467,7 +2467,7 @@ paths:
       security:
       - accessTokenHeader: []
       - accessTokenCookie: []
-  /api/auth/sessions/token:
+  /api/users/me/sessions/token:
     post:
       tags:
       - Sessions
@@ -6107,12 +6107,6 @@ components:
     KLogger:
       type: object
       properties:
-        isLoggingOff:
-          type: boolean
-          deprecated: true
-          description: Use isLoggingOff() instead
-        name:
-          type: string
         isInfoEnabled:
           type: boolean
           deprecated: true
@@ -6133,6 +6127,12 @@ components:
           type: boolean
           deprecated: true
           description: Use isWarnEnabled() instead
+        isLoggingOff:
+          type: boolean
+          deprecated: true
+          description: Use isLoggingOff() instead
+        name:
+          type: string
       required:
       - isDebugEnabled
       - isErrorEnabled
@@ -6465,6 +6465,24 @@ components:
       - id
       - name
       - roles
+    SessionInfoRequest:
+      type: object
+      properties:
+        browser:
+          type: string
+          description: The name of the browser used.
+          example: Chrome
+        os:
+          type: string
+          description: The operating system of the device.
+          example: WIndows
+    GenerateSessionTokenResponse:
+      type: object
+      properties:
+        token:
+          type: string
+      required:
+      - token
     AddPasswordAuthenticationRequest:
       type: object
       properties:
@@ -6506,17 +6524,6 @@ components:
           $ref: "#/components/schemas/SessionInfoRequest"
       required:
       - name
-    SessionInfoRequest:
-      type: object
-      properties:
-        browser:
-          type: string
-          description: The name of the browser used.
-          example: Chrome
-        os:
-          type: string
-          description: The operating system of the device.
-          example: WIndows
     City:
       type: object
       properties:
@@ -6822,13 +6829,6 @@ components:
           type: string
       required:
       - twoFactorRequired
-    GenerateSessionTokenResponse:
-      type: object
-      properties:
-        token:
-          type: string
-      required:
-      - token
     RegisterUserRequest:
       type: object
       properties:
@@ -7061,12 +7061,15 @@ components:
         totalPages:
           type: integer
           format: int32
-        pageable:
-          $ref: "#/components/schemas/PageableObject"
         first:
           type: boolean
         last:
           type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
         size:
           type: integer
           format: int32
@@ -7079,16 +7082,11 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
-        numberOfElements:
-          type: integer
-          format: int32
         empty:
           type: boolean
     PageableObject:
       type: object
       properties:
-        unpaged:
-          type: boolean
         paged:
           type: boolean
         pageNumber:
@@ -7097,6 +7095,8 @@ components:
         pageSize:
           type: integer
           format: int32
+        unpaged:
+          type: boolean
         offset:
           type: integer
           format: int64
@@ -7105,12 +7105,49 @@ components:
     SortObject:
       type: object
       properties:
-        unsorted:
-          type: boolean
         sorted:
+          type: boolean
+        unsorted:
           type: boolean
         empty:
           type: boolean
+    LocationInfo:
+      type: object
+      properties:
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        cityName:
+          type: string
+        countryCode:
+          type: string
+      required:
+      - countryCode
+      - latitude
+      - longitude
+    SessionInfoResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        browser:
+          type: string
+        os:
+          type: string
+        ipAddress:
+          type: string
+        location:
+          $ref: "#/components/schemas/LocationInfo"
+        lastActive:
+          type: string
+          format: date-time
+      required:
+      - id
+      - lastActive
     IdentityProviderResponse:
       type: object
       properties:
@@ -7328,12 +7365,15 @@ components:
         totalPages:
           type: integer
           format: int32
-        pageable:
-          $ref: "#/components/schemas/PageableObject"
         first:
           type: boolean
         last:
           type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
         size:
           type: integer
           format: int32
@@ -7346,9 +7386,6 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
-        numberOfElements:
-          type: integer
-          format: int32
         empty:
           type: boolean
     PageTagResponse:
@@ -7360,12 +7397,15 @@ components:
         totalPages:
           type: integer
           format: int32
-        pageable:
-          $ref: "#/components/schemas/PageableObject"
         first:
           type: boolean
         last:
           type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
         size:
           type: integer
           format: int32
@@ -7378,9 +7418,6 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
-        numberOfElements:
-          type: integer
-          format: int32
         empty:
           type: boolean
     ArticleOverviewResponse:
@@ -7445,12 +7482,15 @@ components:
         totalPages:
           type: integer
           format: int32
-        pageable:
-          $ref: "#/components/schemas/PageableObject"
         first:
           type: boolean
         last:
           type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
         size:
           type: integer
           format: int32
@@ -7463,9 +7503,6 @@ components:
           format: int32
         sort:
           $ref: "#/components/schemas/SortObject"
-        numberOfElements:
-          type: integer
-          format: int32
         empty:
           type: boolean
     AuthenticationStatusResponse:
@@ -7498,43 +7535,6 @@ components:
       - authenticated
       - stepUp
       - twoFactorRequired
-    LocationInfo:
-      type: object
-      properties:
-        latitude:
-          type: number
-          format: double
-        longitude:
-          type: number
-          format: double
-        cityName:
-          type: string
-        countryCode:
-          type: string
-      required:
-      - countryCode
-      - latitude
-      - longitude
-    SessionInfoResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        browser:
-          type: string
-        os:
-          type: string
-        ipAddress:
-          type: string
-        location:
-          $ref: "#/components/schemas/LocationInfo"
-        lastActive:
-          type: string
-          format: date-time
-      required:
-      - id
-      - lastActive
     MailCooldownResponse:
       type: object
       properties:
