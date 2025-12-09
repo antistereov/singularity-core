@@ -592,7 +592,7 @@ class AuthenticationController(
             .getOrNull()
 
         val authorized = authorizedUserId != null
-        val twoFactorRequired = if (authorized) false else (twoFactorToken != null)
+        val twoFactorRequired = twoFactorToken != null
 
         val stepUpToken = if (authorized && currentSessionId != null) {
             stepUpTokenService.extract(exchange, authorizedUserId, currentSessionId)

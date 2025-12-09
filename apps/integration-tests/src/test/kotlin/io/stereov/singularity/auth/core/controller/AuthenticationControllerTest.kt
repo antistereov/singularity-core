@@ -724,7 +724,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
         Assertions.assertTrue(res.authenticated)
         Assertions.assertFalse(res.stepUp)
         Assertions.assertFalse(res.emailVerified!!)
-        Assertions.assertFalse(res.twoFactorRequired)
+        Assertions.assertTrue(res.twoFactorRequired)
         Assertions.assertEquals(res.twoFactorMethods , user.info.twoFactorMethods)
         Assertions.assertEquals(res.preferredTwoFactorMethod, user.info.preferredTwoFactorMethod.getOrThrow())
     }
