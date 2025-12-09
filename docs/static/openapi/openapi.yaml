@@ -35,22 +35,22 @@ tags:
 - name: OAuth2
   description: Operations related to connecting and disconnecting identity providers
     to existing accounts.
+- name: Profile Management
+  description: Operations related to principal settings.
 - name: Sessions
   description: Operations related to session management.
+- name: Managing Users
+  description: Operations related to user management.
 - name: Roles
   description: Operations related to roles.
 - name: Groups
   description: Operation related to group and member management.
-- name: Managing Users
-  description: Operations related to user management.
-- name: Profile Management
-  description: Operations related to principal settings.
 - name: Security
   description: Operations related to managing the servers security.
-- name: Articles
-  description: Operations related to articles
 - name: Content Management
   description: Operations related to management of content of all types.
+- name: Articles
+  description: Operations related to articles
 - name: Invitations
   description: Operations related to invitations.
 - name: Tags

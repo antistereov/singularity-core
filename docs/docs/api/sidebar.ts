@@ -203,6 +203,59 @@ const sidebar: SidebarsConfig = {
     },
     {
       type: "category",
+      label: "Profile Management",
+      link: {
+        type: "generated-index",
+        title: "Profile Management",
+        slug: "/category/api/profile-management",
+      },
+      items: [
+        {
+          type: "doc",
+          id: "api/get-authorized-principal",
+          label: "Get Principal",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "api/update-authorized-user",
+          label: "Update Principal",
+          className: "api-method put",
+        },
+        {
+          type: "doc",
+          id: "api/delete-authorized-principal",
+          label: "Delete Principal",
+          className: "api-method delete",
+        },
+        {
+          type: "doc",
+          id: "api/change-email-of-authorized-user",
+          label: "Change Email",
+          className: "api-method put",
+        },
+        {
+          type: "doc",
+          id: "api/change-password-of-authorized-user",
+          label: "Change Password",
+          className: "api-method put",
+        },
+        {
+          type: "doc",
+          id: "api/set-avatar-of-authorized-user",
+          label: "Update Avatar",
+          className: "api-method put",
+        },
+        {
+          type: "doc",
+          id: "api/delete-avatar-of-authorized-user",
+          label: "Delete Avatar",
+          className: "api-method delete",
+        },
+      ],
+    },
+    {
+      type: "category",
       label: "Sessions",
       link: {
         type: "generated-index",
@@ -233,6 +286,35 @@ const sidebar: SidebarsConfig = {
           id: "api/generate-session-token",
           label: "Generate SessionToken",
           className: "api-method post",
+        },
+      ],
+    },
+    {
+      type: "category",
+      label: "Managing Users",
+      link: {
+        type: "generated-index",
+        title: "Managing Users",
+        slug: "/category/api/managing-users",
+      },
+      items: [
+        {
+          type: "doc",
+          id: "api/get-user-by-id",
+          label: "Get User By ID",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "api/delete-user-by-id",
+          label: "Delete User By ID",
+          className: "api-method delete",
+        },
+        {
+          type: "doc",
+          id: "api/get-users",
+          label: "Get Users",
+          className: "api-method get",
         },
       ],
     },
@@ -326,88 +408,6 @@ const sidebar: SidebarsConfig = {
     },
     {
       type: "category",
-      label: "Managing Users",
-      link: {
-        type: "generated-index",
-        title: "Managing Users",
-        slug: "/category/api/managing-users",
-      },
-      items: [
-        {
-          type: "doc",
-          id: "api/get-user-by-id",
-          label: "Get User By ID",
-          className: "api-method get",
-        },
-        {
-          type: "doc",
-          id: "api/delete-user-by-id",
-          label: "Delete User By ID",
-          className: "api-method delete",
-        },
-        {
-          type: "doc",
-          id: "api/get-users",
-          label: "Get Users",
-          className: "api-method get",
-        },
-      ],
-    },
-    {
-      type: "category",
-      label: "Profile Management",
-      link: {
-        type: "generated-index",
-        title: "Profile Management",
-        slug: "/category/api/profile-management",
-      },
-      items: [
-        {
-          type: "doc",
-          id: "api/get-authorized-principal",
-          label: "Get Principal",
-          className: "api-method get",
-        },
-        {
-          type: "doc",
-          id: "api/update-authorized-user",
-          label: "Update Principal",
-          className: "api-method put",
-        },
-        {
-          type: "doc",
-          id: "api/delete-authorized-principal",
-          label: "Delete Principal",
-          className: "api-method delete",
-        },
-        {
-          type: "doc",
-          id: "api/change-email-of-authorized-user",
-          label: "Change Email",
-          className: "api-method put",
-        },
-        {
-          type: "doc",
-          id: "api/change-password-of-authorized-user",
-          label: "Change Password",
-          className: "api-method put",
-        },
-        {
-          type: "doc",
-          id: "api/set-avatar-of-authorized-user",
-          label: "Update Avatar",
-          className: "api-method put",
-        },
-        {
-          type: "doc",
-          id: "api/delete-avatar-of-authorized-user",
-          label: "Delete Avatar",
-          className: "api-method delete",
-        },
-      ],
-    },
-    {
-      type: "category",
       label: "Security",
       link: {
         type: "generated-index",
@@ -426,6 +426,47 @@ const sidebar: SidebarsConfig = {
           id: "api/get-secret-key-rotation-status",
           label: "Get Secret Rotation Status",
           className: "api-method get",
+        },
+      ],
+    },
+    {
+      type: "category",
+      label: "Content Management",
+      link: {
+        type: "generated-index",
+        title: "Content Management",
+        slug: "/category/api/content-management",
+      },
+      items: [
+        {
+          type: "doc",
+          id: "api/get-content-object-access-details",
+          label: "Get Access Details of Content Objects",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "api/update-content-object-access",
+          label: "Update Access of Content Objects",
+          className: "api-method put",
+        },
+        {
+          type: "doc",
+          id: "api/update-content-object-owner",
+          label: "Update Owner of Content Object ",
+          className: "api-method put",
+        },
+        {
+          type: "doc",
+          id: "api/update-content-object-trusted-state",
+          label: "Update Trusted State of Content Object ",
+          className: "api-method put",
+        },
+        {
+          type: "doc",
+          id: "api/delete-content-object-by-key",
+          label: "Delete Content Object",
+          className: "api-method delete",
         },
       ],
     },
@@ -474,47 +515,6 @@ const sidebar: SidebarsConfig = {
           label: "Update Article Image",
           className: "api-method put",
         },
-        {
-          type: "doc",
-          id: "api/get-content-object-access-details",
-          label: "Get Access Details of Content Objects",
-          className: "api-method get",
-        },
-        {
-          type: "doc",
-          id: "api/update-content-object-access",
-          label: "Update Access of Content Objects",
-          className: "api-method put",
-        },
-        {
-          type: "doc",
-          id: "api/update-content-object-owner",
-          label: "Update Owner of Content Object ",
-          className: "api-method put",
-        },
-        {
-          type: "doc",
-          id: "api/update-content-object-trusted-state",
-          label: "Update Trusted State of Content Object ",
-          className: "api-method put",
-        },
-        {
-          type: "doc",
-          id: "api/delete-content-object-by-key",
-          label: "Delete Content Object",
-          className: "api-method delete",
-        },
-      ],
-    },
-    {
-      type: "category",
-      label: "Content Management",
-      link: {
-        type: "generated-index",
-        title: "Content Management",
-        slug: "/category/api/content-management",
-      },
-      items: [
         {
           type: "doc",
           id: "api/get-content-object-access-details",
