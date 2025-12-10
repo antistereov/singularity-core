@@ -331,6 +331,7 @@ class AuthenticationController(
         val clearTwoFactorAuthenticationToken = cookieCreator.clearCookie(TwoFactorTokenType.Authentication)
             .getOrThrow { when (it) { is CookieException.Creation -> it } }
         val clearOAuth2ProviderConnectionToken = cookieCreator.clearCookie(OAuth2TokenType.ProviderConnection)
+            .getOrThrow { when (it) { is CookieException.Creation -> it } }
 
         authenticationService.logout(authenticationOutcome)
             .getOrThrow { when (it) { is LogoutException -> it } }

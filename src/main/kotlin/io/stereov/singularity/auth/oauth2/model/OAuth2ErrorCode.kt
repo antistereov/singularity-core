@@ -13,6 +13,7 @@ enum class OAuth2ErrorCode(val value: String) {
     SUB_CLAIM_MISSING("sub_claim_missing"),
     EMAIL_CLAIM_MISSING("email_claim_missing"),
     PROVIDER_ALREADY_CONNECTED("provider_already_connected"),
+    CONNECTED_TO_ANOTHER_PRINCIPAL("connected_to_another_principal"),
     CONNECTION_TOKEN_EXPIRED("connection_token_expired"),
     INVALID_CONNECTION_TOKEN("invalid_connection_token"),
     CONNECTION_TOKEN_PROVIDER_MISMATCH("connection_token_provider_mismatch"),
