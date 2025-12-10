@@ -22,7 +22,7 @@ class SessionControllerTest : BaseIntegrationTest() {
         userService.save(user.info)
 
         val response = webTestClient.get()
-            .uri("/api/auth/sessions")
+            .uri("/api/users/me/sessions")
             .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isOk
@@ -39,7 +39,7 @@ class SessionControllerTest : BaseIntegrationTest() {
     }
     @Test fun `getSessions requires authentication`() = runTest {
         webTestClient.get()
-            .uri("/api/auth/sessions")
+            .uri("/api/users/me/sessions")
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -48,7 +48,7 @@ class SessionControllerTest : BaseIntegrationTest() {
         val user = registerUser()
 
         webTestClient.delete()
-            .uri("/api/auth/sessions/${user.sessionId}")
+            .uri("/api/users/me/sessions/${user.sessionId}")
             .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isOk
@@ -60,7 +60,7 @@ class SessionControllerTest : BaseIntegrationTest() {
     }
     @Test fun `removeSession requires authentication`() = runTest {
         webTestClient.delete()
-            .uri("/api/auth/sessions/${UUID.randomUUID()}")
+            .uri("/api/users/me/sessions/${UUID.randomUUID()}")
             .exchange()
             .expectStatus().isUnauthorized
     }
@@ -68,7 +68,7 @@ class SessionControllerTest : BaseIntegrationTest() {
     @Test fun `clearSessions deletes sessions`() = runTest {
         val user = registerUser()
         webTestClient.delete()
-            .uri("/api/auth/sessions")
+            .uri("/api/users/me/sessions")
             .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus()
@@ -81,7 +81,7 @@ class SessionControllerTest : BaseIntegrationTest() {
     }
     @Test fun `clearSessions requires authentication`() = runTest {
         webTestClient.delete()
-            .uri("/api/auth/sessions")
+            .uri("/api/users/me/sessions")
             .exchange()
             .expectStatus().isUnauthorized
     }

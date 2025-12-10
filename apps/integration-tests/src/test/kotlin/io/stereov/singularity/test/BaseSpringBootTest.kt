@@ -496,7 +496,7 @@ class BaseSpringBootTest() {
 
     suspend fun deleteAllSessions(response: TestRegisterResponse<*>) {
         webTestClient.delete()
-            .uri("/api/auth/sessions")
+            .uri("/api/users/me/sessions")
             .accessTokenCookie(response.accessToken)
             .exchange()
             .expectStatus().isOk

@@ -78,7 +78,7 @@ class CookieAuthenticationTest() : BaseIntegrationTest() {
         val user = registerUser()
 
         webTestClient.delete()
-            .uri("/api/auth/sessions")
+            .uri("/api/users/me/sessions")
             .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isOk
@@ -203,7 +203,7 @@ class CookieAuthenticationTest() : BaseIntegrationTest() {
         val user = registerUser()
 
         webTestClient.delete()
-            .uri("/api/auth/sessions")
+            .uri("/api/users/me/sessions")
             .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isOk

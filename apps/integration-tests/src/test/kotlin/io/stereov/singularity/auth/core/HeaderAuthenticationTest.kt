@@ -82,7 +82,7 @@ class HeaderAuthenticationTest : BaseSpringBootTest() {
         val user = registerUser()
 
         webTestClient.delete()
-            .uri("/api/auth/sessions")
+            .uri("/api/users/me/sessions")
             .header(HttpHeaders.AUTHORIZATION, "Bearer ${user.accessToken}")
             .exchange()
             .expectStatus().isOk
@@ -205,7 +205,7 @@ class HeaderAuthenticationTest : BaseSpringBootTest() {
         val user = registerUser()
 
         webTestClient.delete()
-            .uri("/api/auth/sessions")
+            .uri("/api/users/me/sessions")
             .header(SessionTokenType.Access.header, "Bearer ${user.accessToken}")
             .exchange()
             .expectStatus().isOk

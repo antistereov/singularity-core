@@ -46,10 +46,10 @@ allowing users to remotely log out of specific devices without having to change 
 ### Invalidating a Specific Session
 
 You can invalidate a specific session using the session's ID through the endpoint
-[`DELETE /api/auth/sessions/<session-id>`](../../api/delete-session.api.mdx)
+[`DELETE /api/users/me/sessions/<session-id>`](../../api/delete-session.api.mdx)
 with a valid [`AccesstToken`](./tokens#access-token).
 
 ### Invalidating all Session
 
-You can invalidate all sessions through [`DELETE /api/auth/sessions`](../../api/delete-all-sessions.api.mdx)
+You can invalidate all sessions through [`DELETE /api/users/me/sessions`](../../api/delete-all-sessions.api.mdx)
 with a valid [`AccesstToken`](./tokens#access-token).
