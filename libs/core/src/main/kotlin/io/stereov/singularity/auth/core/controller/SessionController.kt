@@ -14,7 +14,9 @@ import io.stereov.singularity.auth.jwt.exception.TokenCreationException
 import io.stereov.singularity.auth.token.component.CookieCreator
 import io.stereov.singularity.auth.token.exception.AccessTokenExtractionException
 import io.stereov.singularity.auth.token.exception.CookieException
+import io.stereov.singularity.auth.token.model.OAuth2TokenType
 import io.stereov.singularity.auth.token.model.SessionTokenType
+import io.stereov.singularity.auth.token.model.TwoFactorTokenType
 import io.stereov.singularity.auth.token.service.SessionTokenService
 import io.stereov.singularity.cache.exception.CacheException
 import io.stereov.singularity.database.encryption.exception.SaveEncryptedDocumentException
@@ -235,6 +237,12 @@ class SessionController(
             .getOrThrow { when (it) { is CookieException.Creation -> it } }
         val clearStepUpToken = cookieCreator.clearCookie(SessionTokenType.StepUp)
             .getOrThrow { when (it) { is CookieException.Creation -> it } }
+        val clearSessionToken = cookieCreator.clearCookie(SessionTokenType.Session)
+            .getOrThrow { when (it) { is CookieException.Creation -> it } }
+        val clearTwoFactorAuthenticationToken = cookieCreator.clearCookie(TwoFactorTokenType.Authentication)
+            .getOrThrow { when (it) { is CookieException.Creation -> it } }
+        val clearOAuth2ProviderConnectionToken = cookieCreator.clearCookie(OAuth2TokenType.ProviderConnection)
+            .getOrThrow { when (it) { is CookieException.Creation -> it } }
 
         sessionService.deleteAllSessions(principal)
             .getOrThrow { when (it) { is SaveEncryptedDocumentException -> it } }
@@ -246,6 +254,9 @@ class SessionController(
             .header("Set-Cookie", clearAccessToken.toString())
             .header("Set-Cookie", clearRefreshToken.toString())
             .header("Set-Cookie", clearStepUpToken.toString())
+            .header("Set-Cookie", clearSessionToken.toString())
+            .header("Set-Cookie", clearTwoFactorAuthenticationToken.toString())
+            .header("Set-Cookie", clearOAuth2ProviderConnectionToken.toString())
             .body(SuccessResponse(true))
     }
 }
