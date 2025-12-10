@@ -1,3 +1,15 @@
+## [v1.10.3]
+
+## Changelog
+
+## 🐛 Fixes
+- [a0c268d](https://github.com/antistereov/singularity/commits/a0c268d) **auth**: revoke all tokens when deleting session
+
+
+## Contributors
+We'd like to thank the following people for their contributions:
+antistereov
+
 ## [v1.10.2]
 
 ## Changelog
