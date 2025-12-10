@@ -98,7 +98,7 @@ class OAuth2ProviderController(
             token = if (authProperties.allowHeaderAuthentication) token.value else null
         )
 
-        val connectionTokenCookie = cookieCreator.createCookie(token)
+        val connectionTokenCookie = cookieCreator.createCookie(token, sameSite = "Lash")
             .getOrThrow { when (it) { is CookieException.Creation -> it } }
 
         return ResponseEntity.ok()

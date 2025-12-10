@@ -101,7 +101,13 @@ class OAuth2AuthenticationService(
              .recoverIf({ it is FindUserByProviderIdentityException.NotFound }, { null })
              .getOrThrow { OAuth2FlowException(OAuth2ErrorCode.SERVER_ERROR, "Failed to find user by provider identity") }
 
-         if (existingUser != null) return handleLogin(existingUser, authenticated, stepUp) to OAuth2Action.LOGIN
+         if (existingUser != null) {
+             if (oauth2ProviderConnectionTokenValue != null) {
+                 throw OAuth2FlowException(OAuth2ErrorCode.CONNECTED_TO_ANOTHER_PRINCIPAL, "Failed to connect provider to user: identity is already connected to another user")
+             } else {
+                 return handleLogin(existingUser, authenticated, stepUp) to OAuth2Action.LOGIN
+             }
+         }
 
          return when (oauth2ProviderConnectionTokenValue != null) {
              true -> handleConnection(email, provider, principalId, oauth2ProviderConnectionTokenValue, stepUpTokenValue, exchange, locale)
@@ -121,8 +127,9 @@ class OAuth2AuthenticationService(
     private suspend fun handleLogin(user: User, authenticated: Boolean, stepUp: Boolean): User {
         logger.debug { "Handling OAuth2 login for user ${user.id}" }
 
-        if (authenticated && !stepUp)
+        if (authenticated && !stepUp) {
             throw OAuth2FlowException(OAuth2ErrorCode.USER_ALREADY_AUTHENTICATED, "Login via OAuth2 provider failed: user is already authenticated")
+        }
 
         return user
     }

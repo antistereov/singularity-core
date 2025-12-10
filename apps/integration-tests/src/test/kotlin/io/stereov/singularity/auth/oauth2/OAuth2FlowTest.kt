@@ -2523,6 +2523,62 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
         assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
     }
+    // Not Yet Connected
+    @Test fun `connection flow needs provider that is not yet connected`() = runTest {
+        val successRedirectUri = "http://localhost:8000/dashboard"
+
+        val principalId = "12345"
+        val registeredUser = registerOAuth2(provider = "another", principalId = principalId)
+        val sub = "123"
+        registerOAuth2(provider = "github", principalId = sub)
+
+        mockOAuth2Server.enqueueResponses(sub = sub)
+
+        val (state, sessionCookie) = webTestClient.get()
+            .uri("$authorizationPath?redirect_uri=$successRedirectUri")
+            .exchange()
+            .expectStatus().isFound
+            .expectBody()
+            .returnResult()
+            .extractStateAndSession()
+
+        val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os")).getOrThrow()
+        val providerConnectionToken = oAuth2ProviderConnectionTokenService
+            .create(registeredUser.id, registeredUser.sessionId, "github")
+            .getOrThrow()
+        val redirectUri = "$loginPath?code=dummy-code&state=$state"
+        val res = webTestClient.get().uri(redirectUri)
+            .cookie("SESSION", sessionCookie)
+            .accessTokenCookie(registeredUser.accessToken)
+            .oauth2ConnectionCookie(providerConnectionToken)
+            .stepUpTokenCookie(registeredUser.stepUpToken)
+            .sessionTokenCookie(sessionToken)
+            .exchange()
+            .expectStatus().isFound
+            .expectBody()
+            .returnResult()
+
+        mockOAuth2Server.verifyRequests()
+
+        res.responseHeaders
+            .location
+            .assertErrorCode(OAuth2ErrorCode.CONNECTED_TO_ANOTHER_PRINCIPAL)
+
+        val user = userService.findByEmail(registeredUser.email!!).getOrThrow()
+        assertEquals(registeredUser.id, user.id.getOrThrow())
+        assertEquals(2, principalService.findAll().getOrThrow().toList().size)
+        assertEquals(mutableSetOf(Role.User.USER), user.roles)
+
+        val identities = user.sensitive.identities.providers
+        assertEquals(1, identities.size)
+
+        assertNull(identities["github"])
+
+        requireNotNull(res)
+        assertThrows<TokenExtractionException> { res.extractAccessToken() }
+        assertThrows<TokenExtractionException> { res.extractRefreshToken() }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
+    }
 
     // STEP-UP
 
@@ -4365,6 +4421,55 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertThrows<TokenExtractionException> { res.extractAccessToken() }
         assertThrows<TokenExtractionException> { res.extractRefreshToken() }
         assertThrows<TokenExtractionException> { res.extractStepUpToken(registeredUser.id, registeredUser.sessionId) }
+    }
+    // Not Yet Connected
+    @Test fun `concerting guest to user flow needs provider that is not yet connected`() = runTest {
+        val successRedirectUri = "http://localhost:8000/dashboard"
+
+        val guest = createGuest()
+        val sub = "123"
+        registerOAuth2(provider = "github", principalId = sub)
+
+        mockOAuth2Server.enqueueResponses(sub = sub)
+
+        val (state, sessionCookie) = webTestClient.get()
+            .uri("$authorizationPath?redirect_uri=$successRedirectUri")
+            .exchange()
+            .expectStatus().isFound
+            .expectBody()
+            .returnResult()
+            .extractStateAndSession()
+
+        val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os")).getOrThrow()
+        val providerConnectionToken = oAuth2ProviderConnectionTokenService
+            .create(guest.id, guest.sessionId, "github")
+            .getOrThrow()
+        val redirectUri = "$loginPath?code=dummy-code&state=$state"
+        val res = webTestClient.get().uri(redirectUri)
+            .cookie("SESSION", sessionCookie)
+            .accessTokenCookie(guest.accessToken)
+            .oauth2ConnectionCookie(providerConnectionToken)
+            .stepUpTokenCookie(guest.stepUpToken)
+            .sessionTokenCookie(sessionToken)
+            .exchange()
+            .expectStatus().isFound
+            .expectBody()
+            .returnResult()
+
+        mockOAuth2Server.verifyRequests()
+
+        res.responseHeaders
+            .location
+            .assertErrorCode(OAuth2ErrorCode.CONNECTED_TO_ANOTHER_PRINCIPAL)
+
+        val foundGuest = guestService.findById(guest.id).getOrThrow()
+        assertEquals(2, principalService.findAll().getOrThrow().toList().size)
+        assertEquals(mutableSetOf(Role.Guest.GUEST), foundGuest.roles)
+
+        requireNotNull(res)
+        assertThrows<TokenExtractionException> { res.extractAccessToken() }
+        assertThrows<TokenExtractionException> { res.extractRefreshToken() }
+        assertThrows<TokenExtractionException> { res.extractStepUpToken(guest.id, guest.sessionId) }
     }
 
 }

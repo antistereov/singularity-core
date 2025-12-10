@@ -259,6 +259,7 @@ these codes can occur when trying to connect an OAuth2 provider to an existing a
 | `access_token_missing`               | Connecting a new provider requires an [`AccessToken`](./tokens#access-token).                                                       |
 | `access_token_expired`               | The provided [`AccessToken`](./tokens#access-token) is expired.                                                                     |
 | `invalid_access_token`               | The provided [`AccessToken`](./tokens#access-token) is invalid.                                                                     |
+| `connected_to_another_principal`     | The account that the principal wants to connect is already connected to another principal.                                          |
 
 ### Registration
 
@@ -294,14 +295,15 @@ these codes can occur when trying to perform [step-up authentication](./authenti
 
 ### Converting Guests to Users
 
-| Code                                 | Description                                                                                                                                                   |
-|--------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Code                                 | Description                                                                                                                                                                      |
+|--------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `user_already_authenticated`         | Conversion of [`GUEST`](../principals/introduction.md#guests) to user account failed. The user already authenticated.                                                            |
 | `email_already_registered`           | Conversion of [`GUEST`](../principals/introduction.md#guests) to user account failed. The email attribute of the OAuth2 provider matches an email of an already registered user. |
-| `provider_already_connected`         | The user already connected the provider.                                                                                                                      |
-| `connection_token_expired`           | The provided [`OAuth2ProviderConnectionToken`](./tokens.md#oauth2-provider-connection-token) is expired.                                                      |
-| `invalid_connection_token`           | The provided [`OAuth2ProviderConnectionToken`](./tokens.md#oauth2-provider-connection-token) cannot be decoded.                                               |
-| `connection_token_provider_mismatch` | The provided [`OAuth2ProviderConnectionToken`](./tokens.md#oauth2-provider-connection-token) does not match the requested provider.                           |
-| `step_up_missing`                    | Connecting a new provider requires step-up.                                                                                                                   |
-| `step_up_token_expired`              | The provided [`StepUpToken`](./tokens.md#step-up-token) is expired.                                                                                           |
-| `invalid_step_up_token`              | The provided [`StepUpToken`](./tokens.md#step-up-token) is invalid.                                                                                           |
+| `provider_already_connected`         | The user already connected the provider.                                                                                                                                         |
+| `connection_token_expired`           | The provided [`OAuth2ProviderConnectionToken`](./tokens.md#oauth2-provider-connection-token) is expired.                                                                         |
+| `invalid_connection_token`           | The provided [`OAuth2ProviderConnectionToken`](./tokens.md#oauth2-provider-connection-token) cannot be decoded.                                                                  |
+| `connection_token_provider_mismatch` | The provided [`OAuth2ProviderConnectionToken`](./tokens.md#oauth2-provider-connection-token) does not match the requested provider.                                              |
+| `step_up_missing`                    | Connecting a new provider requires step-up.                                                                                                                                      |
+| `step_up_token_expired`              | The provided [`StepUpToken`](./tokens.md#step-up-token) is expired.                                                                                                              |
+| `invalid_step_up_token`              | The provided [`StepUpToken`](./tokens.md#step-up-token) is invalid.                                                                                                              |
+| `connected_to_another_principal`     | The account that the principal wants to connect is already connected to another principal.                                                                                       |
