@@ -5,6 +5,7 @@ import com.github.michaelbull.result.mapError
 import com.github.michaelbull.result.runCatching
 import com.warrenstrange.googleauth.GoogleAuthenticator
 import io.stereov.singularity.auth.twofactor.exception.TotpException
+import io.stereov.singularity.global.properties.AppProperties
 import org.springframework.stereotype.Service
 
 /**
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service
 @Service
 class TotpService(
     private val gAuth: GoogleAuthenticator,
+    private val appProperties: AppProperties
 ) {
 
     /**
@@ -64,6 +66,6 @@ class TotpService(
      * @return A string representing the OTP Auth URL.
      */
     fun getOtpAuthUrl(username: String, secret: String): String {
-        return "otpauth://totp/$username?secret=$secret&issuer="
+        return "otpauth://totp/$username?secret=$secret&issuer=${appProperties.name}"
     }
 }
