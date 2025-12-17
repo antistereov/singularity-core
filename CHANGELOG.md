@@ -1,3 +1,15 @@
+## [v1.10.4]
+
+## Changelog
+
+## 🧪 Tests
+- [3513121](https://github.com/antistereov/singularity/commits/3513121) **auth**: fix tests after change in totp service
+
+
+## Contributors
+We'd like to thank the following people for their contributions:
+antistereov
+
 ## [v1.10.3]
 
 ## Changelog
