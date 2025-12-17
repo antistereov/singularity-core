@@ -21,5 +21,5 @@ data class UiProperties(
     val emailVerificationUri: String = "${baseUri}/auth/verify-email",
     val passwordResetUri: String = "${baseUri}/auth/reset-password",
 
-    val securitySettingsUri: String = "${baseUri}/me"
+    val securitySettingsUri: String = "${baseUri}/me/settings#sessions"
 )
