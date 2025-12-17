@@ -204,8 +204,8 @@ class TwoFactorAuthConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun totpService(googleAuthenticator: GoogleAuthenticator): TotpService {
-        return TotpService(googleAuthenticator)
+    fun totpService(googleAuthenticator: GoogleAuthenticator, appProperties: AppProperties): TotpService {
+        return TotpService(googleAuthenticator, appProperties)
     }
     
     @Bean
