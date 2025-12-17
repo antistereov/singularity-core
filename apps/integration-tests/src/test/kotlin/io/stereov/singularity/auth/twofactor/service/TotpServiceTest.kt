@@ -2,13 +2,15 @@ package io.stereov.singularity.auth.twofactor.service
 
 import com.github.michaelbull.result.getOrThrow
 import com.warrenstrange.googleauth.GoogleAuthenticator
+import io.stereov.singularity.global.properties.AppProperties
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 class TotpServiceTest {
 
     private val gAuth = GoogleAuthenticator()
-    private val totpService = TotpService(gAuth)
+    private val appProperties = AppProperties()
+    private val totpService = TotpService(gAuth, appProperties)
 
     @Test
     fun `2FA works as expected`() {
