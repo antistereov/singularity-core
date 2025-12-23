@@ -83,7 +83,7 @@ jobs:
           file: ./apps/demo/Dockerfile
           platforms: linux/amd64
           push: false
-          tags: harbor.stereov.io/singularity/demo:latest
+          tags: harbor.stereov.io/singularity/demo:${{ github.sha }}
 
       - name: Build and push image
         if: github.event_name == 'push'
@@ -93,7 +93,7 @@ jobs:
           file: ./apps/demo/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: harbor.stereov.io/singularity/demo:latest
+          tags: harbor.stereov.io/singularity/demo:${{ github.sha }}
 
   stereov-io:
     name: Build stereov-io
@@ -124,7 +124,7 @@ jobs:
           file: ./apps/stereov-io/Dockerfile
           platforms: linux/amd64
           push: false
-          tags: harbor.stereov.io/stereov-io/singularity:latest
+          tags: harbor.stereov.io/stereov-io/singularity:${{ github.sha }}
 
       - name: Build and push image
         if: github.event_name == 'push'
@@ -134,4 +134,4 @@ jobs:
           file: ./apps/stereov-io/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: harbor.stereov.io/stereov-io/singularity:latest
+          tags: harbor.stereov.io/stereov-io/singularity:${{ github.sha }}
