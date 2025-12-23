@@ -83,7 +83,7 @@ jobs:
         if: github.event_name == 'push'
         working-directory: ./gitops-config
         run: |
-          yq -i '.spec.template.spec.containers[0].image = "harbor.stereov.io/singularity/docs:${{ github.sha }}"' apps/singularity/docs/deployment.yaml
+          yq -i 'select(.kind == "Deployment") .spec.template.spec.containers[0].image = "harbor.stereov.io/singularity/docs:${{ github.sha }}"' apps/singularity/docs/deployment.yaml
 
       - name: Commit and Push
         if: github.event_name == 'push'
