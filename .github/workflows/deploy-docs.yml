@@ -59,7 +59,7 @@ jobs:
           file: ./docs/Dockerfile
           platforms: linux/amd64
           push: false
-          tags: harbor.stereov.io/singularity/docs:latest
+          tags: harbor.stereov.io/singularity/docs:${{ github.sha }}
 
       - name: Build and Push Docusaurus Image
         if: github.event_name == 'push'
@@ -69,4 +69,28 @@ jobs:
           file: ./docs/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: harbor.stereov.io/singularity/docs:latest
+          tags: harbor.stereov.io/singularity/docs:${{ github.sha }}
+
+      - name: Checkout ArgoCD Repo
+        if: github.event_name == 'push'
+        uses: actions/checkout@v4
+        with:
+          repository: your-org/argocd-manifests
+          token: ${{ secrets.GITOPS_PAT }}
+          path: gitops-config
+
+      - name: Update Manifest
+        if: github.event_name == 'push'
+        working-directory: ./gitops-config
+        run: |
+          yq -i '.spec.template.spec.containers[0].image = "harbor.stereov.io/singularity/docs:${{ github.sha }}"' yq -i '.spec.template.spec.containers[0].image = "harbor.stereov.io/singularity/docs:${{ github.sha }}"' apps/singularity/docs/deployment.yaml
+
+      - name: Commit and Push
+        if: github.event_name == 'push'
+        working-directory: ./gitops-config
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "chore(singularity): update docs image to ${{ github.sha }}"
+          git push
