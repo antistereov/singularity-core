@@ -75,7 +75,7 @@ jobs:
         if: github.event_name == 'push'
         uses: actions/checkout@v4
         with:
-          repository: your-org/argocd-manifests
+          repository: antistereov/k8s-clusters
           token: ${{ secrets.GITOPS_PAT }}
           path: gitops-config
 
