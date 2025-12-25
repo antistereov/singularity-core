@@ -340,6 +340,7 @@ class OAuth2AlertUnitTest : BaseOAuth2FlowTest() {
 
         val (state, sessionCookie) = webTestClient.get()
             .uri("$authorizationPath?redirect_uri=$successRedirectUri&step_up=true")
+            .accessTokenCookie(registeredUser.accessToken)
             .exchange()
             .expectStatus().isFound
             .expectBody()
