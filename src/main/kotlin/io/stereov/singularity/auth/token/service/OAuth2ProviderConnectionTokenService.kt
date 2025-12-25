@@ -94,7 +94,7 @@ class OAuth2ProviderConnectionTokenService(
             .mapError { ex -> OAuth2ProviderConnectionTokenExtractionException.fromTokenExtractionException(ex) }
             .bind()
 
-        val userId = jwt.subject?.let { ObjectId(it) }
+        val userId = jwt.subject?.let { runCatching { ObjectId(it) }.get() }
             .toResultOr { OAuth2ProviderConnectionTokenExtractionException.Invalid("OAuth2ProviderConnectionToken does not contain sub") }
             .bind()
 
