@@ -5,7 +5,6 @@ import com.github.michaelbull.result.getOrThrow
 import io.github.oshai.kotlinlogging.KotlinLogging.logger
 import io.stereov.singularity.auth.alert.properties.SecurityAlertProperties
 import io.stereov.singularity.auth.alert.service.LoginAlertService
-import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.auth.oauth2.exception.OAuth2FlowException
 import io.stereov.singularity.auth.oauth2.model.OAuth2ErrorCode
 import io.stereov.singularity.auth.oauth2.properties.OAuth2Properties
@@ -19,7 +18,6 @@ import io.stereov.singularity.auth.token.model.SessionToken
 import io.stereov.singularity.auth.token.model.SessionTokenType
 import io.stereov.singularity.auth.token.service.*
 import io.stereov.singularity.email.core.properties.EmailProperties
-import io.stereov.singularity.global.util.getOrNull
 import kotlinx.coroutines.reactor.mono
 import org.apache.http.client.utils.URIBuilder
 import org.springframework.http.HttpStatus
@@ -138,12 +136,7 @@ class CustomOAuth2AuthenticationSuccessHandler(
         state: OAuth2StateToken
     ) {
         val oauth2Authentication = authentication as OAuth2AuthenticationToken
-        val sessionId = accessTokenService.extract(exchange).getOrNull()?.let {
-            when (it) {
-                is AuthenticationOutcome.Authenticated -> it.sessionId
-                is AuthenticationOutcome.None -> null
-            }
-        } ?: UUID.randomUUID()
+        val sessionId = state.sessionId ?: UUID.randomUUID()
 
         val oauth2ProviderConnectionToken = exchange.request.cookies.getFirst(OAuth2TokenType.ProviderConnection.COOKIE_NAME)?.value
         val stepUpTokenValue = exchange.request.cookies.getFirst(SessionTokenType.StepUp.COOKIE_NAME)?.value
@@ -157,10 +150,6 @@ class CustomOAuth2AuthenticationSuccessHandler(
             sessionId,
             sessionToken.locale
         )
-        val accessToken = accessTokenService.create(user, sessionId)
-            .getOrThrow { OAuth2FlowException(OAuth2ErrorCode.SERVER_ERROR, "Failed to create AccessToken")}
-        val refreshToken = refreshTokenService.create(user, sessionId, sessionToken.toSessionInfoRequest(), exchange)
-            .getOrThrow { OAuth2FlowException(OAuth2ErrorCode.SERVER_ERROR, "Failed to create RefreshToken")}
 
         if (state.stepUp) {
             val userId = user.id.getOrElse { throw OAuth2FlowException(OAuth2ErrorCode.SERVER_ERROR, "Failed to extract user ID") }
@@ -175,17 +164,22 @@ class CustomOAuth2AuthenticationSuccessHandler(
                 .getOrThrow { OAuth2FlowException(OAuth2ErrorCode.SERVER_ERROR, "Failed to create StepUpToken cookie") }
             exchange.response.headers.add(SessionTokenType.StepUp.HEADER, stepUpToken.value)
             exchange.response.cookies.add(SessionTokenType.StepUp.COOKIE_NAME, stepUpCookie)
+        } else {
+            val accessToken = accessTokenService.create(user, sessionId)
+                .getOrThrow { OAuth2FlowException(OAuth2ErrorCode.SERVER_ERROR, "Failed to create AccessToken")}
+            val refreshToken = refreshTokenService.create(user, sessionId, sessionToken.toSessionInfoRequest(), exchange)
+                .getOrThrow { OAuth2FlowException(OAuth2ErrorCode.SERVER_ERROR, "Failed to create RefreshToken")}
+
+            val accessTokenCookie = cookieCreator.createCookie(accessToken)
+                .getOrThrow { OAuth2FlowException(OAuth2ErrorCode.SERVER_ERROR, "Failed to create AccessToken cookie") }
+            val refreshTokenCookie = cookieCreator.createCookie(refreshToken)
+                .getOrThrow { OAuth2FlowException(OAuth2ErrorCode.SERVER_ERROR, "Failed to create RefreshToken cookie") }
+
+            exchange.response.headers.add(SessionTokenType.Access.HEADER, accessToken.value)
+            exchange.response.headers.add(SessionTokenType.Refresh.HEADER, refreshToken.value)
+            exchange.response.cookies.add(SessionTokenType.Access.COOKIE_NAME, accessTokenCookie)
+            exchange.response.cookies.add(SessionTokenType.Refresh.COOKIE_NAME, refreshTokenCookie)
         }
-
-        val accessTokenCookie = cookieCreator.createCookie(accessToken)
-            .getOrThrow { OAuth2FlowException(OAuth2ErrorCode.SERVER_ERROR, "Failed to create AccessToken cookie") }
-        val refreshTokenCookie = cookieCreator.createCookie(refreshToken)
-            .getOrThrow { OAuth2FlowException(OAuth2ErrorCode.SERVER_ERROR, "Failed to create RefreshToken cookie") }
-
-        exchange.response.headers.add(SessionTokenType.Access.HEADER, accessToken.value)
-        exchange.response.headers.add(SessionTokenType.Refresh.HEADER, refreshToken.value)
-        exchange.response.cookies.add(SessionTokenType.Access.COOKIE_NAME, accessTokenCookie)
-        exchange.response.cookies.add(SessionTokenType.Refresh.COOKIE_NAME, refreshTokenCookie)
 
         if (action == OAuth2AuthenticationService.OAuth2Action.LOGIN && !state.stepUp
             && emailProperties.enable && securityAlertProperties.login) {

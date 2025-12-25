@@ -42,16 +42,19 @@ class CustomOAuth2AuthorizationRequestResolver(
     ): OAuth2AuthorizationRequest {
         val redirectUri = exchange.request.queryParams.getFirst(Constants.REDIRECT_URI_PARAMETER)
         val stepUp = exchange.request.queryParams.getFirst(Constants.STEP_UP_PARAMETER).toBoolean()
-        val userId = accessTokenService.extract(exchange).get()?.let {
-            if (it is AuthenticationOutcome.Authenticated) {
-                it.accessToken.userId
-            } else { null }
-        }
+        val accessToken = accessTokenService.extract(exchange).get()
+        val userId = if (accessToken is AuthenticationOutcome.Authenticated) {
+                accessToken.principalId
+            } else { null  }
+        val sessionId = if (accessToken is AuthenticationOutcome.Authenticated) {
+            accessToken.sessionId
+        } else { null }
         val oAuth2StateToken = oAuth2StateTokenService.create(
             request.state,
             redirectUri,
             stepUp,
-            userId
+            userId,
+            sessionId
         ).getOrThrow()
 
         val req = OAuth2AuthorizationRequest.from(request)

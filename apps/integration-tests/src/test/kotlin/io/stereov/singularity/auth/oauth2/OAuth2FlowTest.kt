@@ -2,6 +2,7 @@ package io.stereov.singularity.auth.oauth2
 
 import com.github.michaelbull.result.getOrThrow
 import io.stereov.singularity.auth.core.dto.request.SessionInfoRequest
+import io.stereov.singularity.auth.core.model.SessionInfo
 import io.stereov.singularity.auth.jwt.exception.TokenExtractionException
 import io.stereov.singularity.auth.oauth2.model.OAuth2ErrorCode
 import io.stereov.singularity.file.core.model.FileKey
@@ -28,6 +29,7 @@ import java.io.File
 import java.net.URI
 import java.time.Duration
 import java.time.Instant
+import java.util.*
 
 class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
@@ -1477,6 +1479,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val (state, sessionCookie) = webTestClient.get()
             .uri("$authorizationPath?redirect_uri=$successRedirectUri")
+            .accessTokenCookie(registeredUser.accessToken)
             .exchange()
             .expectStatus().isFound
             .expectBody()
@@ -2592,9 +2595,16 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val info = mockOAuth2Server.enqueueResponses(sub = principalId, email = registeredUser.email!!)
 
+        val sessionId = UUID.randomUUID()
+        val updatedUser = registeredUser.info.copy()
+        updatedUser.sensitive.sessions[sessionId] = SessionInfo()
+        userService.save(updatedUser)
+
+        val accessToken = accessTokenService.create(updatedUser, sessionId).getOrThrow()
+
         val (state, sessionCookie) = webTestClient.get()
             .uri("$authorizationPath?redirect_uri=$successRedirectUri&step_up=true")
-            .accessTokenCookie(registeredUser.accessToken)
+            .accessTokenCookie(accessToken)
             .exchange()
             .expectStatus().isFound
             .expectBody()
@@ -2602,7 +2612,6 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .extractStateAndSession()
 
         val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os")).getOrThrow()
-
 
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
         val res = webTestClient.get().uri(redirectUri)
@@ -2632,16 +2641,12 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(1, user.sensitive.sessions.size)
 
         requireNotNull(res)
-        val accessToken = res.extractAccessToken()
-        val refreshToken = res.extractRefreshToken()
-        val stepUpToken = res.extractStepUpToken(accessToken.userId, accessToken.sessionId)
+        assertThrows<TokenExtractionException> { res.extractAccessToken() }
+        assertThrows<TokenExtractionException> {  res.extractRefreshToken() }
 
-        assertEquals(user.id.getOrThrow(), accessToken.userId)
-        assertEquals(user.id.getOrThrow(), refreshToken.userId)
+        val stepUpToken = res.extractStepUpToken(registeredUser.id, user.sensitive.sessions.keys.first() )
+
         assertEquals(user.id.getOrThrow(), stepUpToken.userId)
-        assertEquals(refreshToken.sessionId, accessToken.sessionId)
-        assertEquals(refreshToken.sessionId, stepUpToken.sessionId)
-        assertEquals(setOf(refreshToken.sessionId), user.sensitive.sessions.keys)
     }
     // State
     @Test fun `stepUp flow needs state`() = runTest {
@@ -3000,6 +3005,11 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .location
             .assertErrorCode(OAuth2ErrorCode.WRONG_ACCOUNT_AUTHENTICATED)
 
+        val sessionId = UUID.randomUUID()
+        val updatedUser = registeredUser.info.copy()
+        updatedUser.sensitive.sessions[sessionId] = SessionInfo()
+        userService.save(updatedUser)
+
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, principalService.findAll().getOrThrow().toList().size)
@@ -3054,6 +3064,11 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
             .location
             .assertErrorCode(OAuth2ErrorCode.WRONG_ACCOUNT_AUTHENTICATED)
 
+        val sessionId = UUID.randomUUID()
+        val updatedUser = registeredUser.info.copy()
+        updatedUser.sensitive.sessions[sessionId] = SessionInfo()
+        userService.save(updatedUser)
+
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
         assertEquals(1, principalService.findAll().getOrThrow().toList().size)
@@ -3107,6 +3122,11 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         res.responseHeaders
             .location
             .assertErrorCode(OAuth2ErrorCode.WRONG_ACCOUNT_AUTHENTICATED)
+
+        val sessionId = UUID.randomUUID()
+        val updatedUser = registeredUser.info.copy()
+        updatedUser.sensitive.sessions[sessionId] = SessionInfo()
+        userService.save(updatedUser)
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
@@ -3333,8 +3353,6 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(2, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
-        assertEquals(1, user.sensitive.sessions.size)
-
         val identities = user.sensitive.identities.providers
         assertEquals(1, identities.size)
 
@@ -3387,8 +3405,6 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(oauth.id, user.id.getOrThrow())
         assertEquals(2, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
-
-        assertEquals(1, user.sensitive.sessions.size)
 
         val identities = user.sensitive.identities.providers
         assertEquals(1, identities.size)
@@ -3443,8 +3459,6 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         assertEquals(2, principalService.findAll().getOrThrow().toList().size)
         assertEquals(mutableSetOf(Role.User.USER), user.roles)
 
-        assertEquals(1, user.sensitive.sessions.size)
-
         val identities = user.sensitive.identities.providers
         assertEquals(1, identities.size)
 
@@ -3469,6 +3483,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val (state, sessionCookie) = webTestClient.get()
             .uri("$authorizationPath?redirect_uri=$successRedirectUri")
+            .accessTokenCookie(registeredUser.accessToken)
             .exchange()
             .expectStatus().isFound
             .expectBody()
