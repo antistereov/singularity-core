@@ -2594,6 +2594,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val (state, sessionCookie) = webTestClient.get()
             .uri("$authorizationPath?redirect_uri=$successRedirectUri&step_up=true")
+            .accessTokenCookie(registeredUser.accessToken)
             .exchange()
             .expectStatus().isFound
             .expectBody()
@@ -2606,7 +2607,6 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
         val res = webTestClient.get().uri(redirectUri)
             .cookie("SESSION", sessionCookie)
-            .accessTokenCookie(registeredUser.accessToken)
             .sessionTokenCookie(sessionToken)
             .exchange()
             .expectStatus().isFound
@@ -2998,7 +2998,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         res.responseHeaders
             .location
-            .assertErrorCode(OAuth2ErrorCode.ACCESS_TOKEN_MISSING)
+            .assertErrorCode(OAuth2ErrorCode.WRONG_ACCOUNT_AUTHENTICATED)
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
@@ -3031,6 +3031,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val (state, sessionCookie) = webTestClient.get()
             .uri("$authorizationPath?redirect_uri=$successRedirectUri&step_up=true")
+            .accessTokenCookie("invalid")
             .exchange()
             .expectStatus().isFound
             .expectBody()
@@ -3041,7 +3042,6 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         val redirectUri = "$loginPath?code=dummy-code&state=$state"
         val res = webTestClient.get().uri(redirectUri)
             .cookie("SESSION", sessionCookie)
-            .accessTokenCookie("invalid")
             .sessionTokenCookie(sessionToken)
             .exchange()
             .expectStatus().isFound
@@ -3052,7 +3052,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         res.responseHeaders
             .location
-            .assertErrorCode(OAuth2ErrorCode.INVALID_ACCESS_TOKEN)
+            .assertErrorCode(OAuth2ErrorCode.WRONG_ACCOUNT_AUTHENTICATED)
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())
@@ -3085,6 +3085,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         val (state, sessionCookie) = webTestClient.get()
             .uri("$authorizationPath?redirect_uri=$successRedirectUri&step_up=true")
+            .accessTokenCookie(accessTokenService.create(registeredUser.info, registeredUser.sessionId, Instant.ofEpochSecond(0)).getOrThrow())
             .exchange()
             .expectStatus().isFound
             .expectBody()
@@ -3095,7 +3096,6 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
         val sessionToken = sessionTokenService.create(SessionInfoRequest("browser", "os")).getOrThrow()
         val res = webTestClient.get().uri(redirectUri)
             .cookie("SESSION", sessionCookie)
-            .accessTokenCookie(accessTokenService.create(registeredUser.info, registeredUser.sessionId, Instant.ofEpochSecond(0)).getOrThrow())
             .sessionTokenCookie(sessionToken)
             .exchange()
             .expectStatus().isFound
@@ -3106,7 +3106,7 @@ class OAuth2FlowTest() : BaseOAuth2FlowTest() {
 
         res.responseHeaders
             .location
-            .assertErrorCode(OAuth2ErrorCode.ACCESS_TOKEN_EXPIRED)
+            .assertErrorCode(OAuth2ErrorCode.WRONG_ACCOUNT_AUTHENTICATED)
 
         val user = userService.findByEmail(registeredUser.email).getOrThrow()
         assertEquals(registeredUser.id, user.id.getOrThrow())

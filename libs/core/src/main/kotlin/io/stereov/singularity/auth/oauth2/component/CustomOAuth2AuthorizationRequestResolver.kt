@@ -1,6 +1,9 @@
 package io.stereov.singularity.auth.oauth2.component
 
+import com.github.michaelbull.result.get
 import com.github.michaelbull.result.getOrThrow
+import io.stereov.singularity.auth.core.model.AuthenticationOutcome
+import io.stereov.singularity.auth.token.service.AccessTokenService
 import io.stereov.singularity.auth.token.service.OAuth2StateTokenService
 import io.stereov.singularity.global.util.Constants
 import kotlinx.coroutines.reactor.mono
@@ -13,7 +16,8 @@ import reactor.core.publisher.Mono
 
 class CustomOAuth2AuthorizationRequestResolver(
     clientRegistrations: ReactiveClientRegistrationRepository,
-    private val oAuth2StateTokenService: OAuth2StateTokenService
+    private val oAuth2StateTokenService: OAuth2StateTokenService,
+    private val accessTokenService: AccessTokenService,
 ) : ServerOAuth2AuthorizationRequestResolver {
 
     private val delegate = DefaultServerOAuth2AuthorizationRequestResolver(clientRegistrations)
@@ -38,11 +42,16 @@ class CustomOAuth2AuthorizationRequestResolver(
     ): OAuth2AuthorizationRequest {
         val redirectUri = exchange.request.queryParams.getFirst(Constants.REDIRECT_URI_PARAMETER)
         val stepUp = exchange.request.queryParams.getFirst(Constants.STEP_UP_PARAMETER).toBoolean()
-
+        val userId = accessTokenService.extract(exchange).get()?.let {
+            if (it is AuthenticationOutcome.Authenticated) {
+                it.accessToken.userId
+            } else { null }
+        }
         val oAuth2StateToken = oAuth2StateTokenService.create(
             request.state,
             redirectUri,
             stepUp,
+            userId
         ).getOrThrow()
 
         val req = OAuth2AuthorizationRequest.from(request)

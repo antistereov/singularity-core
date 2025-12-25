@@ -11,12 +11,8 @@ import io.stereov.singularity.auth.oauth2.component.CustomOAuth2AuthenticationSu
 import io.stereov.singularity.auth.oauth2.component.CustomOAuth2AuthorizationRequestResolver
 import io.stereov.singularity.auth.oauth2.properties.OAuth2Properties
 import io.stereov.singularity.auth.oauth2.service.OAuth2AuthenticationService
-import io.stereov.singularity.auth.token.service.OAuth2StateTokenService
 import io.stereov.singularity.auth.token.component.CookieCreator
-import io.stereov.singularity.auth.token.service.AccessTokenService
-import io.stereov.singularity.auth.token.service.RefreshTokenService
-import io.stereov.singularity.auth.token.service.SessionTokenService
-import io.stereov.singularity.auth.token.service.StepUpTokenService
+import io.stereov.singularity.auth.token.service.*
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.global.filter.LoggingFilter
 import io.stereov.singularity.global.properties.UiProperties
@@ -133,7 +129,8 @@ class WebSecurityConfiguration {
                 oauth2.authorizationRequestResolver(
                     CustomOAuth2AuthorizationRequestResolver(
                         clientRegistrations,
-                        oAuth2StateTokenService
+                        oAuth2StateTokenService,
+                        accessTokenService
                     )
                 )
                 oauth2.authenticationSuccessHandler(

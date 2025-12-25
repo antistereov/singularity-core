@@ -286,12 +286,9 @@ these codes can occur when trying to log in a user account via OAuth2.
 Besides the error codes that can occur on all flows,
 these codes can occur when trying to perform [step-up authentication](./authentication.md#step-up) via OAuth2.
 
-| Code                          | Description                                                                                     |
-|-------------------------------|-------------------------------------------------------------------------------------------------|
-| `access_token_missing`        | Connecting a new provider requires an [`AccessToken`](./tokens#access-token).                   |
-| `access_token_expired`        | The provided [`AccessToken`](./tokens#access-token) is expired.                                 |
-| `invalid_access_token`        | The provided [`AccessToken`](./tokens#access-token) is invalid.                                 |
-| `wrong_account_authenticated` | The account you logged in via OAuth2 does not match the [`AccessToken`](./tokens#access-token). |
+| Code                          | Description                                                                                                                        |
+|-------------------------------|------------------------------------------------------------------------------------------------------------------------------------|
+| `wrong_account_authenticated` | The account you logged in via OAuth2 does not match the [`AccessToken`](./tokens#access-token) or the token is missing or invalid. |
 
 ### Converting Guests to Users
 

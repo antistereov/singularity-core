@@ -164,8 +164,7 @@ class CustomOAuth2AuthenticationSuccessHandler(
 
         if (state.stepUp) {
             val userId = user.id.getOrElse { throw OAuth2FlowException(OAuth2ErrorCode.SERVER_ERROR, "Failed to extract user ID") }
-            val accessToken = accessTokenService.extractOrOAuth2FlowException(exchange)
-            if (userId != accessToken.principalId)
+            if (userId != state.userId)
                 throw OAuth2FlowException(
                     OAuth2ErrorCode.WRONG_ACCOUNT_AUTHENTICATED,
                     "Step-up failed: the account you authenticated via OAuth2 doesn't match the AccessToken"

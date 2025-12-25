@@ -8,6 +8,7 @@ import io.stereov.singularity.auth.jwt.service.JwtService
 import io.stereov.singularity.auth.token.exception.OAuth2StateTokenCreationException
 import io.stereov.singularity.auth.token.exception.OAuth2StateTokenExtractionException
 import io.stereov.singularity.auth.token.model.OAuth2StateToken
+import org.bson.types.ObjectId
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
 import org.springframework.stereotype.Service
 import java.time.Instant
@@ -44,6 +45,7 @@ class OAuth2StateTokenService(
         randomState: String,
         redirectUri: String?,
         stepUp: Boolean,
+        userId: ObjectId?,
     ): Result<OAuth2StateToken, OAuth2StateTokenCreationException> = coroutineBinding {
         logger.debug { "Creating OAuth2StateToken" }
 
@@ -53,6 +55,9 @@ class OAuth2StateTokenService(
                 .claim(stepUpClaim, stepUp.toString())
                 .expiresAt(Instant.now().plusSeconds(jwtProperties.expiresIn))
 
+            if (userId != null) {
+                claimsSet.subject(userId.toString())
+            }
 
             if (redirectUri != null)
                 claimsSet.claim(redirectUriClaim, redirectUri)
@@ -65,7 +70,7 @@ class OAuth2StateTokenService(
 
         jwtService.encodeJwt(claims, tokenType)
             .mapError { ex -> OAuth2StateTokenCreationException.fromTokenCreationException(ex) }
-            .map { jwt -> OAuth2StateToken(randomState, redirectUri, stepUp, jwt) }
+            .map { jwt -> OAuth2StateToken(randomState, redirectUri, stepUp, userId, jwt) }
             .bind()
     }
 
@@ -92,10 +97,13 @@ class OAuth2StateTokenService(
             .toResultOr { OAuth2StateTokenExtractionException.Invalid("No step up claim found in token") }
             .bind()
 
+        val userId = jwt.subject?.let { runCatching {  ObjectId(it) }.get() }
+
         OAuth2StateToken(
             randomState = randomState,
             redirectUri = redirectUri,
             stepUp = stepUp,
+            userId = userId,
             jwt = jwt,
         )
     }
