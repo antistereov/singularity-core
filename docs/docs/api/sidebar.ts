@@ -664,38 +664,14 @@ const sidebar: SidebarsConfig = {
         },
         {
           type: "doc",
-          id: "api/schemas/guest",
-          label: "Guest",
-          className: "schema",
-        },
-        {
-          type: "doc",
-          id: "api/schemas/klogger",
-          label: "KLogger",
-          className: "schema",
-        },
-        {
-          type: "doc",
           id: "api/schemas/objectid",
           label: "ObjectId",
           className: "schema",
         },
         {
           type: "doc",
-          id: "api/schemas/role",
-          label: "Role",
-          className: "schema",
-        },
-        {
-          type: "doc",
-          id: "api/schemas/user",
-          label: "User",
-          className: "schema",
-        },
-        {
-          type: "doc",
-          id: "api/schemas/userresponse",
-          label: "UserResponse",
+          id: "api/schemas/principalresponse",
+          label: "PrincipalResponse",
           className: "schema",
         },
         {
@@ -772,14 +748,14 @@ const sidebar: SidebarsConfig = {
         },
         {
           type: "doc",
-          id: "api/schemas/tagresponse",
-          label: "TagResponse",
+          id: "api/schemas/principaloverviewresponse",
+          label: "PrincipalOverviewResponse",
           className: "schema",
         },
         {
           type: "doc",
-          id: "api/schemas/useroverviewresponse",
-          label: "UserOverviewResponse",
+          id: "api/schemas/tagresponse",
+          label: "TagResponse",
           className: "schema",
         },
         {
@@ -1036,8 +1012,8 @@ const sidebar: SidebarsConfig = {
         },
         {
           type: "doc",
-          id: "api/schemas/pageuseroverviewresponse",
-          label: "PageUserOverviewResponse",
+          id: "api/schemas/pageprincipaloverviewresponse",
+          label: "PagePrincipalOverviewResponse",
           className: "schema",
         },
         {

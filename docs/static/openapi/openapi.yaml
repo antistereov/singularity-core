@@ -863,7 +863,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/UserResponse"
+                $ref: "#/components/schemas/PrincipalResponse"
         "500":
           description: |-
             The following error codes correspond to this status:
@@ -1207,7 +1207,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/UserResponse"
+                $ref: "#/components/schemas/PrincipalResponse"
         "500":
           description: |-
             The following error codes correspond to this status:
@@ -1481,7 +1481,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/UserResponse"
+                $ref: "#/components/schemas/PrincipalResponse"
         "500":
           description: |-
             The following error codes correspond to this status:
@@ -1804,7 +1804,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/UserResponse"
+                $ref: "#/components/schemas/PrincipalResponse"
         "500":
           description: |-
             The following error codes correspond to this status:
@@ -1896,7 +1896,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/UserResponse"
+                $ref: "#/components/schemas/PrincipalResponse"
         "500":
           description: |-
             The following error codes correspond to this status:
@@ -2108,7 +2108,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/UserResponse"
+                $ref: "#/components/schemas/PrincipalResponse"
         "500":
           description: |-
             The following error codes correspond to this status:
@@ -2189,7 +2189,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/UserResponse"
+                $ref: "#/components/schemas/PrincipalResponse"
         "500":
           description: |-
             The following error codes correspond to this status:
@@ -2724,7 +2724,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/UserResponse"
+                $ref: "#/components/schemas/PrincipalResponse"
         "500":
           description: |-
             The following error codes correspond to this status:
@@ -2795,7 +2795,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/UserResponse"
+                $ref: "#/components/schemas/PrincipalResponse"
         "500":
           description: |-
             The following error codes correspond to this status:
@@ -3319,7 +3319,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/UserResponse"
+                $ref: "#/components/schemas/PrincipalResponse"
         "500":
           description: |-
             The following error codes correspond to this status:
@@ -3398,7 +3398,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/UserResponse"
+                $ref: "#/components/schemas/PrincipalResponse"
         "500":
           description: |-
             The following error codes correspond to this status:
@@ -3466,7 +3466,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/UserOverviewResponse"
+                $ref: "#/components/schemas/PrincipalOverviewResponse"
         "500":
           description: |-
             The following error codes correspond to this status:
@@ -3704,7 +3704,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/PageUserOverviewResponse"
+                $ref: "#/components/schemas/PagePrincipalOverviewResponse"
         "500":
           description: |-
             The following error codes correspond to this status:
@@ -3761,7 +3761,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/UserResponse"
+                $ref: "#/components/schemas/PrincipalResponse"
         "500":
           description: |-
             The following error codes correspond to this status:
@@ -3820,7 +3820,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/UserResponse"
+                $ref: "#/components/schemas/PrincipalResponse"
         "500":
           description: |-
             The following error codes correspond to this status:
@@ -4047,7 +4047,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/UserResponse"
+                $ref: "#/components/schemas/PrincipalResponse"
         "500":
           description: |-
             The following error codes correspond to this status:
@@ -4127,7 +4127,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/UserResponse"
+                $ref: "#/components/schemas/PrincipalResponse"
         "500":
           description: |-
             The following error codes correspond to this status:
@@ -4190,7 +4190,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/UserResponse"
+                $ref: "#/components/schemas/PrincipalResponse"
         "500":
           description: |-
             The following error codes correspond to this status:
@@ -6099,48 +6099,6 @@ components:
       - key
       - size
       - url
-    Guest:
-      allOf:
-      - $ref: "#/components/schemas/Role"
-      enum:
-      - GUEST
-    KLogger:
-      type: object
-      properties:
-        isInfoEnabled:
-          type: boolean
-          deprecated: true
-          description: Use isInfoEnabled() instead
-        isDebugEnabled:
-          type: boolean
-          deprecated: true
-          description: Use isDebugEnabled() instead
-        isErrorEnabled:
-          type: boolean
-          deprecated: true
-          description: Use isErrorEnabled() instead
-        isTraceEnabled:
-          type: boolean
-          deprecated: true
-          description: Use isTraceEnabled() instead
-        isWarnEnabled:
-          type: boolean
-          deprecated: true
-          description: Use isWarnEnabled() instead
-        isLoggingOff:
-          type: boolean
-          deprecated: true
-          description: Use isLoggingOff() instead
-        name:
-          type: string
-      required:
-      - isDebugEnabled
-      - isErrorEnabled
-      - isInfoEnabled
-      - isLoggingOff
-      - isTraceEnabled
-      - isWarnEnabled
-      - name
     ObjectId:
       type: object
       properties:
@@ -6150,23 +6108,7 @@ components:
         date:
           type: string
           format: date-time
-    Role:
-      type: object
-      properties:
-        value:
-          type: string
-        logger:
-          $ref: "#/components/schemas/KLogger"
-      required:
-      - logger
-      - value
-    User:
-      allOf:
-      - $ref: "#/components/schemas/Role"
-      enum:
-      - USER
-      - ADMIN
-    UserResponse:
+    PrincipalResponse:
       type: object
       properties:
         id:
@@ -6182,9 +6124,7 @@ components:
         roles:
           type: array
           items:
-            oneOf:
-            - $ref: "#/components/schemas/Guest"
-            - $ref: "#/components/schemas/User"
+            type: string
           uniqueItems: true
         emailVerified:
           type: boolean
@@ -6385,7 +6325,7 @@ components:
           type: string
           format: date-time
         owner:
-          $ref: "#/components/schemas/UserOverviewResponse"
+          $ref: "#/components/schemas/PrincipalOverviewResponse"
         path:
           type: string
         state:
@@ -6429,6 +6369,24 @@ components:
       - title
       - trusted
       - updatedAt
+    PrincipalOverviewResponse:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/ObjectId"
+        name:
+          type: string
+        avatar:
+          $ref: "#/components/schemas/FileMetadataResponse"
+        roles:
+          type: array
+          items:
+            type: string
+          uniqueItems: true
+      required:
+      - id
+      - name
+      - roles
     TagResponse:
       type: object
       properties:
@@ -6445,26 +6403,6 @@ components:
       - key
       - locale
       - name
-    UserOverviewResponse:
-      type: object
-      properties:
-        id:
-          $ref: "#/components/schemas/ObjectId"
-        name:
-          type: string
-        avatar:
-          $ref: "#/components/schemas/FileMetadataResponse"
-        roles:
-          type: array
-          items:
-            oneOf:
-            - $ref: "#/components/schemas/Guest"
-            - $ref: "#/components/schemas/User"
-          uniqueItems: true
-      required:
-      - id
-      - name
-      - roles
     SessionInfoRequest:
       type: object
       properties:
@@ -6570,7 +6508,7 @@ components:
       type: object
       properties:
         user:
-          $ref: "#/components/schemas/UserResponse"
+          $ref: "#/components/schemas/PrincipalResponse"
         accessToken:
           type: string
         refreshToken:
@@ -6648,7 +6586,7 @@ components:
       type: object
       properties:
         user:
-          $ref: "#/components/schemas/UserResponse"
+          $ref: "#/components/schemas/PrincipalResponse"
         accessToken:
           type: string
         refreshToken:
@@ -6752,7 +6690,7 @@ components:
       type: object
       properties:
         user:
-          $ref: "#/components/schemas/UserOverviewResponse"
+          $ref: "#/components/schemas/PrincipalOverviewResponse"
         role:
           type: string
           enum:
@@ -6857,14 +6795,14 @@ components:
     RefreshTokenResponse:
       type: object
       properties:
-        user:
-          $ref: "#/components/schemas/UserResponse"
+        principal:
+          $ref: "#/components/schemas/PrincipalResponse"
         accessToken:
           type: string
         refreshToken:
           type: string
       required:
-      - user
+      - principal
     ResetPasswordRequest:
       type: object
       properties:
@@ -6911,7 +6849,7 @@ components:
       type: object
       properties:
         user:
-          $ref: "#/components/schemas/UserResponse"
+          $ref: "#/components/schemas/PrincipalResponse"
         accessToken:
           type: string
         refreshToken:
@@ -6970,7 +6908,7 @@ components:
       type: object
       properties:
         user:
-          $ref: "#/components/schemas/UserResponse"
+          $ref: "#/components/schemas/PrincipalResponse"
         accessToken:
           type: string
         refreshToken:
@@ -7052,7 +6990,7 @@ components:
           type: string
       required:
       - locale
-    PageUserOverviewResponse:
+    PagePrincipalOverviewResponse:
       type: object
       properties:
         totalElements:
@@ -7076,7 +7014,7 @@ components:
         content:
           type: array
           items:
-            $ref: "#/components/schemas/UserOverviewResponse"
+            $ref: "#/components/schemas/PrincipalOverviewResponse"
         number:
           type: integer
           format: int32
