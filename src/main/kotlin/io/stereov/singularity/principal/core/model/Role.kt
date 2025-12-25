@@ -1,5 +1,6 @@
 package io.stereov.singularity.principal.core.model
 
+import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
@@ -23,6 +24,7 @@ import io.stereov.singularity.principal.core.exception.RoleException
 sealed interface Role {
 
     val logger: KLogger
+    @get:JsonValue
     val value: String
 
     /**
