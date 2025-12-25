@@ -19,7 +19,7 @@ import io.stereov.singularity.auth.twofactor.exception.ValidateTotpSetupExceptio
 import io.stereov.singularity.auth.twofactor.service.TotpAuthenticationService
 import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.OpenApiConstants
-import io.stereov.singularity.principal.core.dto.response.UserResponse
+import io.stereov.singularity.principal.core.dto.response.PrincipalResponse
 import io.stereov.singularity.principal.core.exception.FindUserByIdException
 import io.stereov.singularity.principal.core.exception.PrincipalMapperException
 import io.stereov.singularity.principal.core.mapper.PrincipalMapper
@@ -185,7 +185,7 @@ class TotpAuthenticationController(
         @RequestBody setupRequest: TwoFactorVerifySetupRequest,
         @RequestParam locale: Locale?,
         exchange: ServerWebExchange,
-    ): ResponseEntity<UserResponse> {
+    ): ResponseEntity<PrincipalResponse> {
         val authentication = authorizationService.getAuthenticationOutcome()
             .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
             .requireAuthentication()
@@ -246,7 +246,7 @@ class TotpAuthenticationController(
             ApiResponse(
                 responseCode = "200",
                 description = "Success.",
-                content = [Content(schema = Schema(implementation = UserResponse::class))]
+                content = [Content(schema = Schema(implementation = PrincipalResponse::class))]
             )
         ]
     )
@@ -261,7 +261,7 @@ class TotpAuthenticationController(
     suspend fun disableTotpAsTwoFactorMethod(
         @RequestParam locale: Locale?,
         exchange: ServerWebExchange,
-    ): ResponseEntity<UserResponse> {
+    ): ResponseEntity<PrincipalResponse> {
         val authentication = authorizationService.getAuthenticationOutcome()
             .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
             .requireAuthentication()

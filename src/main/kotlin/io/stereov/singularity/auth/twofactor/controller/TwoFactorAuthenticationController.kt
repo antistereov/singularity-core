@@ -23,7 +23,7 @@ import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthenticationServ
 import io.stereov.singularity.database.core.exception.DocumentException
 import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.OpenApiConstants
-import io.stereov.singularity.principal.core.dto.response.UserResponse
+import io.stereov.singularity.principal.core.dto.response.PrincipalResponse
 import io.stereov.singularity.principal.core.exception.FindUserByIdException
 import io.stereov.singularity.principal.core.exception.PrincipalMapperException
 import io.stereov.singularity.principal.core.mapper.PrincipalMapper
@@ -304,7 +304,7 @@ class TwoFactorAuthenticationController(
     suspend fun changePreferredTwoFactorMethod(
         @RequestBody req: ChangePreferredTwoFactorMethodRequest,
         exchange: ServerWebExchange,
-    ): ResponseEntity<UserResponse> {
+    ): ResponseEntity<PrincipalResponse> {
         val authentication = authorizationService.getAuthenticationOutcome()
             .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
             .requireAuthentication()
