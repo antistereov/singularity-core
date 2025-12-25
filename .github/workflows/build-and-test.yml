@@ -135,3 +135,27 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: harbor.stereov.io/stereov-io/singularity:${{ github.sha }}
+
+      - name: Checkout ArgoCD Repo
+        if: github.event_name == 'push'
+        uses: actions/checkout@v4
+        with:
+          repository: antistereov/k8s-clusters
+          token: ${{ secrets.GITOPS_PAT }}
+          path: gitops-config
+
+      - name: Update Manifest
+        if: github.event_name == 'push'
+        working-directory: ./gitops-config
+        run: |
+          yq -i 'select(.kind == "Deployment") .spec.template.spec.containers[0].image = "harbor.stereov.io/stereov-io/singularity:${{ github.sha }}"' apps/stereov-io/singularity/deployment.yaml
+
+      - name: Commit and Push
+        if: github.event_name == 'push'
+        working-directory: ./gitops-config
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "chore(stereov-io): update singularity image to ${{ github.sha }}"
+          git push
