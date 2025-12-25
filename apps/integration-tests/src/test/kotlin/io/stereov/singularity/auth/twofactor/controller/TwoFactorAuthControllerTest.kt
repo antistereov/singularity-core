@@ -10,7 +10,7 @@ import io.stereov.singularity.auth.twofactor.dto.request.ChangePreferredTwoFacto
 import io.stereov.singularity.auth.twofactor.dto.request.CompleteLoginRequest
 import io.stereov.singularity.auth.twofactor.dto.request.CompleteStepUpRequest
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
-import io.stereov.singularity.principal.core.dto.response.UserResponse
+import io.stereov.singularity.principal.core.dto.response.PrincipalResponse
 import io.stereov.singularity.principal.core.exception.UserException
 import io.stereov.singularity.test.BaseMailIntegrationTest
 import kotlinx.coroutines.test.runTest
@@ -723,7 +723,7 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
             .stepUpTokenCookie(user.stepUpToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserResponse::class.java)
+            .expectBody(PrincipalResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -746,7 +746,7 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
             .stepUpTokenCookie(user.stepUpToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserResponse::class.java)
+            .expectBody(PrincipalResponse::class.java)
             .returnResult()
             .responseBody
 

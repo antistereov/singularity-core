@@ -1,7 +1,7 @@
 package io.stereov.singularity.admin.core.controller
 
 import com.github.michaelbull.result.getOrThrow
-import io.stereov.singularity.principal.core.dto.response.UserResponse
+import io.stereov.singularity.principal.core.dto.response.PrincipalResponse
 import io.stereov.singularity.principal.core.model.Role
 import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.test.runTest
@@ -20,7 +20,7 @@ class AdminControllerTest : BaseIntegrationTest() {
             .accessTokenCookie(admin.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserResponse::class.java)
+            .expectBody(PrincipalResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -44,7 +44,7 @@ class AdminControllerTest : BaseIntegrationTest() {
             .accessTokenCookie(admin.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserResponse::class.java)
+            .expectBody(PrincipalResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -121,7 +121,7 @@ class AdminControllerTest : BaseIntegrationTest() {
             .accessTokenCookie(admin.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserResponse::class.java)
+            .expectBody(PrincipalResponse::class.java)
             .returnResult()
             .responseBody
 

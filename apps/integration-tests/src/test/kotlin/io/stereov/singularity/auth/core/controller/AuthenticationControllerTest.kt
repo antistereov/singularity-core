@@ -13,7 +13,7 @@ import io.stereov.singularity.auth.token.model.OAuth2TokenType
 import io.stereov.singularity.auth.token.model.SessionTokenType
 import io.stereov.singularity.auth.token.model.TwoFactorTokenType
 import io.stereov.singularity.global.util.Random
-import io.stereov.singularity.principal.core.dto.response.UserResponse
+import io.stereov.singularity.principal.core.dto.response.PrincipalResponse
 import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.test.runTest
@@ -171,19 +171,19 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
         Assertions.assertTrue(refreshToken.isNotBlank())
         Assertions.assertEquals(user.id, account.id)
 
-        val userResponse = webTestClient.get()
+        val principalResponse = webTestClient.get()
             .uri("/api/users/me")
             .accessTokenCookie(accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserResponse::class.java)
+            .expectBody(PrincipalResponse::class.java)
             .returnResult()
             .responseBody
 
-        requireNotNull(userResponse)
+        requireNotNull(principalResponse)
 
-        Assertions.assertEquals(user.id, userResponse.id)
-        Assertions.assertEquals(user.info.sensitive.email, userResponse.email)
+        Assertions.assertEquals(user.id, principalResponse.id)
+        Assertions.assertEquals(user.info.sensitive.email, principalResponse.email)
 
         Assertions.assertEquals(user.sessionId, user.info.sensitive.sessions.keys.first())
         Assertions.assertEquals(1, user.info.sensitive.sessions.size)
@@ -268,7 +268,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
             .accessTokenCookie(accessToken.value)
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserResponse::class.java)
+            .expectBody(PrincipalResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -389,7 +389,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
         Assertions.assertTrue(accessToken.isNotBlank())
         Assertions.assertTrue(refreshToken.isNotBlank())
 
-        Assertions.assertEquals(user.id, res.user.id)
+        Assertions.assertEquals(user.id, res.principal.id)
 
         webTestClient.post()
             .uri("/api/auth/refresh")

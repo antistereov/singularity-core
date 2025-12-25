@@ -1,7 +1,7 @@
 package io.stereov.singularity.principal.group.controller
 
 import com.github.michaelbull.result.getOrThrow
-import io.stereov.singularity.principal.core.dto.response.UserResponse
+import io.stereov.singularity.principal.core.dto.response.PrincipalResponse
 import io.stereov.singularity.principal.group.model.Group
 import io.stereov.singularity.principal.group.model.GroupTranslation
 import io.stereov.singularity.test.BaseIntegrationTest
@@ -32,7 +32,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
             .accessTokenCookie(admin.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserResponse::class.java)
+            .expectBody(PrincipalResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -148,7 +148,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
             .accessTokenCookie(admin.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserResponse::class.java)
+            .expectBody(PrincipalResponse::class.java)
             .returnResult()
             .responseBody
 

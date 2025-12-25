@@ -13,7 +13,7 @@ import io.stereov.singularity.auth.twofactor.dto.response.TwoFactorRecoveryRespo
 import io.stereov.singularity.auth.twofactor.dto.response.TwoFactorSetupResponse
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
 import io.stereov.singularity.global.util.Random
-import io.stereov.singularity.principal.core.dto.response.UserResponse
+import io.stereov.singularity.principal.core.dto.response.PrincipalResponse
 import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*
@@ -51,7 +51,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
             .bodyValue(TwoFactorVerifySetupRequest(response.token, code))
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserResponse::class.java)
+            .expectBody(PrincipalResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -145,7 +145,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
             .bodyValue(TwoFactorVerifySetupRequest(response.token, code))
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserResponse::class.java)
+            .expectBody(PrincipalResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -199,7 +199,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
             .bodyValue(TwoFactorVerifySetupRequest(token.value, code))
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserResponse::class.java)
+            .expectBody(PrincipalResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -545,7 +545,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
             .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserResponse::class.java)
+            .expectBody(PrincipalResponse::class.java)
             .returnResult()
 
         val body = res.responseBody

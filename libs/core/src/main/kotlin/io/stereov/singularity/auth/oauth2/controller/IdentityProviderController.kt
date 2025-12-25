@@ -12,7 +12,7 @@ import io.stereov.singularity.auth.token.exception.AccessTokenExtractionExceptio
 import io.stereov.singularity.auth.token.exception.StepUpTokenExtractionException
 import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.OpenApiConstants
-import io.stereov.singularity.principal.core.dto.response.UserResponse
+import io.stereov.singularity.principal.core.dto.response.PrincipalResponse
 import io.stereov.singularity.principal.core.exception.FindUserByIdException
 import io.stereov.singularity.principal.core.exception.PrincipalMapperException
 import io.stereov.singularity.principal.core.mapper.PrincipalMapper
@@ -121,7 +121,7 @@ class IdentityProviderController(
             ApiResponse(
                 responseCode = "200",
                 description = "Success.",
-                content = [Content(schema = Schema(implementation = UserResponse::class))]
+                content = [Content(schema = Schema(implementation = PrincipalResponse::class))]
             )
         ]
     )
@@ -136,7 +136,7 @@ class IdentityProviderController(
     suspend fun addPasswordAuthentication(
         @RequestBody @Valid req: AddPasswordAuthenticationRequest,
         exchange: ServerWebExchange
-    ): ResponseEntity<UserResponse> {
+    ): ResponseEntity<PrincipalResponse> {
         val authentication = authorizationService.getAuthenticationOutcome()
             .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
             .requireAuthentication()
@@ -186,7 +186,7 @@ class IdentityProviderController(
             ApiResponse(
                 responseCode = "200",
                 description = "Success.",
-                content = [Content(schema = Schema(implementation = UserResponse::class))]
+                content = [Content(schema = Schema(implementation = PrincipalResponse::class))]
             ),
         ]
     )
@@ -202,7 +202,7 @@ class IdentityProviderController(
         @PathVariable provider: String,
         @RequestParam locale: Locale?,
         exchange: ServerWebExchange
-    ): ResponseEntity<UserResponse> {
+    ): ResponseEntity<PrincipalResponse> {
         val authentication = authorizationService.getAuthenticationOutcome()
             .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
             .requireAuthentication()

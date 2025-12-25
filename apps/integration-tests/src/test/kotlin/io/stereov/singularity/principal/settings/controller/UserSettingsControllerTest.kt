@@ -7,7 +7,7 @@ import io.stereov.singularity.auth.token.model.SessionTokenType
 import io.stereov.singularity.file.core.model.FileMetadataDocument
 import io.stereov.singularity.file.image.properties.ImageProperties
 import io.stereov.singularity.file.local.properties.LocalFileStorageProperties
-import io.stereov.singularity.principal.core.dto.response.UserResponse
+import io.stereov.singularity.principal.core.dto.response.PrincipalResponse
 import io.stereov.singularity.principal.settings.dto.request.ChangeEmailRequest
 import io.stereov.singularity.principal.settings.dto.request.ChangePasswordRequest
 import io.stereov.singularity.principal.settings.dto.request.ChangePrincipalRequest
@@ -42,7 +42,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .header(HttpHeaders.COOKIE, "${SessionTokenType.Access.cookieName}=${user.accessToken}")
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserResponse::class.java)
+            .expectBody(PrincipalResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -285,7 +285,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserResponse::class.java)
+            .expectBody(PrincipalResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -534,7 +534,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .bodyValue(ChangePrincipalRequest(newName))
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserResponse::class.java)
+            .expectBody(PrincipalResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -589,7 +589,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             )
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserResponse::class.java)
+            .expectBody(PrincipalResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -673,7 +673,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             )
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserResponse::class.java)
+            .expectBody(PrincipalResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -691,7 +691,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             )
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserResponse::class.java)
+            .expectBody(PrincipalResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -824,7 +824,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             )
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserResponse::class.java)
+            .expectBody(PrincipalResponse::class.java)
             .returnResult()
             .responseBody
         webTestClient.delete()
@@ -900,7 +900,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             )
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserResponse::class.java)
+            .expectBody(PrincipalResponse::class.java)
             .returnResult()
             .responseBody
 

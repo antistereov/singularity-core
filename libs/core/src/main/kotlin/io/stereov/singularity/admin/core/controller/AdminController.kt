@@ -12,7 +12,7 @@ import io.stereov.singularity.auth.token.exception.AccessTokenExtractionExceptio
 import io.stereov.singularity.database.encryption.exception.SaveEncryptedDocumentException
 import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.OpenApiConstants
-import io.stereov.singularity.principal.core.dto.response.UserResponse
+import io.stereov.singularity.principal.core.dto.response.PrincipalResponse
 import io.stereov.singularity.principal.core.exception.FindPrincipalByIdException
 import io.stereov.singularity.principal.core.exception.FindUserByIdException
 import io.stereov.singularity.principal.core.exception.PrincipalException
@@ -81,7 +81,7 @@ class AdminController(
     ])
     suspend fun grantAdminPermissions(
         @PathVariable userId: ObjectId
-    ): ResponseEntity<UserResponse> {
+    ): ResponseEntity<PrincipalResponse> {
         authorizationService.getAuthenticationOutcome()
             .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
             .requireAuthentication()
@@ -151,7 +151,7 @@ class AdminController(
     ])
     suspend fun revokeAdminPermissions(
         @PathVariable userId: ObjectId
-    ): ResponseEntity<UserResponse> {
+    ): ResponseEntity<PrincipalResponse> {
         authorizationService.getAuthenticationOutcome()
             .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
             .requireAuthentication()

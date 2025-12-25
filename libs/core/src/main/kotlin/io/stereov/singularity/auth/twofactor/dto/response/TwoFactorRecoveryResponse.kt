@@ -1,9 +1,9 @@
 package io.stereov.singularity.auth.twofactor.dto.response
 
-import io.stereov.singularity.principal.core.dto.response.UserResponse
+import io.stereov.singularity.principal.core.dto.response.PrincipalResponse
 
 data class TwoFactorRecoveryResponse(
-    val user: UserResponse,
+    val user: PrincipalResponse,
     val accessToken: String?,
     val refreshToken: String?,
     val stepUpToken: String?,

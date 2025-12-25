@@ -16,7 +16,7 @@ import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.exception.SingularityException
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.global.model.SuccessResponse
-import io.stereov.singularity.principal.core.dto.response.UserResponse
+import io.stereov.singularity.principal.core.dto.response.PrincipalResponse
 import io.stereov.singularity.principal.core.exception.FindPrincipalByIdException
 import io.stereov.singularity.principal.core.exception.FindUserByIdException
 import io.stereov.singularity.principal.core.exception.PrincipalMapperException
@@ -89,7 +89,7 @@ class PrincipalSettingsController(
         FindPrincipalByIdException::class,
         PrincipalMapperException::class
     ])
-    suspend fun getAuthorizedPrincipal(): ResponseEntity<UserResponse> {
+    suspend fun getAuthorizedPrincipal(): ResponseEntity<PrincipalResponse> {
         val principalId = authorizationService.getAuthenticationOutcome()
             .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
             .requireAuthentication()
@@ -229,7 +229,7 @@ class PrincipalSettingsController(
         @RequestBody @Valid payload: ChangePasswordRequest,
         @RequestParam locale: Locale?,
         exchange: ServerWebExchange,
-    ): ResponseEntity<UserResponse> {
+    ): ResponseEntity<PrincipalResponse> {
         val authentication = authorizationService.getAuthenticationOutcome()
             .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
             .requireAuthentication()
@@ -280,7 +280,7 @@ class PrincipalSettingsController(
         SaveEncryptedDocumentException::class,
         PrincipalMapperException::class
     ])
-    suspend fun updateAuthorizedUser(@RequestBody payload: ChangePrincipalRequest): ResponseEntity<UserResponse> {
+    suspend fun updateAuthorizedUser(@RequestBody payload: ChangePrincipalRequest): ResponseEntity<PrincipalResponse> {
         val principalId = authorizationService.getAuthenticationOutcome()
             .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
             .requireAuthentication()
@@ -331,7 +331,7 @@ class PrincipalSettingsController(
     ])
     suspend fun setAvatarOfAuthorizedUser(
         @RequestPart file: FilePart,
-    ): ResponseEntity<UserResponse> {
+    ): ResponseEntity<PrincipalResponse> {
         val authentication = authorizationService.getAuthenticationOutcome()
             .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
             .requireAuthentication()
@@ -378,7 +378,7 @@ class PrincipalSettingsController(
         DeleteUserAvatarException::class,
         PrincipalMapperException::class
     ])
-    suspend fun deleteAvatarOfAuthorizedUser(): ResponseEntity<UserResponse> {
+    suspend fun deleteAvatarOfAuthorizedUser(): ResponseEntity<PrincipalResponse> {
         val authentication = authorizationService.getAuthenticationOutcome()
             .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
             .requireAuthentication()

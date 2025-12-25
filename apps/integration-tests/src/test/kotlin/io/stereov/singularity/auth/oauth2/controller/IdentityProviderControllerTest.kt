@@ -4,7 +4,7 @@ import com.github.michaelbull.result.getOrThrow
 import io.stereov.singularity.auth.core.dto.request.LoginRequest
 import io.stereov.singularity.auth.core.dto.response.IdentityProviderResponse
 import io.stereov.singularity.auth.oauth2.dto.request.AddPasswordAuthenticationRequest
-import io.stereov.singularity.principal.core.dto.response.UserResponse
+import io.stereov.singularity.principal.core.dto.response.PrincipalResponse
 import io.stereov.singularity.principal.core.exception.UserException
 import io.stereov.singularity.principal.core.model.identity.UserIdentity
 import io.stereov.singularity.test.BaseIntegrationTest
@@ -61,7 +61,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
             .bodyValue(req)
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserResponse::class.java)
+            .expectBody(PrincipalResponse::class.java)
             .returnResult()
 
         val body = requireNotNull(res.responseBody)
@@ -255,7 +255,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
             .stepUpTokenCookie(user.stepUpToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserResponse::class.java)
+            .expectBody(PrincipalResponse::class.java)
             .returnResult()
 
         val body = requireNotNull(res.responseBody)

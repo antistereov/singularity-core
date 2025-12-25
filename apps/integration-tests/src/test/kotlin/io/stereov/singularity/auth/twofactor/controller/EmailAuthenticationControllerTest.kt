@@ -6,7 +6,7 @@ import io.stereov.singularity.auth.core.dto.response.MailCooldownResponse
 import io.stereov.singularity.auth.token.model.SessionTokenType
 import io.stereov.singularity.auth.twofactor.dto.request.EnableEmailTwoFactorMethodRequest
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
-import io.stereov.singularity.principal.core.dto.response.UserResponse
+import io.stereov.singularity.principal.core.dto.response.PrincipalResponse
 import io.stereov.singularity.test.BaseMailIntegrationTest
 import jakarta.mail.internet.MimeMessage
 import kotlinx.coroutines.test.runTest
@@ -95,7 +95,7 @@ class EmailAuthenticationControllerTest : BaseMailIntegrationTest() {
             .bodyValue(EnableEmailTwoFactorMethodRequest(user.email2faCode))
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserResponse::class.java)
+            .expectBody(PrincipalResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -224,7 +224,7 @@ class EmailAuthenticationControllerTest : BaseMailIntegrationTest() {
             .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserResponse::class.java)
+            .expectBody(PrincipalResponse::class.java)
             .returnResult()
 
         val body = res.responseBody

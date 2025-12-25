@@ -5,7 +5,7 @@ import io.stereov.singularity.file.core.dto.FileMetadataResponse
 import io.stereov.singularity.principal.core.model.Role
 import org.bson.types.ObjectId
 
-data class UserResponse(
+data class PrincipalResponse(
     val id: ObjectId,
     val name: String,
     val email: String?,

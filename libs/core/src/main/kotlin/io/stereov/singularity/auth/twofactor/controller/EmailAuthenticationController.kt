@@ -19,7 +19,7 @@ import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.global.model.SendEmailResponse
 import io.stereov.singularity.global.model.SuccessResponse
 import io.stereov.singularity.global.util.getOrNull
-import io.stereov.singularity.principal.core.dto.response.UserResponse
+import io.stereov.singularity.principal.core.dto.response.PrincipalResponse
 import io.stereov.singularity.principal.core.exception.FindUserByIdException
 import io.stereov.singularity.principal.core.exception.PrincipalMapperException
 import io.stereov.singularity.principal.core.mapper.PrincipalMapper
@@ -181,7 +181,7 @@ class EmailAuthenticationController(
             ApiResponse(
                 responseCode = "200",
                 description = "Updated user information.",
-                content = [Content(schema = Schema(implementation = UserResponse::class))]
+                content = [Content(schema = Schema(implementation = PrincipalResponse::class))]
             )
         ]
     )
@@ -197,7 +197,7 @@ class EmailAuthenticationController(
         @RequestBody payload: EnableEmailTwoFactorMethodRequest,
         @RequestParam locale: Locale?,
         exchange: ServerWebExchange,
-    ): ResponseEntity<UserResponse> {
+    ): ResponseEntity<PrincipalResponse> {
         val authentication = authorizationService.getAuthenticationOutcome()
             .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
             .requireAuthentication()
@@ -255,7 +255,7 @@ class EmailAuthenticationController(
             ApiResponse(
                 responseCode = "200",
                 description = "Updated user information.",
-                content = [Content(schema = Schema(implementation = UserResponse::class))]
+                content = [Content(schema = Schema(implementation = PrincipalResponse::class))]
             )
         ]
     )
@@ -270,7 +270,7 @@ class EmailAuthenticationController(
     suspend fun disableEmailAsTwoFactorMethod(
         @RequestParam locale: Locale?,
         exchange: ServerWebExchange,
-    ): ResponseEntity<UserResponse> {
+    ): ResponseEntity<PrincipalResponse> {
 
         val authentication = authorizationService.getAuthenticationOutcome()
             .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }

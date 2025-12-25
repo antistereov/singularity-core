@@ -13,7 +13,7 @@ import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.global.model.PageableRequest
 import io.stereov.singularity.global.model.SuccessResponse
 import io.stereov.singularity.global.util.mapContent
-import io.stereov.singularity.principal.core.dto.response.UserOverviewResponse
+import io.stereov.singularity.principal.core.dto.response.PrincipalOverviewResponse
 import io.stereov.singularity.principal.core.exception.FindUserByIdException
 import io.stereov.singularity.principal.core.exception.GetUsersException
 import io.stereov.singularity.principal.core.exception.PrincipalMapperException
@@ -67,7 +67,7 @@ class UserController(
     ])
     suspend fun getUserById(
         @PathVariable id: ObjectId
-    ): ResponseEntity<UserOverviewResponse> {
+    ): ResponseEntity<PrincipalOverviewResponse> {
 
         val user = userService.findById(id)
             .getOrThrow { FindUserByIdException.from(it) }
@@ -140,7 +140,7 @@ class UserController(
         @RequestParam(required = false) createdAtBefore: Instant?,
         @RequestParam(required = false) lastActiveAfter: Instant?,
         @RequestParam(required = false) lastActiveBefore: Instant?
-    ): ResponseEntity<Page<UserOverviewResponse>> {
+    ): ResponseEntity<Page<PrincipalOverviewResponse>> {
         val authenticationOutcome = authorizationService.getAuthenticationOutcome()
             .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
             .requireAuthentication()

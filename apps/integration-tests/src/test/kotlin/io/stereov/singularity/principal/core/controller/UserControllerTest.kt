@@ -4,8 +4,8 @@ import com.github.michaelbull.result.getOrThrow
 import io.stereov.singularity.file.core.model.FileMetadataDocument
 import io.stereov.singularity.file.image.properties.ImageProperties
 import io.stereov.singularity.file.local.properties.LocalFileStorageProperties
-import io.stereov.singularity.principal.core.dto.response.UserOverviewResponse
-import io.stereov.singularity.principal.core.dto.response.UserResponse
+import io.stereov.singularity.principal.core.dto.response.PrincipalOverviewResponse
+import io.stereov.singularity.principal.core.dto.response.PrincipalResponse
 import io.stereov.singularity.principal.core.model.Role
 import io.stereov.singularity.principal.core.model.identity.UserIdentity
 import io.stereov.singularity.test.BaseIntegrationTest
@@ -27,7 +27,7 @@ class UserControllerTest() : BaseIntegrationTest() {
     lateinit var localFileStorageProperties: LocalFileStorageProperties
 
     data class UserOverviewPage(
-        val content: List<UserOverviewResponse> = emptyList(),
+        val content: List<PrincipalOverviewResponse> = emptyList(),
         val pageNumber: Int,
         val pageSize: Int,
         val numberOfElements: Int,
@@ -46,7 +46,7 @@ class UserControllerTest() : BaseIntegrationTest() {
             .uri("/api/users/${user.id}")
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserOverviewResponse::class.java)
+            .expectBody(PrincipalOverviewResponse::class.java)
             .returnResult()
             .responseBody
 
@@ -95,7 +95,7 @@ class UserControllerTest() : BaseIntegrationTest() {
             )
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserResponse::class.java)
+            .expectBody(PrincipalResponse::class.java)
             .returnResult()
             .responseBody
 
