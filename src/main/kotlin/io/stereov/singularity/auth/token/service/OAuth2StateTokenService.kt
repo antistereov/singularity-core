@@ -12,6 +12,7 @@ import org.bson.types.ObjectId
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
 import org.springframework.stereotype.Service
 import java.time.Instant
+import java.util.*
 
 /**
  * Service for managing OAuth2 state tokens. This service provides functionality to create and extract
@@ -32,6 +33,7 @@ class OAuth2StateTokenService(
     private val randomStateClaim = "random_state"
     private val redirectUriClaim = "redirect_uri"
     private val stepUpClaim = "step_up"
+    private val sessionIdClaim = "session_id"
 
     /**
      * Creates an [OAuth2StateToken] with the specified parameters.
@@ -46,6 +48,7 @@ class OAuth2StateTokenService(
         redirectUri: String?,
         stepUp: Boolean,
         userId: ObjectId?,
+        sessionId: UUID?
     ): Result<OAuth2StateToken, OAuth2StateTokenCreationException> = coroutineBinding {
         logger.debug { "Creating OAuth2StateToken" }
 
@@ -57,6 +60,9 @@ class OAuth2StateTokenService(
 
             if (userId != null) {
                 claimsSet.subject(userId.toString())
+            }
+            if (sessionId != null) {
+                claimsSet.claim(sessionIdClaim, sessionId)
             }
 
             if (redirectUri != null)
@@ -70,7 +76,7 @@ class OAuth2StateTokenService(
 
         jwtService.encodeJwt(claims, tokenType)
             .mapError { ex -> OAuth2StateTokenCreationException.fromTokenCreationException(ex) }
-            .map { jwt -> OAuth2StateToken(randomState, redirectUri, stepUp, userId, jwt) }
+            .map { jwt -> OAuth2StateToken(randomState, redirectUri, stepUp, userId, sessionId, jwt) }
             .bind()
     }
 
@@ -98,12 +104,14 @@ class OAuth2StateTokenService(
             .bind()
 
         val userId = jwt.subject?.let { runCatching {  ObjectId(it) }.get() }
+        val sessionId = jwt.claims[sessionIdClaim]?.let { runCatching { UUID.fromString(it as? String) }.get() }
 
         OAuth2StateToken(
             randomState = randomState,
             redirectUri = redirectUri,
             stepUp = stepUp,
             userId = userId,
+            sessionId = sessionId,
             jwt = jwt,
         )
     }
