@@ -513,29 +513,36 @@
     },
     {
       "name": "singularity.file.storage.s3.access-key",
-      "type": "java.util.List<java.lang.String>",
+      "type": "java.lang.String",
       "sourceType": "io.stereov.singularity.file.s3.properties.S3Properties",
       "description": "Your S3 access key."
     },
     {
       "name": "singularity.file.storage.s3.secret-key",
-      "type": "java.util.List<java.lang.String>",
+      "type": "java.lang.String",
       "sourceType": "io.stereov.singularity.file.s3.properties.S3Properties",
       "description": "Your S3 secret key."
     },
     {
       "name": "singularity.file.storage.s3.signature-duration",
-      "type": "java.util.List<java.lang.Long>",
+      "type": "java.lang.Long",
       "sourceType": "io.stereov.singularity.file.s3.properties.S3Properties",
       "description": "How many minutes should presigned URIs be valid? Default is 5 min.",
       "defaultValue": 5
     },
     {
       "name": "singularity.file.storage.s3.path-style-access-enabled",
-      "type": "java.util.List<java.lang.Boolean>",
+      "type": "java.lang.Boolean",
       "sourceType": "io.stereov.singularity.file.s3.properties.S3Properties",
       "description": "Should the bucket be added as subdomain or inside the path. If enabled bucket.domain.com will become domain.com/bucket",
       "defaultValue": false
+    },
+    {
+      "name": "singularity.file.storage.s3.path",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.file.s3.properties.S3Properties",
+      "description": "The path inside the bucket where the files will be stored.",
+      "defaultValue": ""
     },
     {
       "name": "singularity.secrets.store",
