@@ -1,3 +1,15 @@
+## [v1.10.5]
+
+## Changelog
+
+## 🚀 Features
+- [6c84e14](https://github.com/antistereov/singularity/commits/6c84e14) **s3**: add path attribute to specify inside bucket
+
+
+## Contributors
+We'd like to thank the following people for their contributions:
+antistereov
+
 ## [v1.10.4]
 
 ## Changelog
