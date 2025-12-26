@@ -1,5 +1,6 @@
 package io.stereov.singularity.auth.core.controller
 
+import com.github.michaelbull.result.get
 import com.github.michaelbull.result.getOrThrow
 import com.github.michaelbull.result.onFailure
 import io.github.oshai.kotlinlogging.KLogger
@@ -14,7 +15,10 @@ import io.stereov.singularity.auth.core.dto.response.AuthenticationStatusRespons
 import io.stereov.singularity.auth.core.dto.response.LoginResponse
 import io.stereov.singularity.auth.core.dto.response.RefreshTokenResponse
 import io.stereov.singularity.auth.core.dto.response.StepUpResponse
-import io.stereov.singularity.auth.core.exception.*
+import io.stereov.singularity.auth.core.exception.AuthenticationException
+import io.stereov.singularity.auth.core.exception.LoginException
+import io.stereov.singularity.auth.core.exception.RegisterException
+import io.stereov.singularity.auth.core.exception.StepUpException
 import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.auth.core.properties.AuthProperties
 import io.stereov.singularity.auth.core.service.AuthenticationService
@@ -310,15 +314,13 @@ class AuthenticationController(
         ]
     )
     @ThrowsDomainError([
-        AccessTokenExtractionException::class,
         CookieException.Creation::class,
-        LogoutException::class
     ])
     suspend fun logout(): ResponseEntity<SuccessResponse> {
         logger.info { "Executing logout" }
 
         val authenticationOutcome = authorizationService.getAuthenticationOutcome()
-            .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
+            .get()
 
         val clearAccessToken = cookieCreator.clearCookie(SessionTokenType.Access)
             .getOrThrow { when (it) { is CookieException.Creation -> it } }
@@ -333,8 +335,8 @@ class AuthenticationController(
         val clearOAuth2ProviderConnectionToken = cookieCreator.clearCookie(OAuth2TokenType.ProviderConnection)
             .getOrThrow { when (it) { is CookieException.Creation -> it } }
 
-        authenticationService.logout(authenticationOutcome)
-            .getOrThrow { when (it) { is LogoutException -> it } }
+        authenticationOutcome?.let { authenticationService.logout(authenticationOutcome) }
+            ?.get()
 
         return ResponseEntity.ok()
             .header("Set-Cookie", clearAccessToken.toString())

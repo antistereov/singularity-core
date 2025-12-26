@@ -358,12 +358,33 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
 
         Assertions.assertTrue(userService.findById(user.id).getOrThrow().sensitive.sessions.isEmpty())
     }
-    @Test fun `logout requires authentication`() = runTest {
-        webTestClient.post()
+    @Test fun `logout does not require authentication`() = runTest {
+        val response = webTestClient.post()
             .uri("/api/auth/logout")
-            .bodyValue(SessionInfoRequest("session"))
             .exchange()
-            .expectStatus().isNotModified
+            .expectStatus().isOk
+            .expectBody()
+            .returnResult()
+
+        val cookies = response.responseCookies
+
+        val accessToken = cookies[SessionTokenType.Access.cookieName]?.firstOrNull()?.value
+        val refreshToken = cookies[SessionTokenType.Access.cookieName]?.firstOrNull()?.value
+        val sessionToken = cookies[SessionTokenType.Session.cookieName]?.firstOrNull()?.value
+        val stepUpToken = cookies[SessionTokenType.StepUp.cookieName]?.firstOrNull()?.value
+        val twoFactorAuthenticationToken = cookies[TwoFactorTokenType.Authentication.cookieName]?.firstOrNull()?.value
+        val oAuth2ProviderConnectionToken = cookies[OAuth2TokenType.ProviderConnection.cookieName]?.firstOrNull()?.value
+
+        Assertions.assertTrue(accessToken.isNullOrBlank())
+        Assertions.assertTrue(refreshToken.isNullOrBlank())
+        Assertions.assertTrue(sessionToken.isNullOrBlank())
+        Assertions.assertTrue(stepUpToken.isNullOrBlank())
+        Assertions.assertTrue(twoFactorAuthenticationToken.isNullOrBlank())
+        Assertions.assertTrue(oAuth2ProviderConnectionToken.isNullOrBlank())
+
+        val account = response.responseBody
+
+        requireNotNull(account) { "No account provided in response" }
     }
 
     @Test fun `refresh returns valid tokens`() = runTest {
