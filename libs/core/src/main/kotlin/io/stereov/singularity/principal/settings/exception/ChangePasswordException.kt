@@ -1,5 +1,6 @@
 package io.stereov.singularity.principal.settings.exception
 
+import io.stereov.singularity.auth.core.exception.InvalidCredentialsFailure
 import io.stereov.singularity.database.core.exception.DatabaseFailure
 import io.stereov.singularity.database.core.exception.PostCommitSideEffectFailure
 import io.stereov.singularity.database.encryption.exception.SaveEncryptedDocumentException
@@ -86,6 +87,14 @@ sealed class ChangePasswordException(
         HashFailure.CODE,
         HashFailure.STATUS,
         HashFailure.DESCRIPTION,
+        cause
+    )
+
+    class WrongPassword(msg: String, cause: Throwable? = null) : ChangePasswordException(
+        msg,
+        InvalidCredentialsFailure.CODE,
+        InvalidCredentialsFailure.STATUS,
+        InvalidCredentialsFailure.DESCRIPTION,
         cause
     )
 

@@ -117,6 +117,14 @@ class PrincipalSettingsService(
             .toResultOr { ChangePasswordException.NoPasswordSet("Cannot change password: user did not set up password authentication") }
             .bind()
 
+        val passwordCorrect = hashService.checkBcrypt(payload.oldPassword, passwordProvider.password)
+            .mapError { ex -> ChangePasswordException.Hashing("Failed to check old password: ${ex.message}") }
+            .bind()
+
+        if (!passwordCorrect) {
+            Err(ChangePasswordException.WrongPassword("Wrong password")).bind()
+        }
+
         passwordProvider.password = hashService.hashBcrypt(payload.newPassword)
             .mapError { ex -> ChangePasswordException.Hashing("Failed to hash new password: ${ex.message}", ex) }
             .bind()
