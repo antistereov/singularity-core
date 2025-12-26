@@ -16,4 +16,5 @@ data class S3Properties(
     val secretKey: String,
     val signatureDuration: Long = 5,
     val pathStyleAccessEnabled: Boolean = false,
+    val path: String = ""
 )

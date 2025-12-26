@@ -31,6 +31,7 @@ import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignReques
 import java.net.URLDecoder
 import java.time.Duration
 import java.util.concurrent.atomic.AtomicLong
+import kotlin.io.path.Path
 
 @Service
 @ConditionalOnProperty(prefix = "singularity.file.storage", value = ["type"], havingValue = "s3", matchIfMissing = false)
@@ -70,7 +71,7 @@ class S3FileStorage(
 
                 val putRequest = PutObjectRequest.builder()
                     .bucket(s3Properties.bucket)
-                    .key(req.key.key)
+                    .key(Path(s3Properties.path).resolve(req.key.key).toString())
                     .contentLength(finalLength)
                     .contentType(req.contentType)
                     .acl(ObjectCannedACL.PRIVATE)
@@ -118,7 +119,7 @@ class S3FileStorage(
         val putRequest = runCatching {
             PutObjectRequest.builder()
                 .bucket(s3Properties.bucket)
-                .key(req.key.key)
+                .key(Path(s3Properties.path).resolve(req.key.key).toString())
                 .contentLength(size)
                 .contentType(req.contentType)
                 .acl(ObjectCannedACL.PRIVATE)
@@ -150,7 +151,7 @@ class S3FileStorage(
         logger.debug { "Checking existence of file: $key" }
 
         return runSuspendCatching {
-            s3Client.headObject { it.bucket(s3Properties.bucket).key(key) }.await()
+            s3Client.headObject { it.bucket(s3Properties.bucket).key(Path(s3Properties.path).resolve(key).toString()) }.await()
             true
         }.recoverIf(
             { ex -> ex is NoSuchKeyException },
@@ -163,7 +164,7 @@ class S3FileStorage(
 
         return runSuspendCatching {
             s3Client.deleteObject {
-                it.bucket(s3Properties.bucket).key(key)
+                it.bucket(s3Properties.bucket).key(Path(s3Properties.path).resolve(key).toString())
             }.await()
             Unit
         }.mapError { ex -> FileException.Operation("Failed to remove rendition with key $key: ${ex.message}", ex) }
@@ -177,7 +178,7 @@ class S3FileStorage(
         runSuspendCatching {
             val getObjectRequest = GetObjectRequest.builder()
                 .bucket(s3Properties.bucket)
-                .key(key)
+                .key(Path(s3Properties.path).resolve(key).toString())
                 .build()
 
             val presignRequest = GetObjectPresignRequest.builder()
