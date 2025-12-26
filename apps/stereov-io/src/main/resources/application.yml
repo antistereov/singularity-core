@@ -134,7 +134,7 @@ singularity:
             name: Coding
           DE:
             name: Programmieren
-    content-url: ${UI_BASE_URL}/{contentType}/{contentKey}
+    content-uri: ${UI_BASE_URL}/{contentType}/{contentKey}
 
 sentry:
   dsn: ${SENTRY_DSN}
