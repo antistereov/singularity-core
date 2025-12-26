@@ -251,34 +251,7 @@ paths:
         "500":
           description: |-
             The following error codes correspond to this status:
-            * **`ACCESS_TOKEN_ALLOWLIST_READING_FAILURE`:** Represents an exception indicating a failure when reading the allowlist for an access token cache.
             * **`COOKIE_CREATION_FAILURE`:** Thrown when an exception occurred during the creation of a cookie.
-            * **`DATABASE_FAILURE`:** Exception representing a general failure related to database operations.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "401":
-          description: |-
-            The following error codes correspond to this status:
-            * **`ACCESS_TOKEN_EXPIRED`:** Indicates that the access token is expired.
-            * **`ACCESS_TOKEN_INVALID`:** Indicates that the access token cannot be decoded.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "304":
-          description: |-
-            The following error codes correspond to this status:
-            * **`ALREADY_LOGGED_OUT`:** User is already logged out.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "404":
-          description: |-
-            The following error codes correspond to this status:
-            * **`USER_NOT_FOUND`:** User not found.
           content:
             application/json:
               schema:
