@@ -54,6 +54,7 @@ singularity:
       database-directory: ${GEOLOCATION_DIRECTORY}
       account-id: ${MAXMIND_ACCOUNT_ID}
       license-key: ${MAXMIND_LICENSE_KEY}
+      download: ${GEOLOCATION_DOWNLOAD:true}
     allow-header-authentication: false
     oauth2:
       enable: true
