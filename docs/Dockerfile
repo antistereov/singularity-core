@@ -1,30 +1,6 @@
-# Stage 1: Base image.
-## Start with a base image containing NodeJS so we can build Docusaurus.
-FROM node:22 AS base
-## Disable colour output from yarn to make logs easier to read.
-ENV FORCE_COLOR=0
-## Enable corepack.
-RUN corepack enable
-## Set the working directory to `/opt/docusaurus`.
-WORKDIR /opt/docusaurus
+FROM nginx:alpine
 
-# Stage 2: Production build
-FROM base AS prod
-## Set the working directory to `/opt/docusaurus`.
-WORKDIR /opt/docusaurus
-## Copy over the source code.
-COPY . /opt/docusaurus/
-## Install dependencies with `--immutable` to ensure reproducibility.
-RUN yarn install --immutable
-## Build the static site.
-RUN yarn build
+COPY build /usr/share/nginx/html
 
-# Stage 3: Serve with `docusaurus serve`.
-FROM prod AS serve
-## Expose the port that Docusaurus will run on.
-EXPOSE 3000
-## Run the production server.
-CMD ["yarn", "serve", "--host", "0.0.0.0", "--no-open"]
-
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-   CMD wget --quiet --tries=1 --spider http://localhost:3000 || exit 1
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
