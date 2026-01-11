@@ -1,6 +1,14 @@
 name: Deploy Docusaurus and Demo
 
 on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'libs/core/**'
+      - 'apps/demo/**'
+      - '.github/workflows/deploy-docs.yml'
+      - 'docs/**'
   push:
     paths:
       - 'libs/core/**'
