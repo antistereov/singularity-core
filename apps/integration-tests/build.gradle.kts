@@ -43,6 +43,7 @@ dependencies {
 
     testImplementation("org.testcontainers:testcontainers-minio:${testContainersVersion}")
     testImplementation("io.minio:minio:8.5.17")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 configurations.all {
