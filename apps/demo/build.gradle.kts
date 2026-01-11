@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "2.2.21"
+    kotlin("jvm")
     kotlin("plugin.spring") version "2.2.21"
     id("org.springframework.boot") version "3.4.1"
     id("io.spring.dependency-management") version "1.1.4"
@@ -47,11 +47,11 @@ tasks.register("updateDocusaurusOpenApiDocs") {
     dependsOn("generateOpenApiDocs")
 
     doLast {
-        exec {
+        providers.exec {
             commandLine = listOf("yarn", "docusaurus", "clean-api-docs", "all")
             workingDir = File("$rootDir/docs")
         }
-        exec {
+        providers.exec {
             commandLine = listOf("yarn", "docusaurus", "gen-api-docs", "all")
             workingDir = File("$rootDir/docs")
         }
