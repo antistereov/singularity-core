@@ -9,8 +9,6 @@ import io.lettuce.core.api.coroutines.RedisCoroutinesCommands
 import io.stereov.singularity.cache.exception.CacheException
 import io.stereov.singularity.email.core.properties.EmailProperties
 import kotlinx.coroutines.reactive.awaitSingle
-import kotlinx.coroutines.reactive.collect
-import kotlinx.coroutines.reactor.asFlux
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.stereotype.Service
@@ -32,7 +30,7 @@ import java.time.Duration
 class CacheService(
     val redisCommands: RedisCoroutinesCommands<String, ByteArray>,
     val jsonMapper: JsonMapper,
-    private val redisTemplate: ReactiveRedisTemplate<String, String>,
+    val redisTemplate: ReactiveRedisTemplate<String, String>,
     private val emailProperties: EmailProperties
 ) {
     val logger = KotlinLogging.logger {}
@@ -84,7 +82,7 @@ class CacheService(
     suspend fun exists(key: String): Result<Boolean, CacheException.Operation> {
         logger.debug { "Checking if value for key $key exists" }
 
-        return runSuspendCatching {  redisCommands.exists(key)?.let { it > 0 } ?: false }
+        return runSuspendCatching {  redisTemplate.hasKey(key).awaitSingle() }
             .mapError { ex -> CacheException.Operation("Failed to check existence of key $key: ${ex.message}", ex) }
     }
 
@@ -104,7 +102,7 @@ class CacheService(
     final suspend inline fun <reified T: Any> get(key: String): Result<T, CacheException> {
         logger.debug { "Getting value for key: $key" }
 
-        return runSuspendCatching { redisCommands.get(key) }
+        return runSuspendCatching { redisTemplate.opsForValue().get(key).awaitSingleOrNull() }
             .mapError { ex -> CacheException.Operation("Failed to generate value for key $key: ${ex.message}", ex) }
             .andThen { value ->
                 if (value != null) {
@@ -129,7 +127,7 @@ class CacheService(
     suspend fun delete(vararg keys: String): Result<Long, CacheException.Operation> {
         logger.debug { "Deleting data for keys: $keys" }
 
-        return runSuspendCatching { redisCommands.unlink(*keys) }
+        return runSuspendCatching { redisTemplate.delete(*keys).awaitSingle() }
             .mapError { ex -> CacheException.Operation("Failed to delete keys ${keys}: ${ex.message}", ex) }
             .map { it ?: 0 }
     }
@@ -150,11 +148,7 @@ class CacheService(
                 .mapError { ex -> CacheException.Operation("Failed to flush cache: ${ex.message}", ex) }
         } else {
             runSuspendCatching {
-                redisCommands.keys(pattern).asFlux()
-                .buffer(1000)
-                .collect { keys ->
-                    redisCommands.unlink(*keys.toTypedArray())
-                }
+                redisTemplate.delete(redisTemplate.keys(pattern)).awaitSingle()
             }
                 .mapError { ex -> CacheException.Operation("Failed to delete keys with pattern $pattern: ${ex.message}", ex) }
         }
