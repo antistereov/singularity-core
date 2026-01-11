@@ -126,7 +126,6 @@ dependencies {
 }
 
 configurations.all {
-//    exclude(group = "commons-logging", module = "commons-logging")
     exclude(group = "org.springframework", module = "spring-webmvc")
     exclude(group = "org.springframework.boot", module = "spring-boot-starter-logging")
     exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat")
