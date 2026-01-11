@@ -1,6 +1,5 @@
 package io.stereov.singularity.database.encryption.service
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.michaelbull.result.*
 import com.github.michaelbull.result.coroutines.coroutineBinding
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -10,6 +9,7 @@ import io.stereov.singularity.secrets.core.component.SecretStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.springframework.stereotype.Service
+import tools.jackson.databind.json.JsonMapper
 import java.util.*
 import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
@@ -26,7 +26,7 @@ import javax.crypto.spec.SecretKeySpec
 class EncryptionService(
     private val encryptionSecretService: EncryptionSecretService,
     private val secretStore: SecretStore,
-    private val objectMapper: ObjectMapper
+    private val jsonMapper: JsonMapper
 ) {
 
     private val logger = KotlinLogging.logger {}
@@ -44,7 +44,7 @@ class EncryptionService(
      */
     suspend fun <T> wrap(value: T): Result<Encrypted<T>, EncryptionException> = withContext(Dispatchers.IO) {
         return@withContext runCatching {
-            objectMapper.writeValueAsString(value)
+            jsonMapper.writeValueAsString(value)
         }
             .mapError { ex -> EncryptionException.ObjectMapping("Failed to write object as string: ${ex.message}", ex) }
             .andThen { jsonStr -> encrypt(jsonStr) }
@@ -64,7 +64,7 @@ class EncryptionService(
      */
     suspend fun <T> unwrap(encrypted: Encrypted<T>, clazz: Class<T>): Result<T, EncryptionException> = withContext(Dispatchers.IO) {
         return@withContext decrypt(encrypted).flatMap { decryptedJson ->
-            runCatching { objectMapper.readValue(decryptedJson, clazz) }
+            runCatching { jsonMapper.readValue(decryptedJson, clazz) }
                 .mapError { ex -> EncryptionException.ObjectMapping("Failed to create object of string $decryptedJson: ${ex.message}", ex) }
         }
     }

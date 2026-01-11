@@ -106,7 +106,7 @@ dependencies {
 
     // Serialization and Validation
     api("org.springframework.boot:spring-boot-starter-validation")
-    api("com.fasterxml.jackson.module:jackson-module-kotlin")
+    api("tools.jackson.module:jackson-module-kotlin")
 
     // Mail
     api("org.springframework.boot:spring-boot-starter-mail")
@@ -126,7 +126,7 @@ dependencies {
 }
 
 configurations.all {
-    exclude(group = "commons-logging", module = "commons-logging")
+//    exclude(group = "commons-logging", module = "commons-logging")
     exclude(group = "org.springframework", module = "spring-webmvc")
     exclude(group = "org.springframework.boot", module = "spring-boot-starter-logging")
     exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat")
