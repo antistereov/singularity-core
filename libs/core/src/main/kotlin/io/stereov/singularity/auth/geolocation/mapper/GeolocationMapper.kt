@@ -19,11 +19,11 @@ class GeolocationMapper {
     fun createGeolocationResponse(cityResponse: CityResponse): GeolocationResponse {
 
         return GeolocationResponse(
-            ipAddress = cityResponse.traits.ipAddress,
-            city = cityResponse.city,
-            country = cityResponse.country,
-            continent = cityResponse.continent,
-            location = cityResponse.location,
+            ipAddress = cityResponse.traits().ipAddress().toString(),
+            city = cityResponse.city(),
+            country = cityResponse.country(),
+            continent = cityResponse.continent(),
+            location = cityResponse.location(),
         )
     }
 }
