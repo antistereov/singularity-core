@@ -17,4 +17,8 @@ updates:
     directory: "/docs"
     schedule:
       interval: "daily"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
 
