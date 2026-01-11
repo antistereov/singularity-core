@@ -1,7 +1,6 @@
 package io.stereov.singularity.principal.core.model
 
 import com.fasterxml.jackson.annotation.JsonValue
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
@@ -9,6 +8,7 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.global.config.JsonConfiguration
 import io.stereov.singularity.principal.core.exception.RoleException
+import tools.jackson.databind.annotation.JsonDeserialize
 
 /**
  * Represents a role within the system.
