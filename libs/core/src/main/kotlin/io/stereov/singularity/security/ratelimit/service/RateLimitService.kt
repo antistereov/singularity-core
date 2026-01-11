@@ -56,7 +56,7 @@ class RateLimitService(
      *
      * @return a Mono<Void> that completes if the user is within the rate limit or emits an error if the limit is exceeded
      */
-    fun checkUserRateLimit(): Mono<Void?> = mono {
+    fun checkUserRateLimit(): Mono<Any> = mono {
         authorizationService.getAuthenticationOutcome()
             .getOrThrow()
             .requireAuthentication()
