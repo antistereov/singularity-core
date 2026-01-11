@@ -4,9 +4,10 @@ WORKDIR /app
 
 COPY ./gradle/ ./gradle/
 COPY ./settings.gradle.kts /app/settings.gradle.kts
+COPY ./build.gradle.kts /app/build.gradle.kts
 COPY ./gradlew /app/gradlew
-COPY ./apps/demo/ ./apps/demo/
-COPY ./libs/core/ ./libs/core/
+COPY ./apps/ /app/apps/
+COPY ./libs/ /app/libs/
 
 RUN chmod +x ./gradlew && \
     ./gradlew :apps:demo:bootJar -x test --no-daemon
