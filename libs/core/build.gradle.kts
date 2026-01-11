@@ -1,3 +1,4 @@
+
 import org.jreleaser.model.Active
 import org.jreleaser.model.Signing
 import org.springframework.boot.gradle.tasks.bundling.BootJar
@@ -249,18 +250,18 @@ jreleaser {
     deploy {
         maven {
             mavenCentral {
-                this.create("sonatype") {
-                    applyMavenCentralRules.set(true)
+                register("sonatype") {
+                    applyMavenCentralRules = true
 
-                    username.set(mavenCentralUsername)
-                    password.set(mavenCentralPassword)
+                    username = mavenCentralUsername
+                    password = mavenCentralPassword
 
-                    active.set(Active.ALWAYS)
-                    url.set("https://central.sonatype.com/api/v1/publisher")
+                    active = Active.ALWAYS
+                    url = "https://central.sonatype.com/api/v1/publisher"
                     stagingRepository("build/staging-deploy")
 
-                    maxRetries.set(100)
-                    retryDelay.set(60)
+                    maxRetries = 100
+                    retryDelay = 60
                 }
             }
         }
