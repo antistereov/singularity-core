@@ -49,6 +49,8 @@ class LocalSecretStoreConfiguration(
             H2ConnectionConfiguration.builder()
                 .file(filePath.absolute().toString())
                 .username("sa")
+                .property("DATABASE_TO_UPPER", "FALSE")
+                .property("CASE_INSENSITIVE_IDENTIFIERS", "TRUE")
                 .build()
         )
     }
