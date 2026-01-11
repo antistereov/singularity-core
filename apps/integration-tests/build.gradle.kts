@@ -1,8 +1,8 @@
 plugins {
     kotlin("jvm")
-    kotlin("plugin.spring") version "2.2.21"
-    id("org.springframework.boot") version "3.4.1"
-    id("io.spring.dependency-management") version "1.1.4"
+    kotlin("plugin.spring") version "2.3.0"
+    id("org.springframework.boot") version "4.0.1"
+    id("io.spring.dependency-management") version "1.1.7"
 }
 
 repositories {
@@ -16,8 +16,8 @@ kotlin {
     jvmToolchain(21)
 }
 
-val kotlinxVersion = "1.10.1"
-val testContainersVersion = "2.0.2"
+val kotlinxVersion = "1.10.2"
+val testContainersVersion = "2.0.3"
 
 dependencies {
     // Web Starter
@@ -32,9 +32,9 @@ dependencies {
         exclude(group = "org.mockito")
     }
     testImplementation("org.springframework.security:spring-security-test")
-    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
-    testImplementation("io.mockk:mockk:1.13.13")
+    testImplementation("com.squareup.okhttp3:mockwebserver:5.3.2")
+    testImplementation("org.junit.jupiter:junit-jupiter:6.0.2")
+    testImplementation("io.mockk:mockk:1.14.7")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinxVersion")
     testImplementation("org.testcontainers:testcontainers:$testContainersVersion")
     testImplementation("org.testcontainers:testcontainers-junit-jupiter:$testContainersVersion")
@@ -42,7 +42,7 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers-vault:${testContainersVersion}")
 
     testImplementation("org.testcontainers:testcontainers-minio:${testContainersVersion}")
-    testImplementation("io.minio:minio:8.5.17")
+    testImplementation("io.minio:minio:8.6.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

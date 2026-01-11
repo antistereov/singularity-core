@@ -1,8 +1,8 @@
 plugins {
     kotlin("jvm")
-    kotlin("plugin.spring") version "2.2.21"
-    id("org.springframework.boot") version "3.4.1"
-    id("io.spring.dependency-management") version "1.1.4"
+    kotlin("plugin.spring") version "2.3.0"
+    id("org.springframework.boot") version "4.0.1"
+    id("io.spring.dependency-management") version "1.1.7"
     id("org.springdoc.openapi-gradle-plugin") version "1.9.0"
 }
 
@@ -19,7 +19,7 @@ repositories {
 
 dependencies {
     api(project(":libs:core"))
-    implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.25.0")
+    implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.29.0")
 }
 
 configurations.all {
