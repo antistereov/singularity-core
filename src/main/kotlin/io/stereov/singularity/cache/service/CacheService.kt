@@ -1,7 +1,5 @@
 package io.stereov.singularity.cache.service
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.*
 import com.github.michaelbull.result.coroutines.coroutineBinding
 import com.github.michaelbull.result.coroutines.runSuspendCatching
@@ -16,6 +14,8 @@ import kotlinx.coroutines.reactor.asFlux
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.stereotype.Service
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.module.kotlin.readValue
 import java.time.Duration
 
 /**
@@ -25,13 +25,13 @@ import java.time.Duration
  * It uses an object mapper for serialization/deserialization and supports error handling via custom exceptions.
  *
  * @property redisCommands The Redis coroutine commands the interface used for communication with the Redis server.
- * @property objectMapper The object mapper instance used for serializing and deserializing objects to/from JSON.
+ * @property jsonMapper The object mapper instance used for serializing and deserializing objects to/from JSON.
  */
 @Service
 @OptIn(ExperimentalLettuceCoroutinesApi::class)
 class CacheService(
     val redisCommands: RedisCoroutinesCommands<String, ByteArray>,
-    val objectMapper: ObjectMapper,
+    val jsonMapper: JsonMapper,
     private val redisTemplate: ReactiveRedisTemplate<String, String>,
     private val emailProperties: EmailProperties
 ) {
@@ -52,7 +52,7 @@ class CacheService(
             logger.debug { "Saving key $key to Redis" }
 
             val string = runCatching {
-                objectMapper.writeValueAsString(value)
+                jsonMapper.writeValueAsString(value)
             }
                 .mapError { ex -> CacheException.ObjectMapper("Failed to write value as string: ${ex.message}", ex) }
                 .bind()
@@ -108,7 +108,7 @@ class CacheService(
             .mapError { ex -> CacheException.Operation("Failed to generate value for key $key: ${ex.message}", ex) }
             .andThen { value ->
                 if (value != null) {
-                    runCatching { objectMapper.readValue<T>(value) }
+                    runCatching { jsonMapper.readValue<T>(value) }
                         .mapError { ex -> CacheException.ObjectMapper("Failed to serialize value $value to class ${T::class.simpleName}: ${ex.message}", ex) }
                 } else {
                     Err(CacheException.KeyNotFound("No key $key cached"))

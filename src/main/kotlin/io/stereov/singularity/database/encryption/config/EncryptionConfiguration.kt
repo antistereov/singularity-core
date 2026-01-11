@@ -1,6 +1,5 @@
 package io.stereov.singularity.database.encryption.config
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.stereov.singularity.database.encryption.service.EncryptionSecretService
 import io.stereov.singularity.database.encryption.service.EncryptionService
 import io.stereov.singularity.global.properties.AppProperties
@@ -10,6 +9,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import tools.jackson.databind.json.JsonMapper
 
 @Configuration
 @AutoConfiguration(
@@ -27,7 +27,7 @@ class EncryptionConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun encryptionService(encryptionSecretService: EncryptionSecretService, secretStore: SecretStore, objectMapper: ObjectMapper): EncryptionService {
-        return EncryptionService(encryptionSecretService, secretStore, objectMapper)
+    fun encryptionService(encryptionSecretService: EncryptionSecretService, secretStore: SecretStore, jsonMapper: JsonMapper): EncryptionService {
+        return EncryptionService(encryptionSecretService, secretStore, jsonMapper)
     }
 }
