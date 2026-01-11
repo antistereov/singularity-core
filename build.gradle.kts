@@ -3,7 +3,7 @@ import org.jreleaser.model.Signing
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
-    kotlin("jvm") version "2.2.21"
+    kotlin("jvm")
     kotlin("plugin.spring") version "2.2.21"
     id("org.springframework.boot") version "3.4.1"
     id("io.spring.dependency-management") version "1.1.4"
