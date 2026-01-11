@@ -1,8 +1,5 @@
 package io.stereov.singularity.global.config
 
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.DeserializationContext
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.github.michaelbull.result.getOrElse
 import io.stereov.singularity.principal.core.exception.RoleException
 import io.stereov.singularity.principal.core.model.Role
@@ -12,6 +9,7 @@ import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomize
 import org.springframework.context.annotation.Bean
 import tools.jackson.core.JsonGenerator
 import tools.jackson.databind.SerializationContext
+import tools.jackson.databind.ValueDeserializer
 import tools.jackson.databind.ValueSerializer
 import tools.jackson.databind.module.SimpleModule
 import java.io.IOException
@@ -37,10 +35,11 @@ class JsonConfiguration {
         }
     }
 
-    class RoleDeserializer : StdDeserializer<Role>(Role::class.java) {
-
-        @Throws(IOException::class)
-        override fun deserialize(p: JsonParser, ctxt: DeserializationContext): Role {
+    class RoleDeserializer : ValueDeserializer<Role>() {
+        override fun deserialize(
+            p: tools.jackson.core.JsonParser,
+            ctxt: tools.jackson.databind.DeserializationContext
+        ): Role {
             val roleString = p.readValueAs(String::class.java)
 
             return Role.fromString(roleString)
