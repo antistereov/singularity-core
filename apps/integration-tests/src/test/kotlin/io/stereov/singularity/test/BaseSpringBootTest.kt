@@ -1,6 +1,5 @@
 package io.stereov.singularity.test
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.michaelbull.result.getOrThrow
 import com.warrenstrange.googleauth.GoogleAuthenticator
 import io.mockk.every
@@ -62,6 +61,7 @@ import org.springframework.context.annotation.Import
 import org.springframework.test.web.reactive.server.EntityExchangeResult
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.returnResult
+import tools.jackson.databind.json.JsonMapper
 import java.time.Duration
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
@@ -117,7 +117,7 @@ class BaseSpringBootTest() {
     lateinit var sessionTokenService: SessionTokenService
 
     @Autowired
-    lateinit var objectMapper: ObjectMapper
+    lateinit var jsonMapper: JsonMapper
 
     @Autowired
     lateinit var oAuth2ProviderConnectionTokenService: OAuth2ProviderConnectionTokenService

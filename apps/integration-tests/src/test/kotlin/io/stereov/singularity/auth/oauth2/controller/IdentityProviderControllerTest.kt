@@ -29,7 +29,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
 
         val body = requireNotNull(res.responseBody)
 
-        Assertions.assertTrue( body.map { objectMapper.convertValue(it, IdentityProviderResponse::class.java) }
+        Assertions.assertTrue( body.map { jsonMapper.convertValue(it, IdentityProviderResponse::class.java) }
             .containsAll(
                 listOf(
                     IdentityProviderResponse(UserIdentity.PASSWORD_IDENTITY),
