@@ -1,9 +1,11 @@
 server:
   port: ${BACKEND_PORT}
 spring:
+  mongodb:
+    uri: mongodb://${MONGO_DB_USERNAME}:${MONGO_DB_PASSWORD}@${MONGO_DB_HOST}:${MONGO_DB_PORT}/${MONGO_DB_DATABASE_NAME}?authSource=admin&tls=${MONGO_DB_SSL_ENABLED:false}
+    representation:
+      uuid: standard
   data:
-    mongodb:
-      uri: mongodb://${MONGO_DB_USERNAME}:${MONGO_DB_PASSWORD}@${MONGO_DB_HOST}:${MONGO_DB_PORT}/${MONGO_DB_DATABASE_NAME}?authSource=admin&tls=${MONGO_DB_SSL_ENABLED:false}
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
