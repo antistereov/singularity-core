@@ -40,11 +40,11 @@ jobs:
 
       - name: Build with Gradle
         run: |
-          ./gradlew assemble
+          ./gradlew assemble --no-daemon
 
       - name: Run Tests
         run: |
-          ./gradlew test
+          ./gradlew test --no-daemon
 
       - name: Publish Test Reports
         uses: mikepenz/action-junit-report@v5
