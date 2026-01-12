@@ -1,3 +1,15 @@
+## [v1.10.6]
+
+## Changelog
+
+## 🧰 Tasks
+- [9e954ba](https://github.com/antistereov/singularity/commits/9e954ba) **deps**: update jreleaser to version 1.22.0
+
+
+## Contributors
+We'd like to thank the following people for their contributions:
+antistereov
+
 ## [v1.10.5]
 
 ## Changelog
