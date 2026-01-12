@@ -19,6 +19,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.springframework.test.web.reactive.server.expectBody
 import java.time.Instant
 import java.util.*
 
@@ -36,7 +37,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
             .stepUpTokenCookie(stepUpToken.value)
             .exchange()
             .expectStatus().isOk
-            .expectBody(TwoFactorSetupResponse::class.java)
+            .expectBody<TwoFactorSetupResponse>()
             .returnResult()
             .responseBody
 
@@ -51,7 +52,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
             .bodyValue(TwoFactorVerifySetupRequest(response.token, code))
             .exchange()
             .expectStatus().isOk
-            .expectBody(PrincipalResponse::class.java)
+            .expectBody<PrincipalResponse>()
             .returnResult()
             .responseBody
 
@@ -69,7 +70,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
             .bodyValue(login)
             .exchange()
             .expectStatus().isOk
-            .expectBody(LoginResponse::class.java)
+            .expectBody<LoginResponse>()
             .returnResult()
 
         val loginResBody = loginRes.responseBody
@@ -86,7 +87,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
             .bodyValue(CompleteStepUpRequest(totp = code))
             .exchange()
             .expectStatus().isOk
-            .expectBody(LoginResponse::class.java)
+            .expectBody<LoginResponse>()
             .returnResult()
 
         val body = requireNotNull(userRes.responseBody)
@@ -130,7 +131,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
             .stepUpTokenCookie(cookieCreator.createCookie(stepUpToken).getOrThrow().value)
             .exchange()
             .expectStatus().isOk
-            .expectBody(TwoFactorSetupResponse::class.java)
+            .expectBody<TwoFactorSetupResponse>()
             .returnResult()
             .responseBody
 
@@ -145,7 +146,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
             .bodyValue(TwoFactorVerifySetupRequest(response.token, code))
             .exchange()
             .expectStatus().isOk
-            .expectBody(PrincipalResponse::class.java)
+            .expectBody<PrincipalResponse>()
             .returnResult()
             .responseBody
 
@@ -199,7 +200,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
             .bodyValue(TwoFactorVerifySetupRequest(token.value, code))
             .exchange()
             .expectStatus().isOk
-            .expectBody(PrincipalResponse::class.java)
+            .expectBody<PrincipalResponse>()
             .returnResult()
             .responseBody
 
@@ -401,7 +402,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
             .bodyValue(TotpRecoveryRequest(user.totpRecovery, null))
             .exchange()
             .expectStatus().isOk
-            .expectBody(TwoFactorRecoveryResponse::class.java)
+            .expectBody<TwoFactorRecoveryResponse>()
             .returnResult()
 
         val body = res.responseBody
@@ -440,7 +441,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
             .bodyValue(TotpRecoveryRequest(user.totpRecovery, null))
             .exchange()
             .expectStatus().isOk
-            .expectBody(TwoFactorRecoveryResponse::class.java)
+            .expectBody<TwoFactorRecoveryResponse>()
             .returnResult()
 
         val body = res.responseBody
@@ -523,7 +524,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
             .twoFactorAuthenticationTokenCookie(user.twoFactorToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(LoginResponse::class.java)
+            .expectBody<TwoFactorRecoveryResponse>()
             .returnResult()
             .extractAccessToken()
 
@@ -545,7 +546,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
             .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(PrincipalResponse::class.java)
+            .expectBody<PrincipalResponse>()
             .returnResult()
 
         val body = res.responseBody

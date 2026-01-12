@@ -153,7 +153,7 @@ class ArticleServiceTest : BaseArticleTest() {
             .awaitFirst()
 
         assertEquals(3, res.content.size)
-        assertEquals(5, res.totalElements)
+        assertEquals(5, res.page.totalElements)
         assertEquals(article.key, res.content[0].key)
         assertEquals(article1.key, res.content[1].key)
         assertEquals(article2.key, res.content[2].key)
@@ -168,7 +168,7 @@ class ArticleServiceTest : BaseArticleTest() {
             .awaitFirst()
 
         assertEquals(2, res1.content.size)
-        assertEquals(5, res1.totalElements)
+        assertEquals(5, res1.page.totalElements)
         assertEquals(article3.key, res1.content[0].key)
         assertEquals(article4.key, res1.content[1].key)
     }
@@ -189,7 +189,7 @@ class ArticleServiceTest : BaseArticleTest() {
             .awaitFirst()
 
         assertEquals(1, res.content.size)
-        assertEquals(1, res.totalElements)
+        assertEquals(1, res.page.totalElements)
         assertEquals(article.key, res.content[0].key)
     }
     @Test fun `find works with title in another locale`() = runTest {
@@ -209,7 +209,7 @@ class ArticleServiceTest : BaseArticleTest() {
             .awaitFirst()
 
         assertEquals(1, res.content.size)
-        assertEquals(1, res.totalElements)
+        assertEquals(1, res.page.totalElements)
         assertEquals(article.key, res.content[0].key)
     }
     @Test fun `find works with content`() = runTest {
@@ -229,7 +229,7 @@ class ArticleServiceTest : BaseArticleTest() {
             .awaitFirst()
 
         assertEquals(1, res.content.size)
-        assertEquals(1, res.totalElements)
+        assertEquals(1, res.page.totalElements)
         assertEquals(article.key, res.content[0].key)
     }
     @Test fun `find works with content in another locale`() = runTest {
@@ -249,7 +249,7 @@ class ArticleServiceTest : BaseArticleTest() {
             .awaitFirst()
 
         assertEquals(1, res.content.size)
-        assertEquals(1, res.totalElements)
+        assertEquals(1, res.page.totalElements)
         assertEquals(article.key, res.content[0].key)
     }
     @Test fun `find works with state`() = runTest {
@@ -269,7 +269,7 @@ class ArticleServiceTest : BaseArticleTest() {
             .awaitFirst()
 
         assertEquals(1, res.content.size)
-        assertEquals(1, res.totalElements)
+        assertEquals(1, res.page.totalElements)
         assertEquals(article.key, res.content[0].key)
     }
     @Test fun `find works with tags`() = runTest {
@@ -290,7 +290,7 @@ class ArticleServiceTest : BaseArticleTest() {
             .awaitFirst()
 
         assertEquals(1, res.content.size)
-        assertEquals(1, res.totalElements)
+        assertEquals(1, res.page.totalElements)
         assertEquals(article.key, res.content[0].key)
     }
     @Test fun `find works with roles`() = runTest {
@@ -308,7 +308,7 @@ class ArticleServiceTest : BaseArticleTest() {
             .awaitFirst()
 
         assertEquals(1, res.content.size)
-        assertEquals(1, res.totalElements)
+        assertEquals(1, res.page.totalElements)
         assertEquals(article.key, res.content[0].key)
     }
     @Test fun `find works with createdAtBefore`() = runTest {
@@ -328,7 +328,7 @@ class ArticleServiceTest : BaseArticleTest() {
             .awaitFirst()
 
         assertEquals(1, res.content.size)
-        assertEquals(1, res.totalElements)
+        assertEquals(1, res.page.totalElements)
         assertEquals(article.key, res.content[0].key)
     }
     @Test fun `find works with updatedAtBefore`() = runTest {
@@ -347,7 +347,7 @@ class ArticleServiceTest : BaseArticleTest() {
             .awaitFirst()
 
         assertEquals(1, res.content.size)
-        assertEquals(1, res.totalElements)
+        assertEquals(1, res.page.totalElements)
         assertEquals(article.key, res.content[0].key)
     }
     @Test fun `find works with publishedAtBefore`() = runTest {
@@ -367,7 +367,7 @@ class ArticleServiceTest : BaseArticleTest() {
             .awaitFirst()
 
         assertEquals(1, res.content.size)
-        assertEquals(1, res.totalElements)
+        assertEquals(1, res.page.totalElements)
         assertEquals(article.key, res.content[0].key)
     }
     @Test fun `find works with createdAtAfter`() = runTest {
@@ -387,7 +387,7 @@ class ArticleServiceTest : BaseArticleTest() {
             .awaitFirst()
 
         assertEquals(1, res.content.size)
-        assertEquals(1, res.totalElements)
+        assertEquals(1, res.page.totalElements)
         assertEquals(article.key, res.content[0].key)
     }
     @Test fun `find works with updatedAtAfter`() = runTest {
@@ -406,7 +406,7 @@ class ArticleServiceTest : BaseArticleTest() {
             .awaitFirst()
 
         assertEquals(1, res.content.size)
-        assertEquals(1, res.totalElements)
+        assertEquals(1, res.page.totalElements)
         assertEquals(article.key, res.content[0].key)
     }
     @Test fun `find works with publishedAtAfter`() = runTest {
@@ -426,7 +426,7 @@ class ArticleServiceTest : BaseArticleTest() {
             .awaitFirst()
 
         assertEquals(1, res.content.size)
-        assertEquals(1, res.totalElements)
+        assertEquals(1, res.page.totalElements)
         assertEquals(article.key, res.content[0].key)
     }
     @Test fun `find does not need owner`() = runTest {
@@ -445,7 +445,7 @@ class ArticleServiceTest : BaseArticleTest() {
             .awaitFirst()
 
         assertEquals(1, res.content.size)
-        assertEquals(1, res.totalElements)
+        assertEquals(1, res.page.totalElements)
         assertEquals(article.key, res.content[0].key)
         assertEquals(owner.id, article.access.ownerId)
     }

@@ -2,9 +2,11 @@ server:
   port: 8000
 
 spring:
+  mongodb:
+    uri: mongodb://${MONGO_DB_USERNAME}:${MONGO_DB_PASSWORD}@${MONGO_DB_HOST}:${MONGO_DB_PORT}/${MONGO_DB_DATABASE_NAME}?authSource=admin&tls=${MONGO_DB_SSL_ENABLED:false}
+    representation:
+      uuid: standard
   data:
-    mongodb:
-      uri: mongodb://${MONGO_DB_USERNAME:singularity}:${MONGO_DB_PASSWORD:singularity}@${MONGO_DB_HOST:localhost}:${MONGO_DB_PORT:27017}/${MONGO_DB_DATABASE_NAME:test-application}?authSource=admin&tls=false
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}

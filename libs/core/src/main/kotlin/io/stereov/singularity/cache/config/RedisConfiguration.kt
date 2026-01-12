@@ -16,10 +16,7 @@ import io.stereov.singularity.cache.service.CacheService
 import io.stereov.singularity.global.config.ApplicationConfiguration
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
-import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
-import org.springframework.boot.autoconfigure.data.redis.RedisProperties
-import org.springframework.boot.autoconfigure.data.web.SpringDataWebAutoConfiguration
-import org.springframework.boot.autoconfigure.mongo.MongoReactiveAutoConfiguration
+import org.springframework.boot.data.redis.autoconfigure.DataRedisProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import java.time.Duration
@@ -29,10 +26,6 @@ import java.time.Duration
  *
  * This class is responsible for configuring the Redis-related services
  * and components in the application.
- *
- * It runs after the [MongoReactiveAutoConfiguration], [SpringDataWebAutoConfiguration],
- * [RedisAutoConfiguration], and [ApplicationConfiguration] classes to ensure that
- * the necessary configurations are applied in the correct order.
  *
  * It enables the following services:
  * - [CacheService]
@@ -55,7 +48,7 @@ class RedisConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun redisClient(redisProperties: RedisProperties): RedisClient {
+    fun redisClient(redisProperties: DataRedisProperties): RedisClient {
         val redisUri = RedisURI.builder()
             .withHost(redisProperties.host)
             .withPort(redisProperties.port)

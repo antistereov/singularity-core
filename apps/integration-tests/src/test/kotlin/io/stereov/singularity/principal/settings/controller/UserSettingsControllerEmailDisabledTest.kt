@@ -8,6 +8,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
+import org.springframework.test.web.reactive.server.expectBody
 
 class UserSettingsControllerEmailDisabledTest : BaseIntegrationTest() {
 
@@ -22,7 +23,7 @@ class UserSettingsControllerEmailDisabledTest : BaseIntegrationTest() {
             .bodyValue(ChangeEmailRequest(newEmail))
             .exchange()
             .expectStatus().isOk
-            .expectBody(ChangeEmailResponse::class.java)
+            .expectBody<ChangeEmailResponse>()
             .returnResult()
             .responseBody
 

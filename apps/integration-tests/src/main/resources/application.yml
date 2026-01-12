@@ -2,9 +2,12 @@ server:
   port: 8001
 
 spring:
+  mongodb:
+    uri: mongodb://${MONGO_DB_USERNAME:singularity}:${MONGO_DB_PASSWORD:singularity}@${MONGO_DB_HOST:localhost}:${MONGO_DB_PORT:27017}/${MONGO_DB_DATABASE_NAME:test-application}?authSource=admin&tls=false
+    representation:
+      uuid: standard
+
   data:
-    mongodb:
-      uri: mongodb://singularity:singularity@localhost:27017/test-application?authSource=admin&tls=false
     redis:
       host: localhost
       port: 6379

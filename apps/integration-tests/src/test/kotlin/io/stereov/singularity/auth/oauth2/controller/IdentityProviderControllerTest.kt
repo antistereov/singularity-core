@@ -12,6 +12,8 @@ import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.springframework.test.web.reactive.server.expectBody
+import kotlin.collections.map
 
 class IdentityProviderControllerTest : BaseIntegrationTest() {
 
@@ -23,13 +25,14 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
         val res = webTestClient.get()
             .uri("/api/users/me/providers")
             .accessTokenCookie(user.accessToken)
-            .exchange().expectStatus().isOk
-            .expectBody(List::class.java)
+            .exchange()
+            .expectStatus().isOk
+            .expectBody<List<*>>()
             .returnResult()
 
         val body = requireNotNull(res.responseBody)
 
-        Assertions.assertTrue( body.map { objectMapper.convertValue(it, IdentityProviderResponse::class.java) }
+        Assertions.assertTrue( body.map { jsonMapper.convertValue(it, IdentityProviderResponse::class.java) }
             .containsAll(
                 listOf(
                     IdentityProviderResponse(UserIdentity.PASSWORD_IDENTITY),
@@ -61,7 +64,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
             .bodyValue(req)
             .exchange()
             .expectStatus().isOk
-            .expectBody(PrincipalResponse::class.java)
+            .expectBody<PrincipalResponse>()
             .returnResult()
 
         val body = requireNotNull(res.responseBody)
@@ -255,7 +258,7 @@ class IdentityProviderControllerTest : BaseIntegrationTest() {
             .stepUpTokenCookie(user.stepUpToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(PrincipalResponse::class.java)
+            .expectBody<PrincipalResponse>()
             .returnResult()
 
         val body = requireNotNull(res.responseBody)

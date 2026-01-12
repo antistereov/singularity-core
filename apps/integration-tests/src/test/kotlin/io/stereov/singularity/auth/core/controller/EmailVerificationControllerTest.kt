@@ -10,6 +10,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
+import org.springframework.test.web.reactive.server.expectBody
 import java.time.Instant
 
 class EmailVerificationControllerTest : BaseMailIntegrationTest() {
@@ -142,7 +143,7 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
             .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(MailCooldownResponse::class.java)
+            .expectBody<MailCooldownResponse>()
             .returnResult()
             .responseBody
 
@@ -158,7 +159,7 @@ class EmailVerificationControllerTest : BaseMailIntegrationTest() {
             .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(MailCooldownResponse::class.java)
+            .expectBody<MailCooldownResponse>()
             .returnResult()
             .responseBody
 

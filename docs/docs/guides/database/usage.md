@@ -216,10 +216,10 @@ class CoolStuffController(
     suspend fun getCoolStuffPaginated(
         // Add the pageable parameter so you can customize page, size and sort
         pageable: Pageable
-    ): ResponseEntity<Page<CoolStuffDocument>> {
+    ): ResponseEntity<PagedModel<CoolStuffDocument>> {
         // findAllPaginated returns Result<Page<CoolStuffDocument>, FindAllDocumentsPaginatedException>.
         val coolStuffPage = coolStuffService.findAllPaginated(pageable).getOrThrow()
-        return ResponseEntity.ok(coolStuffPage)
+        return ResponseEntity.ok(PagedModel(coolStuffPage))
     }
 }
 ```

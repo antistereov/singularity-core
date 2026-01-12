@@ -10,7 +10,6 @@ import io.stereov.singularity.file.core.exception.FileException
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.OpenApiConstants
-import io.stereov.singularity.global.model.PageableRequest
 import io.stereov.singularity.global.model.SuccessResponse
 import io.stereov.singularity.global.util.mapContent
 import io.stereov.singularity.principal.core.dto.response.PrincipalOverviewResponse
@@ -26,7 +25,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.bson.types.ObjectId
-import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+import org.springframework.data.web.PagedModel
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.time.Instant
@@ -129,9 +129,7 @@ class UserController(
         PrincipalMapperException::class
     ])
     suspend fun getUsers(
-        @RequestParam page: Int = 0,
-        @RequestParam size: Int = 10,
-        @RequestParam sort: List<String> = emptyList(),
+        pageable: Pageable,
         @RequestParam(required = false) email: String?,
         @RequestParam(required = false) roles: Set<String>?,
         @RequestParam(required = false) groups: Set<String>?,
@@ -140,7 +138,7 @@ class UserController(
         @RequestParam(required = false) createdAtBefore: Instant?,
         @RequestParam(required = false) lastActiveAfter: Instant?,
         @RequestParam(required = false) lastActiveBefore: Instant?
-    ): ResponseEntity<Page<PrincipalOverviewResponse>> {
+    ): ResponseEntity<PagedModel<PrincipalOverviewResponse>> {
         val authenticationOutcome = authorizationService.getAuthenticationOutcome()
             .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
             .requireAuthentication()
@@ -151,7 +149,7 @@ class UserController(
         val mappedRoles = roles?.mapNotNull { Role.fromString(it).get() }?.toSet()
 
         val users = userService.findAllPaginated(
-            pageable = PageableRequest(page, size, sort).toPageable(),
+            pageable = pageable,
             email = email,
             roles = mappedRoles,
             groups = groups,
@@ -167,7 +165,7 @@ class UserController(
                 .getOrThrow { ex -> when (ex) { is PrincipalMapperException -> ex } }
         }
 
-        return ResponseEntity.ok().body(mappedUsers)
+        return ResponseEntity.ok().body(PagedModel(mappedUsers))
     }
 
     @DeleteMapping("{id}")

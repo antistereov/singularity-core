@@ -80,13 +80,13 @@ class OAuth2AuthenticationService(
          val provider = oauth2Authentication.authorizedClientRegistrationId
          val oauth2User = oauth2Authentication.principal
 
-         val principalId = oauth2User.attributes["sub"]?.toString()
-             ?: oauth2User.attributes["id"]?.toString()
+         val principalId = oauth2User?.attributes["sub"]?.toString()
+             ?: oauth2User?.attributes["id"]?.toString()
              ?: throw OAuth2FlowException(OAuth2ErrorCode.SUB_CLAIM_MISSING,
                  "No sub claim provided by OAuth2 provider.")
 
          val email = try {
-             oauth2User.attributes["email"] as String
+             oauth2User?.attributes["email"] as String
          } catch (e: Exception) {
              throw OAuth2FlowException(OAuth2ErrorCode.EMAIL_CLAIM_MISSING,"No email provided from OAuth2 provider.", e)
          }

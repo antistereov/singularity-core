@@ -59,7 +59,7 @@ class BaseOAuth2FlowTest : BaseIntegrationTest() {
         )
         enqueue(
             MockResponse()
-                .setBody(objectMapper.writeValueAsString(info))
+                .setBody(jsonMapper.writeValueAsString(info))
                 .addHeader("Content-Type", "application/json")
         )
 

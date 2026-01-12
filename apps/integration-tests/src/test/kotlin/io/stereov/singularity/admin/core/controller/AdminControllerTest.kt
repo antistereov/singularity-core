@@ -8,6 +8,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
+import org.springframework.test.web.reactive.server.expectBody
 
 class AdminControllerTest : BaseIntegrationTest() {
 
@@ -20,7 +21,7 @@ class AdminControllerTest : BaseIntegrationTest() {
             .accessTokenCookie(admin.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(PrincipalResponse::class.java)
+            .expectBody<PrincipalResponse>()
             .returnResult()
             .responseBody
 
@@ -44,7 +45,7 @@ class AdminControllerTest : BaseIntegrationTest() {
             .accessTokenCookie(admin.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(PrincipalResponse::class.java)
+            .expectBody<PrincipalResponse>()
             .returnResult()
             .responseBody
 
@@ -121,7 +122,7 @@ class AdminControllerTest : BaseIntegrationTest() {
             .accessTokenCookie(admin.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(PrincipalResponse::class.java)
+            .expectBody<PrincipalResponse>()
             .returnResult()
             .responseBody
 

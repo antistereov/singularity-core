@@ -28,7 +28,7 @@ class BaseIntegrationTest : BaseSpringBootTest() {
         @JvmStatic
         @Suppress("UNUSED")
         fun properties(registry: DynamicPropertyRegistry) {
-            registry.add("spring.data.mongodb.uri") { "${mongoDBContainer.connectionString}/test" }
+            registry.add("spring.mongodb.uri") { "${mongoDBContainer.connectionString}/test" }
             registry.add("spring.data.redis.host") { redisContainer.host }
             registry.add("spring.data.redis.port") { redisContainer.getMappedPort(6379) }
             registry.add("singularity.security.rate-limit.user-limit") { 10000 }

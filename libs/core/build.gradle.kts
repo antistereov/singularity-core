@@ -5,19 +5,19 @@ import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
     kotlin("jvm")
-    kotlin("plugin.spring") version "2.2.21"
-    id("org.springframework.boot") version "3.4.1"
-    id("io.spring.dependency-management") version "1.1.4"
+    kotlin("plugin.spring") version "2.3.0"
+    id("org.springframework.boot") version "4.0.1"
+    id("io.spring.dependency-management") version "1.1.7"
     id("maven-publish")
     id("java-library")
-    id("org.jreleaser") version "1.19.0"
+    id("org.jreleaser") version "1.21.0"
 }
 
 group = properties["group"] as String
 version = properties["version"] as String
 
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain(25)
 }
 
 tasks.withType<Test> {
@@ -37,10 +37,10 @@ repositories {
     mavenCentral()
 }
 
-val kotlinVersion = "2.2.21"
-val kotlinxVersion = "1.10.1"
-val springBootVersion = "3.5.6"
-val bucket4jVersion = "8.14.0"
+val kotlinVersion = "2.3.0"
+val kotlinxVersion = "1.10.2"
+val springBootVersion = "4.0.1"
+val bucket4jVersion = "8.16.0"
 
 dependencies {
     // Spring Boot Starters
@@ -56,7 +56,7 @@ dependencies {
     api("org.springframework.boot:spring-boot-starter-oauth2-client")
 
     // File Storage
-    implementation(platform("software.amazon.awssdk:bom:2.27.21"))
+    implementation(platform("software.amazon.awssdk:bom:2.41.5"))
     implementation("software.amazon.awssdk:s3")
 
     // 2FA
@@ -67,22 +67,22 @@ dependencies {
     api("org.springframework.boot:spring-boot-starter-reactor-netty")
     api("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
     api("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:$kotlinxVersion")
-    api("io.projectreactor.netty:reactor-netty:1.2.1")
+    api("io.projectreactor.netty:reactor-netty:1.3.1")
 
     // Development
     api("org.springframework.boot:spring-boot-devtools:$springBootVersion")
 
     // Logging
-    api("io.github.oshai:kotlin-logging-jvm:7.0.6")
+    api("io.github.oshai:kotlin-logging-jvm:7.0.14")
     api("org.springframework.boot:spring-boot-starter-log4j2")
-    api("com.lmax:disruptor:3.4.4")
+    api("com.lmax:disruptor:4.0.0")
 
     // MongoDB
     api("org.springframework.boot:spring-boot-starter-data-mongodb-reactive")
 
     // Redis
     api("org.springframework.boot:spring-boot-starter-data-redis-reactive")
-    api("io.lettuce:lettuce-core:6.5.2.RELEASE")
+    api("io.lettuce:lettuce-core:7.2.1.RELEASE")
 
     // R2DBC and H2
     api("org.springframework.boot:spring-boot-starter-data-r2dbc")
@@ -94,7 +94,7 @@ dependencies {
     api("com.bucket4j:bucket4j_jdk17-lettuce:$bucket4jVersion")
 
     // Geolocation
-    api("com.maxmind.geoip2:geoip2:4.3.1")
+    api("com.maxmind.geoip2:geoip2:5.0.2")
 
     // Compression
     api("org.apache.commons:commons-compress:1.28.0")
@@ -106,19 +106,19 @@ dependencies {
 
     // Serialization and Validation
     api("org.springframework.boot:spring-boot-starter-validation")
-    api("com.fasterxml.jackson.module:jackson-module-kotlin")
+    api("tools.jackson.module:jackson-module-kotlin")
 
     // Mail
     api("org.springframework.boot:spring-boot-starter-mail")
 
     // Secrets
-    implementation("org.springframework.vault:spring-vault-core:3.2.0")
+    implementation("org.springframework.vault:spring-vault-core:4.0.0")
 
     // Slugs
     implementation("com.github.slugify:slugify:3.0.7")
 
     // Documentation
-    api("org.springdoc:springdoc-openapi-starter-webflux-api:2.8.13")
+    api("org.springdoc:springdoc-openapi-starter-webflux-api:3.0.1")
 
     // Result
     api("com.michael-bull.kotlin-result:kotlin-result:2.1.0")
@@ -126,7 +126,6 @@ dependencies {
 }
 
 configurations.all {
-    exclude(group = "commons-logging", module = "commons-logging")
     exclude(group = "org.springframework", module = "spring-webmvc")
     exclude(group = "org.springframework.boot", module = "spring-boot-starter-logging")
     exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat")

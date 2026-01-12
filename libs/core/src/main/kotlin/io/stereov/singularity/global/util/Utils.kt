@@ -29,7 +29,7 @@ fun ServerHttpRequest.getClientIp(preferredHeader: String = "X-Real-IP"): String
         ?: remoteAddress?.address?.hostAddress
 }
 
-suspend fun <S, T> Page<T>.mapContent(map: suspend (content: T) -> S): Page<S> {
+suspend fun <S: Any, T: Any> Page<T>.mapContent(map: suspend (content: T) -> S): Page<S> {
     val mappedContent = this.content.map { map(it) }
     return PageImpl(mappedContent, this.pageable, this.totalElements)
 }

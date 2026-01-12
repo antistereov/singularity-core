@@ -20,6 +20,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
+import org.springframework.test.web.reactive.server.expectBody
 
 class AuthenticationControllerTest() : BaseIntegrationTest() {
 
@@ -154,7 +155,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
             .bodyValue(loginRequest)
             .exchange()
             .expectStatus().isOk
-            .expectBody(LoginResponse::class.java)
+            .expectBody<LoginResponse>()
             .returnResult()
 
         val accessToken = response.responseCookies[SessionTokenType.Access.cookieName]
@@ -176,7 +177,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
             .accessTokenCookie(accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(PrincipalResponse::class.java)
+            .expectBody<PrincipalResponse>()
             .returnResult()
             .responseBody
 
@@ -204,7 +205,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
             .bodyValue(req)
             .exchange()
             .expectStatus().isOk
-            .expectBody(LoginResponse::class.java)
+            .expectBody<LoginResponse>()
             .returnResult()
 
         val accessToken = result.extractAccessToken()
@@ -259,7 +260,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
             .bodyValue(LoginRequest(user.email!!, user.password!!))
             .exchange()
             .expectStatus().isOk
-            .expectBody(LoginResponse::class.java)
+            .expectBody<LoginResponse>()
             .returnResult()
         val accessToken = res.extractAccessToken()
 
@@ -268,7 +269,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
             .accessTokenCookie(accessToken.value)
             .exchange()
             .expectStatus().isOk
-            .expectBody(PrincipalResponse::class.java)
+            .expectBody<PrincipalResponse>()
             .returnResult()
             .responseBody
 
@@ -290,7 +291,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
             .bodyValue(loginRequest)
             .exchange()
             .expectStatus().isOk
-            .expectBody(LoginResponse::class.java)
+            .expectBody<LoginResponse>()
             .returnResult()
 
         val twoFactorToken = response.extractTwoFactorAuthenticationToken()
@@ -394,7 +395,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
             .cookie(SessionTokenType.Refresh.cookieName, user.refreshToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(RefreshTokenResponse::class.java)
+            .expectBody<RefreshTokenResponse>()
             .returnResult()
 
         val res = response.responseBody
@@ -493,7 +494,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
             .bodyValue(req)
             .exchange()
             .expectStatus().isOk
-            .expectBody(StepUpResponse::class.java)
+            .expectBody<StepUpResponse>()
             .returnResult()
 
         val stepUpTokenValue = response.responseCookies[SessionTokenType.StepUp.cookieName]
@@ -565,7 +566,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
             .bodyValue(req)
             .exchange()
             .expectStatus().isOk
-            .expectBody(StepUpResponse::class.java)
+            .expectBody<StepUpResponse>()
             .returnResult()
 
         val twoFactorToken = response.extractTwoFactorAuthenticationToken()
@@ -584,7 +585,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
             .accessTokenCookie(guest.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(StepUpResponse::class.java)
+            .expectBody<StepUpResponse>()
             .returnResult()
 
         val stepUpTokenValue = response.responseCookies[SessionTokenType.StepUp.cookieName]
@@ -602,7 +603,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
             .uri("/api/auth/status")
             .exchange()
             .expectStatus().isOk
-            .expectBody(AuthenticationStatusResponse::class.java)
+            .expectBody<AuthenticationStatusResponse>()
             .returnResult()
             .responseBody
 
@@ -623,7 +624,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
             .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(AuthenticationStatusResponse::class.java)
+            .expectBody<AuthenticationStatusResponse>()
             .returnResult()
             .responseBody
 
@@ -646,7 +647,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
             .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(AuthenticationStatusResponse::class.java)
+            .expectBody<AuthenticationStatusResponse>()
             .returnResult()
             .responseBody
 
@@ -668,7 +669,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
             .stepUpTokenCookie(user.stepUpToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(AuthenticationStatusResponse::class.java)
+            .expectBody<AuthenticationStatusResponse>()
             .returnResult()
             .responseBody
 
@@ -689,7 +690,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
             .stepUpTokenCookie(user.stepUpToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(AuthenticationStatusResponse::class.java)
+            .expectBody<AuthenticationStatusResponse>()
             .returnResult()
             .responseBody
 
@@ -712,7 +713,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
             .twoFactorAuthenticationTokenCookie(twoFactorToken.value)
             .exchange()
             .expectStatus().isOk
-            .expectBody(AuthenticationStatusResponse::class.java)
+            .expectBody<AuthenticationStatusResponse>()
             .returnResult()
             .responseBody
 
@@ -736,7 +737,7 @@ class AuthenticationControllerTest() : BaseIntegrationTest() {
             .twoFactorAuthenticationTokenCookie(twoFactorToken.value)
             .exchange()
             .expectStatus().isOk
-            .expectBody(AuthenticationStatusResponse::class.java)
+            .expectBody<AuthenticationStatusResponse>()
             .returnResult()
             .responseBody
 

@@ -29,7 +29,7 @@ class HeaderAuthenticationPreferHeaderTest : BaseSpringBootTest() {
         fun properties(registry: DynamicPropertyRegistry) {
             registry.add("singularity.auth.allow-header-authentication") { true }
             registry.add("singularity.auth.prefer-header-authentication") { true }
-            registry.add("spring.data.mongodb.uri") { "${mongoDBContainer.connectionString}/test" }
+            registry.add("spring.mongodb.uri") { "${mongoDBContainer.connectionString}/test" }
             registry.add("spring.data.redis.host") { redisContainer.host }
             registry.add("spring.data.redis.port") { redisContainer.getMappedPort(6379) }
         }

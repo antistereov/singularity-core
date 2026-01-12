@@ -1,42 +1,51 @@
 package io.stereov.singularity.global.config
 
-import com.fasterxml.jackson.core.JsonGenerator
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.DeserializationContext
-import com.fasterxml.jackson.databind.SerializerProvider
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer
-import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.github.michaelbull.result.getOrElse
 import io.stereov.singularity.principal.core.exception.RoleException
 import io.stereov.singularity.principal.core.model.Role
 import org.bson.types.ObjectId
 import org.springframework.boot.autoconfigure.AutoConfiguration
-import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer
+import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer
 import org.springframework.context.annotation.Bean
+import org.springframework.data.web.config.SpringDataJackson3Configuration
+import tools.jackson.core.JsonGenerator
+import tools.jackson.databind.SerializationContext
+import tools.jackson.databind.ValueDeserializer
+import tools.jackson.databind.ValueSerializer
+import tools.jackson.databind.module.SimpleModule
 import java.io.IOException
 
 @AutoConfiguration
 class JsonConfiguration {
 
     @Bean
-    fun jacksonCustomizer() = Jackson2ObjectMapperBuilderCustomizer {
-        it.serializerByType(ObjectId::class.java, ObjectIdToStringSerializer())
+    fun jacksonModule(): SpringDataJackson3Configuration.PageModule {
+        return SpringDataJackson3Configuration.PageModule(null)
     }
 
-    class ObjectIdToStringSerializer : StdSerializer<ObjectId>(ObjectId::class.java) {
+    @Bean
+    fun jacksonCustomizer() = JsonMapperBuilderCustomizer { builder ->
+        val module = SimpleModule()
+        module.addSerializer(ObjectId::class.java, ObjectIdToStringSerializer())
+
+        builder.addModule(module)
+    }
+
+    class ObjectIdToStringSerializer : ValueSerializer<ObjectId>() {
         override fun serialize(
             value: ObjectId,
             gen: JsonGenerator,
-            provider: SerializerProvider
+            ctxt: SerializationContext
         ) {
             gen.writeString(value.toHexString())
         }
     }
 
-    class RoleDeserializer : StdDeserializer<Role>(Role::class.java) {
-
-        @Throws(IOException::class)
-        override fun deserialize(p: JsonParser, ctxt: DeserializationContext): Role {
+    class RoleDeserializer : ValueDeserializer<Role>() {
+        override fun deserialize(
+            p: tools.jackson.core.JsonParser,
+            ctxt: tools.jackson.databind.DeserializationContext
+        ): Role {
             val roleString = p.readValueAs(String::class.java)
 
             return Role.fromString(roleString)

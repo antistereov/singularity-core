@@ -119,10 +119,10 @@ class RefreshTokenService(
         val locationInfo = location
             ?.let { location -> 
                 SessionInfo.LocationInfo(
-                    location.location.latitude,
-                    location.location.longitude,
-                    location.city.names["en"],
-                    location.country.isoCode
+                    location.location.latitude(),
+                    location.location.longitude(),
+                    location.city.names()["en"],
+                    location.country.isoCode()
                 ) 
             }
 

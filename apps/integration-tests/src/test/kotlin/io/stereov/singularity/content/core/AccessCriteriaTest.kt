@@ -12,6 +12,8 @@ import io.stereov.singularity.test.BaseArticleTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import org.springframework.data.web.PagedModel
+import org.springframework.test.web.reactive.server.expectBody
 
 class AccessCriteriaTest : BaseArticleTest() {
 
@@ -19,15 +21,7 @@ class AccessCriteriaTest : BaseArticleTest() {
 
     data class ArticleOverviewPage(
         val content: List<ArticleOverviewResponse> = emptyList(),
-        val pageNumber: Int,
-        val pageSize: Int,
-        val numberOfElements: Int,
-        val totalElements: Long,
-        val totalPages: Int,
-        val first: Boolean,
-        val last: Boolean,
-        val hasNext: Boolean,
-        val hasPrevious: Boolean
+        val page: PagedModel.PageMetadata,
     )
 
     @Test
@@ -39,12 +33,12 @@ class AccessCriteriaTest : BaseArticleTest() {
         val res = webTestClient.get()
             .uri(articleBasePath)
             .exchange()
-            .expectBody(ArticleOverviewPage::class.java)
+            .expectBody<ArticleOverviewPage>()
             .returnResult()
             .responseBody
         requireNotNull(res)
 
-        Assertions.assertEquals(1, res.totalElements)
+        Assertions.assertEquals(1, res.page.totalElements)
         Assertions.assertEquals(article.id.getOrThrow(), res.content.first().id)
     }
     @Test
@@ -56,13 +50,13 @@ class AccessCriteriaTest : BaseArticleTest() {
         val res = webTestClient.get()
             .uri(articleBasePath)
             .exchange()
-            .expectBody(ArticleOverviewPage::class.java)
+            .expectBody<ArticleOverviewPage>()
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        Assertions.assertEquals(0, res.totalElements)
+        Assertions.assertEquals(0, res.page.totalElements)
     }
     @Test
     fun `getArticles works with private`() = runTest {
@@ -73,13 +67,13 @@ class AccessCriteriaTest : BaseArticleTest() {
         val res = webTestClient.get()
             .uri(articleBasePath)
             .exchange()
-            .expectBody(ArticleOverviewPage::class.java)
+            .expectBody<ArticleOverviewPage>()
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        Assertions.assertEquals(0, res.totalElements)
+        Assertions.assertEquals(0, res.page.totalElements)
     }
     @Test
     fun `getArticles works with creator`() = runTest {
@@ -93,13 +87,13 @@ class AccessCriteriaTest : BaseArticleTest() {
             .uri(articleBasePath)
             .accessTokenCookie(user.accessToken)
             .exchange()
-            .expectBody(ArticleOverviewPage::class.java)
+            .expectBody<ArticleOverviewPage>()
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        Assertions.assertEquals(1, res.totalElements)
+        Assertions.assertEquals(1, res.page.totalElements)
         Assertions.assertEquals(article.id.getOrThrow(), res.content.first().id)
     }
     @Test
@@ -113,13 +107,13 @@ class AccessCriteriaTest : BaseArticleTest() {
             .uri(articleBasePath)
             .accessTokenCookie(user.accessToken)
             .exchange()
-            .expectBody(ArticleOverviewPage::class.java)
+            .expectBody<ArticleOverviewPage>()
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        Assertions.assertEquals(1, res.totalElements)
+        Assertions.assertEquals(1, res.page.totalElements)
         Assertions.assertEquals(article.id.getOrThrow(), res.content.first().id)
     }
     @Test
@@ -133,13 +127,13 @@ class AccessCriteriaTest : BaseArticleTest() {
             .uri(articleBasePath)
             .accessTokenCookie(user.accessToken)
             .exchange()
-            .expectBody(ArticleOverviewPage::class.java)
+            .expectBody<ArticleOverviewPage>()
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        Assertions.assertEquals(1, res.totalElements)
+        Assertions.assertEquals(1, res.page.totalElements)
         Assertions.assertEquals(article.id.getOrThrow(), res.content.first().id)
     }
     @Test
@@ -153,13 +147,13 @@ class AccessCriteriaTest : BaseArticleTest() {
             .uri(articleBasePath)
             .accessTokenCookie(user.accessToken)
             .exchange()
-            .expectBody(ArticleOverviewPage::class.java)
+            .expectBody<ArticleOverviewPage>()
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        Assertions.assertEquals(1, res.totalElements)
+        Assertions.assertEquals(1, res.page.totalElements)
         Assertions.assertEquals(article.id.getOrThrow(), res.content.first().id)
     }
     @Test
@@ -175,13 +169,13 @@ class AccessCriteriaTest : BaseArticleTest() {
             .uri(articleBasePath)
             .accessTokenCookie(user.accessToken)
             .exchange()
-            .expectBody(ArticleOverviewPage::class.java)
+            .expectBody<ArticleOverviewPage>()
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        Assertions.assertEquals(1, res.totalElements)
+        Assertions.assertEquals(1, res.page.totalElements)
         Assertions.assertEquals(article.id.getOrThrow(), res.content.first().id)
     }
     @Test
@@ -196,13 +190,13 @@ class AccessCriteriaTest : BaseArticleTest() {
             .uri(articleBasePath)
             .accessTokenCookie(user.accessToken)
             .exchange()
-            .expectBody(ArticleOverviewPage::class.java)
+            .expectBody<ArticleOverviewPage>()
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        Assertions.assertEquals(1, res.totalElements)
+        Assertions.assertEquals(1, res.page.totalElements)
         Assertions.assertEquals(article.id.getOrThrow(), res.content.first().id)
     }
     @Test
@@ -217,13 +211,13 @@ class AccessCriteriaTest : BaseArticleTest() {
             .uri(articleBasePath)
             .accessTokenCookie(user.accessToken)
             .exchange()
-            .expectBody(ArticleOverviewPage::class.java)
+            .expectBody<ArticleOverviewPage>()
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        Assertions.assertEquals(1, res.totalElements)
+        Assertions.assertEquals(1, res.page.totalElements)
         Assertions.assertEquals(article.id.getOrThrow(), res.content.first().id)
     }
     @Test
@@ -241,13 +235,13 @@ class AccessCriteriaTest : BaseArticleTest() {
             .uri("$articleBasePath?tags=${tag.key}")
             .accessTokenCookie(user.accessToken)
             .exchange()
-            .expectBody(ArticleOverviewPage::class.java)
+            .expectBody<ArticleOverviewPage>()
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        Assertions.assertEquals(1, res.totalElements)
+        Assertions.assertEquals(1, res.page.totalElements)
         Assertions.assertEquals(article.id.getOrThrow(), res.content.first().id)
     }
     @Test
@@ -268,13 +262,13 @@ class AccessCriteriaTest : BaseArticleTest() {
             .uri("$articleBasePath?tags=${tag.key},${anotherTag.key}")
             .accessTokenCookie(user.accessToken)
             .exchange()
-            .expectBody(ArticleOverviewPage::class.java)
+            .expectBody<ArticleOverviewPage>()
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        Assertions.assertEquals(2, res.totalElements)
+        Assertions.assertEquals(2, res.page.totalElements)
         Assertions.assertTrue(res.content.any { it.id == article.id.getOrThrow() })
         Assertions.assertTrue(res.content.any { it.id == anotherArticle.id.getOrThrow() })
     }
@@ -289,13 +283,13 @@ class AccessCriteriaTest : BaseArticleTest() {
         val res = webTestClient.get()
             .uri("$articleBasePath?sort=createdAt,desc&state=published")
             .exchange()
-            .expectBody(ArticleOverviewPage::class.java)
+            .expectBody<ArticleOverviewPage>()
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        Assertions.assertEquals(1, res.totalElements)
+        Assertions.assertEquals(1, res.page.totalElements)
         Assertions.assertEquals(1, res.content.size)
         Assertions.assertEquals(article.id.getOrThrow(), res.content.first().id)
     }
@@ -309,13 +303,13 @@ class AccessCriteriaTest : BaseArticleTest() {
         val res = webTestClient.get()
             .uri("$articleBasePath?sort=createdAt,desc&state=published")
             .exchange()
-            .expectBody(ArticleOverviewPage::class.java)
+            .expectBody<ArticleOverviewPage>()
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        Assertions.assertEquals(0, res.totalElements)
+        Assertions.assertEquals(0, res.page.totalElements)
         Assertions.assertEquals(0, res.content.size)
     }
     @Test
@@ -328,13 +322,13 @@ class AccessCriteriaTest : BaseArticleTest() {
         val res = webTestClient.get()
             .uri("$articleBasePath?sort=createdAt,desc&state=published")
             .exchange()
-            .expectBody(ArticleOverviewPage::class.java)
+            .expectBody<ArticleOverviewPage>()
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        Assertions.assertEquals(0, res.totalElements)
+        Assertions.assertEquals(0, res.page.totalElements)
         Assertions.assertEquals(0, res.content.size)
     }
     @Test
@@ -347,13 +341,13 @@ class AccessCriteriaTest : BaseArticleTest() {
         val res = webTestClient.get()
             .uri("$articleBasePath?sort=createdAt,desc&state=published")
             .exchange()
-            .expectBody(ArticleOverviewPage::class.java)
+            .expectBody<ArticleOverviewPage>()
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        Assertions.assertEquals(0, res.totalElements)
+        Assertions.assertEquals(0, res.page.totalElements)
         Assertions.assertEquals(0, res.content.size)
     }
     @Test
@@ -366,13 +360,13 @@ class AccessCriteriaTest : BaseArticleTest() {
         val res = webTestClient.get()
             .uri("$articleBasePath?sort=createdAt,desc&state=published")
             .exchange()
-            .expectBody(ArticleOverviewPage::class.java)
+            .expectBody<ArticleOverviewPage>()
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        Assertions.assertEquals(0, res.totalElements)
+        Assertions.assertEquals(0, res.page.totalElements)
         Assertions.assertEquals(0, res.content.size)
     }
     @Test
@@ -388,13 +382,13 @@ class AccessCriteriaTest : BaseArticleTest() {
             .uri("$articleBasePath?sort=createdAt,desc&state=published")
             .accessTokenCookie(user.accessToken)
             .exchange()
-            .expectBody(ArticleOverviewPage::class.java)
+            .expectBody<ArticleOverviewPage>()
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        Assertions.assertEquals(1, res.totalElements)
+        Assertions.assertEquals(1, res.page.totalElements)
         Assertions.assertEquals(1, res.content.size)
         Assertions.assertEquals(article.id.getOrThrow(), res.content.first().id)
     }
@@ -410,13 +404,13 @@ class AccessCriteriaTest : BaseArticleTest() {
             .uri("$articleBasePath?sort=createdAt,desc&state=published")
             .accessTokenCookie(user.accessToken)
             .exchange()
-            .expectBody(ArticleOverviewPage::class.java)
+            .expectBody<ArticleOverviewPage>()
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        Assertions.assertEquals(1, res.totalElements)
+        Assertions.assertEquals(1, res.page.totalElements)
         Assertions.assertEquals(1, res.content.size)
         Assertions.assertEquals(article.id.getOrThrow(), res.content.first().id)
     }
@@ -432,13 +426,13 @@ class AccessCriteriaTest : BaseArticleTest() {
             .uri("$articleBasePath?sort=createdAt,desc&state=published")
             .accessTokenCookie(user.accessToken)
             .exchange()
-            .expectBody(ArticleOverviewPage::class.java)
+            .expectBody<ArticleOverviewPage>()
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        Assertions.assertEquals(1, res.totalElements)
+        Assertions.assertEquals(1, res.page.totalElements)
         Assertions.assertEquals(1, res.content.size)
         Assertions.assertEquals(article.id.getOrThrow(), res.content.first().id)
     }
@@ -454,13 +448,13 @@ class AccessCriteriaTest : BaseArticleTest() {
             .uri("$articleBasePath?sort=createdAt,desc&state=published")
             .accessTokenCookie(user.accessToken)
             .exchange()
-            .expectBody(ArticleOverviewPage::class.java)
+            .expectBody<ArticleOverviewPage>()
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        Assertions.assertEquals(1, res.totalElements)
+        Assertions.assertEquals(1, res.page.totalElements)
         Assertions.assertEquals(1, res.content.size)
         Assertions.assertEquals(article.id.getOrThrow(), res.content.first().id)
     }
@@ -477,13 +471,13 @@ class AccessCriteriaTest : BaseArticleTest() {
             .uri("$articleBasePath?sort=createdAt,desc&state=published")
             .accessTokenCookie(user.accessToken)
             .exchange()
-            .expectBody(ArticleOverviewPage::class.java)
+            .expectBody<ArticleOverviewPage>()
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        Assertions.assertEquals(1, res.totalElements)
+        Assertions.assertEquals(1, res.page.totalElements)
         Assertions.assertEquals(1, res.content.size)
         Assertions.assertEquals(article.id.getOrThrow(), res.content.first().id)
     }
@@ -500,13 +494,13 @@ class AccessCriteriaTest : BaseArticleTest() {
             .uri("$articleBasePath?sort=createdAt,desc&state=published")
             .accessTokenCookie(user.accessToken)
             .exchange()
-            .expectBody(ArticleOverviewPage::class.java)
+            .expectBody<ArticleOverviewPage>()
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        Assertions.assertEquals(1, res.totalElements)
+        Assertions.assertEquals(1, res.page.totalElements)
         Assertions.assertEquals(1, res.content.size)
         Assertions.assertEquals(article.id.getOrThrow(), res.content.first().id)
     }
@@ -523,13 +517,13 @@ class AccessCriteriaTest : BaseArticleTest() {
             .uri("$articleBasePath?sort=createdAt,desc&state=published")
             .accessTokenCookie(user.accessToken)
             .exchange()
-            .expectBody(ArticleOverviewPage::class.java)
+            .expectBody<ArticleOverviewPage>()
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        Assertions.assertEquals(1, res.totalElements)
+        Assertions.assertEquals(1, res.page.totalElements)
         Assertions.assertEquals(1, res.content.size)
         Assertions.assertEquals(article.id.getOrThrow(), res.content.first().id)
     }

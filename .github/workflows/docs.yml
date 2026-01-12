@@ -1,18 +1,14 @@
-name: Deploy Docusaurus and Demo
+name: Update Docusaurus
 
 on:
   pull_request:
     branches:
       - main
     paths:
-      - 'libs/core/**'
-      - 'apps/demo/**'
       - '.github/workflows/deploy-docs.yml'
       - 'docs/**'
   push:
     paths:
-      - 'libs/core/**'
-      - 'apps/demo/**'
       - '.github/workflows/deploy-docs.yml'
       - 'docs/**'
     branches:
@@ -20,14 +16,14 @@ on:
 
 jobs:
   docs:
-    name: Build and Deploy Docusaurus
+    name: Update Docusaurus
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - name: Cache node modules
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: 'yarn'
           cache-dependency-path: 'docs/yarn.lock'
       - name: Install yarn

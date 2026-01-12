@@ -1,7 +1,5 @@
 package io.stereov.singularity.cache.service
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.*
 import com.github.michaelbull.result.coroutines.coroutineBinding
 import com.github.michaelbull.result.coroutines.runSuspendCatching
@@ -11,11 +9,11 @@ import io.lettuce.core.api.coroutines.RedisCoroutinesCommands
 import io.stereov.singularity.cache.exception.CacheException
 import io.stereov.singularity.email.core.properties.EmailProperties
 import kotlinx.coroutines.reactive.awaitSingle
-import kotlinx.coroutines.reactive.collect
-import kotlinx.coroutines.reactor.asFlux
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.stereotype.Service
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.module.kotlin.readValue
 import java.time.Duration
 
 /**
@@ -25,14 +23,14 @@ import java.time.Duration
  * It uses an object mapper for serialization/deserialization and supports error handling via custom exceptions.
  *
  * @property redisCommands The Redis coroutine commands the interface used for communication with the Redis server.
- * @property objectMapper The object mapper instance used for serializing and deserializing objects to/from JSON.
+ * @property jsonMapper The object mapper instance used for serializing and deserializing objects to/from JSON.
  */
 @Service
 @OptIn(ExperimentalLettuceCoroutinesApi::class)
 class CacheService(
     val redisCommands: RedisCoroutinesCommands<String, ByteArray>,
-    val objectMapper: ObjectMapper,
-    private val redisTemplate: ReactiveRedisTemplate<String, String>,
+    val jsonMapper: JsonMapper,
+    val redisTemplate: ReactiveRedisTemplate<String, String>,
     private val emailProperties: EmailProperties
 ) {
     val logger = KotlinLogging.logger {}
@@ -52,7 +50,7 @@ class CacheService(
             logger.debug { "Saving key $key to Redis" }
 
             val string = runCatching {
-                objectMapper.writeValueAsString(value)
+                jsonMapper.writeValueAsString(value)
             }
                 .mapError { ex -> CacheException.ObjectMapper("Failed to write value as string: ${ex.message}", ex) }
                 .bind()
@@ -84,7 +82,7 @@ class CacheService(
     suspend fun exists(key: String): Result<Boolean, CacheException.Operation> {
         logger.debug { "Checking if value for key $key exists" }
 
-        return runSuspendCatching {  redisCommands.exists(key)?.let { it > 0 } ?: false }
+        return runSuspendCatching {  redisTemplate.hasKey(key).awaitSingle() }
             .mapError { ex -> CacheException.Operation("Failed to check existence of key $key: ${ex.message}", ex) }
     }
 
@@ -104,11 +102,11 @@ class CacheService(
     final suspend inline fun <reified T: Any> get(key: String): Result<T, CacheException> {
         logger.debug { "Getting value for key: $key" }
 
-        return runSuspendCatching { redisCommands.get(key) }
+        return runSuspendCatching { redisTemplate.opsForValue().get(key).awaitSingleOrNull() }
             .mapError { ex -> CacheException.Operation("Failed to generate value for key $key: ${ex.message}", ex) }
             .andThen { value ->
                 if (value != null) {
-                    runCatching { objectMapper.readValue<T>(value) }
+                    runCatching { jsonMapper.readValue<T>(value) }
                         .mapError { ex -> CacheException.ObjectMapper("Failed to serialize value $value to class ${T::class.simpleName}: ${ex.message}", ex) }
                 } else {
                     Err(CacheException.KeyNotFound("No key $key cached"))
@@ -129,9 +127,8 @@ class CacheService(
     suspend fun delete(vararg keys: String): Result<Long, CacheException.Operation> {
         logger.debug { "Deleting data for keys: $keys" }
 
-        return runSuspendCatching { redisCommands.unlink(*keys) }
+        return runSuspendCatching { redisTemplate.delete(*keys).awaitSingle() }
             .mapError { ex -> CacheException.Operation("Failed to delete keys ${keys}: ${ex.message}", ex) }
-            .map { it ?: 0 }
     }
 
     /**
@@ -150,11 +147,7 @@ class CacheService(
                 .mapError { ex -> CacheException.Operation("Failed to flush cache: ${ex.message}", ex) }
         } else {
             runSuspendCatching {
-                redisCommands.keys(pattern).asFlux()
-                .buffer(1000)
-                .collect { keys ->
-                    redisCommands.unlink(*keys.toTypedArray())
-                }
+                redisTemplate.delete(redisTemplate.keys(pattern)).awaitSingle()
             }
                 .mapError { ex -> CacheException.Operation("Failed to delete keys with pattern $pattern: ${ex.message}", ex) }
         }

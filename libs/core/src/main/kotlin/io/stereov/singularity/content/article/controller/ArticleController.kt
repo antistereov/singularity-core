@@ -9,13 +9,13 @@ import io.stereov.singularity.content.article.exception.GetArticleResponseByKeyE
 import io.stereov.singularity.content.article.exception.GetArticleResponsesException
 import io.stereov.singularity.content.article.service.ArticleService
 import io.stereov.singularity.global.annotation.ThrowsDomainError
-import io.stereov.singularity.global.model.PageableRequest
 import io.swagger.v3.oas.annotations.ExternalDocumentation
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
-import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+import org.springframework.data.web.PagedModel
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.time.Instant
@@ -104,9 +104,7 @@ class ArticleController(
         GetArticleResponsesException::class
     ])
     suspend fun getArticles(
-        @RequestParam page: Int = 0,
-        @RequestParam size: Int = 10,
-        @RequestParam sort: List<String> = emptyList(),
+        pageable: Pageable,
         @RequestParam tags: List<String> = emptyList(),
         @RequestParam title: String? = null,
         @RequestParam content: String? = null,
@@ -119,12 +117,12 @@ class ArticleController(
         @RequestParam publishedAtBefore: Instant?,
         @RequestParam publishedAtAfter: Instant?,
         @RequestParam locale: Locale?,
-    ): ResponseEntity<Page<ArticleOverviewResponse>> {
+    ): ResponseEntity<PagedModel<ArticleOverviewResponse>> {
         val authenticationOutcome = authorizationService.getAuthenticationOutcome()
             .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
 
         val response = service.getArticles(
-            PageableRequest(page, size, sort).toPageable(),
+            pageable,
             authenticationOutcome,
             title,
             content,
@@ -140,6 +138,6 @@ class ArticleController(
             locale
         ).getOrThrow { when (it) { is GetArticleResponsesException -> it } }
 
-        return ResponseEntity.ok(response)
+        return ResponseEntity.ok(PagedModel(response))
     }
 }

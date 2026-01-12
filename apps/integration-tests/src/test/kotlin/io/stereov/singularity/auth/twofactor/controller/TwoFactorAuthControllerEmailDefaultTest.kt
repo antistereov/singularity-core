@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
+import org.springframework.test.web.reactive.server.expectBody
 
 class TwoFactorAuthControllerEmailDefaultTest : BaseMailIntegrationTest() {
 
@@ -33,7 +34,7 @@ class TwoFactorAuthControllerEmailDefaultTest : BaseMailIntegrationTest() {
             .bodyValue(LoginRequest(user.email!!, user.password!!))
             .exchange()
             .expectStatus().isOk
-            .expectBody(LoginResponse::class.java)
+            .expectBody<LoginResponse>()
             .returnResult()
 
         val body = requireNotNull(res.responseBody)

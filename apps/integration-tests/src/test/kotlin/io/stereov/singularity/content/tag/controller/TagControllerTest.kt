@@ -18,10 +18,11 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
+import org.springframework.test.web.reactive.server.expectBody
 import org.springframework.test.web.reactive.server.returnResult
 import java.util.*
 
-class TagControllerTest() : BaseIntegrationTest() {
+class TagControllerTest : BaseIntegrationTest() {
 
     @Autowired
     lateinit var tagMapper: TagMapper
@@ -35,7 +36,7 @@ class TagControllerTest() : BaseIntegrationTest() {
             .bodyValue(CreateTagRequest("test", name = "Test", description = "Test", locale = null))
             .exchange()
             .expectStatus().isOk
-            .expectBody(TagResponse::class.java)
+            .expectBody<TagResponse>()
             .returnResult()
             .responseBody
 
@@ -56,7 +57,7 @@ class TagControllerTest() : BaseIntegrationTest() {
             .bodyValue(CreateTagRequest("test", name = "Test", description = "Test", locale = Locale.GERMAN))
             .exchange()
             .expectStatus().isOk
-            .expectBody(TagResponse::class.java)
+            .expectBody<TagResponse>()
             .returnResult()
             .responseBody
 
@@ -138,7 +139,7 @@ class TagControllerTest() : BaseIntegrationTest() {
             .uri("/api/content/tags/${tag.key}")
             .exchange()
             .expectStatus().isOk
-            .expectBody(TagResponse::class.java)
+            .expectBody<TagResponse>()
             .returnResult()
             .responseBody
 
@@ -160,7 +161,7 @@ class TagControllerTest() : BaseIntegrationTest() {
             .uri("/api/content/tags/${tag.key}?locale=de")
             .exchange()
             .expectStatus().isOk
-            .expectBody(TagResponse::class.java)
+            .expectBody<TagResponse>()
             .returnResult()
             .responseBody
 
@@ -203,7 +204,7 @@ class TagControllerTest() : BaseIntegrationTest() {
 
         requireNotNull(res)
 
-        assertEquals(2, res.totalElements)
+        assertEquals(2, res.page.totalElements)
         assertTrue(res.content.any { it.key == tag1.key})
         assertTrue(res.content.any { it.key == tag2.key})
     }
@@ -233,7 +234,7 @@ class TagControllerTest() : BaseIntegrationTest() {
 
         requireNotNull(res)
 
-        assertEquals(1, res.totalElements)
+        assertEquals(1, res.page.totalElements)
         assertEquals(tag1.key, res.content.first().key)
     }
     @Test fun `find works with key`() = runTest {
@@ -262,7 +263,7 @@ class TagControllerTest() : BaseIntegrationTest() {
 
         requireNotNull(res)
 
-        assertEquals(1, res.totalElements)
+        assertEquals(1, res.page.totalElements)
         assertEquals(tag1.key, res.content.first().key)
     }
     @Test fun `find works with description`() = runTest {
@@ -291,7 +292,7 @@ class TagControllerTest() : BaseIntegrationTest() {
 
         requireNotNull(res)
 
-        assertEquals(1, res.totalElements)
+        assertEquals(1, res.page.totalElements)
         assertEquals(tag1.key, res.content.first().key)
     }
     @Test fun `find works with another locale`() = runTest {
@@ -320,7 +321,7 @@ class TagControllerTest() : BaseIntegrationTest() {
 
         requireNotNull(res)
 
-        assertEquals(1, res.totalElements)
+        assertEquals(1, res.page.totalElements)
         assertEquals(tag1.key, res.content.first().key)
     }
     @Test fun `find works with nothing`() = runTest {
@@ -335,7 +336,7 @@ class TagControllerTest() : BaseIntegrationTest() {
 
         requireNotNull(res)
 
-        assertEquals(0, res.totalElements)
+        assertEquals(0, res.page.totalElements)
     }
 
     @Test fun `update works`() = runTest {
@@ -360,7 +361,7 @@ class TagControllerTest() : BaseIntegrationTest() {
             .bodyValue(req)
             .exchange()
             .expectStatus().isOk
-            .expectBody(TagResponse::class.java)
+            .expectBody<TagResponse>()
             .returnResult()
             .responseBody
 
@@ -428,7 +429,7 @@ class TagControllerTest() : BaseIntegrationTest() {
             .bodyValue(req)
             .exchange()
             .expectStatus().isOk
-            .expectBody(TagResponse::class.java)
+            .expectBody<TagResponse>()
             .returnResult()
             .responseBody
 
