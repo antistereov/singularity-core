@@ -26,7 +26,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
-import org.springframework.data.domain.Page
+import org.springframework.data.web.PagedModel
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.util.*
@@ -168,7 +168,7 @@ class TagController(
         @RequestParam name: String?,
         @RequestParam description: String?,
         @RequestParam locale: Locale?,
-    ): ResponseEntity<Page<TagResponse>> {
+    ): ResponseEntity<PagedModel<TagResponse>> {
         val res = service.findAllPaginated(
             PageableRequest(page, size, sort).toPageable(),
             key,
@@ -181,7 +181,7 @@ class TagController(
                 .getOrThrow { when (it) { is TranslateException.NoTranslations -> it } }
         }
 
-        return ResponseEntity.ok(response)
+        return ResponseEntity.ok(PagedModel(response))
     }
 
     @PatchMapping("/{key}")

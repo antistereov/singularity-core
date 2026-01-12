@@ -26,7 +26,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.bson.types.ObjectId
-import org.springframework.data.domain.Page
+import org.springframework.data.web.PagedModel
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.time.Instant
@@ -140,7 +140,7 @@ class UserController(
         @RequestParam(required = false) createdAtBefore: Instant?,
         @RequestParam(required = false) lastActiveAfter: Instant?,
         @RequestParam(required = false) lastActiveBefore: Instant?
-    ): ResponseEntity<Page<PrincipalOverviewResponse>> {
+    ): ResponseEntity<PagedModel<PrincipalOverviewResponse>> {
         val authenticationOutcome = authorizationService.getAuthenticationOutcome()
             .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
             .requireAuthentication()
@@ -167,7 +167,7 @@ class UserController(
                 .getOrThrow { ex -> when (ex) { is PrincipalMapperException -> ex } }
         }
 
-        return ResponseEntity.ok().body(mappedUsers)
+        return ResponseEntity.ok().body(PagedModel(mappedUsers))
     }
 
     @DeleteMapping("{id}")
