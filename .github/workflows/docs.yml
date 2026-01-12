@@ -1,4 +1,4 @@
-name: Deploy Docusaurus and Demo
+name: Update Docusaurus
 
 on:
   pull_request:
@@ -16,7 +16,7 @@ on:
 
 jobs:
   docs:
-    name: Build and Deploy Docusaurus
+    name: Update Docusaurus
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

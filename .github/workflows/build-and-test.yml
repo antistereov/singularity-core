@@ -54,8 +54,8 @@ jobs:
           require_tests: true
           include_passed: false
 
-  demo_image:
-    name: Build and Push Demo Image
+  demo:
+    name: Build Demo Image
     needs: build_and_test
     runs-on: ubuntu-latest
     steps:
