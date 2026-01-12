@@ -13,7 +13,7 @@ group = properties["group"] as String
 version = properties["version"] as String
 
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain(25)
 }
 
 dependencies {
