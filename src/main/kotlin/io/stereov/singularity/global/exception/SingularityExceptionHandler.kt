@@ -15,7 +15,7 @@ class SingularityExceptionHandler {
 
     @ExceptionHandler(SingularityException::class)
     @Suppress("UNUSED")
-    fun handleException(ex: SingularityException, exchange: ServerWebExchange): ResponseEntity<ErrorResponse> {
+    suspend fun handleException(ex: SingularityException, exchange: ServerWebExchange): ResponseEntity<ErrorResponse> {
         logger.warn { "${ex.javaClass.simpleName} - ${ex.message}" }
 
         val status = ex.status

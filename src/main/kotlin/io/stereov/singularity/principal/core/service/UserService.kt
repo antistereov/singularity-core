@@ -200,7 +200,7 @@ class UserService(
             reactiveMongoTemplate.findById<EncryptedPrincipal<*, *>>(id, "principals")
                 .awaitSingleOrNull()
         }
-            .mapError { ex -> FindEncryptedDocumentByIdException.Database("Failed to retrieve user with id $id from database", ex) }
+            .mapError { ex -> FindEncryptedDocumentByIdException.Database("Failed to retrieve user with id $id from database: ${ex.message}", ex) }
             .andThen { it.toResultOr { FindEncryptedDocumentByIdException.NotFound("No user found with id $id") }}
             .bind()
 
