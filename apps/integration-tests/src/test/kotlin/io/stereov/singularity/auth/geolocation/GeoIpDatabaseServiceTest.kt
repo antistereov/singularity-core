@@ -43,8 +43,8 @@ class GeoIpDatabaseServiceTest : BaseIntegrationTest() {
 
         println(location)
 
-        assertThat(location.city.names["en"]).isEqualTo("Berlin")
-        assertThat(location.country.isoCode).isEqualTo("DE")
+        assertThat(location.city().names()["en"]).isEqualTo("Berlin")
+        assertThat(location.country().isoCode()).isEqualTo("DE")
     }
 
     @Test @DirtiesContext fun `should download database`() = runTest {
@@ -56,8 +56,8 @@ class GeoIpDatabaseServiceTest : BaseIntegrationTest() {
 
         println(location)
 
-        assertThat(location.city.names["en"]).isEqualTo("Berlin")
-        assertThat(location.country.isoCode).isEqualTo("DE")
+        assertThat(location.city().names()["en"]).isEqualTo("Berlin")
+        assertThat(location.country().isoCode()).isEqualTo("DE")
 
         file.delete()
     }
@@ -74,8 +74,8 @@ class GeoIpDatabaseServiceTest : BaseIntegrationTest() {
 
         println(location)
 
-        assertThat(location.city.names["en"]).isEqualTo("Berlin")
-        assertThat(location.country.isoCode).isEqualTo("DE")
+        assertThat(location.city().names()["en"]).isEqualTo("Berlin")
+        assertThat(location.country().isoCode()).isEqualTo("DE")
 
         file.delete()
     }

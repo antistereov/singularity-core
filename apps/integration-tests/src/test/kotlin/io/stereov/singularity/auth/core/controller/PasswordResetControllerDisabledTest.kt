@@ -13,7 +13,7 @@ class PasswordResetControllerDisabledTest : BaseIntegrationTest() {
 
         webTestClient.post()
             .uri("/api/auth/password/reset-request")
-            .bodyValue(SendPasswordResetRequest(user.info.sensitive.email!!))
+            .bodyValue(SendPasswordResetRequest(user.info.sensitive.email))
             .exchange()
             .expectStatus()
             .isEqualTo(HttpStatus.SERVICE_UNAVAILABLE)
