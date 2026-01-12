@@ -524,7 +524,7 @@ class TotpAuthenticationControllerTest : BaseIntegrationTest() {
             .twoFactorAuthenticationTokenCookie(user.twoFactorToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody<LoginResponse>()
+            .expectBody<TwoFactorRecoveryResponse>()
             .returnResult()
             .extractAccessToken()
 
