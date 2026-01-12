@@ -240,10 +240,11 @@ curl -X GET 'https://example.com/api/auth/refresh' \
 ## Logout
 
 You can perform a logout using [`POST /api/auth/logout`](../../api/logout.api.mdx).
-Please note that you need to be **authenticated** to perform a logout.
 
-If successful and authorized, 
+If the user was authorized, 
 the session will be deleted and all [`AccessToken`](./tokens#access-token)s will be invalidated.
+
+All cookies related to *Singularity* will be deleted.
 
 :::info
 You can also delete all active sessions.
