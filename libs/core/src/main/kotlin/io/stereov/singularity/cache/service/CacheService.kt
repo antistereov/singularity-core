@@ -129,7 +129,6 @@ class CacheService(
 
         return runSuspendCatching { redisTemplate.delete(*keys).awaitSingle() }
             .mapError { ex -> CacheException.Operation("Failed to delete keys ${keys}: ${ex.message}", ex) }
-            .map { it ?: 0 }
     }
 
     /**
