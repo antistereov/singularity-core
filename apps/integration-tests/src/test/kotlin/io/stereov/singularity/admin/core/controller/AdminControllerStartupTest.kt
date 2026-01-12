@@ -38,7 +38,7 @@ class AdminControllerStartupTest : BaseSpringBootTest() {
             registry.add("singularity.app.create-root-user") { "true" }
             registry.add("singularity.app.root-email") { "root@email.com" }
             registry.add("singularity.app.root-password") { "root-password" }
-            registry.add("spring.data.mongodb.uri") { "${mongoDBContainer.connectionString}/test" }
+            registry.add("spring.mongodb.uri") { "${mongoDBContainer.connectionString}/test" }
             registry.add("spring.data.redis.host") { redisContainer.host }
             registry.add("spring.data.redis.port") { redisContainer.getMappedPort(6379) }
         }
