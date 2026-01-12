@@ -28,8 +28,8 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
-import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
+import org.springframework.data.web.PagedModel
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.util.*
@@ -154,7 +154,7 @@ class GroupController(
         @RequestParam size: Int = 10,
         @RequestParam sort: List<String> = emptyList(),
         @RequestParam locale: Locale?
-    ): ResponseEntity<Page<GroupResponse>> {
+    ): ResponseEntity<PagedModel<GroupResponse>> {
         authorizationService.getAuthenticationOutcome()
             .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
             .requireAuthentication()
@@ -170,7 +170,7 @@ class GroupController(
         }
 
         return ResponseEntity.ok(
-            PageImpl(responses, pages.pageable, pages.totalElements)
+            PagedModel(PageImpl(responses, pages.pageable, pages.totalElements))
         )
     }
 

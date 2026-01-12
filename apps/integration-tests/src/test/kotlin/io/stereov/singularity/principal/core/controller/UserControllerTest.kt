@@ -15,28 +15,22 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ClassPathResource
+import org.springframework.data.web.PagedModel
 import org.springframework.http.MediaType
 import org.springframework.http.client.MultipartBodyBuilder
+import org.springframework.test.web.reactive.server.expectBody
 import org.springframework.web.util.UriComponentsBuilder
 import java.io.File
 import java.time.Instant
 
-class UserControllerTest() : BaseIntegrationTest() {
+class UserControllerTest : BaseIntegrationTest() {
 
     @Autowired
     lateinit var localFileStorageProperties: LocalFileStorageProperties
 
     data class UserOverviewPage(
         val content: List<PrincipalOverviewResponse> = emptyList(),
-        val pageNumber: Int,
-        val pageSize: Int,
-        val numberOfElements: Int,
-        val totalElements: Long,
-        val totalPages: Int,
-        val first: Boolean,
-        val last: Boolean,
-        val hasNext: Boolean,
-        val hasPrevious: Boolean
+        val page: PagedModel.PageMetadata
     )
 
     @Test fun `getUserById works`() = runTest {
@@ -46,7 +40,7 @@ class UserControllerTest() : BaseIntegrationTest() {
             .uri("/api/users/${user.id}")
             .exchange()
             .expectStatus().isOk
-            .expectBody(PrincipalOverviewResponse::class.java)
+            .expectBody<PrincipalOverviewResponse>()
             .returnResult()
             .responseBody
 
@@ -95,7 +89,7 @@ class UserControllerTest() : BaseIntegrationTest() {
             )
             .exchange()
             .expectStatus().isOk
-            .expectBody(PrincipalResponse::class.java)
+            .expectBody<PrincipalResponse>()
             .returnResult()
             .responseBody
 
@@ -197,13 +191,13 @@ class UserControllerTest() : BaseIntegrationTest() {
             .accessTokenCookie(user1.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserOverviewPage::class.java)
+            .expectBody<UserOverviewPage>()
             .returnResult()
             .responseBody
 
         requireNotNull(res1)
 
-        assertEquals(5, res1.totalElements)
+        assertEquals(5, res1.page.totalElements)
         assertEquals(4, res1.content.size)
         assertEquals(user1.id, res1.content.first().id)
         assertEquals(user2.id, res1.content[1].id)
@@ -223,13 +217,13 @@ class UserControllerTest() : BaseIntegrationTest() {
             .accessTokenCookie(user1.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserOverviewPage::class.java)
+            .expectBody<UserOverviewPage>()
             .returnResult()
             .responseBody
 
         requireNotNull(res2)
 
-        assertEquals(5, res2.totalElements)
+        assertEquals(5, res2.page.totalElements)
         assertEquals(1, res2.content.size)
         assertEquals(user5.id, res2.content.first().id)
     }
@@ -257,13 +251,13 @@ class UserControllerTest() : BaseIntegrationTest() {
             .accessTokenCookie(user1.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserOverviewPage::class.java)
+            .expectBody<UserOverviewPage>()
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        assertEquals(1, res.totalElements)
+        assertEquals(1, res.page.totalElements)
         assertEquals(1, res.content.size)
         assertEquals(user1.id, res.content.first().id)
     }
@@ -284,13 +278,13 @@ class UserControllerTest() : BaseIntegrationTest() {
             .accessTokenCookie(user1.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserOverviewPage::class.java)
+            .expectBody<UserOverviewPage>()
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        assertEquals(1, res.totalElements)
+        assertEquals(1, res.page.totalElements)
         assertEquals(1, res.content.size)
         assertEquals(user1.id, res.content.first().id)
     }
@@ -311,13 +305,13 @@ class UserControllerTest() : BaseIntegrationTest() {
             .accessTokenCookie(user1.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserOverviewPage::class.java)
+            .expectBody<UserOverviewPage>()
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        assertEquals(0, res.totalElements)
+        assertEquals(0, res.page.totalElements)
         assertEquals(0, res.content.size)
     }
     @Test fun `getUsers works with roles`() = runTest {
@@ -337,13 +331,13 @@ class UserControllerTest() : BaseIntegrationTest() {
             .accessTokenCookie(user1.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserOverviewPage::class.java)
+            .expectBody<UserOverviewPage>()
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        assertEquals(1, res.totalElements)
+        assertEquals(1, res.page.totalElements)
         assertEquals(1, res.content.size)
         assertEquals(user1.id, res.content.first().id)
     }
@@ -364,13 +358,13 @@ class UserControllerTest() : BaseIntegrationTest() {
             .accessTokenCookie(user1.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserOverviewPage::class.java)
+            .expectBody<UserOverviewPage>()
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        assertEquals(1, res.totalElements)
+        assertEquals(1, res.page.totalElements)
         assertEquals(1, res.content.size)
         assertEquals(user1.id, res.content.first().id)
     }
@@ -391,13 +385,13 @@ class UserControllerTest() : BaseIntegrationTest() {
             .accessTokenCookie(user1.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserOverviewPage::class.java)
+            .expectBody<UserOverviewPage>()
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        assertEquals(1, res.totalElements)
+        assertEquals(1, res.page.totalElements)
         assertEquals(1, res.content.size)
         assertEquals(user1.id, res.content.first().id)
     }
@@ -418,18 +412,18 @@ class UserControllerTest() : BaseIntegrationTest() {
             .accessTokenCookie(user1.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserOverviewPage::class.java)
+            .expectBody<UserOverviewPage>()
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        assertEquals(1, res.totalElements)
+        assertEquals(1, res.page.totalElements)
         assertEquals(1, res.content.size)
         assertEquals(user1.id, res.content.first().id)
     }
     @Test fun `getUsers works with identities`() = runTest {
-        val user1 = registerUser(roles = listOf(Role.User.ADMIN, Role.User.USER), )
+        val user1 = registerUser(roles = listOf(Role.User.ADMIN, Role.User.USER))
         registerOAuth2()
 
         val uri = UriComponentsBuilder.fromUriString("/api/users")
@@ -445,18 +439,18 @@ class UserControllerTest() : BaseIntegrationTest() {
             .accessTokenCookie(user1.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserOverviewPage::class.java)
+            .expectBody<UserOverviewPage>()
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        assertEquals(1, res.totalElements)
+        assertEquals(1, res.page.totalElements)
         assertEquals(1, res.content.size)
         assertEquals(user1.id, res.content.first().id)
     }
     @Test fun `getUsers works with multiple identities`() = runTest {
-        val user1 = registerUser(roles = listOf(Role.User.ADMIN, Role.User.USER), )
+        val user1 = registerUser(roles = listOf(Role.User.ADMIN, Role.User.USER))
         registerOAuth2()
 
         val uri = UriComponentsBuilder.fromUriString("/api/users")
@@ -472,18 +466,18 @@ class UserControllerTest() : BaseIntegrationTest() {
             .accessTokenCookie(user1.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserOverviewPage::class.java)
+            .expectBody<UserOverviewPage>()
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        assertEquals(1, res.totalElements)
+        assertEquals(1, res.page.totalElements)
         assertEquals(1, res.content.size)
         assertEquals(user1.id, res.content.first().id)
     }
     @Test fun `getUsers works with createdAtAfter`() = runTest {
-        val user1 = registerUser(roles = listOf(Role.User.ADMIN, Role.User.USER), )
+        val user1 = registerUser(roles = listOf(Role.User.ADMIN, Role.User.USER))
         val user2 = registerUser()
         userService.save(user2.info.copy(createdAt = Instant.ofEpochSecond(0)))
 
@@ -500,18 +494,18 @@ class UserControllerTest() : BaseIntegrationTest() {
             .accessTokenCookie(user1.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserOverviewPage::class.java)
+            .expectBody<UserOverviewPage>()
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        assertEquals(1, res.totalElements)
+        assertEquals(1, res.page.totalElements)
         assertEquals(1, res.content.size)
         assertEquals(user1.id, res.content.first().id)
     }
     @Test fun `getUsers works with createdAtBefore`() = runTest {
-        val user1 = registerUser(roles = listOf(Role.User.ADMIN, Role.User.USER), )
+        val user1 = registerUser(roles = listOf(Role.User.ADMIN, Role.User.USER))
         val user2 = registerUser()
         userService.save(user2.info.copy(createdAt = Instant.now().plusSeconds(1000)))
 
@@ -528,18 +522,18 @@ class UserControllerTest() : BaseIntegrationTest() {
             .accessTokenCookie(user1.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserOverviewPage::class.java)
+            .expectBody<UserOverviewPage>()
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        assertEquals(1, res.totalElements)
+        assertEquals(1, res.page.totalElements)
         assertEquals(1, res.content.size)
         assertEquals(user1.id, res.content.first().id)
     }
     @Test fun `getUsers works with lastActiveAfter`() = runTest {
-        val user1 = registerUser(roles = listOf(Role.User.ADMIN, Role.User.USER), )
+        val user1 = registerUser(roles = listOf(Role.User.ADMIN, Role.User.USER))
         val user2 = registerUser()
         userService.save(user2.info.copy(lastActive = Instant.ofEpochSecond(0)))
 
@@ -556,18 +550,18 @@ class UserControllerTest() : BaseIntegrationTest() {
             .accessTokenCookie(user1.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserOverviewPage::class.java)
+            .expectBody<UserOverviewPage>()
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        assertEquals(1, res.totalElements)
+        assertEquals(1, res.page.totalElements)
         assertEquals(1, res.content.size)
         assertEquals(user1.id, res.content.first().id)
     }
     @Test fun `getUsers works with lastActiveBefore`() = runTest {
-        val user1 = registerUser(roles = listOf(Role.User.ADMIN, Role.User.USER), )
+        val user1 = registerUser(roles = listOf(Role.User.ADMIN, Role.User.USER))
         val user2 = registerUser()
         userService.save(user2.info.copy(lastActive = Instant.now().plusSeconds(1000)))
 
@@ -584,13 +578,13 @@ class UserControllerTest() : BaseIntegrationTest() {
             .accessTokenCookie(user1.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(UserOverviewPage::class.java)
+            .expectBody<UserOverviewPage>()
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
-        assertEquals(1, res.totalElements)
+        assertEquals(1, res.page.totalElements)
         assertEquals(1, res.content.size)
         assertEquals(user1.id, res.content.first().id)
     }

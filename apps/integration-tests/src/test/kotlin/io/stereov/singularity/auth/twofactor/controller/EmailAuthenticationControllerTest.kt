@@ -13,6 +13,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
+import org.springframework.test.web.reactive.server.expectBody
 import java.time.Instant
 import java.util.*
 
@@ -95,7 +96,7 @@ class EmailAuthenticationControllerTest : BaseMailIntegrationTest() {
             .bodyValue(EnableEmailTwoFactorMethodRequest(user.email2faCode))
             .exchange()
             .expectStatus().isOk
-            .expectBody(PrincipalResponse::class.java)
+            .expectBody<PrincipalResponse>()
             .returnResult()
             .responseBody
 
@@ -224,7 +225,7 @@ class EmailAuthenticationControllerTest : BaseMailIntegrationTest() {
             .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(PrincipalResponse::class.java)
+            .expectBody<PrincipalResponse>()
             .returnResult()
 
         val body = res.responseBody
@@ -370,7 +371,7 @@ class EmailAuthenticationControllerTest : BaseMailIntegrationTest() {
             .accessTokenCookie(user.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(MailCooldownResponse::class.java)
+            .expectBody<MailCooldownResponse>()
             .returnResult()
             .responseBody
 
@@ -392,7 +393,7 @@ class EmailAuthenticationControllerTest : BaseMailIntegrationTest() {
             .twoFactorAuthenticationTokenCookie(user.twoFactorToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(MailCooldownResponse::class.java)
+            .expectBody<MailCooldownResponse>()
             .returnResult()
             .responseBody
 
@@ -415,7 +416,7 @@ class EmailAuthenticationControllerTest : BaseMailIntegrationTest() {
             .twoFactorAuthenticationTokenCookie(user.twoFactorToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(MailCooldownResponse::class.java)
+            .expectBody<MailCooldownResponse>()
             .returnResult()
             .responseBody
 
@@ -446,7 +447,7 @@ class EmailAuthenticationControllerTest : BaseMailIntegrationTest() {
             .twoFactorAuthenticationTokenCookie(user.twoFactorToken!!)
             .exchange()
             .expectStatus().isOk
-            .expectBody(MailCooldownResponse::class.java)
+            .expectBody<MailCooldownResponse>()
             .returnResult()
             .responseBody
 

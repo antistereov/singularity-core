@@ -60,6 +60,7 @@ import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Import
 import org.springframework.test.web.reactive.server.EntityExchangeResult
 import org.springframework.test.web.reactive.server.WebTestClient
+import org.springframework.test.web.reactive.server.expectBody
 import org.springframework.test.web.reactive.server.returnResult
 import tools.jackson.databind.json.JsonMapper
 import java.time.Duration
@@ -286,7 +287,7 @@ class BaseSpringBootTest() {
                 .stepUpTokenCookie(stepUpToken.value)
                 .exchange()
                 .expectStatus().isOk
-                .expectBody(TwoFactorSetupResponse::class.java)
+                .expectBody<TwoFactorSetupResponse>()
                 .returnResult()
                 .responseBody
 
@@ -406,7 +407,7 @@ class BaseSpringBootTest() {
             .uri("/api/guests")
             .bodyValue(req)
             .exchange()
-            .expectBody(CreateGuestResponse::class.java)
+            .expectBody<CreateGuestResponse>()
             .returnResult()
 
         val accessToken = result.extractAccessToken()

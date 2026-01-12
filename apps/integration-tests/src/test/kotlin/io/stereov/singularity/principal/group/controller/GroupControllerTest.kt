@@ -10,22 +10,16 @@ import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import org.springframework.data.web.PagedModel
 import org.springframework.http.HttpStatus
+import org.springframework.test.web.reactive.server.expectBody
 import java.util.*
 
 class GroupControllerTest() : BaseIntegrationTest() {
 
     data class GroupPage(
         val content: List<GroupResponse> = emptyList(),
-        val pageNumber: Int,
-        val pageSize: Int,
-        val numberOfElements: Int,
-        val totalElements: Long,
-        val totalPages: Int,
-        val first: Boolean,
-        val last: Boolean,
-        val hasNext: Boolean,
-        val hasPrevious: Boolean
+        val page: PagedModel.PageMetadata
     )
 
     @Test fun `createGroup works`() = runTest {
@@ -45,7 +39,7 @@ class GroupControllerTest() : BaseIntegrationTest() {
             .bodyValue(req)
             .exchange()
             .expectStatus().isOk
-            .expectBody(GroupResponse::class.java)
+            .expectBody<GroupResponse>()
             .returnResult()
             .responseBody
 
@@ -62,7 +56,7 @@ class GroupControllerTest() : BaseIntegrationTest() {
             .accessTokenCookie(admin.accessToken)
             .bodyValue(req)
             .exchange()
-            .expectBody(GroupResponse::class.java)
+            .expectBody<GroupResponse>()
             .returnResult()
             .responseBody
 
@@ -210,16 +204,16 @@ class GroupControllerTest() : BaseIntegrationTest() {
             .accessTokenCookie(admin.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(GroupPage::class.java)
+            .expectBody<GroupPage>()
             .returnResult()
             .responseBody
 
         requireNotNull(res)
 
         Assertions.assertEquals(2, res.content.size)
-        Assertions.assertEquals(2, res.totalElements)
-        Assertions.assertEquals(1, res.totalPages)
-        Assertions.assertEquals(0, res.pageNumber)
+        Assertions.assertEquals(2, res.page.totalElements)
+        Assertions.assertEquals(1, res.page.totalPages)
+        Assertions.assertEquals(0, res.page.number)
 
         val pilots = res.content
             .find { it.key == "pilots" }
@@ -240,16 +234,16 @@ class GroupControllerTest() : BaseIntegrationTest() {
             .accessTokenCookie(admin.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(GroupPage::class.java)
+            .expectBody<GroupPage>()
             .returnResult()
             .responseBody
 
         requireNotNull(resDE)
 
         Assertions.assertEquals(2, resDE.content.size)
-        Assertions.assertEquals(2, resDE.totalElements)
-        Assertions.assertEquals(1, resDE.totalPages)
-        Assertions.assertEquals(0, resDE.pageNumber)
+        Assertions.assertEquals(2, resDE.page.totalElements)
+        Assertions.assertEquals(1, resDE.page.totalPages)
+        Assertions.assertEquals(0, resDE.page.number)
 
         val pilotsDE = resDE.content
             .find { it.key == "pilots" }
@@ -269,16 +263,16 @@ class GroupControllerTest() : BaseIntegrationTest() {
             .uri("/api/groups?locale=en")
             .accessTokenCookie(admin.accessToken)
             .exchange()
-            .expectBody(GroupPage::class.java)
+            .expectBody<GroupPage>()
             .returnResult()
             .responseBody
 
         requireNotNull(resEN)
 
         Assertions.assertEquals(2, resEN.content.size)
-        Assertions.assertEquals(2, resEN.totalElements)
-        Assertions.assertEquals(1, resEN.totalPages)
-        Assertions.assertEquals(0, resEN.pageNumber)
+        Assertions.assertEquals(2, resEN.page.totalElements)
+        Assertions.assertEquals(1, resEN.page.totalPages)
+        Assertions.assertEquals(0, resEN.page.number)
 
         val pilotsEN = resEN.content
             .find { it.key == "pilots" }
@@ -327,7 +321,7 @@ class GroupControllerTest() : BaseIntegrationTest() {
             .accessTokenCookie(admin.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(GroupResponse::class.java)
+            .expectBody<GroupResponse>()
             .returnResult()
             .responseBody
 
@@ -340,7 +334,7 @@ class GroupControllerTest() : BaseIntegrationTest() {
             .uri("/api/groups/pilots?locale=de")
             .accessTokenCookie(admin.accessToken)
             .exchange()
-            .expectBody(GroupResponse::class.java)
+            .expectBody<GroupResponse>()
             .returnResult()
             .responseBody
 
@@ -353,7 +347,7 @@ class GroupControllerTest() : BaseIntegrationTest() {
             .uri("/api/groups/pilots?locale=en")
             .accessTokenCookie(admin.accessToken)
             .exchange()
-            .expectBody(GroupResponse::class.java)
+            .expectBody<GroupResponse>()
             .returnResult()
             .responseBody
 
@@ -414,7 +408,7 @@ class GroupControllerTest() : BaseIntegrationTest() {
             .accessTokenCookie(admin.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(GroupResponse::class.java)
+            .expectBody<GroupResponse>()
             .returnResult()
             .responseBody
 
@@ -434,7 +428,7 @@ class GroupControllerTest() : BaseIntegrationTest() {
             .bodyValue(req)
             .accessTokenCookie(admin.accessToken)
             .exchange()
-            .expectBody(GroupResponse::class.java)
+            .expectBody<GroupResponse>()
             .returnResult()
             .responseBody
 
@@ -468,7 +462,7 @@ class GroupControllerTest() : BaseIntegrationTest() {
             .bodyValue(req)
             .accessTokenCookie(admin.accessToken)
             .exchange()
-            .expectBody(GroupResponse::class.java)
+            .expectBody<GroupResponse>()
             .returnResult()
             .responseBody
 

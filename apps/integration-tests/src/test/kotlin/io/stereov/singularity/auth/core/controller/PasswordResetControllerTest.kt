@@ -15,6 +15,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
+import org.springframework.test.web.reactive.server.expectBody
 import java.time.Instant
 
 class PasswordResetControllerTest : BaseMailIntegrationTest() {
@@ -302,7 +303,7 @@ class PasswordResetControllerTest : BaseMailIntegrationTest() {
             .uri("/api/auth/password/reset/cooldown?email=${user.email}")
             .exchange()
             .expectStatus().isOk
-            .expectBody(MailCooldownResponse::class.java)
+            .expectBody<MailCooldownResponse>()
             .returnResult()
             .responseBody
 
@@ -317,7 +318,7 @@ class PasswordResetControllerTest : BaseMailIntegrationTest() {
             .uri("/api/auth/password/reset/cooldown?email=${user.email}")
             .exchange()
             .expectStatus().isOk
-            .expectBody(MailCooldownResponse::class.java)
+            .expectBody<MailCooldownResponse>()
             .returnResult()
             .responseBody
 
@@ -336,7 +337,7 @@ class PasswordResetControllerTest : BaseMailIntegrationTest() {
             .uri("/api/auth/password/reset/cooldown?email=another@email.com")
             .exchange()
             .expectStatus().isOk
-            .expectBody(MailCooldownResponse::class.java)
+            .expectBody<MailCooldownResponse>()
             .returnResult()
             .responseBody
 

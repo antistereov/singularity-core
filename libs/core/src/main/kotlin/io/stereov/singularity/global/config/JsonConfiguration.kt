@@ -7,6 +7,7 @@ import org.bson.types.ObjectId
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer
 import org.springframework.context.annotation.Bean
+import org.springframework.data.web.config.SpringDataJackson3Configuration
 import tools.jackson.core.JsonGenerator
 import tools.jackson.databind.SerializationContext
 import tools.jackson.databind.ValueDeserializer
@@ -16,6 +17,11 @@ import java.io.IOException
 
 @AutoConfiguration
 class JsonConfiguration {
+
+    @Bean
+    fun jacksonModule(): SpringDataJackson3Configuration.PageModule {
+        return SpringDataJackson3Configuration.PageModule(null)
+    }
 
     @Bean
     fun jacksonCustomizer() = JsonMapperBuilderCustomizer { builder ->

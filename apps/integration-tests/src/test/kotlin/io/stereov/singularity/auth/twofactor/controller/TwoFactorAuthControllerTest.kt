@@ -17,6 +17,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.springframework.test.web.reactive.server.expectBody
 import java.time.Instant
 import java.util.*
 
@@ -61,7 +62,7 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
             .twoFactorAuthenticationTokenCookie(user.twoFactorToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(LoginResponse::class.java)
+            .expectBody<LoginResponse>()
             .returnResult()
 
         val body = res.responseBody
@@ -91,7 +92,7 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
             .twoFactorAuthenticationTokenCookie(user.twoFactorToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(LoginResponse::class.java)
+            .expectBody<LoginResponse>()
             .returnResult()
             .extractAccessToken()
 
@@ -215,7 +216,7 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
             .twoFactorAuthenticationTokenCookie(user.twoFactorToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(LoginResponse::class.java)
+            .expectBody<LoginResponse>()
             .returnResult()
 
         val body = res.responseBody
@@ -278,7 +279,7 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
             .twoFactorAuthenticationTokenCookie(user.twoFactorToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(LoginResponse::class.java)
+            .expectBody<LoginResponse>()
             .returnResult()
 
         val accessToken = res.extractAccessToken()
@@ -418,7 +419,7 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
             .twoFactorAuthenticationTokenCookie(user.twoFactorToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(StepUpResponse::class.java)
+            .expectBody<StepUpResponse>()
             .returnResult()
 
         val body = res.responseBody
@@ -561,7 +562,7 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
             .twoFactorAuthenticationTokenCookie(user.twoFactorToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(StepUpResponse::class.java)
+            .expectBody<StepUpResponse>()
             .returnResult()
 
         val body = res.responseBody
@@ -723,7 +724,7 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
             .stepUpTokenCookie(user.stepUpToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(PrincipalResponse::class.java)
+            .expectBody<PrincipalResponse>()
             .returnResult()
             .responseBody
 
@@ -746,7 +747,7 @@ class TwoFactorAuthControllerTest : BaseMailIntegrationTest() {
             .stepUpTokenCookie(user.stepUpToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(PrincipalResponse::class.java)
+            .expectBody<PrincipalResponse>()
             .returnResult()
             .responseBody
 

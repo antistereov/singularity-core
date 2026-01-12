@@ -8,6 +8,7 @@ import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import org.springframework.test.web.reactive.server.expectBody
 import java.util.*
 
 class GroupMemberControllerTest : BaseIntegrationTest(){
@@ -32,7 +33,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
             .accessTokenCookie(admin.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(PrincipalResponse::class.java)
+            .expectBody<PrincipalResponse>()
             .returnResult()
             .responseBody
 
@@ -148,7 +149,7 @@ class GroupMemberControllerTest : BaseIntegrationTest(){
             .accessTokenCookie(admin.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(PrincipalResponse::class.java)
+            .expectBody<PrincipalResponse>()
             .returnResult()
             .responseBody
 

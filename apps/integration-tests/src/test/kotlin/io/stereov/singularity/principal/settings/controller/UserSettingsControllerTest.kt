@@ -24,6 +24,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.client.MultipartBodyBuilder
+import org.springframework.test.web.reactive.server.expectBody
 import java.io.File
 import java.net.URI
 import java.time.Instant
@@ -42,7 +43,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .header(HttpHeaders.COOKIE, "${SessionTokenType.Access.cookieName}=${user.accessToken}")
             .exchange()
             .expectStatus().isOk
-            .expectBody(PrincipalResponse::class.java)
+            .expectBody<PrincipalResponse>()
             .returnResult()
             .responseBody
 
@@ -68,7 +69,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .bodyValue(ChangeEmailRequest(newEmail))
             .exchange()
             .expectStatus().isOk
-            .expectBody(ChangeEmailResponse::class.java)
+            .expectBody<ChangeEmailResponse>()
             .returnResult()
             .responseBody
 
@@ -95,7 +96,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .bodyValue(ChangeEmailRequest(newEmail))
             .exchange()
             .expectStatus().isOk
-            .expectBody(ChangeEmailResponse::class.java)
+            .expectBody<ChangeEmailResponse>()
             .returnResult()
             .responseBody
 
@@ -243,7 +244,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .bodyValue(ChangeEmailRequest(newEmail))
             .exchange()
             .expectStatus().isOk
-            .expectBody(ChangeEmailResponse::class.java)
+            .expectBody<ChangeEmailResponse>()
             .returnResult()
             .responseBody
 
@@ -285,7 +286,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .bodyValue(ChangePasswordRequest(oldPassword, newPassword))
             .exchange()
             .expectStatus().isOk
-            .expectBody(PrincipalResponse::class.java)
+            .expectBody<PrincipalResponse>()
             .returnResult()
             .responseBody
 
@@ -534,7 +535,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             .bodyValue(ChangePrincipalRequest(newName))
             .exchange()
             .expectStatus().isOk
-            .expectBody(PrincipalResponse::class.java)
+            .expectBody<PrincipalResponse>()
             .returnResult()
             .responseBody
 
@@ -589,7 +590,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             )
             .exchange()
             .expectStatus().isOk
-            .expectBody(PrincipalResponse::class.java)
+            .expectBody<PrincipalResponse>()
             .returnResult()
             .responseBody
 
@@ -673,7 +674,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             )
             .exchange()
             .expectStatus().isOk
-            .expectBody(PrincipalResponse::class.java)
+            .expectBody<PrincipalResponse>()
             .returnResult()
             .responseBody
 
@@ -691,7 +692,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             )
             .exchange()
             .expectStatus().isOk
-            .expectBody(PrincipalResponse::class.java)
+            .expectBody<PrincipalResponse>()
             .returnResult()
             .responseBody
 
@@ -824,7 +825,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             )
             .exchange()
             .expectStatus().isOk
-            .expectBody(PrincipalResponse::class.java)
+            .expectBody<PrincipalResponse>()
             .returnResult()
             .responseBody
         webTestClient.delete()
@@ -900,7 +901,7 @@ class UserSettingsControllerTest() : BaseMailIntegrationTest() {
             )
             .exchange()
             .expectStatus().isOk
-            .expectBody(PrincipalResponse::class.java)
+            .expectBody<PrincipalResponse>()
             .returnResult()
             .responseBody
 

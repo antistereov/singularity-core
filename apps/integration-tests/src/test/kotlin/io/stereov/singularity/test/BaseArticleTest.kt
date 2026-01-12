@@ -13,6 +13,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.test.web.reactive.server.expectBody
 import java.util.*
 
 class BaseArticleTest : BaseMailIntegrationTest() {
@@ -51,7 +52,7 @@ class BaseArticleTest : BaseMailIntegrationTest() {
             .bodyValue(req)
             .exchange()
             .expectStatus().isOk
-            .expectBody(FullArticleResponse::class.java)
+            .expectBody<FullArticleResponse>()
             .returnResult()
             .responseBody
 

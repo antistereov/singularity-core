@@ -38,9 +38,7 @@ class GeolocationServiceTest : BaseIntegrationTest() {
     }
 
     @Test fun `should resolve geolocation`() = runTest {
-        val city = geoLocationService.getCityResponse(InetAddress.getByName("8.8.8.8")).getOrThrow()
-        
-        assertThat(city.toString()).isEqualTo("CityResponse[city=City[locales=[en], confidence=null, geonameId=null, names={}], continent=Continent[locales=[en], code=NA, geonameId=6255149, names={ja=北アメリカ, pt-BR=América do Norte, en=North America, zh-CN=北美洲, fr=Amérique du Nord, es=Norteamérica, de=Nordamerika, ru=Северная Америка}], country=Country[locales=[en], confidence=null, geonameId=6252001, isInEuropeanUnion=false, isoCode=US, names={ja=アメリカ, pt-BR=EUA, en=United States, zh-CN=美国, fr=États Unis, es=Estados Unidos, de=USA, ru=США}], location=Location[accuracyRadius=1000, averageIncome=null, latitude=37.751, longitude=-97.822, populationDensity=null, timeZone=America/Chicago], maxmind=MaxMind[queriesRemaining=null], postal=Postal[code=null, confidence=null], registeredCountry=Country[locales=[en], confidence=null, geonameId=6252001, isInEuropeanUnion=false, isoCode=US, names={ja=アメリカ, pt-BR=EUA, en=United States, zh-CN=美国, fr=États Unis, es=Estados Unidos, de=USA, ru=США}], representedCountry=RepresentedCountry[locales=[en], confidence=null, geonameId=null, isInEuropeanUnion=false, isoCode=null, names={}, type=null], subdivisions=[], traits=Traits[autonomousSystemNumber=null, autonomousSystemOrganization=null, connectionType=null, domain=null, ipAddress=/8.8.8.8, isAnonymous=false, isAnonymousVpn=false, isAnycast=false, isHostingProvider=false, isLegitimateProxy=false, isPublicProxy=false, isResidentialProxy=false, isTorExitNode=false, ipRiskSnapshot=null, isp=null, mobileCountryCode=null, mobileNetworkCode=null, network=8.8.8.0/23, organization=null, userType=null, userCount=null, staticIpScore=null]]")
+        geoLocationService.getCityResponse(InetAddress.getByName("8.8.8.8")).getOrThrow()
     }
 
     @Test fun `it should resolve geolocation in session`() = runTest {

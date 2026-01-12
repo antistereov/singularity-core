@@ -7,6 +7,7 @@ import io.stereov.singularity.test.BaseIntegrationTest
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import org.springframework.test.web.reactive.server.expectBody
 
 class OAuth2ProviderControllerTest : BaseIntegrationTest() {
 
@@ -21,7 +22,7 @@ class OAuth2ProviderControllerTest : BaseIntegrationTest() {
             .bodyValue(req)
             .exchange()
             .expectStatus().isOk
-            .expectBody(OAuth2ProviderConnectionTokenResponse::class.java)
+            .expectBody<OAuth2ProviderConnectionTokenResponse>()
             .returnResult()
 
         val token = res.extractOAuth2ProviderConnectionToken(user.info)
@@ -41,7 +42,7 @@ class OAuth2ProviderControllerTest : BaseIntegrationTest() {
             .bodyValue(req)
             .exchange()
             .expectStatus().isOk
-            .expectBody(OAuth2ProviderConnectionTokenResponse::class.java)
+            .expectBody<OAuth2ProviderConnectionTokenResponse>()
             .returnResult()
 
         val token = res.extractOAuth2ProviderConnectionToken(user.info)
@@ -61,7 +62,7 @@ class OAuth2ProviderControllerTest : BaseIntegrationTest() {
             .bodyValue(req)
             .exchange()
             .expectStatus().isOk
-            .expectBody(OAuth2ProviderConnectionTokenResponse::class.java)
+            .expectBody<OAuth2ProviderConnectionTokenResponse>()
             .returnResult()
 
         val token = res.extractOAuth2ProviderConnectionToken(user.info)

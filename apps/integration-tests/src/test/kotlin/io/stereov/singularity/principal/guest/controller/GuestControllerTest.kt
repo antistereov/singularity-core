@@ -15,6 +15,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
+import org.springframework.test.web.reactive.server.expectBody
 
 class GuestControllerTest : BaseIntegrationTest() {
 
@@ -25,7 +26,7 @@ class GuestControllerTest : BaseIntegrationTest() {
             .bodyValue(CreateGuestRequest(name, null))
             .exchange()
             .expectStatus().isOk
-            .expectBody(CreateGuestResponse::class.java)
+            .expectBody<CreateGuestResponse>()
             .returnResult()
 
         val accessToken = result.extractAccessToken()
@@ -51,7 +52,7 @@ class GuestControllerTest : BaseIntegrationTest() {
             .bodyValue(req)
             .exchange()
             .expectStatus().isOk
-            .expectBody(CreateGuestResponse::class.java)
+            .expectBody<CreateGuestResponse>()
             .returnResult()
 
         val accessToken = result.extractAccessToken()
@@ -93,7 +94,7 @@ class GuestControllerTest : BaseIntegrationTest() {
             .accessTokenCookie(guest.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(ConvertToUserResponse::class.java)
+            .expectBody<ConvertToUserResponse>()
             .returnResult()
 
         val accessToken = result.extractAccessToken()
@@ -134,7 +135,7 @@ class GuestControllerTest : BaseIntegrationTest() {
             .accessTokenCookie(guest.accessToken)
             .exchange()
             .expectStatus().isOk
-            .expectBody(ConvertToUserResponse::class.java)
+            .expectBody<ConvertToUserResponse>()
             .returnResult()
 
         val accessToken = result.extractAccessToken()
