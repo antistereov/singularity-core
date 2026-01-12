@@ -59,5 +59,5 @@ tasks.withType<Test> {
     jvmArgs("-XX:+HeapDumpOnOutOfMemoryError", "-XX:HeapDumpPath=build/oom.hprof")
     maxHeapSize = "2560m"
     maxParallelForks = 1
-    failFast = true
+    failFast = false
 }
