@@ -1,4 +1,4 @@
-FROM gradle:8.5-jdk21 AS build
+FROM gradle:9.2.1-jdk25 AS build
 
 WORKDIR /app
 
@@ -12,7 +12,7 @@ COPY ./libs/ /app/libs/
 RUN chmod +x ./gradlew && \
     ./gradlew :apps:stereov-io:bootJar -x test --no-daemon
 
-FROM eclipse-temurin:21-jdk AS runtime
+FROM eclipse-temurin:25-jdk AS runtime
 
 WORKDIR /app
 
