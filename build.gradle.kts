@@ -199,6 +199,7 @@ jreleaser {
             skipTag.set(false)
             sign.set(true)
             token.set(gitHubToken)
+            immutableRelease.set(false)
 
             uploadAssets.set(Active.ALWAYS)
 
