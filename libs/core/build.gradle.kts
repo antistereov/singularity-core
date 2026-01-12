@@ -10,7 +10,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7"
     id("maven-publish")
     id("java-library")
-    id("org.jreleaser") version "1.21.0"
+    id("org.jreleaser") version "1.22.0"
 }
 
 group = properties["group"] as String
@@ -199,7 +199,6 @@ jreleaser {
             skipTag.set(false)
             sign.set(true)
             token.set(gitHubToken)
-            immutableRelease.set(false)
 
             uploadAssets.set(Active.ALWAYS)
 
@@ -237,14 +236,17 @@ jreleaser {
     }
 
     signing {
-        active.set(Active.ALWAYS)
-        armored.set(true)
+        active = Active.ALWAYS
 
-        if (gpgUseFile) mode.set(Signing.Mode.FILE)
+        pgp {
+            armored = (true)
 
-        publicKey.set(gpgPublicKey)
-        secretKey.set(gpgSecretKey)
-        passphrase.set(gpgPassphrase)
+            if (gpgUseFile) mode.set(Signing.Mode.FILE)
+
+            publicKey = gpgPublicKey
+            secretKey = gpgSecretKey
+            passphrase = gpgPassphrase
+        }
     }
 
     deploy {
