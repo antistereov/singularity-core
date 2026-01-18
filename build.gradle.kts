@@ -56,7 +56,7 @@ dependencies {
     api("org.springframework.boot:spring-boot-starter-oauth2-client")
 
     // File Storage
-    implementation(platform("software.amazon.awssdk:bom:2.41.5"))
+    implementation(platform("software.amazon.awssdk:bom:2.41.10"))
     implementation("software.amazon.awssdk:s3")
 
     // 2FA
@@ -67,7 +67,7 @@ dependencies {
     api("org.springframework.boot:spring-boot-starter-reactor-netty")
     api("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
     api("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:$kotlinxVersion")
-    api("io.projectreactor.netty:reactor-netty:1.3.1")
+    api("io.projectreactor.netty:reactor-netty:1.3.2")
 
     // Development
     api("org.springframework.boot:spring-boot-devtools:$springBootVersion")
