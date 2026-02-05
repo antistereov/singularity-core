@@ -5,8 +5,8 @@ import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
     kotlin("jvm")
-    kotlin("plugin.spring") version "2.3.0"
-    id("org.springframework.boot") version "4.0.1"
+    kotlin("plugin.spring") version "2.3.10"
+    id("org.springframework.boot") version "4.0.2"
     id("io.spring.dependency-management") version "1.1.7"
     id("maven-publish")
     id("java-library")
@@ -37,10 +37,10 @@ repositories {
     mavenCentral()
 }
 
-val kotlinVersion = "2.3.0"
+val kotlinVersion = "2.3.10"
 val kotlinxVersion = "1.10.2"
-val springBootVersion = "4.0.1"
-val bucket4jVersion = "8.16.0"
+val springBootVersion = "4.0.2"
+val bucket4jVersion = "8.16.1"
 
 dependencies {
     // Spring Boot Starters
@@ -56,7 +56,7 @@ dependencies {
     api("org.springframework.boot:spring-boot-starter-oauth2-client")
 
     // File Storage
-    implementation(platform("software.amazon.awssdk:bom:2.41.11"))
+    implementation(platform("software.amazon.awssdk:bom:2.41.22"))
     implementation("software.amazon.awssdk:s3")
 
     // 2FA
@@ -82,7 +82,7 @@ dependencies {
 
     // Redis
     api("org.springframework.boot:spring-boot-starter-data-redis-reactive")
-    api("io.lettuce:lettuce-core:7.2.1.RELEASE")
+    api("io.lettuce:lettuce-core:7.3.0.RELEASE")
 
     // R2DBC and H2
     api("org.springframework.boot:spring-boot-starter-data-r2dbc")
@@ -100,9 +100,9 @@ dependencies {
     api("org.apache.commons:commons-compress:1.28.0")
 
     // Image Scaling
-    api("com.sksamuel.scrimage:scrimage-core:4.3.5")
-    api("com.sksamuel.scrimage:scrimage-formats-extra:4.3.5")
-    api("com.sksamuel.scrimage:scrimage-webp:4.3.5")
+    api("com.sksamuel.scrimage:scrimage-core:4.3.6")
+    api("com.sksamuel.scrimage:scrimage-formats-extra:4.3.6")
+    api("com.sksamuel.scrimage:scrimage-webp:4.3.6")
 
     // Serialization and Validation
     api("org.springframework.boot:spring-boot-starter-validation")
