@@ -56,7 +56,7 @@ dependencies {
     api("org.springframework.boot:spring-boot-starter-oauth2-client")
 
     // File Storage
-    implementation(platform("software.amazon.awssdk:bom:2.41.22"))
+    implementation(platform("software.amazon.awssdk:bom:2.41.24"))
     implementation("software.amazon.awssdk:s3")
 
     // 2FA
@@ -82,7 +82,7 @@ dependencies {
 
     // Redis
     api("org.springframework.boot:spring-boot-starter-data-redis-reactive")
-    api("io.lettuce:lettuce-core:7.3.0.RELEASE")
+    api("io.lettuce:lettuce-core:7.4.0.RELEASE")
 
     // R2DBC and H2
     api("org.springframework.boot:spring-boot-starter-data-r2dbc")
