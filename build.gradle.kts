@@ -6,7 +6,7 @@ import org.springframework.boot.gradle.tasks.bundling.BootJar
 plugins {
     kotlin("jvm")
     kotlin("plugin.spring") version "2.3.10"
-    id("org.springframework.boot") version "4.0.2"
+    id("org.springframework.boot") version "4.0.3"
     id("io.spring.dependency-management") version "1.1.7"
     id("maven-publish")
     id("java-library")
@@ -39,7 +39,7 @@ repositories {
 
 val kotlinVersion = "2.3.10"
 val kotlinxVersion = "1.10.2"
-val springBootVersion = "4.0.2"
+val springBootVersion = "4.0.3"
 val bucket4jVersion = "8.16.1"
 
 dependencies {
@@ -56,7 +56,7 @@ dependencies {
     api("org.springframework.boot:spring-boot-starter-oauth2-client")
 
     // File Storage
-    implementation(platform("software.amazon.awssdk:bom:2.41.29"))
+    implementation(platform("software.amazon.awssdk:bom:2.41.34"))
     implementation("software.amazon.awssdk:s3")
 
     // 2FA
@@ -112,7 +112,7 @@ dependencies {
     api("org.springframework.boot:spring-boot-starter-mail")
 
     // Secrets
-    implementation("org.springframework.vault:spring-vault-core:4.0.0")
+    implementation("org.springframework.vault:spring-vault-core:4.0.1")
 
     // Slugs
     implementation("com.github.slugify:slugify:3.0.7")
