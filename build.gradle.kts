@@ -73,7 +73,7 @@ dependencies {
     api("org.springframework.boot:spring-boot-devtools:$springBootVersion")
 
     // Logging
-    api("io.github.oshai:kotlin-logging-jvm:7.0.14")
+    api("io.github.oshai:kotlin-logging-jvm:8.0.01")
     api("org.springframework.boot:spring-boot-starter-log4j2")
     api("com.lmax:disruptor:4.0.0")
 
