@@ -10,7 +10,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7"
     id("maven-publish")
     id("java-library")
-    id("org.jreleaser") version "1.22.0"
+    id("org.jreleaser") version "1.23.0"
 }
 
 group = properties["group"] as String
@@ -56,7 +56,7 @@ dependencies {
     api("org.springframework.boot:spring-boot-starter-oauth2-client")
 
     // File Storage
-    implementation(platform("software.amazon.awssdk:bom:2.41.34"))
+    implementation(platform("software.amazon.awssdk:bom:2.42.4"))
     implementation("software.amazon.awssdk:s3")
 
     // 2FA
@@ -100,9 +100,9 @@ dependencies {
     api("org.apache.commons:commons-compress:1.28.0")
 
     // Image Scaling
-    api("com.sksamuel.scrimage:scrimage-core:4.3.6")
-    api("com.sksamuel.scrimage:scrimage-formats-extra:4.3.6")
-    api("com.sksamuel.scrimage:scrimage-webp:4.3.6")
+    api("com.sksamuel.scrimage:scrimage-core:4.3.8")
+    api("com.sksamuel.scrimage:scrimage-formats-extra:4.3.8")
+    api("com.sksamuel.scrimage:scrimage-webp:4.3.8")
 
     // Serialization and Validation
     api("org.springframework.boot:spring-boot-starter-validation")
@@ -118,7 +118,7 @@ dependencies {
     implementation("com.github.slugify:slugify:3.0.7")
 
     // Documentation
-    api("org.springdoc:springdoc-openapi-starter-webflux-api:3.0.1")
+    api("org.springdoc:springdoc-openapi-starter-webflux-api:3.0.2")
 
     // Result
     api("com.michael-bull.kotlin-result:kotlin-result:2.1.0")
