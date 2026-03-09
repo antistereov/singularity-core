@@ -8,6 +8,7 @@ import com.github.michaelbull.result.recoverIf
 import com.github.michaelbull.result.runCatching
 import com.nimbusds.jose.util.StandardCharset
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.content.core.component.AccessCriteria
 import io.stereov.singularity.file.core.exception.FileException
 import io.stereov.singularity.file.core.mapper.FileMetadataMapper
 import io.stereov.singularity.file.core.model.FileUploadRequest
@@ -42,6 +43,7 @@ class S3FileStorage(
     override val appProperties: AppProperties,
     override val metadataService: FileMetadataService,
     override val metadataMapper: FileMetadataMapper,
+    override val accessCriteria: AccessCriteria,
     override val storageProperties: StorageProperties
 ) : FileStorage() {
 

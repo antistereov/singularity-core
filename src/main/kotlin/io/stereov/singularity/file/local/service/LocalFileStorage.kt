@@ -5,6 +5,7 @@ import com.github.michaelbull.result.coroutines.coroutineBinding
 import com.github.michaelbull.result.coroutines.runSuspendCatching
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.model.AuthenticationOutcome
+import io.stereov.singularity.content.core.component.AccessCriteria
 import io.stereov.singularity.content.core.model.ContentAccessRole
 import io.stereov.singularity.file.core.exception.FileException
 import io.stereov.singularity.file.core.mapper.FileMetadataMapper
@@ -39,7 +40,8 @@ class LocalFileStorage(
     override val appProperties: AppProperties,
     override val metadataService: FileMetadataService,
     override val metadataMapper: FileMetadataMapper,
-    override val storageProperties: StorageProperties
+    override val storageProperties: StorageProperties,
+    override val accessCriteria: AccessCriteria,
 ) : FileStorage() {
 
     val apiPath = "/api/assets/"

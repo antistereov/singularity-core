@@ -4,10 +4,12 @@ import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.content.core.component.AccessCriteria
 import io.stereov.singularity.content.core.properties.ContentProperties
 import io.stereov.singularity.file.core.component.DataBufferPublisher
+import io.stereov.singularity.file.core.controller.FileController
 import io.stereov.singularity.file.core.mapper.FileMetadataMapper
 import io.stereov.singularity.file.core.properties.StorageProperties
 import io.stereov.singularity.file.core.repository.FileMetadataRepository
 import io.stereov.singularity.file.core.service.FileMetadataService
+import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.file.download.service.DownloadService
 import io.stereov.singularity.global.config.ApplicationConfiguration
 import io.stereov.singularity.translate.service.TranslateService
@@ -35,6 +37,20 @@ class StorageConfiguration {
     @Bean
     @ConditionalOnMissingBean
     fun dataBufferPublisher() = DataBufferPublisher()
+
+    // Controller
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun fileController(
+        fileStorage: FileStorage,
+        authorizationService: AuthorizationService,
+        fileMetadataService: FileMetadataService
+    ) = FileController(
+        fileStorage,
+        authorizationService,
+        fileMetadataService
+    )
 
     // Mapper
 

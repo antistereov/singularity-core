@@ -1,5 +1,6 @@
 package io.stereov.singularity.content.article.exception
 
+import io.stereov.singularity.content.core.exception.GetUniqueKeyException
 import io.stereov.singularity.database.core.exception.DatabaseFailure
 import io.stereov.singularity.database.core.exception.InvalidDocumentFailure
 import io.stereov.singularity.global.exception.InvalidRequestFailure
@@ -48,10 +49,10 @@ sealed class CreateArticleException(
     )
 
     companion object {
-        fun from(ex: GetUniqueArticleKeyException): CreateArticleException {
+        fun from(ex: GetUniqueKeyException): CreateArticleException {
             return when (ex) {
-                is GetUniqueArticleKeyException.Database -> Database(ex.message, ex.cause)
-                is GetUniqueArticleKeyException.InvalidDocument -> InvalidDocument(ex.message, ex.cause)
+                is GetUniqueKeyException.Database -> Database(ex.message, ex.cause)
+                is GetUniqueKeyException.InvalidDocument -> InvalidDocument(ex.message, ex.cause)
             }
         }
     }

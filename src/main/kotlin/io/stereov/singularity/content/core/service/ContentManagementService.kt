@@ -5,6 +5,7 @@ import com.github.michaelbull.result.coroutines.coroutineBinding
 import io.github.oshai.kotlinlogging.KLogger
 import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.auth.core.service.AuthorizationService
+import io.stereov.singularity.content.core.exception.GetUniqueKeyException
 import io.stereov.singularity.content.core.dto.request.InviteUserToContentRequest
 import io.stereov.singularity.content.core.dto.request.UpdateContentAccessRequest
 import io.stereov.singularity.content.core.dto.request.UpdateOwnerRequest
@@ -414,5 +415,31 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
             .bind()
 
         extendedContentAccessDetails(content, authenticationOutcome).bind()
+    }
+
+    suspend fun getUniqueKey(baseKey: String, id: ObjectId?): Result<String, GetUniqueKeyException> {
+        return contentService.findByKey(baseKey)
+            .flatMapEither(
+                success = { article ->
+                    article.id
+                        .map { existingArticleId ->
+                            if (id != existingArticleId) {
+                                "$baseKey-${UUID.randomUUID().toString().substring(0, 8)}"
+                            } else baseKey
+                        }
+                        .mapError { ex ->
+                            GetUniqueKeyException.InvalidDocument(
+                                "Failed to extract ID from article: ${ex.message}",
+                                ex
+                            )
+                        }
+                },
+                failure = { ex ->
+                    when (ex) {
+                        is FindDocumentByKeyException.NotFound -> Ok(baseKey)
+                        is FindDocumentByKeyException.Database -> Err(GetUniqueKeyException.Database("Failed to find article: ${ex.message}", ex))
+                    }
+                }
+            )
     }
 }

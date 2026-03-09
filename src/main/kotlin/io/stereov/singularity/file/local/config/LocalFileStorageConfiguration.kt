@@ -1,6 +1,7 @@
 package io.stereov.singularity.file.local.config
 
 import io.stereov.singularity.auth.core.service.AuthorizationService
+import io.stereov.singularity.content.core.component.AccessCriteria
 import io.stereov.singularity.file.core.config.StorageConfiguration
 import io.stereov.singularity.file.core.mapper.FileMetadataMapper
 import io.stereov.singularity.file.core.properties.StorageProperties
@@ -33,14 +34,16 @@ internal class LocalFileStorageConfiguration {
         appProperties: AppProperties,
         metadataService: FileMetadataService,
         fileMetadataMapper: FileMetadataMapper,
-        storageProperties: StorageProperties
+        storageProperties: StorageProperties,
+        accessCriteria: AccessCriteria,
     ): LocalFileStorage {
         return LocalFileStorage(
             properties,
             appProperties,
             metadataService,
             fileMetadataMapper,
-            storageProperties
+            storageProperties,
+            accessCriteria
         )
     }
 

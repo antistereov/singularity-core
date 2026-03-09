@@ -1,5 +1,6 @@
 package io.stereov.singularity.file.s3.config
 
+import io.stereov.singularity.content.core.component.AccessCriteria
 import io.stereov.singularity.file.core.config.StorageConfiguration
 import io.stereov.singularity.file.core.mapper.FileMetadataMapper
 import io.stereov.singularity.file.core.properties.StorageProperties
@@ -72,7 +73,8 @@ class S3Configuration {
         appProperties: AppProperties,
         metadataService: FileMetadataService,
         metadataMapper: FileMetadataMapper,
-        storageProperties: StorageProperties
+        accessCriteria: AccessCriteria,
+        storageProperties: StorageProperties,
     ): S3FileStorage {
         return S3FileStorage(
             s3Properties,
@@ -81,7 +83,8 @@ class S3Configuration {
             appProperties,
             metadataService,
             metadataMapper,
-            storageProperties
+            accessCriteria,
+            storageProperties,
         )
     }
 }

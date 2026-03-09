@@ -1,5 +1,6 @@
 package io.stereov.singularity.file.core.exception
 
+import io.stereov.singularity.database.core.exception.DatabaseEntityNotFound
 import io.stereov.singularity.database.core.exception.DatabaseFailure
 import io.stereov.singularity.global.exception.SingularityException
 import org.springframework.http.HttpStatus
@@ -25,22 +26,11 @@ sealed class FileMetadataException(
     cause: Throwable? = null
 ) : SingularityException(msg, code, status, description, cause) {
 
-    /**
-     * Indicates that the requested file metadata could not be found.
-     *
-     * This exception is a subclass of [FileMetadataException].
-     *
-     * @param msg A descriptive message detailing the context of the error.
-     * @param cause The underlying cause of this exception, if available.
-     *
-     * @property code `FILE_METADATA_NOT_FOUND`
-     * @property status [HttpStatus.NOT_FOUND]
-     */
     class NotFound(msg: String, cause: Throwable? = null) : FileMetadataException(
         msg,
-        "FILE_METADATA_NOT_FOUND",
-        HttpStatus.NOT_FOUND,
-        "Indicates that the requested file metadata could not be found.",
+        DatabaseEntityNotFound.CODE,
+        DatabaseEntityNotFound.STATUS,
+        DatabaseEntityNotFound.DESCRIPTION,
         cause
     )
 

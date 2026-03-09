@@ -4,11 +4,14 @@ import com.github.michaelbull.result.*
 import com.github.michaelbull.result.coroutines.coroutineBinding
 import io.github.oshai.kotlinlogging.KLogger
 import io.stereov.singularity.auth.core.model.AuthenticationOutcome
+import io.stereov.singularity.content.core.component.AccessCriteria
 import io.stereov.singularity.database.core.exception.DeleteDocumentByKeyException
 import io.stereov.singularity.database.core.exception.FindDocumentByKeyException
+import io.stereov.singularity.database.core.util.CriteriaBuilder
 import io.stereov.singularity.file.core.dto.FileMetadataResponse
 import io.stereov.singularity.file.core.exception.FileException
 import io.stereov.singularity.file.core.exception.FileMetadataException
+import io.stereov.singularity.file.core.exception.GetFilesException
 import io.stereov.singularity.file.core.mapper.FileMetadataMapper
 import io.stereov.singularity.file.core.model.FileKey
 import io.stereov.singularity.file.core.model.FileMetadataDocument
@@ -16,10 +19,14 @@ import io.stereov.singularity.file.core.model.FileUploadRequest
 import io.stereov.singularity.file.core.model.FileUploadResponse
 import io.stereov.singularity.file.core.properties.StorageProperties
 import io.stereov.singularity.global.properties.AppProperties
+import io.stereov.singularity.global.util.mapContent
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.http.codec.multipart.FilePart
+import java.time.Instant
 
 /**
  * Abstract class representing a file storage system with support for uploading,
@@ -34,6 +41,7 @@ abstract class FileStorage {
     abstract val logger: KLogger
     abstract val metadataMapper: FileMetadataMapper
     abstract val storageProperties: StorageProperties
+    abstract val accessCriteria: AccessCriteria
 
     /**
      * Uploads a file and associates it with the provided key and metadata.
@@ -403,6 +411,38 @@ abstract class FileStorage {
                     }
                 }
             )
+    }
+
+    suspend fun getFiles(
+        pageable: Pageable,
+        authenticationOutcome: AuthenticationOutcome,
+        key: String?,
+        contentTypes: List<String>,
+        tags: List<String>,
+        roles: Set<String>,
+        createdAtBefore: Instant?,
+        createdAtAfter: Instant?,
+        updatedAtBefore: Instant?,
+        updatedAtAfter: Instant?,
+    ): Result<Page<FileMetadataResponse>, GetFilesException> = coroutineBinding {
+
+        val criteria = CriteriaBuilder(accessCriteria.generate(roles))
+            .fieldContains(FileMetadataDocument::key, key)
+            .isIn(FileMetadataDocument::contentTypes, contentTypes)
+            .compare(FileMetadataDocument::createdAt, createdAtBefore, createdAtAfter)
+            .compare(FileMetadataDocument::updatedAt, updatedAtBefore, updatedAtAfter)
+            .isIn(FileMetadataDocument::tags, tags)
+            .build()
+
+        val files = metadataService.findAllPaginated(pageable, criteria)
+            .mapError { GetFilesException.from(it) }
+            .bind()
+
+        files.mapContent { file ->
+            metadataResponseByKey(file.key, authenticationOutcome)
+                .mapError { ex -> GetFilesException.File("Failed to retrieve file with key '${file.key}': ${ex.message}", ex) }
+                .bind()
+        }
     }
 
     protected abstract suspend fun uploadRendition(req: FileUploadRequest): Result<FileUploadResponse, FileException.Operation>

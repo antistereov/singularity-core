@@ -48,6 +48,7 @@ class ArticleService(
 
     override val logger: KLogger = KotlinLogging.logger {}
     override val collectionClazz: Class<Article> = Article::class.java
+    override val translatableClazz: Class<ArticleTranslation> = ArticleTranslation::class.java
     override val contentType = Article.CONTENT_TYPE
 
     suspend fun getResponseByKey(

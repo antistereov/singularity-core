@@ -1,5 +1,6 @@
 package io.stereov.singularity.principal.group.exception
 
+import io.stereov.singularity.database.core.exception.DatabaseEntityNotFound
 import io.stereov.singularity.database.core.exception.DatabaseFailure
 import io.stereov.singularity.global.exception.SingularityException
 import org.springframework.http.HttpStatus
@@ -36,9 +37,9 @@ sealed class DeleteGroupByKeyException(
      */
     class NotFound(msg: String, cause: Throwable? = null) : DeleteGroupByKeyException(
         msg,
-        "GROUP_NOT_FOUND",
-        HttpStatus.NOT_FOUND,
-        "No group with specified key found.",
+        DatabaseEntityNotFound.CODE,
+        DatabaseEntityNotFound.STATUS,
+        DatabaseEntityNotFound.DESCRIPTION,
         cause
     )
 

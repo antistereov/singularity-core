@@ -41,7 +41,7 @@ class FileMetadataService(
     override val reactiveMongoTemplate: ReactiveMongoTemplate,
     override val translateService: TranslateService,
     override val accessCriteria: AccessCriteria,
-    override val contentProperties: ContentProperties
+    override val contentProperties: ContentProperties,
 ) : ContentService<FileMetadataDocument>() {
 
     override val logger = KotlinLogging.logger {}

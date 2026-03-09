@@ -152,7 +152,12 @@ class ArticleManagementService(
             .bind()
             .translation.title
 
-        val content = doInviteUser(key, req, inviter, title, contentService.getUri(key).toString(), authenticationOutcome, locale).bind()
+        val url = contentService.getUri(key)
+            .mapError { ex -> InviteUserException.Configuration("Failed to retrieve URL for article: ${ex.message}", ex) }
+            .bind()
+            .toString()
+
+        val content = doInviteUser(key, req, inviter, title, url, authenticationOutcome, locale).bind()
 
         extendedContentAccessDetails(content, authenticationOutcome)
             .mapError { InviteUserException.from(it) }
@@ -180,7 +185,7 @@ class ArticleManagementService(
         authenticationOutcome: AuthenticationOutcome.Authenticated,
         locale: Locale?
     ): Result<FullArticleResponse, UpdateArticleException> = coroutineBinding {
-        logger.debug { "Changing header of article with key \"$key\"" }
+        logger.debug { "Updating article with key \"$key\"" }
 
         val article = contentService.findAuthorizedByKey(key, authenticationOutcome, ContentAccessRole.EDITOR)
             .mapError { ex -> UpdateArticleException.from(ex) }
@@ -331,32 +336,6 @@ class ArticleManagementService(
         articleMapper.createFullResponse(article, authenticationOutcome, locale)
             .mapError { ex -> UpdateContentAccessException.ResponseMapping("Failed to create response: ${ex.message}", ex) }
             .bind()
-    }
-
-    private suspend fun getUniqueKey(baseKey: String, id: ObjectId?): Result<String, GetUniqueArticleKeyException> {
-        return contentService.findByKey(baseKey)
-            .flatMapEither(
-                success = { article ->
-                    article.id
-                        .map { existingArticleId ->
-                            if (id != existingArticleId) {
-                                "$baseKey-${UUID.randomUUID().toString().substring(0, 8)}"
-                            } else baseKey
-                        }
-                        .mapError { ex ->
-                            GetUniqueArticleKeyException.InvalidDocument(
-                                "Failed to extract ID from article: ${ex.message}",
-                                ex
-                            )
-                        }
-                },
-                failure = { ex ->
-                    when (ex) {
-                        is FindDocumentByKeyException.NotFound -> Ok(baseKey)
-                        is FindDocumentByKeyException.Database -> Err(GetUniqueArticleKeyException.Database("Failed to find article: ${ex.message}", ex))
-                    }
-                }
-            )
     }
 
     override suspend fun updateOwner(

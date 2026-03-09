@@ -9,6 +9,7 @@ import io.stereov.singularity.email.core.exception.EmailAuthenticationFailure
 import io.stereov.singularity.email.core.exception.EmailDisabledFailure
 import io.stereov.singularity.email.core.exception.EmailSendFailure
 import io.stereov.singularity.email.core.exception.EmailTemplateFailure
+import io.stereov.singularity.global.exception.ConfigurationFailure
 import io.stereov.singularity.global.exception.SingularityException
 import org.springframework.http.HttpStatus
 
@@ -106,6 +107,14 @@ sealed class InviteUserException(
         AuthenticationException.AuthenticationRequired.CODE,
         AuthenticationException.AuthenticationRequired.STATUS,
         AuthenticationException.AuthenticationRequired.DESCRIPTION,
+        cause
+    )
+
+    class Configuration(msg: String, cause: Throwable? = null) : InviteUserException(
+        msg,
+        ConfigurationFailure.CODE,
+        ConfigurationFailure.STATUS,
+        ConfigurationFailure.DESCRIPTION,
         cause
     )
 

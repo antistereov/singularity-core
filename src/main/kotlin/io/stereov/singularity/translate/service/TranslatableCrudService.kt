@@ -24,9 +24,10 @@ import kotlin.reflect.full.memberProperties
 interface TranslatableCrudService<C: Any, T> : CrudService<T> where T : Translatable<C>, T: WithId  {
 
     val appProperties: AppProperties
+    val translatableClazz: Class<C>
 
     private val fieldNames: Set<String>
-        get() = collectionClazz.kotlin.memberProperties.map { it.name }.toSet()
+        get() = translatableClazz.kotlin.memberProperties.map { it.name }.toSet()
 
     /**
      * Retrieves a paginated list of entities based on the provided pageable configuration and optional criteria,

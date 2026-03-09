@@ -3,6 +3,7 @@ package io.stereov.singularity.content.article.exception
 import io.stereov.singularity.auth.core.exception.AuthenticationException
 import io.stereov.singularity.content.core.exception.ContentNotFoundFailure
 import io.stereov.singularity.content.core.exception.FindContentAuthorizedException
+import io.stereov.singularity.content.core.exception.GetUniqueKeyException
 import io.stereov.singularity.content.core.exception.NotAuthorizedFailure
 import io.stereov.singularity.database.core.exception.DatabaseFailure
 import io.stereov.singularity.database.core.exception.InvalidDocumentFailure
@@ -95,10 +96,10 @@ sealed class UpdateArticleException (
             }
         }
 
-        fun from(ex: GetUniqueArticleKeyException): UpdateArticleException {
+        fun from(ex: GetUniqueKeyException): UpdateArticleException {
             return when (ex) {
-                is GetUniqueArticleKeyException.Database -> Database(ex.message, ex.cause)
-                is GetUniqueArticleKeyException.InvalidDocument -> InvalidDocument(ex.message, ex.cause)
+                is GetUniqueKeyException.Database -> Database(ex.message, ex.cause)
+                is GetUniqueKeyException.InvalidDocument -> InvalidDocument(ex.message, ex.cause)
             }
         }
     }
