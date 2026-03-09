@@ -113,6 +113,7 @@ dependencies {
 
     // Secrets
     implementation("org.springframework.vault:spring-vault-core:4.0.1")
+    implementation("com.infisical:sdk:3.0.7")
 
     // Slugs
     implementation("com.github.slugify:slugify:3.0.7")

@@ -43,6 +43,7 @@ io.stereov.singularity.email.template.config.TemplateConfiguration
 io.stereov.singularity.ratelimit.config.RateLimitConfiguration
 
 io.stereov.singularity.secrets.core.config.SecretsConfiguration
+io.stereov.singularity.secrets.infisical.config.InfisicalSecretStoreConfiguration
 io.stereov.singularity.secrets.local.config.LocalSecretStoreConfiguration
 io.stereov.singularity.secrets.vault.config.VaultSecretStoreConfiguration
 
