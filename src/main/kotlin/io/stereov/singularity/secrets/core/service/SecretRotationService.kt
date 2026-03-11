@@ -86,10 +86,10 @@ class SecretRotationService(
                 logger.info { "Rotating keys for secrets defined in $name}" }
                 service.rotateSecret()
                     .onSuccess {
-                        rotationInfos[name] = RotationInformation(lastRotation = service.getLastUpdate().get(), success = true)
+                        rotationInfos[name] = RotationInformation(lastRotation = service.getLastUpdate(), success = true)
                     }
                     .onFailure { ex ->
-                        rotationInfos[name] = RotationInformation(lastRotation = service.getLastUpdate().get(), success = false, error = ex)
+                        rotationInfos[name] = RotationInformation(lastRotation = service.getLastUpdate(), success = false, error = ex)
                         logger.error(ex) { "Failed to rotate secret for $name: ${ex.message}" }
                     }
             }

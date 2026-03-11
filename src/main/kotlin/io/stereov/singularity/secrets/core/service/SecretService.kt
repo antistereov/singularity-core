@@ -9,6 +9,7 @@ import io.stereov.singularity.secrets.core.exception.SecretStoreException
 import io.stereov.singularity.secrets.core.model.Secret
 import java.time.Instant
 import java.util.*
+import java.util.concurrent.atomic.AtomicReference
 import javax.crypto.KeyGenerator
 
 /**
@@ -35,6 +36,25 @@ abstract class SecretService(
 
     abstract val logger: KLogger
     private val actualKey = "${appProperties.slug}-$key"
+    private val currentSecret = AtomicReference<Secret?>()
+
+    open val rotationCallback: suspend (Secret) -> Unit = {}
+
+    /**
+     * Retrieves the current secret from memory if available, or loads it from the secret store.
+     *
+     * If the secret is already cached in memory (`currentSecret`), it is returned.
+     * Otherwise, it triggers loading of the current secret by calling `loadCurrentSecret`.
+     *
+     * @return A [Result] containing the [Secret] if successful, or a [SecretStoreException] in case of failure.
+     */
+    suspend fun getCurrentSecret(): Result<Secret, SecretStoreException> {
+        this.logger.debug { "Getting current secret" }
+
+        return this.currentSecret.get()
+            ?.let { Ok(it) }
+            ?: this.loadCurrentSecret()
+    }
 
     /**
      * Loads the current secret from the secret store and updates the in-memory cache.
@@ -45,7 +65,7 @@ abstract class SecretService(
      *
      * @return A [Result] containing the [Secret] if successful, or a [SecretStoreException] in case of failure.
      */
-    suspend fun getCurrentSecret(): Result<Secret, SecretStoreException> {
+    private suspend fun loadCurrentSecret(): Result<Secret, SecretStoreException> {
         this.logger.debug { "Loading current secret from key manager" }
 
         return secretStore.get(actualKey)
@@ -57,6 +77,7 @@ abstract class SecretService(
                 secretStore.get(current.value)
                     .mapError { ex -> SecretStoreException.NotFound("Failed to load secret with key ${current.value}: ${ex.message}", ex) }
             }
+            .onSuccess { secret -> currentSecret.set(secret) }
     }
 
     /**
@@ -69,11 +90,12 @@ abstract class SecretService(
     suspend fun updateSecret(): Result<Secret, SecretStoreException> = coroutineBinding {
         logger.debug { "Updating current secret" }
 
-        val newKey = "$actualKey-${UUID.randomUUID()}"
+        val newKey = "$actualKey-${Instant.now()}"
         val newValue = generateKey(algorithm = algorithm).bind()
         val newNote = "Generated on ${Instant.now()}"
 
         val newSecret = secretStore.put(newKey, newValue, newNote).bind()
+        currentSecret.set(newSecret)
 
         secretStore.put(actualKey, newSecret.key, newNote).bind()
     }
@@ -88,10 +110,12 @@ abstract class SecretService(
      * @return A [Result] containing the current or newly created [Secret] if successful,
      * or a [SecretStoreException] in case of failure during retrieval or updating.
      */
-    suspend fun rotateSecret(): Result<Secret, SecretStoreException> {
-        if (fixSecret) return getCurrentSecret()
+    suspend fun rotateSecret(): Result<Secret, SecretStoreException> = coroutineBinding {
+        if (fixSecret) return@coroutineBinding getCurrentSecret().bind()
 
-        return updateSecret()
+        val updated = updateSecret().bind()
+        rotationCallback(updated)
+        updated
     }
 
     /**
@@ -117,5 +141,5 @@ abstract class SecretService(
      * @return The [Instant] representing when the current secret was last updated,
      * or null if no update has been recorded.
      */
-    suspend fun getLastUpdate(): Result<Instant, SecretStoreException> = this.getCurrentSecret().map { it.createdAt }
+    fun getLastUpdate(): Instant? = this.currentSecret.get()?.createdAt
 }

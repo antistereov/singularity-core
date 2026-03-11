@@ -1,7 +1,5 @@
 package io.stereov.singularity.cache.config
 
-import io.lettuce.core.ExperimentalLettuceCoroutinesApi
-import io.lettuce.core.api.coroutines.RedisCoroutinesCommands
 import io.stereov.singularity.cache.service.CacheService
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.global.config.ApplicationConfiguration
@@ -17,7 +15,6 @@ import tools.jackson.databind.json.JsonMapper
         RedisConfiguration::class
     ]
 )
-@OptIn(ExperimentalLettuceCoroutinesApi::class)
 class CacheConfiguration {
 
     // Service
@@ -25,13 +22,11 @@ class CacheConfiguration {
     @Bean
     @ConditionalOnMissingBean
     fun redisService(
-        redisCoroutinesCommands: RedisCoroutinesCommands<String, ByteArray>,
         jsonMapper: JsonMapper,
         redisTemplate: ReactiveRedisTemplate<String, String>,
         emailProperties: EmailProperties
     ): CacheService {
         return CacheService(
-            redisCoroutinesCommands,
             jsonMapper,
             redisTemplate,
             emailProperties

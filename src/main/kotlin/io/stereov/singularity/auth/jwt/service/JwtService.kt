@@ -3,9 +3,12 @@ package io.stereov.singularity.auth.jwt.service
 import com.github.michaelbull.result.*
 import com.github.michaelbull.result.coroutines.coroutineBinding
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.auth.jwt.component.JwtSigningKeyHolder
 import io.stereov.singularity.auth.jwt.exception.TokenCreationException
 import io.stereov.singularity.auth.jwt.exception.TokenExtractionException
+import jakarta.annotation.PostConstruct
 import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.runBlocking
 import org.springframework.security.oauth2.jwt.*
 import org.springframework.stereotype.Service
 import java.time.Instant
@@ -19,11 +22,25 @@ import java.time.Instant
 class JwtService(
     private val jwtDecoder: ReactiveJwtDecoder,
     private val jwtEncoder: JwtEncoder,
-    private val jwtSecretService: JwtSecretService
+    private val jwtSecretService: JwtSecretService,
+    private val jwtSigningKeyHolder: JwtSigningKeyHolder
 ) {
 
     private val logger = KotlinLogging.logger {}
     val tokenTypeClaim = "token_type"
+
+    @PostConstruct
+    fun init() {
+        runBlocking {
+            val secret = jwtSecretService.getCurrentSecret()
+                .getOrThrow()
+                .value
+                .toByteArray()
+
+            jwtSigningKeyHolder.set(secret)
+            logger.info { "Initialized JWT signing key holder" }
+        }
+    }
 
     /**
      * Decodes a JSON Web EmailVerificationTokenCreation (JWT) and validates its type and expiration details.
