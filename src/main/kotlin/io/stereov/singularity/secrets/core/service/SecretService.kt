@@ -90,7 +90,7 @@ abstract class SecretService(
     suspend fun updateSecret(): Result<Secret, SecretStoreException> = coroutineBinding {
         logger.debug { "Updating current secret" }
 
-        val newKey = "$actualKey-${Instant.now()}"
+        val newKey = "$actualKey-${UUID.randomUUID()}"
         val newValue = generateKey(algorithm = algorithm).bind()
         val newNote = "Generated on ${Instant.now()}"
 

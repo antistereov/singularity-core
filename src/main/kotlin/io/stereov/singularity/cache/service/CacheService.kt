@@ -4,10 +4,11 @@ import com.github.michaelbull.result.*
 import com.github.michaelbull.result.coroutines.coroutineBinding
 import com.github.michaelbull.result.coroutines.runSuspendCatching
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.lettuce.core.ExperimentalLettuceCoroutinesApi
+import io.lettuce.core.api.coroutines.RedisCoroutinesCommands
 import io.stereov.singularity.cache.exception.CacheException
 import io.stereov.singularity.email.core.properties.EmailProperties
-import kotlinx.coroutines.reactive.awaitLast
-import kotlinx.coroutines.reactor.awaitSingle
+import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.stereotype.Service
@@ -16,7 +17,9 @@ import tools.jackson.module.kotlin.readValue
 import java.time.Duration
 
 @Service
+@OptIn(ExperimentalLettuceCoroutinesApi::class)
 class CacheService(
+    val redisCommands: RedisCoroutinesCommands<String, ByteArray>,
     val jsonMapper: JsonMapper,
     val redisTemplate: ReactiveRedisTemplate<String, String>,
     private val emailProperties: EmailProperties
@@ -45,20 +48,14 @@ class CacheService(
 
             if (expiresIn != null) {
                 runSuspendCatching {
-                    redisTemplate
-                        .opsForValue()
-                        .set(key, string, expiresIn)
-                        .awaitSingle()
+                    redisCommands.setex(key, expiresIn, string.toByteArray())
                     value
                 }
                     .mapError { ex -> CacheException.Operation("Failed to set key $key with expiration: ${ex.message}", ex) }
                     .bind()
             } else {
                 runSuspendCatching {
-                    redisTemplate
-                        .opsForValue()
-                        .set(key, string)
-                        .awaitSingle()
+                    redisCommands.set(key, string.toByteArray())
                     value
                 }
                     .mapError { ex -> CacheException.Operation("Failed to set key: ${ex.message}", ex) }
@@ -137,13 +134,8 @@ class CacheService(
      */
     suspend fun deleteAll(pattern: String? = null): Result<Unit, CacheException.Operation> {
         return if (pattern == null) {
-            runSuspendCatching {
-                redisTemplate.execute { conn ->
-                    conn.serverCommands().flushDb()
-                }.awaitLast()
-            }
+            runSuspendCatching { redisCommands.flushall() }
                 .mapError { ex -> CacheException.Operation("Failed to flush cache: ${ex.message}", ex) }
-
         } else {
             runSuspendCatching {
                 redisTemplate.delete(redisTemplate.keys(pattern)).awaitSingle()
