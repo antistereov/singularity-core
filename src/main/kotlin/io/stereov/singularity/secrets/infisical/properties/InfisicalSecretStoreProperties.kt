@@ -11,4 +11,5 @@ data class InfisicalSecretStoreProperties(
     val clientSecret: String,
     val projectId: String,
     val environmentSlug: String,
+    val secretPath: String = "/"
 )

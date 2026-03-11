@@ -11,6 +11,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import org.springframework.beans.factory.getBeansOfType
 import org.springframework.context.ApplicationContext
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
@@ -49,7 +50,7 @@ class SecretRotationService(
     }
 
     private fun getSecretServices(): List<SecretService> {
-        return this.context.getBeansOfType(SecretService::class.java).values.toList()
+        return this.context.getBeansOfType<SecretService>().values.toList()
     }
 
     /**
@@ -68,7 +69,7 @@ class SecretRotationService(
      * rotation information if the operation is successful, or a [SecretRotationException]
      * in case of an error.
      */
-    @Scheduled(cron = "\${singularity.secrets.key-rotation-cron:0 0 4 1 1,4,7,10 *}")
+    @Scheduled(cron = $$"${singularity.secrets.key-rotation-cron:0 0 4 1 1,4,7,10 *}")
     suspend fun rotateKeys(): Result<Map<String, RotationInformation>, SecretRotationException> {
         logger.info { "Rotating keys" }
 
@@ -81,14 +82,14 @@ class SecretRotationService(
 
         this.keyRotationScope.launch {
             logger.info { "Rotating secrets" }
-            context.getBeansOfType(SecretService::class.java).forEach { (name, service) ->
+            context.getBeansOfType<SecretService>().forEach { (name, service) ->
                 logger.info { "Rotating keys for secrets defined in $name}" }
                 service.rotateSecret()
                     .onSuccess {
-                        rotationInfos[name] = RotationInformation(lastRotation = service.getLastUpdate(), success = true)
+                        rotationInfos[name] = RotationInformation(lastRotation = service.getLastUpdate().get(), success = true)
                     }
                     .onFailure { ex ->
-                        rotationInfos[name] = RotationInformation(lastRotation = service.getLastUpdate(), success = false, error = ex)
+                        rotationInfos[name] = RotationInformation(lastRotation = service.getLastUpdate().get(), success = false, error = ex)
                         logger.error(ex) { "Failed to rotate secret for $name: ${ex.message}" }
                     }
             }

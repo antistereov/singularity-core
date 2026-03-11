@@ -3,7 +3,6 @@ package io.stereov.singularity.secrets.infisical.config
 import com.infisical.sdk.InfisicalSdk
 import com.infisical.sdk.config.SdkConfig
 import io.stereov.singularity.global.config.ApplicationConfiguration
-import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.secrets.core.component.SecretCache
 import io.stereov.singularity.secrets.infisical.component.InfisicalSecretStore
 import io.stereov.singularity.secrets.infisical.properties.InfisicalSecretStoreProperties
@@ -29,13 +28,11 @@ class InfisicalSecretStoreConfiguration {
     @Bean
     @ConditionalOnMissingBean
     fun infisicalSecretStore(
-        appProperties: AppProperties,
         infisicalProperties: InfisicalSecretStoreProperties,
         secretCache: SecretCache,
         infisical: InfisicalSdk,
         jsonMapper: JsonMapper
     ) = InfisicalSecretStore(
-        appProperties,
         infisicalProperties,
         secretCache,
         infisical,

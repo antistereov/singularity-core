@@ -3,7 +3,6 @@ package io.stereov.singularity.secrets.infisical.component
 import com.github.michaelbull.result.*
 import com.infisical.sdk.InfisicalSdk
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.secrets.core.component.SecretCache
 import io.stereov.singularity.secrets.core.component.SecretStore
 import io.stereov.singularity.secrets.core.exception.SecretStoreException
@@ -18,14 +17,12 @@ import java.util.*
 @Component
 @ConditionalOnProperty(prefix = "singularity.secrets", value = ["store"], havingValue = "infisical", matchIfMissing = false)
 class InfisicalSecretStore(
-    appProperties: AppProperties,
     private val infisicalProperties: InfisicalSecretStoreProperties,
     override val secretCache: SecretCache,
     private val infisical: InfisicalSdk,
     private val jsonMapper: JsonMapper
 ) : SecretStore {
 
-    private val prefix = appProperties.slug
     override val logger = KotlinLogging.logger {}
 
     override suspend fun doGet(key: String): Result<Secret, SecretStoreException> {
@@ -34,23 +31,21 @@ class InfisicalSecretStore(
                 key,
                 infisicalProperties.projectId,
                 infisicalProperties.environmentSlug,
-                prefix,
+                infisicalProperties.secretPath,
                 null,
                 null,
                 null
             )
         }
-            .mapError { ex -> SecretStoreException.Operation("Failed to generate secret with key $key from vault: ${ex.message}", ex) }
-            .flatMap { data ->
-                if (data != null) {
-                    Ok(data.secretValue)
+            .mapError { ex ->
+                if (ex.message?.contains("code=404") == true && ex.message?.contains("Secret with name '$key' not found") == true) {
+                    SecretStoreException.NotFound("No secret with key $key found in vault")
                 } else {
-                    Err(SecretStoreException.NotFound("No secret with key $key found in vault"))
+                    SecretStoreException.Operation("Failed to generate secret with key $key from vault: ${ex.message}", ex) }
                 }
-            }
             .flatMap {
                 runCatching {
-                    jsonMapper.readValue(it, Secret::class.java)
+                    jsonMapper.readValue(it.secretValue, Secret::class.java)
                 }.mapError { ex -> SecretStoreException.Operation("Failed to deserialize secret with key '$key': ${ex.message}", ex) }
             }
     }
@@ -66,12 +61,30 @@ class InfisicalSecretStore(
         return runCatching {
             infisical.Secrets().CreateSecret(
                 key,
+                jsonMapper.writeValueAsString(secret),
                 infisicalProperties.projectId,
                 infisicalProperties.environmentSlug,
-                prefix,
-                jsonMapper.writeValueAsString(secret),
+                infisicalProperties.secretPath,
             )
         }
+            .recoverIf(
+                { ex -> ex.message?.contains("code=400") == true && ex.message?.contains("Secret already exists") == true },
+                {
+                    infisical.Secrets().DeleteSecret(
+                        key,
+                        infisicalProperties.projectId,
+                        infisicalProperties.environmentSlug,
+                        infisicalProperties.secretPath
+                    )
+                    infisical.Secrets().CreateSecret(
+                        key,
+                        jsonMapper.writeValueAsString(secret),
+                        infisicalProperties.projectId,
+                        infisicalProperties.environmentSlug,
+                        infisicalProperties.secretPath,
+                    )
+                }
+            )
             .mapError { ex -> SecretStoreException.Operation("Failed to write secret with key $key to vault: ${ex.message}", ex) }
             .map { secret }
     }

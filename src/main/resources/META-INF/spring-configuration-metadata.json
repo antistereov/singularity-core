@@ -66,6 +66,11 @@
       "sourceType": "io.stereov.singularity.secrets.core.properties.SecretStoreProperties"
     },
     {
+      "name": "singularity.secrets.infisical",
+      "type": "io.stereov.singularity.secrets.infisical.properties.InfisicalSecretStoreProperties",
+      "sourceType": "io.stereov.singularity.secrets.infisical.properties.InfisicalSecretStoreProperties"
+    },
+    {
       "name": "singularity.secrets.local",
       "type": "io.stereov.singularity.secrets.local.properties.LocalSecretStoreProperties",
       "sourceType": "io.stereov.singularity.secrets.local.properties.LocalSecretStoreProperties"
@@ -564,6 +569,46 @@
       "sourceType": "io.stereov.singularity.secrets.core.properties.SecretStoreProperties",
       "defaultValue": 900000,
       "description": "The duration it takes for cached secrets to expire in milliseconds. Default is 900 000ms which is equal to 15min."
+    },
+    {
+      "name": "singularity.secrets.infisical.url",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.secrets.infisical.properties.InfisicalSecretStoreProperties",
+      "description": "The URL of your infisical instance.",
+      "defaultValue": "https://app.infisical.com"
+    },
+    {
+      "name": "singularity.secrets.infisical.clientId",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.secrets.infisical.properties.InfisicalSecretStoreProperties",
+      "description": "The client ID of your infisical instance.",
+      "defaultValue": "https://app.infisical.com"
+    },
+    {
+      "name": "singularity.secrets.infisical.clientSecret",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.secrets.infisical.properties.InfisicalSecretStoreProperties",
+      "description": "The client secret of your infisical instance.",
+      "defaultValue": "https://app.infisical.com"
+    },
+    {
+      "name": "singularity.secrets.infisical.projectId",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.secrets.infisical.properties.InfisicalSecretStoreProperties",
+      "description": "The project ID of the project to be used in your infisical instance."
+    },
+    {
+      "name": "singularity.secrets.infisical.environmentSlug",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.secrets.infisical.properties.InfisicalSecretStoreProperties",
+      "description": "The environment slug to be used in your infisical instance."
+    },
+    {
+      "name": "singularity.secrets.infisical.secretPath",
+      "type": "java.lang.String",
+      "sourceType": "io.stereov.singularity.secrets.infisical.properties.InfisicalSecretStoreProperties",
+      "description": "The path to create the secrets in.",
+      "default": "/"
     },
     {
       "name": "singularity.secrets.local.secret-directory",

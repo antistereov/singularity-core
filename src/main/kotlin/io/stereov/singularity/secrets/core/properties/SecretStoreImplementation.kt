@@ -29,6 +29,8 @@ enum class SecretStoreImplementation {
      */
     VAULT,
 
+    INFISICAL,
+
     /**
      * Represents a local, minimalistic secret store implementation using an H2 database.
      *
