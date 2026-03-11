@@ -175,7 +175,7 @@ class PrincipalSettingsService(
         user: User,
         authentication: AuthenticationOutcome.Authenticated,
     ): Result<User, SetUserAvatarException> = coroutineBinding {
-        val currentAvatar = user.sensitive.avatarFileKey
+        val currentAvatar = user.sensitive.avatarFile
 
         if (currentAvatar != null) {
             fileStorage.remove(currentAvatar)
@@ -203,7 +203,7 @@ class PrincipalSettingsService(
             .bind()
             .key
 
-        user.sensitive.avatarFileKey = avatarKey
+        user.sensitive.avatarFile = avatarKey
 
         userService.save(user)
             .mapError { ex ->
@@ -239,7 +239,7 @@ class PrincipalSettingsService(
     ): Result<User, SetUserAvatarException> = coroutineBinding {
         logger.debug { "Setting avatar for user ${user.id} from URL ${file.url}" }
 
-        val currentAvatar = user.sensitive.avatarFileKey
+        val currentAvatar = user.sensitive.avatarFile
 
         if (currentAvatar != null) {
             runCatching { fileStorage.remove(currentAvatar) }
@@ -256,7 +256,7 @@ class PrincipalSettingsService(
             .bind()
             .key
 
-        user.sensitive.avatarFileKey = avatarKey
+        user.sensitive.avatarFile = avatarKey
 
         userService.save(user)
             .mapError { ex ->
@@ -281,7 +281,7 @@ class PrincipalSettingsService(
      * or a [DeleteUserAvatarException] if an error occurs.
      */
     suspend fun deleteAvatar(user: User): Result<User, DeleteUserAvatarException> = coroutineBinding {
-        val currentAvatar = user.sensitive.avatarFileKey
+        val currentAvatar = user.sensitive.avatarFile
 
         if (currentAvatar != null) {
             fileStorage.remove(currentAvatar)
@@ -289,7 +289,7 @@ class PrincipalSettingsService(
                 .bind()
         }
 
-        user.sensitive.avatarFileKey = null
+        user.sensitive.avatarFile = null
 
         userService.save(user)
             .mapError { ex -> when (ex) {

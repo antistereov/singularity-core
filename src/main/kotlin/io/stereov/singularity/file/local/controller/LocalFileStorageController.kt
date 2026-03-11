@@ -46,7 +46,7 @@ class LocalFileStorageController(
     @Suppress("UNUSED")
     suspend fun serveFile(
         exchange: ServerWebExchange
-    ): ResponseEntity<Flux<DataBuffer>> {
+    ): ResponseEntity<Flux<out DataBuffer>> {
         val fullRequestPath = exchange.request.uri.path
         val basePath = "/api/assets/"
         val key = fullRequestPath.removePrefix(basePath)
@@ -56,14 +56,17 @@ class LocalFileStorageController(
                 is AccessTokenExtractionException -> ex
             } }
 
-        val file = localFileStorage.serveFile(authenticationOutcome, key)
+        val file = localFileStorage.serveFile(key, authenticationOutcome)
             .getOrThrow { ex -> when (ex) {
                 is FileException -> ex
             } }
 
+        val mediaType = file.parseMediaType()
+            .getOrThrow { when (it) { is FileException.Metadata -> it } }
+
         return ResponseEntity.ok()
             .header(HttpHeaders.CONTENT_LENGTH, file.size)
-            .contentType(file.mediaType)
+            .contentType(mediaType)
             .body(file.content)
     }
 }

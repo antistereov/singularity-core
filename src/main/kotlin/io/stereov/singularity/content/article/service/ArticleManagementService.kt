@@ -111,7 +111,7 @@ class ArticleManagementService(
             path = path,
             state = ArticleState.DRAFT,
             colors = ArticleColors(),
-            imageKey = null,
+            image = null,
             trusted = false,
             access = ContentAccessDetails(ownerId),
             translations = translations,
@@ -269,7 +269,7 @@ class ArticleManagementService(
             .mapError { ex -> ChangeArticleImageException.from(ex) }
             .bind()
 
-        val currentImage = article.imageKey
+        val currentImage = article.image
 
         if (currentImage != null) {
             fileStorage.remove(currentImage)
@@ -290,7 +290,7 @@ class ArticleManagementService(
             } }
             .bind()
 
-        article.imageKey = image.key
+        article.image = image.key
 
         val updatedArticle = contentService.save(article)
             .mapError { ex -> ChangeArticleImageException.Database("Failed to save updated article: ${ex.message}", ex) }
@@ -363,7 +363,7 @@ class ArticleManagementService(
             } }
             .bind()
 
-        article.imageKey?.let {
+        article.image?.let {
             fileStorage.remove(it)
                 .onFailure { ex -> logger.error(ex) { "Failed to remove image with key $it" } }
         }

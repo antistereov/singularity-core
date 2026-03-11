@@ -1,10 +1,16 @@
 package io.stereov.singularity.file.core.model
 
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.toResultOr
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.token.model.AccessType
 import io.stereov.singularity.content.core.model.ContentAccessDetails
 import io.stereov.singularity.content.core.model.ContentDocument
+import io.stereov.singularity.file.core.exception.FileException
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
+import org.springframework.data.annotation.Transient
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
@@ -43,6 +49,9 @@ data class FileMetadataDocument(
     override var tags: MutableSet<String> = mutableSetOf()
 ) : ContentDocument<FileMetadataDocument> {
 
+    @Transient
+    private val logger = KotlinLogging.logger {}
+
     constructor(
         id: ObjectId? = null,
         key: String,
@@ -65,6 +74,31 @@ data class FileMetadataDocument(
         trusted = trusted,
         tags = tags
     )
+
+    /**
+     * Retrieves the best matching file rendition based on the provided key.
+     *
+     * If a key is provided, it attempts to find a matching rendition associated with that key.
+     * If no matching rendition is found using the provided key, or if no key is specified,
+     * the method returns the original rendition (if available) or the first available rendition.
+     * If no renditions exist, a [FileException.NotFound] is returned.
+     *
+     * @param key An optional key used to identify a specific file rendition.
+     *            If null, the method attempts to return the original rendition or
+     *            the first available rendition.
+     * @return A [Result] containing the matching rendition of type [FileRendition]
+     *         if found, or a [FileException.NotFound] if no matching rendition exists.
+     */
+    @Transient
+    fun getBestMatchingRendition(key: String? = null): Result<FileRendition, FileException.NotFound> {
+        logger.debug { "Finding best matching rendition for key '$key'" }
+        val matchingRendition = key?.let { renditions[it] }
+
+        if (matchingRendition != null) return Ok(matchingRendition)
+
+        return (renditions[ORIGINAL_RENDITION] ?: renditions.values.firstOrNull())
+            .toResultOr { FileException.NotFound("No rendition with key '$key' found for file with key '${this.key}'") }
+    }
 
     companion object {
         const val ORIGINAL_RENDITION = "original"

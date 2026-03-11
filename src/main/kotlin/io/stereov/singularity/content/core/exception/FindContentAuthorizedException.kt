@@ -2,6 +2,7 @@ package io.stereov.singularity.content.core.exception
 
 import io.stereov.singularity.auth.core.exception.AuthenticationException
 import io.stereov.singularity.database.core.exception.DatabaseFailure
+import io.stereov.singularity.database.core.exception.FindDocumentByIdException
 import io.stereov.singularity.database.core.exception.FindDocumentByKeyException
 import io.stereov.singularity.global.exception.SingularityException
 import org.springframework.http.HttpStatus
@@ -84,6 +85,13 @@ sealed class FindContentAuthorizedException(
             return when (ex) {
                 is FindDocumentByKeyException.Database -> Database(ex.message, ex.cause)
                 is FindDocumentByKeyException.NotFound -> NotFound(ex.message, ex.cause)
+            }
+        }
+
+        fun from(ex: FindDocumentByIdException): FindContentAuthorizedException {
+            return when (ex) {
+                is FindDocumentByIdException.Database -> Database(ex.message, ex.cause)
+                is FindDocumentByIdException.NotFound -> NotFound(ex.message, ex.cause)
             }
         }
 

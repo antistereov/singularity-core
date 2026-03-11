@@ -11,7 +11,9 @@ import io.stereov.singularity.file.core.repository.FileMetadataRepository
 import io.stereov.singularity.file.core.service.FileMetadataService
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.file.download.service.DownloadService
+import io.stereov.singularity.file.image.service.ImageStore
 import io.stereov.singularity.global.config.ApplicationConfiguration
+import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.translate.service.TranslateService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
@@ -44,10 +46,12 @@ class StorageConfiguration {
     @ConditionalOnMissingBean
     fun fileController(
         fileStorage: FileStorage,
+        imageStore: ImageStore,
         authorizationService: AuthorizationService,
         fileMetadataService: FileMetadataService
     ) = FileController(
         fileStorage,
+        imageStore,
         authorizationService,
         fileMetadataService
     )
@@ -56,7 +60,9 @@ class StorageConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun fileMetadataMapper() = FileMetadataMapper()
+    fun fileMetadataMapper(
+        appProperties: AppProperties
+    ) = FileMetadataMapper(appProperties)
 
     // Service
 

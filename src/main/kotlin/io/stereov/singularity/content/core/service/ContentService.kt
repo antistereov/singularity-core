@@ -15,6 +15,7 @@ import io.stereov.singularity.database.core.exception.DatabaseException
 import io.stereov.singularity.database.core.exception.SaveDocumentException
 import io.stereov.singularity.database.core.service.CrudServiceWithKey
 import io.stereov.singularity.translate.service.TranslateService
+import org.bson.types.ObjectId
 import java.net.URI
 import java.net.URL
 import java.time.Instant
@@ -100,7 +101,7 @@ abstract class ContentService<T: ContentDocument<T>> : CrudServiceWithKey<T>  {
      *   Can be null if no user is authenticated.
      * @param role The access role required to retrieve the content (e.g., VIEWER, EDITOR, MAINTAINER).
      * @return A [Result] containing the content of type [T] if the user is authorized,
-     *   or an instance of [ContentException] if an error or unauthorized access occurs.
+     *   or an instance of [FindContentAuthorizedException] if an error or unauthorized access occurs.
      */
     open suspend fun findAuthorizedByKey(
         key: String,
@@ -110,6 +111,22 @@ abstract class ContentService<T: ContentDocument<T>> : CrudServiceWithKey<T>  {
         logger.debug { "Finding ${collectionClazz.simpleName} by key \"$key\" and validating permission: $role" }
 
         val content = findByKey(key)
+            .mapError { ex -> FindContentAuthorizedException.from(ex) }
+            .bind()
+
+        requireAuthorization(authenticationOutcome, content, role)
+            .mapError { ex -> FindContentAuthorizedException.from(ex) }
+            .bind()
+    }
+
+    open suspend fun findAuthorizedById(
+        id: ObjectId,
+        authenticationOutcome: AuthenticationOutcome,
+        role: ContentAccessRole
+    ): Result<T, FindContentAuthorizedException> = coroutineBinding {
+        logger.debug { "Finding ${collectionClazz.simpleName} by id \"$id\" and validating permission: $role" }
+
+        val content = findById(id)
             .mapError { ex -> FindContentAuthorizedException.from(ex) }
             .bind()
 

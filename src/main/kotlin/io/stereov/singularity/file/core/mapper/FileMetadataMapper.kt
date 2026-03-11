@@ -2,14 +2,17 @@ package io.stereov.singularity.file.core.mapper
 
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.binding
+import com.github.michaelbull.result.mapError
 import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.content.core.dto.response.ContentAccessDetailsResponse
-import io.stereov.singularity.database.core.exception.DocumentException
 import io.stereov.singularity.file.core.dto.FileMetadataResponse
 import io.stereov.singularity.file.core.dto.FileRenditionResponse
+import io.stereov.singularity.file.core.exception.FileException
 import io.stereov.singularity.file.core.model.FileMetadataDocument
 import io.stereov.singularity.file.core.model.FileRendition
 import io.stereov.singularity.file.core.model.FileUploadResponse
+import io.stereov.singularity.global.properties.AppProperties
+import org.bson.types.ObjectId
 import org.springframework.stereotype.Component
 
 /**
@@ -23,7 +26,19 @@ import org.springframework.stereotype.Component
  * structures for client-side consumption.
  */
 @Component
-class FileMetadataMapper {
+class FileMetadataMapper(
+    private val appProperties: AppProperties
+) {
+
+    private fun getRenditionUrl(id: ObjectId, rendition: String? = null): String {
+        var basePath = "${appProperties.baseUri}/api/files/${id}"
+
+        if (rendition != null) {
+            basePath += "/$rendition"
+        }
+
+        return basePath
+    }
 
     /**
      * Maps a given [FileRendition] instance and a URL to a [FileRenditionResponse] object.
@@ -33,7 +48,7 @@ class FileMetadataMapper {
      * @param url The URL associated with the file rendition to be included in the response.
      * @return A [FileRenditionResponse] containing the combined metadata and URL.
      */
-    fun toRenditionResponse(rendition: FileRendition, url: String) = FileRenditionResponse(
+    private fun toRenditionResponse(rendition: FileRendition, url: String) = FileRenditionResponse(
         size = rendition.size,
         contentType = rendition.contentType,
         key = rendition.key,
@@ -57,25 +72,32 @@ class FileMetadataMapper {
         height = upload.height,
     )
 
+
     /**
-     * Converts a [FileMetadataDocument] into a [FileMetadataResponse] while incorporating authentication
-     * outcomes and file renditions.
+     * Creates a metadata response for a given file document and authentication token.
      *
-     * @param doc The [FileMetadataDocument] containing the metadata details to be transformed.
-     * @param authenticationOutcome The outcome of the authentication process used to determine access details.
-     * @param renditions A map of file rendition keys to their corresponding [FileRenditionResponse] objects.
-     * @return A [Result] wrapping a [FileMetadataResponse] if the operation is successful, or a
-     * [DocumentException.Invalid] if the document contains no ID.
+     * This method maps the renditions of the provided file document to their
+     * corresponding rendition responses, generates rendition URLs, and constructs
+     * a comprehensive metadata response.
+     *
+     * @param authenticationOutcome The authentication token of the user requesting the metadata response.
+     * @param doc The file metadata document containing the file's metadata and renditions.
+     * @return A [Result] containing the [FileMetadataResponse] representing the metadata,
+     * or a [FileException] if an error occurs during the response creation process.
      */
     fun toMetadataResponse(
         doc: FileMetadataDocument,
         authenticationOutcome: AuthenticationOutcome,
-        renditions: Map<String, FileRenditionResponse>
-    ): Result<FileMetadataResponse, DocumentException.Invalid> = binding {
-        val id = doc.id.bind()
+    ): Result<FileMetadataResponse, FileException> = binding {
+        val fileId = doc.id
+            .mapError { FileException.from(it) }
+            .bind()
+        val renditions = doc.renditions.map { (id, rend) ->
+            id to toRenditionResponse(rend, getRenditionUrl(fileId, rend.key))
+        }.toMap()
 
         FileMetadataResponse(
-            id = id,
+            id = fileId,
             key = doc.key,
             createdAt = doc.createdAt,
             updatedAt = doc.updatedAt,

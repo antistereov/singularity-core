@@ -3,6 +3,7 @@ package io.stereov.singularity.principal.core.model.sensitve
 import io.stereov.singularity.auth.core.model.SessionInfo
 import io.stereov.singularity.principal.core.model.UserSecurityDetails
 import io.stereov.singularity.principal.core.model.identity.UserIdentities
+import org.bson.types.ObjectId
 import java.util.*
 
 /**
@@ -24,7 +25,7 @@ import java.util.*
  * @property sessions A map associating session IDs ([UUID]) with session-specific
  * details ([SessionInfo]). Defined as part of [SensitivePrincipalData] and initialized
  * as an empty map by default.
- * @property avatarFileKey The file key associated with the user's avatar, if any.
+ * @property avatarFile The file key associated with the user's avatar, if any.
  */
 data class SensitiveUserData(
     override var name: String,
@@ -32,5 +33,5 @@ data class SensitiveUserData(
     val identities: UserIdentities,
     var security: UserSecurityDetails,
     override val sessions: MutableMap<UUID, SessionInfo> = mutableMapOf(),
-    var avatarFileKey: String? = null,
+    var avatarFile: ObjectId? = null,
 ) : SensitivePrincipalData

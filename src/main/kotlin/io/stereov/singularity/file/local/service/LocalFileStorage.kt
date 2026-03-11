@@ -1,20 +1,22 @@
 package io.stereov.singularity.file.local.service
 
-import com.github.michaelbull.result.*
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.coroutines.coroutineBinding
 import com.github.michaelbull.result.coroutines.runSuspendCatching
+import com.github.michaelbull.result.mapError
+import com.github.michaelbull.result.runCatching
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.content.core.component.AccessCriteria
-import io.stereov.singularity.content.core.model.ContentAccessRole
 import io.stereov.singularity.file.core.exception.FileException
 import io.stereov.singularity.file.core.mapper.FileMetadataMapper
+import io.stereov.singularity.file.core.model.FileRendition
 import io.stereov.singularity.file.core.model.FileUploadRequest
 import io.stereov.singularity.file.core.model.FileUploadResponse
+import io.stereov.singularity.file.core.model.ServedFile
 import io.stereov.singularity.file.core.properties.StorageProperties
 import io.stereov.singularity.file.core.service.FileMetadataService
 import io.stereov.singularity.file.core.service.FileStorage
-import io.stereov.singularity.file.local.model.ServedFile
 import io.stereov.singularity.file.local.properties.LocalFileStorageProperties
 import io.stereov.singularity.global.properties.AppProperties
 import kotlinx.coroutines.Dispatchers
@@ -24,7 +26,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Primary
 import org.springframework.core.io.buffer.DataBufferUtils
 import org.springframework.core.io.buffer.DefaultDataBufferFactory
-import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import java.nio.file.Files
 import java.nio.file.Path
@@ -63,17 +64,10 @@ class LocalFileStorage(
      * @return A [Result] containing the served file data encapsulated in [ServedFile] if successful,
      * or a [FileException] if an error occurs, such as file access issues, invalid requests, or authorization failures.
      */
-    suspend fun serveFile(
-        authenticationOutcome: AuthenticationOutcome,
-        renditionKey: String,
+    override suspend fun doServeFile(
+        rendition: FileRendition,
     ): Result<ServedFile, FileException> = coroutineBinding {
-
-        logger.debug { "Accessing asset $renditionKey" }
-
-        if (renditionKey.isBlank()) {
-            Err(FileException.BadRequest("Missing file key in request path")).bind()
-        }
-
+        logger.debug { "Accessing asset ${rendition.key}" }
         val baseFileDir = runCatching { Paths.get(properties.fileDirectory).toAbsolutePath().normalize() }
             .mapError { ex ->
                 FileException.Operation(
@@ -83,27 +77,17 @@ class LocalFileStorage(
             }
             .bind()
 
-        val filePath = runCatching { Paths.get(properties.fileDirectory).resolve(renditionKey).normalize().absolute() }
+        val filePath = runCatching { Paths.get(properties.fileDirectory).resolve(rendition.key).normalize().absolute() }
             .mapError { ex -> FileException.Operation("Failed to resolve file path: ${ex.message}") }
             .bind()
 
-        val fileExists = runCatching { filePath.exists() }
+        runCatching { filePath.exists() }
             .mapError { ex ->
                 FileException.Operation(
                     "Failed to check existence of file with path $filePath: ${ex.message}",
                     ex
                 )
             }
-            .bind()
-
-        val metadata = resolveMetadataSyncConflicts(fileExists, renditionKey).bind()
-
-        metadataService.requireAuthorization(authenticationOutcome, metadata, ContentAccessRole.VIEWER)
-            .mapError { ex -> FileException.from(ex) }
-            .bind()
-
-        val rendition = metadata.renditions.values.firstOrNull { it.key == renditionKey }
-            .toResultOr { FileException.Metadata("Metadata does not contain rendition with key $renditionKey although it was found by this key") }
             .bind()
 
         if (!filePath.startsWith(baseFileDir)) {
@@ -115,24 +99,16 @@ class LocalFileStorage(
         val size = runCatching { Files.size(filePath).toString() }
             .mapError { ex ->
                 FileException.Operation(
-                    "Failed to generate file size of file with key $renditionKey: ${ex.message}",
-                    ex
-                )
-            }
-            .bind()
-        val mediaType = runCatching { MediaType.parseMediaType(rendition.contentType) }
-            .mapError { ex ->
-                FileException.Metadata(
-                    "Invalid media type ${rendition.contentType} saved in metadata for file with key $renditionKey: ${ex.message}",
+                    "Failed to generate file size of file with key ${rendition.key}: ${ex.message}",
                     ex
                 )
             }
             .bind()
 
         ServedFile(
-            mediaType = mediaType,
             size = size,
             content = DataBufferUtils.read(filePath, DefaultDataBufferFactory(), 4092),
+            rendition = rendition
         )
     }
 
@@ -257,9 +233,5 @@ class LocalFileStorage(
         }.mapError { ex ->
             FileException.Operation("Failed to delete local file with path \"$filePath\"", ex)
         }
-    }
-
-    override suspend fun getRenditionUrl(key: String): Result<String, FileException.Operation> {
-        return Ok("${appProperties.baseUri}${apiPath}${key}")
     }
 }

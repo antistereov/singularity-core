@@ -50,7 +50,7 @@ class FileManagementService(
     ): Result<FileMetadataResponse, UpdateContentAccessException> = coroutineBinding {
         val content = doUpdateAccess(key, req, authenticationOutcome).bind()
 
-        fileStorage.metadataResponseByKey(content.key, authenticationOutcome)
+        fileStorage.metadataResponseById(content.id, authenticationOutcome)
             .mapError { ex ->
                 UpdateContentAccessException.ResponseMapping(
                     "Failed to map file metadata to response: ${ex.message}",
@@ -103,7 +103,7 @@ class FileManagementService(
     ): Result<FileMetadataResponse, AcceptContentInvitationException> = coroutineBinding {
         val content = doAcceptInvitation(token).bind()
 
-        fileStorage.metadataResponseByKey(content.key, authenticationOutcome)
+        fileStorage.metadataResponseById(content.key, authenticationOutcome)
             .mapError { ex ->
                 AcceptContentInvitationException.ResponseMapping(
                     "Failed to map file metadata to response: ${ex.message}",
@@ -121,7 +121,7 @@ class FileManagementService(
     ): Result<FileMetadataResponse, SetContentTrustedStateException> = coroutineBinding {
         val content = doSetTrustedState(key, trusted).bind()
 
-        fileStorage.metadataResponseByKey(content.key, authenticationOutcome)
+        fileStorage.metadataResponseById(content.key, authenticationOutcome)
             .mapError { ex ->
                 SetContentTrustedStateException.ResponseMapping(
                     "Failed to map file metadata to response: ${ex.message}",
@@ -139,7 +139,7 @@ class FileManagementService(
     ): Result<FileMetadataResponse, UpdateContentOwnerException> = coroutineBinding {
         val content = doUpdateOwner(key, req, authenticationOutcome).bind()
 
-        fileStorage.metadataResponseByKey(content.key, authenticationOutcome)
+        fileStorage.metadataResponseById(content.key, authenticationOutcome)
             .mapError { ex ->
                 UpdateContentOwnerException.ResponseMapping(
                     "Failed to map file metadata to response: ${ex.message}",

@@ -133,7 +133,7 @@ class PrincipalService(
         }
             .onSuccess {
                 if (principal is User) {
-                    principal.sensitive.avatarFileKey?.let { fileStorage.remove(it)
+                    principal.sensitive.avatarFile?.let { fileStorage.remove(it)
                         .onFailure { ex -> logger.error(ex) { "Failed to remove avatar of deleted user with ID $id: ${ex.message}" } }}
                 }
             }

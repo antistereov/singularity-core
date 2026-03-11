@@ -6,13 +6,14 @@ import com.github.michaelbull.result.coroutines.runSuspendCatching
 import com.github.michaelbull.result.mapError
 import com.github.michaelbull.result.recoverIf
 import com.github.michaelbull.result.runCatching
-import com.nimbusds.jose.util.StandardCharset
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.content.core.component.AccessCriteria
 import io.stereov.singularity.file.core.exception.FileException
 import io.stereov.singularity.file.core.mapper.FileMetadataMapper
+import io.stereov.singularity.file.core.model.FileRendition
 import io.stereov.singularity.file.core.model.FileUploadRequest
 import io.stereov.singularity.file.core.model.FileUploadResponse
+import io.stereov.singularity.file.core.model.ServedFile
 import io.stereov.singularity.file.core.properties.StorageProperties
 import io.stereov.singularity.file.core.service.FileMetadataService
 import io.stereov.singularity.file.core.service.FileStorage
@@ -22,15 +23,15 @@ import kotlinx.coroutines.future.await
 import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.core.io.buffer.DataBufferUtils
+import org.springframework.core.io.buffer.DefaultDataBufferFactory
 import org.springframework.stereotype.Service
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import software.amazon.awssdk.core.async.AsyncRequestBody
+import software.amazon.awssdk.core.async.AsyncResponseTransformer
 import software.amazon.awssdk.services.s3.S3AsyncClient
 import software.amazon.awssdk.services.s3.model.*
 import software.amazon.awssdk.services.s3.presigner.S3Presigner
-import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest
-import java.net.URLDecoder
-import java.time.Duration
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.io.path.Path
 
@@ -39,7 +40,6 @@ import kotlin.io.path.Path
 class S3FileStorage(
     private val s3Properties: S3Properties,
     private val s3Client: S3AsyncClient,
-    private val s3Presigner: S3Presigner,
     override val appProperties: AppProperties,
     override val metadataService: FileMetadataService,
     override val metadataMapper: FileMetadataMapper,
@@ -172,31 +172,39 @@ class S3FileStorage(
         }.mapError { ex -> FileException.Operation("Failed to remove rendition with key $key: ${ex.message}", ex) }
     }
 
-    override suspend fun getRenditionUrl(key: String): Result<String, FileException> = coroutineBinding {
+    override suspend fun doServeFile(rendition: FileRendition): Result<ServedFile, FileException> = coroutineBinding {
+        logger.debug { "Accessing S3 asset '${rendition.key}'" }
 
-        val fileExists = renditionExists(key).bind()
-        resolveMetadataSyncConflicts(fileExists, key).bind()
+        val head = runCatching {
+            s3Client.headObject { it.bucket(s3Properties.bucket).key(Path(s3Properties.path).resolve(rendition.key).toString()) }
+                .await()
+        }.mapError { ex ->
+            FileException.Operation(
+                "Failed to read metadata for S3 object ${rendition.key}: ${ex.message}",
+                ex
+            )
+        }.bind()
 
-        runSuspendCatching {
+        val responsePublisher = runSuspendCatching {
             val getObjectRequest = GetObjectRequest.builder()
                 .bucket(s3Properties.bucket)
-                .key(Path(s3Properties.path).resolve(key).toString())
+                .key(Path(s3Properties.path).resolve(rendition.key).toString())
                 .build()
 
-            val presignRequest = GetObjectPresignRequest.builder()
-                .signatureDuration(Duration.ofMinutes(s3Properties.signatureDuration))
-                .getObjectRequest(getObjectRequest)
-                .build()
+            s3Client.getObject(getObjectRequest, AsyncResponseTransformer.toPublisher()).await()
+        }.mapError { ex -> FileException.Operation(
+            "Failed to load S3 object ${rendition.key}: ${ex.message}",
+            ex
+        ) }.bind()
 
-            val presigned = s3Presigner.presignGetObject(presignRequest)
-            URLDecoder.decode(presigned.url().toString(), StandardCharset.UTF_8)
+        val content = Flux.from(responsePublisher).map { byteBuffer ->
+            DefaultDataBufferFactory().wrap(byteBuffer)
         }
-            .mapError { ex ->
-                FileException.Operation(
-                    "Failed to generate url for rendition with key $key: ${ex.message}",
-                    ex
-                )
-            }
-            .bind()
+
+        ServedFile(
+            head.contentLength().toString(),
+            content,
+            rendition
+        )
     }
 }

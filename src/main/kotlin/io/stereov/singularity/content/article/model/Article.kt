@@ -21,7 +21,7 @@ data class Article(
     var path: String,
     var state: ArticleState = ArticleState.DRAFT,
     var colors: ArticleColors = ArticleColors(),
-    var imageKey: String? = null,
+    var image: ObjectId? = null,
     override var trusted: Boolean,
     override var tags: MutableSet<String> = mutableSetOf(),
     override val translations: MutableMap<Locale, ArticleTranslation> = mutableMapOf(),

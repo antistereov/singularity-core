@@ -162,7 +162,7 @@ data class User(
          * @param email2faEnabled Indicates whether two-factor authentication via email is enabled.
          * @param mailTwoFactorCodeExpiresIn The expiration duration in seconds for email-based two-factor authentication codes.
          * @param sessions A mutable map of session information, keyed by session UUID. Defaults to an empty mutable map.
-         * @param avatarFileKey Optional key for the user's avatar file in storage. Defaults to null.
+         * @param avatarFile Optional key for the user's avatar file in storage. Defaults to null.
          */
         fun ofPassword(
             id: ObjectId? = null,
@@ -176,7 +176,7 @@ data class User(
             email2faEnabled: Boolean,
             mailTwoFactorCodeExpiresIn: Long,
             sessions: MutableMap<UUID, SessionInfo> = mutableMapOf(),
-            avatarFileKey: String? = null,
+            avatarFile: ObjectId? = null,
         ) = User(
             id,
             created,
@@ -189,7 +189,7 @@ data class User(
                 UserIdentities(UserIdentity.ofPassword(password)),
                 UserSecurityDetails(email2faEnabled, mailTwoFactorCodeExpiresIn),
                 sessions,
-                avatarFileKey
+                avatarFile
             )
         )
 
@@ -207,7 +207,7 @@ data class User(
          * @param groups A mutable set of groups the user belongs to. Defaults to an empty set if not provided.
          * @param mailTwoFactorCodeExpiresIn The expiration time (in seconds) for two-factor authentication codes sent via email.
          * @param sessions A mutable map of the user's active sessions, keyed by UUID. Defaults to an empty map if not provided.
-         * @param avatarFileKey Optional key representing the path to the user's avatar stored in the file system. Defaults to `null` if not provided.
+         * @param avatarFile Optional key representing the path to the user's avatar stored in the file system. Defaults to `null` if not provided.
          * @return A [User] instance with the specified properties.
          */
         fun ofProvider(
@@ -222,7 +222,7 @@ data class User(
             groups: MutableSet<String> = mutableSetOf(),
             mailTwoFactorCodeExpiresIn: Long,
             sessions: MutableMap<UUID, SessionInfo> = mutableMapOf(),
-            avatarFileKey: String? = null,
+            avatarFile: ObjectId? = null,
         ) = User(
             id,
             created,
@@ -235,7 +235,7 @@ data class User(
                 UserIdentities(providers = mutableMapOf(provider to UserIdentity.ofProvider(principalId))),
                 UserSecurityDetails(false, mailTwoFactorCodeExpiresIn, true),
                 sessions,
-                avatarFileKey
+                avatarFile
             )
         )
     }

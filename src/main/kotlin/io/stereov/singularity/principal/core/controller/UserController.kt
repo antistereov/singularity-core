@@ -214,7 +214,7 @@ class UserController(
         val user = userService.findById(id)
             .getOrThrow { FindUserByIdException.from(it) }
 
-        user.sensitive.avatarFileKey?.let {
+        user.sensitive.avatarFile?.let {
             fileStorage.remove(it).getOrThrow { ex -> when (ex) { is FileException -> ex } }
         }
         userService.deleteById(id)
