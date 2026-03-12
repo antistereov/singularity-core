@@ -180,10 +180,23 @@ abstract class FileStorage {
     suspend fun exists(
         key: DocumentKey
     ): Result<Boolean, FileException> = coroutineBinding {
-        logger.debug { "Checking existence of file with ID '$key'" }
+        logger.debug { "Checking existence of file with key '$key'" }
 
         val metadata = metadataService.findByKey(key)
-            .mapError { ex -> FileException.Metadata("Failed to generate metadata for file with key '$key': ${ex.message}", ex) }
+            .recoverIf(
+                { ex -> ex is FindDocumentByKeyException.NotFound },
+                {
+                    renditionExists(FileRenditionKey(key.value)).onSuccess {
+                        removeRendition(FileRenditionKey(key.value)).onSuccess {
+                            logger.warn { "No metadata found for key '$key' but a file was found and deleted to maintain consistency."}
+                        }
+                    }
+                    return@coroutineBinding false
+                }
+            )
+            .mapError { ex ->
+                FileException.NotFound("No metadata document found for key '$key': ${ex.message}", ex)
+            }
             .bind()
 
         metadata.renditions.values.forEach { rendition ->

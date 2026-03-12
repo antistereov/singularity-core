@@ -82,7 +82,7 @@ class AccessTokenService(
                 .subject(id.toHexString())
                 .claim(Constants.JWT_ROLES_CLAIM, principal.roles)
                 .claim(Constants.JWT_SESSION_CLAIM, sessionId)
-                .claim(Constants.JWT_GROUPS_CLAIM, principal.groups)
+                .claim(Constants.JWT_GROUPS_CLAIM, principal.groups.map { it.value })
                 .id(tokenId)
                 .build()
         }
@@ -208,7 +208,7 @@ class AccessTokenService(
                             val parsed = mutableSetOf<DocumentKey>()
                             for (raw in list) {
                                 val g = (raw as? String)
-                                    .toResultOr { AccessTokenExtractionException.Invalid("Cannot decode group $raw") }
+                                    .toResultOr { AccessTokenExtractionException.Invalid("Cannot decode group '$raw'") }
                                     .bind()
                                 parsed += DocumentKey(g)
                             }

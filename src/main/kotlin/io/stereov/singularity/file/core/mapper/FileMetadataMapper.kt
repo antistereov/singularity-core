@@ -13,7 +13,6 @@ import io.stereov.singularity.file.core.model.FileRendition
 import io.stereov.singularity.file.core.model.FileRenditionKey
 import io.stereov.singularity.file.core.model.FileUploadResponse
 import io.stereov.singularity.global.properties.AppProperties
-import org.bson.types.ObjectId
 import org.springframework.stereotype.Component
 
 /**
@@ -31,14 +30,8 @@ class FileMetadataMapper(
     private val appProperties: AppProperties
 ) {
 
-    private fun getRenditionUrl(id: ObjectId, rendition: FileRenditionKey? = null): String {
-        var basePath = "${appProperties.baseUri}/api/files/${id}"
-
-        if (rendition != null) {
-            basePath += "?rendition=$rendition"
-        }
-
-        return basePath
+    private fun getRenditionUrl(rendition: FileRenditionKey): String {
+        return "${appProperties.baseUri}/api/files/$rendition"
     }
 
     /**
@@ -94,7 +87,7 @@ class FileMetadataMapper(
             .mapError { FileException.from(it) }
             .bind()
         val renditions = doc.renditions.map { (id, rend) ->
-            id to toRenditionResponse(rend, getRenditionUrl(fileId, rend.key))
+            id to toRenditionResponse(rend, getRenditionUrl(rend.key))
         }.toMap()
 
         FileMetadataResponse(

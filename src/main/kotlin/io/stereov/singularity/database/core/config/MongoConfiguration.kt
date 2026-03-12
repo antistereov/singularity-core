@@ -15,7 +15,7 @@ class MongoConfiguration {
     fun customConversions(): MongoCustomConversions {
 
         return MongoCustomConversions(listOf(
-            StringToRoleConverter()
+            StringToRoleConverter(),
         ))
     }
 

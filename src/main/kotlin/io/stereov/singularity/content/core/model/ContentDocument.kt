@@ -12,7 +12,7 @@ import java.time.Instant
  * Represents a document that can be stored within a content management system. This interface serves
  * as a base for creating content-specific implementations.
  *
- * @param T the type of the implementing class, ensuring type-safe chaining when using methods that return the instance.
+ * @param D the type of the implementing class, ensuring type-safe chaining when using methods that return the instance.
  *
  * @property _id The unique identifier of the document.
  * @property key The unique key used to identify the document within the system.
@@ -22,7 +22,7 @@ import java.time.Instant
  * @property trusted Indicates whether the system trusts the content.
  * @property tags A set of tags associated with the content.
  */
-interface ContentDocument<T: ContentDocument<T>> : WithKey {
+interface ContentDocument<D: ContentDocument<D>> : WithKey {
     override val _id: ObjectId?
     override val key: DocumentKey
     val createdAt: Instant
@@ -52,23 +52,23 @@ interface ContentDocument<T: ContentDocument<T>> : WithKey {
      * @return The instance of the implementing class for method chaining.
      */
     @Suppress("UNCHECKED_CAST")
-    fun <T: ContentAccessSubject> share(subject: T, role: ContentAccessRole): T {
+    fun <T: ContentAccessSubject> share(subject: T, role: ContentAccessRole): D {
         access.share(subject, role)
-        return this as T
+        return this as D
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun addInvitation(invitationId: ObjectId): T {
+    fun addInvitation(invitationId: ObjectId): D {
         access.invitations.add(invitationId)
 
-        return this as T
+        return this as D
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun removeInvitation(invitation: ObjectId): T {
+    fun removeInvitation(invitation: ObjectId): D {
         access.invitations.remove(invitation)
 
-        return this as T
+        return this as D
     }
 
     /**

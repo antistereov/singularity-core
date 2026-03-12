@@ -56,8 +56,8 @@ dependencies {
     api("org.springframework.boot:spring-boot-starter-oauth2-client")
 
     // File Storage
-    implementation(platform("software.amazon.awssdk:bom:2.42.8"))
-    implementation("software.amazon.awssdk:s3")
+    api(platform("software.amazon.awssdk:bom:2.42.8"))
+    api("software.amazon.awssdk:s3")
 
     // 2FA
     api("com.warrenstrange:googleauth:1.5.0")

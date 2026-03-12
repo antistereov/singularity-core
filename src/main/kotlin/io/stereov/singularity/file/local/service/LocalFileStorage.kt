@@ -49,7 +49,7 @@ class LocalFileStorage(
 
 
     private suspend fun getFilePath(key: FileRenditionKey): Path {
-        return baseDir.resolve(key.value)
+        return baseDir.resolve(key.value.removePrefix("/"))
     }
 
     override suspend fun doServeFile(
@@ -105,9 +105,7 @@ class LocalFileStorage(
     ): Result<FileUploadResponse, FileException.Operation> = coroutineBinding {
         logger.debug { "Uploading file of content type ${req.mediaType} to path \"${req.key}\"" }
 
-        val filePath = runCatching { baseDir.resolve(req.key.value) }
-            .mapError { ex -> FileException.Operation("Failed to resolve base directory $baseDir: ${ex.message}", ex) }
-            .bind()
+        val filePath = getFilePath(req.key)
 
         withContext(Dispatchers.IO) {
             runCatching { Files.createDirectories(filePath.parent) }

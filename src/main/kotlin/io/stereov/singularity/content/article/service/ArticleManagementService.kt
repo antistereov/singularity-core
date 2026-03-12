@@ -286,6 +286,7 @@ class ArticleManagementService(
             .mapError { ex -> ChangeArticleImageException.InvalidDocument("Failed to create URI: ${ex.message}", ex) }
             .bind()
             .path
+            .removePrefix("/")
 
         val image = imageStore.upload(file, article.key.toString(), path,  true, authenticationOutcome)
             .mapError { ex -> when (ex) {

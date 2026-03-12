@@ -71,7 +71,7 @@ class ArticleService(
         title: String?,
         content: String?,
         state: String?,
-        tags: List<String>,
+        tags: List<DocumentKey>,
         roles: Set<String>,
         createdAtBefore: Instant?,
         createdAtAfter: Instant?,

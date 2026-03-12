@@ -106,7 +106,7 @@ class ArticleController(
     ])
     suspend fun getArticles(
         pageable: Pageable,
-        @RequestParam tags: List<String> = emptyList(),
+        @RequestParam tags: List<DocumentKey> = emptyList(),
         @RequestParam title: String? = null,
         @RequestParam content: String? = null,
         @RequestParam state: String? = null,

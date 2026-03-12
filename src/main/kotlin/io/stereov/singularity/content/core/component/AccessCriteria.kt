@@ -3,10 +3,7 @@ package io.stereov.singularity.content.core.component
 import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.token.model.AccessType
-import io.stereov.singularity.content.core.model.ContentAccessDetails
-import io.stereov.singularity.content.core.model.ContentAccessPermissions
-import io.stereov.singularity.content.core.model.ContentAccessRole
-import io.stereov.singularity.content.core.model.ContentDocument
+import io.stereov.singularity.content.core.model.*
 import io.stereov.singularity.database.core.model.DocumentKey
 import io.stereov.singularity.global.util.getOrNull
 import org.bson.types.ObjectId
@@ -54,13 +51,14 @@ class AccessCriteria(
 
     private fun isOwner(userId: ObjectId) = Criteria.where(ownerIdField).`is`(userId)
 
-    private fun canViewUser(userId: ObjectId) = Criteria().andOperator(Criteria.where(canViewUsersField).`in`(userId.toHexString()), isShared)
-    private fun canEditUser(userId: ObjectId) = Criteria().andOperator(Criteria.where(canEditUsersField).`in`(userId.toHexString()), isShared)
-    private fun isMaintainerUser(userId: ObjectId) = Criteria.where(isMaintainerUsersField).`in`(userId.toHexString())
+    private fun canViewUser(userId: ObjectId) = Criteria().andOperator(Criteria.where(canViewUsersField).`in`(
+        ContentAccessSubject.UserId(userId)), isShared)
+    private fun canEditUser(userId: ObjectId) = Criteria().andOperator(Criteria.where(canEditUsersField).`in`(ContentAccessSubject.UserId(userId)), isShared)
+    private fun isMaintainerUser(userId: ObjectId) = Criteria.where(isMaintainerUsersField).`in`(ContentAccessSubject.UserId(userId))
 
-    private fun canViewGroup(groups: Set<DocumentKey>) = Criteria.where(canViewGroupsField).`in`(groups)
-    private fun canEditGroup(groups: Set<DocumentKey>) = Criteria.where(canEditGroupsField).`in`(groups)
-    private fun isMaintainerGroup(groups: Set<DocumentKey>) = Criteria.where(isMaintainerGroupsField).`in`(groups)
+    private fun canViewGroup(groups: Set<DocumentKey>) = Criteria.where(canViewGroupsField).`in`(groups.map { ContentAccessSubject.GroupKey(it) })
+    private fun canEditGroup(groups: Set<DocumentKey>) = Criteria.where(canEditGroupsField).`in`(groups.map { ContentAccessSubject.GroupKey(it) })
+    private fun isMaintainerGroup(groups: Set<DocumentKey>) = Criteria.where(isMaintainerGroupsField).`in`(groups.map { ContentAccessSubject.GroupKey(it) })
 
     /**
      * Generates access criteria based on the roles provided and the current authentication state.

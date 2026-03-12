@@ -5,6 +5,7 @@ import com.github.michaelbull.result.getOrThrow
 import io.stereov.singularity.auth.core.exception.AuthenticationException
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.token.exception.AccessTokenExtractionException
+import io.stereov.singularity.database.core.model.DocumentKey
 import io.stereov.singularity.database.encryption.exception.DeleteEncryptedDocumentByIdException
 import io.stereov.singularity.file.core.exception.FileException
 import io.stereov.singularity.file.core.service.FileStorage
@@ -132,7 +133,7 @@ class UserController(
         pageable: Pageable,
         @RequestParam(required = false) email: String?,
         @RequestParam(required = false) roles: Set<String>?,
-        @RequestParam(required = false) groups: Set<String>?,
+        @RequestParam(required = false) groups: Set<DocumentKey>?,
         @RequestParam(required = false) identities: Set<String>?,
         @RequestParam(required = false) createdAtAfter: Instant?,
         @RequestParam(required = false) createdAtBefore: Instant?,

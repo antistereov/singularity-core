@@ -28,11 +28,11 @@ data class FileKeyHelper(
     }
 
     private fun String.addRenditionIdentifier(renditionIdentifier: String): String {
-        if (renditionIdentifier.isNotBlank()) {
+        return if (renditionIdentifier.isNotBlank()) {
             this.plus("-$renditionIdentifier")
+        } else {
+            this
         }
-
-        return this
     }
 
     private fun String.addExtension(): String {
@@ -43,11 +43,11 @@ data class FileKeyHelper(
                 { MediaTypeExtensionRegistry.resolve(mediaType) }
             )
 
-        if (extension?.isNotBlank() == true) {
-            this.plus(extension)
+        return if (extension?.isNotBlank() == true) {
+            this.plus(".$extension")
+        } else {
+            this
         }
-
-        return this
     }
 
     fun toDocumentKey() = DocumentKey(

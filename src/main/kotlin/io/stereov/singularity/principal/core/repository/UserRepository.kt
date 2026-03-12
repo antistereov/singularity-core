@@ -21,5 +21,5 @@ interface UserRepository : SensitiveCrudRepository<EncryptedUser> {
 
     suspend fun findAllByRolesContaining(role: Role): Flow<EncryptedUser>
 
-    suspend fun findAllByGroupsContaining(group: DocumentKey): Flow<EncryptedUser>
+    suspend fun findAllByGroupsContaining(groups: Set<DocumentKey>): Flow<EncryptedUser>
 }

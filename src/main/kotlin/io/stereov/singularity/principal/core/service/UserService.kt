@@ -193,7 +193,7 @@ class UserService(
     suspend fun findAllByGroupContaining(group: DocumentKey): Flow<Result<User, EncryptionException>> {
         logger.debug { "Finding all users with group membership $group" }
 
-        return repository.findAllByGroupsContaining(group).map { decrypt(it) }
+        return repository.findAllByGroupsContaining(mutableSetOf(group)).map { decrypt(it) }
     }
 
     override suspend fun findById(id: ObjectId): Result<User, FindEncryptedDocumentByIdException> = coroutineBinding {
@@ -232,7 +232,7 @@ class UserService(
         pageable: Pageable,
         email: String?,
         roles: Set<Role>?,
-        groups: Set<String>?,
+        groups: Set<DocumentKey>?,
         createdAtBefore: Instant?,
         createdAtAfter: Instant?,
         lastActiveBefore: Instant?,
