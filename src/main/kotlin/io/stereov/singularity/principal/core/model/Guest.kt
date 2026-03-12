@@ -1,6 +1,7 @@
 package io.stereov.singularity.principal.core.model
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.database.core.model.DocumentKey
 import io.stereov.singularity.principal.core.model.sensitve.SensitiveGuestData
 import org.bson.types.ObjectId
 import java.time.Instant
@@ -32,6 +33,6 @@ data class Guest(
 
     override val logger = KotlinLogging.logger {}
 
-    override val groups = emptySet<String>()
+    override val groups = setOf<DocumentKey>()
     override val roles = setOf(Role.Guest.GUEST)
 }

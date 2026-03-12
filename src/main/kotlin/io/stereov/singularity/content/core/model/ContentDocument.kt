@@ -2,6 +2,7 @@ package io.stereov.singularity.content.core.model
 
 import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.auth.token.model.AccessType
+import io.stereov.singularity.database.core.model.DocumentKey
 import io.stereov.singularity.database.core.model.WithKey
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Transient
@@ -23,12 +24,12 @@ import java.time.Instant
  */
 interface ContentDocument<T: ContentDocument<T>> : WithKey {
     override val _id: ObjectId?
-    override val key: String
+    override val key: DocumentKey
     val createdAt: Instant
     var updatedAt: Instant
     var access: ContentAccessDetails
     var trusted: Boolean
-    var tags: MutableSet<String>
+    var tags: MutableSet<DocumentKey>
 
     /**
      * Indicates whether the content is publicly accessible.
@@ -46,14 +47,13 @@ interface ContentDocument<T: ContentDocument<T>> : WithKey {
      * Shares the content with the specified subject and assigns a role to them.
      * This allows the subject to access or interact with the content based on the assigned role.
      *
-     * @param type The type of subject to share the content with, such as a user or a group.
-     * @param subjectId The unique identifier of the subject to whom the content is being shared.
+     * @param subject The unique identifier of the subject to whom the content is being shared.
      * @param role The access role to assign to the subject (e.g., VIEWER, EDITOR, MAINTAINER).
      * @return The instance of the implementing class for method chaining.
      */
     @Suppress("UNCHECKED_CAST")
-    fun share(type: ContentAccessSubject, subjectId: String, role: ContentAccessRole): T {
-        access.share(type, subjectId, role)
+    fun <T: ContentAccessSubject> share(subject: T, role: ContentAccessRole): T {
+        access.share(subject, role)
         return this as T
     }
 

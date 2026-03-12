@@ -5,7 +5,6 @@ import com.github.michaelbull.result.coroutines.coroutineBinding
 import io.github.oshai.kotlinlogging.KLogger
 import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.auth.core.service.AuthorizationService
-import io.stereov.singularity.content.core.exception.GetUniqueKeyException
 import io.stereov.singularity.content.core.dto.request.InviteUserToContentRequest
 import io.stereov.singularity.content.core.dto.request.UpdateContentAccessRequest
 import io.stereov.singularity.content.core.dto.request.UpdateOwnerRequest
@@ -22,6 +21,7 @@ import io.stereov.singularity.content.invitation.model.InvitationToken
 import io.stereov.singularity.content.invitation.service.InvitationService
 import io.stereov.singularity.database.core.exception.DocumentException
 import io.stereov.singularity.database.core.exception.FindDocumentByKeyException
+import io.stereov.singularity.database.core.model.DocumentKey
 import io.stereov.singularity.database.encryption.exception.FindEncryptedDocumentByIdException
 import io.stereov.singularity.principal.core.exception.FindUserByEmailException
 import io.stereov.singularity.principal.core.mapper.PrincipalMapper
@@ -33,7 +33,7 @@ import io.stereov.singularity.translate.service.TranslateService
 import org.bson.types.ObjectId
 import java.util.*
 
-abstract class ContentManagementService<T: ContentDocument<T>>() {
+abstract class ContentManagementService<T: ContentDocument<T>> {
 
     abstract val userService: UserService
     abstract val contentService: ContentService<T>
@@ -48,13 +48,13 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
     abstract val logger: KLogger
 
     abstract suspend fun updateAccess(
-        key: String,
+        key: DocumentKey,
         req: UpdateContentAccessRequest,
         authenticationOutcome: AuthenticationOutcome,
         locale: Locale?
     ): Result<ContentResponse<T>, UpdateContentAccessException>
     protected suspend fun doUpdateAccess(
-        key: String,
+        key: DocumentKey,
         req: UpdateContentAccessRequest,
         authenticationOutcome: AuthenticationOutcome
     ): Result<T, UpdateContentAccessException> = coroutineBinding {
@@ -92,14 +92,14 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
     }
 
     abstract suspend fun inviteUser(
-        key: String,
+        key: DocumentKey,
         req: InviteUserToContentRequest,
         inviter: User,
         authenticationOutcome: AuthenticationOutcome,
         locale: Locale?
     ): Result<ExtendedContentAccessDetailsResponse, InviteUserException>
     protected suspend fun doInviteUser(
-        key: String,
+        key: DocumentKey,
         req: InviteUserToContentRequest,
         inviter: User,
         title: String,
@@ -157,6 +157,7 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
         val key = (invitation.sensitive.claims["key"] as? String)
             .toResultOr { AcceptContentInvitationException.InvalidInvitation("No key claim found in invitation") }
             .bind()
+            .let { DocumentKey(it) }
         val roleString = (invitation.sensitive.claims["role"] as? String)
             .toResultOr { AcceptContentInvitationException.InvalidInvitation("No role claim found in invitation") }
             .bind()
@@ -192,7 +193,7 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
             .mapError { ex -> AcceptContentInvitationException.InvalidInvitation("Database entity of invited user contains no ID: ${ex.message}", ex) }
             .bind()
 
-        content.share(ContentAccessSubject.USER, userId.toString(), role)
+        content.share(ContentAccessSubject.UserId(userId), role)
         content.removeInvitation(token.invitationId)
 
         contentService.save(content)
@@ -201,13 +202,13 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
     }
 
     abstract suspend fun setTrustedState(
-        key: String,
+        key: DocumentKey,
         authenticationOutcome: AuthenticationOutcome,
         trusted: Boolean,
         locale: Locale?
     ): Result<ContentResponse<T>, SetContentTrustedStateException>
     protected suspend fun doSetTrustedState(
-        key: String,
+        key: DocumentKey,
         trusted: Boolean,
     ): Result<T, SetContentTrustedStateException> = coroutineBinding {
         logger.debug { "Setting trusted state" }
@@ -224,13 +225,13 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
     }
 
     abstract suspend fun updateOwner(
-        key: String,
+        key: DocumentKey,
         req: UpdateOwnerRequest,
         authenticationOutcome: AuthenticationOutcome.Authenticated,
         locale: Locale?
     ): Result<ContentResponse<T>, UpdateContentOwnerException>
     protected suspend fun doUpdateOwner(
-        key: String,
+        key: DocumentKey,
         req: UpdateOwnerRequest,
         authenticationOutcome: AuthenticationOutcome.Authenticated
     ): Result<T, UpdateContentOwnerException> = coroutineBinding {
@@ -245,7 +246,7 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
             Err(UpdateContentOwnerException.NotAuthorized("Only the owner can update the owner of this resource"))
                 .bind()
         }
-        val newOwnerId = ObjectId(req.newOwnerId)
+        val newOwnerId = req.newOwnerId
 
         val userExists = userService.existsById(newOwnerId)
             .mapError { ex -> UpdateContentOwnerException.Database("Failed to check existence of user with ID ${req.newOwnerId}: ${ex.message}", ex) }
@@ -255,7 +256,7 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
                 .bind()
         }
 
-        content.access.share(ContentAccessSubject.USER, content.access.ownerId.toString(), ContentAccessRole.MAINTAINER)
+        content.access.share(ContentAccessSubject.UserId(content.access.ownerId), ContentAccessRole.MAINTAINER)
         content.access.ownerId = newOwnerId
 
         contentService.save(content)
@@ -264,7 +265,7 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
     }
 
     open suspend fun deleteByKey(
-        key: String,
+        key: DocumentKey,
         authenticationOutcome: AuthenticationOutcome
     ): Result<Unit, DeleteContentByKeyException> = coroutineBinding {
         logger.debug { "Deleting content with key \"$key\"" }
@@ -279,7 +280,7 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
     }
 
     suspend fun deleteInvitation(
-        contentKey: String,
+        contentKey: DocumentKey,
         invitationId: ObjectId,
         authenticationOutcome: AuthenticationOutcome
     ): Result<T, DeleteContentInvitationException> = coroutineBinding {
@@ -321,11 +322,7 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
         val users = mutableListOf<UserContentAccessDetails>()
 
         content.access.users.maintainer.forEach { id ->
-            val objectId = runCatching { ObjectId(id) }
-                .mapError { ex -> GenerateExtendedContentAccessDetailsException.InvalidDocument("Failed to parse user ID $id: ${ex.message}", ex) }
-                .bind()
-
-            userService.findById(objectId)
+            userService.findById(id.value)
                 .map { user ->
                     val overview = principalMapper.toOverview(user, authenticationOutcome)
                         .mapError { ex -> GenerateExtendedContentAccessDetailsException.Database("Failed to map user to overview: ${ex.message}", ex) }
@@ -341,11 +338,7 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
         }
 
         content.access.users.editor.forEach { id ->
-            val objectId = runCatching { ObjectId(id) }
-                .mapError { ex -> GenerateExtendedContentAccessDetailsException.InvalidDocument("Failed to parse user ID $id: ${ex.message}", ex) }
-                .bind()
-
-            userService.findById(objectId)
+            userService.findById(id.value)
                 .map { user ->
                     val overview = principalMapper.toOverview(user, authenticationOutcome)
                         .mapError { ex -> GenerateExtendedContentAccessDetailsException.Database("Failed to map user to overview: ${ex.message}", ex) }
@@ -361,11 +354,7 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
         }
 
         content.access.users.viewer.forEach { id ->
-            val objectId = runCatching { ObjectId(id) }
-                .mapError { ex -> GenerateExtendedContentAccessDetailsException.InvalidDocument("Failed to parse user ID $id: ${ex.message}", ex) }
-                .bind()
-
-            userService.findById(objectId)
+            userService.findById(id.value)
                 .map { user ->
                     val overview = principalMapper.toOverview(user, authenticationOutcome)
                         .mapError { ex -> GenerateExtendedContentAccessDetailsException.Database("Failed to map user to overview: ${ex.message}", ex) }
@@ -405,7 +394,7 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
      *   or [GenerateExtendedContentAccessDetailsException] in case of failure.
      */
     suspend fun extendedContentAccessDetails(
-        key: String,
+        key: DocumentKey,
         authenticationOutcome: AuthenticationOutcome
     ): Result<ExtendedContentAccessDetailsResponse, GenerateExtendedContentAccessDetailsException> = coroutineBinding {
         logger.debug { "Fetching extended content access details for article with key \"$key\"" }
@@ -417,14 +406,14 @@ abstract class ContentManagementService<T: ContentDocument<T>>() {
         extendedContentAccessDetails(content, authenticationOutcome).bind()
     }
 
-    suspend fun getUniqueKey(baseKey: String, id: ObjectId?): Result<String, GetUniqueKeyException> {
+    suspend fun getUniqueKey(baseKey: DocumentKey, id: ObjectId?): Result<DocumentKey, GetUniqueKeyException> {
         return contentService.findByKey(baseKey)
             .flatMapEither(
                 success = { article ->
                     article.id
                         .map { existingArticleId ->
                             if (id != existingArticleId) {
-                                "$baseKey-${UUID.randomUUID().toString().substring(0, 8)}"
+                                DocumentKey("$baseKey-${UUID.randomUUID().toString().substring(0, 8)}")
                             } else baseKey
                         }
                         .mapError { ex ->

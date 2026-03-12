@@ -10,6 +10,7 @@ import io.stereov.singularity.file.core.dto.FileRenditionResponse
 import io.stereov.singularity.file.core.exception.FileException
 import io.stereov.singularity.file.core.model.FileMetadataDocument
 import io.stereov.singularity.file.core.model.FileRendition
+import io.stereov.singularity.file.core.model.FileRenditionKey
 import io.stereov.singularity.file.core.model.FileUploadResponse
 import io.stereov.singularity.global.properties.AppProperties
 import org.bson.types.ObjectId
@@ -30,11 +31,11 @@ class FileMetadataMapper(
     private val appProperties: AppProperties
 ) {
 
-    private fun getRenditionUrl(id: ObjectId, rendition: String? = null): String {
+    private fun getRenditionUrl(id: ObjectId, rendition: FileRenditionKey? = null): String {
         var basePath = "${appProperties.baseUri}/api/files/${id}"
 
         if (rendition != null) {
-            basePath += "/$rendition"
+            basePath += "?rendition=$rendition"
         }
 
         return basePath

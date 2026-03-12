@@ -175,7 +175,7 @@ class PrincipalSettingsService(
         user: User,
         authentication: AuthenticationOutcome.Authenticated,
     ): Result<User, SetUserAvatarException> = coroutineBinding {
-        val currentAvatar = user.sensitive.avatarFile
+        val currentAvatar = user.sensitive.avatarFileKey
 
         if (currentAvatar != null) {
             fileStorage.remove(currentAvatar)
@@ -194,21 +194,30 @@ class PrincipalSettingsService(
         }
 
         val fileStoragePath = user.fileStoragePath
-            .mapError { ex -> SetUserAvatarException.Database("Failed to get file storage path for user: ${ex.message}", ex) }
+            .mapError { ex ->
+                SetUserAvatarException.Database(
+                    "Failed to get file storage path for user: ${ex.message}",
+                    ex
+                )
+            }
             .bind()
 
         val avatarKey = imageStore
-            .upload(authentication, file, "$fileStoragePath/avatar", true)
+            .upload(file, "avatar", fileStoragePath, true, authentication)
             .mapError { ex -> SetUserAvatarException.File("Failed to upload new avatar: ${ex.message}") }
             .bind()
             .key
 
-        user.sensitive.avatarFile = avatarKey
+        user.sensitive.avatarFileKey = avatarKey
 
         userService.save(user)
             .mapError { ex ->
                 when (ex) {
-                    is SaveEncryptedDocumentException.PostCommitSideEffect -> SetUserAvatarException.PostCommitSideEffect("Failed to decrypt user after successful commit: ${ex.message}", ex)
+                    is SaveEncryptedDocumentException.PostCommitSideEffect -> SetUserAvatarException.PostCommitSideEffect(
+                        "Failed to decrypt user after successful commit: ${ex.message}",
+                        ex
+                    )
+
                     else -> {
                         fileStorage.remove(avatarKey)
                             .onFailure { ex -> logger.debug(ex) { "Failed to remove uploaded image after failed save: ${ex.message}" } }
@@ -216,7 +225,21 @@ class PrincipalSettingsService(
                     }
                 }
             }
-            .bind()
+        userService.save(user)
+            .mapError { ex ->
+                when (ex) {
+                    is SaveEncryptedDocumentException.PostCommitSideEffect -> SetUserAvatarException.PostCommitSideEffect(
+                        "Failed to decrypt user after successful commit: ${ex.message}",
+                        ex
+                    )
+
+                    else -> {
+                        fileStorage.remove(avatarKey)
+                            .onFailure { ex -> logger.debug(ex) { "Failed to remove uploaded image after failed save: ${ex.message}" } }
+                        SetUserAvatarException.Database("Failed to save updated user to database: ${ex.message}", ex)
+                    }
+                }
+            }.bind()
     }
 
     /**
@@ -239,7 +262,7 @@ class PrincipalSettingsService(
     ): Result<User, SetUserAvatarException> = coroutineBinding {
         logger.debug { "Setting avatar for user ${user.id} from URL ${file.url}" }
 
-        val currentAvatar = user.sensitive.avatarFile
+        val currentAvatar = user.sensitive.avatarFileKey
 
         if (currentAvatar != null) {
             runCatching { fileStorage.remove(currentAvatar) }
@@ -251,12 +274,12 @@ class PrincipalSettingsService(
             .bind()
 
         val avatarKey = imageStore
-            .upload(authentication, file, "$fileStoragePath/avatar", true)
+            .upload(file, "avatar", fileStoragePath, true, authentication)
             .mapError { ex -> SetUserAvatarException.File("Failed to upload new avatar: ${ex.message}") }
             .bind()
             .key
 
-        user.sensitive.avatarFile = avatarKey
+        user.sensitive.avatarFileKey = avatarKey
 
         userService.save(user)
             .mapError { ex ->
@@ -281,7 +304,7 @@ class PrincipalSettingsService(
      * or a [DeleteUserAvatarException] if an error occurs.
      */
     suspend fun deleteAvatar(user: User): Result<User, DeleteUserAvatarException> = coroutineBinding {
-        val currentAvatar = user.sensitive.avatarFile
+        val currentAvatar = user.sensitive.avatarFileKey
 
         if (currentAvatar != null) {
             fileStorage.remove(currentAvatar)
@@ -289,7 +312,7 @@ class PrincipalSettingsService(
                 .bind()
         }
 
-        user.sensitive.avatarFile = null
+        user.sensitive.avatarFileKey = null
 
         userService.save(user)
             .mapError { ex -> when (ex) {

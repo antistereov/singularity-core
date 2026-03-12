@@ -6,6 +6,7 @@ import io.stereov.singularity.content.article.model.ArticleState
 import io.stereov.singularity.content.core.dto.response.ContentAccessDetailsResponse
 import io.stereov.singularity.content.core.dto.response.ContentResponse
 import io.stereov.singularity.content.tag.dto.TagResponse
+import io.stereov.singularity.database.core.model.DocumentKey
 import io.stereov.singularity.file.core.dto.FileMetadataResponse
 import io.stereov.singularity.principal.core.dto.response.PrincipalOverviewResponse
 import org.bson.types.ObjectId
@@ -14,7 +15,7 @@ import java.util.*
 
 data class FullArticleResponse(
     val id: ObjectId,
-    val key: String,
+    val key: DocumentKey,
     val createdAt: Instant,
     val publishedAt: Instant?,
     val updatedAt: Instant,

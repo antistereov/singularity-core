@@ -6,16 +6,16 @@ import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.token.exception.AccessTokenExtractionException
 import io.stereov.singularity.content.core.exception.FindContentAuthorizedException
 import io.stereov.singularity.content.core.model.ContentAccessRole
+import io.stereov.singularity.database.core.model.DocumentKey
 import io.stereov.singularity.file.core.dto.FileMetadataResponse
 import io.stereov.singularity.file.core.exception.FileException
 import io.stereov.singularity.file.core.exception.GetFilesException
-import io.stereov.singularity.file.core.model.FileKey
+import io.stereov.singularity.file.core.model.FileRenditionKey
 import io.stereov.singularity.file.core.service.FileMetadataService
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.file.image.service.ImageStore
 import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.SuccessResponse
-import org.bson.types.ObjectId
 import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedModel
@@ -24,6 +24,7 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Flux
 import java.time.Instant
 
@@ -43,24 +44,23 @@ class FileController(
         FileException::class
     ])
     suspend fun uploadFile(
-        @RequestPart("file") file: FilePart,
-        @RequestParam("path") path: String?,
-        @RequestParam("filename") filename: String?,
-        @RequestParam("suffix") suffix: String?,
-        @RequestParam("public") public: Boolean = false
+        @RequestPart file: FilePart,
+        @RequestParam filename: String?,
+        @RequestParam path: String?,
+        @RequestParam("public") isPublic: Boolean = false
     ): ResponseEntity<FileMetadataResponse> {
         val authenticationOutcome = authorizationService.getAuthenticationOutcome()
             .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
             .requireAuthentication()
             .getOrThrow { when (it) { is AuthenticationException.AuthenticationRequired -> it } }
 
-        val fileKey = FileKey(filename ?: file.filename(), path, suffix)
-
         val response = if (ImageStore.ALLOWED_MEDIA_TYPES.contains(file.headers().contentType)) {
-            imageStore.upload(authenticationOutcome, file, fileKey.key, public)
+            imageStore.upload(file, filename ?: file.filename(), path, isPublic, authenticationOutcome)
+                .getOrThrow { when (it) { is FileException -> it } }
         } else {
-            fileStorage.upload(authenticationOutcome, fileKey, file, public)
-        }.getOrThrow { when (it) { is FileException -> it } }
+            fileStorage.upload(file, filename ?: file.filename(), path, isPublic, authenticationOutcome)
+                .getOrThrow { when (it) { is FileException -> it } }
+        }
 
         return ResponseEntity.ok(response)
     }
@@ -73,7 +73,7 @@ class FileController(
         FileException::class
     ])
     suspend fun deleteFile(
-        @RequestParam key: String
+        @RequestParam key: DocumentKey
     ): ResponseEntity<SuccessResponse> {
         val authenticationOutcome = authorizationService.getAuthenticationOutcome()
             .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
@@ -120,26 +120,23 @@ class FileController(
         return ResponseEntity.ok(PagedModel(response))
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/**")
     @ThrowsDomainError([
         AccessTokenExtractionException::class,
         FindContentAuthorizedException::class,
         FileException::class
     ])
     suspend fun serveFile(
-        @PathVariable id: ObjectId,
-        @RequestParam rendition: String?
+        exchange: ServerWebExchange
     ): ResponseEntity<Flux<out DataBuffer>> {
+        val fullRequestPath = exchange.request.uri.path
+        val basePath = "/api/files/"
+        val key = FileRenditionKey(fullRequestPath.removePrefix(basePath))
+
         val authenticationOutcome = authorizationService.getAuthenticationOutcome()
             .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
 
-        val fileMetadata = fileMetadataService.findAuthorizedById(id, authenticationOutcome, ContentAccessRole.VIEWER)
-            .getOrThrow { when (it) { is FindContentAuthorizedException -> it } }
-
-        val rendition = fileMetadata.getBestMatchingRendition(rendition)
-            .getOrThrow { when (it) { is FileException.NotFound -> it } }
-
-        val servedFile = fileStorage.serveFile(rendition.key, authenticationOutcome)
+        val servedFile = fileStorage.serveFile(key, authenticationOutcome)
             .getOrThrow { when (it) { is FileException -> it } }
 
         val mediaType = servedFile.parseMediaType()

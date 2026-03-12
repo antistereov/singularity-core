@@ -6,6 +6,7 @@ import com.github.michaelbull.result.Result
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.exception.AuthenticationException
 import io.stereov.singularity.auth.token.model.AccessToken
+import io.stereov.singularity.database.core.model.DocumentKey
 import io.stereov.singularity.principal.core.model.Role
 import org.bson.types.ObjectId
 import org.springframework.security.authentication.AbstractAuthenticationToken
@@ -54,7 +55,7 @@ sealed class AuthenticationOutcome(
     open class Authenticated(
         val principalId: ObjectId,
         val roles: Set<Role>,
-        val groups: Set<String>,
+        val groups: Set<DocumentKey>,
         val accessToken: AccessToken,
     ) : AuthenticationOutcome(
         authorities = roles.map { SimpleGrantedAuthority("ROLE_$it") },
@@ -76,7 +77,7 @@ sealed class AuthenticationOutcome(
             }
         }
 
-        fun requireGroupMembership(groupKey: String): Result<Authenticated, AuthenticationException.GroupMembershipRequired> {
+        fun requireGroupMembership(groupKey: DocumentKey): Result<Authenticated, AuthenticationException.GroupMembershipRequired> {
             logger.debug { "Checking if the current user is part of the group \"$groupKey\"" }
 
             return when (groups.contains(groupKey) || roles.contains(Role.User.ADMIN)) {
@@ -100,7 +101,7 @@ sealed class AuthenticationOutcome(
      * Usage of this class is typically for cases where authentication results are required, but no
      * valid credentials or session information is present.
      */
-    class None() : AuthenticationOutcome(emptySet()) {
+    class None : AuthenticationOutcome(emptySet()) {
         override fun getPrincipal() = null
     }
 }

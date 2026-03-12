@@ -1,5 +1,6 @@
 package io.stereov.singularity.principal.core.model.encrypted
 
+import io.stereov.singularity.database.core.model.DocumentKey
 import io.stereov.singularity.database.encryption.model.Encrypted
 import io.stereov.singularity.principal.core.model.Guest
 import io.stereov.singularity.principal.core.model.Role
@@ -36,5 +37,5 @@ data class EncryptedGuest(
 ) : EncryptedPrincipal<Role.Guest, SensitiveGuestData> {
 
     override val roles = setOf(Role.Guest.GUEST)
-    override val groups = emptySet<String>()
+    override val groups = emptySet<DocumentKey>()
 }

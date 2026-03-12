@@ -14,6 +14,7 @@ import io.stereov.singularity.content.tag.service.TagService
 import io.stereov.singularity.database.core.exception.DeleteDocumentByKeyException
 import io.stereov.singularity.database.core.exception.FindAllDocumentsPaginatedException
 import io.stereov.singularity.database.core.exception.FindDocumentByKeyException
+import io.stereov.singularity.database.core.model.DocumentKey
 import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.global.model.SuccessResponse
@@ -122,7 +123,7 @@ class TagController(
         TranslateException.NoTranslations::class
     ])
     suspend fun getTagByKey(
-        @PathVariable key: String,
+        @PathVariable key: DocumentKey,
         @RequestParam locale: Locale?
     ): ResponseEntity<TagResponse> {
         val tag = service.findByKey(key)
@@ -223,7 +224,7 @@ class TagController(
         TranslateException.NoTranslations::class
     ])
     suspend fun updateTag(
-        @PathVariable key: String,
+        @PathVariable key: DocumentKey,
         @RequestBody req: UpdateTagRequest,
         @RequestParam locale: Locale?
     ): ResponseEntity<TagResponse> {
@@ -280,7 +281,7 @@ class TagController(
         AuthenticationException.GroupMembershipRequired::class,
         DeleteDocumentByKeyException::class
     ])
-    suspend fun deleteTag(@PathVariable key: String): ResponseEntity<SuccessResponse> {
+    suspend fun deleteTag(@PathVariable key: DocumentKey): ResponseEntity<SuccessResponse> {
         authorizationService.getAuthenticationOutcome()
             .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }
             .requireAuthentication()

@@ -6,6 +6,7 @@ import com.github.michaelbull.result.coroutines.runSuspendCatching
 import io.stereov.singularity.database.core.exception.DeleteDocumentByKeyException
 import io.stereov.singularity.database.core.exception.ExistsDocumentByKeyException
 import io.stereov.singularity.database.core.exception.FindDocumentByKeyException
+import io.stereov.singularity.database.core.model.DocumentKey
 import io.stereov.singularity.database.core.model.WithKey
 import io.stereov.singularity.database.core.repository.CoroutineCrudRepositoryWithKey
 
@@ -20,7 +21,7 @@ interface CrudServiceWithKey<D: WithKey> : CrudService<D> {
      * @return A [Result] containing the Document if found, or a [FindDocumentByKeyException]
      *  detailing the failure reason if the operation is unsuccessful.
      */
-    suspend fun findByKey(key: String): Result<D, FindDocumentByKeyException> {
+    suspend fun findByKey(key: DocumentKey): Result<D, FindDocumentByKeyException> {
         logger.debug { "Finding ${collectionClazz.simpleName} by key \"$key\"" }
 
         return runSuspendCatching { repository.findByKey(key) }
@@ -35,7 +36,7 @@ interface CrudServiceWithKey<D: WithKey> : CrudService<D> {
      * @return A [Result] containing true if the group exists, false otherwise.
      *  Returns a failure with [ExistsDocumentByKeyException] in case of an error.
      */
-    suspend fun existsByKey(key: String): Result<Boolean, ExistsDocumentByKeyException> {
+    suspend fun existsByKey(key: DocumentKey): Result<Boolean, ExistsDocumentByKeyException> {
         logger.debug { "Checking if ${collectionClazz.simpleName} with key \"$key\" exists" }
 
         return runSuspendCatching { repository.existsByKey(key) }
@@ -53,7 +54,7 @@ interface CrudServiceWithKey<D: WithKey> : CrudService<D> {
      * @return A [Result] containing [Unit] if the deletion is successful, or
      * a [DeleteDocumentByKeyException] indicating the failure reason.
      */
-    suspend fun deleteByKey(key: String): Result<Unit, DeleteDocumentByKeyException> = coroutineBinding {
+    suspend fun deleteByKey(key: DocumentKey): Result<Unit, DeleteDocumentByKeyException> = coroutineBinding {
         logger.debug { "Deleting ${collectionClazz.simpleName} with key \"$key\"" }
 
         val exists = existsByKey(key)

@@ -16,6 +16,7 @@ import io.stereov.singularity.content.invitation.mapper.InvitationMapper
 import io.stereov.singularity.content.invitation.model.InvitationToken
 import io.stereov.singularity.content.invitation.service.InvitationService
 import io.stereov.singularity.database.core.exception.FindDocumentByKeyException
+import io.stereov.singularity.database.core.model.DocumentKey
 import io.stereov.singularity.file.core.dto.FileMetadataResponse
 import io.stereov.singularity.file.core.model.FileMetadataDocument
 import io.stereov.singularity.principal.core.mapper.PrincipalMapper
@@ -43,14 +44,14 @@ class FileManagementService(
     override val contentType = FileMetadataDocument.CONTENT_TYPE
 
     override suspend fun updateAccess(
-        key: String,
+        key: DocumentKey,
         req: UpdateContentAccessRequest,
         authenticationOutcome: AuthenticationOutcome,
         locale: Locale?
     ): Result<FileMetadataResponse, UpdateContentAccessException> = coroutineBinding {
         val content = doUpdateAccess(key, req, authenticationOutcome).bind()
 
-        fileStorage.metadataResponseById(content.id, authenticationOutcome)
+        fileStorage.metadataResponseByKey(content.key, authenticationOutcome)
             .mapError { ex ->
                 UpdateContentAccessException.ResponseMapping(
                     "Failed to map file metadata to response: ${ex.message}",
@@ -61,7 +62,7 @@ class FileManagementService(
     }
 
     override suspend fun inviteUser(
-        key: String,
+        key: DocumentKey,
         req: InviteUserToContentRequest,
         inviter: User,
         authenticationOutcome: AuthenticationOutcome,
@@ -77,7 +78,7 @@ class FileManagementService(
                 }
                 .bind()
 
-            val title = event.key
+            val title = event.key.value
 
             val url = contentService.getUri(key)
                 .mapError { ex ->
@@ -103,7 +104,7 @@ class FileManagementService(
     ): Result<FileMetadataResponse, AcceptContentInvitationException> = coroutineBinding {
         val content = doAcceptInvitation(token).bind()
 
-        fileStorage.metadataResponseById(content.key, authenticationOutcome)
+        fileStorage.metadataResponseByKey(content.key, authenticationOutcome)
             .mapError { ex ->
                 AcceptContentInvitationException.ResponseMapping(
                     "Failed to map file metadata to response: ${ex.message}",
@@ -114,14 +115,14 @@ class FileManagementService(
     }
 
     override suspend fun setTrustedState(
-        key: String,
+        key: DocumentKey,
         authenticationOutcome: AuthenticationOutcome,
         trusted: Boolean,
         locale: Locale?
     ): Result<FileMetadataResponse, SetContentTrustedStateException> = coroutineBinding {
         val content = doSetTrustedState(key, trusted).bind()
 
-        fileStorage.metadataResponseById(content.key, authenticationOutcome)
+        fileStorage.metadataResponseByKey(content.key, authenticationOutcome)
             .mapError { ex ->
                 SetContentTrustedStateException.ResponseMapping(
                     "Failed to map file metadata to response: ${ex.message}",
@@ -132,14 +133,14 @@ class FileManagementService(
     }
 
     override suspend fun updateOwner(
-        key: String,
+        key: DocumentKey,
         req: UpdateOwnerRequest,
         authenticationOutcome: AuthenticationOutcome.Authenticated,
         locale: Locale?
     ): Result<FileMetadataResponse, UpdateContentOwnerException> = coroutineBinding {
         val content = doUpdateOwner(key, req, authenticationOutcome).bind()
 
-        fileStorage.metadataResponseById(content.key, authenticationOutcome)
+        fileStorage.metadataResponseByKey(content.key, authenticationOutcome)
             .mapError { ex ->
                 UpdateContentOwnerException.ResponseMapping(
                     "Failed to map file metadata to response: ${ex.message}",

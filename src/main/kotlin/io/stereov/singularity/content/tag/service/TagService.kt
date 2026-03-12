@@ -19,6 +19,7 @@ import io.stereov.singularity.content.tag.model.TagTranslation
 import io.stereov.singularity.content.tag.repository.TagRepository
 import io.stereov.singularity.database.core.exception.FindAllDocumentsPaginatedException
 import io.stereov.singularity.database.core.exception.FindDocumentByKeyException
+import io.stereov.singularity.database.core.model.DocumentKey
 import io.stereov.singularity.database.core.service.CrudServiceWithKey
 import io.stereov.singularity.database.core.util.CriteriaBuilder
 import io.stereov.singularity.global.properties.AppProperties
@@ -154,7 +155,7 @@ class TagService(
      * @return A [Result] containing the updated [TagDocument] if successful; otherwise, a [UpdateTagException] indicating the error that occurred.
      */
     suspend fun updateTag(
-        key: String,
+        key: DocumentKey,
         req: UpdateTagRequest
     ): Result<TagDocument, UpdateTagException> = coroutineBinding {
         logger.debug { "Updating tag with key \"$key\"" }

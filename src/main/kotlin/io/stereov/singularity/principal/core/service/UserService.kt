@@ -4,6 +4,7 @@ import com.github.michaelbull.result.*
 import com.github.michaelbull.result.coroutines.coroutineBinding
 import com.github.michaelbull.result.coroutines.runSuspendCatching
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.stereov.singularity.database.core.model.DocumentKey
 import io.stereov.singularity.database.core.util.CriteriaBuilder
 import io.stereov.singularity.database.encryption.exception.EncryptionException
 import io.stereov.singularity.database.encryption.exception.FindAllEncryptedDocumentsPaginatedException
@@ -189,7 +190,7 @@ class UserService(
      * @param group The group identifier to search for in user group memberships.
      * @return A [Flow] of [Result]s containing either the decrypted [User] or an [EncryptionException].
      */
-    suspend fun findAllByGroupContaining(group: String): Flow<Result<User, EncryptionException>> {
+    suspend fun findAllByGroupContaining(group: DocumentKey): Flow<Result<User, EncryptionException>> {
         logger.debug { "Finding all users with group membership $group" }
 
         return repository.findAllByGroupsContaining(group).map { decrypt(it) }

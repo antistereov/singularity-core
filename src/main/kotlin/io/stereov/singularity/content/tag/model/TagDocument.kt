@@ -1,5 +1,6 @@
 package io.stereov.singularity.content.tag.model
 
+import io.stereov.singularity.database.core.model.DocumentKey
 import io.stereov.singularity.database.core.model.WithKey
 import io.stereov.singularity.translate.model.Translatable
 import org.bson.types.ObjectId
@@ -22,6 +23,6 @@ import java.util.*
 @Document(collection = "tags")
 data class TagDocument(
     @Id override val _id: ObjectId? = null,
-    @Indexed(unique = true) override var key: String,
+    @Indexed(unique = true) override var key: DocumentKey,
     override val translations: MutableMap<Locale, TagTranslation> = mutableMapOf(),
 ) : Translatable<TagTranslation>, WithKey

@@ -17,6 +17,7 @@ import io.stereov.singularity.content.invitation.exception.DeleteInvitationByIdE
 import io.stereov.singularity.content.invitation.exception.InvitationTokenExtractionException
 import io.stereov.singularity.content.invitation.service.InvitationService
 import io.stereov.singularity.content.invitation.service.InvitationTokenService
+import io.stereov.singularity.database.core.model.DocumentKey
 import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.global.model.SuccessResponse
@@ -89,7 +90,7 @@ class InvitationController(
         InviteUserException::class
     ])
     suspend fun inviteUserToContentObject(
-        @PathVariable key: String,
+        @PathVariable key: DocumentKey,
         @PathVariable contentType: String,
         @RequestBody req: InviteUserToContentRequest,
         @RequestParam locale: Locale?

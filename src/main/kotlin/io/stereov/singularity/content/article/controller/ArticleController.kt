@@ -8,6 +8,7 @@ import io.stereov.singularity.content.article.dto.response.FullArticleResponse
 import io.stereov.singularity.content.article.exception.GetArticleResponseByKeyException
 import io.stereov.singularity.content.article.exception.GetArticleResponsesException
 import io.stereov.singularity.content.article.service.ArticleService
+import io.stereov.singularity.database.core.model.DocumentKey
 import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.swagger.v3.oas.annotations.ExternalDocumentation
 import io.swagger.v3.oas.annotations.Operation
@@ -61,7 +62,7 @@ class ArticleController(
         GetArticleResponseByKeyException::class
     ])
     suspend fun getArticleByKey(
-        @PathVariable key: String,
+        @PathVariable key: DocumentKey,
         @RequestParam locale: Locale?
     ): ResponseEntity<FullArticleResponse> {
         val authenticationOutcome = authorizationService.getAuthenticationOutcome()

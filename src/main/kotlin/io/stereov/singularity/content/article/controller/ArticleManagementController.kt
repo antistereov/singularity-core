@@ -13,6 +13,7 @@ import io.stereov.singularity.content.article.exception.ChangeArticleStateExcept
 import io.stereov.singularity.content.article.exception.CreateArticleException
 import io.stereov.singularity.content.article.exception.UpdateArticleException
 import io.stereov.singularity.content.article.service.ArticleManagementService
+import io.stereov.singularity.database.core.model.DocumentKey
 import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.principal.group.model.KnownGroups
@@ -129,7 +130,7 @@ class ArticleManagementController(
         UpdateArticleException::class,
     ])
     suspend fun updateArticle(
-        @PathVariable key: String,
+        @PathVariable key: DocumentKey,
         @RequestBody req: UpdateArticleRequest,
         @RequestParam locale: Locale?
     ): ResponseEntity<FullArticleResponse> {
@@ -177,7 +178,7 @@ class ArticleManagementController(
         ]
     )
     suspend fun updateArticleImage(
-        @PathVariable key: String,
+        @PathVariable key: DocumentKey,
         @RequestPart file: FilePart,
         @RequestParam locale: Locale?
     ): ResponseEntity<FullArticleResponse> {
@@ -225,7 +226,7 @@ class ArticleManagementController(
         ]
     )
     suspend fun updateArticleState(
-        @PathVariable key: String,
+        @PathVariable key: DocumentKey,
         @RequestBody req: ChangeArticleStateRequest,
         @RequestParam locale: Locale?
     ): ResponseEntity<FullArticleResponse> {

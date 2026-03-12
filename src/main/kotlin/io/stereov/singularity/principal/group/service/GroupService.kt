@@ -4,6 +4,7 @@ import com.github.michaelbull.result.*
 import com.github.michaelbull.result.coroutines.coroutineBinding
 import io.github.oshai.kotlinlogging.KotlinLogging.logger
 import io.stereov.singularity.database.core.exception.FindDocumentByKeyException
+import io.stereov.singularity.database.core.model.DocumentKey
 import io.stereov.singularity.database.core.service.CrudServiceWithKey
 import io.stereov.singularity.database.encryption.exception.EncryptionException
 import io.stereov.singularity.global.properties.AppProperties
@@ -94,7 +95,7 @@ class GroupService(
      * or an [UpdateGroupException] if an error occurs.
      */
     suspend fun update(
-        key: String,
+        key: DocumentKey,
         req: UpdateGroupRequest
     ): Result<Group, UpdateGroupException> = coroutineBinding {
         logger.debug { "Updating group with key \"$key\"" }
@@ -129,7 +130,7 @@ class GroupService(
      * if an error occurs during the deletion process, such as issues with database operations
      * or failure to update users.
      */
-    suspend fun deleteByKeyAndUpdateMembers(key: String): Result<Unit, DeleteGroupByKeyException> = coroutineBinding {
+    suspend fun deleteByKeyAndUpdateMembers(key: DocumentKey): Result<Unit, DeleteGroupByKeyException> = coroutineBinding {
         logger.debug { "Deleting group with key \"$key\"" }
 
         val exists = existsByKey(key)

@@ -6,6 +6,7 @@ import com.github.michaelbull.result.coroutines.coroutineBinding
 import com.github.michaelbull.result.mapError
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.cache.AccessTokenCache
+import io.stereov.singularity.database.core.model.DocumentKey
 import io.stereov.singularity.database.encryption.exception.FindEncryptedDocumentByIdException
 import io.stereov.singularity.database.encryption.exception.SaveEncryptedDocumentException
 import io.stereov.singularity.principal.core.model.User
@@ -38,7 +39,7 @@ class GroupMemberService(
      */
     suspend fun add(
         userId: ObjectId,
-        groupKey: String
+        groupKey: DocumentKey
     ): Result<User, GroupMemberException> = coroutineBinding {
         logger.debug { "Adding user \"$userId\" to group \"$groupKey\"" }
 
@@ -84,7 +85,7 @@ class GroupMemberService(
      */
     suspend fun remove(
         userId: ObjectId,
-        groupKey: String
+        groupKey: DocumentKey
     ): Result<User, GroupMemberException> = coroutineBinding {
         logger.debug { "Removing user \"$userId\" from group \"$groupKey\""}
 

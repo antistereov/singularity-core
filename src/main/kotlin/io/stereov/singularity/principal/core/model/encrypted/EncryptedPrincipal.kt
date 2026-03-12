@@ -1,5 +1,6 @@
 package io.stereov.singularity.principal.core.model.encrypted
 
+import io.stereov.singularity.database.core.model.DocumentKey
 import io.stereov.singularity.database.core.model.WithId
 import io.stereov.singularity.database.encryption.model.Encrypted
 import io.stereov.singularity.database.encryption.model.EncryptedSensitiveDocument
@@ -27,7 +28,7 @@ import java.time.Instant
  */
 sealed interface EncryptedPrincipal<R: Role, S: SensitivePrincipalData> : EncryptedSensitiveDocument<S>, WithId {
     val roles: Set<R>
-    val groups: Set<String>
+    val groups: Set<DocumentKey>
     val createdAt: Instant
     val lastActive: Instant
     override val sensitive: Encrypted<S>

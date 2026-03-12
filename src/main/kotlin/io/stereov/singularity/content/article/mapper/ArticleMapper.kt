@@ -73,7 +73,7 @@ class ArticleMapper(
             path = dto.path,
             state = dto.state,
             colors = dto.colors,
-            image = dto.image?.id,
+            imageKey = dto.image?.key,
             trusted = dto.trusted,
             access = ContentAccessDetails.create(dto.access, dto.owner.id),
             translations = translations,
@@ -124,7 +124,7 @@ class ArticleMapper(
             }
 
 
-        val image = article.image?.let { fileStorage.metadataResponseById(it, authenticationOutcome) }
+        val image = article.imageKey?.let { fileStorage.metadataResponseByKey(it, authenticationOutcome) }
             ?.recover { ex ->
                 logger.error(ex) { "Failed to fetch image metadata" }
                 null

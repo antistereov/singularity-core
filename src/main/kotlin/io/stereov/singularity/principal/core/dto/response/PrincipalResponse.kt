@@ -1,6 +1,7 @@
 package io.stereov.singularity.principal.core.dto.response
 
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
+import io.stereov.singularity.database.core.model.DocumentKey
 import io.stereov.singularity.file.core.dto.FileMetadataResponse
 import io.stereov.singularity.principal.core.model.Role
 import org.bson.types.ObjectId
@@ -18,5 +19,5 @@ data class PrincipalResponse(
     val twoFactorMethods: List<TwoFactorMethod>,
     val avatar: FileMetadataResponse?,
     val createdAt: String,
-    val groups: Set<String>,
+    val groups: Set<DocumentKey>,
 )

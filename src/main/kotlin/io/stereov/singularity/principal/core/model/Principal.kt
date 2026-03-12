@@ -2,6 +2,7 @@ package io.stereov.singularity.principal.core.model
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.stereov.singularity.auth.core.model.SessionInfo
+import io.stereov.singularity.database.core.model.DocumentKey
 import io.stereov.singularity.database.encryption.model.SensitiveDocument
 import io.stereov.singularity.principal.core.model.sensitve.SensitivePrincipalData
 import java.time.Instant
@@ -21,7 +22,7 @@ sealed interface Principal<R: Role, S: SensitivePrincipalData> : SensitiveDocume
     val createdAt: Instant
     var lastActive: Instant
     val roles: Set<R>
-    val groups: Set<String>
+    val groups: Set<DocumentKey>
     override val sensitive: S
 
     val logger: KLogger

@@ -1,5 +1,6 @@
 package io.stereov.singularity.principal.core.model.encrypted
 
+import io.stereov.singularity.database.core.model.DocumentKey
 import io.stereov.singularity.database.encryption.model.Encrypted
 import io.stereov.singularity.database.hash.model.SearchableHash
 import io.stereov.singularity.principal.core.model.Role
@@ -36,7 +37,7 @@ data class EncryptedUser(
     val email: SearchableHash,
     val identities: HashedUserIdentities,
     override val roles: Set<Role.User>,
-    override val groups: Set<String>,
+    override val groups: Set<DocumentKey>,
     override val createdAt: Instant = Instant.now(),
     override var lastActive: Instant = Instant.now(),
     override var sensitive: Encrypted<SensitiveUserData>,

@@ -4,6 +4,7 @@ import com.github.michaelbull.result.getOrThrow
 import io.stereov.singularity.auth.core.exception.AuthenticationException
 import io.stereov.singularity.auth.core.service.AuthorizationService
 import io.stereov.singularity.auth.token.exception.AccessTokenExtractionException
+import io.stereov.singularity.database.core.model.DocumentKey
 import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.principal.core.dto.response.PrincipalResponse
@@ -66,7 +67,7 @@ class GroupMemberController(
         PrincipalMapperException::class,
     ])
     suspend fun addMemberToGroup(
-        @PathVariable groupKey: String,
+        @PathVariable groupKey: DocumentKey,
         @PathVariable userId: ObjectId,
     ): ResponseEntity<PrincipalResponse> {
         val authentication = authorizationService.getAuthenticationOutcome()
@@ -121,7 +122,7 @@ class GroupMemberController(
         PrincipalMapperException::class,
     ])
     suspend fun removeMemberFromGroup(
-        @PathVariable groupKey: String,
+        @PathVariable groupKey: DocumentKey,
         @PathVariable userId: ObjectId
     ): ResponseEntity<PrincipalResponse> {
         val authentication = authorizationService.getAuthenticationOutcome()

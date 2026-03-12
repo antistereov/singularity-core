@@ -6,6 +6,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.model.SessionInfo
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
 import io.stereov.singularity.database.core.exception.DocumentException
+import io.stereov.singularity.database.core.model.DocumentKey
 import io.stereov.singularity.database.hash.model.Hash
 import io.stereov.singularity.principal.core.exception.UserException
 import io.stereov.singularity.principal.core.model.identity.UserIdentities
@@ -41,7 +42,7 @@ data class User(
     override val createdAt: Instant = Instant.now(),
     override var lastActive: Instant = Instant.now(),
     var isAdmin: Boolean = false,
-    override val groups: MutableSet<String>,
+    override val groups: MutableSet<DocumentKey>,
     override var sensitive: SensitiveUserData,
 ) : Principal<Role.User, SensitiveUserData> {
 
@@ -162,7 +163,7 @@ data class User(
          * @param email2faEnabled Indicates whether two-factor authentication via email is enabled.
          * @param mailTwoFactorCodeExpiresIn The expiration duration in seconds for email-based two-factor authentication codes.
          * @param sessions A mutable map of session information, keyed by session UUID. Defaults to an empty mutable map.
-         * @param avatarFile Optional key for the user's avatar file in storage. Defaults to null.
+         * @param avatarFileKey Optional key for the user's avatar file in storage. Defaults to null.
          */
         fun ofPassword(
             id: ObjectId? = null,
@@ -172,11 +173,11 @@ data class User(
             name: String,
             email: String,
             isAdmin: Boolean = false,
-            groups: MutableSet<String> = mutableSetOf(),
+            groups: MutableSet<DocumentKey> = mutableSetOf(),
             email2faEnabled: Boolean,
             mailTwoFactorCodeExpiresIn: Long,
             sessions: MutableMap<UUID, SessionInfo> = mutableMapOf(),
-            avatarFile: ObjectId? = null,
+            avatarFileKey: DocumentKey? = null,
         ) = User(
             id,
             created,
@@ -189,7 +190,7 @@ data class User(
                 UserIdentities(UserIdentity.ofPassword(password)),
                 UserSecurityDetails(email2faEnabled, mailTwoFactorCodeExpiresIn),
                 sessions,
-                avatarFile
+                avatarFileKey
             )
         )
 
@@ -207,7 +208,7 @@ data class User(
          * @param groups A mutable set of groups the user belongs to. Defaults to an empty set if not provided.
          * @param mailTwoFactorCodeExpiresIn The expiration time (in seconds) for two-factor authentication codes sent via email.
          * @param sessions A mutable map of the user's active sessions, keyed by UUID. Defaults to an empty map if not provided.
-         * @param avatarFile Optional key representing the path to the user's avatar stored in the file system. Defaults to `null` if not provided.
+         * @param avatarFileKey Optional key representing the path to the user's avatar stored in the file system. Defaults to `null` if not provided.
          * @return A [User] instance with the specified properties.
          */
         fun ofProvider(
@@ -219,10 +220,10 @@ data class User(
             name: String,
             email: String,
             isAdmin: Boolean = false,
-            groups: MutableSet<String> = mutableSetOf(),
+            groups: MutableSet<DocumentKey> = mutableSetOf(),
             mailTwoFactorCodeExpiresIn: Long,
             sessions: MutableMap<UUID, SessionInfo> = mutableMapOf(),
-            avatarFile: ObjectId? = null,
+            avatarFileKey: DocumentKey? = null,
         ) = User(
             id,
             created,
@@ -235,7 +236,7 @@ data class User(
                 UserIdentities(providers = mutableMapOf(provider to UserIdentity.ofProvider(principalId))),
                 UserSecurityDetails(false, mailTwoFactorCodeExpiresIn, true),
                 sessions,
-                avatarFile
+                avatarFileKey
             )
         )
     }

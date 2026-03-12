@@ -10,10 +10,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.content.core.component.AccessCriteria
 import io.stereov.singularity.file.core.exception.FileException
 import io.stereov.singularity.file.core.mapper.FileMetadataMapper
-import io.stereov.singularity.file.core.model.FileRendition
-import io.stereov.singularity.file.core.model.FileUploadRequest
-import io.stereov.singularity.file.core.model.FileUploadResponse
-import io.stereov.singularity.file.core.model.ServedFile
+import io.stereov.singularity.file.core.model.*
 import io.stereov.singularity.file.core.properties.StorageProperties
 import io.stereov.singularity.file.core.service.FileMetadataService
 import io.stereov.singularity.file.core.service.FileStorage
@@ -45,25 +42,16 @@ class LocalFileStorage(
     override val accessCriteria: AccessCriteria,
 ) : FileStorage() {
 
-    val apiPath = "/api/assets/"
     override val logger = KotlinLogging.logger {}
 
     private val baseDir: Path
         get() = Files.createDirectories(Paths.get(properties.fileDirectory))
 
 
-    private suspend fun getFilePath(key: String): Path {
-        return baseDir.resolve(key)
+    private suspend fun getFilePath(key: FileRenditionKey): Path {
+        return baseDir.resolve(key.value)
     }
 
-    /**
-     * Serves a file based on the provided key and authentication outcome.
-     *
-     * @param authenticationOutcome The result of the authentication process, used to validate user permissions.
-     * @param renditionKey The file key to locate and serve the file.
-     * @return A [Result] containing the served file data encapsulated in [ServedFile] if successful,
-     * or a [FileException] if an error occurs, such as file access issues, invalid requests, or authorization failures.
-     */
     override suspend fun doServeFile(
         rendition: FileRendition,
     ): Result<ServedFile, FileException> = coroutineBinding {
@@ -77,7 +65,7 @@ class LocalFileStorage(
             }
             .bind()
 
-        val filePath = runCatching { Paths.get(properties.fileDirectory).resolve(rendition.key).normalize().absolute() }
+        val filePath = runCatching { Paths.get(properties.fileDirectory).resolve(rendition.key.value).normalize().absolute() }
             .mapError { ex -> FileException.Operation("Failed to resolve file path: ${ex.message}") }
             .bind()
 
@@ -115,9 +103,9 @@ class LocalFileStorage(
     override suspend fun uploadRendition(
         req: FileUploadRequest
     ): Result<FileUploadResponse, FileException.Operation> = coroutineBinding {
-        logger.debug { "Uploading file of content type ${req.contentType} to path \"${req.key}\"" }
+        logger.debug { "Uploading file of content type ${req.mediaType} to path \"${req.key}\"" }
 
-        val filePath = runCatching { baseDir.resolve(req.key.key) }
+        val filePath = runCatching { baseDir.resolve(req.key.value) }
             .mapError { ex -> FileException.Operation("Failed to resolve base directory $baseDir: ${ex.message}", ex) }
             .bind()
 
@@ -152,9 +140,9 @@ class LocalFileStorage(
             .bind()
 
         FileUploadResponse(
-            contentType = req.contentType,
+            contentType = req.mediaType.toString(),
             size = size,
-            key = req.key.key,
+            key = req.key,
             width = req.width,
             height = req.height
         )
@@ -175,9 +163,9 @@ class LocalFileStorage(
                 .bind()
 
             FileUploadResponse(
-                contentType = req.contentType,
+                contentType = req.mediaType.toString(),
                 size = size,
-                key = req.key.key,
+                key = req.key,
                 width = req.width,
                 height = req.height
             )
@@ -198,16 +186,16 @@ class LocalFileStorage(
                 .bind()
 
             FileUploadResponse(
-                contentType = req.contentType,
+                contentType = req.mediaType.toString(),
                 size = size,
-                key = req.key.key,
+                key = req.key,
                 width = req.width,
                 height = req.height
             )
         }
     }
 
-    override suspend fun renditionExists(key: String): Result<Boolean, FileException.Operation> {
+    override suspend fun renditionExists(key: FileRenditionKey): Result<Boolean, FileException.Operation> {
         logger.debug { "Checking if file with path \"$key\" exists" }
 
         val filePath = getFilePath(key)
@@ -220,7 +208,7 @@ class LocalFileStorage(
             .mapError { ex -> FileException.Operation("Failed to check existence of local file with path $filePath: ${ex.message}", ex) }
     }
 
-    override suspend fun removeRendition(key: String): Result<Unit, FileException.Operation> {
+    override suspend fun removeRendition(key: FileRenditionKey): Result<Unit, FileException.Operation> {
         logger.debug { "Removing local file in path \"$key\"" }
 
         val filePath = getFilePath(key)

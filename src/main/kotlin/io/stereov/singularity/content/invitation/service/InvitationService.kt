@@ -15,6 +15,7 @@ import io.stereov.singularity.content.invitation.model.SensitiveInvitationData
 import io.stereov.singularity.content.invitation.properties.InvitationProperties
 import io.stereov.singularity.content.invitation.repository.InvitationRepository
 import io.stereov.singularity.database.core.exception.DatabaseException
+import io.stereov.singularity.database.core.model.DocumentKey
 import io.stereov.singularity.database.encryption.exception.EncryptionException
 import io.stereov.singularity.database.encryption.exception.FindEncryptedDocumentByIdException
 import io.stereov.singularity.database.encryption.exception.SaveEncryptedDocumentException
@@ -39,6 +40,7 @@ import org.springframework.context.ApplicationContext
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.remove
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.time.Instant
@@ -116,7 +118,7 @@ class InvitationService(
      */
     suspend fun invite(
         contentType: String,
-        contentKey: String,
+        contentKey: DocumentKey,
         email: String,
         inviterName: String,
         invitedTo: String,
@@ -129,7 +131,7 @@ class InvitationService(
 
         val acceptUri = invitationProperties.acceptUri
             .replace("{contentType}", contentType)
-            .replace("{contentKey}", contentKey)
+            .replace("{contentKey}", contentKey.value)
 
         val actualLocale = locale ?: appProperties.locale
 
@@ -242,6 +244,7 @@ class InvitationService(
             .bind()
         val key = (invitation.sensitive.claims["key"] as? String)
             .toResultOr { DeleteInvitationByIdException.InvalidInvitation("No key found in invitation") }
+            .map { DocumentKey(it) }
             .bind()
         applicationContext.findContentManagementService(contentType)
             .mapError { ex ->
@@ -281,7 +284,7 @@ class InvitationService(
         val query = Query(Criteria.where(EncryptedInvitation::expiresAt.name).lte(Instant.now()))
 
         return runSuspendCatching {
-            reactiveMongoTemplate.remove(query, EncryptedInvitation::class.java).awaitLast()
+            reactiveMongoTemplate.remove<EncryptedInvitation>(query).awaitLast()
             Unit
         }.mapError { ex -> DatabaseException.Database("Failed to remove expired invitations: ${ex.message}", ex) }
     }

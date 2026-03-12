@@ -11,6 +11,7 @@ import io.stereov.singularity.content.core.dto.response.ExtendedContentAccessDet
 import io.stereov.singularity.content.core.exception.*
 import io.stereov.singularity.content.core.util.findContentManagementService
 import io.stereov.singularity.content.invitation.exception.ContentManagementException
+import io.stereov.singularity.database.core.model.DocumentKey
 import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.global.model.SuccessResponse
@@ -79,7 +80,7 @@ class ContentManagementController(
         UpdateContentAccessException::class,
     ])
     suspend fun updateContentObjectAccess(
-        @PathVariable key: String,
+        @PathVariable key: DocumentKey,
         @PathVariable contentType: String,
         @RequestBody req: UpdateContentAccessRequest,
         @RequestParam locale: Locale?
@@ -143,7 +144,7 @@ class ContentManagementController(
     ])
     suspend fun getContentObjectAccessDetails(
         @PathVariable contentType: String,
-        @PathVariable key: String
+        @PathVariable key: DocumentKey
     ): ResponseEntity<ExtendedContentAccessDetailsResponse> {
         val authenticationOutcome = authorizationService.getAuthenticationOutcome()
             .getOrThrow { when (it) { is AccessTokenExtractionException -> it} }
@@ -202,7 +203,7 @@ class ContentManagementController(
     ])
     suspend fun deleteContentObjectByKey(
         @PathVariable contentType: String,
-        @PathVariable key: String
+        @PathVariable key: DocumentKey
     ): ResponseEntity<SuccessResponse> {
         val authenticationOutcome = authorizationService.getAuthenticationOutcome()
             .getOrThrow { when (it) { is AccessTokenExtractionException -> it} }
@@ -266,7 +267,7 @@ class ContentManagementController(
     ])
     suspend fun updateContentObjectTrustedState(
         @PathVariable contentType: String,
-        @PathVariable key: String,
+        @PathVariable key: DocumentKey,
         @RequestParam trusted: Boolean,
         @RequestParam locale: Locale?
     ): ResponseEntity<ContentResponse<*>> {
@@ -335,7 +336,7 @@ class ContentManagementController(
     ])
     suspend fun updateContentObjectOwner(
         @PathVariable contentType: String,
-        @PathVariable key: String,
+        @PathVariable key: DocumentKey,
         @RequestBody req: UpdateOwnerRequest,
         @RequestParam locale: Locale?
     ): ResponseEntity<ContentResponse<*>> {

@@ -17,7 +17,7 @@ package io.stereov.singularity.file.core.model
  * @property width The width of the file rendition in pixels, if applicable.
  */
 data class FileRendition(
-    val key: String,
+    val key: FileRenditionKey,
     val size: Long,
     val contentType: String,
     val height: Int? = null,

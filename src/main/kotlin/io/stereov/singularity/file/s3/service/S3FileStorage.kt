@@ -10,10 +10,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.content.core.component.AccessCriteria
 import io.stereov.singularity.file.core.exception.FileException
 import io.stereov.singularity.file.core.mapper.FileMetadataMapper
-import io.stereov.singularity.file.core.model.FileRendition
-import io.stereov.singularity.file.core.model.FileUploadRequest
-import io.stereov.singularity.file.core.model.FileUploadResponse
-import io.stereov.singularity.file.core.model.ServedFile
+import io.stereov.singularity.file.core.model.*
 import io.stereov.singularity.file.core.properties.StorageProperties
 import io.stereov.singularity.file.core.service.FileMetadataService
 import io.stereov.singularity.file.core.service.FileStorage
@@ -31,9 +28,7 @@ import software.amazon.awssdk.core.async.AsyncRequestBody
 import software.amazon.awssdk.core.async.AsyncResponseTransformer
 import software.amazon.awssdk.services.s3.S3AsyncClient
 import software.amazon.awssdk.services.s3.model.*
-import software.amazon.awssdk.services.s3.presigner.S3Presigner
 import java.util.concurrent.atomic.AtomicLong
-import kotlin.io.path.Path
 
 @Service
 @ConditionalOnProperty(prefix = "singularity.file.storage", value = ["type"], havingValue = "s3", matchIfMissing = false)
@@ -49,8 +44,15 @@ class S3FileStorage(
 
     override val logger = KotlinLogging.logger {}
 
+    private fun getFullPath(renditionKey: FileRenditionKey): String {
+        val s3Path = s3Properties.path.removeSuffix("/")
+        val renditionPath = renditionKey.value.removePrefix("/")
+
+        return "$s3Path/$renditionPath"
+    }
+
     override suspend fun uploadRendition(req: FileUploadRequest): Result<FileUploadResponse, FileException.Operation> {
-        logger.debug { "Uploading file: \"${req.key}\" as $${req.contentType}" }
+        logger.debug { "Uploading file: \"${req.key}\" as $${req.mediaType}" }
         return when (req) {
             is FileUploadRequest.FilePartUpload -> doUploadFilePart(req)
             is FileUploadRequest.ByteArrayUpload -> doUploadByteArray(req)
@@ -73,9 +75,9 @@ class S3FileStorage(
 
                 val putRequest = PutObjectRequest.builder()
                     .bucket(s3Properties.bucket)
-                    .key(Path(s3Properties.path).resolve(req.key.key).toString())
+                    .key(getFullPath(req.key))
                     .contentLength(finalLength)
-                    .contentType(req.contentType)
+                    .contentType(req.mediaType.toString())
                     .acl(ObjectCannedACL.PRIVATE)
                     .build()
 
@@ -91,8 +93,8 @@ class S3FileStorage(
             .bind()
 
         FileUploadResponse(
-            key = req.key.key,
-            contentType = req.contentType,
+            key = req.key,
+            contentType = req.mediaType.toString(),
             size = contentLength.get(),
             width = req.width,
             height = req.height
@@ -105,7 +107,7 @@ class S3FileStorage(
     ): Result<FileUploadResponse, FileException.Operation> {
         val dataBufferRequest = FileUploadRequest.DataBufferUpload(
             key = req.key,
-            contentType = req.contentType,
+            mediaType = req.mediaType,
             data = req.data.content(),
             width = req.width,
             height = req.height
@@ -121,9 +123,9 @@ class S3FileStorage(
         val putRequest = runCatching {
             PutObjectRequest.builder()
                 .bucket(s3Properties.bucket)
-                .key(Path(s3Properties.path).resolve(req.key.key).toString())
+                .key(getFullPath(req.key))
                 .contentLength(size)
-                .contentType(req.contentType)
+                .contentType(req.mediaType.toString())
                 .acl(ObjectCannedACL.PRIVATE)
                 .build()
         }
@@ -141,19 +143,19 @@ class S3FileStorage(
             .bind()
 
         FileUploadResponse(
-            key = req.key.key,
-            contentType = req.contentType,
+            key = req.key,
+            contentType = req.mediaType.toString(),
             size = size,
             width = req.width,
             height = req.height
         )
     }
 
-    override suspend fun renditionExists(key: String): Result<Boolean, FileException.Operation> {
+    override suspend fun renditionExists(key: FileRenditionKey): Result<Boolean, FileException.Operation> {
         logger.debug { "Checking existence of file: $key" }
 
         return runSuspendCatching {
-            s3Client.headObject { it.bucket(s3Properties.bucket).key(Path(s3Properties.path).resolve(key).toString()) }.await()
+            s3Client.headObject { it.bucket(s3Properties.bucket).key(getFullPath(key)) }.await()
             true
         }.recoverIf(
             { ex -> ex is NoSuchKeyException },
@@ -161,12 +163,12 @@ class S3FileStorage(
         ).mapError { ex -> FileException.Operation("Failed to check existence of file with key $key: ${ex.message}", ex) }
     }
 
-    override suspend fun removeRendition(key: String): Result<Unit, FileException.Operation> {
+    override suspend fun removeRendition(key: FileRenditionKey): Result<Unit, FileException.Operation> {
         logger.debug { "Removing file: $key" }
 
         return runSuspendCatching {
             s3Client.deleteObject {
-                it.bucket(s3Properties.bucket).key(Path(s3Properties.path).resolve(key).toString())
+                it.bucket(s3Properties.bucket).key(getFullPath(key))
             }.await()
             Unit
         }.mapError { ex -> FileException.Operation("Failed to remove rendition with key $key: ${ex.message}", ex) }
@@ -176,7 +178,7 @@ class S3FileStorage(
         logger.debug { "Accessing S3 asset '${rendition.key}'" }
 
         val head = runCatching {
-            s3Client.headObject { it.bucket(s3Properties.bucket).key(Path(s3Properties.path).resolve(rendition.key).toString()) }
+            s3Client.headObject { it.bucket(s3Properties.bucket).key(getFullPath(rendition.key)) }
                 .await()
         }.mapError { ex ->
             FileException.Operation(
@@ -188,7 +190,7 @@ class S3FileStorage(
         val responsePublisher = runSuspendCatching {
             val getObjectRequest = GetObjectRequest.builder()
                 .bucket(s3Properties.bucket)
-                .key(Path(s3Properties.path).resolve(rendition.key).toString())
+                .key(getFullPath((rendition.key)))
                 .build()
 
             s3Client.getObject(getObjectRequest, AsyncResponseTransformer.toPublisher()).await()

@@ -43,25 +43,7 @@ fun <V, E> Result<V, E>.getOrNull(): V? {
     return this.getOrElse { null }
 }
 
-/**
- * Executes the specified [action] after processing either the success or failure result.
- * The provided [action] is called regardless of the outcome of the [Result].
- *
- * @param action A lambda function that will be executed after the result is processed.
- * @return The original [Result] instance.
- */
-suspend fun <V, E> Result<V, E>.finally(action: suspend () -> Unit): Result<V,E> {
-    action()
-    return this
-}
-
-/**
- * Applies the specified suspendable [action] to this [Result] instance, regardless of whether it represents
- * a success or failure, and returns the result of executing the [action].
- *
- * @param action A suspendable function that takes the current [Result] as input and returns a transformed [Result].
- * @return A new [Result] transformed by the executed [action].
- */
-suspend fun <V, E, W> Result<V, E>.finallyMap(action: suspend (Result<V, E>) -> Result<W, E>): Result<W, E> {
-    return action(this)
-}
+inline fun <T> T.letIf(
+    condition: (T) -> Boolean,
+    block: (T) -> T
+): T = if (condition(this)) block(this) else this

@@ -4,6 +4,7 @@ import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.auth.token.model.AccessType
 import io.stereov.singularity.content.core.dto.request.UpdateContentAccessRequest
 import io.stereov.singularity.content.core.dto.response.ContentAccessDetailsResponse
+import io.stereov.singularity.database.core.model.DocumentKey
 import io.stereov.singularity.principal.core.model.Role
 import org.bson.types.ObjectId
 
@@ -21,8 +22,8 @@ import org.bson.types.ObjectId
 data class ContentAccessDetails(
     var ownerId: ObjectId,
     var visibility: AccessType = AccessType.PRIVATE,
-    val users: ContentAccessPermissions = ContentAccessPermissions(),
-    val groups: ContentAccessPermissions = ContentAccessPermissions(),
+    val users: ContentAccessPermissions<ContentAccessSubject.UserId> = ContentAccessPermissions(),
+    val groups: ContentAccessPermissions<ContentAccessSubject.GroupKey> = ContentAccessPermissions(),
     val invitations: MutableSet<ObjectId> = mutableSetOf()
 ) {
 
@@ -30,17 +31,16 @@ data class ContentAccessDetails(
      * Shares the content with the specified subject by assigning a role.
      * The content's visibility is updated to `SHARED` if it was previously `PRIVATE`.
      *
-     * @param type The type of subject to share the content with, either a user or a group.
-     * @param subjectId The unique identifier of the subject with whom the content is being shared.
+     * @param subject The unique identifier of the subject with whom the content is being shared.
      * @param role The access role assigned to the subject (e.g., VIEWER, EDITOR, MAINTAINER).
      * @return The updated instance of [ContentAccessDetails] after sharing the content.
      */
-    fun share(type: ContentAccessSubject, subjectId: String, role: ContentAccessRole): ContentAccessDetails {
+    fun <T : ContentAccessSubject> share(subject: T, role: ContentAccessRole): ContentAccessDetails {
         if (visibility == AccessType.PRIVATE) visibility = AccessType.SHARED
 
-        when (type) {
-            ContentAccessSubject.USER -> users.put(subjectId, role)
-            ContentAccessSubject.GROUP -> groups.put(subjectId, role)
+        when (subject) {
+            is ContentAccessSubject.UserId -> users.put(subject, role)
+            is ContentAccessSubject.GroupKey ->  groups.put(subject, role)
         }
 
         return this
@@ -74,15 +74,14 @@ data class ContentAccessDetails(
     /**
      * Checks whether a specific subject has access to the content with a given role.
      *
-     * @param type The type of the subject, which can be either `USER` or `GROUP`.
-     * @param subjectId The unique identifier of the subject whose access is being verified.
+     * @param subject The unique identifier of the subject whose access is being verified.
      * @param role The access role to verify for the subject, such as VIEWER, EDITOR, or MAINTAINER.
      * @return `true` if the subject has access to the content with the specified role; otherwise, `false`.
      */
-    fun hasAccess(type: ContentAccessSubject, subjectId: String, role: ContentAccessRole): Boolean {
-        return when (type) {
-            ContentAccessSubject.USER -> users.hasAccess(subjectId, role) || ObjectId(subjectId) == ownerId
-            ContentAccessSubject.GROUP -> groups.hasAccess(subjectId, role)
+    fun <T: ContentAccessSubject> hasAccess(subject: T, role: ContentAccessRole): Boolean {
+        return when (subject) {
+            is ContentAccessSubject.UserId -> users.hasAccess(subject, role) || subject.value == ownerId
+            is ContentAccessSubject.GroupKey -> groups.hasAccess(subject, role)
         }
     }
 
@@ -105,15 +104,17 @@ data class ContentAccessDetails(
             is AuthenticationOutcome.Authenticated -> {
                 val isAdmin = authentication.roles.contains(Role.User.ADMIN)
                 val isOwner = authentication.principalId == ownerId
+                
+                val userId = ContentAccessSubject.UserId(authentication.principalId)
 
-                val userIsMaintainer = hasAccess(ContentAccessSubject.USER, authentication.principalId.toString(), ContentAccessRole.MAINTAINER)
-                val groupIsMaintainer = authentication.groups.any { groupId -> hasAccess(ContentAccessSubject.GROUP, groupId, ContentAccessRole.MAINTAINER) }
+                val userIsMaintainer = hasAccess(userId, ContentAccessRole.MAINTAINER)
+                val groupIsMaintainer = authentication.groups.any { groupKey -> hasAccess(ContentAccessSubject.GroupKey(groupKey), ContentAccessRole.MAINTAINER) }
 
-                val userIsEditor = hasAccess(ContentAccessSubject.USER, authentication.principalId.toString(), ContentAccessRole.EDITOR)
-                val groupIsEditor = authentication.groups.any { groupId -> hasAccess(ContentAccessSubject.GROUP, groupId, ContentAccessRole.EDITOR) }
+                val userIsEditor = hasAccess(userId, ContentAccessRole.EDITOR)
+                val groupIsEditor = authentication.groups.any { groupKey -> hasAccess(ContentAccessSubject.GroupKey(groupKey), ContentAccessRole.EDITOR) }
 
-                val userIsViewer = hasAccess(ContentAccessSubject.USER, authentication.principalId.toString(), ContentAccessRole.VIEWER)
-                val groupIsViewer = authentication.groups.any { groupId -> hasAccess(ContentAccessSubject.GROUP, groupId, ContentAccessRole.VIEWER) }
+                val userIsViewer = hasAccess(userId, ContentAccessRole.VIEWER)
+                val groupIsViewer = authentication.groups.any { groupKey -> hasAccess(ContentAccessSubject.GroupKey(groupKey), ContentAccessRole.VIEWER) }
 
                 when (role) {
                     ContentAccessRole.VIEWER -> isAdmin || isOwner || userIsMaintainer || groupIsMaintainer || userIsEditor || groupIsEditor || userIsViewer || groupIsViewer || isPublic
@@ -127,13 +128,13 @@ data class ContentAccessDetails(
 
     private fun updateShared(
         sharedUsers: Map<ObjectId, ContentAccessRole>,
-        sharedGroups: Map<String, ContentAccessRole>
+        sharedGroups: Map<DocumentKey, ContentAccessRole>
     ): ContentAccessDetails {
         users.clear()
         groups.clear()
 
-        sharedUsers.forEach { (userId, role) -> users.put(userId.toString(), role) }
-        sharedGroups.forEach { (groupKey, role) -> groups.put(groupKey, role) }
+        sharedUsers.forEach { (userId, role) -> users.put(ContentAccessSubject.UserId(userId), role) }
+        sharedGroups.forEach { (groupKey, role) -> groups.put(ContentAccessSubject.GroupKey(groupKey), role) }
 
         return this
     }
@@ -145,7 +146,7 @@ data class ContentAccessDetails(
                 visibility = AccessType.PUBLIC
                 updateShared(req.sharedUsers, req.sharedGroups)
 
-                return this
+                this
             }
             AccessType.SHARED -> {
                 visibility = AccessType.SHARED
@@ -155,7 +156,7 @@ data class ContentAccessDetails(
                     visibility = AccessType.PRIVATE
                 }
 
-                return this
+                this
             }
         }
     }
@@ -166,14 +167,10 @@ data class ContentAccessDetails(
 
             return when (req.visibility) {
                 AccessType.PUBLIC -> {
-                    val access = ContentAccessDetails(ownerId, AccessType.PUBLIC)
-
-                    return access
+                    ContentAccessDetails(ownerId, AccessType.PUBLIC)
                 }
                 AccessType.SHARED -> {
-                    val access = ContentAccessDetails(ownerId, AccessType.SHARED)
-
-                    return access
+                    ContentAccessDetails(ownerId, AccessType.SHARED)
                 }
                 AccessType.PRIVATE -> ContentAccessDetails(ownerId, AccessType.PRIVATE)
             }

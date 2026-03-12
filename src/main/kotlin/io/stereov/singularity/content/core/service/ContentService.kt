@@ -13,9 +13,9 @@ import io.stereov.singularity.content.core.properties.ContentProperties
 import io.stereov.singularity.content.core.repository.ContentRepository
 import io.stereov.singularity.database.core.exception.DatabaseException
 import io.stereov.singularity.database.core.exception.SaveDocumentException
+import io.stereov.singularity.database.core.model.DocumentKey
 import io.stereov.singularity.database.core.service.CrudServiceWithKey
 import io.stereov.singularity.translate.service.TranslateService
-import org.bson.types.ObjectId
 import java.net.URI
 import java.net.URL
 import java.time.Instant
@@ -41,11 +41,11 @@ abstract class ContentService<T: ContentDocument<T>> : CrudServiceWithKey<T>  {
      * @param key The unique identifier used to replace the placeholder {contentKey} in the content URI.
      * @return A [Result] containing the constructed [URL] if successful, or an [IllegalArgumentException] if the URI format is invalid.
      */
-    fun getUri(key: String): Result<URL, IllegalArgumentException> = runCatching {
+    fun getUri(key: DocumentKey): Result<URL, IllegalArgumentException> = runCatching {
         URI.create(
             contentProperties.contentUri
                 .replace("{contentType}", contentType)
-                .replace("{contentKey}", key)
+                .replace("{contentKey}", key.value)
         ).toURL()
     }.mapError { ex -> IllegalArgumentException("The given string violates RFC 2396", ex) }
 
@@ -104,29 +104,13 @@ abstract class ContentService<T: ContentDocument<T>> : CrudServiceWithKey<T>  {
      *   or an instance of [FindContentAuthorizedException] if an error or unauthorized access occurs.
      */
     open suspend fun findAuthorizedByKey(
-        key: String,
+        key: DocumentKey,
         authenticationOutcome: AuthenticationOutcome,
         role: ContentAccessRole
     ): Result<T, FindContentAuthorizedException> = coroutineBinding {
         logger.debug { "Finding ${collectionClazz.simpleName} by key \"$key\" and validating permission: $role" }
 
         val content = findByKey(key)
-            .mapError { ex -> FindContentAuthorizedException.from(ex) }
-            .bind()
-
-        requireAuthorization(authenticationOutcome, content, role)
-            .mapError { ex -> FindContentAuthorizedException.from(ex) }
-            .bind()
-    }
-
-    open suspend fun findAuthorizedById(
-        id: ObjectId,
-        authenticationOutcome: AuthenticationOutcome,
-        role: ContentAccessRole
-    ): Result<T, FindContentAuthorizedException> = coroutineBinding {
-        logger.debug { "Finding ${collectionClazz.simpleName} by id \"$id\" and validating permission: $role" }
-
-        val content = findById(id)
             .mapError { ex -> FindContentAuthorizedException.from(ex) }
             .bind()
 

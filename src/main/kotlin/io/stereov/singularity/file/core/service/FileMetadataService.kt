@@ -15,6 +15,7 @@ import io.stereov.singularity.database.core.exception.SaveDocumentException
 import io.stereov.singularity.database.core.util.CriteriaBuilder
 import io.stereov.singularity.file.core.exception.FileMetadataException
 import io.stereov.singularity.file.core.model.FileMetadataDocument
+import io.stereov.singularity.file.core.model.FileRenditionKey
 import io.stereov.singularity.file.core.repository.FileMetadataRepository
 import io.stereov.singularity.translate.service.TranslateService
 import kotlinx.coroutines.reactive.awaitFirst
@@ -56,7 +57,7 @@ class FileMetadataService(
      * @param authorized Indicates if access criteria should be added to the query. Defaults to false.
      * @return A MongoDB query object that can be used to query the database.
      */
-    private suspend fun renditionQuery(key: String, authorized: Boolean = false): Query {
+    private suspend fun renditionQuery(key: FileRenditionKey, authorized: Boolean = false): Query {
         val criteria = CriteriaBuilder()
             .hasElement(FileMetadataDocument::renditionKeys, key)
         if (authorized) criteria.add(accessCriteria.generate())
@@ -70,7 +71,7 @@ class FileMetadataService(
      * @return A [Result] containing either the found [FileMetadataDocument] or a [FileMetadataException]
      *         if the metadata could not be found or another error occurred.
      */
-    suspend fun findRenditionByKey(key: String): Result<FileMetadataDocument, FileMetadataException> {
+    suspend fun findRenditionByKey(key: FileRenditionKey): Result<FileMetadataDocument, FileMetadataException> {
         logger.debug { "Finding file with key $key" }
 
         return runSuspendCatching {
@@ -91,8 +92,8 @@ class FileMetadataService(
      * @return A [Result] containing a [Boolean] indicating whether the file metadata document exists,
      *   or a [FileMetadataException.Database] if an error occurs during the check.
      */
-    suspend fun existsRenditionByKey(key: String): Result<Boolean, FileMetadataException.Database> {
-        logger.debug { "Checking existence of file with key $key" }
+    suspend fun existsRenditionByKey(key: FileRenditionKey): Result<Boolean, FileMetadataException.Database> {
+        logger.debug { "Checking existence of file with key '$key'" }
         return runSuspendCatching {
             reactiveMongoTemplate.exists<FileMetadataDocument>(renditionQuery(key))
                 .awaitFirst()
@@ -111,7 +112,7 @@ class FileMetadataService(
      *   in case of an error during the process.
      */
     suspend fun deleteRenditionByKey(
-        key: String
+        key: FileRenditionKey
     ): Result<Unit, FileMetadataException> = coroutineBinding {
         logger.debug { "Deleting rendition with key $key" }
 

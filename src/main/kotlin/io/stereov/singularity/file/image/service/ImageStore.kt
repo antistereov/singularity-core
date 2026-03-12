@@ -11,10 +11,12 @@ import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.file.core.component.DataBufferPublisher
 import io.stereov.singularity.file.core.dto.FileMetadataResponse
 import io.stereov.singularity.file.core.exception.FileException
-import io.stereov.singularity.file.core.model.FileKey
+import io.stereov.singularity.file.core.model.FileKeyHelper
 import io.stereov.singularity.file.core.model.FileMetadataDocument
+import io.stereov.singularity.file.core.model.FileRenditionKey
 import io.stereov.singularity.file.core.model.FileUploadRequest
 import io.stereov.singularity.file.core.service.FileStorage
+import io.stereov.singularity.file.core.util.mediaType
 import io.stereov.singularity.file.download.model.StreamedFile
 import io.stereov.singularity.file.image.properties.ImageProperties
 import kotlinx.coroutines.Dispatchers
@@ -40,74 +42,54 @@ class ImageStore(
 
     private val logger = KotlinLogging.logger {}
 
-    /**
-     * Uploads an image file to the file storage while handling authentication, metadata, and visibility.
-     *
-     * @param authentication The authentication outcome representing the authenticated user.
-     * @param file The streamed file to be uploaded.
-     * @param key The unique key used to identify the uploaded file.
-     * @param isPublic Whether the uploaded file should be publicly accessible.
-     * @return A [Result] containing the [FileMetadataResponse] if the upload is successful, or a [FileException] if an error occurs.
-     */
     suspend fun upload(
-        authentication: AuthenticationOutcome.Authenticated,
         file: StreamedFile,
-        key: String,
-        isPublic: Boolean
+        filename: String = file.url.substringAfterLast("/"),
+        path: String?,
+        isPublic: Boolean,
+        authentication: AuthenticationOutcome.Authenticated,
     ): Result<FileMetadataResponse, FileException> {
-        logger.debug { "Uploading image with key $key" }
-        val originalExtension = file.url.substringAfterLast(".", "")
+        logger.debug { "Uploading image with from URL ${file.url}" }
         val imageBytes = dataBufferPublisher.toSingleByteArray(file.content)
-
-
-        return upload(authentication, imageBytes, file.contentType, key, isPublic, originalExtension)
+        return upload(filename, imageBytes, file.contentType, path, isPublic, authentication)
     }
 
-    /**
-     * Uploads a file to the storage system, handling metadata, authentication, and visibility options.
-     *
-     * @param authentication The authentication outcome representing the authenticated user.
-     * @param file The file to be uploaded, provided as a [FilePart].
-     * @param key The unique key or identifier for the uploaded file.
-     * @param isPublic A boolean indicating whether the file should be publicly accessible.
-     * @return A [Result] encapsulating the [FileMetadataResponse] upon successful upload, or a [FileException] in case of failure.
-     */
     suspend fun upload(
-        authentication: AuthenticationOutcome.Authenticated,
         file: FilePart,
-        key: String,
-        isPublic: Boolean
-    ): Result<FileMetadataResponse, FileException> {
+        filename: String = file.filename(),
+        path: String?,
+        isPublic: Boolean,
+        authentication: AuthenticationOutcome.Authenticated,
+    ): Result<FileMetadataResponse, FileException> = coroutineBinding {
         val imageBytes = dataBufferPublisher.toSingleByteArray(file.content())
-        val originalExtension = file.filename().substringAfterLast(".", "")
+        val mediaType = file.mediaType().bind()
 
-        return upload(authentication, imageBytes, file.headers().contentType, key, isPublic, originalExtension)
+        upload(filename, imageBytes, mediaType, path, isPublic, authentication)
+            .bind()
     }
 
     private suspend fun createUploadRequest(
         originalImage: ImmutableImage,
         size: Int,
-        key: String,
-        suffix: String?,
-        mediaType: String
+        renditionKey: FileRenditionKey,
+        mediaType: MediaType
     ): Result<FileUploadRequest, FileException> {
 
         return runSuspendCatching {
-            val fileKey = FileKey(filename = key, suffix = suffix, extension = "webp")
-            logger.debug { "Creating upload request for $fileKey" }
+            logger.debug { "Creating upload request for rendition with key '$renditionKey'" }
             val resized = originalImage.resize(size)
 
             val resizedBytes = resized.bytes(webpWriter)
 
             FileUploadRequest.ByteArrayUpload(
-                key = fileKey,
-                contentType = mediaType,
+                key = renditionKey,
+                mediaType = mediaType,
                 data = resizedBytes,
                 width = resized.width,
                 height = resized.height,
             )
         }
-            .mapError { ex -> FileException.Operation("Failed to create upload request for $key: ${ex.message}", ex) }
+            .mapError { ex -> FileException.Operation("Failed to create upload request for $renditionKey: ${ex.message}", ex) }
     }
 
     suspend fun ImmutableImage.resize(size: Int): ImmutableImage = withContext(Dispatchers.Default) {
@@ -146,34 +128,23 @@ class ImageStore(
         return@withContext finalImage
     }
 
-    /**
-     * Uploads an image along with its renditions to a file storage system.
-     *
-     * @param authentication The authentication object containing user credentials and permissions.
-     * @param imageBytes The raw byte array of the image to be uploaded.
-     * @param contentType The media type of the image (e.g., "image/jpeg", "image/png"). Null if unspecified.
-     * @param key The unique identifier for the file in the storage.
-     * @param isPublic Boolean flag indicating whether the file should be publicly accessible.
-     * @param fileExtension The file extension of the uploaded image (e.g., "jpg", "png"). Null if unspecified.
-     * @return A [Result] containing the [FileMetadataResponse] of the uploaded file on success, or a [FileException] on failure.
-     */
     suspend fun upload(
-        authentication: AuthenticationOutcome.Authenticated,
+        filename: String,
         imageBytes: ByteArray,
-        contentType: MediaType?,
-        key: String,
+        mediaType: MediaType?,
+        path: String?,
         isPublic: Boolean,
-        fileExtension: String?
+        authentication: AuthenticationOutcome.Authenticated
     ): Result<FileMetadataResponse, FileException> = coroutineBinding {
         val webpMediaType = MediaType.parseMediaType("image/webp")
 
-        val actualContentType = contentType.toResultOr {
+        val actualContentType = mediaType.toResultOr {
             FileException.UnsupportedMediaType("Content type is not specified")
         }.flatMap {
             if (it in ALLOWED_MEDIA_TYPES) {
                 Ok(it)
             } else {
-                Err(FileException.UnsupportedMediaType("Unsupported file type: $contentType"))
+                Err(FileException.UnsupportedMediaType("Unsupported file type: $mediaType"))
             }
         }.bind()
 
@@ -187,32 +158,37 @@ class ImageStore(
 
         val filesToUpload = mutableMapOf<String, FileUploadRequest>()
 
+        val fileKeyHelper = FileKeyHelper(
+            filename,
+            mediaType,
+            path
+        )
+
         filesToUpload[ImageProperties::small.name] = createUploadRequest(
             originalImage,
             imageProperties.small,
-            key,
-            ImageProperties::small.name,
-            webpMediaType.toString()
+            fileKeyHelper.toRenditionKey(ImageProperties::small.name),
+            webpMediaType
         ).bind()
         filesToUpload[ImageProperties::medium.name] = createUploadRequest(
             originalImage,
             imageProperties.medium,
-            key,
-            ImageProperties::medium.name,
-            webpMediaType.toString()
+            fileKeyHelper.toRenditionKey(ImageProperties::medium.name),
+            webpMediaType
         ).bind()
         filesToUpload[ImageProperties::large.name] = createUploadRequest(
             originalImage,
             imageProperties.large,
-            key,
-            ImageProperties::large.name,
-            webpMediaType.toString()
+            fileKeyHelper.toRenditionKey(ImageProperties::large.name),
+            webpMediaType
         ).bind()
+
+        val documentKey = fileKeyHelper.toDocumentKey()
 
         if (imageProperties.storeOriginal) {
             filesToUpload[FileMetadataDocument.ORIGINAL_RENDITION] = FileUploadRequest.ByteArrayUpload(
-                key = FileKey(filename = key, extension = fileExtension),
-                contentType = actualContentType.toString(),
+                key = fileKeyHelper.toRenditionKey(FileMetadataDocument.ORIGINAL_RENDITION),
+                mediaType = actualContentType,
                 data = imageBytes,
                 width = originalImage.width,
                 height = originalImage.height,
@@ -220,10 +196,10 @@ class ImageStore(
         }
 
         fileStorage.uploadMultipleRenditions(
-            authentication,
-            FileKey(filename = key).key,
+            documentKey,
             files = filesToUpload,
             isPublic,
+            authentication,
         ).bind()
     }
 

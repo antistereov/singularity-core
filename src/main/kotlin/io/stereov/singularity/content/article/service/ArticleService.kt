@@ -20,6 +20,7 @@ import io.stereov.singularity.content.core.component.AccessCriteria
 import io.stereov.singularity.content.core.model.ContentAccessRole
 import io.stereov.singularity.content.core.properties.ContentProperties
 import io.stereov.singularity.content.core.service.ContentService
+import io.stereov.singularity.database.core.model.DocumentKey
 import io.stereov.singularity.database.core.util.CriteriaBuilder
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.global.util.mapContent
@@ -52,7 +53,7 @@ class ArticleService(
     override val contentType = Article.CONTENT_TYPE
 
     suspend fun getResponseByKey(
-        key: String,
+        key: DocumentKey,
         authenticationOutcome: AuthenticationOutcome,
         locale: Locale?
     ): Result<FullArticleResponse, GetArticleResponseByKeyException> = coroutineBinding {

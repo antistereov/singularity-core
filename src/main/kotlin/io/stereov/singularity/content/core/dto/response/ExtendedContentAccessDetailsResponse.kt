@@ -3,6 +3,7 @@ package io.stereov.singularity.content.core.dto.response
 import io.stereov.singularity.auth.token.model.AccessType
 import io.stereov.singularity.content.core.model.ContentAccessDetails
 import io.stereov.singularity.content.core.model.ContentAccessRole
+import io.stereov.singularity.content.core.model.ContentAccessSubject
 import io.stereov.singularity.content.invitation.dto.InvitationResponse
 import org.bson.types.ObjectId
 
@@ -10,13 +11,13 @@ data class ExtendedContentAccessDetailsResponse(
     val ownerId: ObjectId,
     var visibility: AccessType = AccessType.PRIVATE,
     val users: List<UserContentAccessDetails>,
-    val groups: Map<String, ContentAccessRole>,
+    val groups: Map<ContentAccessSubject.GroupKey, ContentAccessRole>,
     val invitations: List<InvitationResponse>
 ) {
 
     companion object {
         fun create(contentAccessDetails: ContentAccessDetails, invitations: List<InvitationResponse>, users: List<UserContentAccessDetails>): ExtendedContentAccessDetailsResponse {
-            val groups = mutableMapOf<String, ContentAccessRole>()
+            val groups = mutableMapOf<ContentAccessSubject.GroupKey, ContentAccessRole>()
             contentAccessDetails.groups.viewer.forEach { group -> groups[group] = ContentAccessRole.VIEWER }
             contentAccessDetails.groups.editor.forEach { group -> groups[group] = ContentAccessRole.EDITOR }
             contentAccessDetails.groups.maintainer.forEach { group -> groups[group] = ContentAccessRole.MAINTAINER }

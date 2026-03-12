@@ -7,6 +7,7 @@ import io.stereov.singularity.auth.token.exception.AccessTokenExtractionExceptio
 import io.stereov.singularity.database.core.exception.DatabaseException
 import io.stereov.singularity.database.core.exception.FindAllDocumentsPaginatedException
 import io.stereov.singularity.database.core.exception.FindDocumentByKeyException
+import io.stereov.singularity.database.core.model.DocumentKey
 import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.global.model.SuccessResponse
@@ -215,7 +216,7 @@ class GroupController(
         TranslateException.NoTranslations::class,
     ])
     suspend fun getGroupByKey(
-        @PathVariable key: String,
+        @PathVariable key: DocumentKey,
         @RequestParam locale: Locale?
     ): ResponseEntity<GroupResponse> {
         authorizationService.getAuthenticationOutcome()
@@ -278,7 +279,7 @@ class GroupController(
         TranslateException.NoTranslations::class,
     ])
     suspend fun updateGroup(
-        @PathVariable key: String,
+        @PathVariable key: DocumentKey,
         @RequestBody req: UpdateGroupRequest,
         @RequestParam locale: Locale?
     ): ResponseEntity<GroupResponse> {
@@ -328,7 +329,7 @@ class GroupController(
         DeleteGroupByKeyException::class,
     ])
     suspend fun deleteGroup(
-        @PathVariable key: String
+        @PathVariable key: DocumentKey
     ): ResponseEntity<SuccessResponse> {
         authorizationService.getAuthenticationOutcome()
             .getOrThrow { when (it) { is AccessTokenExtractionException -> it } }

@@ -9,7 +9,10 @@ import io.stereov.singularity.content.article.dto.request.ChangeArticleStateRequ
 import io.stereov.singularity.content.article.dto.request.CreateArticleRequest
 import io.stereov.singularity.content.article.dto.request.UpdateArticleRequest
 import io.stereov.singularity.content.article.dto.response.FullArticleResponse
-import io.stereov.singularity.content.article.exception.*
+import io.stereov.singularity.content.article.exception.ChangeArticleImageException
+import io.stereov.singularity.content.article.exception.ChangeArticleStateException
+import io.stereov.singularity.content.article.exception.CreateArticleException
+import io.stereov.singularity.content.article.exception.UpdateArticleException
 import io.stereov.singularity.content.article.mapper.ArticleMapper
 import io.stereov.singularity.content.article.model.Article
 import io.stereov.singularity.content.article.model.ArticleColors
@@ -27,6 +30,7 @@ import io.stereov.singularity.content.invitation.mapper.InvitationMapper
 import io.stereov.singularity.content.invitation.model.InvitationToken
 import io.stereov.singularity.content.invitation.service.InvitationService
 import io.stereov.singularity.database.core.exception.FindDocumentByKeyException
+import io.stereov.singularity.database.core.model.DocumentKey
 import io.stereov.singularity.file.core.exception.FileException
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.file.image.service.ImageStore
@@ -75,7 +79,7 @@ class ArticleManagementService(
             )).bind()
         }
 
-        val key = getUniqueKey(req.title.toSlug(), null)
+        val key = getUniqueKey(DocumentKey(req.title.toSlug()), null)
             .mapError { CreateArticleException.from(it) }
             .bind()
 
@@ -93,7 +97,7 @@ class ArticleManagementService(
 
     private fun createArticle(
         req: CreateArticleRequest,
-        key: String,
+        key: DocumentKey,
         ownerId: ObjectId
     ): Result<Article, CreateArticleException> = binding {
         val translations = mutableMapOf(req.locale to ArticleTranslation(req.title, req.summary, req.content))
@@ -111,7 +115,7 @@ class ArticleManagementService(
             path = path,
             state = ArticleState.DRAFT,
             colors = ArticleColors(),
-            image = null,
+            imageKey = null,
             trusted = false,
             access = ContentAccessDetails(ownerId),
             translations = translations,
@@ -119,7 +123,7 @@ class ArticleManagementService(
     }
 
     override suspend fun setTrustedState(
-        key: String,
+        key: DocumentKey,
         authenticationOutcome: AuthenticationOutcome,
         trusted: Boolean,
         locale: Locale?
@@ -132,7 +136,7 @@ class ArticleManagementService(
     }
 
     override suspend fun inviteUser(
-        key: String,
+        key: DocumentKey,
         req: InviteUserToContentRequest,
         inviter: User,
         authenticationOutcome: AuthenticationOutcome,
@@ -180,7 +184,7 @@ class ArticleManagementService(
     }
 
     suspend fun updateArticle(
-        key: String,
+        key: DocumentKey,
         req: UpdateArticleRequest,
         authenticationOutcome: AuthenticationOutcome.Authenticated,
         locale: Locale?
@@ -204,7 +208,7 @@ class ArticleManagementService(
             .bind()
             .translation.title
             .toSlug()
-            .let { getUniqueKey(it, articleId) }
+            .let { getUniqueKey(DocumentKey(it), articleId) }
             .mapError { ex -> UpdateArticleException.from(ex) }
             .bind()
 
@@ -258,7 +262,7 @@ class ArticleManagementService(
     }
 
     suspend fun changeImage(
-        key: String,
+        key: DocumentKey,
         file: FilePart,
         authenticationOutcome: AuthenticationOutcome.Authenticated,
         locale: Locale?
@@ -269,7 +273,7 @@ class ArticleManagementService(
             .mapError { ex -> ChangeArticleImageException.from(ex) }
             .bind()
 
-        val currentImage = article.image
+        val currentImage = article.imageKey
 
         if (currentImage != null) {
             fileStorage.remove(currentImage)
@@ -278,19 +282,19 @@ class ArticleManagementService(
                 }
         }
 
-        val imageKey = contentService.getUri(key)
+        val path = contentService.getUri(key)
             .mapError { ex -> ChangeArticleImageException.InvalidDocument("Failed to create URI: ${ex.message}", ex) }
             .bind()
-            .path.removePrefix("/") + "/" + article.key
+            .path
 
-        val image = imageStore.upload(authenticationOutcome, file, imageKey,  true)
+        val image = imageStore.upload(file, article.key.toString(), path,  true, authenticationOutcome)
             .mapError { ex -> when (ex) {
                 is FileException.UnsupportedMediaType -> ChangeArticleImageException.UnsupportedMediaType(ex.message)
                 else -> ChangeArticleImageException.File("Failed to upload image: ${ex.message}", ex)
             } }
             .bind()
 
-        article.image = image.key
+        article.imageKey = image.key
 
         val updatedArticle = contentService.save(article)
             .mapError { ex -> ChangeArticleImageException.Database("Failed to save updated article: ${ex.message}", ex) }
@@ -302,7 +306,7 @@ class ArticleManagementService(
     }
 
     suspend fun changeState(
-        key: String,
+        key: DocumentKey,
         req: ChangeArticleStateRequest,
         authenticationOutcome: AuthenticationOutcome.Authenticated,
         locale: Locale?
@@ -325,7 +329,7 @@ class ArticleManagementService(
     }
 
     override suspend fun updateAccess(
-        key: String,
+        key: DocumentKey,
         req: UpdateContentAccessRequest,
         authenticationOutcome: AuthenticationOutcome,
         locale: Locale?
@@ -339,7 +343,7 @@ class ArticleManagementService(
     }
 
     override suspend fun updateOwner(
-        key: String,
+        key: DocumentKey,
         req: UpdateOwnerRequest,
         authenticationOutcome: AuthenticationOutcome.Authenticated,
         locale: Locale?
@@ -353,7 +357,7 @@ class ArticleManagementService(
     }
 
     override suspend fun deleteByKey(
-        key: String,
+        key: DocumentKey,
         authenticationOutcome: AuthenticationOutcome
     ): Result<Unit, DeleteContentByKeyException> = coroutineBinding {
         val article = contentService.findByKey(key)
@@ -363,7 +367,7 @@ class ArticleManagementService(
             } }
             .bind()
 
-        article.image?.let {
+        article.imageKey?.let {
             fileStorage.remove(it)
                 .onFailure { ex -> logger.error(ex) { "Failed to remove image with key $it" } }
         }

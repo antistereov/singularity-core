@@ -1,5 +1,6 @@
 package io.stereov.singularity.principal.group.model
 
+import io.stereov.singularity.database.core.model.DocumentKey
 import io.stereov.singularity.principal.group.model.KnownGroups.CONTRIBUTOR
 
 
@@ -14,5 +15,5 @@ import io.stereov.singularity.principal.group.model.KnownGroups.CONTRIBUTOR
  * @property CONTRIBUTOR A predefined key representing the "contributor" group.
  */
 object KnownGroups {
-    const val CONTRIBUTOR = "contributor"
+    val CONTRIBUTOR: DocumentKey = DocumentKey("contributor")
 }

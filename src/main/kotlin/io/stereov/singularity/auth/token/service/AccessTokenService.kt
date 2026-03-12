@@ -16,6 +16,7 @@ import io.stereov.singularity.auth.token.exception.AccessTokenCreationException
 import io.stereov.singularity.auth.token.exception.AccessTokenExtractionException
 import io.stereov.singularity.auth.token.model.AccessToken
 import io.stereov.singularity.auth.token.model.SessionTokenType
+import io.stereov.singularity.database.core.model.DocumentKey
 import io.stereov.singularity.global.util.Constants
 import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.principal.core.model.Principal
@@ -204,12 +205,12 @@ class AccessTokenService(
                     val groups = (jwt.claims[Constants.JWT_GROUPS_CLAIM] as? List<*>)
                         .toResultOr { AccessTokenExtractionException.Invalid("Access token does not contain groups") }
                         .andThen { list ->
-                            val parsed = mutableSetOf<String>()
+                            val parsed = mutableSetOf<DocumentKey>()
                             for (raw in list) {
                                 val g = (raw as? String)
                                     .toResultOr { AccessTokenExtractionException.Invalid("Cannot decode group $raw") }
                                     .bind()
-                                parsed += g
+                                parsed += DocumentKey(g)
                             }
                             Ok(parsed.toSet())
                         }.bind()

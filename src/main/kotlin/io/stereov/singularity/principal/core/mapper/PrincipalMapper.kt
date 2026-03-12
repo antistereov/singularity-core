@@ -41,12 +41,12 @@ class PrincipalMapper(
         logger.debug { "Creating PrincipalResponse for user with id \"${principal.id}\"" }
         
         val avatarKey = when (principal) {
-            is User -> principal.sensitive.avatarFile
+            is User -> principal.sensitive.avatarFileKey
             is Guest -> null
         }
 
         val avatarMetadata = avatarKey
-            ?.let { fileStorage.metadataResponseById(it, authenticationOutcome) }
+            ?.let { fileStorage.metadataResponseByKey(it, authenticationOutcome) }
             ?.recover { null }
             ?.bind()
         
@@ -120,12 +120,12 @@ class PrincipalMapper(
         logger.debug { "Creating PrincipalOverviewResponse for user with ID \"${principal.id}\"" }
 
         val avatarKey = when (principal) {
-            is User -> principal.sensitive.avatarFile
+            is User -> principal.sensitive.avatarFileKey
             is Guest -> null
         }
 
         val avatarMetadata = avatarKey
-            ?.let { fileStorage.metadataResponseById(it, authenticationOutcome) }
+            ?.let { fileStorage.metadataResponseByKey(it, authenticationOutcome) }
             ?.recover { ex ->
                 logger.error(ex) { "Failed to get avatar key" }
                 null

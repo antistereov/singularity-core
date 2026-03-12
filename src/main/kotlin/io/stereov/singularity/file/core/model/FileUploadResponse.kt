@@ -15,7 +15,7 @@ package io.stereov.singularity.file.core.model
  * @property height The height of the uploaded file in pixels, if applicable (e.g., for images or videos).
  */
 data class FileUploadResponse(
-    val key: String,
+    val key: FileRenditionKey,
     val size: Long,
     val contentType: String,
     val width: Int?,

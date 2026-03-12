@@ -9,22 +9,22 @@ package io.stereov.singularity.content.core.model
  * @property editor A mutable set containing IDs of subjects with "editor" permissions.
  * @property viewer A mutable set containing IDs of subjects with "viewer" permissions.
  */
-data class ContentAccessPermissions(
-    val maintainer: MutableSet<String> = mutableSetOf(),
-    val editor: MutableSet<String> = mutableSetOf(),
-    val viewer: MutableSet<String> = mutableSetOf(),
+data class ContentAccessPermissions<T : ContentAccessSubject>(
+    val maintainer: MutableSet<T> = mutableSetOf(),
+    val editor: MutableSet<T> = mutableSetOf(),
+    val viewer: MutableSet<T> = mutableSetOf(),
 ) {
 
     /**
      * Removes a subject's permissions from all roles, including maintainer, editor, and viewer.
      *
-     * @param subjectId The unique identifier of the subject whose permissions are to be removed.
+     * @param subject The unique identifier of the subject whose permissions are to be removed.
      * @return `true` if the subject was removed from at least one role, `false` if the subject did not exist in any role.
      */
-    fun remove(subjectId: String): Boolean {
-        val removedFromAdmins = this.maintainer.remove(subjectId)
-        val removedFromEditors = this.editor.remove(subjectId)
-        val removedFromViewers = this.viewer.remove(subjectId)
+    fun remove(subject: T): Boolean {
+        val removedFromAdmins = this.maintainer.remove(subject)
+        val removedFromEditors = this.editor.remove(subject)
+        val removedFromViewers = this.viewer.remove(subject)
 
         return removedFromAdmins || removedFromEditors || removedFromViewers
     }
@@ -33,16 +33,16 @@ data class ContentAccessPermissions(
      * Assigns a specific role to a subject by first removing any existing permissions for the subject
      * and then adding the subject to the list associated with the specified role.
      *
-     * @param subjectId The unique identifier of the subject to which the role is assigned.
+     * @param subject The unique identifier of the subject to which the role is assigned.
      * @param role The role to be assigned to the subject, such as MAINTAINER, EDITOR, or VIEWER.
      */
-    fun put(subjectId: String, role: ContentAccessRole) {
-        remove(subjectId)
+    fun put(subject: T, role: ContentAccessRole) {
+        remove(subject)
 
         when(role) {
-            ContentAccessRole.MAINTAINER -> this.maintainer.add(subjectId)
-            ContentAccessRole.EDITOR -> this.editor.add(subjectId)
-            ContentAccessRole.VIEWER -> this.viewer.add(subjectId)
+            ContentAccessRole.MAINTAINER -> this.maintainer.add(subject)
+            ContentAccessRole.EDITOR -> this.editor.add(subject)
+            ContentAccessRole.VIEWER -> this.viewer.add(subject)
         }
     }
 
@@ -70,15 +70,15 @@ data class ContentAccessPermissions(
     /**
      * Determines whether a subject ID has access to a given role based on the permissions assigned.
      *
-     * @param subjectId The identifier of the subject whose access is to be checked.
+     * @param subject The identifier of the subject whose access is to be checked.
      * @param role The role for which access needs to be verified, such as VIEWER, EDITOR, or MAINTAINER.
      * @return `true` if the subject has access to the specified role, `false` otherwise.
      */
-    fun hasAccess(subjectId: String, role: ContentAccessRole): Boolean {
+    fun hasAccess(subject: T, role: ContentAccessRole): Boolean {
         return when (role) {
-            ContentAccessRole.VIEWER -> maintainer.contains(subjectId) || editor.contains(subjectId) || viewer.contains(subjectId)
-            ContentAccessRole.EDITOR -> maintainer.contains(subjectId) || editor.contains(subjectId)
-            ContentAccessRole.MAINTAINER -> maintainer.contains(subjectId)
+            ContentAccessRole.VIEWER -> maintainer.contains(subject) || editor.contains(subject) || viewer.contains(subject)
+            ContentAccessRole.EDITOR -> maintainer.contains(subject) || editor.contains(subject)
+            ContentAccessRole.MAINTAINER -> maintainer.contains(subject)
         }
     }
 }
