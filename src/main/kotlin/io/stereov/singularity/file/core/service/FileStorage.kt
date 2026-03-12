@@ -186,14 +186,7 @@ abstract class FileStorage {
         val metadata = metadataService.findByKey(key)
             .recoverIf(
                 { ex -> ex is FindDocumentByKeyException.NotFound },
-                {
-                    renditionExists(FileRenditionKey(key.value)).onSuccess {
-                        removeRendition(FileRenditionKey(key.value)).onSuccess {
-                            logger.warn { "No metadata found for key '$key' but a file was found and deleted to maintain consistency."}
-                        }
-                    }
-                    return@coroutineBinding false
-                }
+                { return@coroutineBinding false }
             )
             .mapError { ex ->
                 FileException.NotFound("No metadata document found for key '$key': ${ex.message}", ex)
