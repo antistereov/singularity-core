@@ -23,6 +23,7 @@ import io.stereov.singularity.database.core.exception.DocumentException
 import io.stereov.singularity.database.core.exception.FindDocumentByKeyException
 import io.stereov.singularity.database.core.model.DocumentKey
 import io.stereov.singularity.database.encryption.exception.FindEncryptedDocumentByIdException
+import io.stereov.singularity.global.util.Random.generateId
 import io.stereov.singularity.principal.core.exception.FindUserByEmailException
 import io.stereov.singularity.principal.core.mapper.PrincipalMapper
 import io.stereov.singularity.principal.core.model.User
@@ -246,7 +247,7 @@ abstract class ContentManagementService<T: ContentDocument<T>> {
             Err(UpdateContentOwnerException.NotAuthorized("Only the owner can update the owner of this resource"))
                 .bind()
         }
-        val newOwnerId = ObjectId(req.newOwnerId)
+        val newOwnerId = req.newOwnerId
 
         val userExists = userService.existsById(newOwnerId)
             .mapError { ex -> UpdateContentOwnerException.Database("Failed to check existence of user with ID ${req.newOwnerId}: ${ex.message}", ex) }
@@ -413,7 +414,7 @@ abstract class ContentManagementService<T: ContentDocument<T>> {
                     article.id
                         .map { existingArticleId ->
                             if (id != existingArticleId) {
-                                DocumentKey("$baseKey-${UUID.randomUUID().toString().substring(0, 8)}")
+                                DocumentKey("$baseKey-${generateId()}")
                             } else baseKey
                         }
                         .mapError { ex ->

@@ -17,6 +17,7 @@ import io.stereov.singularity.file.core.exception.GetFilesException
 import io.stereov.singularity.file.core.mapper.FileMetadataMapper
 import io.stereov.singularity.file.core.model.*
 import io.stereov.singularity.file.core.properties.StorageProperties
+import io.stereov.singularity.file.core.util.FileKeyHelper
 import io.stereov.singularity.file.core.util.mediaType
 import io.stereov.singularity.global.properties.AppProperties
 import io.stereov.singularity.global.util.mapContent

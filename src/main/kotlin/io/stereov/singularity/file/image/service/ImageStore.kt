@@ -11,7 +11,7 @@ import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.file.core.component.DataBufferPublisher
 import io.stereov.singularity.file.core.dto.FileMetadataResponse
 import io.stereov.singularity.file.core.exception.FileException
-import io.stereov.singularity.file.core.model.FileKeyHelper
+import io.stereov.singularity.file.core.util.FileKeyHelper
 import io.stereov.singularity.file.core.model.FileMetadataDocument
 import io.stereov.singularity.file.core.model.FileRenditionKey
 import io.stereov.singularity.file.core.model.FileUploadRequest

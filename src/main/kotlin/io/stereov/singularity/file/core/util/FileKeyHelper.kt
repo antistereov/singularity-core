@@ -1,27 +1,35 @@
-package io.stereov.singularity.file.core.model
+package io.stereov.singularity.file.core.util
 
 import io.stereov.singularity.database.core.model.DocumentKey
-import io.stereov.singularity.file.core.util.MediaTypeExtensionRegistry
+import io.stereov.singularity.file.core.model.FileRenditionKey
+import io.stereov.singularity.global.util.Random
 import io.stereov.singularity.global.util.letIf
+import io.stereov.singularity.global.util.toSlug
 import org.springframework.http.MediaType
-import java.util.*
 
 data class FileKeyHelper(
     val filename: String,
     val mediaType: MediaType?,
     val path: String?,
-    val uuid: UUID = UUID.randomUUID()
 ) {
 
     private fun generateFilename(): String {
-        var calculatedValue = if (path.isNullOrBlank()) "" else path.removeSuffix("/").plus("/")
+        var calculatedValue = if (path.isNullOrBlank()) "" else path
+            .removePrefix("/")
+            .removeSuffix("/")
+            .plus("/")
+        val random = Random.generateId()
 
-        val originalFilename = filename.substringBeforeLast(".")
+        val originalFilename = filename
+            .removePrefix("/")
+            .removeSuffix("/")
+            .substringBeforeLast(".")
+
         if (originalFilename.isBlank()) {
-            calculatedValue += uuid.toString()
+            calculatedValue += random
         } else {
             calculatedValue += originalFilename
-            calculatedValue += "-$uuid"
+            calculatedValue += "-$random"
         }
 
         return calculatedValue
@@ -37,6 +45,8 @@ data class FileKeyHelper(
 
     private fun String.addExtension(): String {
         val extension =  filename.substringAfterLast(".", "")
+            .removePrefix("/")
+            .removeSuffix("/")
             .let { it as String? }
             .letIf(
                 { it.isNullOrBlank() },
@@ -51,7 +61,9 @@ data class FileKeyHelper(
     }
 
     fun toDocumentKey() = DocumentKey(
-        generateFilename().addExtension()
+        generateFilename()
+            .addExtension()
+            .toSlug()
     )
 
     fun toRenditionKey(renditionIdentifier: String = "") = FileRenditionKey(

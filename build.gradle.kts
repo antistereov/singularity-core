@@ -112,11 +112,14 @@ dependencies {
     api("org.springframework.boot:spring-boot-starter-mail")
 
     // Secrets
-    implementation("org.springframework.vault:spring-vault-core:4.0.1")
-    implementation("com.infisical:sdk:3.0.7")
+    api("org.springframework.vault:spring-vault-core:4.0.1")
+    api("com.infisical:sdk:3.0.7")
 
     // Slugs
-    implementation("com.github.slugify:slugify:3.0.7")
+    api("com.github.slugify:slugify:3.0.7")
+
+    // Random Strings
+    api("com.aventrix.jnanoid:jnanoid:2.0.0")
 
     // Documentation
     api("org.springdoc:springdoc-openapi-starter-webflux-api:3.0.2")
