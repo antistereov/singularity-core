@@ -9,9 +9,12 @@ import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomize
 import org.springframework.context.annotation.Bean
 import org.springframework.data.web.config.SpringDataJackson3Configuration
 import tools.jackson.core.JsonGenerator
+import tools.jackson.core.JsonParser
+import tools.jackson.databind.DeserializationContext
 import tools.jackson.databind.SerializationContext
 import tools.jackson.databind.ValueDeserializer
 import tools.jackson.databind.ValueSerializer
+import tools.jackson.databind.exc.InvalidFormatException
 import tools.jackson.databind.module.SimpleModule
 import java.io.IOException
 
@@ -27,7 +30,7 @@ class JsonConfiguration {
     fun jacksonCustomizer() = JsonMapperBuilderCustomizer { builder ->
         val module = SimpleModule()
         module.addSerializer(ObjectId::class.java, ObjectIdToStringSerializer())
-
+        module.addDeserializer(ObjectId::class.java, StringToObjectIdDeserializer())
         builder.addModule(module)
     }
 
@@ -41,10 +44,29 @@ class JsonConfiguration {
         }
     }
 
+    class StringToObjectIdDeserializer : ValueDeserializer<ObjectId>() {
+        override fun deserialize(
+            p: JsonParser,
+            ctxt: DeserializationContext
+        ): ObjectId {
+            val value = p.valueAsString
+            return try {
+                ObjectId(value)
+            } catch (_: IllegalArgumentException) {
+                throw InvalidFormatException(
+                    p,
+                    "Invalid ObjectId: $value",
+                    value,
+                    ObjectId::class.java
+                )
+            }
+        }
+    }
+
     class RoleDeserializer : ValueDeserializer<Role>() {
         override fun deserialize(
-            p: tools.jackson.core.JsonParser,
-            ctxt: tools.jackson.databind.DeserializationContext
+            p: JsonParser,
+            ctxt: DeserializationContext
         ): Role {
             val roleString = p.readValueAs(String::class.java)
 

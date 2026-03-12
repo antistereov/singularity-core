@@ -246,7 +246,7 @@ abstract class ContentManagementService<T: ContentDocument<T>> {
             Err(UpdateContentOwnerException.NotAuthorized("Only the owner can update the owner of this resource"))
                 .bind()
         }
-        val newOwnerId = req.newOwnerId
+        val newOwnerId = ObjectId(req.newOwnerId)
 
         val userExists = userService.existsById(newOwnerId)
             .mapError { ex -> UpdateContentOwnerException.Database("Failed to check existence of user with ID ${req.newOwnerId}: ${ex.message}", ex) }
