@@ -19,6 +19,7 @@ import io.stereov.singularity.global.model.SuccessResponse
 import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedModel
+import org.springframework.http.CacheControl
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Flux
 import java.time.Instant
+import java.util.concurrent.TimeUnit
 
 @RestController
 @RequestMapping("/api/files")
@@ -142,7 +144,17 @@ class FileController(
         val mediaType = servedFile.parseMediaType()
             .getOrThrow { when (it) { is FileException.Metadata -> it } }
 
+        val cacheControl = if (servedFile.isPublic) {
+            CacheControl.maxAge(365, TimeUnit.DAYS)
+                .cachePublic()
+                .immutable()
+        } else {
+            CacheControl.maxAge(1, TimeUnit.HOURS)
+                .cachePrivate()
+        }
+
         return ResponseEntity.ok()
+            .cacheControl(cacheControl)
             .header(HttpHeaders.CONTENT_LENGTH, servedFile.size)
             .contentType(mediaType)
             .body(servedFile.content)

@@ -174,7 +174,7 @@ class S3FileStorage(
         }.mapError { ex -> FileException.Operation("Failed to remove rendition with key $key: ${ex.message}", ex) }
     }
 
-    override suspend fun doServeFile(rendition: FileRendition): Result<ServedFile, FileException> = coroutineBinding {
+    override suspend fun doServeFile(rendition: FileRendition, isPublic: Boolean): Result<ServedFile, FileException> = coroutineBinding {
         logger.debug { "Accessing S3 asset '${rendition.key}'" }
 
         val head = runCatching {
@@ -206,7 +206,8 @@ class S3FileStorage(
         ServedFile(
             head.contentLength().toString(),
             content,
-            rendition
+            rendition,
+            isPublic
         )
     }
 }

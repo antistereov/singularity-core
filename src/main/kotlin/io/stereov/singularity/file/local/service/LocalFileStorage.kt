@@ -54,6 +54,7 @@ class LocalFileStorage(
 
     override suspend fun doServeFile(
         rendition: FileRendition,
+        isPublic: Boolean
     ): Result<ServedFile, FileException> = coroutineBinding {
         logger.debug { "Accessing asset ${rendition.key}" }
         val baseFileDir = runCatching { Paths.get(properties.fileDirectory).toAbsolutePath().normalize() }
@@ -96,7 +97,8 @@ class LocalFileStorage(
         ServedFile(
             size = size,
             content = DataBufferUtils.read(filePath, DefaultDataBufferFactory(), 4092),
-            rendition = rendition
+            rendition = rendition,
+            isPublic = isPublic
         )
     }
 

@@ -373,11 +373,11 @@ abstract class FileStorage {
             .toResultOr { FileException.Metadata("Metadata does not contain rendition with key $renditionKey although it was found by this key") }
             .bind()
 
-        doServeFile(rendition)
+        doServeFile(rendition, metadata.isPublic)
             .bind()
     }
 
-    protected abstract suspend fun doServeFile(rendition: FileRendition): Result<ServedFile, FileException>
+    protected abstract suspend fun doServeFile(rendition: FileRendition, isPublic: Boolean): Result<ServedFile, FileException>
     protected abstract suspend fun uploadRendition(req: FileUploadRequest): Result<FileUploadResponse, FileException.Operation>
     protected abstract suspend fun renditionExists(key: FileRenditionKey): Result<Boolean, FileException.Operation>
     protected abstract suspend fun removeRendition(key: FileRenditionKey): Result<Unit, FileException.Operation>

@@ -17,7 +17,8 @@ import reactor.core.publisher.Flux
 data class ServedFile(
     val size: String,
     val content: Flux<out DataBuffer>,
-    val rendition: FileRendition
+    val rendition: FileRendition,
+    val isPublic: Boolean
 ) {
 
     fun parseMediaType(): Result<MediaType, FileException.Metadata> {
