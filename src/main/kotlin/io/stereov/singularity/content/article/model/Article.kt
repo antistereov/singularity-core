@@ -13,7 +13,7 @@ import java.util.*
 
 @Document(collection = "articles")
 data class Article(
-    @Id override val _id: ObjectId? = null,
+    @Id override val id: ObjectId = ObjectId(),
     @Indexed(unique = true) override var key: DocumentKey,
     override var createdAt: Instant = Instant.now(),
     override var updatedAt: Instant = Instant.now(),

@@ -62,16 +62,13 @@ class AccessTokenService(
         sessionId: UUID,
         issuedAt: Instant = Instant.now()
     ): Result<AccessToken, AccessTokenCreationException> = coroutineBinding {
-        val id = principal.id
-            .mapError { ex -> AccessTokenCreationException.InvalidPrincipal("Failed to generate access token because the associated principal document contains no ID: ${ex.message}", ex) }
-            .bind()
-        logger.debug { "Creating access token for user ${principal._id} and session $sessionId" }
+        logger.debug { "Creating access token for user ${principal.id} and session $sessionId" }
 
         val tokenId = Random.generateString(20)
             .mapError { ex -> AccessTokenCreationException.Failed("Failed to generate token id: ${ex.message}", ex) }
             .bind()
 
-        runCatching { accessTokenCache.allowTokenId(id, sessionId, tokenId) }
+        runCatching { accessTokenCache.allowTokenId(principal.id, sessionId, tokenId) }
             .mapError { ex -> AccessTokenCreationException.Cache("Failed to cache access token: ${ex.message}", ex) }
             .bind()
 
@@ -79,7 +76,7 @@ class AccessTokenService(
             JwtClaimsSet.builder()
                 .issuedAt(issuedAt)
                 .expiresAt(issuedAt.plusSeconds(jwtProperties.expiresIn))
-                .subject(id.toHexString())
+                .subject(principal.id.toHexString())
                 .claim(Constants.JWT_ROLES_CLAIM, principal.roles)
                 .claim(Constants.JWT_SESSION_CLAIM, sessionId)
                 .claim(Constants.JWT_GROUPS_CLAIM, principal.groups.map { it.value })
@@ -95,7 +92,7 @@ class AccessTokenService(
                 is TokenCreationException.Secret -> AccessTokenCreationException.Secret("Failed to fetch current JWT secret: ${ex.message}", ex)
             } }
             .map { jwt ->
-                AccessToken(id, sessionId, tokenId, principal.roles, principal.groups, jwt)
+                AccessToken(principal.id, sessionId, tokenId, principal.roles, principal.groups, jwt)
             }
             .bind()
     }

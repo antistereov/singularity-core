@@ -62,10 +62,6 @@ class RefreshTokenService(
         sessionInfo: SessionInfoRequest?,
         exchange: ServerWebExchange
     ): Result<RefreshToken, RefreshTokenCreationException> = coroutineBinding {
-        val id = principal.id
-            .mapError { ex -> RefreshTokenCreationException.InvalidPrincipal("Failed to generate refresh token because the associated principal document contains no ID: ${ex.message}", ex) }
-            .bind()
-
         val refreshTokenId = Random.generateString(20)
             .mapError { ex ->
                 RefreshTokenCreationException.Failed("Failed to create refresh token because no refresh token ID could be generated: ${ex.message}", ex)
@@ -76,7 +72,7 @@ class RefreshTokenService(
             .mapError { ex ->
                 RefreshTokenCreationException.Failed("Failed to create refresh token because updating session in the user document for user ${principal.id} failed: ${ex.message}", ex)
             }
-            .andThen { create(id, sessionId, refreshTokenId) }
+            .andThen { create(principal.id, sessionId, refreshTokenId) }
             .bind()
     }
 

@@ -20,7 +20,6 @@ import io.stereov.singularity.auth.twofactor.dto.request.CompleteStepUpRequest
 import io.stereov.singularity.auth.twofactor.exception.ChangePreferredTwoFactorMethodException
 import io.stereov.singularity.auth.twofactor.exception.ValidateTwoFactorException
 import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthenticationService
-import io.stereov.singularity.database.core.exception.DocumentException
 import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.OpenApiConstants
 import io.stereov.singularity.principal.core.dto.response.PrincipalResponse
@@ -214,7 +213,6 @@ class TwoFactorAuthenticationController(
         ValidateTwoFactorException::class,
         AccessTokenExtractionException::class,
         AuthenticationException.AuthenticationRequired::class,
-        DocumentException.Invalid::class,
         StepUpTokenCreationException::class,
         CookieException.Creation::class
     ])
@@ -236,7 +234,6 @@ class TwoFactorAuthenticationController(
         val sessionId = authentication.sessionId
 
         val userId = user.id
-            .getOrThrow { when (it) { is DocumentException.Invalid -> it } }
 
         if (userId != authentication.principalId) {
             throw TwoFactorAuthenticationTokenExtractionException.Invalid(": TwoFactorAuthenticationToken does not match AccessToken")

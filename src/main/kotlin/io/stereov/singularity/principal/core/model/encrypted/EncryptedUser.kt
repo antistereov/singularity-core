@@ -3,6 +3,7 @@ package io.stereov.singularity.principal.core.model.encrypted
 import io.stereov.singularity.database.core.model.DocumentKey
 import io.stereov.singularity.database.encryption.model.Encrypted
 import io.stereov.singularity.database.hash.model.SearchableHash
+import io.stereov.singularity.principal.core.model.Principal
 import io.stereov.singularity.principal.core.model.Role
 import io.stereov.singularity.principal.core.model.User
 import io.stereov.singularity.principal.core.model.identity.HashedUserIdentities
@@ -21,7 +22,7 @@ import java.time.Instant
  *
  * @constructor Creates a new instance of [EncryptedUser].
  *
- * @property _id The unique identifier for the user, represented as an optional [ObjectId].
+ * @property id The unique identifier for the user, represented as an optional [ObjectId].
  * @property email The hashed email of the user, stored as a [SearchableHash] for secure search.
  * @property identities A collection of hashed user identities represented by [HashedUserIdentities],
  * containing both password-based and provider-based identities.
@@ -31,9 +32,9 @@ import java.time.Instant
  * @property lastActive The timestamp of the user's last activity. Defaults to the current instant.
  * @property sensitive An instance of [Encrypted] containing encrypted sensitive user data of type [SensitiveUserData].
  */
-@Document(collection = "principals")
+@Document(collection = Principal.COLLECTION_NAME)
 data class EncryptedUser(
-    @Id override val _id: ObjectId? = null,
+    @Id override val id: ObjectId = ObjectId(),
     val email: SearchableHash,
     val identities: HashedUserIdentities,
     override val roles: Set<Role.User>,

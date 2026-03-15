@@ -6,7 +6,6 @@ import io.stereov.singularity.content.core.exception.FindContentAuthorizedExcept
 import io.stereov.singularity.content.core.exception.GetUniqueKeyException
 import io.stereov.singularity.content.core.exception.NotAuthorizedFailure
 import io.stereov.singularity.database.core.exception.DatabaseFailure
-import io.stereov.singularity.database.core.exception.InvalidDocumentFailure
 import io.stereov.singularity.file.core.exception.FileFailure
 import io.stereov.singularity.global.exception.ResponseMappingFailure
 import io.stereov.singularity.global.exception.SingularityException
@@ -53,14 +52,6 @@ sealed class ChangeArticleStateException (
         cause
     )
 
-    class InvalidDocument(msg: String, cause: Throwable? = null): ChangeArticleStateException(
-        msg,
-        InvalidDocumentFailure.CODE,
-        InvalidDocumentFailure.STATUS,
-        InvalidDocumentFailure.DESCRIPTION,
-        cause
-    )
-
     class NoTranslations(msg: String, cause: Throwable? = null) : ChangeArticleStateException(
         msg,
         TranslateException.NoTranslations.CODE,
@@ -101,7 +92,6 @@ sealed class ChangeArticleStateException (
         fun from(ex: GetUniqueKeyException): ChangeArticleStateException {
             return when (ex) {
                 is GetUniqueKeyException.Database -> Database(ex.message, ex.cause)
-                is GetUniqueKeyException.InvalidDocument -> InvalidDocument(ex.message, ex.cause)
             }
         }
     }

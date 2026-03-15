@@ -171,7 +171,7 @@ abstract class SensitiveCrudService<SensitiveData, DecryptedDocument: SensitiveD
     suspend fun save(
         document: DecryptedDocument
     ): Result<DecryptedDocument, SaveEncryptedDocumentException> = coroutineBinding {
-        logger.debug { "Saving ${encryptedDocumentClazz.simpleName} with id ${document._id}" }
+        logger.debug { "Saving ${encryptedDocumentClazz.simpleName} with id ${document.id}" }
 
         val encryptedDoc = encrypt(document)
             .mapError { ex -> SaveEncryptedDocumentException.Encryption("Failed to encrypt ${encryptedDocumentClazz.simpleName}: ${ex.message}", ex) }
@@ -310,11 +310,11 @@ abstract class SensitiveCrudService<SensitiveData, DecryptedDocument: SensitiveD
                     .mapError { ex -> RotateEncryptedDocumentSecretException.Encryption("Failed to generate current secret: ${ex.message}", ex) }
                     .bind().key
                 if (it.sensitive.secretKey == secretKey) {
-                    logger.debug { "Skipping rotation of document ${it._id}: Encryption secret did not change" }
+                    logger.debug { "Skipping rotation of document ${it.id}: Encryption secret did not change" }
                     return@map it
                 }
 
-                logger.debug { "Rotating key of document ${it._id}" }
+                logger.debug { "Rotating key of document ${it.id}" }
                 val decrypted = decrypt(it)
                     .mapError { ex -> RotateEncryptedDocumentSecretException.Encryption("Failed to decrypt ${encryptedDocumentClazz.simpleName}: ${ex.message}", ex) }
                     .bind()

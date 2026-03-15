@@ -15,7 +15,7 @@ import java.time.Instant
  * its role. It holds metadata such as creation time, last activity time, and sensitive
  * information specific to the guest user.
  *
- * @property _id The unique identifier of the guest document. May be null if the guest
+ * @property id The unique identifier of the guest document. May be null if the guest
  * document has not been persisted yet.
  * @property createdAt The timestamp indicating when the guest was created. Defaults to
  * the current instant if not explicitly provided.
@@ -25,7 +25,7 @@ import java.time.Instant
  * and session-related information.
  */
 data class Guest(
-    override var _id: ObjectId? = null,
+    override var id: ObjectId = ObjectId(),
     override val createdAt: Instant = Instant.now(),
     override var lastActive: Instant = Instant.now(),
     override val sensitive: SensitiveGuestData

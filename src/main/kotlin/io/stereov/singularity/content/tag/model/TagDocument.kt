@@ -16,13 +16,13 @@ import java.util.*
  * This class is marked as a MongoDB document and is stored in the "tags" collection.
  * It implements both [Translatable] to handle translations and [WithKey] for key-based identification.
  *
- * @property _id The unique identifier for the document, managed by the database.
+ * @property id The unique identifier for the document, managed by the database.
  * @property key The unique key for the tag. This field is indexed and must be unique.
  * @property translations A mutable map containing translations of the tag's content for different locales.
  */
 @Document(collection = "tags")
 data class TagDocument(
-    @Id override val _id: ObjectId? = null,
+    @Id override val id: ObjectId = ObjectId(),
     @Indexed(unique = true) override var key: DocumentKey,
     override val translations: MutableMap<Locale, TagTranslation> = mutableMapOf(),
 ) : Translatable<TagTranslation>, WithKey

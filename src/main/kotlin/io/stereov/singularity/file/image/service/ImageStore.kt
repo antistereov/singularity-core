@@ -11,11 +11,12 @@ import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.file.core.component.DataBufferPublisher
 import io.stereov.singularity.file.core.dto.FileMetadataResponse
 import io.stereov.singularity.file.core.exception.FileException
-import io.stereov.singularity.file.core.util.FileKeyHelper
 import io.stereov.singularity.file.core.model.FileMetadataDocument
 import io.stereov.singularity.file.core.model.FileRenditionKey
 import io.stereov.singularity.file.core.model.FileUploadRequest
+import io.stereov.singularity.file.core.model.WithFileStorage
 import io.stereov.singularity.file.core.service.FileStorage
+import io.stereov.singularity.file.core.util.FileKeyHelper
 import io.stereov.singularity.file.core.util.mediaType
 import io.stereov.singularity.file.download.model.StreamedFile
 import io.stereov.singularity.file.image.properties.ImageProperties
@@ -55,6 +56,18 @@ class ImageStore(
     }
 
     suspend fun upload(
+        file: StreamedFile,
+        filename: String = file.url.substringAfterLast("/"),
+        document: WithFileStorage,
+        isPublic: Boolean,
+        authentication: AuthenticationOutcome.Authenticated,
+    ): Result<FileMetadataResponse, FileException> {
+        logger.debug { "Uploading image with from URL ${file.url}" }
+        val imageBytes = dataBufferPublisher.toSingleByteArray(file.content)
+        return upload(filename, imageBytes, file.contentType, document.fileStoragePath, isPublic, authentication)
+    }
+
+    suspend fun upload(
         file: FilePart,
         filename: String = file.filename(),
         path: String?,
@@ -65,6 +78,20 @@ class ImageStore(
         val mediaType = file.mediaType().bind()
 
         upload(filename, imageBytes, mediaType, path, isPublic, authentication)
+            .bind()
+    }
+
+    suspend fun upload(
+        file: FilePart,
+        filename: String = file.filename(),
+        document: WithFileStorage,
+        isPublic: Boolean,
+        authentication: AuthenticationOutcome.Authenticated,
+    ): Result<FileMetadataResponse, FileException> = coroutineBinding {
+        val imageBytes = dataBufferPublisher.toSingleByteArray(file.content())
+        val mediaType = file.mediaType().bind()
+
+        upload(filename, imageBytes, mediaType, document.fileStoragePath, isPublic, authentication)
             .bind()
     }
 

@@ -85,10 +85,7 @@ class TotpAuthenticationService(
                 .bind()
         }
         
-        val userId = user.id.mapError { ex -> GenerateTotpDetailsException.InvalidDocument("Failed to get user id: ${ex.message}", ex) }
-            .bind()
-
-        val setupToken = setupTokenService.create(userId, secret, recoveryCodes)
+        val setupToken = setupTokenService.create(user.id, secret, recoveryCodes)
             .mapError { ex -> GenerateTotpDetailsException.TokenCreation("Failed to create setup token: ${ex.message}", ex) }
             .bind()
 
@@ -147,11 +144,7 @@ class TotpAuthenticationService(
             } }
             .bind()
         
-        val userId = user.id
-            .mapError { ex -> ValidateTotpSetupException.InvalidDocument("Failed to get user id: ${ex.message}", ex) }
-            .bind()
-        
-        accessTokenCache.invalidateAllTokens(userId)
+        accessTokenCache.invalidateAllTokens(user.id)
             .mapError { ex -> ValidateTotpSetupException.PostCommitSideEffect("Failed to invalidate all tokens: ${ex.message}", ex) }
             .bind()
         

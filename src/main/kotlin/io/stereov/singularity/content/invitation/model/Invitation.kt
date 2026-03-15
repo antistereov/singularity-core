@@ -14,14 +14,14 @@ import java.time.Instant
  * claims associated with the invitation. The class implements the [SensitiveDocument] interface,
  * providing a standard structure for documents with sensitive content.
  *
- * @property _id The unique identifier for the invitation document in the database.
+ * @property id The unique identifier for the invitation document in the database.
  * @property issuedAt The timestamp indicating when the invitation was issued. Defaults to the current time.
  * @property expiresAt The timestamp indicating when the invitation expires.
  * @property sensitive The sensitive data associated with the invitation, including the recipient's
  * email and related claims.
  */
 data class Invitation(
-    @Id override var _id: ObjectId? = null,
+    @Id override val id: ObjectId = ObjectId(),
     val issuedAt: Instant = Instant.now(),
     val expiresAt: Instant,
     override val sensitive: SensitiveInvitationData,

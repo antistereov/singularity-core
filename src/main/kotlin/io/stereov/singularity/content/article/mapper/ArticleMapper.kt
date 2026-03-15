@@ -65,7 +65,7 @@ class ArticleMapper(
         requireNotNull(dto.owner) { "Owner of article ${dto.key} does not exist" }
 
         return Article(
-            _id = dto.id,
+            id = dto.id,
             key = dto.key,
             createdAt = dto.createdAt,
             publishedAt = dto.publishedAt,
@@ -131,10 +131,6 @@ class ArticleMapper(
             }
             ?.bind()
 
-        val articleId = article.id
-            .mapError { ex -> CreateFullArticleResponseException.Database("Failed to extract ID from article: ${ex.message}", ex) }
-            .bind()
-
         val ownerOverview = actualOwner?.let {
             principalMapper.toOverview(actualOwner, authenticationOutcome)
                 .mapError { ex -> CreateFullArticleResponseException.Database("Failed to map owner to overview: ${ex.message}", ex) }
@@ -142,7 +138,7 @@ class ArticleMapper(
         }
 
         FullArticleResponse(
-            id = articleId,
+            id = article.id,
             key = article.key,
             createdAt = article.createdAt,
             publishedAt = article.publishedAt,

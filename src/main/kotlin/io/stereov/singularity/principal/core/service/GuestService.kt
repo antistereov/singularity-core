@@ -58,7 +58,7 @@ class GuestService (
     ): Result<EncryptedGuest, EncryptionException> {
         return Ok(
             EncryptedGuest(
-            document._id,
+            document.id,
             document.createdAt,
             document.lastActive,
             encryptedSensitive
@@ -71,7 +71,7 @@ class GuestService (
     ): Result<Guest, EncryptionException> {
         return Ok(
         Guest(
-            encrypted._id,
+            encrypted.id,
             encrypted.createdAt,
             encrypted.lastActive,
             decryptedSensitive

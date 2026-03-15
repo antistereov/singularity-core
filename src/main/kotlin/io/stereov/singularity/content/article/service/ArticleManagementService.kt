@@ -107,7 +107,7 @@ class ArticleManagementService(
             .path
 
         Article(
-            _id = null,
+            id = ObjectId(),
             key = key,
             createdAt = Instant.now(),
             publishedAt = null,
@@ -198,17 +198,13 @@ class ArticleManagementService(
         article.updateTranslation(req)
             .bind()
 
-        val articleId = article.id
-            .mapError { ex -> UpdateArticleException.InvalidDocument("Failed to extract ID from article: ${ex.message}", ex) }
-            .bind()
-
         val uniqueKey = translateService
             .translate(article, translateService.defaultLocale)
             .mapError { ex -> UpdateArticleException.NoTranslations("Failed to translate article: ${ex.message}", ex) }
             .bind()
             .translation.title
             .toSlug()
-            .let { getUniqueKey(DocumentKey(it), articleId) }
+            .let { getUniqueKey(DocumentKey(it), article.id) }
             .mapError { ex -> UpdateArticleException.from(ex) }
             .bind()
 

@@ -202,13 +202,7 @@ class OAuth2AuthenticationService(
             val result = downloadService.download(avatarUrl)
                 .flatMapEither(
                     { avatar ->
-                        val userId = savedUser.id.getOrThrow { ex ->
-                            OAuth2FlowException(
-                                OAuth2ErrorCode.SERVER_ERROR,
-                                "Failed to get user id after OAuth2 registration",
-                                ex
-                            )
-                        }
+                        val userId = savedUser.id
                         val authentication = AuthenticationOutcome.Authenticated(
                             userId,
                             savedUser.roles,

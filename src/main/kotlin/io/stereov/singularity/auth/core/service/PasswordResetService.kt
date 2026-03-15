@@ -15,7 +15,6 @@ import io.stereov.singularity.auth.core.model.NoAccountInfoAction
 import io.stereov.singularity.auth.token.model.PasswordResetToken
 import io.stereov.singularity.auth.token.service.PasswordResetTokenService
 import io.stereov.singularity.cache.service.CacheService
-import io.stereov.singularity.database.core.exception.DocumentException
 import io.stereov.singularity.database.encryption.exception.FindEncryptedDocumentByIdException
 import io.stereov.singularity.database.encryption.exception.SaveEncryptedDocumentException
 import io.stereov.singularity.database.hash.service.HashService
@@ -157,8 +156,6 @@ class PasswordResetService(
         val actualLocale = locale ?: appProperties.locale
 
         val passwordResetUri = generatePasswordResetUri(user)
-            .mapError { ex -> SendPasswordResetException.Token("Failed to generate password reset URI: ${ex.message}", ex) }
-            .bind()
 
         val slug = "password_reset"
         val templatePath = "${EmailConstants.TEMPLATE_DIR}/$slug.html"
@@ -183,10 +180,10 @@ class PasswordResetService(
             .bind()
     }
 
-    suspend fun generatePasswordResetUri(user: User): Result<String, DocumentException.Invalid> = coroutineBinding {
-        val userId = user.id.bind()
+    suspend fun generatePasswordResetUri(user: User): String {
+        val userId = user.id
         val secret = user.sensitive.security.password.resetSecret
         val token = passwordResetTokenService.create(userId, secret)
-        "${uiProperties.passwordResetUri}?token=$token"
+        return "${uiProperties.passwordResetUri}?token=$token"
     }
 }

@@ -154,10 +154,7 @@ class EmailVerificationService(
                 .bind()
         }
 
-        val userId = user.id.mapError { ex -> SendVerificationEmailException.Database("Failed to retrieve user ID: ${ex.message}", ex) }
-            .bind()
-
-        val token = emailVerificationTokenService.create(userId, email, secret)
+        val token = emailVerificationTokenService.create(user.id, email, secret)
             .mapError { ex -> SendVerificationEmailException.EmailVerificationTokenCreation("Failed to create verification token: ${ex.message}", ex) }
             .bind()
 

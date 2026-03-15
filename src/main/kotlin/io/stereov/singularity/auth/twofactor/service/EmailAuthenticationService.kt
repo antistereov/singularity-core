@@ -236,13 +236,9 @@ class EmailAuthenticationService(
             } }
             .bind()
 
-        user.id
-            .andThen { userId ->
-                accessTokenCache.invalidateAllTokens(userId)
-                    .mapError { ex -> EnableEmailAuthenticationException.PostCommitSideEffect("Failed to invalidate all tokens: ${ex.message}", ex) }
-            }
-            .mapError { ex -> EnableEmailAuthenticationException.PostCommitSideEffect("Failed to invalidate all tokens: ${ex.message}", ex) }
-            .bind()
+            accessTokenCache.invalidateAllTokens(user.id)
+                .mapError { ex -> EnableEmailAuthenticationException.PostCommitSideEffect("Failed to invalidate all tokens: ${ex.message}", ex) }
+                .bind()
 
         if (securityAlertProperties.twoFactorAdded  && emailProperties.enable) {
             securityAlertService.sendTwoFactorAdded(

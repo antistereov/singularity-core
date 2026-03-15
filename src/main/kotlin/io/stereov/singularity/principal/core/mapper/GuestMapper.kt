@@ -25,13 +25,13 @@ class GuestMapper() {
      * @return A [Guest] object populated with the specified values.
      */
     fun createGuest(
-        id: ObjectId? = null,
+        id: ObjectId = ObjectId(),
         created: Instant = Instant.now(),
         lastActive: Instant = Instant.now(),
         name: String,
         sessions: MutableMap<UUID, SessionInfo> = mutableMapOf(),
     ) = Guest(
-        _id = id,
+        id = id,
         createdAt = created,
         lastActive = lastActive,
         sensitive = SensitiveGuestData(

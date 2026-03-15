@@ -76,7 +76,7 @@ class UserService(
         val hashedPassword = document.sensitive.identities.password?.let {  HashedUserIdentity.Password(it.password) }
 
         EncryptedUser(
-            document._id,
+            document.id,
             hashedEmail,
             HashedUserIdentities(hashedPassword, hashedProviders),
             document.roles,
@@ -93,7 +93,7 @@ class UserService(
     ): Result<User, EncryptionException> {
         return Ok(
             User(
-            encrypted._id,
+            encrypted.id,
             encrypted.createdAt,
             encrypted.lastActive,
             encrypted.roles.contains(Role.User.ADMIN),

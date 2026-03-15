@@ -3,6 +3,7 @@ package io.stereov.singularity.principal.core.model.encrypted
 import io.stereov.singularity.database.core.model.DocumentKey
 import io.stereov.singularity.database.encryption.model.Encrypted
 import io.stereov.singularity.principal.core.model.Guest
+import io.stereov.singularity.principal.core.model.Principal
 import io.stereov.singularity.principal.core.model.Role
 import io.stereov.singularity.principal.core.model.sensitve.SensitiveGuestData
 import org.bson.types.ObjectId
@@ -21,16 +22,16 @@ import java.time.Instant
  * The sensitive information is encrypted using the [Encrypted] wrapper over [SensitiveGuestData],
  * which contains details such as the guest's name and their active sessions.
  *
- * @property _id The unique identifier of the guest entity stored in the database.
+ * @property id The unique identifier of the guest entity stored in the database.
  * @property createdAt The timestamp indicating when the guest entity was created.
  * @property lastActive The timestamp of the last recorded activity for the guest.
  * @property sensitive The encrypted sensitive data related to the guest.
  * @property roles The set of roles assigned to the guest, limited to [Role.Guest.GUEST].
  * @property groups The set of group identifiers to which the guest belongs, which is empty for guests.
  */
-@Document(collection = "principals")
+@Document(collection = Principal.COLLECTION_NAME)
 data class EncryptedGuest(
-    @Id override val _id: ObjectId? = null,
+    @Id override val id: ObjectId = ObjectId(),
     override val createdAt: Instant = Instant.now(),
     override var lastActive: Instant = Instant.now(),
     override val sensitive: Encrypted<SensitiveGuestData>,

@@ -32,7 +32,7 @@ import java.time.Instant
  */
 @Document(collection = "files")
 data class FileMetadataDocument(
-    @Id override val _id: ObjectId? = null,
+    @Id override val id: ObjectId = ObjectId(),
     @Indexed(unique = true) override val key: DocumentKey,
     override val createdAt: Instant = Instant.now(),
     override var updatedAt: Instant = Instant.now(),
@@ -45,7 +45,7 @@ data class FileMetadataDocument(
 ) : ContentDocument<FileMetadataDocument> {
 
     constructor(
-        id: ObjectId? = null,
+        id: ObjectId = ObjectId(),
         key: DocumentKey,
         createdAt: Instant = Instant.now(),
         updatedAt: Instant = Instant.now(),
@@ -55,7 +55,7 @@ data class FileMetadataDocument(
         trusted: Boolean = false,
         tags: MutableSet<DocumentKey> = mutableSetOf()
     ): this(
-        _id = id,
+        id = id,
         key = key,
         createdAt = createdAt,
         updatedAt = updatedAt,

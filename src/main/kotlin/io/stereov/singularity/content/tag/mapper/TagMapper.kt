@@ -9,6 +9,7 @@ import io.stereov.singularity.content.tag.model.TagDocument
 import io.stereov.singularity.content.tag.model.TagTranslation
 import io.stereov.singularity.translate.exception.TranslateException
 import io.stereov.singularity.translate.service.TranslateService
+import org.bson.types.ObjectId
 import org.springframework.stereotype.Component
 import java.util.*
 
@@ -66,7 +67,7 @@ class TagMapper(
         val locale = req.locale ?: translationService.defaultLocale
 
         return TagDocument(
-            _id = null,
+            id = ObjectId(),
             key = req.key,
             translations = mutableMapOf(locale to TagTranslation(req.name, req.description ?: "")),
         )
@@ -83,7 +84,7 @@ class TagMapper(
      */
     fun createTag(req: CreateTagMultiLangRequest): TagDocument {
         return TagDocument(
-            _id = null,
+            id = ObjectId(),
             key = req.key,
             translations = req.translations,
         )

@@ -19,7 +19,6 @@ import io.stereov.singularity.content.invitation.mapper.InvitationMapper
 import io.stereov.singularity.content.invitation.model.Invitation
 import io.stereov.singularity.content.invitation.model.InvitationToken
 import io.stereov.singularity.content.invitation.service.InvitationService
-import io.stereov.singularity.database.core.exception.DocumentException
 import io.stereov.singularity.database.core.exception.FindDocumentByKeyException
 import io.stereov.singularity.database.core.model.DocumentKey
 import io.stereov.singularity.database.encryption.exception.FindEncryptedDocumentByIdException
@@ -136,11 +135,7 @@ abstract class ContentManagementService<T: ContentDocument<T>> {
             .mapError { InviteUserException.from(it) }
              .bind()
 
-        val invitationId = invitation.id
-            .mapError { ex -> InviteUserException.Database("Failed to extract ID from invitation: ${ex.message}", ex) }
-            .bind()
-
-        content.addInvitation(invitationId)
+        content.addInvitation(invitation.id)
 
         contentService.save(content)
             .mapError { ex -> InviteUserException.Database("Failed to save updated document to database: ${ex.message}", ex) }
@@ -190,11 +185,7 @@ abstract class ContentManagementService<T: ContentDocument<T>> {
             }}
             .bind()
 
-        val userId = user.id
-            .mapError { ex -> AcceptContentInvitationException.InvalidInvitation("Database entity of invited user contains no ID: ${ex.message}", ex) }
-            .bind()
-
-        content.share(ContentAccessSubject.UserId(userId), role)
+        content.share(ContentAccessSubject.UserId(user.id), role)
         content.removeInvitation(token.invitationId)
 
         contentService.save(content)
@@ -374,12 +365,8 @@ abstract class ContentManagementService<T: ContentDocument<T>> {
             .mapError { ex -> GenerateExtendedContentAccessDetailsException.Database("Failed to save updated content to database: ${ex.message}", ex) }
             .bind()
 
-        val invitationResponses = invitations.map {
-            invitationMapper.toInvitationResponse(it)
-                .mapError {ex ->  when (ex) {
-                    is DocumentException.Invalid -> GenerateExtendedContentAccessDetailsException.InvalidDocument("Failed to map invitation to response: ${ex.message}", ex)
-                } }
-                .bind()
+        val invitationResponses = invitations.map { invitation ->
+            invitationMapper.toInvitationResponse(invitation)
         }
 
         ExtendedContentAccessDetailsResponse.create(updatedContent.access, invitationResponses, users)
@@ -411,18 +398,11 @@ abstract class ContentManagementService<T: ContentDocument<T>> {
         return contentService.findByKey(baseKey)
             .flatMapEither(
                 success = { article ->
-                    article.id
-                        .map { existingArticleId ->
-                            if (id != existingArticleId) {
-                                DocumentKey("$baseKey-${generateId()}")
-                            } else baseKey
-                        }
-                        .mapError { ex ->
-                            GetUniqueKeyException.InvalidDocument(
-                                "Failed to extract ID from article: ${ex.message}",
-                                ex
-                            )
-                        }
+                    val existingArticleId = article.id
+
+                    if (id != existingArticleId) {
+                        Ok(DocumentKey("$baseKey-${generateId()}"))
+                    } else Ok(baseKey)
                 },
                 failure = { ex ->
                     when (ex) {

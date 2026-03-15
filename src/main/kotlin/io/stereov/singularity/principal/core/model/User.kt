@@ -5,9 +5,9 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.model.SessionInfo
 import io.stereov.singularity.auth.twofactor.model.TwoFactorMethod
-import io.stereov.singularity.database.core.exception.DocumentException
 import io.stereov.singularity.database.core.model.DocumentKey
 import io.stereov.singularity.database.hash.model.Hash
+import io.stereov.singularity.file.core.model.WithFileStorage
 import io.stereov.singularity.principal.core.exception.UserException
 import io.stereov.singularity.principal.core.model.identity.UserIdentities
 import io.stereov.singularity.principal.core.model.identity.UserIdentity
@@ -21,7 +21,7 @@ import java.util.*
  * Represents a user in the system, implementing the [Principal] interface. A user can have different roles and settings,
  * including two-factor authentication and administrative privileges.
  *
- * @property _id The unique identifier of the user.
+ * @property id The unique identifier of the user.
  * @property createdAt The timestamp when the user was created.
  * @property lastActive The timestamp when the user was last active.
  * @property isAdmin Indicates whether the user has administrative privileges.
@@ -38,27 +38,26 @@ import java.util.*
  * @property preferredTwoFactorMethod Retrieves the preferred two-factor authentication method as a [Result].
  */
 data class User(
-    override var _id: ObjectId? = null,
+    override var id: ObjectId = ObjectId(),
     override val createdAt: Instant = Instant.now(),
     override var lastActive: Instant = Instant.now(),
     var isAdmin: Boolean = false,
     override val groups: MutableSet<DocumentKey>,
     override var sensitive: SensitiveUserData,
-) : Principal<Role.User, SensitiveUserData> {
+) : Principal<Role.User, SensitiveUserData>, WithFileStorage {
 
     override var roles = buildSet {
         add(Role.User.USER)
         if (isAdmin) add(Role.User.ADMIN)
     }
 
+    override val prefix = Principal.COLLECTION_NAME
+
     override val logger: KLogger
         get() = KotlinLogging.logger {}
 
     val email
         get() = sensitive.email
-
-    val fileStoragePath: Result<String, DocumentException.Invalid>
-        get() = id.map { "users/$it" }
 
     val twoFactorEnabled: Boolean
         get() = sensitive.security.twoFactor.enabled
@@ -148,7 +147,6 @@ data class User(
     }
 
     companion object {
-
         /**
          * Creates a new instance of the [User] class with the provided parameters and password-based identity.
          *
@@ -166,7 +164,7 @@ data class User(
          * @param avatarFileKey Optional key for the user's avatar file in storage. Defaults to null.
          */
         fun ofPassword(
-            id: ObjectId? = null,
+            id: ObjectId = ObjectId(),
             password: Hash,
             created: Instant = Instant.now(),
             lastActive: Instant = Instant.now(),
@@ -212,7 +210,7 @@ data class User(
          * @return A [User] instance with the specified properties.
          */
         fun ofProvider(
-            id: ObjectId? = null,
+            id: ObjectId = ObjectId(),
             provider: String,
             principalId: String,
             created: Instant = Instant.now(),

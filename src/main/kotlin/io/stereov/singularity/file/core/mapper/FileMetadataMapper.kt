@@ -2,7 +2,6 @@ package io.stereov.singularity.file.core.mapper
 
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.binding
-import com.github.michaelbull.result.mapError
 import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.content.core.dto.response.ContentAccessDetailsResponse
 import io.stereov.singularity.file.core.dto.FileMetadataResponse
@@ -83,15 +82,12 @@ class FileMetadataMapper(
         doc: FileMetadataDocument,
         authenticationOutcome: AuthenticationOutcome,
     ): Result<FileMetadataResponse, FileException> = binding {
-        val fileId = doc.id
-            .mapError { FileException.from(it) }
-            .bind()
         val renditions = doc.renditions.map { (id, rend) ->
             id to toRenditionResponse(rend, getRenditionUrl(rend.key))
         }.toMap()
 
         FileMetadataResponse(
-            id = fileId,
+            id = doc.id,
             key = doc.key,
             createdAt = doc.createdAt,
             updatedAt = doc.updatedAt,

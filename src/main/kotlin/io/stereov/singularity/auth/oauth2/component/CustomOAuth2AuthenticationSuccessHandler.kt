@@ -152,13 +152,12 @@ class CustomOAuth2AuthenticationSuccessHandler(
         )
 
         if (state.stepUp) {
-            val userId = user.id.getOrElse { throw OAuth2FlowException(OAuth2ErrorCode.SERVER_ERROR, "Failed to extract user ID") }
-            if (userId != state.userId)
+            if (user.id != state.userId)
                 throw OAuth2FlowException(
                     OAuth2ErrorCode.WRONG_ACCOUNT_AUTHENTICATED,
                     "Step-up failed: the account you authenticated via OAuth2 doesn't match the AccessToken"
                 )
-            val stepUpToken = stepUpTokenService.create(userId, sessionId)
+            val stepUpToken = stepUpTokenService.create(user.id, sessionId)
                 .getOrThrow { OAuth2FlowException(OAuth2ErrorCode.SERVER_ERROR, "Failed to create StepUpToken") }
             val stepUpCookie = cookieCreator.createCookie(stepUpToken)
                 .getOrThrow { OAuth2FlowException(OAuth2ErrorCode.SERVER_ERROR, "Failed to create StepUpToken cookie") }

@@ -24,6 +24,7 @@ import io.stereov.singularity.global.util.mapContent
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import org.bson.types.ObjectId
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.http.codec.multipart.FilePart
@@ -81,7 +82,7 @@ abstract class FileStorage {
         val upload = uploadRendition(req).bind()
 
         val metadata = metadataService.save(FileMetadataDocument(
-            id = null,
+            id = ObjectId(),
             key = documentKey,
             ownerId = authentication.principalId,
             isPublic = isPublic,
@@ -135,7 +136,7 @@ abstract class FileStorage {
             job.await()
         }
         val doc = metadataService.save(FileMetadataDocument(
-            id = null,
+            id = ObjectId(),
             key = key,
             ownerId = authentication.principalId,
             isPublic = isPublic,

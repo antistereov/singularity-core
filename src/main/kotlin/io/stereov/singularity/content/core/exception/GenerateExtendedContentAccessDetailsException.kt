@@ -2,7 +2,6 @@ package io.stereov.singularity.content.core.exception
 
 import io.stereov.singularity.auth.core.exception.AuthenticationException
 import io.stereov.singularity.database.core.exception.DatabaseFailure
-import io.stereov.singularity.database.core.exception.InvalidDocumentFailure
 import io.stereov.singularity.global.exception.SingularityException
 import org.springframework.http.HttpStatus
 
@@ -35,14 +34,6 @@ sealed class GenerateExtendedContentAccessDetailsException (
         ContentNotFoundFailure.CODE,
         ContentNotFoundFailure.STATUS,
         ContentNotFoundFailure.DESCRIPTION,
-        cause
-    )
-
-    class InvalidDocument(msg: String, cause: Throwable? = null): GenerateExtendedContentAccessDetailsException(
-        msg,
-        InvalidDocumentFailure.CODE,
-        InvalidDocumentFailure.STATUS,
-        InvalidDocumentFailure.DESCRIPTION,
         cause
     )
 

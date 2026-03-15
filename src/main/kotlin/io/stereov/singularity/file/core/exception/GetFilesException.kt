@@ -4,7 +4,6 @@ import io.stereov.singularity.content.core.exception.NotAuthorizedFailure
 import io.stereov.singularity.database.core.exception.DatabaseEntityNotFound
 import io.stereov.singularity.database.core.exception.DatabaseFailure
 import io.stereov.singularity.database.core.exception.FindAllDocumentsPaginatedException
-import io.stereov.singularity.database.core.exception.InvalidDocumentFailure
 import io.stereov.singularity.global.exception.SingularityException
 import io.stereov.singularity.translate.exception.TranslateException
 import org.springframework.http.HttpStatus
@@ -54,14 +53,6 @@ sealed class GetFilesException(
         DatabaseFailure.CODE,
         DatabaseFailure.STATUS,
         DatabaseFailure.DESCRIPTION,
-        cause
-    )
-
-    class Invalid(msg: String, cause: Throwable? = null) : GetFilesException(
-        msg,
-        InvalidDocumentFailure.CODE,
-        InvalidDocumentFailure.STATUS,
-        InvalidDocumentFailure.DESCRIPTION,
         cause
     )
 

@@ -51,7 +51,7 @@ class AdminService(
      * or an exception of type [SaveEncryptedDocumentException] if an error occurs during the save operation.
      */
     suspend fun addAdminRole(user: User): Result<User, SaveEncryptedDocumentException> {
-        logger.debug { "Adding admin role to user ${user._id}" }
+        logger.debug { "Adding admin role to user ${user.id}" }
 
         user.addAdminRole()
         return userService.save(user)
@@ -66,7 +66,7 @@ class AdminService(
      * @return A [Result] containing the updated [User] if successful, or an exception of type [RevokeAdminRoleException] if an error occurs.
      */
     suspend fun revokeAdminRole(user: User): Result<User, RevokeAdminRoleException> {
-        logger.debug { "Revoking admin role from user ${user._id}" }
+        logger.debug { "Revoking admin role from user ${user.id}" }
 
         if (userService.findAllByRolesContaining(Role.User.ADMIN).count() == 1) {
             return Err(RevokeAdminRoleException.AtLeastOneAdminRequired("Cannot revoke admin role for last existing admin: at least one admin is required."))

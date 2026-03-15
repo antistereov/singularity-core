@@ -17,7 +17,7 @@ import java.time.Instant
  * The class implements the [EncryptedSensitiveDocument] interface, which provides a structure for
  * documents containing encrypted sensitive information.
  *
- * @property _id The unique identifier for the invitation document in the database.
+ * @property id The unique identifier for the invitation document in the database.
  * @property issuedAt The timestamp when the invitation was issued. Defaults to the current time.
  * @property expiresAt The timestamp when the invitation expires.
  * @property sensitive The encrypted sensitive data of the invitation, containing the recipient's email
@@ -25,7 +25,7 @@ import java.time.Instant
  */
 @Document(collection = "invitations")
 data class EncryptedInvitation(
-    override val _id: ObjectId? = null,
+    override val id: ObjectId = ObjectId(),
     val issuedAt: Instant = Instant.now(),
     val expiresAt: Instant,
     override val sensitive: Encrypted<SensitiveInvitationData>

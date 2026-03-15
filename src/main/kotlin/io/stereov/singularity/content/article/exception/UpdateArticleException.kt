@@ -99,7 +99,6 @@ sealed class UpdateArticleException (
         fun from(ex: GetUniqueKeyException): UpdateArticleException {
             return when (ex) {
                 is GetUniqueKeyException.Database -> Database(ex.message, ex.cause)
-                is GetUniqueKeyException.InvalidDocument -> InvalidDocument(ex.message, ex.cause)
             }
         }
     }

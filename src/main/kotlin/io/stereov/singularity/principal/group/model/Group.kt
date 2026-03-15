@@ -17,14 +17,14 @@ import java.util.*
  * the object is not yet persisted. The `id` property provides a safe mechanism to retrieve the `_id`
  * or return an appropriate exception if the document is invalid.
  *
- * @property _id The unique identifier of the group, as stored in the database.
+ * @property id The unique identifier of the group, as stored in the database.
  * @property key A unique string identifier for the group, intended for lookup purposes.
  * @property translations A map containing localized translations of the group’s name and description,
  * where the key is a [Locale] and the value is a [GroupTranslation].
  */
 @Document(collection = "groups")
 data class Group(
-    @Id override val _id: ObjectId? = null,
+    @Id override val id: ObjectId = ObjectId(),
     @Indexed(unique = true) override var key: DocumentKey,
     override val translations: MutableMap<Locale, GroupTranslation>,
 ) : Translatable<GroupTranslation>, WithKey

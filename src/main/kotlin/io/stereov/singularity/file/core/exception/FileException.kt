@@ -2,7 +2,6 @@ package io.stereov.singularity.file.core.exception
 
 import io.stereov.singularity.auth.core.exception.AuthenticationException
 import io.stereov.singularity.content.core.exception.ContentException
-import io.stereov.singularity.database.core.exception.DocumentException
 import io.stereov.singularity.global.exception.SingularityException
 import org.springframework.http.HttpStatus
 
@@ -205,10 +204,6 @@ sealed class FileException(msg: String, code: String, status: HttpStatus, descri
                 is ContentException.NotAuthorized -> NotAuthorized(ex.message, ex.cause)
                 is ContentException.NotAuthenticated -> NotAuthenticated(ex.message, ex.cause)
             }
-        }
-
-        fun from(ex: DocumentException.Invalid) : FileException {
-            return Metadata(ex.message, ex.cause)
         }
     }
 }

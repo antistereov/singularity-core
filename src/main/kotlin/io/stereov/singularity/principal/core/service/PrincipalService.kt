@@ -128,7 +128,7 @@ class PrincipalService(
             .bind()
 
         runSuspendCatching {
-            reactiveMongoTemplate.remove(Query(Criteria.where(Principal<*,*>::_id.name).`is`(id)), Principal::class.java,"principals")
+            reactiveMongoTemplate.remove(Query(Criteria.where(Principal<*,*>::id.name).`is`(id)), Principal::class.java,"principals")
                 .awaitSingle()
         }
             .onSuccess {

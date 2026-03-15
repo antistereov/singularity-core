@@ -34,7 +34,6 @@ import io.stereov.singularity.auth.token.service.RefreshTokenService
 import io.stereov.singularity.auth.token.service.StepUpTokenService
 import io.stereov.singularity.auth.token.service.TwoFactorAuthenticationTokenService
 import io.stereov.singularity.auth.twofactor.service.TwoFactorAuthenticationService
-import io.stereov.singularity.database.core.exception.DocumentException
 import io.stereov.singularity.email.core.properties.EmailProperties
 import io.stereov.singularity.global.annotation.ThrowsDomainError
 import io.stereov.singularity.global.model.OpenApiConstants
@@ -203,7 +202,6 @@ class AuthenticationController(
     )
     @ThrowsDomainError([
         LoginException::class,
-        DocumentException.Invalid::class,
         TwoFactorAuthenticationTokenCreationException::class,
         PrincipalMapperException::class,
         CookieException.Creation::class,
@@ -224,9 +222,7 @@ class AuthenticationController(
             twoFactorAuthenticationService.handleTwoFactor(user, locale)
                 .onFailure { ex -> logger.error(ex) { "Failed to handle two factor authentication" } }
 
-            val userId = user.id.getOrThrow { when (it) { is DocumentException.Invalid -> it }}
-
-            val twoFactorAuthenticationToken = twoFactorAuthenticationTokenService.create(userId)
+            val twoFactorAuthenticationToken = twoFactorAuthenticationTokenService.create(user.id)
                 .getOrThrow { when (it) { is TwoFactorAuthenticationTokenCreationException -> it } }
 
             val response = principalMapper.toResponse(user)
@@ -480,7 +476,6 @@ class AuthenticationController(
         AccessTokenExtractionException::class,
         AuthenticationException.AuthenticationRequired::class,
         FindPrincipalByIdException::class,
-        DocumentException.Invalid::class,
         TwoFactorAuthenticationTokenCreationException::class,
         StepUpException::class,
         StepUpTokenCreationException::class,
@@ -503,13 +498,12 @@ class AuthenticationController(
 
         principal = authenticationService.stepUp(principal, sessionId, req)
             .getOrThrow { when (it) { is StepUpException -> it } }
-        val principalId = principal.id.getOrThrow { when (it) { is DocumentException.Invalid -> it } }
 
         if (principal is User && principal.twoFactorEnabled) {
             twoFactorAuthenticationService.handleTwoFactor(principal, locale)
                 .onFailure { ex -> logger.error(ex) { "Failed to handle two factor authentication" } }
 
-            val twoFactorToken = twoFactorAuthenticationTokenService.create(principalId)
+            val twoFactorToken = twoFactorAuthenticationTokenService.create(principal.id)
                 .getOrThrow { when (it) { is TwoFactorAuthenticationTokenCreationException -> it } }
 
             val twoFactorCookie = cookieCreator.createCookie(twoFactorToken)
@@ -528,7 +522,7 @@ class AuthenticationController(
                 )
         }
 
-        val stepUpToken = stepUpTokenService.create(principalId, sessionId)
+        val stepUpToken = stepUpTokenService.create(principal.id, sessionId)
             .getOrThrow { when (it) { is StepUpTokenCreationException -> it } }
 
         val res = StepUpResponse(

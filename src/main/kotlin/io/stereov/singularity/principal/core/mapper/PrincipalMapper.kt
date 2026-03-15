@@ -2,14 +2,13 @@ package io.stereov.singularity.principal.core.mapper
 
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.coroutines.coroutineBinding
-import com.github.michaelbull.result.mapError
 import com.github.michaelbull.result.recover
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.core.model.AuthenticationOutcome
 import io.stereov.singularity.file.core.service.FileStorage
 import io.stereov.singularity.global.util.getOrNull
-import io.stereov.singularity.principal.core.dto.response.PrincipalResponse
 import io.stereov.singularity.principal.core.dto.response.PrincipalOverviewResponse
+import io.stereov.singularity.principal.core.dto.response.PrincipalResponse
 import io.stereov.singularity.principal.core.exception.PrincipalMapperException
 import io.stereov.singularity.principal.core.model.Guest
 import io.stereov.singularity.principal.core.model.Principal
@@ -50,9 +49,6 @@ class PrincipalMapper(
             ?.recover { null }
             ?.bind()
         
-        val id = principal.id.mapError { ex -> PrincipalMapperException.InvalidDocument("Failed to create user response because the user document does not contain an id: ${ex.message}", ex) }
-            .bind()
-        
         val identityProviders = when (principal) {
             is User -> principal.sensitive.identities.providers.map { it.key }
                 .toMutableList()
@@ -88,7 +84,7 @@ class PrincipalMapper(
         }
 
         PrincipalResponse(
-            id,
+            principal.id,
             principal.sensitive.name,
             email,
             identityProviders,
@@ -132,12 +128,8 @@ class PrincipalMapper(
             }
             ?.bind()
         
-        val id = principal.id
-            .mapError { ex -> PrincipalMapperException.InvalidDocument("Failed to create user overview response because the user document does not contain an id: ${ex.message}", ex) }
-            .bind()
-        
         PrincipalOverviewResponse(
-            id,
+            principal.id,
             principal.sensitive.name,
             avatarMetadata,
             principal.roles

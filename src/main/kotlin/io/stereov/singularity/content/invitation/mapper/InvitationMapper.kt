@@ -1,10 +1,7 @@
 package io.stereov.singularity.content.invitation.mapper
 
-import com.github.michaelbull.result.Result
-import com.github.michaelbull.result.map
 import io.stereov.singularity.content.invitation.dto.InvitationResponse
 import io.stereov.singularity.content.invitation.model.Invitation
-import io.stereov.singularity.database.core.exception.DocumentException
 import org.springframework.stereotype.Component
 
 /**
@@ -25,18 +22,15 @@ class InvitationMapper {
      * the id, issuedAt, expiresAt, and sensitive data such as email and claims.
      *
      * @param invitation The Invitation object containing the details to be converted.
-     * @return A [Result] containing the successfully created [InvitationResponse] or a [DocumentException.Invalid]
-     * indicating an error in case of an invalid document.
+     * @return The successfully created [InvitationResponse].
      */
-    fun toInvitationResponse(invitation: Invitation): Result<InvitationResponse, DocumentException.Invalid> {
-        return invitation.id.map { id ->
-            InvitationResponse(
-                id,
-                invitation.issuedAt,
-                invitation.expiresAt,
-                invitation.sensitive.email,
-                invitation.sensitive.claims
-            )
-        }
+    fun toInvitationResponse(invitation: Invitation): InvitationResponse {
+        return InvitationResponse(
+            invitation.id,
+            invitation.issuedAt,
+            invitation.expiresAt,
+            invitation.sensitive.email,
+            invitation.sensitive.claims
+        )
     }
 }

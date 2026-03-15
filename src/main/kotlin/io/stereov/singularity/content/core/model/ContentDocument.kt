@@ -14,7 +14,7 @@ import java.time.Instant
  *
  * @param D the type of the implementing class, ensuring type-safe chaining when using methods that return the instance.
  *
- * @property _id The unique identifier of the document.
+ * @property id The unique identifier of the document.
  * @property key The unique key used to identify the document within the system.
  * @property createdAt The date and time when the document was created.
  * @property updatedAt The date and time when the document was last updated.
@@ -23,7 +23,7 @@ import java.time.Instant
  * @property tags A set of tags associated with the content.
  */
 interface ContentDocument<D: ContentDocument<D>> : WithKey {
-    override val _id: ObjectId?
+    override val id: ObjectId
     override val key: DocumentKey
     val createdAt: Instant
     var updatedAt: Instant

@@ -80,7 +80,7 @@ class InvitationService(
     ): Result<Invitation, EncryptionException> {
         return Ok(
             Invitation(
-                encrypted._id,
+                encrypted.id,
                 encrypted.issuedAt,
                 encrypted.expiresAt,
                 decryptedSensitive
@@ -94,7 +94,7 @@ class InvitationService(
     ): Result<EncryptedInvitation, EncryptionException> {
         return Ok(
             EncryptedInvitation(
-                document._id,
+                document.id,
                 document.issuedAt,
                 document.expiresAt,
                 encryptedSensitive

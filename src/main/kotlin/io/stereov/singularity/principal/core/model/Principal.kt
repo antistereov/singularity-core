@@ -90,4 +90,8 @@ sealed interface Principal<R: Role, S: SensitivePrincipalData> : SensitiveDocume
 
         return this
     }
+
+    companion object {
+        const val COLLECTION_NAME = "principals"
+    }
 }
