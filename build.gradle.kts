@@ -40,7 +40,7 @@ repositories {
 val kotlinVersion = "2.3.10"
 val kotlinxVersion = "1.10.2"
 val springBootVersion = "4.0.3"
-val bucket4jVersion = "8.16.1"
+val bucket4jVersion = "8.17.0"
 
 dependencies {
     // Spring Boot Starters
@@ -56,7 +56,7 @@ dependencies {
     api("org.springframework.boot:spring-boot-starter-oauth2-client")
 
     // File Storage
-    api(platform("software.amazon.awssdk:bom:2.42.8"))
+    api(platform("software.amazon.awssdk:bom:2.42.13"))
     api("software.amazon.awssdk:s3")
 
     // 2FA
@@ -67,7 +67,7 @@ dependencies {
     api("org.springframework.boot:spring-boot-starter-reactor-netty")
     api("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
     api("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:$kotlinxVersion")
-    api("io.projectreactor.netty:reactor-netty:1.3.3")
+    api("io.projectreactor.netty:reactor-netty:1.3.4")
 
     // Development
     api("org.springframework.boot:spring-boot-devtools:$springBootVersion")
@@ -125,8 +125,8 @@ dependencies {
     api("org.springdoc:springdoc-openapi-starter-webflux-api:3.0.2")
 
     // Result
-    api("com.michael-bull.kotlin-result:kotlin-result:2.1.0")
-    api("com.michael-bull.kotlin-result:kotlin-result-coroutines:2.1.0")
+    api("com.michael-bull.kotlin-result:kotlin-result:2.3.1")
+    api("com.michael-bull.kotlin-result:kotlin-result-coroutines:2.3.1")
 }
 
 configurations.all {
