@@ -1,6 +1,6 @@
 services:
   dev_mongo:
-    image: mongodb/mongodb-community-server:latest@sha256:5aeb94a0dd2de8e3347b539b11fb4d5dd21803e50cc296a1ff1bf67ecb599615
+    image: mongodb/mongodb-community-server:latest@sha256:9cdf9e0f2c029b6ad3903401632419f6e54eaf07735dc56b5329e61e6ccf702a
     container_name: dev_mongo
     ports:
       - "27017:27017"
@@ -11,7 +11,7 @@ services:
     volumes:
       - dev_mongo_data:/data/db
   dev_redis:
-    image: redis:latest@sha256:1c054d54ecd1597bba52f4304bca5afbc5565ebe614c5b3d7dc5b7f8a0cd768d
+    image: redis:latest@sha256:009cc37796fbdbe1b631b4cc0582bed167e5e403ed8bcd06f77eb6cb5aeb6f93
     container_name: dev_redis
     ports:
       - "6379:6379"
