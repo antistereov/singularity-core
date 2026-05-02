@@ -5,12 +5,12 @@ import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
     kotlin("jvm")
-    kotlin("plugin.spring") version "2.3.10"
-    id("org.springframework.boot") version "4.0.3"
+    kotlin("plugin.spring") version "2.3.21"
+    id("org.springframework.boot") version "4.0.6"
     id("io.spring.dependency-management") version "1.1.7"
     id("maven-publish")
     id("java-library")
-    id("org.jreleaser") version "1.23.0"
+    id("org.jreleaser") version "1.24.0"
 }
 
 group = properties["group"] as String
@@ -37,10 +37,10 @@ repositories {
     mavenCentral()
 }
 
-val kotlinVersion = "2.3.10"
+val kotlinVersion = "2.3.21"
 val kotlinxVersion = "1.10.2"
-val springBootVersion = "4.0.3"
-val bucket4jVersion = "8.17.0"
+val springBootVersion = "4.0.6"
+val bucket4jVersion = "8.18.0"
 
 dependencies {
     // Spring Boot Starters
@@ -56,7 +56,7 @@ dependencies {
     api("org.springframework.boot:spring-boot-starter-oauth2-client")
 
     // File Storage
-    api(platform("software.amazon.awssdk:bom:2.42.13"))
+    api(platform("software.amazon.awssdk:bom:2.44.0"))
     api("software.amazon.awssdk:s3")
 
     // 2FA
@@ -67,7 +67,7 @@ dependencies {
     api("org.springframework.boot:spring-boot-starter-reactor-netty")
     api("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
     api("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:$kotlinxVersion")
-    api("io.projectreactor.netty:reactor-netty:1.3.4")
+    api("io.projectreactor.netty:reactor-netty:1.3.5")
 
     // Development
     api("org.springframework.boot:spring-boot-devtools:$springBootVersion")
@@ -82,7 +82,7 @@ dependencies {
 
     // Redis
     api("org.springframework.boot:spring-boot-starter-data-redis-reactive")
-    api("io.lettuce:lettuce-core:7.5.0.RELEASE")
+    api("io.lettuce:lettuce-core:7.5.1.RELEASE")
 
     // R2DBC and H2
     api("org.springframework.boot:spring-boot-starter-data-r2dbc")
@@ -100,9 +100,9 @@ dependencies {
     api("org.apache.commons:commons-compress:1.28.0")
 
     // Image Scaling
-    api("com.sksamuel.scrimage:scrimage-core:4.3.8")
-    api("com.sksamuel.scrimage:scrimage-formats-extra:4.3.8")
-    api("com.sksamuel.scrimage:scrimage-webp:4.3.8")
+    api("com.sksamuel.scrimage:scrimage-core:4.5.1")
+    api("com.sksamuel.scrimage:scrimage-formats-extra:4.5.1")
+    api("com.sksamuel.scrimage:scrimage-webp:4.5.1")
 
     // Serialization and Validation
     api("org.springframework.boot:spring-boot-starter-validation")
@@ -112,7 +112,7 @@ dependencies {
     api("org.springframework.boot:spring-boot-starter-mail")
 
     // Secrets
-    api("org.springframework.vault:spring-vault-core:4.0.1")
+    api("org.springframework.vault:spring-vault-core:4.0.2")
     api("com.infisical:sdk:3.0.7")
 
     // Slugs
@@ -122,7 +122,7 @@ dependencies {
     api("com.aventrix.jnanoid:jnanoid:2.0.0")
 
     // Documentation
-    api("org.springdoc:springdoc-openapi-starter-webflux-api:3.0.2")
+    api("org.springdoc:springdoc-openapi-starter-webflux-api:3.0.3")
 
     // Result
     api("com.michael-bull.kotlin-result:kotlin-result:2.3.1")
