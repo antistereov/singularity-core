@@ -13,4 +13,7 @@ import java.util.*
 interface Translatable<C> {
 
     val translations: Map<Locale, C>
+
+    val availableLocales: Set<Locale>
+        get() = translations.keys
 }
