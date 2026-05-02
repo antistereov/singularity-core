@@ -198,21 +198,6 @@ class ArticleManagementService(
         article.updateTranslation(req)
             .bind()
 
-        val uniqueKey = translateService
-            .translate(article, translateService.defaultLocale)
-            .mapError { ex -> UpdateArticleException.NoTranslations("Failed to translate article: ${ex.message}", ex) }
-            .bind()
-            .translation.title
-            .toSlug()
-            .let { getUniqueKey(DocumentKey(it), article.id) }
-            .mapError { ex -> UpdateArticleException.from(ex) }
-            .bind()
-
-        article.key = uniqueKey
-        article.path = contentService.getUri(uniqueKey)
-            .mapError { ex -> UpdateArticleException.InvalidDocument("Failed to create URI: ${ex.message}", ex) }
-            .bind()
-            .path
         req.colors?.let { colors ->
             colors.text?.let { article.colors.text = colors.text }
             colors.background?.let { article.colors.background = colors.background }
@@ -273,7 +258,7 @@ class ArticleManagementService(
 
         if (currentImage != null) {
             fileStorage.remove(currentImage)
-                .onFailure { ex ->
+                .onErr { ex ->
                     logger.debug(ex) { "Failed to remove old image" }
                 }
         }
@@ -366,7 +351,7 @@ class ArticleManagementService(
 
         article.imageKey?.let {
             fileStorage.remove(it)
-                .onFailure { ex -> logger.error(ex) { "Failed to remove image with key $it" } }
+                .onErr { ex -> logger.error(ex) { "Failed to remove image with key $it" } }
         }
         super.deleteByKey(key, authenticationOutcome).bind()
     }
