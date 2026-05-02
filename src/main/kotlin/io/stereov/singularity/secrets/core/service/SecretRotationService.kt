@@ -85,10 +85,10 @@ class SecretRotationService(
             context.getBeansOfType<SecretService>().forEach { (name, service) ->
                 logger.info { "Rotating keys for secrets defined in $name}" }
                 service.rotateSecret()
-                    .onSuccess {
+                    .onOk {
                         rotationInfos[name] = RotationInformation(lastRotation = service.getLastUpdate(), success = true)
                     }
-                    .onFailure { ex ->
+                    .onErr { ex ->
                         rotationInfos[name] = RotationInformation(lastRotation = service.getLastUpdate(), success = false, error = ex)
                         logger.error(ex) { "Failed to rotate secret for $name: ${ex.message}" }
                     }
@@ -98,10 +98,10 @@ class SecretRotationService(
             context.getBeansOfType(SensitiveCrudService::class.java).forEach { (name, service) ->
                 logger.info { "Rotating keys for documents defined in $name" }
                 service.rotateSecret()
-                    .onSuccess {
+                    .onOk {
                         rotationInfos[name] = RotationInformation(lastRotation = service.getLastSuccessfulKeyRotation(), success = true)
                     }
-                    .onFailure { ex ->
+                    .onErr { ex ->
                         rotationInfos[name] = RotationInformation(lastRotation = service.getLastSuccessfulKeyRotation(), success = false, error = ex)
                         logger.error(ex) { "Failed to rotate secret for $name: ${ex.message}" }
                     }

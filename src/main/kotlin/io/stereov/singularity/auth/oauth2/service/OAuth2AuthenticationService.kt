@@ -174,7 +174,7 @@ class OAuth2AuthenticationService(
                 val user = userService.findByEmail(email)
                     .getOrThrow { OAuth2FlowException(OAuth2ErrorCode.SERVER_ERROR, "Failed to find user with email $email") }
                 identityProviderInfoService.send(user, locale)
-                    .onFailure { ex -> logger.error(ex) { "Failed to send identity provider info"} }
+                    .onErr { ex -> logger.error(ex) { "Failed to send identity provider info"} }
             }
 
             throw OAuth2FlowException(OAuth2ErrorCode.EMAIL_ALREADY_REGISTERED,

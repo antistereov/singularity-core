@@ -38,7 +38,7 @@ class LocalSecretRepository(
                 )
             """.trimIndent()
             ).then().block()
-        }.onFailure { ex -> logger.warn(ex) { "Failed to initialize local secret repository: ${ex.message}"} }
+        }.onErr { ex -> logger.warn(ex) { "Failed to initialize local secret repository: ${ex.message}"} }
     }
 
     suspend fun findByKey(key: String): Result<LocalSecretEntity, SecretStoreException> {

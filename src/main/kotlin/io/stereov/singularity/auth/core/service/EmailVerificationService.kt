@@ -4,7 +4,7 @@ import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.coroutines.coroutineBinding
 import com.github.michaelbull.result.mapError
-import com.github.michaelbull.result.onFailure
+import com.github.michaelbull.result.onErr
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.alert.properties.SecurityAlertProperties
 import io.stereov.singularity.auth.alert.service.SecurityAlertService
@@ -99,7 +99,7 @@ class EmailVerificationService(
 
         if (isEmailUpdate && emailProperties.enable && securityAlertProperties.emailChanged) {
             securityAlertService.sendEmailChanged( oldEmail = oldEmail, newEmail = newEmail, user = savedUser, locale = locale)
-                .onFailure { ex -> logger.error(ex) { "Failed to send email changed alert"} }
+                .onErr { ex -> logger.error(ex) { "Failed to send email changed alert"} }
         }
 
         user

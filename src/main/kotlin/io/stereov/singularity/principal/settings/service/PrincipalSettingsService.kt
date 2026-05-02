@@ -5,7 +5,7 @@ import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.coroutines.coroutineBinding
 import com.github.michaelbull.result.getOrElse
 import com.github.michaelbull.result.mapError
-import com.github.michaelbull.result.onFailure
+import com.github.michaelbull.result.onErr
 import com.github.michaelbull.result.toResultOr
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.alert.properties.SecurityAlertProperties
@@ -90,7 +90,7 @@ class PrincipalSettingsService(
 
         if (emailProperties.enable) {
             val cooldown = emailVerificationService.sendVerificationEmail(user, locale, payload.newEmail)
-                .onFailure { ex -> logger.error(ex) { "Failed to send verification email for user ${user.id}"} }
+                .onErr { ex -> logger.error(ex) { "Failed to send verification email for user ${user.id}"} }
                 .getOrElse { 0 }
             ChangeEmailResponse(true, cooldown)
         } else {
@@ -179,7 +179,7 @@ class PrincipalSettingsService(
 
         if (currentAvatar != null) {
             fileStorage.remove(currentAvatar)
-                .onFailure { ex -> logger.debug(ex) { "Failed to remove old image" } }
+                .onErr { ex -> logger.debug(ex) { "Failed to remove old image" } }
         }
 
         val allowedMediaTypes = listOf(MediaType.IMAGE_JPEG, MediaType.IMAGE_GIF, MediaType.IMAGE_PNG)
@@ -211,7 +211,7 @@ class PrincipalSettingsService(
 
                     else -> {
                         fileStorage.remove(avatarKey)
-                            .onFailure { ex -> logger.debug(ex) { "Failed to remove uploaded image after failed save: ${ex.message}" } }
+                            .onErr { ex -> logger.debug(ex) { "Failed to remove uploaded image after failed save: ${ex.message}" } }
                         SetUserAvatarException.Database("Failed to save updated user to database: ${ex.message}", ex)
                     }
                 }
@@ -226,7 +226,7 @@ class PrincipalSettingsService(
 
                     else -> {
                         fileStorage.remove(avatarKey)
-                            .onFailure { ex -> logger.debug(ex) { "Failed to remove uploaded image after failed save: ${ex.message}" } }
+                            .onErr { ex -> logger.debug(ex) { "Failed to remove uploaded image after failed save: ${ex.message}" } }
                         SetUserAvatarException.Database("Failed to save updated user to database: ${ex.message}", ex)
                     }
                 }
@@ -274,7 +274,7 @@ class PrincipalSettingsService(
                     is SaveEncryptedDocumentException.PostCommitSideEffect -> SetUserAvatarException.PostCommitSideEffect("Failed to decrypt user after successful commit: ${ex.message}", ex)
                     else -> {
                         fileStorage.remove(avatarKey)
-                            .onFailure { ex -> logger.debug(ex) { "Failed to remove uploaded image after failed save: ${ex.message}" } }
+                            .onErr { ex -> logger.debug(ex) { "Failed to remove uploaded image after failed save: ${ex.message}" } }
                         SetUserAvatarException.Database("Failed to save updated user to database: ${ex.message}", ex)
                     }
                 }

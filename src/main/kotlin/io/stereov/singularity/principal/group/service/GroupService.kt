@@ -52,8 +52,8 @@ class GroupService(
 
         appProperties.groups.forEach { groupRequest ->
             create(groupRequest)
-                .onSuccess { logger.info { "Created group with key \"${groupRequest.key}\""} }
-                .onFailure { ex -> logger.error(ex) { "Failed to create group with key \"${groupRequest.key}\""}}
+                .onOk { logger.info { "Created group with key \"${groupRequest.key}\"" } }
+                .onErr { ex -> logger.error(ex) { "Failed to create group with key \"${groupRequest.key}\""}}
         }
     }
 
@@ -145,7 +145,7 @@ class GroupService(
         userService.findAllByGroupContaining(key)
             .asFlux()
             .map { user ->
-                user.onSuccess { it.groups.remove(key) }
+                user.onOk { it.groups.remove(key) }
             }
             .buffer(1000)
             .collect { results ->
@@ -153,8 +153,8 @@ class GroupService(
                 val successes = mutableListOf<User>()
                 
                 results.forEach { result ->
-                    result.onSuccess { successes.add(it) }
-                        .onFailure { ex -> errors.add(ex) }
+                    result.onOk { successes.add(it) }
+                        .onErr { ex -> errors.add(ex) }
                 }
 
                 userService.saveAll(successes)

@@ -2,7 +2,7 @@ package io.stereov.singularity.auth.geolocation.service
 
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.map
-import com.github.michaelbull.result.onFailure
+import com.github.michaelbull.result.onErr
 import com.maxmind.geoip2.model.CityResponse
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.geolocation.dto.GeolocationResponse
@@ -76,7 +76,7 @@ class GeolocationService(
 
         return ipAddress.getOrNull()?.let {
             getLocationResponse(it)
-                .onFailure { ex -> logger.warn { "Failed to resolve geolocation for IP address $it: ${ex.message}"} }
+                .onErr { ex -> logger.warn { "Failed to resolve geolocation for IP address $it: ${ex.message}"} }
                 .getOrNull()
         }
     }

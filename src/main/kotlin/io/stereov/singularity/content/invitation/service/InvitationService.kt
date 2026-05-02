@@ -70,7 +70,7 @@ class InvitationService(
     private fun scheduledCleanup() {
         runBlocking {
             runSuspendCatching { removeExpired() }
-                .onFailure { ex -> logger.error(ex) { "Failed to remove expired invitations" } }
+                .onErr { ex -> logger.error(ex) { "Failed to remove expired invitations" } }
         }
     }
 

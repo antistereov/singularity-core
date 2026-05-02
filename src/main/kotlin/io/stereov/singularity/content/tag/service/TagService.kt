@@ -4,7 +4,7 @@ import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.coroutines.coroutineBinding
 import com.github.michaelbull.result.mapError
-import com.github.michaelbull.result.onFailure
+import com.github.michaelbull.result.onErr
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.content.core.properties.ContentProperties
@@ -56,7 +56,7 @@ class TagService(
         contentProperties.tags?.forEach { tagRequest ->
             logger.info { "Created tag with key \"${tagRequest.key}\""}
             create(tagRequest)
-                .onFailure { ex -> when (ex) {
+                .onErr { ex -> when (ex) {
                     is CreateTagException.KeyExists -> logger.info { "Skipping creation of tag with key \"${tagRequest.key}\" because it already exists"}
                     is CreateTagException.Database -> logger.error(ex) { "Failed to create tag with key \"${tagRequest.key}\""}
                 }

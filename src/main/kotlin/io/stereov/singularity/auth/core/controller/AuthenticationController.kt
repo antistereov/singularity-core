@@ -2,7 +2,7 @@ package io.stereov.singularity.auth.core.controller
 
 import com.github.michaelbull.result.get
 import com.github.michaelbull.result.getOrThrow
-import com.github.michaelbull.result.onFailure
+import com.github.michaelbull.result.onErr
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.auth.alert.properties.SecurityAlertProperties
@@ -220,7 +220,7 @@ class AuthenticationController(
 
         if (user.twoFactorEnabled) {
             twoFactorAuthenticationService.handleTwoFactor(user, locale)
-                .onFailure { ex -> logger.error(ex) { "Failed to handle two factor authentication" } }
+                .onErr { ex -> logger.error(ex) { "Failed to handle two factor authentication" } }
 
             val twoFactorAuthenticationToken = twoFactorAuthenticationTokenService.create(user.id)
                 .getOrThrow { when (it) { is TwoFactorAuthenticationTokenCreationException -> it } }
@@ -272,7 +272,7 @@ class AuthenticationController(
 
         if (securityAlertProperties.login && emailProperties.enable) {
             loginAlertService.send(user, locale, session)
-                .onFailure { ex -> logger.error(ex) { "Failed to send login alert" } }
+                .onErr { ex -> logger.error(ex) { "Failed to send login alert" } }
         }
 
         val accessTokenCookie = cookieCreator.createCookie(accessToken)
@@ -501,7 +501,7 @@ class AuthenticationController(
 
         if (principal is User && principal.twoFactorEnabled) {
             twoFactorAuthenticationService.handleTwoFactor(principal, locale)
-                .onFailure { ex -> logger.error(ex) { "Failed to handle two factor authentication" } }
+                .onErr { ex -> logger.error(ex) { "Failed to handle two factor authentication" } }
 
             val twoFactorToken = twoFactorAuthenticationTokenService.create(principal.id)
                 .getOrThrow { when (it) { is TwoFactorAuthenticationTokenCreationException -> it } }

@@ -128,13 +128,19 @@ class PrincipalService(
             .bind()
 
         runSuspendCatching {
-            reactiveMongoTemplate.remove(Query(Criteria.where(Principal<*,*>::id.name).`is`(id)), Principal::class.java,"principals")
+            reactiveMongoTemplate.remove(
+                Query(Criteria.where(Principal<*, *>::id.name).`is`(id)),
+                Principal::class.java,
+                "principals"
+            )
                 .awaitSingle()
         }
-            .onSuccess {
+            .onOk {
                 if (principal is User) {
-                    principal.sensitive.avatarFileKey?.let { fileStorage.remove(it)
-                        .onFailure { ex -> logger.error(ex) { "Failed to remove avatar of deleted user with ID $id: ${ex.message}" } }}
+                    principal.sensitive.avatarFileKey?.let {
+                        fileStorage.remove(it)
+                            .onErr { ex -> logger.error(ex) { "Failed to remove avatar of deleted user with ID $id: ${ex.message}" } }
+                    }
                 }
             }
             .mapError { ex -> DeleteEncryptedDocumentByIdException.Database("Failed to delete principal with id ${id}: ${ex.message}", ex) }

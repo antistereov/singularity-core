@@ -4,7 +4,7 @@ import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.coroutines.coroutineBinding
 import com.github.michaelbull.result.mapError
-import com.github.michaelbull.result.onFailure
+import com.github.michaelbull.result.onErr
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.admin.core.exception.InitRootAccountException
 import io.stereov.singularity.admin.core.exception.RevokeAdminRoleException
@@ -40,7 +40,7 @@ class AdminService(
 
     @PostConstruct
     fun init() {
-        runBlocking { initRootAccount().onFailure { ex -> logger.error(ex) { "Failed to initialize root account"} } }
+        runBlocking { initRootAccount().onErr { ex -> logger.error(ex) { "Failed to initialize root account" } } }
     }
 
     /**

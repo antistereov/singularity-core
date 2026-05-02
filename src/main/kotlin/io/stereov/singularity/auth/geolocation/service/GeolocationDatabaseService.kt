@@ -51,14 +51,14 @@ class GeolocationDatabaseService(
 
     @PostConstruct
     fun initialize() = runBlocking {
-         updateDatabase().onFailure {
+         updateDatabase().onErr {
              logger.warn(it) { "Failed to update geolocation database: ${it.message}"}
          }
     }
 
     @Scheduled(cron = "0 0 3 * */2 *")
     private fun update() = runBlocking{
-        if (properties.download) updateDatabase().onFailure {
+        if (properties.download) updateDatabase().onErr {
             logger.warn(it) { "Failed to update geolocation database: ${it.message}"}
         }
     }

@@ -204,7 +204,7 @@ class IdentityProviderService(
                 }
 
                 accessTokenCache.invalidateAllTokens(accessToken.principalId)
-                    .onFailure { ex -> logger.error(ex) { "Failed to invalidate access tokens for guest $principalId"} }
+                    .onErr { ex -> logger.error(ex) { "Failed to invalidate access tokens for guest $principalId"} }
 
                 User.ofProvider(
                     accessToken.principalId,
@@ -255,7 +255,7 @@ class IdentityProviderService(
 
         if (emailProperties.enable && securityAlertProperties.oauth2ProviderConnected && !isGuest) {
             securityAlertService.sendOAuth2Connected(savedUser, provider, locale)
-                .onFailure { ex -> logger.error(ex) { "Failed to send security alert" } }
+                .onErr { ex -> logger.error(ex) { "Failed to send security alert" } }
         }
 
         val action = when (isGuest) {

@@ -1,7 +1,7 @@
 package io.stereov.singularity.admin.core.controller
 
 import com.github.michaelbull.result.getOrThrow
-import com.github.michaelbull.result.onFailure
+import com.github.michaelbull.result.onErr
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.stereov.singularity.admin.core.exception.RevokeAdminRoleException
 import io.stereov.singularity.admin.core.service.AdminService
@@ -90,7 +90,7 @@ class AdminController(
             .getOrThrow { when (it) { is AuthenticationException.RoleRequired -> it } }
 
         accessTokenCache.invalidateAllTokens(userId)
-            .onFailure { ex -> logger.error(ex) { "Failed to invalidate all tokens for user $userId" } }
+            .onErr { ex -> logger.error(ex) { "Failed to invalidate all tokens for user $userId" } }
 
         var principal = principalService.findById(userId)
             .getOrThrow { when (it) { is FindPrincipalByIdException -> it } }
@@ -160,13 +160,13 @@ class AdminController(
             .getOrThrow { when (it) { is AuthenticationException.RoleRequired -> it } }
 
         accessTokenCache.invalidateAllTokens(userId)
-            .onFailure { ex -> logger.error(ex) { "Failed to invalidate all tokens for user $userId" } }
+            .onErr { ex -> logger.error(ex) { "Failed to invalidate all tokens for user $userId" } }
 
         var user = userService.findById(userId)
             .getOrThrow { FindUserByIdException.from(it) }
 
         accessTokenCache.invalidateAllTokens(userId)
-            .onFailure { ex -> logger.error(ex) { "Failed to invalidate all tokens for user $userId" } }
+            .onErr { ex -> logger.error(ex) { "Failed to invalidate all tokens for user $userId" } }
 
         user = adminService.revokeAdminRole(user)
             .getOrThrow { when (it) { is RevokeAdminRoleException -> it }}

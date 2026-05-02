@@ -88,7 +88,7 @@ class AuthenticationService(
             .mapError {
                 if (emailProperties.enable) {
                     identityProviderInfoService.send(user, locale)
-                        .onFailure { ex -> logger.error(ex) { "Failed to send identity provider info"} }
+                        .onErr { ex -> logger.error(ex) { "Failed to send identity provider info"} }
                 }
 
                 LoginException.InvalidCredentials("Login failed: invalid credentials")
@@ -138,11 +138,11 @@ class AuthenticationService(
         if (user != null) {
             if (securityAlertProperties.registrationWithExistingEmail && emailProperties.enable ) {
                 registrationAlertService.send(user, locale)
-                    .onFailure { exception -> logger.error(exception) { "Failed to send registration alert"} }
+                    .onErr { exception -> logger.error(exception) { "Failed to send registration alert"} }
             }
             if (sendEmail && emailProperties.enable) {
                 emailVerificationService.startCooldown(payload.email)
-                    .onFailure { exception -> logger.error(exception) { "Failed to start email cooldown"} }
+                    .onErr { exception -> logger.error(exception) { "Failed to start email cooldown"} }
             }
 
             return@coroutineBinding
@@ -169,7 +169,7 @@ class AuthenticationService(
 
         if (sendEmail && emailProperties.enable) {
             emailVerificationService.sendVerificationEmail(registeredUser, locale)
-                .onFailure { ex -> logger.error(ex) { "Failed to send verification email"} }
+                .onErr { ex -> logger.error(ex) { "Failed to send verification email"} }
         }
     }
 
@@ -204,10 +204,10 @@ class AuthenticationService(
                     .bind()
 
                 accessTokenCache.invalidateToken(principalId, sessionId, tokenId)
-                    .onFailure { ex -> logger.error(ex) { "Failed to invalidate access token"} }
+                    .onErr { ex -> logger.error(ex) { "Failed to invalidate access token"} }
 
                 sessionService.deleteSession(principal, sessionId)
-                    .onFailure { ex -> logger.error(ex) { "Failed to delete session"} }
+                    .onErr { ex -> logger.error(ex) { "Failed to delete session"} }
             }
             is AuthenticationOutcome.None -> {
                 Err(LogoutException.AlreadyLoggedOut("Logout failed: user is already logged out"))
