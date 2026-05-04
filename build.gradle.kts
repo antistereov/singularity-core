@@ -116,7 +116,7 @@ dependencies {
     api("com.infisical:sdk:3.0.7")
 
     // Slugs
-    api("com.github.slugify:slugify:3.0.7")
+    api("com.github.slugify:slugify:4.0.0")
 
     // Random Strings
     api("com.aventrix.jnanoid:jnanoid:2.0.0")
