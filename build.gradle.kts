@@ -38,7 +38,7 @@ repositories {
 }
 
 val kotlinVersion = "2.3.21"
-val kotlinxVersion = "1.10.2"
+val kotlinxVersion = "1.11.0"
 val springBootVersion = "4.0.6"
 val bucket4jVersion = "8.18.0"
 
@@ -56,7 +56,7 @@ dependencies {
     api("org.springframework.boot:spring-boot-starter-oauth2-client")
 
     // File Storage
-    api(platform("software.amazon.awssdk:bom:2.44.0"))
+    api(platform("software.amazon.awssdk:bom:2.44.4"))
     api("software.amazon.awssdk:s3")
 
     // 2FA
@@ -73,7 +73,7 @@ dependencies {
     api("org.springframework.boot:spring-boot-devtools:$springBootVersion")
 
     // Logging
-    api("io.github.oshai:kotlin-logging-jvm:8.0.01")
+    api("io.github.oshai:kotlin-logging-jvm:8.0.02")
     api("org.springframework.boot:spring-boot-starter-log4j2")
     api("com.lmax:disruptor:4.0.0")
 
