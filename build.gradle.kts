@@ -56,7 +56,7 @@ dependencies {
     api("org.springframework.boot:spring-boot-starter-oauth2-client")
 
     // File Storage
-    api(platform("software.amazon.awssdk:bom:2.44.12"))
+    api(platform("software.amazon.awssdk:bom:2.45.1"))
     api("software.amazon.awssdk:s3")
 
     // 2FA
@@ -73,7 +73,7 @@ dependencies {
     api("org.springframework.boot:spring-boot-devtools:$springBootVersion")
 
     // Logging
-    api("io.github.oshai:kotlin-logging-jvm:8.0.03")
+    api("io.github.oshai:kotlin-logging-jvm:8.0.4")
     api("org.springframework.boot:spring-boot-starter-log4j2")
     api("com.lmax:disruptor:4.0.0")
 
@@ -82,7 +82,7 @@ dependencies {
 
     // Redis
     api("org.springframework.boot:spring-boot-starter-data-redis-reactive")
-    api("io.lettuce:lettuce-core:7.5.2.RELEASE")
+    api("io.lettuce:lettuce-core:7.6.0.RELEASE")
 
     // R2DBC and H2
     api("org.springframework.boot:spring-boot-starter-data-r2dbc")
@@ -100,9 +100,9 @@ dependencies {
     api("org.apache.commons:commons-compress:1.28.0")
 
     // Image Scaling
-    api("com.sksamuel.scrimage:scrimage-core:4.5.4")
-    api("com.sksamuel.scrimage:scrimage-formats-extra:4.5.4")
-    api("com.sksamuel.scrimage:scrimage-webp:4.5.4")
+    api("com.sksamuel.scrimage:scrimage-core:4.6.0")
+    api("com.sksamuel.scrimage:scrimage-formats-extra:4.6.0")
+    api("com.sksamuel.scrimage:scrimage-webp:4.6.0")
 
     // Serialization and Validation
     api("org.springframework.boot:spring-boot-starter-validation")
