@@ -5,7 +5,7 @@ import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
     kotlin("jvm")
-    kotlin("plugin.spring") version "2.3.21"
+    kotlin("plugin.spring") version "2.4.0"
     id("org.springframework.boot") version "4.0.6"
     id("io.spring.dependency-management") version "1.1.7"
     id("maven-publish")
@@ -37,7 +37,7 @@ repositories {
     mavenCentral()
 }
 
-val kotlinVersion = "2.3.21"
+val kotlinVersion = "2.4.0"
 val kotlinxVersion = "1.11.0"
 val springBootVersion = "4.0.6"
 val bucket4jVersion = "8.19.0"
@@ -56,7 +56,7 @@ dependencies {
     api("org.springframework.boot:spring-boot-starter-oauth2-client")
 
     // File Storage
-    api(platform("software.amazon.awssdk:bom:2.45.1"))
+    api(platform("software.amazon.awssdk:bom:2.46.7"))
     api("software.amazon.awssdk:s3")
 
     // 2FA
@@ -67,7 +67,7 @@ dependencies {
     api("org.springframework.boot:spring-boot-starter-reactor-netty")
     api("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
     api("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:$kotlinxVersion")
-    api("io.projectreactor.netty:reactor-netty:1.3.5")
+    api("io.projectreactor.netty:reactor-netty:1.3.6")
 
     // Development
     api("org.springframework.boot:spring-boot-devtools:$springBootVersion")
@@ -100,9 +100,9 @@ dependencies {
     api("org.apache.commons:commons-compress:1.28.0")
 
     // Image Scaling
-    api("com.sksamuel.scrimage:scrimage-core:4.6.0")
-    api("com.sksamuel.scrimage:scrimage-formats-extra:4.6.0")
-    api("com.sksamuel.scrimage:scrimage-webp:4.6.0")
+    api("com.sksamuel.scrimage:scrimage-core:4.6.2")
+    api("com.sksamuel.scrimage:scrimage-formats-extra:4.6.2")
+    api("com.sksamuel.scrimage:scrimage-webp:4.6.2")
 
     // Serialization and Validation
     api("org.springframework.boot:spring-boot-starter-validation")
