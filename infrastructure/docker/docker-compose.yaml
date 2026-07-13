@@ -1,6 +1,6 @@
 services:
   dev_mongo:
-    image: mongodb/mongodb-community-server:latest@sha256:8b5a4020a32b949ddf6cf53a299da8ec920772545168ec443f80c0da35fe6e35
+    image: mongodb/mongodb-community-server:latest@sha256:61e497c42f45a148aedde43b214003d5a9958e00cb4695ff2f71bcc6e5a62ca8
     container_name: dev_mongo
     ports:
       - "27017:27017"
